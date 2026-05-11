@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/router.dart';
+import 'core/theme/theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,18 +22,23 @@ Future<void> main() async {
   runApp(const ProviderScope(child: PetfolioApp()));
 }
 
-class PetfolioApp extends StatelessWidget {
+class PetfolioApp extends ConsumerWidget {
   const PetfolioApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+
     return MaterialApp.router(
       title: 'Petfolio',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4CAF50)),
-        useMaterial3: true,
-      ),
-      routerConfig: goRouter,
+      debugShowCheckedModeBanner: false,
+
+      // ── Design system themes ─────────────────────────────────────────────
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ThemeMode.system,
+
+      routerConfig: router,
     );
   }
 }

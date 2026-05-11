@@ -5,7 +5,10 @@
       "mcp__5d4f3e29-8e00-4c0a-a2e0-3f9d9a2735f2__search_docs",
       "mcp__5d4f3e29-8e00-4c0a-a2e0-3f9d9a2735f2__execute_sql",
       "mcp__5d4f3e29-8e00-4c0a-a2e0-3f9d9a2735f2__list_tables",
-      "mcp__5d4f3e29-8e00-4c0a-a2e0-3f9d9a2735f2__get_advisors"
+      "mcp__5d4f3e29-8e00-4c0a-a2e0-3f9d9a2735f2__get_advisors",
+      "Bash(flutter pub *)",
+      "WebFetch(domain:api.anthropic.com)",
+      "Bash(cat /tmp/petfolio_design/petfolio/README.md)"
     ]
   }
 }

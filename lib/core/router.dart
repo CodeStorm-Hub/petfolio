@@ -1,57 +1,127 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/auth/presentation/controllers/auth_controller.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/care/presentation/screens/care_screen.dart';
 import '../features/marketplace/presentation/screens/marketplace_screen.dart';
 import '../features/matching/presentation/screens/matching_screen.dart';
+import '../features/pet_profile/presentation/controllers/pet_list_controller.dart';
+import '../features/pet_profile/presentation/screens/onboarding_screen.dart';
 import '../features/pet_profile/presentation/screens/pet_profile_screen.dart';
 import '../features/social/presentation/screens/social_screen.dart';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Router provider — must be consumed with ref.watch in the app widget.
+// ─────────────────────────────────────────────────────────────────────────────
+
+final routerProvider = Provider<GoRouter>((ref) {
+  final notifier = _RouterNotifier(ref);
+
+  return GoRouter(
+    navigatorKey: _rootNavigatorKey,
+    initialLocation: '/home',
+    refreshListenable: notifier,
+    redirect: notifier.redirect,
+    routes: [
+      ShellRoute(
+        navigatorKey: _shellNavigatorKey,
+        builder: (context, state, child) => AppShell(child: child),
+        routes: [
+          GoRoute(
+            path: '/home',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: PetProfileScreen()),
+          ),
+          GoRoute(
+            path: '/care',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: CareScreen()),
+          ),
+          GoRoute(
+            path: '/social',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: SocialScreen()),
+          ),
+          GoRoute(
+            path: '/matching',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: MatchingScreen()),
+          ),
+          GoRoute(
+            path: '/marketplace',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: MarketplaceScreen()),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
+    ],
+  );
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Redirect logic
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _RouterNotifier extends ChangeNotifier {
+  _RouterNotifier(this._ref) {
+    // Notify GoRouter whenever auth state or pet list changes.
+    _ref.listen(authStateProvider, (_, __) => notifyListeners());
+    _ref.listen(petListProvider, (_, __) => notifyListeners());
+  }
+
+  final Ref _ref;
+
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
+    final isLoggedIn = _ref.read(isLoggedInProvider);
+    final loc = state.matchedLocation;
+
+    // ── Not logged in → always go to /login ────────────────────────
+    if (!isLoggedIn) {
+      return loc == '/login' ? null : '/login';
+    }
+
+    // ── Logged in on /login → leave ─────────────────────────────────
+    if (loc == '/login') return '/home';
+
+    // ── Logged in but no pets → go to /onboarding ───────────────────
+    // Only redirect when the pet list has finished loading AND is empty,
+    // so we don't flash the onboarding screen on cold start.
+    final pets = _ref.read(petListProvider).valueOrNull;
+    if (pets != null && pets.isEmpty && loc != '/onboarding') {
+      return '/onboarding';
+    }
+
+    // ── After onboarding completes (pets now exist) → go to /home ───
+    if (loc == '/onboarding' && pets != null && pets.isNotEmpty) {
+      return '/home';
+    }
+
+    return null; // no redirect
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Navigator keys
+// ─────────────────────────────────────────────────────────────────────────────
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
-final goRouter = GoRouter(
-  navigatorKey: _rootNavigatorKey,
-  initialLocation: '/home',
-  routes: [
-    ShellRoute(
-      navigatorKey: _shellNavigatorKey,
-      builder: (context, state, child) => AppShell(child: child),
-      routes: [
-        GoRoute(
-          path: '/home',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: PetProfileScreen()),
-        ),
-        GoRoute(
-          path: '/care',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: CareScreen()),
-        ),
-        GoRoute(
-          path: '/social',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: SocialScreen()),
-        ),
-        GoRoute(
-          path: '/matching',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: MatchingScreen()),
-        ),
-        GoRoute(
-          path: '/marketplace',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: MarketplaceScreen()),
-        ),
-      ],
-    ),
-    GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginScreen(),
-    ),
-  ],
-);
+// ─────────────────────────────────────────────────────────────────────────────
+// AppShell — adaptive nav (bottom bar ≤ 599 dp, rail ≥ 600 dp)
+// ─────────────────────────────────────────────────────────────────────────────
 
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.child});
@@ -59,12 +129,11 @@ class AppShell extends StatelessWidget {
   final Widget child;
 
   static const _destinations = [
-    _NavDestination(icon: Icons.pets, label: 'Pets', path: '/home'),
-    _NavDestination(icon: Icons.favorite, label: 'Care', path: '/care'),
-    _NavDestination(icon: Icons.people, label: 'Social', path: '/social'),
-    _NavDestination(
-        icon: Icons.favorite_border, label: 'Match', path: '/matching'),
-    _NavDestination(icon: Icons.store, label: 'Market', path: '/marketplace'),
+    _NavDestination(icon: Icons.pets_outlined, activeIcon: Icons.pets, label: 'Pets', path: '/home'),
+    _NavDestination(icon: Icons.favorite_border, activeIcon: Icons.favorite, label: 'Care', path: '/care'),
+    _NavDestination(icon: Icons.people_outline, activeIcon: Icons.people, label: 'Social', path: '/social'),
+    _NavDestination(icon: Icons.favorite_border_outlined, activeIcon: Icons.favorite, label: 'Match', path: '/matching'),
+    _NavDestination(icon: Icons.store_outlined, activeIcon: Icons.store, label: 'Market', path: '/marketplace'),
   ];
 
   int _selectedIndex(BuildContext context) {
@@ -93,6 +162,7 @@ class AppShell extends StatelessWidget {
                 for (final d in _destinations)
                   NavigationRailDestination(
                     icon: Icon(d.icon),
+                    selectedIcon: Icon(d.activeIcon),
                     label: Text(d.label),
                   ),
               ],
@@ -113,6 +183,7 @@ class AppShell extends StatelessWidget {
           for (final d in _destinations)
             NavigationDestination(
               icon: Icon(d.icon),
+              selectedIcon: Icon(d.activeIcon),
               label: d.label,
             ),
         ],
@@ -124,11 +195,13 @@ class AppShell extends StatelessWidget {
 class _NavDestination {
   const _NavDestination({
     required this.icon,
+    required this.activeIcon,
     required this.label,
     required this.path,
   });
 
   final IconData icon;
+  final IconData activeIcon;
   final String label;
   final String path;
 }
