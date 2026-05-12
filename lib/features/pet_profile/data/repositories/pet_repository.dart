@@ -9,10 +9,19 @@ class PetRepository {
 
   final SupabaseClient _client;
 
+  /// Fetches all pets owned by the currently authenticated user.
+  ///
+  /// The `pets` SELECT RLS policy allows `is_public = true` rows as well as
+  /// owner rows, so we MUST add an explicit [owner_id] filter — otherwise we
+  /// would receive every public pet in the database, not just the user's own.
   Future<List<Pet>> fetchPets() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return [];
+
     final rows = await _client
         .from('pets')
         .select()
+        .eq('owner_id', userId)
         .order('created_at', ascending: true);
     return rows.map(Pet.fromJson).toList();
   }

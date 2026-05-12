@@ -1,7 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../auth/data/repositories/auth_repository.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../data/models/pet.dart';
 import '../../data/repositories/pet_repository.dart';
@@ -13,15 +14,32 @@ final petRepositoryProvider = Provider<PetRepository>(
 class PetListNotifier extends AsyncNotifier<List<Pet>> {
   @override
   Future<List<Pet>> build() async {
+    // Read the current user directly rather than watching isLoggedInProvider.
+    //
+    // Watching a derived bool caused petListProvider to rebuild on EVERY auth
+    // event (including the automatic tokenRefreshed ping Supabase sends every
+    // ~55 minutes), putting the provider back into AsyncLoading and making all
+    // screens show a loading spinner.  The router invalidates this provider
+    // whenever the logged-in status genuinely changes (sign-in / sign-out).
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return [];
+
     try {
-      return await ref.read(petRepositoryProvider).fetchPets();
+      return await ref
+          .read(petRepositoryProvider)
+          .fetchPets()
+          .timeout(
+            const Duration(seconds: 15),
+            onTimeout: () => throw TimeoutException(
+              'Could not reach the server. Check your connection.',
+            ),
+          );
     } on AuthException {
-      // JWT from a previous project is invalid — sign out so the user
-      // can re-authenticate against the current Supabase project.
+      // JWT rejected by Supabase — session belongs to a different project or
+      // is completely invalid.  Force sign-out so the user can log back in.
       await ref.read(authRepositoryProvider).signOut();
       return [];
     } catch (e) {
-      // Re-throw other errors so the UI can show them.
       rethrow;
     }
   }

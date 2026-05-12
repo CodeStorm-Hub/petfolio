@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
+import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
 import '../../data/models/feed_post.dart';
 import '../controllers/social_controller.dart';
 
@@ -19,10 +20,35 @@ class SocialScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pet = ref.watch(activePetControllerProvider);
-    if (pet == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-    return _SocialView(pet: pet);
+    if (pet != null) return _SocialView(pet: pet);
+
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final petsAsync = ref.watch(petListProvider);
+    return Scaffold(
+      backgroundColor: pt.surface1,
+      body: Center(
+        child: petsAsync.when(
+          skipLoadingOnReload: true,
+          loading: () => const CircularProgressIndicator.adaptive(),
+          error: (_, _) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
+              const SizedBox(height: 12),
+              Text('Connection error',
+                  style: TextStyle(fontSize: 15, color: pt.ink500)),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: () => ref.invalidate(petListProvider),
+                icon: const Icon(Icons.refresh_rounded, size: 16),
+                label: const Text('Retry'),
+              ),
+            ],
+          ),
+          data: (_) => const CircularProgressIndicator.adaptive(),
+        ),
+      ),
+    );
   }
 }
 

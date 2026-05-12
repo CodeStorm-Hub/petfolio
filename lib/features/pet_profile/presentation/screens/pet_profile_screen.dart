@@ -37,23 +37,50 @@ class PetProfileScreen extends ConsumerWidget {
 
             // ── Body ───────────────────────────────────────────────────
             if (activePet == null)
-              // Loading / no pets state
+              // Loading / error / no-pets state
               SliverFillRemaining(
                 child: petsAsync.when(
+                  skipLoadingOnReload: true,
                   loading: () =>
                       const Center(child: CircularProgressIndicator.adaptive()),
                   error: (e, _) => Center(
                     child: Padding(
                       padding: const EdgeInsets.all(24),
-                      child: Text(
-                        'Could not load pets\n\n$e',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 13, color: pt.ink500),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.wifi_off_rounded,
+                              size: 48, color: pt.ink300),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Could not load pets',
+                            style: const TextStyle(
+                              fontFamily: 'Sora',
+                              fontWeight: FontWeight.w600,
+                              fontSize: 17,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Check your connection and try again.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 13, color: pt.ink500),
+                          ),
+                          const SizedBox(height: 24),
+                          FilledButton.icon(
+                            onPressed: () =>
+                                ref.invalidate(petListProvider),
+                            icon: const Icon(Icons.refresh_rounded, size: 16),
+                            label: const Text('Retry'),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   data: (pets) => pets.isEmpty
                       ? _EmptyPetsState(pt: pt)
+                      // Pets loaded but ActivePetController is still restoring
+                      // the saved selection from SharedPreferences — brief shimmer.
                       : const Center(child: CircularProgressIndicator.adaptive()),
                 ),
               )

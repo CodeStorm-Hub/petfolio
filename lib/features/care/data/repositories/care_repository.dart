@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,6 +59,10 @@ class CareRepository {
   }
 
   // ── Toggle a task (offline-first) ──────────────────────────────────────────
+  //
+  // Writes locally first, then awaits the remote sync.
+  // Throws if the remote call fails so the controller can revert both
+  // the UI state and the local SharedPreferences entry.
 
   Future<void> toggleTask({
     required String petId,
@@ -73,11 +75,25 @@ class CareRepository {
     // 1. Write locally — UI already updated optimistically by the controller.
     await prefs.setBool(_key(petId, today, task), done);
 
-    // 2. Sync to Supabase in background — failures are silent (offline expected).
-    unawaited(_syncToRemote(petId: petId, task: task, date: today, done: done));
+    // 2. Sync to Supabase — propagates on failure so the controller can revert.
+    await _syncToRemote(petId: petId, task: task, date: today, done: done);
   }
 
-  // ── Background Supabase sync ────────────────────────────────────────────────
+  /// Reverts the local SharedPreferences entry for today's task back to
+  /// [previousValue].  Called by [CareNotifier] when the remote sync throws.
+  Future<void> revertLocal({
+    required String petId,
+    required CareTaskType task,
+    required bool previousValue,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_key(petId, _today(), task), previousValue);
+  }
+
+  // ── Supabase sync ───────────────────────────────────────────────────────────
+  //
+  // Not authenticated → no-op (offline / guest mode is fine).
+  // Network / PostgREST error → rethrows so the caller can handle it.
 
   Future<void> _syncToRemote({
     required String petId,
@@ -85,32 +101,27 @@ class CareRepository {
     required DateTime date,
     required bool done,
   }) async {
-    try {
-      final userId = _client.auth.currentUser?.id;
-      if (userId == null) return;
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return; // Offline / not authenticated — local is truth.
 
-      if (done) {
-        await _client.from('care_logs').upsert(
-          {
-            'pet_id':      petId,
-            'logged_by':   userId,
-            'care_type':   _dbCareType(task),
-            'logged_date': _fmt(date),
-            'occurred_at': '${_fmt(date)}T00:00:00.000Z',
-          },
-          onConflict: 'pet_id, care_type, logged_date',
-        );
-      } else {
-        await _client
-            .from('care_logs')
-            .delete()
-            .eq('pet_id', petId)
-            .eq('care_type', _dbCareType(task))
-            .eq('logged_date', _fmt(date));
-      }
-    } catch (e) {
-      // Expected when offline — local state is source of truth.
-      debugPrint('[CareRepository] remote sync failed: $e');
+    if (done) {
+      await _client.from('care_logs').upsert(
+        {
+          'pet_id':      petId,
+          'logged_by':   userId,
+          'care_type':   _dbCareType(task),
+          'logged_date': _fmt(date),
+          'occurred_at': '${_fmt(date)}T00:00:00.000Z',
+        },
+        onConflict: 'pet_id, care_type, logged_date',
+      );
+    } else {
+      await _client
+          .from('care_logs')
+          .delete()
+          .eq('pet_id', petId)
+          .eq('care_type', _dbCareType(task))
+          .eq('logged_date', _fmt(date));
     }
   }
 

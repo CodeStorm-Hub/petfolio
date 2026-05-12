@@ -97,7 +97,7 @@ class PetSwitcherSheet extends ConsumerWidget {
                                   fontSize: 13, color: pt.ink500),
                             ),
                             loading: () => const SizedBox.shrink(),
-                            error: (_, __) => const SizedBox.shrink(),
+                            error: (_, _) => const SizedBox.shrink(),
                           ),
                         ],
                       ),

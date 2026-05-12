@@ -145,15 +145,26 @@ class CareNotifier extends FamilyNotifier<CareState, String> {
     );
   }
 
-  /// Optimistically toggle a task, then sync to Supabase in background.
+  /// Optimistically toggle a task, persist locally, and sync to Supabase.
+  ///
+  /// If the remote write fails the UI state **and** the SharedPreferences
+  /// entry are both reverted so the user sees no phantom change.
   Future<void> toggle(CareTaskType task) async {
-    final currentlyDone = state.today.isDone(task);
-    final newDone = !currentlyDone;
+    final prevState = state;
+    final previousDone = state.today.isDone(task);
+    final newDone = !previousDone;
 
-    // 1. Optimistic UI update.
+    // 1. Optimistic UI update — feels instant for the user.
     state = state.copyWithToggle(task, newDone);
 
-    // 2. Write locally + background remote sync.
-    await _repo.toggleTask(petId: arg, task: task, done: newDone);
+    try {
+      // 2. Write to local prefs + await remote sync (throws on network failure).
+      await _repo.toggleTask(petId: arg, task: task, done: newDone);
+    } catch (e, st) {
+      // 3. Remote sync failed — roll back UI and local prefs.
+      debugPrint('[CareNotifier] toggle failed, reverting: $e\n$st');
+      state = prevState;
+      await _repo.revertLocal(petId: arg, task: task, previousValue: previousDone);
+    }
   }
 }

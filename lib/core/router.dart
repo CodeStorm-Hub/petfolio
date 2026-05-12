@@ -107,8 +107,19 @@ final routerProvider = Provider<GoRouter>((ref) {
 
 class _RouterNotifier extends ChangeNotifier {
   _RouterNotifier(this._ref) {
-    // Notify GoRouter whenever auth state or pet list changes.
-    _ref.listen(authStateProvider, (_, _) => notifyListeners());
+    // Re-evaluate redirects whenever auth status genuinely changes (sign-in /
+    // sign-out) AND invalidate the pet list so it re-fetches for the new user.
+    // We intentionally do NOT notify on every auth event (e.g. tokenRefreshed)
+    // because that would put petListProvider back into AsyncLoading on each
+    // ~55-minute token rotation, making all screens show a loading spinner.
+    _ref.listen<bool>(isLoggedInProvider, (previous, next) {
+      if (previous != next) {
+        // Auth status truly flipped — invalidate so petListProvider re-runs
+        // with the new (or absent) user ID.
+        _ref.invalidate(petListProvider);
+      }
+      notifyListeners();
+    });
     _ref.listen(petListProvider, (_, _) => notifyListeners());
   }
 

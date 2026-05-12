@@ -52,23 +52,47 @@ class _CareScreenState extends ConsumerState<CareScreen> {
 
     final petsAsync = ref.watch(petListProvider);
     if (activePet == null) {
+      // Show a spinner while pets are first loading; show a friendly empty
+      // state when loaded but there are no pets yet; show a wifi-off error
+      // with a retry button when the fetch fails (e.g. network timeout).
+      final body = petsAsync.when(
+        skipLoadingOnReload: true,
+        loading: () => const CircularProgressIndicator.adaptive(),
+        error: (_, _) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
+            const SizedBox(height: 12),
+            Text(
+              'Could not load pets',
+              style: TextStyle(fontSize: 15, color: pt.ink500),
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: () => ref.invalidate(petListProvider),
+              icon: const Icon(Icons.refresh_rounded, size: 16),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
+        data: (pets) => pets.isEmpty
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.pets_outlined, size: 48, color: pt.ink300),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Add a pet to track care',
+                    style: TextStyle(fontSize: 15, color: pt.ink500),
+                  ),
+                ],
+              )
+            // Pets are loaded but ActivePetController is still picking one.
+            : const CircularProgressIndicator.adaptive(),
+      );
       return Scaffold(
         backgroundColor: pt.surface1,
-        body: Center(
-          child: petsAsync.isLoading
-              ? const CircularProgressIndicator.adaptive()
-              : Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.pets_outlined, size: 48, color: pt.ink300),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Add a pet to track care',
-                      style: TextStyle(fontSize: 15, color: pt.ink500),
-                    ),
-                  ],
-                ),
-        ),
+        body: Center(child: body),
       );
     }
 
