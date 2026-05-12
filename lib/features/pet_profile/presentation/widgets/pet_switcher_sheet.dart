@@ -32,7 +32,6 @@ class PetSwitcherSheet extends ConsumerWidget {
     final petsAsync = ref.watch(petListProvider);
     final activePet = ref.watch(activePetControllerProvider);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
 
     return DraggableScrollableSheet(
@@ -82,7 +81,15 @@ class PetSwitcherSheet extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Your pets', style: tt.headlineSmall),
+                          const Text(
+                            'Your pets',
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.22,
+                            ),
+                          ),
                           petsAsync.when(
                             data: (pets) => Text(
                               '${pets.length} pet${pets.length == 1 ? '' : 's'} · tap to switch',
@@ -334,50 +341,51 @@ class _AddPetButton extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-        decoration: BoxDecoration(
-          color: AppColors.blue50,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: AppColors.blue400,
-            width: 1.5,
-            // DashPathEffect not available without custom painter;
-            // use solid border to approximate the dashed affordance.
-          ),
+      child: CustomPaint(
+        painter: _DashedRoundedBorderPainter(
+          color: AppColors.blue400,
+          radius: 18,
+          strokeWidth: 1.5,
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: cs.primary,
-                shape: BoxShape.circle,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          decoration: BoxDecoration(
+            color: AppColors.blue50,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: cs.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.add, color: Colors.white, size: 22),
               ),
-              child: const Icon(Icons.add, color: Colors.white, size: 22),
-            ),
-            const SizedBox(width: 14),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Add another pet',
-                  style: TextStyle(
-                    fontFamily: 'Sora',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
+              const SizedBox(width: 14),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Add another pet',
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Name, breed, photo — 30 seconds',
-                  style: TextStyle(fontSize: 13, color: pt.ink500),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(height: 2),
+                  Text(
+                    'Name, breed, photo — 30 seconds',
+                    style: TextStyle(fontSize: 13, color: pt.ink500),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -425,4 +433,48 @@ class _ManageRow extends StatelessWidget {
       ),
     );
   }
+}
+
+// ── Dashed border painter ─────────────────────────────────────────────────────
+
+class _DashedRoundedBorderPainter extends CustomPainter {
+  const _DashedRoundedBorderPainter({
+    required this.color,
+    required this.radius,
+    this.strokeWidth = 1.5,
+  });
+  final Color color;
+  final double radius;
+  final double strokeWidth;
+  static const double _dashLength = 8;
+  static const double _gapLength = 6;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    final half = strokeWidth / 2;
+    final rrect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(half, half, size.width - strokeWidth, size.height - strokeWidth),
+      Radius.circular(radius),
+    );
+    final path = Path()..addRRect(rrect);
+
+    for (final metric in path.computeMetrics()) {
+      var start = 0.0;
+      while (start < metric.length) {
+        final end = (start + _dashLength).clamp(0.0, metric.length);
+        canvas.drawPath(metric.extractPath(start, end), paint);
+        start += _dashLength + _gapLength;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedRoundedBorderPainter old) =>
+      old.color != color || old.radius != radius;
 }

@@ -170,6 +170,12 @@ class _ActivePetHeader extends StatelessWidget {
             ),
           ),
 
+          // Outdoor-mode toggle (placeholder — no state yet)
+          _HeaderChip(
+            child: Icon(Icons.wb_sunny_outlined, size: 18, color: cs.onSurfaceVariant),
+          ),
+          const SizedBox(width: 0),
+
           // Notification bell
           _HeaderChip(
             child: Stack(

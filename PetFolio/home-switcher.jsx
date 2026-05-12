@@ -1,6 +1,6 @@
 // Home screen + Active Pet Switcher bottom sheet.
 
-function Home({ pets, activeId, onOpenSwitcher, onOpenAdd, onOutdoor, outdoor }) {
+function Home({ pets, activeId, onOpenSwitcher, onOpenAdd, onOutdoor, outdoor, onTab }) {
   const active = pets.find(p => p.id === activeId) || pets[0];
   return (
     <div style={{
@@ -18,7 +18,7 @@ function Home({ pets, activeId, onOpenSwitcher, onOpenAdd, onOutdoor, outdoor })
         <SectionLabel>From the feed</SectionLabel>
         <FeedCard active={active} />
       </div>
-      <TabBar />
+      <TabBar onTab={onTab} />
     </div>
   );
 }
@@ -219,7 +219,7 @@ function SectionLabel({ children }) {
   );
 }
 
-function TabBar() {
+function TabBar({ onTab }) {
   const tabs = [
     { id: 'home', label: 'Home', icon: (c) => <path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-7h-6v7H4a1 1 0 01-1-1V11z" stroke={c} strokeWidth="1.75" strokeLinejoin="round" fill="none"/> },
     { id: 'feed', label: 'Social', icon: (c) => <><circle cx="12" cy="12" r="9" stroke={c} strokeWidth="1.75" fill="none"/><circle cx="12" cy="9" r="2.5" stroke={c} strokeWidth="1.75" fill="none"/><path d="M6 18c1-3 3-4 6-4s5 1 6 4" stroke={c} strokeWidth="1.75" fill="none"/></> },
@@ -242,7 +242,7 @@ function TabBar() {
           const active = i === 0;
           const c = active ? TOKENS.blue500 : TOKENS.ink500;
           return (
-            <button key={t.id} aria-label={t.label} style={{
+            <button key={t.id} onClick={() => onTab && onTab(t.id)} aria-label={t.label} style={{
               flex: 1, height: '100%', border: 'none', background: 'transparent', cursor: 'pointer',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
               padding: '8px 0',

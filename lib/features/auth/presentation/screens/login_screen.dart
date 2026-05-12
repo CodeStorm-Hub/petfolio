@@ -126,7 +126,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   _isSignUp
                       ? 'One home for every pet in your life.'
                       : 'Sign in to continue.',
-                  style: tt.bodyLarge?.copyWith(color: pt.ink500),
+                  style: tt.bodyLarge,
                 ),
                 const SizedBox(height: 36),
 

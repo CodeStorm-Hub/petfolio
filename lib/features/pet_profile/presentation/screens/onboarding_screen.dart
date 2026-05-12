@@ -63,7 +63,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Something went wrong. Please try again.')),
+          SnackBar(content: Text('Error: $e')),
         );
       }
     } finally {
@@ -201,7 +201,7 @@ class _OnboardingHeader extends StatelessWidget {
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.shadowE1L,
-                      blurRadius: 4,
+                      blurRadius: 2,
                       offset: const Offset(0, 1),
                     ),
                     BoxShadow(
@@ -210,7 +210,12 @@ class _OnboardingHeader extends StatelessWidget {
                         spreadRadius: 0.5),
                   ],
                 ),
-                child: const Icon(Icons.chevron_left_rounded, size: 24),
+                child: Center(
+                  child: CustomPaint(
+                    size: const Size(10, 18),
+                    painter: _ChevronPainter(color: cs.onSurfaceVariant),
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 14),
@@ -286,20 +291,24 @@ class _StepFrame extends StatelessWidget {
             children: [
               Text(
                 eyebrow.toUpperCase(),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.08 * 12,
-                  color: cs.primary,
+                  color: AppColors.blue600,
                 ),
               ),
               const SizedBox(height: 8),
-              Text(title, style: tt.displaySmall),
+              Text(title, style: tt.displayMedium),
               if (subtitle != null) ...[
                 const SizedBox(height: 10),
                 Text(
                   subtitle!,
-                  style: tt.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
+                  style: TextStyle(
+                    fontSize: 15,
+                    height: 1.45,
+                    color: cs.onSurfaceVariant,
+                  ),
                 ),
               ],
             ],
@@ -388,12 +397,13 @@ class _WelcomeStep extends StatelessWidget {
               width: double.infinity,
               child: TextButton(
                 onPressed: onSkip,
-                child: Text(
+                child: const Text(
                   "I'll do this later",
                   style: TextStyle(
+                    fontFamily: 'Inter',
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: AppColors.blue600,
                   ),
                 ),
               ),
@@ -576,13 +586,16 @@ class _SpeciesCard extends StatelessWidget {
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
+                  const BoxShadow(
+                    color: Color(0x40FFFFFF),
+                    blurRadius: 0,
+                    spreadRadius: -1,
+                    offset: Offset(0, 1),
+                  ),
                 ],
               ),
               alignment: Alignment.center,
-              child: Text(
-                species.emoji,
-                style: const TextStyle(fontSize: 22),
-              ),
+              child: _SpeciesGlyph(species: species, color: Colors.white, size: 22),
             ),
             const Spacer(),
             Text(
@@ -974,76 +987,92 @@ class _PhotoStep extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: _pickImage,
-                    child: Container(
-                      width: 220,
-                      height: 220,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: photoBytes != null ? null : species.tint,
-                        image: photoBytes != null
-                            ? DecorationImage(
-                                image: MemoryImage(photoBytes!),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
-                        border: photoBytes == null
-                            ? Border.all(
-                                color: species.accent,
-                                width: 2,
-                                style: BorderStyle.solid,
-                              )
-                            : Border.all(
-                                color: species.tint,
-                                width: 4,
-                              ),
-                        boxShadow: photoBytes != null
-                            ? [
-                                BoxShadow(
-                                  color: species.accent.withAlpha(85),
-                                  blurRadius: 40,
-                                  offset: const Offset(0, 18),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: photoBytes == null
-                          ? Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 56,
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    color: species.accent,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Photo or tinted placeholder
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(36),
+                          child: Container(
+                            width: 220,
+                            height: 220,
+                            decoration: BoxDecoration(
+                              color: species.tint,
+                              borderRadius: BorderRadius.circular(36),
+                              image: photoBytes != null
+                                  ? DecorationImage(
+                                      image: MemoryImage(photoBytes!),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
+                              boxShadow: photoBytes != null
+                                  ? [
                                       BoxShadow(
-                                        color: species.accent.withAlpha(100),
-                                        blurRadius: 8,
+                                        color: species.accent.withAlpha(85),
+                                        blurRadius: 40,
+                                        offset: const Offset(0, 18),
+                                      ),
+                                      BoxShadow(
+                                        color: species.tint,
+                                        blurRadius: 0,
+                                        spreadRadius: 4,
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: photoBytes == null
+                                ? Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: 56,
+                                        height: 56,
+                                        decoration: BoxDecoration(
+                                          color: species.accent,
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withAlpha(30),
+                                              blurRadius: 0,
+                                              spreadRadius: -1,
+                                              offset: const Offset(0, 1),
+                                            ),
+                                          ],
+                                        ),
+                                        child: const Icon(Icons.add,
+                                            color: Colors.white, size: 26),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        'Tap to add photo',
+                                        style: TextStyle(
+                                          fontFamily: 'Sora',
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 16,
+                                          color: species.accent,
+                                        ),
                                       ),
                                     ],
-                                  ),
-                                  child: const Icon(Icons.add,
-                                      color: Colors.white, size: 26),
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'Tap to add photo',
-                                  style: TextStyle(
-                                    fontFamily: 'Sora',
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                    color: species.accent,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : null,
+                                  )
+                                : null,
+                          ),
+                        ),
+                        // Dashed border overlay (only when no photo)
+                        if (photoBytes == null)
+                          CustomPaint(
+                            size: const Size(220, 220),
+                            painter: _DashedBorderPainter(
+                              color: species.accent,
+                              radius: 36,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 18),
                   Text(
-                    'We\'ll never share photos without your permission.\nEXIF location data is stripped on upload.',
+                    "We'll never share photos without your permission.\nEXIF location data is stripped on upload.",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 13, color: pt.ink500, height: 1.45),
                   ),
@@ -1081,7 +1110,6 @@ class _DoneStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
 
     final hasBreed = breed != null && !breed!.startsWith("Don't");
@@ -1152,7 +1180,13 @@ class _DoneStep extends StatelessWidget {
               // ── Name + profile created ────────────────────────────────
               Text(
                 'Hi, ${name.isNotEmpty ? name : 'friend'}.',
-                style: tt.displaySmall?.copyWith(letterSpacing: -0.5),
+                style: const TextStyle(
+                  fontFamily: 'Sora',
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.64,
+                  height: 1.1,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
@@ -1161,7 +1195,11 @@ class _DoneStep extends StatelessWidget {
                   if (hasBreed) '$breed · ',
                   'Profile created. You can fill in age, weight, vet info anytime from Health.',
                 ].join(),
-                style: tt.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
+                style: TextStyle(
+                  fontSize: 16,
+                  height: 1.45,
+                  color: cs.onSurfaceVariant,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 28),
@@ -1235,4 +1273,202 @@ class _ChecklistItem extends StatelessWidget {
       ),
     );
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CustomPainters
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Narrow left-chevron matching the 10×18 SVG in the design (M9 1L1 9l8 8).
+class _ChevronPainter extends CustomPainter {
+  const _ChevronPainter({required this.color});
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    canvas.drawPath(
+      Path()
+        ..moveTo(size.width, 0)
+        ..lineTo(0, size.height / 2)
+        ..lineTo(size.width, size.height),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ChevronPainter old) => old.color != color;
+}
+
+/// Species-specific glyph icon — white filled shapes on the accent background.
+/// Mirrors the SPECIES_GLYPHS SVG paths from the design's avatars.jsx,
+/// drawn in a 16×16 coordinate space.
+class _SpeciesGlyph extends StatelessWidget {
+  const _SpeciesGlyph({
+    required this.species,
+    required this.color,
+    this.size = 22,
+  });
+  final PetSpecies species;
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(size, size),
+      painter: _SpeciesGlyphPainter(species: species, color: color),
+    );
+  }
+}
+
+class _SpeciesGlyphPainter extends CustomPainter {
+  const _SpeciesGlyphPainter({required this.species, required this.color});
+  final PetSpecies species;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Scale from 16×16 viewBox to actual canvas size.
+    final s = size.width / 16;
+    final fill = Paint()..color = color..style = PaintingStyle.fill;
+
+    switch (species) {
+      case PetSpecies.dog:
+        // body + two ear blobs
+        canvas.drawCircle(Offset(8 * s, 9 * s), 4 * s, fill);
+        canvas.drawCircle(Offset(4 * s, 5 * s), 1.6 * s, fill);
+        canvas.drawCircle(Offset(12 * s, 5 * s), 1.6 * s, fill);
+      case PetSpecies.cat:
+        // body + pointed ears
+        canvas.drawCircle(Offset(8 * s, 10 * s), 4 * s, fill);
+        canvas.drawPath(
+          Path()
+            ..moveTo(3.5 * s, 4 * s)
+            ..lineTo(5.5 * s, 8 * s)
+            ..lineTo(7.3 * s, 7 * s)
+            ..close(),
+          fill,
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(12.5 * s, 4 * s)
+            ..lineTo(10.5 * s, 8 * s)
+            ..lineTo(8.7 * s, 7 * s)
+            ..close(),
+          fill,
+        );
+      case PetSpecies.rabbit:
+        // body + tall oval ears
+        canvas.drawCircle(Offset(8 * s, 11 * s), 3.5 * s, fill);
+        canvas.drawOval(
+          Rect.fromCenter(
+              center: Offset(6 * s, 5 * s), width: 2.4 * s, height: 6 * s),
+          fill,
+        );
+        canvas.drawOval(
+          Rect.fromCenter(
+              center: Offset(10 * s, 5 * s), width: 2.4 * s, height: 6 * s),
+          fill,
+        );
+      case PetSpecies.bird:
+        // body + wing + tail accents
+        canvas.drawCircle(Offset(8 * s, 9 * s), 3.5 * s, fill);
+        canvas.drawPath(
+          Path()
+            ..moveTo(5 * s, 6 * s)
+            ..lineTo(3 * s, 4 * s)
+            ..lineTo(5.5 * s, 4.5 * s)
+            ..close(),
+          fill,
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(11 * s, 11 * s)
+            ..lineTo(14 * s, 12 * s)
+            ..lineTo(13 * s, 10 * s)
+            ..close(),
+          fill,
+        );
+      case PetSpecies.fish:
+        // body ellipse + tail triangle
+        canvas.drawOval(
+          Rect.fromCenter(
+              center: Offset(7 * s, 8 * s), width: 8 * s, height: 5 * s),
+          fill,
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(11 * s, 8 * s)
+            ..lineTo(14 * s, 6 * s)
+            ..lineTo(14 * s, 10 * s)
+            ..close(),
+          fill,
+        );
+      case PetSpecies.reptile:
+        // flat body ellipse + white eye dot
+        canvas.drawOval(
+          Rect.fromCenter(
+              center: Offset(8 * s, 9 * s), width: 9 * s, height: 4.4 * s),
+          fill,
+        );
+        canvas.drawCircle(
+          Offset(11.5 * s, 8 * s),
+          0.6 * s,
+          Paint()..color = Colors.white,
+        );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_SpeciesGlyphPainter old) =>
+      old.species != species || old.color != color;
+}
+
+/// Draws a dashed rounded-rect border. Used for the photo placeholder.
+class _DashedBorderPainter extends CustomPainter {
+  const _DashedBorderPainter({
+    required this.color,
+    required this.radius,
+    this.strokeWidth = 2,
+  });
+  final Color color;
+  final double radius;
+  final double strokeWidth;
+  static const double _dashLength = 8;
+  static const double _gapLength = 6;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    final half = strokeWidth / 2;
+    final rrect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(half, half, size.width - strokeWidth, size.height - strokeWidth),
+      Radius.circular(radius),
+    );
+    final path = Path()..addRRect(rrect);
+
+    for (final metric in path.computeMetrics()) {
+      var start = 0.0;
+      while (start < metric.length) {
+        final end = (start + _dashLength).clamp(0.0, metric.length);
+        canvas.drawPath(metric.extractPath(start, end), paint);
+        start += _dashLength + _gapLength;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedBorderPainter old) =>
+      old.color != color || old.radius != radius;
 }

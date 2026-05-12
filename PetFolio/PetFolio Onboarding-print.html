@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>PetFolio — Onboarding & Pet Switcher (Print)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #DFE6F1; }
+  body { font-family: 'Inter', system-ui, sans-serif; color: #0B1220; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  *, *::before, *::after { box-sizing: border-box; }
+
+  .print-page {
+    width: 100%; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    padding: 28px 24px 32px;
+    background: radial-gradient(ellipse at 50% 0%, #E8EEF7 0%, #DFE6F1 100%);
+    break-after: page;
+    page-break-after: always;
+  }
+  .print-page:last-child { break-after: auto; page-break-after: auto; }
+  .print-caption {
+    margin-bottom: 16px; font-family: 'Sora', system-ui; font-weight: 600;
+    font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; color: #2A3447;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .print-caption b { color: #0B1220; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; text-transform: none; }
+  .print-caption span { color: #5C657A; font-size: 13px; font-weight: 500; text-transform: none; letter-spacing: 0; }
+  .print-cover {
+    background: radial-gradient(ellipse at 50% 0%, #E8EEF7 0%, #DFE6F1 100%);
+    padding: 80px 60px;
+  }
+  .print-cover h1 {
+    font-family: 'Sora', system-ui; font-size: 72px; font-weight: 700; letter-spacing: -0.03em;
+    line-height: 1; color: #0B1220; margin: 0;
+  }
+  .print-cover .accent {
+    color: #2563EB;
+  }
+  .print-cover p {
+    font-size: 18px; line-height: 1.5; color: #2A3447; max-width: 620px; margin: 24px 0 0;
+  }
+  .print-cover .meta {
+    margin-top: 64px; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: #5C657A; letter-spacing: 0.04em; text-transform: uppercase;
+    display: flex; gap: 32px;
+  }
+  .print-cover .meta div b { display: block; color: #0B1220; font-size: 13px; margin-top: 4px; font-family: 'Inter'; text-transform: none; letter-spacing: 0; }
+  .print-cover .swatches { display: flex; gap: 10px; margin-top: 40px; }
+  .print-cover .swatch { width: 56px; height: 56px; border-radius: 14px; box-shadow: 0 6px 16px -6px rgba(11,18,32,0.25); }
+
+  @page { size: A4 portrait; margin: 0; }
+  @media print {
+    body { background: #fff; }
+    .print-page { padding: 16px; min-height: 100vh; }
+    button { cursor: default !important; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="avatars.jsx"></script>
+<script type="text/babel" src="onboarding.jsx"></script>
+<script type="text/babel" src="home-switcher.jsx"></script>
+
+<script type="text/babel">
+function Cover() {
+  return (
+    <div className="print-page print-cover" style={{ alignItems: 'flex-start', justifyContent: 'center' }}>
+      <div style={{ width: '100%', maxWidth: 720 }}>
+        <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#5C657A', marginBottom: 24 }}>
+          PetFolio · Design Spec v1.0
+        </div>
+        <h1>Onboarding<br/>&amp; <span className="accent">Active Pet</span><br/>Switcher.</h1>
+        <p>Progressive profiling onboarding (4 steps — species, name, breed, photo) and a sleek glassmorphism bottom-sheet pet switcher. Built on PetFolio's Modern Blue design system with warm empathetic secondaries, outdoor-grade contrast, and 52–64 dp touch targets.</p>
+        <div className="swatches">
+          <div className="swatch" style={{ background: '#2563EB' }}/>
+          <div className="swatch" style={{ background: '#E76F51' }}/>
+          <div className="swatch" style={{ background: '#F4A261' }}/>
+          <div className="swatch" style={{ background: '#6BAF92' }}/>
+          <div className="swatch" style={{ background: '#9B5C8A' }}/>
+          <div className="swatch" style={{ background: '#F5C49B' }}/>
+        </div>
+        <div className="meta">
+          <div>Pages<b>8 screens</b></div>
+          <div>Platform<b>iOS · Flutter</b></div>
+          <div>Date<b>May 2026</b></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Page({ label, title, sub, children }) {
+  return (
+    <div className="print-page">
+      <div className="print-caption">
+        <span>{label}</span>
+        <b>{title}</b>
+        {sub && <span>· {sub}</span>}
+      </div>
+      <IOSDevice width={390} height={780}>
+        <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+          {children}
+        </div>
+      </IOSDevice>
+    </div>
+  );
+}
+
+// ─── Static snapshot wrappers ───────────────────────────────────
+function OnboardingFrozen({ step, draft }) {
+  // Render only the screen content for a given step (skip the wrapper state machine)
+  const sp = SPECIES.find(s => s.id === draft.species);
+  return (
+    <div style={{
+      height: '100%', display: 'flex', flexDirection: 'column',
+      background: '#FAFBFD', fontFamily: 'Inter, system-ui, sans-serif', color: '#0B1220',
+    }}>
+      {step > 0 && step < 5 && (
+        <OnboardingHeaderStatic step={step} total={4} />
+      )}
+      <div style={{ flex: 1, overflow: 'hidden' }}>
+        {step === 0 && <WelcomeStatic/>}
+        {step === 1 && <ChooseSpeciesStatic value={draft.species}/>}
+        {step === 2 && <ChooseNameStatic value={draft.name} species={draft.species}/>}
+        {step === 3 && <ChooseBreedStatic value={draft.breed} species={draft.species}/>}
+        {step === 4 && <AddPhotoStatic draft={draft}/>}
+        {step === 5 && <DoneStatic draft={draft}/>}
+      </div>
+    </div>
+  );
+}
+
+function OnboardingHeaderStatic({ step, total }) {
+  return (
+    <div style={{ padding: '58px 16px 8px', display: 'flex', alignItems: 'center', gap: 14 }}>
+      <div style={{
+        width: 44, height: 44, borderRadius: '50%',
+        background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: '0 1px 2px rgba(11,18,32,0.06), 0 0 0 0.5px #E4E7EF',
+      }}>
+        <svg width="10" height="18" viewBox="0 0 10 18"><path d="M9 1L1 9l8 8" stroke="#2A3447" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+      <div style={{ flex: 1, display: 'flex', gap: 6 }}>
+        {Array.from({ length: total }).map((_, i) => (
+          <div key={i} style={{ flex: 1, height: 4, borderRadius: 999, background: i < step ? '#2563EB' : '#E4E7EF' }}/>
+        ))}
+      </div>
+      <div style={{ fontSize: 13, color: '#5C657A', fontVariantNumeric: 'tabular-nums' }}>{step}/{total}</div>
+    </div>
+  );
+}
+
+function WelcomeStatic() {
+  return (
+    <div style={{ padding: '96px 24px 24px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', gap: 28 }}>
+        <Hero/>
+        <div>
+          <div style={{ fontFamily: 'Sora', fontSize: 36, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.05, color: '#0B1220' }}>Welcome to<br/>PetFolio</div>
+          <div style={{ marginTop: 14, fontSize: 17, lineHeight: 1.45, color: '#2A3447', maxWidth: 300 }}>One home for every pet in your life — social, health, care, and the marketplace.</div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 12 }}>
+        <PrimaryButton>Add your first pet</PrimaryButton>
+        <button style={{ height: 52, borderRadius: 16, border: 'none', background: 'transparent', color: '#1D4FCC', fontWeight: 600, fontSize: 16, fontFamily: 'Inter' }}>I'll do this later</button>
+      </div>
+    </div>
+  );
+}
+function ChooseSpeciesStatic({ value }) { return <ChooseSpecies value={value} onPick={()=>{}}/>; }
+function ChooseNameStatic({ value, species }) {
+  const sp = SPECIES.find(s => s.id === species);
+  return (
+    <StepFrameStatic eyebrow="Step 2 of 4" title={`What's your ${sp?.label.toLowerCase() || 'pet'}'s name?`} sub="Just a name for now — you can fill in the rest later." cta={<PrimaryButton>Continue</PrimaryButton>}>
+      <div style={{ padding: '8px 4px 0' }}>
+        <div style={{
+          width: '100%', height: 64, padding: '0 20px', display: 'flex', alignItems: 'center',
+          borderRadius: 16, background: '#FFFFFF',
+          boxShadow: '0 0 0 1.5px #2563EB, 0 1px 2px rgba(11,18,32,0.04)',
+          fontSize: 22, fontFamily: 'Sora', fontWeight: 600, color: '#0B1220',
+        }}>{value || ''}<span style={{ width: 2, height: 26, background: '#2563EB', marginLeft: 2 }}/></div>
+        <div style={{ marginTop: 12, fontSize: 13, color: '#5C657A', paddingLeft: 4 }}>{(value || '').length} / 24</div>
+      </div>
+    </StepFrameStatic>
+  );
+}
+function ChooseBreedStatic({ value, species }) { return <ChooseBreed value={value} species={species} onPick={()=>{}}/>; }
+function AddPhotoStatic({ draft }) {
+  return <AddPhoto draft={draft} onSet={()=>{}} onSkip={()=>{}} onNext={()=>{}}/>;
+}
+function DoneStatic({ draft }) { return <Done draft={draft} onEnter={()=>{}}/>; }
+
+function StepFrameStatic({ eyebrow, title, sub, children, cta }) {
+  return (
+    <div style={{ padding: '20px 20px 24px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ marginBottom: 24 }}>
+        {eyebrow && <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1D4FCC', marginBottom: 8 }}>{eyebrow}</div>}
+        <div style={{ fontFamily: 'Sora', fontSize: 30, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.1, color: '#0B1220' }}>{title}</div>
+        {sub && <div style={{ marginTop: 10, fontSize: 15, lineHeight: 1.45, color: '#2A3447' }}>{sub}</div>}
+      </div>
+      <div style={{ flex: 1, minHeight: 0 }}>{children}</div>
+      {cta && <div style={{ paddingTop: 16 }}>{cta}</div>}
+    </div>
+  );
+}
+
+function HomeFrozen({ openSwitcher, glass = true }) {
+  return (
+    <div style={{ position: 'relative', height: '100%', width: '100%', overflow: 'hidden' }}>
+      <Home pets={SEED_PETS} activeId={SEED_PETS[0].id}
+            onOpenSwitcher={()=>{}} onOpenAdd={()=>{}} outdoor={false} onOutdoor={()=>{}} />
+      <PetSwitcher open={openSwitcher} pets={SEED_PETS} activeId={SEED_PETS[0].id}
+                   onClose={()=>{}} onPick={()=>{}} onAdd={()=>{}}
+                   glass={glass} outdoor={false} sheetHeight={'78%'} />
+    </div>
+  );
+}
+
+// ─── Document ───────────────────────────────────────────────────
+function PrintDoc() {
+  const dogDraft       = { species: 'dog',    name: '',     breed: null,             photo: null };
+  const dogDraftName   = { species: 'dog',    name: 'Pip',  breed: null,             photo: null };
+  const dogDraftBreed  = { species: 'dog',    name: 'Pip',  breed: 'Border Collie',  photo: null };
+  const dogDraftPhoto  = { species: 'dog',    name: 'Pip',  breed: 'Border Collie',  photo: null };
+  const dogDraftDone   = { species: 'dog',    name: 'Pip',  breed: 'Border Collie',  photo: null,
+                            accent: '#E76F51', tint: '#FBDFD5' };
+  return (
+    <>
+      <Cover/>
+      <Page label="01 / Onboarding"  title="Welcome">
+        <OnboardingFrozen step={0} draft={dogDraft}/>
+      </Page>
+      <Page label="02 / Onboarding"  title="Choose species" sub="Step 1 of 4">
+        <OnboardingFrozen step={1} draft={dogDraft}/>
+      </Page>
+      <Page label="03 / Onboarding"  title="Pet name" sub="Step 2 of 4">
+        <OnboardingFrozen step={2} draft={dogDraftName}/>
+      </Page>
+      <Page label="04 / Onboarding"  title="Breed" sub="Step 3 of 4 — searchable, opt-out friendly">
+        <OnboardingFrozen step={3} draft={dogDraftBreed}/>
+      </Page>
+      <Page label="05 / Onboarding"  title="Photo" sub="Step 4 of 4 — skippable">
+        <OnboardingFrozen step={4} draft={dogDraftPhoto}/>
+      </Page>
+      <Page label="06 / Onboarding"  title="Profile created" sub="Deferred fields surfaced">
+        <OnboardingFrozen step={5} draft={dogDraftDone}/>
+      </Page>
+      <Page label="07 / Home"        title="Active pet header" sub="Tap header to open switcher">
+        <HomeFrozen openSwitcher={false}/>
+      </Page>
+      <Page label="08 / Switcher"    title="Pet switcher bottom sheet" sub="Glass, drag-to-dismiss">
+        <HomeFrozen openSwitcher={true} glass={true}/>
+      </Page>
+    </>
+  );
+}
+
+// Defer mount until Babel + fonts are ready.
+function start() {
+  ReactDOM.createRoot(document.getElementById('root')).render(<PrintDoc/>);
+  // Auto-print after fonts + layout settle.
+  Promise.all([
+    document.fonts ? document.fonts.ready : Promise.resolve(),
+    new Promise(r => setTimeout(r, 900)),
+  ]).then(() => {
+    setTimeout(() => window.print(), 200);
+  });
+}
+start();
+</script>
+</body>
+</html>
