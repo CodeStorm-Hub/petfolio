@@ -25,7 +25,7 @@ class PetRepository {
   }) async {
     final userId = _client.auth.currentUser!.id;
     final row = await _client.from('pets').insert({
-      'user_id': userId,
+      'owner_id': userId,
       'name': name,
       'species': species,
       if (breed != null && !breed.startsWith("Don't")) 'breed': breed,

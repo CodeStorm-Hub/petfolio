@@ -7,7 +7,11 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/presentation/controllers/auth_controller.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/care/presentation/screens/care_screen.dart';
+import '../features/marketplace/data/models/product.dart';
+import '../features/marketplace/presentation/screens/cart_screen.dart';
 import '../features/marketplace/presentation/screens/marketplace_screen.dart';
+import '../features/marketplace/presentation/screens/order_confirmation_screen.dart';
+import '../features/marketplace/presentation/screens/product_detail_screen.dart';
 import '../features/matching/presentation/screens/matching_screen.dart';
 import '../features/pet_profile/presentation/controllers/pet_list_controller.dart';
 import '../features/pet_profile/presentation/screens/onboarding_screen.dart';
@@ -66,6 +70,28 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
       ),
+
+      // ── Marketplace full-screen routes (outside ShellRoute / no bottom nav) ─
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/marketplace/product/:id',
+        builder: (context, state) => ProductDetailScreen(
+          productId: state.pathParameters['id']!,
+          product: state.extra as Product?,
+        ),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/marketplace/cart',
+        builder: (context, state) => const CartScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/marketplace/order/:id',
+        builder: (context, state) => OrderConfirmationScreen(
+          orderId: state.pathParameters['id']!,
+        ),
+      ),
     ],
   );
 });
@@ -77,8 +103,8 @@ final routerProvider = Provider<GoRouter>((ref) {
 class _RouterNotifier extends ChangeNotifier {
   _RouterNotifier(this._ref) {
     // Notify GoRouter whenever auth state or pet list changes.
-    _ref.listen(authStateProvider, (_, __) => notifyListeners());
-    _ref.listen(petListProvider, (_, __) => notifyListeners());
+    _ref.listen(authStateProvider, (_, _) => notifyListeners());
+    _ref.listen(petListProvider, (_, _) => notifyListeners());
   }
 
   final Ref _ref;

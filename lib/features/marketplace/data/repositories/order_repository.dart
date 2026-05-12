@@ -15,15 +15,23 @@ final orderRepositoryProvider = Provider<OrderRepository>(
 // Repository
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Remote table: public.marketplace_orders
+// Columns used:
+//   id                       uuid  PK
+//   buyer_id                 uuid  (auth.uid of the purchaser)
+//   title                    text  (required, short human label for the order)
+//   amount_cents             bigint (total in smallest currency unit, e.g. 1998 = $19.98)
+//   currency                 text  default 'usd'
+//   status                   text  pending | confirmed | cancelled | ...
+//   stripe_payment_intent_id text  nullable
+//   line_items               jsonb (cart snapshot)
+
 class OrderRepository {
   const OrderRepository(this._client);
 
   final SupabaseClient _client;
 
-  /// Insert a pending order row and return its id.
-  ///
-  /// Called BEFORE the Stripe Payment Sheet is presented so we have an
-  /// idempotency key ([orderId]) ready for the Edge Function.
+  /// Insert a pending order and return its id.
   Future<String> insertPendingOrder({
     required String buyerId,
     required CartState cart,
@@ -32,9 +40,9 @@ class OrderRepository {
         .from('marketplace_orders')
         .insert({
           'buyer_id':    buyerId,
+          'title':       'PetFolio Order',
           'status':      'pending',
           'amount_cents': cart.totalCents,
-          'currency':    'usd',
           'line_items':  cart.toLineItemsJson(),
         })
         .select('id')
@@ -43,8 +51,8 @@ class OrderRepository {
     return row['id'] as String;
   }
 
-  /// Request the Edge Function to create (or retrieve) a PaymentIntent.
-  /// Returns the Stripe client_secret.
+  /// Call the Edge Function to create (or retrieve) a Stripe PaymentIntent.
+  /// Returns the client_secret.
   Future<String> createPaymentIntent(String orderId) async {
     final response = await _client.functions.invoke(
       'create-payment-intent',
@@ -55,16 +63,17 @@ class OrderRepository {
       throw Exception('Edge Function error ${response.status}: ${response.data}');
     }
 
-    final clientSecret = (response.data as Map<String, dynamic>)['clientSecret'] as String?;
+    final clientSecret =
+        (response.data as Map<String, dynamic>)['clientSecret'] as String?;
     if (clientSecret == null) throw Exception('Missing clientSecret in response');
     return clientSecret;
   }
 
-  /// Mark the order as paid after Payment Sheet succeeds.
+  /// Mark the order as confirmed after the Payment Sheet succeeds.
   Future<void> confirmOrder(String orderId) async {
     await _client
         .from('marketplace_orders')
-        .update({'status': 'paid'})
+        .update({'status': 'confirmed'})
         .eq('id', orderId);
   }
 
@@ -83,6 +92,6 @@ class OrderRepository {
         .select()
         .eq('id', orderId)
         .single();
-    return row as Map<String, dynamic>;
+    return row;
   }
 }

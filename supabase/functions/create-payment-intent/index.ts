@@ -66,7 +66,7 @@ serve(async (req) => {
 
     const { data: order, error: orderErr } = await admin
       .from('marketplace_orders')
-      .select('id, amount_cents, currency, buyer_id, stripe_payment_intent_id, line_items')
+      .select('id, amount_cents, currency, buyer_id, stripe_payment_intent_id')
       .eq('id', orderId)
       .single();
 
@@ -95,6 +95,7 @@ serve(async (req) => {
     }
 
     // ── Create a new PaymentIntent ───────────────────────────────────────────
+    // amount_cents is stored as bigint integer cents — pass directly to Stripe.
     const pi = await stripe.paymentIntents.create({
       amount: order.amount_cents,
       currency: order.currency ?? 'usd',

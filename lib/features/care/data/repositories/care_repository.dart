@@ -92,19 +92,20 @@ class CareRepository {
       if (done) {
         await _client.from('care_logs').upsert(
           {
-            'pet_id': petId,
-            'user_id': userId,
-            'task_type': task.name,
+            'pet_id':      petId,
+            'logged_by':   userId,
+            'care_type':   _dbCareType(task),
             'logged_date': _fmt(date),
+            'occurred_at': '${_fmt(date)}T00:00:00.000Z',
           },
-          onConflict: 'pet_id, task_type, logged_date',
+          onConflict: 'pet_id, care_type, logged_date',
         );
       } else {
         await _client
             .from('care_logs')
             .delete()
             .eq('pet_id', petId)
-            .eq('task_type', task.name)
+            .eq('care_type', _dbCareType(task))
             .eq('logged_date', _fmt(date));
       }
     } catch (e) {
@@ -129,15 +130,15 @@ class CareRepository {
 
       final rows = await _client
           .from('care_logs')
-          .select('task_type, logged_date')
+          .select('care_type, logged_date')
           .eq('pet_id', petId)
-          .eq('user_id', userId)
+          .eq('logged_by', userId)
           .gte('logged_date', _fmt(weekAgo))
           .lte('logged_date', _fmt(today));
 
       // Mark all past days from remote (don't overwrite today in-progress).
       for (final row in rows) {
-        final taskType = _parseTaskType(row['task_type'] as String?);
+        final taskType = _parseTaskType(row['care_type'] as String?);
         final dateStr = row['logged_date'] as String?;
         if (taskType == null || dateStr == null) continue;
 
@@ -157,8 +158,17 @@ class CareRepository {
     }
   }
 
-  CareTaskType? _parseTaskType(String? s) {
-    if (s == null) return null;
-    return CareTaskType.values.where((t) => t.name == s).firstOrNull;
-  }
+  // Maps Flutter enum values to the DB care_type check constraint values.
+  static String _dbCareType(CareTaskType t) => switch (t) {
+        CareTaskType.feed => 'feeding',
+        CareTaskType.walk => 'walk',
+        CareTaskType.med  => 'medication',
+      };
+
+  CareTaskType? _parseTaskType(String? s) => switch (s) {
+        'feeding'    => CareTaskType.feed,
+        'walk'       => CareTaskType.walk,
+        'medication' => CareTaskType.med,
+        _            => null,
+      };
 }

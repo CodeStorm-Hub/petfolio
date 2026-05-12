@@ -7,7 +7,7 @@ import 'package:petfolio/features/pet_profile/data/models/pet_species.dart';
 class Pet {
   const Pet({
     required this.id,
-    required this.userId,
+    required this.ownerId,
     required this.name,
     required this.species,
     this.breed,
@@ -16,7 +16,7 @@ class Pet {
   });
 
   final String id;
-  final String userId;
+  final String ownerId;
   final String name;
 
   /// Matches [PetSpecies.name] — stored as a plain string in the DB.
@@ -30,7 +30,7 @@ class Pet {
 
   Pet copyWith({String? name, String? breed, String? avatarUrl}) => Pet(
         id: id,
-        userId: userId,
+        ownerId: ownerId,
         name: name ?? this.name,
         species: species,
         breed: breed ?? this.breed,
@@ -40,7 +40,7 @@ class Pet {
 
   factory Pet.fromJson(Map<String, dynamic> json) => Pet(
         id: json['id'] as String,
-        userId: json['user_id'] as String,
+        ownerId: json['owner_id'] as String,
         name: json['name'] as String,
         species: json['species'] as String,
         breed: json['breed'] as String?,
@@ -50,7 +50,7 @@ class Pet {
 
   Map<String, dynamic> toJson() => {
         'id': id,
-        'user_id': userId,
+        'owner_id': ownerId,
         'name': name,
         'species': species,
         if (breed != null) 'breed': breed,
