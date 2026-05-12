@@ -306,7 +306,7 @@ class _ShopBody extends ConsumerWidget {
           ),
           SliverToBoxAdapter(
             child: SizedBox(
-              height: 220,
+              height: 260,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),

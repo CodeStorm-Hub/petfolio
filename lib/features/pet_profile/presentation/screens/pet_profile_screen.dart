@@ -25,6 +25,7 @@ class PetProfileScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: pt.surface1,
       body: SafeArea(
+        bottom: false, // Prevents duplicate padding above the navigation bar
         child: CustomScrollView(
           slivers: [
             // ── Active pet header ──────────────────────────────────────
@@ -165,7 +166,8 @@ class _ActivePetHeader extends StatelessWidget {
                           borderRadius: 999,
                         ),
                   const SizedBox(width: 12),
-                  Column(
+                  Expanded( // <-- Wrap this Column in an Expanded widget
+                  child:Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -201,6 +203,7 @@ class _ActivePetHeader extends StatelessWidget {
                         ],
                       ),
                     ],
+                  ),
                   ),
                 ],
               ),
