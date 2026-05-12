@@ -74,36 +74,77 @@ class _SocialView extends ConsumerWidget {
             _SocialHeader(pet: pet),
             Expanded(
               child: feedAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, _) => const Center(
-                  child: Text('Something went wrong — please try again'),
-                ),
-                data: (posts) => CustomScrollView(
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: _StoriesRow(posts: posts, pet: pet),
-                    ),
-                    SliverPadding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 32),
-                      sliver: SliverList.separated(
-                        itemCount: posts.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 16),
-                        itemBuilder: (ctx, i) {
-                          final post = posts[i];
-                          return post.isMemorial
-                              ? _MemorialPost(
-                                  post: post,
-                                  onCandle: () =>
-                                      notifier.toggleCandle(post.id),
-                                )
-                              : _RegularPost(
-                                  post: post,
-                                  onLike: () => notifier.toggleLike(post.id),
-                                );
-                        },
+                skipLoadingOnReload: true,
+                loading: () =>
+                    const Center(child: CircularProgressIndicator.adaptive()),
+                error: (_, _) => Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
+                      const SizedBox(height: 12),
+                      Text('Could not load feed',
+                          style: TextStyle(fontSize: 15, color: pt.ink500)),
+                      const SizedBox(height: 16),
+                      FilledButton.icon(
+                        onPressed: () => notifier.refresh(),
+                        icon: const Icon(Icons.refresh_rounded, size: 16),
+                        label: const Text('Retry'),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                ),
+                data: (posts) => RefreshIndicator.adaptive(
+                  onRefresh: notifier.refresh,
+                  child: CustomScrollView(
+                    // Keep scroll physics active even when posts is empty so
+                    // RefreshIndicator still works.
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: _StoriesRow(posts: posts, pet: pet),
+                      ),
+                      if (posts.isEmpty)
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: Center(
+                            child: Text(
+                              'No posts yet — be the first to share!',
+                              style: TextStyle(color: pt.ink500),
+                            ),
+                          ),
+                        )
+                      else
+                        SliverPadding(
+                          padding: const EdgeInsets.only(top: 8, bottom: 32),
+                          // SliverList.builder lazily builds children as they
+                          // scroll into view — optimal for long feeds.
+                          sliver: SliverList.builder(
+                            itemCount: posts.length,
+                            itemBuilder: (ctx, i) {
+                              final post = posts[i];
+                              final card = post.isMemorial
+                                  ? _MemorialPost(
+                                      post: post,
+                                      onCandle: () =>
+                                          notifier.toggleCandle(post.id),
+                                    )
+                                  : _RegularPost(
+                                      post: post,
+                                      onLike: () =>
+                                          notifier.toggleLike(post.id),
+                                    );
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: i == posts.length - 1 ? 0 : 16,
+                                ),
+                                child: card,
+                              );
+                            },
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -438,7 +479,9 @@ class _PostHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 1),
                 Text(
-                  '${post.fuzzyLocation} · ${post.timeAgo}',
+                  post.fuzzyLocation.isEmpty
+                      ? post.timeAgo
+                      : '${post.fuzzyLocation} · ${post.timeAgo}',
                   style: tt.labelMedium?.copyWith(color: pt.ink500),
                 ),
               ],
@@ -592,7 +635,7 @@ class _RegularFooter extends StatelessWidget {
           // Action row
           Row(
             children: [
-              // Paw like button — coral when liked, default when not
+              // Heart like button — instantly red on tap via optimistic update
               GestureDetector(
                 onTap: onLike,
                 behavior: HitTestBehavior.opaque,
@@ -605,7 +648,9 @@ class _RegularFooter extends StatelessWidget {
                       child: child,
                     ),
                     child: Icon(
-                      post.isLiked ? Icons.pets : Icons.pets_outlined,
+                      post.isLiked
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
                       key: ValueKey(post.isLiked),
                       color: post.isLiked
                           ? AppColors.coral500

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/router.dart';
@@ -8,6 +9,15 @@ import 'core/theme/theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // ── Google Fonts ──────────────────────────────────────────────────────────
+  // Disable the runtime CDN fetch.  When the device has no network / DNS
+  // (common on freshly-booted Android emulators) `google_fonts` would
+  // otherwise throw an UNHANDLED `ClientException: Failed host lookup
+  // 'fonts.gstatic.com'` for every TextStyle rebuild — flooding the log and
+  // breaking hot reload.  With `allowRuntimeFetching = false` the package
+  // silently falls back to the platform default font instead.
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   // ── Stripe ────────────────────────────────────────────────────────────────
   // Publishable key is injected at build time:

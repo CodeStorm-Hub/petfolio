@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Required by Supabase (HTTPS), google_fonts CDN, and image loaders.
+         Debug builds also declare this in src/debug/AndroidManifest.xml so
+         the Flutter tool can hot-reload; release / profile builds need it
+         here or all network calls fail with errno=7 (no DNS). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
     <application
