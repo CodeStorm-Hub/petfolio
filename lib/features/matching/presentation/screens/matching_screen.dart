@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -70,6 +71,7 @@ class _DiscoveryView extends ConsumerWidget {
     return Scaffold(
       backgroundColor: pt.surface1,
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             _DiscoveryHeader(state: state),
@@ -459,6 +461,13 @@ class _PetBlob extends StatelessWidget {
   const _PetBlob({required this.candidate});
   final DiscoveryCandidate candidate;
 
+  static const _blobRadius = BorderRadius.only(
+    topLeft: Radius.circular(120),
+    topRight: Radius.circular(100),
+    bottomLeft: Radius.circular(80),
+    bottomRight: Radius.circular(140),
+  );
+
   @override
   Widget build(BuildContext context) {
     final emoji = switch (candidate.species) {
@@ -467,20 +476,61 @@ class _PetBlob extends StatelessWidget {
       _ => '🐶',
     };
 
-    return Container(
-      width: 200,
-      height: 220,
-      decoration: BoxDecoration(
-        color: candidate.subjectColor.withAlpha(180),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(120),
-          topRight: Radius.circular(100),
-          bottomLeft: Radius.circular(80),
-          bottomRight: Radius.circular(140),
-        ),
-      ),
-      alignment: Alignment.center,
-      child: Text(emoji, style: const TextStyle(fontSize: 88)),
+    return LayoutBuilder(
+      builder: (_, constraints) {
+        // Scale the blob with the available area, clamped for small/large screens.
+        final w = (constraints.maxWidth * 0.52).clamp(120.0, 220.0);
+        final h = w * 1.1;
+        final emojiSize = w * 0.44;
+
+        final blobDecoration = BoxDecoration(
+          color: candidate.subjectColor.withAlpha(180),
+          borderRadius: _blobRadius,
+        );
+
+        // When a real pet photo is available, show it inside the blob shape.
+        // Fall back to the emoji illustration on network error or absence.
+        final hasPhoto = candidate.avatarUrl != null &&
+            candidate.avatarUrl!.isNotEmpty;
+
+        if (hasPhoto) {
+          return ClipRRect(
+            borderRadius: _blobRadius,
+            child: CachedNetworkImage(
+              imageUrl: candidate.avatarUrl!,
+              width: w,
+              height: h,
+              fit: BoxFit.cover,
+              // Placeholder: show the coloured blob while the image loads.
+              placeholder: (_, _) => Container(
+                width: w,
+                height: h,
+                decoration: blobDecoration,
+                alignment: Alignment.center,
+                child: Text(emoji,
+                    style: TextStyle(fontSize: emojiSize)),
+              ),
+              // Error: fall back to emoji blob — never a broken-image icon.
+              errorWidget: (_, _, _) => Container(
+                width: w,
+                height: h,
+                decoration: blobDecoration,
+                alignment: Alignment.center,
+                child: Text(emoji,
+                    style: TextStyle(fontSize: emojiSize)),
+              ),
+            ),
+          );
+        }
+
+        return Container(
+          width: w,
+          height: h,
+          decoration: blobDecoration,
+          alignment: Alignment.center,
+          child: Text(emoji, style: TextStyle(fontSize: emojiSize)),
+        );
+      },
     );
   }
 }
@@ -515,13 +565,17 @@ class _InfoPanel extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  candidate.name,
-                  style: GoogleFonts.sora(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    height: 1.1,
+                Flexible(
+                  child: Text(
+                    candidate.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.sora(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      height: 1.1,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),

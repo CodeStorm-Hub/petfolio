@@ -69,6 +69,10 @@ class _SocialView extends ConsumerWidget {
     return Scaffold(
       backgroundColor: pt.surface1,
       body: SafeArea(
+        // bottom: false — the shell scaffold's BottomNavigationBar already
+        // insets the body; adding another safe-area bottom pad would create
+        // a double gap above the home indicator.
+        bottom: false,
         child: Column(
           children: [
             _SocialHeader(pet: pet),

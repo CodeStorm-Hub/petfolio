@@ -180,17 +180,21 @@ class _ActivePetHeader extends StatelessWidget {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          activePet != null
-                              ? Text(
-                                  activePet!.name,
-                                  style: const TextStyle(
-                                    fontFamily: 'Sora',
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 22,
-                                    letterSpacing: -0.2,
-                                  ),
-                                )
-                              : SkeletonLoader(width: 100, height: 22),
+                          Flexible(
+                            child: activePet != null
+                                ? Text(
+                                    activePet!.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: 'Sora',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 22,
+                                      letterSpacing: -0.2,
+                                    ),
+                                  )
+                                : SkeletonLoader(width: 100, height: 22),
+                          ),
                           const SizedBox(width: 4),
                           Icon(Icons.keyboard_arrow_down_rounded,
                               size: 18, color: pt.ink500),

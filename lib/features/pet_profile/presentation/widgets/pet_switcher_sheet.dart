@@ -366,23 +366,29 @@ class _AddPetButton extends StatelessWidget {
                 child: const Icon(Icons.add, color: Colors.white, size: 22),
               ),
               const SizedBox(width: 14),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Add another pet',
-                    style: TextStyle(
-                      fontFamily: 'Sora',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Add another pet',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Sora',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Name, breed, photo — 30 seconds',
-                    style: TextStyle(fontSize: 13, color: pt.ink500),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      'Name, breed, photo — 30 seconds',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 13, color: pt.ink500),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
