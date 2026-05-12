@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../auth/data/repositories/auth_repository.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../data/models/pet.dart';
 import '../../data/repositories/pet_repository.dart';
 
@@ -10,14 +12,30 @@ final petRepositoryProvider = Provider<PetRepository>(
 
 class PetListNotifier extends AsyncNotifier<List<Pet>> {
   @override
-  Future<List<Pet>> build() =>
-      ref.read(petRepositoryProvider).fetchPets();
+  Future<List<Pet>> build() async {
+    try {
+      return await ref.read(petRepositoryProvider).fetchPets();
+    } on AuthException {
+      // JWT from a previous project is invalid — sign out so the user
+      // can re-authenticate against the current Supabase project.
+      await ref.read(authRepositoryProvider).signOut();
+      return [];
+    } catch (e) {
+      // Re-throw other errors so the UI can show them.
+      rethrow;
+    }
+  }
 
   Future<void> refresh() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () => ref.read(petRepositoryProvider).fetchPets(),
-    );
+    try {
+      state = AsyncData(await ref.read(petRepositoryProvider).fetchPets());
+    } on AuthException {
+      await ref.read(authRepositoryProvider).signOut();
+      state = const AsyncData([]);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
   }
 
   /// Creates a pet in Supabase, appends it to the local list, and returns it.

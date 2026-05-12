@@ -43,8 +43,14 @@ class PetProfileScreen extends ConsumerWidget {
                   loading: () =>
                       const Center(child: CircularProgressIndicator.adaptive()),
                   error: (e, _) => Center(
-                    child: Text('Could not load pets',
-                        style: TextStyle(color: pt.ink500)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Text(
+                        'Could not load pets\n\n$e',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 13, color: pt.ink500),
+                      ),
+                    ),
                   ),
                   data: (pets) => pets.isEmpty
                       ? _EmptyPetsState(pt: pt)
