@@ -22,6 +22,6 @@ final isLoggedInProvider = Provider<bool>((ref) {
     data: (s) => s.session != null,
     // Fall back to checking the cached session so the router doesn't flicker.
     loading: () => Supabase.instance.client.auth.currentSession != null,
-    error: (_, __) => false,
+    error: (_, _) => false,
   );
 });

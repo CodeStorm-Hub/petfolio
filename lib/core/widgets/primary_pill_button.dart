@@ -87,6 +87,11 @@ class _PrimaryPillButtonState extends State<PrimaryPillButton>
 
   void _onTapDown(TapDownDetails _) {
     if (!_isEnabled) return;
+    // Dismiss the soft keyboard at the earliest possible moment (pointer-down,
+    // before any layout shift).  Without this, the Scaffold shrinks between
+    // onTapDown and onTap, the button moves, and the tap is cancelled —
+    // forcing the user to tap twice on Android.
+    FocusManager.instance.primaryFocus?.unfocus();
     // Only primary variant scales (§5.2: "the only button that scales")
     if (widget.variant == PillButtonVariant.primary &&
         !MediaQuery.of(context).disableAnimations) {

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/auth/presentation/controllers/auth_controller.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
+import '../features/auth/presentation/screens/registration_screen.dart';
 import '../features/care/presentation/screens/care_screen.dart';
 import '../features/marketplace/data/models/product.dart';
 import '../features/marketplace/presentation/screens/cart_screen.dart';
@@ -67,6 +68,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegistrationScreen(),
+      ),
+      GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
       ),
@@ -113,13 +118,13 @@ class _RouterNotifier extends ChangeNotifier {
     final isLoggedIn = _ref.read(isLoggedInProvider);
     final loc = state.matchedLocation;
 
-    // ── Not logged in → always go to /login ────────────────────────
+    // ── Not logged in → only /login and /register are allowed ────────
     if (!isLoggedIn) {
-      return loc == '/login' ? null : '/login';
+      return (loc == '/login' || loc == '/register') ? null : '/login';
     }
 
-    // ── Logged in on /login → leave ─────────────────────────────────
-    if (loc == '/login') return '/home';
+    // ── Logged in on an auth screen → leave ─────────────────────────
+    if (loc == '/login' || loc == '/register') return '/home';
 
     // ── Logged in but no pets → go to /onboarding ───────────────────
     // Only redirect when the pet list has finished loading AND is empty,

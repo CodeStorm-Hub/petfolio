@@ -9,19 +9,22 @@ import 'package:petfolio/core/widgets/widgets.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/auth_widgets.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+class RegistrationScreen extends ConsumerStatefulWidget {
+  const RegistrationScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<RegistrationScreen> createState() =>
+      _RegistrationScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen>
+class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirm = true;
   bool _isLoading = false;
   String? _error;
 
@@ -45,6 +48,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     _fadeCtrl.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmController.dispose();
     super.dispose();
   }
 
@@ -57,11 +61,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     });
 
     try {
-      await ref.read(authRepositoryProvider).signIn(
+      await ref.read(authRepositoryProvider).signUp(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
-      // GoRouter's authStateProvider listener triggers redirect to /home.
+      // GoRouter redirects to /home or /onboarding after auth state changes.
     } on AuthException catch (e) {
       if (mounted) setState(() => _error = e.message);
     } catch (_) {
@@ -101,10 +105,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text('Welcome back', style: tt.headlineMedium),
+                        Text('Create account', style: tt.headlineMedium),
                         const SizedBox(height: 4),
                         Text(
-                          'Sign in to continue.',
+                          'One home for every pet in your life.',
                           style: tt.bodyMedium?.copyWith(color: pt.ink500),
                         ),
                         const SizedBox(height: 28),
@@ -133,8 +137,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           controller: _passwordController,
                           label: 'Password',
                           obscureText: _obscurePassword,
-                          textInputAction: TextInputAction.done,
-                          onSubmitted: (_) => _submit(),
+                          textInputAction: TextInputAction.next,
                           suffixIcon: VisibilityToggle(
                             obscure: _obscurePassword,
                             onTap: () => setState(
@@ -151,6 +154,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             return null;
                           },
                         ),
+                        const SizedBox(height: 14),
+
+                        // Confirm password
+                        AuthField(
+                          controller: _confirmController,
+                          label: 'Confirm password',
+                          obscureText: _obscureConfirm,
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (_) => _submit(),
+                          suffixIcon: VisibilityToggle(
+                            obscure: _obscureConfirm,
+                            onTap: () => setState(
+                                () => _obscureConfirm = !_obscureConfirm),
+                            color: pt.ink300,
+                          ),
+                          validator: (v) {
+                            if (v == null || v.isEmpty) {
+                              return 'Please confirm your password';
+                            }
+                            if (v != _passwordController.text) {
+                              return 'Passwords do not match';
+                            }
+                            return null;
+                          },
+                        ),
 
                         // Error banner
                         if (_error != null) ...[
@@ -161,7 +189,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
                         // CTA
                         PrimaryPillButton(
-                          label: 'Sign in',
+                          label: 'Create account',
                           onPressed: _isLoading ? null : _submit,
                           isLoading: _isLoading,
                           isFullWidth: true,
@@ -173,11 +201,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 ),
                 const SizedBox(height: 24),
 
-                // ── Register link ────────────────────────────────────────
+                // ── Login link ───────────────────────────────────────────
                 AuthToggleLink(
-                  question: "Don't have an account?",
-                  actionLabel: 'Create one',
-                  onTap: () => context.go('/register'),
+                  question: 'Already have an account?',
+                  actionLabel: 'Sign in',
+                  onTap: () => context.go('/login'),
                 ),
                 const SizedBox(height: 16),
               ],
