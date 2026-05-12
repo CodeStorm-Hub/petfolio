@@ -15,7 +15,9 @@
       "mcp__plugin_supabase_supabase__list_projects",
       "mcp__plugin_supabase_supabase__get_project_url",
       "mcp__plugin_supabase_supabase__get_publishable_keys",
-      "Bash(dart analyze *)"
+      "Bash(dart analyze *)",
+      "WebSearch",
+      "WebFetch(domain:pub.dev)"
     ]
   }
 }
