@@ -19,7 +19,10 @@
       "WebSearch",
       "WebFetch(domain:pub.dev)",
       "Bash(supabase functions *)",
-      "mcp__plugin_supabase_supabase__get_logs"
+      "mcp__plugin_supabase_supabase__get_logs",
+      "Bash(dart doc *)",
+      "Read(//c/Users/syedr/AppData/Local/Pub/Cache/hosted/pub.dev/**)",
+      "Bash(grep -r \"translateByDouble\" \"C:\\\\src\\\\flutter\\\\packages\\\\flutter\\\\lib\" --include=\"*.dart\" -n 2>/dev/null | head -5; grep -r \"translateByDouble\" \"C:\\\\flutter\\\\packages\\\\flutter\\\\lib\" --include=\"*.dart\" -n 2>/dev/null | head -5)"
     ]
   }
 }

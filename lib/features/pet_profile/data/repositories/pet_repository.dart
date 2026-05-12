@@ -37,7 +37,9 @@ class PetRepository {
       'owner_id': userId,
       'name': name,
       'species': species,
+      // ignore: use_null_aware_elements
       if (breed != null && !breed.startsWith("Don't")) 'breed': breed,
+      // ignore: use_null_aware_elements
       if (avatarUrl != null) 'avatar_url': avatarUrl,
     }).select().single();
     return Pet.fromJson(row);

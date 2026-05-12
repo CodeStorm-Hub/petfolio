@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../data/models/product.dart';
+import '../controllers/cart_controller.dart';
 import 'product_glyph.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ProductCard — used in the 2-column grid on the shop screen
 // ─────────────────────────────────────────────────────────────────────────────
 
-class ProductCard extends StatelessWidget {
+class ProductCard extends ConsumerWidget {
   const ProductCard({
     super.key,
     required this.product,
@@ -19,13 +21,24 @@ class ProductCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _ProductTile(product: product),
+          Stack(
+            children: [
+              _ProductTile(product: product),
+              Positioned(
+                bottom: 8,
+                right: 8,
+                child: _QuickAddButton(
+                  onTap: () => ref.read(cartProvider.notifier).add(product),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           _ProductMeta(product: product),
         ],
@@ -38,7 +51,7 @@ class ProductCard extends StatelessWidget {
 // ProductCardCompact — narrower horizontal card (Subscribe & Save row)
 // ─────────────────────────────────────────────────────────────────────────────
 
-class ProductCardCompact extends StatelessWidget {
+class ProductCardCompact extends ConsumerWidget {
   const ProductCardCompact({
     super.key,
     required this.product,
@@ -49,7 +62,7 @@ class ProductCardCompact extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
@@ -57,11 +70,56 @@ class ProductCardCompact extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _ProductTile(product: product),
+            Stack(
+              children: [
+                _ProductTile(product: product),
+                Positioned(
+                  bottom: 8,
+                  right: 8,
+                  child: _QuickAddButton(
+                    onTap: () => ref.read(cartProvider.notifier).add(product),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 8),
             _ProductMeta(product: product, compact: true),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// _QuickAddButton — circular "+" overlay, bottom-right of tile
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _QuickAddButton extends StatelessWidget {
+  const _QuickAddButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x1A0B1220),
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: const Icon(Icons.add_rounded, size: 18, color: AppColors.ink950),
       ),
     );
   }

@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petfolio/core/theme/app_colors.dart';
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 import 'package:petfolio/features/pet_profile/data/models/pet.dart';
@@ -1094,7 +1093,7 @@ class _VitalsChart extends StatefulWidget {
 }
 
 class _VitalsChartState extends State<_VitalsChart> {
-  bool _showWeight = true;
+  final bool _showWeight = true;
 
   static const _weights = [20.4, 20.1, 19.8, 19.6, 19.4, 19.3, 19.5, 19.7, 19.6, 19.4, 19.2, 19.1];
   static const _bcs    = [6, 6, 5, 5, 5, 5, 5, 5, 4, 4, 5, 5];
@@ -1428,9 +1427,9 @@ class _TaskGlyphPainter extends CustomPainter {
           Radius.circular(2 * s),
         );
         final matrix = Matrix4.identity()
-          ..translate(7 * s, 7 * s)
+          ..translateByDouble(7 * s, 7 * s, 0, 1)
           ..rotateZ(-math.pi / 6)
-          ..translate(-7 * s, -7 * s);
+          ..translateByDouble(-7 * s, -7 * s, 0, 1);
         canvas.save();
         canvas.transform(matrix.storage);
         canvas.drawRRect(rect, paint);

@@ -149,6 +149,39 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
     }
   }
 
+  /// Totals the current cart and calls the `create-payment-intent` Edge
+  /// Function, logging both the outgoing request and the response.
+  ///
+  /// This method does **not** launch the Stripe Payment Sheet — it is a
+  /// diagnostic / integration-verification helper that confirms the Edge
+  /// Function is reachable and returns a valid payload.
+  Future<void> requestPaymentIntent() async {
+    final cart = ref.read(cartProvider);
+    final totalCents = cart.totalCents;
+    final itemCount = cart.itemCount;
+
+    debugPrint(
+      '[CheckoutNotifier] requestPaymentIntent – '
+      'amountCents=$totalCents, items=$itemCount',
+    );
+
+    try {
+      final response = await Supabase.instance.client.functions.invoke(
+        'create-payment-intent',
+        body: {
+          'amountCents': totalCents,
+          'currency': 'usd',
+          'itemCount': itemCount,
+        },
+      );
+      debugPrint(
+        '[CheckoutNotifier] Edge Function response: ${response.data}',
+      );
+    } catch (e) {
+      debugPrint('[CheckoutNotifier] requestPaymentIntent failed: $e');
+    }
+  }
+
   /// Reset back to idle (e.g. after displaying an error snackbar).
   void reset() => state = const CheckoutState(status: CheckoutStatus.idle);
 }

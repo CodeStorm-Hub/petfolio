@@ -174,12 +174,12 @@ class _AvatarImage extends StatelessWidget {
           width: diameter,
           height: diameter,
           fit: BoxFit.cover,
-          placeholder: (_, __) => SkeletonLoader(
+          placeholder: (_, _) => SkeletonLoader(
             width: diameter,
             height: diameter,
             borderRadius: radius,
           ),
-          errorWidget: (_, __, ___) => _InitialsCircle(
+          errorWidget: (_, _, _) => _InitialsCircle(
             initials: initials,
             diameter: diameter,
             bgColor: bgColor,
