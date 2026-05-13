@@ -1,9 +1,7 @@
 import 'package:petfolio/features/pet_profile/data/models/pet_species.dart';
 
-/// Immutable domain model for a pet.
-///
-/// Maps 1-to-1 with the `pets` table in Supabase.
-/// Use [copyWith] for local updates; call PetRepository to persist.
+enum ActivityLevel { sedentary, low, moderate, high, veryHigh }
+
 class Pet {
   const Pet({
     required this.id,
@@ -12,31 +10,92 @@ class Pet {
     required this.species,
     this.breed,
     this.avatarUrl,
+    this.dateOfBirth,
+    this.activityLevel,
     required this.createdAt,
   });
 
   final String id;
   final String ownerId;
   final String name;
-
-  /// Matches [PetSpecies.name] — stored as a plain string in the DB.
   final String species;
-
   final String? breed;
   final String? avatarUrl;
+  final DateTime? dateOfBirth;
+  final ActivityLevel? activityLevel;
   final DateTime createdAt;
 
   PetSpecies get speciesEnum => PetSpecies.fromId(species) ?? PetSpecies.dog;
 
-  Pet copyWith({String? name, String? breed, String? avatarUrl}) => Pet(
+  int? get ageInYears {
+    if (dateOfBirth == null) return null;
+    final now = DateTime.now();
+    int years = now.year - dateOfBirth!.year;
+    if (now.month < dateOfBirth!.month ||
+        (now.month == dateOfBirth!.month && now.day < dateOfBirth!.day)) {
+      years--;
+    }
+    return years < 0 ? 0 : years;
+  }
+
+  String get ageLabel {
+    final years = ageInYears;
+    if (years == null) return 'Age unknown';
+    if (years == 0) {
+      final months = _monthsSinceBirth;
+      return months <= 1 ? '1 month' : '$months months';
+    }
+    return years == 1 ? '1 year' : '$years years';
+  }
+
+  int get _monthsSinceBirth {
+    if (dateOfBirth == null) return 0;
+    final now = DateTime.now();
+    return (now.year - dateOfBirth!.year) * 12 + (now.month - dateOfBirth!.month);
+  }
+
+  Pet copyWith({
+    String? name,
+    String? breed,
+    String? avatarUrl,
+    DateTime? dateOfBirth,
+    ActivityLevel? activityLevel,
+  }) =>
+      Pet(
         id: id,
         ownerId: ownerId,
         name: name ?? this.name,
         species: species,
         breed: breed ?? this.breed,
         avatarUrl: avatarUrl ?? this.avatarUrl,
+        dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+        activityLevel: activityLevel ?? this.activityLevel,
         createdAt: createdAt,
       );
+
+  static ActivityLevel? _activityLevelFromJson(String? value) {
+    if (value == null) return null;
+    const map = {
+      'sedentary': ActivityLevel.sedentary,
+      'low': ActivityLevel.low,
+      'moderate': ActivityLevel.moderate,
+      'high': ActivityLevel.high,
+      'very_high': ActivityLevel.veryHigh,
+    };
+    return map[value];
+  }
+
+  static String? _activityLevelToJson(ActivityLevel? level) {
+    if (level == null) return null;
+    const map = {
+      ActivityLevel.sedentary: 'sedentary',
+      ActivityLevel.low: 'low',
+      ActivityLevel.moderate: 'moderate',
+      ActivityLevel.high: 'high',
+      ActivityLevel.veryHigh: 'very_high',
+    };
+    return map[level];
+  }
 
   factory Pet.fromJson(Map<String, dynamic> json) => Pet(
         id: json['id'] as String,
@@ -45,6 +104,10 @@ class Pet {
         species: json['species'] as String,
         breed: json['breed'] as String?,
         avatarUrl: json['avatar_url'] as String?,
+        dateOfBirth: json['date_of_birth'] == null
+            ? null
+            : DateTime.parse(json['date_of_birth'] as String),
+        activityLevel: _activityLevelFromJson(json['activity_level'] as String?),
         createdAt: DateTime.parse(json['created_at'] as String),
       );
 
@@ -55,6 +118,8 @@ class Pet {
         'species': species,
         if (breed != null) 'breed': breed,
         if (avatarUrl != null) 'avatar_url': avatarUrl,
+        if (dateOfBirth != null) 'date_of_birth': dateOfBirth!.toIso8601String(),
+        if (activityLevel != null) 'activity_level': _activityLevelToJson(activityLevel),
         'created_at': createdAt.toIso8601String(),
       };
 
