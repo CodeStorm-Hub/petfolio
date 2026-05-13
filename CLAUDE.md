@@ -145,52 +145,90 @@ flutter pub run build_runner build --delete-conflicting-outputs
 
 ## Known Gaps & Implementation Status
 
-### Mostly Connected (Ready for Use)
-- **Auth** — email/password sign-in/sign-up, session management
-- **Pet Profile** — onboarding, listing, avatar upload, active pet switching
-- **Care** — daily checklist persistence (care_logs table)
-- **Marketplace** — product catalog, cart, order creation
+### Fully Connected & Working
+- **Auth** — email/password sign-in/sign-up, session management ✓
+- **Pet Profile** — onboarding, listing, avatar upload (pets bucket), active pet switching ✓
+- **Care Checklist** — daily logging to `care_logs` table with `logged_date` uniqueness constraint ✓
+- **Marketplace** — 8 products in DB, product catalog, cart, order creation with Stripe payment intent ✓
 
-### Partially Connected (Needs Work)
-- **Care Reminders & Health Streak** — hardcoded in UI; should query `care_logs` and `health_vitals`
+### Partially Implemented
+- **Care Reminders & Health Streak** — hardcoded in UI; `care_logs` table exists but UI doesn't compute from it; `health_vitals` table exists but unused
 - **Product Fallback** — silent fallback to demo catalog on fetch errors; should show visible error states
 - **Checkout** — order creation works; confirmation status is client-side only (no Stripe webhook verification)
+- **Social Reactions** — `post_likes` and `post_candles` tables exist; code has partial write support but no feed fetch
 
 ### Mock / Disconnected (Do Not Rely On)
-- **Social Feed** — entirely mock data; does not fetch `posts` table
-- **Matching Discovery** — entirely mock swipe deck; code expects `swipes`/`matches` tables that do not exist
-- **Matching Chat** — chat thread model mismatch (code expects `pet_id_1/pet_id_2`, DB has `participant_1_id/participant_2_id`)
+- **Social Feed** — entirely mock data; app doesn't fetch `posts` table (0 rows)
+- **Matching Discovery** — entirely mock swipe deck with sample data (0 match_requests in practice)
+- **Matching Chat** — critical schema mismatch: code expects `chat_threads.pet_id_1` and `chat_threads.pet_id_2`, but DB has `participant_1_id` and `participant_2_id` (user-based)
+- **Health Vitals** — table exists in DB with proper schema but no UI or repository implementation
 
-### Database Schema Mismatches
-- Matching feature writes to nonexistent `swipes` and `matches` tables
-- Chat threads in code assume pet-based participants; actual schema uses user participants + `match_request_id`
-- See `/docs/flutter_supabase_full_app_review_2026-05-13.md` **High Priority** section for full list
+### Critical Schema Mismatches
+1. **Chat Threads (Broken)**:
+   - ❌ Code expects: `chat_threads.pet_id_1`, `chat_threads.pet_id_2`
+   - ✓ DB has: `chat_threads.participant_1_id`, `participant_2_id` (user participants)
+   - DB also has: `match_request_id` (foreign key to accepted requests)
+
+2. **Matching Swipe Logic**:
+   - ❌ Code writes to nonexistent `swipes` and `matches` tables
+   - ✓ DB has: `match_requests` table with proper requester/target pet/user logic
+   - Approach: Refactor discovery to build queries from `match_requests` status and visibility
+
+3. **Post Reactions**:
+   - ✓ `post_likes` and `post_candles` tables exist
+   - ⚠️ Code can write reactions but feed doesn't fetch posts, so reactions won't display
+
+See `/docs/flutter_supabase_full_app_review_2026-05-13.md` **High Priority** and **Phase 2/3** sections for detailed implementation roadmap.
 
 ## Supabase Integration
+
+### Project Details
+- **URL**: https://jqyjvhwlcqcsuwcqgcwf.supabase.co
+- **Region**: ap-northeast-1 (Japan)
+- **Database**: PostgreSQL 17.6.1
+- **Status**: Active & Healthy
+- **All tables have RLS (Row Level Security) enabled**
 
 ### Connection & Auth
 - Supabase client initialized in `main.dart` with URL and anon key
 - Auth state streamed via `authStateProvider` (Riverpod)
 - Repositories inject `SupabaseClient` via constructor or `ref.watch(supabaseProvider)`
 
-### Key Tables
-| Table | Purpose | Status |
-|-------|---------|--------|
-| `users` | User profiles (username, avatar, bio) | Connected |
-| `pets` | Pet profiles per owner | Connected |
-| `care_logs` | Daily checklist entries (feed/walk/med) | Connected |
-| `products` | Marketplace catalog | Connected |
-| `marketplace_orders` | Order history | Connected |
-| `posts` | Social feed (author, content, images) | Exists but not queried |
-| `match_requests` | Breeding/playdate/adoption requests | Schema exists; code doesn't match |
-| `chat_threads` | Conversations between users | Schema mismatch in code |
+### Database Schema (12 Tables, RLS Enabled)
+| Table | Rows | Purpose | Status |
+|-------|------|---------|--------|
+| `users` | 3 | User profiles (username, avatar, bio) | Connected |
+| `pets` | 2 | Pet profiles per owner | Connected |
+| `care_logs` | 0 | Daily checklist (care_type, logged_date unique constraint) | Connected |
+| `health_vitals` | 0 | Health tracking (weight, temp, heart rate, etc.) | Schema exists, UI not implemented |
+| `products` | 8 | Marketplace catalog (food, gear, toys, treats, health, grooming) | Connected |
+| `marketplace_orders` | 1 | Order history with Stripe payment intent tracking | Connected |
+| `posts` | 0 | Social feed (author, pet, content, images, visibility) | Exists but not queried by app |
+| `post_likes` | 0 | Social reactions (user/pet can like posts) | Exists, code partially connected |
+| `post_candles` | 0 | Memorial candles on posts (user/pet can light candles) | Exists, code partially connected |
+| `match_requests` | 1 | Pet matching requests (playdate/breeding/adoption) | Schema exists; code schema-incompatible |
+| `chat_threads` | 0 | Conversations between users (user participants, match_request_id) | Schema mismatch: code expects pet_id_1/pet_id_2 |
+| `chat_messages` | 0 | Messages in chat threads | Not implemented in app |
 
 ### Storage
 - `pets` bucket — pet avatar uploads during onboarding
 
-### Advisors (From Review)
-- Missing FK indexes on match/post reactions (performance optimization)
-- Leaked password protection disabled (security setting)
+### Security Advisors (From Supabase Linter)
+- ⚠️ **Leaked Password Protection Disabled** — Enable HaveIBeenPwned.org integration in Auth settings to prevent compromised passwords
+  - Reference: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
+
+### Performance Advisors (From Supabase Linter)
+- 6 unindexed foreign keys (INFO level):
+  - `match_requests.requester_pet_id` and `match_requests.target_pet_id`
+  - `post_likes.pet_id` and `post_likes.user_id`
+  - `post_candles.pet_id` and `post_candles.user_id`
+  - Reference: https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys
+
+- 16+ unused indexes (INFO level) — Not critical; database is new with minimal production usage. Do not drop before real workload analysis.
+  - Reference: https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index
+
+### Migrations
+- **20260512000000_marketplace** — Only migration applied; schema initialized via Supabase dashboard or other tooling
 
 ## Code Patterns & Conventions
 
@@ -287,6 +325,26 @@ Resolve analyzer issues (currently 8 info-level; no errors).
 3. Test: `flutter test`
 4. Build: `flutter build apk --release` (or appropriate platform)
 
+## Supabase Development Workflow
+
+### Testing Database Changes Locally
+If making schema changes:
+1. Use Supabase CLI for local development: `supabase start` / `supabase stop`
+2. Write migrations in `supabase/migrations/`
+3. Test locally before applying to production project (`jqyjvhwlcqcsuwcqgcwf`)
+4. RLS policies are enforced on all tables — test with appropriate user context
+
+### Current Database State
+- 3 users, 2 pets, 1 match_request, 1 marketplace_order, 8 products (test data)
+- 0 posts, 0 care_logs, 0 health_vitals (empty feature tables)
+- All tables RLS-enabled; queries require proper auth context
+
+### Querying Tips
+- **Care logs**: Use `logged_date` for efficient daily grouping (has CURRENT_DATE default)
+- **Products**: 8 catalog items ready; category field supports (food, gear, toys, treats, health, grooming)
+- **Match requests**: Check `status` (pending/accepted/rejected/cancelled) and `match_type` (playdate/breeding/adoption)
+- **Chat threads**: Filter by `participant_1_id` or `participant_2_id` (user IDs, not pet IDs)
+
 ## Common Pitfalls & Tips
 
 1. **Forget to regenerate code** — After changing `@freezed` or `@JsonSerializable` classes, run `build_runner`. Hot reload won't pick up generated code changes.
@@ -302,6 +360,10 @@ Resolve analyzer issues (currently 8 info-level; no errors).
 6. **Auth redirect logic** — `_RouterNotifier.redirect()` watches `isLoggedInProvider` and blocks unauthenticated routes. If adding protected routes, ensure the redirect includes them.
 
 7. **Environment variables** — Supabase/Stripe keys are hardcoded in `main.dart` defaults; use `--dart-define` for production builds.
+
+8. **Chat schema mismatch** — Flutter code uses `pet_id_1`/`pet_id_2` but DB uses `participant_1_id`/`participant_2_id` (user participants). This is a blocking issue for chat features.
+
+9. **RLS policies** — All queries run as the logged-in user. Public reads may require explicit policy configuration. Check Supabase dashboard if getting 0 rows on expected queries.
 
 ## Reference Documents
 
