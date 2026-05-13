@@ -1,0 +1,79 @@
+# ==========================================
+# 1. PETFOLIO SPECIFIC NOISE (CRITICAL TO IGNORE)
+# ==========================================
+# These folders contain hundreds of HTML, JSX, XML, and PNG 
+# files from UI audits and design stitches. They will flood 
+# the context window and cause severe token bloat.
+claude_design/
+docs/logs/
+qa-screens/
+redesign_stitch/
+stitch_petsphere_app_redesign/
+*.xml
+*.html
+*.jsx
+
+# ==========================================
+# 2. FLUTTER BUILD & CACHE
+# ==========================================
+build/
+.dart_tool/
+.pub-cache/
+.pub/
+
+# ==========================================
+# 3. CODE GENERATION
+# ==========================================
+# Ignore generated files so the AI doesn't try to edit them directly
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+*.part.dart
+
+# ==========================================
+# 4. NATIVE PLATFORM DIRECTORIES
+# ==========================================
+# Unless you are specifically asking the agent to write Kotlin/Swift, 
+# keep these ignored so it focuses on the `lib/` directory.
+android/
+ios/
+web/
+macos/
+windows/
+linux/
+
+# ==========================================
+# 5. ASSETS & MEDIA
+# ==========================================
+assets/
+google_fonts/
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.ttf
+*.mp4
+*.gif
+*.zip
+
+# ==========================================
+# 6. SUPABASE LOCAL STATE
+# ==========================================
+supabase/.temp/
+
+# ==========================================
+# 7. DEPENDENCY LOCKS
+# ==========================================
+pubspec.lock
+skills-lock.json
+
+# ==========================================
+# 8. IDE & ENVIRONMENT
+# ==========================================
+.idea/
+.vscode/
+.claude/
+.agents/
+.cursor/
+*.iml
+.metadata

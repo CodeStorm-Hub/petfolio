@@ -402,3 +402,31 @@ If making schema changes:
   - For complete schema, use `supabase db pull` to sync the live schema or inspect the Supabase dashboard
 - **Theme & Design**: `/lib/core/theme/`
 - **Router & Navigation**: `/lib/core/router.dart`
+
+## Project Rules & Token Optimization Strategy
+
+### 1. Strict No-Documentation Rule (Implementation Only)
+* **Code Only:** Do not write any inline comments, dartdocs (`///`), explanations of code, or standalone documentation files. Focus 100% of your output on functional task implementations.
+* **Explicit Override:** You may only write documentation if I explicitly command you with a prompt like "write a documentation file for this." Otherwise, output clean, uncommented code.
+
+### 2. State Management & Session Resets (The `progress.md` Pattern)
+* **Maintain State:** You must actively maintain a `progress.md` file at the root of the project. 
+* **Log & Wipe:** After completing a distinct phase of a feature, update `progress.md` with a concise bulleted summary of what was implemented, any new data contracts/models created, and the immediate next step. 
+* **Prompt to Clear:** After updating `progress.md`, you MUST explicitly advise the user: "Phase complete and logged to progress.md. Please clear this chat session (/clear) to save tokens before proceeding to the next phase."
+
+### 3. Aggressive Context Scoping
+* **Blind by Default:** Do not scan, grep, or read the entire codebase to "understand the app". 
+* **Targeted Reads:** Only read files in directories explicitly related to the current task. If working on Pet Care UI, only read `lib/features/care/` and shared widgets in `lib/core/widgets/`.
+* **Respect Ignores:** Strictly adhere to the `.claudeignore` file. Never attempt to read UI design dumps, `.g.dart` generated files, or native Android/iOS folders unless explicitly commanded.
+
+### 4. Output Formatting & Boilerplate Reduction
+* **Targeted Diffs:** When updating an existing file, do not rewrite the entire 500-line file if you only changed one method. Output only the specific class, widget, or method that changed, along with instructions on where to place it.
+* **No Unnecessary Explanations:** Do not explain standard Flutter/Dart concepts or write essays about how the code works unless asked.
+
+### 5. Strict Sequential Execution
+When given a full feature to implement, execute strictly in this order, waiting for user confirmation or session clears between steps:
+1. Supabase SQL Schema & RLS
+2. Dart Models (Freezed/JsonSerializable)
+3. Repositories (Supabase DB calls)
+4. State Management (Controllers)
+5. UI/UX Implementation
