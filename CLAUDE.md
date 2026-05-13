@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Architecture documents are in `/docs`:
 - `flutter_supabase_full_app_review_2026-05-13.md` — comprehensive QA review covering features, DB mapping, implementation gaps, and phase-by-phase recommendations
-- `database_schema_and_erd.md` — Supabase public schema with all tables, columns, constraints, and relationships
+- `database_schema_and_erd.md` — Supabase schema reference (note: currently documents 9 tables; live project has 12 — see "Schema Sync" below)
 - `database_schema_review.md` — schema analysis and notes
 
 Read the full review before starting substantial work; it details which features are connected vs. mock/broken.
@@ -26,17 +26,23 @@ flutter pub get
 ```
 
 ### Environment Variables
-Create `.env` file (copy from `.env.example`) with:
-```
-SUPABASE_URL=<your-supabase-project-url>
-SUPABASE_ANON_KEY=<your-anonymous-key>
+The app uses `--dart-define` for environment configuration. Default values are hardcoded in `main.dart` for dev/test but should be injected via `--dart-define` for production.
+
+**Supabase** (optional — uses hardcoded defaults if not provided):
+```bash
+flutter run \
+  --dart-define=SUPABASE_URL=<your-supabase-project-url> \
+  --dart-define=SUPABASE_ANON_KEY=<your-anonymous-key>
 ```
 
-Default values are hardcoded in `main.dart` for dev/test but should be injected via `--dart-define` for production.
-
-For Stripe, inject `STRIPE_PUBLISHABLE_KEY` at build time:
+**Stripe** (required for checkout to work):
 ```bash
 flutter run --dart-define=STRIPE_PUBLISHABLE_KEY=pk_test_...
+```
+
+For convenience with multiple defines, use `--dart-define-from-file=.env` (requires Dart 2.19+):
+```bash
+flutter run --dart-define-from-file=.env
 ```
 
 ## Common Commands
@@ -195,6 +201,8 @@ See `/docs/flutter_supabase_full_app_review_2026-05-13.md` **High Priority** and
 - Repositories inject `SupabaseClient` via constructor or `ref.watch(supabaseProvider)`
 
 ### Database Schema (12 Tables, RLS Enabled)
+⚠️ **Note**: This reflects the **live Supabase project** (`jqyjvhwlcqcsuwcqgcwf`). The repo's local schema files (`supabase/schema.sql`) are currently out of sync and do not include all tables. See "Schema Sync" section below.
+
 | Table | Rows | Purpose | Status |
 |-------|------|---------|--------|
 | `users` | 3 | User profiles (username, avatar, bio) | Connected |
@@ -327,6 +335,28 @@ Resolve analyzer issues (currently 8 info-level; no errors).
 
 ## Supabase Development Workflow
 
+### Schema Sync
+The repo's `supabase/schema.sql` and migrations are currently out of sync with the live Supabase project. To sync:
+
+1. **Pull latest schema from live project**:
+   ```bash
+   supabase db pull --project-id jqyjvhwlcqcsuwcqgcwf
+   ```
+   This will generate a new migration file with any schema changes not yet in the repo.
+
+2. **Verify the migration**:
+   ```bash
+   git diff supabase/migrations/
+   ```
+   Review the changes to ensure they're intentional.
+
+3. **Apply locally** (if testing):
+   ```bash
+   supabase db reset
+   ```
+
+4. **Commit and push** the new migration to the repo.
+
 ### Testing Database Changes Locally
 If making schema changes:
 1. Use Supabase CLI for local development: `supabase start` / `supabase stop`
@@ -368,6 +398,7 @@ If making schema changes:
 ## Reference Documents
 
 - **Comprehensive QA & Implementation Plan**: `/docs/flutter_supabase_full_app_review_2026-05-13.md`
-- **Database Schema**: `/docs/database_schema_and_erd.md`
+- **Database Schema** (incomplete — 9 of 12 tables): `/docs/database_schema_and_erd.md`
+  - For complete schema, use `supabase db pull` to sync the live schema or inspect the Supabase dashboard
 - **Theme & Design**: `/lib/core/theme/`
 - **Router & Navigation**: `/lib/core/router.dart`
