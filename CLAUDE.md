@@ -412,7 +412,7 @@ If making schema changes:
 ### 2. State Management & Session Resets (The `progress.md` Pattern)
 * **Maintain State:** You must actively maintain a `progress.md` file at the root of the project. 
 * **Log & Wipe:** After completing a distinct phase of a feature, update `progress.md` with a concise bulleted summary of what was implemented, any new data contracts/models created, and the immediate next step. 
-* **Prompt to Clear:** After updating `progress.md`, you MUST explicitly advise the user: "Phase complete and logged to progress.md. Please clear this chat session (/remember) then (/clear) to save tokens before proceeding to the next phase."
+* **Prompt to Clear:** After updating `progress.md`, you MUST explicitly advise the user: "Phase complete and to logg .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase."
 
 ### 3. Aggressive Context Scoping
 * **Blind by Default:** Do not scan, grep, or read the entire codebase to "understand the app". 
