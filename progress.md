@@ -174,3 +174,50 @@ All fields use `@JsonSerializable(fieldRename: FieldRename.snake)` — Dart `cam
 ### Next step
 
 Wire controllers (Riverpod StateNotifiers) for `CareTaskRepository` and `HealthRepository`, then build UI screens to display tasks and health logs.
+
+---
+
+---
+
+## 2026-05-14 — Onboarding Refactor: Care Engine Data Capture
+
+**Files modified:**
+- `lib/features/pet_profile/data/models/pet.dart`
+- `lib/features/pet_profile/data/repositories/pet_repository.dart`
+- `lib/features/pet_profile/presentation/controllers/pet_list_controller.dart`
+- `lib/features/pet_profile/presentation/screens/onboarding_screen.dart`
+
+### What was implemented
+
+Refactored the pet onboarding flow from 5 steps to 8 steps (6 visible in progress bar) to capture care-engine-required data during pet creation.
+
+**New step flow:**
+- Step 0: Welcome (unchanged)
+- Step 1: Species + Breed (combined — species grid auto-expands breed list below)
+- Step 2: Name (unchanged)
+- Step 3: Date of Birth (Material date picker, shows computed age, skippable)
+- Step 4: Weight (current + optional target, kg/lbs toggle, skippable)
+- Step 5: Activity Level (5-card grid: Couch Potato → Athlete, skippable)
+- Step 6: Photo (moved from step 4, unchanged)
+- Step 7: Done (updated summary with breed/age/weight chips + accurate checklist)
+
+**Data contracts added to `Pet` model:**
+- `dateOfBirth: DateTime?` — maps `pets.date_of_birth`
+- `weightKg: double?` — maps `pets.weight_kg`
+- `activityLevel: String?` — maps `pets.activity_level`
+
+**Repository changes:**
+- `PetRepository.createPet()` now accepts and writes `dateOfBirth`, `weightKg`, `activityLevel`
+- `PetRepository.writeTargetWeight(petId, kg)` — inserts target weight into `health_vitals` with `vital_type='weight'`, `notes='goal'` (best-effort, non-fatal if it fails)
+
+**UX decisions:**
+- DOB, weight, and activity steps all have "Skip for now" (secondary CTA) — no required steps after name
+- Unit toggle (kg/lbs) in the weight step converts on the fly; stores kg in DB
+- Species+breed combined: breed section animates in with `AnimatedSize` after species tap; search field clears automatically on species change
+- Done step shows breed/age/weight as styled chips; checklist reflects which care-engine fields were provided
+
+### Known constraint
+- `health_vitals` RLS policy may need an explicit INSERT policy for the pet owner — verify in Supabase dashboard if target weight writes fail (currently best-effort/silent)
+
+### Next step
+Wire the care engine controllers to consume `pet.dateOfBirth` and `pet.activityLevel` for personalised task defaults. The care `Pet` model in `lib/features/care/data/models/pet.dart` is now a duplicate — consolidate with this model when wiring care controllers.

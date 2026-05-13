@@ -1,9 +1,5 @@
 import 'package:petfolio/features/pet_profile/data/models/pet_species.dart';
 
-/// Immutable domain model for a pet.
-///
-/// Maps 1-to-1 with the `pets` table in Supabase.
-/// Use [copyWith] for local updates; call PetRepository to persist.
 class Pet {
   const Pet({
     required this.id,
@@ -13,22 +9,33 @@ class Pet {
     this.breed,
     this.avatarUrl,
     required this.createdAt,
+    this.dateOfBirth,
+    this.weightKg,
+    this.activityLevel,
   });
 
   final String id;
   final String ownerId;
   final String name;
-
-  /// Matches [PetSpecies.name] — stored as a plain string in the DB.
   final String species;
-
   final String? breed;
   final String? avatarUrl;
   final DateTime createdAt;
+  final DateTime? dateOfBirth;
+  final double? weightKg;
+  final String? activityLevel;
 
   PetSpecies get speciesEnum => PetSpecies.fromId(species) ?? PetSpecies.dog;
 
-  Pet copyWith({String? name, String? breed, String? avatarUrl}) => Pet(
+  Pet copyWith({
+    String? name,
+    String? breed,
+    String? avatarUrl,
+    DateTime? dateOfBirth,
+    double? weightKg,
+    String? activityLevel,
+  }) =>
+      Pet(
         id: id,
         ownerId: ownerId,
         name: name ?? this.name,
@@ -36,6 +43,9 @@ class Pet {
         breed: breed ?? this.breed,
         avatarUrl: avatarUrl ?? this.avatarUrl,
         createdAt: createdAt,
+        dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+        weightKg: weightKg ?? this.weightKg,
+        activityLevel: activityLevel ?? this.activityLevel,
       );
 
   factory Pet.fromJson(Map<String, dynamic> json) => Pet(
@@ -46,6 +56,13 @@ class Pet {
         breed: json['breed'] as String?,
         avatarUrl: json['avatar_url'] as String?,
         createdAt: DateTime.parse(json['created_at'] as String),
+        dateOfBirth: json['date_of_birth'] != null
+            ? DateTime.parse(json['date_of_birth'] as String)
+            : null,
+        weightKg: json['weight_kg'] != null
+            ? (json['weight_kg'] as num).toDouble()
+            : null,
+        activityLevel: json['activity_level'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -56,6 +73,10 @@ class Pet {
         if (breed != null) 'breed': breed,
         if (avatarUrl != null) 'avatar_url': avatarUrl,
         'created_at': createdAt.toIso8601String(),
+        if (dateOfBirth != null)
+          'date_of_birth': dateOfBirth!.toIso8601String().split('T').first,
+        if (weightKg != null) 'weight_kg': weightKg,
+        if (activityLevel != null) 'activity_level': activityLevel,
       };
 
   @override
