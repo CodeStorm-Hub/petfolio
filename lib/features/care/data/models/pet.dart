@@ -8,10 +8,10 @@ part 'pet.g.dart';
 enum ActivityLevel { sedentary, low, moderate, high, veryHigh }
 
 @freezed
+@JsonSerializable(fieldRename: FieldRename.snake)
 class Pet with _$Pet {
   const Pet._();
 
-  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory Pet({
     required String id,
     required String ownerId,

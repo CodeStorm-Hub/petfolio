@@ -30,10 +30,10 @@ enum CareFrequency {
 }
 
 @freezed
+@JsonSerializable(fieldRename: FieldRename.snake)
 class CareTask with _$CareTask {
   const CareTask._();
 
-  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory CareTask({
     required String id,
     required String petId,

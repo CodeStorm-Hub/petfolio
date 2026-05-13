@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/care_task_type.dart';
-import '../../data/repositories/care_repository.dart';
+import '../../data/repositories/checklist_repository.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // State
@@ -114,7 +114,7 @@ class CareNotifier extends FamilyNotifier<CareState, String> {
     return CareState(petId: petId, week: emptyWeek, streak: 0);
   }
 
-  CareRepository get _repo => ref.read(careRepositoryProvider);
+  ChecklistRepository get _repo => ref.read(checklistRepositoryProvider);
 
   /// Load local SharedPreferences state immediately — no network.
   Future<void> loadLocal() async {

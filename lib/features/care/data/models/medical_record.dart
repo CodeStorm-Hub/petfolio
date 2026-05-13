@@ -14,10 +14,10 @@ enum MedicalRecordType {
 }
 
 @freezed
+@JsonSerializable(fieldRename: FieldRename.snake)
 class MedicalRecord with _$MedicalRecord {
   const MedicalRecord._();
 
-  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory MedicalRecord({
     required String id,
     required String petId,

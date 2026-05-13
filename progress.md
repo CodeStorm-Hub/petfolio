@@ -118,3 +118,59 @@ All fields use `@JsonSerializable(fieldRename: FieldRename.snake)` — Dart `cam
 - `care_tasks` gamification point totals need Dart-side aggregation for streak/score UI.
 - `medical_vault.reminder_enabled` + `next_due_at` → push notification scheduling.
 - `health_logs.follow_up_date` → optionally auto-create a `vet_visit` `care_task` row.
+
+---
+
+---
+
+## 2026-05-14 — Care & Health Repositories + AppException
+
+**Files created/modified:**
+- `lib/core/errors/app_exception.dart` — new
+- `lib/features/care/data/repositories/care_repository.dart` — replaced (was checklist logic, now CareTask CRUD)
+- `lib/features/care/data/repositories/checklist_repository.dart` — new (renamed from old care_repository.dart)
+- `lib/features/care/data/repositories/health_repository.dart` — new
+- `lib/features/care/presentation/controllers/care_controller.dart` — import updated
+- `lib/features/care/data/models/*.dart` (4 files) — annotation fix
+
+### What was implemented
+
+- **`AppException`** — sealed class with 5 typed subclasses: `NetworkException`, `NotAuthenticatedException`, `NotFoundException`, `ValidationException`, `DatabaseException`. All repositories catch `PostgrestException` and rethrow as the appropriate subclass. `PGRST116` (no rows) maps to `NotFoundException`.
+
+- **`CareTaskRepository`** (`care_repository.dart`) — full CRUD against `care_tasks` table:
+  - `fetchTasksForPet(petId)` — all tasks ordered by `created_at`
+  - `fetchTasksForDate(petId, date)` — two queries merged: uncompleted tasks + tasks with `completed_at` on target date
+  - `createTask(task)` — inserts without `id` (DB generates); returns created row
+  - `updateTask(task)` — updates by `id`; returns updated row
+  - `deleteTask(taskId)` — hard delete
+  - `toggleCompletion(taskId, {required bool isCompleted})` — atomically sets `is_completed` + `completed_at`; returns updated row
+
+- **`HealthRepository`** (`health_repository.dart`) — CRUD against `health_logs` table:
+  - `fetchLogsForPet(petId)` — newest first
+  - `fetchLogsByType(petId, type)` — filtered by `HealthLogType`
+  - `fetchWeightHistory(petId)` — weight entries only, ascending (chart-ready)
+  - `createLog`, `updateLog`, `deleteLog`
+
+- **`MedicalVaultRepository`** (`health_repository.dart`) — CRUD against `medical_vault` table:
+  - `fetchRecordsForPet(petId)` — all records newest first
+  - `fetchActiveRecords(petId)` — `is_active = true`, ordered by `next_due_at` ascending
+  - `fetchRecordsByType(petId, type)` — filtered by `MedicalRecordType`
+  - `createRecord`, `updateRecord`, `deleteRecord`
+  - `deactivateRecord(recordId)` — soft delete (sets `is_active = false`)
+
+- **`ChecklistRepository`** (`checklist_repository.dart`) — existing offline-first daily checklist logic (SharedPreferences + `care_logs` upsert/delete) preserved verbatim; class/provider renamed so `care_repository.dart` was free for the new implementation.
+
+- **Annotation fix** — moved `@JsonSerializable(fieldRename: FieldRename.snake)` from factory constructor to class declaration in `care_task.dart`, `health_log.dart`, `medical_record.dart`, `pet.dart`. Resolves `invalid_annotation_target` lint. `flutter analyze` → 0 issues.
+
+### Providers
+
+| Provider | Type |
+|---|---|
+| `careTaskRepositoryProvider` | `Provider<CareTaskRepository>` |
+| `healthRepositoryProvider` | `Provider<HealthRepository>` |
+| `medicalVaultRepositoryProvider` | `Provider<MedicalVaultRepository>` |
+| `checklistRepositoryProvider` | `Provider<ChecklistRepository>` (replaces old `careRepositoryProvider`) |
+
+### Next step
+
+Wire controllers (Riverpod StateNotifiers) for `CareTaskRepository` and `HealthRepository`, then build UI screens to display tasks and health logs.

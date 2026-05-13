@@ -18,10 +18,10 @@ enum HealthLogType {
 enum HealthSeverity { mild, moderate, severe, critical }
 
 @freezed
+@JsonSerializable(fieldRename: FieldRename.snake)
 class HealthLog with _$HealthLog {
   const HealthLog._();
 
-  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory HealthLog({
     required String id,
     required String petId,

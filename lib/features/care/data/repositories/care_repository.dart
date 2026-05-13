@@ -1,185 +1,185 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../models/care_task_type.dart';
+import '../../../../core/errors/app_exception.dart';
+import '../models/care_task.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Provider
 // ─────────────────────────────────────────────────────────────────────────────
 
-final careRepositoryProvider = Provider<CareRepository>((ref) {
-  return CareRepository(Supabase.instance.client);
-});
+final careTaskRepositoryProvider = Provider<CareTaskRepository>(
+  (_) => CareTaskRepository(Supabase.instance.client),
+);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Offline-first care repository
+// Repository — care_tasks table
 //
-// Write path:  SharedPreferences (immediate) → Supabase (background).
-// Read path:   SharedPreferences (cold-start) → merge Supabase (background).
-//
-// Key format:  care_{petId}_{yyyy-MM-dd}_{taskType}  →  bool
+// All write operations require an authenticated user (RLS enforced).
+// Throws [AppException] subclasses; never leaks raw [PostgrestException].
 // ─────────────────────────────────────────────────────────────────────────────
 
-class CareRepository {
-  CareRepository(this._client);
+class CareTaskRepository {
+  const CareTaskRepository(this._client);
 
   final SupabaseClient _client;
 
-  // ── Local helpers ───────────────────────────────────────────────────────────
+  // ── Auth guard ──────────────────────────────────────────────────────────────
 
-  String _key(String petId, DateTime date, CareTaskType task) =>
-      'care_${petId}_${_fmt(date)}_${task.name}';
-
-  String _fmt(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-'
-      '${d.month.toString().padLeft(2, '0')}-'
-      '${d.day.toString().padLeft(2, '0')}';
-
-  DateTime _today() => DateUtils.dateOnly(DateTime.now());
-
-  // ── Read 7-day window from SharedPreferences ────────────────────────────────
-
-  Future<Map<DateTime, Map<CareTaskType, bool>>> loadLocalWeek(
-      String petId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final result = <DateTime, Map<CareTaskType, bool>>{};
-    final today = _today();
-
-    for (var i = 6; i >= 0; i--) {
-      final day = today.subtract(Duration(days: i));
-      final tasks = <CareTaskType, bool>{};
-      for (final t in CareTaskType.values) {
-        tasks[t] = prefs.getBool(_key(petId, day, t)) ?? false;
-      }
-      result[day] = tasks;
-    }
-    return result;
+  void _requireAuth() {
+    if (_client.auth.currentUser == null) throw const NotAuthenticatedException();
   }
 
-  // ── Toggle a task (offline-first) ──────────────────────────────────────────
-  //
-  // Writes locally first, then awaits the remote sync.
-  // Throws if the remote call fails so the controller can revert both
-  // the UI state and the local SharedPreferences entry.
+  // ── Fetch all tasks for a pet ───────────────────────────────────────────────
 
-  Future<void> toggleTask({
-    required String petId,
-    required CareTaskType task,
-    required bool done,
-  }) async {
-    final today = _today();
-    final prefs = await SharedPreferences.getInstance();
-
-    // 1. Write locally — UI already updated optimistically by the controller.
-    await prefs.setBool(_key(petId, today, task), done);
-
-    // 2. Sync to Supabase — propagates on failure so the controller can revert.
-    await _syncToRemote(petId: petId, task: task, date: today, done: done);
-  }
-
-  /// Reverts the local SharedPreferences entry for today's task back to
-  /// [previousValue].  Called by [CareNotifier] when the remote sync throws.
-  Future<void> revertLocal({
-    required String petId,
-    required CareTaskType task,
-    required bool previousValue,
-  }) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_key(petId, _today(), task), previousValue);
-  }
-
-  // ── Supabase sync ───────────────────────────────────────────────────────────
-  //
-  // Not authenticated → no-op (offline / guest mode is fine).
-  // Network / PostgREST error → rethrows so the caller can handle it.
-
-  Future<void> _syncToRemote({
-    required String petId,
-    required CareTaskType task,
-    required DateTime date,
-    required bool done,
-  }) async {
-    final userId = _client.auth.currentUser?.id;
-    if (userId == null) return; // Offline / not authenticated — local is truth.
-
-    if (done) {
-      await _client.from('care_logs').upsert(
-        {
-          'pet_id':      petId,
-          'logged_by':   userId,
-          'care_type':   _dbCareType(task),
-          'logged_date': _fmt(date),
-          'occurred_at': '${_fmt(date)}T00:00:00.000Z',
-        },
-        onConflict: 'pet_id, care_type, logged_date',
-      );
-    } else {
-      await _client
-          .from('care_logs')
-          .delete()
-          .eq('pet_id', petId)
-          .eq('care_type', _dbCareType(task))
-          .eq('logged_date', _fmt(date));
-    }
-  }
-
-  // ── Merge remote logs into SharedPreferences ────────────────────────────────
-  //
-  // Called once per screen mount. Remote wins for past days (user may have
-  // completed tasks on another device); local wins for today (in-progress).
-
-  Future<void> refreshFromRemote(String petId) async {
+  Future<List<CareTask>> fetchTasksForPet(String petId) async {
     try {
-      final userId = _client.auth.currentUser?.id;
-      if (userId == null) return;
-
-      final today = _today();
-      final weekAgo = today.subtract(const Duration(days: 6));
-      final prefs = await SharedPreferences.getInstance();
-
+      _requireAuth();
       final rows = await _client
-          .from('care_logs')
-          .select('care_type, logged_date')
+          .from('care_tasks')
+          .select()
           .eq('pet_id', petId)
-          .eq('logged_by', userId)
-          .gte('logged_date', _fmt(weekAgo))
-          .lte('logged_date', _fmt(today));
-
-      // Mark all past days from remote (don't overwrite today in-progress).
-      for (final row in rows) {
-        final taskType = _parseTaskType(row['care_type'] as String?);
-        final dateStr = row['logged_date'] as String?;
-        if (taskType == null || dateStr == null) continue;
-
-        final date = DateTime.tryParse(dateStr);
-        if (date == null) continue;
-        final dayOnly = DateUtils.dateOnly(date);
-
-        // Remote wins for all days; today we only mark true (never remove).
-        final key = _key(petId, dayOnly, taskType);
-        final localVal = prefs.getBool(key) ?? false;
-        if (!localVal) {
-          await prefs.setBool(key, true);
-        }
-      }
+          .order('created_at');
+      return rows.map(CareTask.fromJson).toList();
+    } on AppException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      debugPrint('[CareRepository] remote refresh failed: $e');
+      throw NetworkException(e.toString());
     }
   }
 
-  // Maps Flutter enum values to the DB care_type check constraint values.
-  static String _dbCareType(CareTaskType t) => switch (t) {
-        CareTaskType.feed => 'feeding',
-        CareTaskType.walk => 'walk',
-        CareTaskType.med  => 'medication',
-      };
+  // ── Fetch tasks relevant to a specific date ─────────────────────────────────
+  //
+  // Returns:
+  //   • all uncompleted tasks (pending, due on any day)
+  //   • tasks completed on [date] (for history / streak views)
+  //
+  // Two queries are issued and merged client-side to avoid complex OR filters.
 
-  CareTaskType? _parseTaskType(String? s) => switch (s) {
-        'feeding'    => CareTaskType.feed,
-        'walk'       => CareTaskType.walk,
-        'medication' => CareTaskType.med,
-        _            => null,
-      };
+  Future<List<CareTask>> fetchTasksForDate(String petId, DateTime date) async {
+    try {
+      _requireAuth();
+
+      final day = DateUtils.dateOnly(date);
+      final startOfDay = DateTime.utc(day.year, day.month, day.day);
+      final endOfDay   = DateTime.utc(day.year, day.month, day.day, 23, 59, 59, 999);
+
+      final pendingRows = await _client
+          .from('care_tasks')
+          .select()
+          .eq('pet_id', petId)
+          .eq('is_completed', false)
+          .order('created_at');
+
+      final completedRows = await _client
+          .from('care_tasks')
+          .select()
+          .eq('pet_id', petId)
+          .eq('is_completed', true)
+          .gte('completed_at', startOfDay.toIso8601String())
+          .lte('completed_at', endOfDay.toIso8601String())
+          .order('completed_at', ascending: false);
+
+      return [
+        ...pendingRows.map(CareTask.fromJson),
+        ...completedRows.map(CareTask.fromJson),
+      ];
+    } on AppException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
+    } catch (e) {
+      throw NetworkException(e.toString());
+    }
+  }
+
+  // ── Create ──────────────────────────────────────────────────────────────────
+
+  Future<CareTask> createTask(CareTask task) async {
+    try {
+      _requireAuth();
+      final payload = task.toJson()..remove('id');
+      final row = await _client
+          .from('care_tasks')
+          .insert(payload)
+          .select()
+          .single();
+      return CareTask.fromJson(row);
+    } on AppException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      if (e.code == 'PGRST116') throw const NotFoundException();
+      throw DatabaseException.fromPostgrest(e);
+    } catch (e) {
+      throw NetworkException(e.toString());
+    }
+  }
+
+  // ── Update ──────────────────────────────────────────────────────────────────
+
+  Future<CareTask> updateTask(CareTask task) async {
+    try {
+      _requireAuth();
+      final row = await _client
+          .from('care_tasks')
+          .update(task.toJson())
+          .eq('id', task.id)
+          .select()
+          .single();
+      return CareTask.fromJson(row);
+    } on AppException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      if (e.code == 'PGRST116') throw const NotFoundException();
+      throw DatabaseException.fromPostgrest(e);
+    } catch (e) {
+      throw NetworkException(e.toString());
+    }
+  }
+
+  // ── Delete ──────────────────────────────────────────────────────────────────
+
+  Future<void> deleteTask(String taskId) async {
+    try {
+      _requireAuth();
+      await _client.from('care_tasks').delete().eq('id', taskId);
+    } on AppException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
+    } catch (e) {
+      throw NetworkException(e.toString());
+    }
+  }
+
+  // ── Toggle completion ───────────────────────────────────────────────────────
+  //
+  // Sets is_completed + completed_at atomically.
+  // Returns the updated task with DB-assigned updated_at.
+
+  Future<CareTask> toggleCompletion(String taskId, {required bool isCompleted}) async {
+    try {
+      _requireAuth();
+      final row = await _client
+          .from('care_tasks')
+          .update({
+            'is_completed': isCompleted,
+            'completed_at': isCompleted ? DateTime.now().toUtc().toIso8601String() : null,
+          })
+          .eq('id', taskId)
+          .select()
+          .single();
+      return CareTask.fromJson(row);
+    } on AppException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      if (e.code == 'PGRST116') throw const NotFoundException();
+      throw DatabaseException.fromPostgrest(e);
+    } catch (e) {
+      throw NetworkException(e.toString());
+    }
+  }
 }
