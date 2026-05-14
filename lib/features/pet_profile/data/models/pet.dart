@@ -11,6 +11,7 @@ class Pet {
     this.breed,
     this.avatarUrl,
     this.dateOfBirth,
+    this.weightKg,
     this.activityLevel,
     required this.createdAt,
   });
@@ -22,6 +23,7 @@ class Pet {
   final String? breed;
   final String? avatarUrl;
   final DateTime? dateOfBirth;
+  final double? weightKg;
   final ActivityLevel? activityLevel;
   final DateTime createdAt;
 
@@ -59,6 +61,7 @@ class Pet {
     String? breed,
     String? avatarUrl,
     DateTime? dateOfBirth,
+    double? weightKg,
     ActivityLevel? activityLevel,
   }) =>
       Pet(
@@ -69,6 +72,7 @@ class Pet {
         breed: breed ?? this.breed,
         avatarUrl: avatarUrl ?? this.avatarUrl,
         dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+        weightKg: weightKg ?? this.weightKg,
         activityLevel: activityLevel ?? this.activityLevel,
         createdAt: createdAt,
       );
@@ -107,6 +111,9 @@ class Pet {
         dateOfBirth: json['date_of_birth'] == null
             ? null
             : DateTime.parse(json['date_of_birth'] as String),
+        weightKg: json['weight_kg'] != null
+            ? (json['weight_kg'] as num).toDouble()
+            : null,
         activityLevel: _activityLevelFromJson(json['activity_level'] as String?),
         createdAt: DateTime.parse(json['created_at'] as String),
       );
@@ -119,6 +126,7 @@ class Pet {
         if (breed != null) 'breed': breed,
         if (avatarUrl != null) 'avatar_url': avatarUrl,
         if (dateOfBirth != null) 'date_of_birth': dateOfBirth!.toIso8601String(),
+        if (weightKg != null) 'weight_kg': weightKg,
         if (activityLevel != null) 'activity_level': _activityLevelToJson(activityLevel),
         'created_at': createdAt.toIso8601String(),
       };

@@ -62,12 +62,18 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
     required String species,
     String? breed,
     String? avatarUrl,
+    DateTime? dateOfBirth,
+    double? weightKg,
+    String? activityLevel,
   }) async {
     final pet = await ref.read(petRepositoryProvider).createPet(
           name: name,
           species: species,
           breed: breed,
           avatarUrl: avatarUrl,
+          dateOfBirth: dateOfBirth,
+          weightKg: weightKg,
+          activityLevel: activityLevel,
         );
     state = AsyncData([...state.valueOrNull ?? [], pet]);
     return pet;

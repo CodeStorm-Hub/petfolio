@@ -24,7 +24,9 @@
       "Read(//c/Users/syedr/AppData/Local/Pub/Cache/hosted/pub.dev/**)",
       "Bash(grep -r \"translateByDouble\" \"C:\\\\src\\\\flutter\\\\packages\\\\flutter\\\\lib\" --include=\"*.dart\" -n 2>/dev/null | head -5; grep -r \"translateByDouble\" \"C:\\\\flutter\\\\packages\\\\flutter\\\\lib\" --include=\"*.dart\" -n 2>/dev/null | head -5)",
       "Bash(npx supabase *)",
-      "Bash(Test-Path \"G:\\\\GitHub\\\\petfolio\\\\progress.md\")"
+      "Bash(Test-Path \"G:\\\\GitHub\\\\petfolio\\\\progress.md\")",
+      "Skill(remember:remember)",
+      "Skill(remember:remember:*)"
     ]
   }
 }
