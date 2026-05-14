@@ -238,6 +238,7 @@ class AppShell extends StatelessWidget {
         destinations: [
           for (final d in _destinations)
             NavigationDestination(
+              key: ValueKey<String>('shell_nav_${d.path.replaceAll('/', '_')}'),
               icon: Icon(d.icon),
               selectedIcon: Icon(d.activeIcon),
               label: d.label,

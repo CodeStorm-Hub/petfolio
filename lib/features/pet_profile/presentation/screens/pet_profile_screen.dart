@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 
+import 'package:petfolio/features/care/presentation/controllers/care_streak_stream_provider.dart';
+
 import '../../data/models/pet.dart';
 import '../controllers/active_pet_controller.dart';
 import '../controllers/pet_list_controller.dart';
@@ -275,13 +277,18 @@ class _HeaderChip extends StatelessWidget {
 
 // ── Hero card ─────────────────────────────────────────────────────────────────
 
-class _HeroCard extends StatelessWidget {
+class _HeroCard extends ConsumerWidget {
   const _HeroCard({required this.pet});
   final Pet pet;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final accent = pet.speciesEnum.accent;
+    final streakAsync = ref.watch(careStreakRealtimeProvider(pet.id));
+    final streakLabel = streakAsync.maybeWhen(
+      data: (s) => '${s.currentStreak}',
+      orElse: () => '0',
+    );
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
@@ -356,9 +363,9 @@ class _HeroCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
-                  const Text(
-                    '28',
-                    style: TextStyle(
+                  Text(
+                    streakLabel,
+                    style: const TextStyle(
                       fontFamily: 'Sora',
                       fontSize: 56,
                       fontWeight: FontWeight.w700,

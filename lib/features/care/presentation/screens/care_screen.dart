@@ -128,6 +128,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
     return Scaffold(
       backgroundColor: _outdoor ? cs.surface : pt.surface1,
       floatingActionButton: FloatingActionButton(
+        key: const ValueKey<String>('care_fab_add_task'),
         onPressed: openAddSheet,
         child: const Icon(Icons.add_rounded),
       ),
@@ -142,54 +143,84 @@ class _CareScreenState extends ConsumerState<CareScreen> {
               onOutdoor: () => setState(() => _outdoor = !_outdoor),
             ),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
-                children: [
-                  _StreakBanner(
-                    care: care,
-                    species: species,
-                    outdoor: _outdoor,
-                  ),
-                  const SizedBox(height: 20),
-                  _HorizontalDatePicker(
-                    selectedDate: dashboard.selectedDate,
-                    onDateSelected: (d) =>
-                        ref.read(careDashboardProvider.notifier).selectDate(d),
-                  ),
-                  const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
-                    child: Row(
-                      children: [
-                        Text(
-                          'DAILY TASKS',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.08 * 12,
-                            color: _outdoor ? AppColors.ink700 : pt.ink500,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final wide = constraints.maxWidth >= 600;
+                  final list = ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+                    children: [
+                      _StreakBanner(
+                        care: care,
+                        species: species,
+                        outdoor: _outdoor,
+                      ),
+                      const SizedBox(height: 24),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: cs.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: pt.line200),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.shadowE1L,
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                          child: _HorizontalDatePicker(
+                            selectedDate: dashboard.selectedDate,
+                            onDateSelected: (d) =>
+                                ref.read(careDashboardProvider.notifier).selectDate(d),
                           ),
                         ),
-                        const Spacer(),
-                        Text(
-                          'Swipe to complete',
-                          style: TextStyle(fontSize: 12, color: pt.ink300),
+                      ),
+                      const SizedBox(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
+                        child: Row(
+                          children: [
+                            Text(
+                              'DAILY TASKS',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.08 * 12,
+                                color: _outdoor ? AppColors.ink700 : pt.ink500,
+                              ),
+                            ),
+                            const Spacer(),
+                            Text(
+                              'Swipe to complete',
+                              style: TextStyle(fontSize: 12, color: pt.ink300),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
+                      _DailyTasksDashboard(
+                        state: dashboard,
+                        petId: activePet.id,
+                        petName: activePet.name,
+                        species: species,
+                        onAddTask: openAddSheet,
+                      ),
+                      const SizedBox(height: 24),
+                      _NutritionBanner(pt: pt),
+                      const SizedBox(height: 12),
+                      _MedicalVaultBanner(pt: pt),
+                    ],
+                  );
+                  if (!wide) return list;
+                  return Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 560),
+                      child: list,
                     ),
-                  ),
-                  _DailyTasksDashboard(
-                    state: dashboard,
-                    petId: activePet.id,
-                    petName: activePet.name,
-                    species: species,
-                    onAddTask: openAddSheet,
-                  ),
-                  const SizedBox(height: 20),
-                  _NutritionBanner(pt: pt),
-                  const SizedBox(height: 12),
-                  _MedicalVaultBanner(pt: pt),
-                ],
+                  );
+                },
               ),
             ),
           ],
@@ -345,8 +376,17 @@ class _StreakBanner extends ConsumerWidget {
   final bool outdoor;
 
   static const _dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  static const _monthShort = [
+    'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+    'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
+  ];
 
   static String _letterForDate(DateTime d) => _dayLetters[d.weekday - 1];
+
+  static List<DateTime> _weekEndingOn(DateTime endDay) {
+    final end = DateUtils.dateOnly(endDay);
+    return List.generate(7, (i) => end.subtract(Duration(days: 6 - i)));
+  }
 
   static List<dbtask.CareTaskType> _distinctTypes(List<dbtask.CareTask> tasks) {
     final seen = <dbtask.CareTaskType>{};
@@ -361,8 +401,9 @@ class _StreakBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboard = ref.watch(careDashboardProvider);
     final calendarToday = DateUtils.dateOnly(DateTime.now());
-    final isViewingToday = dashboard.selectedDate == calendarToday;
-    final ringTasks = dashboard.todayTasks.valueOrNull ?? [];
+    final selectedDay = DateUtils.dateOnly(dashboard.selectedDate);
+    final isViewingToday = selectedDay == calendarToday;
+    final ringTasks = dashboard.tasks.valueOrNull ?? [];
     final total = ringTasks.length;
     final done = ringTasks.where((t) => t.isCompleted).length;
     final progress = total == 0 ? 0.0 : (done / total).clamp(0.0, 1.0);
@@ -371,11 +412,11 @@ class _StreakBanner extends ConsumerWidget {
       data: (s) => s.currentStreak,
       orElse: () => care.streak,
     );
+    final streakNorm =
+        (math.min(math.max(streakCount, 0), 28) / 28.0).clamp(0.0, 1.0);
 
     final weekHits = dashboard.weekGoalHit.valueOrNull ?? List.filled(7, false);
-    final today = DateUtils.dateOnly(DateTime.now());
-    final weekDates =
-        List.generate(7, (i) => today.subtract(Duration(days: 6 - i)));
+    final weekDates = _weekEndingOn(selectedDay);
 
     final accent = species.accent;
     final darkAccent = Color.lerp(accent, Colors.black, 0.22)!;
@@ -440,8 +481,8 @@ class _StreakBanner extends ConsumerWidget {
                           const SizedBox(height: 8),
                           Text(
                             isViewingToday
-                                ? "Ring fills as today's tasks are done"
-                                : "Rings track today's plan. Tasks below follow the date you pick.",
+                                ? 'Inner ring: tasks done today · outer: streak (28d scale)'
+                                : 'Inner ring shows ${_monthShort[selectedDay.month - 1]} ${selectedDay.day}. Tasks below match this day.',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
@@ -461,9 +502,11 @@ class _StreakBanner extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          const Text(
-                            'TODAY',
-                            style: TextStyle(
+                          Text(
+                            isViewingToday
+                                ? 'TODAY'
+                                : '${_monthShort[selectedDay.month - 1]} ${selectedDay.day}',
+                            style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.08 * 10,
@@ -488,67 +531,142 @@ class _StreakBanner extends ConsumerWidget {
                 const SizedBox(height: 18),
                 Center(
                   child: SizedBox(
-                    width: 132,
-                    height: 132,
+                    width: 158,
+                    height: 158,
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
                         SizedBox.expand(
                           child: CircularProgressIndicator(
-                            value: progress,
-                            strokeWidth: 11,
-                            backgroundColor: Colors.white.withAlpha(36),
-                            color: Colors.white,
+                            value: streakNorm,
+                            strokeWidth: 7,
+                            backgroundColor: Colors.white.withAlpha(22),
+                            color: Colors.white.withAlpha(100),
                             strokeCap: StrokeCap.round,
                           ),
                         ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.local_fire_department_rounded,
+                        Padding(
+                          padding: const EdgeInsets.all(13),
+                          child: SizedBox.expand(
+                            child: CircularProgressIndicator(
+                              value: progress,
+                              strokeWidth: 10,
+                              backgroundColor: Colors.white.withAlpha(36),
                               color: Colors.white,
-                              size: 32,
+                              strokeCap: StrokeCap.round,
                             ),
-                            Text(
-                              '$streakCount',
-                              style: const TextStyle(
-                                fontFamily: 'Sora',
-                                fontSize: 28,
-                                fontWeight: FontWeight.w800,
-                                height: 1,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
+                        if (total > 0)
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '$done',
+                                style: const TextStyle(
+                                  fontFamily: 'Sora',
+                                  fontSize: 34,
+                                  fontWeight: FontWeight.w800,
+                                  height: 1,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Text(
+                                'of $total',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withAlpha(200),
+                                  letterSpacing: 0.04 * 12,
+                                ),
+                              ),
+                            ],
+                          )
+                        else
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.local_fire_department_rounded,
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                              Text(
+                                '$streakCount',
+                                style: const TextStyle(
+                                  fontFamily: 'Sora',
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w800,
+                                  height: 1,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'day streak',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withAlpha(200),
+                                  letterSpacing: 0.04 * 11,
+                                ),
+                              ),
+                            ],
+                          ),
                       ],
                     ),
                   ),
                 ),
+                if (total > 0) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.local_fire_department_rounded,
+                        color: Colors.white.withAlpha(230),
+                        size: 18,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '$streakCount day streak',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white.withAlpha(220),
+                          letterSpacing: 0.04 * 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(7, (i) {
                     final hit = i < weekHits.length && weekHits[i];
-                    final isToday = i == 6;
                     final d = weekDates[i];
+                    final dOnly = DateUtils.dateOnly(d);
+                    final isSelectedDay = dOnly == selectedDay;
+                    final isCalendarToday = dOnly == calendarToday;
                     return Column(
                       children: [
                         AnimatedContainer(
                           duration: PetfolioThemeExtension.durationSm,
-                          width: isToday ? 14 : 11,
-                          height: isToday ? 14 : 11,
+                          width: isSelectedDay ? 15 : (isCalendarToday ? 13 : 11),
+                          height: isSelectedDay ? 15 : (isCalendarToday ? 13 : 11),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: hit
                                 ? Colors.white
                                 : Colors.white.withAlpha(28),
                             border: Border.all(
-                              color: isToday
+                              color: isSelectedDay
                                   ? Colors.white
-                                  : Colors.white.withAlpha(100),
-                              width: isToday ? 2 : 1,
+                                  : (isCalendarToday
+                                      ? Colors.white.withAlpha(220)
+                                      : Colors.white.withAlpha(100)),
+                              width: isSelectedDay ? 2.5 : 1,
                             ),
                             boxShadow: hit
                                 ? [
@@ -568,7 +686,7 @@ class _StreakBanner extends ConsumerWidget {
                             fontFamily: 'Sora',
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: isToday
+                            color: isSelectedDay
                                 ? Colors.white
                                 : Colors.white.withAlpha(178),
                           ),
@@ -678,9 +796,12 @@ class _HorizontalDatePickerState extends State<_HorizontalDatePicker> {
           final isToday = date == today;
           final isFuture = date.isAfter(today);
 
+          final ymd =
+              '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
           return Padding(
             padding: EdgeInsets.only(right: i < _totalDays - 1 ? _chipGap : 0),
             child: GestureDetector(
+              key: ValueKey<String>('care_date_$ymd'),
               onTap: () => widget.onDateSelected(date),
               child: AnimatedContainer(
                 duration: PetfolioThemeExtension.durationSm,
@@ -901,6 +1022,7 @@ class _CareTaskCard extends ConsumerWidget {
               ),
               const SizedBox(width: 12),
               GestureDetector(
+                key: ValueKey<String>('care_task_check_${task.id}'),
                 onTap: () {
                   if (logOnly) {
                     if (!done) return;
@@ -1169,6 +1291,7 @@ class _MedicalVaultBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return GestureDetector(
+      key: const ValueKey<String>('care_medical_vault_banner'),
       onTap: () => context.push('/care/medical-vault'),
       child: Container(
         decoration: BoxDecoration(
@@ -1230,6 +1353,7 @@ class _NutritionBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return GestureDetector(
+      key: const ValueKey<String>('care_nutrition_banner'),
       onTap: () => context.push('/care/nutrition'),
       child: Container(
         decoration: BoxDecoration(

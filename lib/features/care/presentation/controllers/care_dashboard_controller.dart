@@ -63,9 +63,9 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
     badgeTypes: {},
   );
 
-  List<DateTime> _weekEndingToday() {
-    final today = DateUtils.dateOnly(DateTime.now());
-    return List.generate(7, (i) => today.subtract(Duration(days: 6 - i)));
+  List<DateTime> _weekEndingOn(DateTime endDay) {
+    final end = DateUtils.dateOnly(endDay);
+    return List.generate(7, (i) => end.subtract(Duration(days: 6 - i)));
   }
 
   AsyncValue<CareStreak> _streakAsync(AsyncValue<CareStreak> raw) =>
@@ -145,8 +145,8 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
       weekGoalHit: const AsyncLoading(),
     );
     state = _routine;
-    final weekDates = _weekEndingToday();
     final dSel = DateUtils.dateOnly(date);
+    final weekDates = _weekEndingOn(dSel);
     final dToday = DateUtils.dateOnly(DateTime.now());
     final tasksFuture = _repo.fetchTasksForDate(petId, dSel);
     final todayTasksFuture = dSel == dToday

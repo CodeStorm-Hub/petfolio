@@ -316,24 +316,28 @@ class PetCareRepository {
 
   static bool _appliesOnDay(CareTask task, DateTime dayLocal) {
     final start = _localDateOnly(task.createdAt);
-    if (dayLocal.isBefore(start)) return false;
 
     switch (task.frequency) {
+      case CareFrequency.daily:
+      case CareFrequency.twiceDaily:
+      case CareFrequency.asNeeded:
+        return true;
       case CareFrequency.once:
+        if (dayLocal.isBefore(start)) return false;
         if (task.isCompleted && task.completedAt != null) {
           return dayLocal == _localDateOnly(task.completedAt!);
         }
         return !dayLocal.isBefore(start);
       case CareFrequency.weekly:
+        if (dayLocal.isBefore(start)) return false;
         final diff = dayLocal.difference(start).inDays;
         return diff >= 0 && diff % 7 == 0;
       case CareFrequency.biweekly:
+        if (dayLocal.isBefore(start)) return false;
         final diff = dayLocal.difference(start).inDays;
         return diff >= 0 && diff % 14 == 0;
       case CareFrequency.monthly:
-      case CareFrequency.daily:
-      case CareFrequency.twiceDaily:
-      case CareFrequency.asNeeded:
+        if (dayLocal.isBefore(start)) return false;
         return true;
     }
   }
@@ -549,19 +553,19 @@ class PetCareRepository {
 
       var badgeUnlocked = false;
       if (isCompleted) {
-        final todayLocal = DateUtils.dateOnly(DateTime.now());
-        if (DateUtils.dateOnly(forDay) == todayLocal) {
-          try {
-            final raw = await _client.rpc(
-              'check_daily_completion',
-              params: {'target_pet_id': petId},
-            );
-            if (raw is Map) {
-              final v = raw['badge_unlocked'];
-              badgeUnlocked = v == true || v == 'true';
-            }
-          } catch (_) {}
-        }
+        try {
+          final raw = await _client.rpc(
+            'check_daily_completion',
+            params: {
+              'target_pet_id': petId,
+              'completion_date': dayStr,
+            },
+          );
+          if (raw is Map) {
+            final v = raw['badge_unlocked'];
+            badgeUnlocked = v == true || v == 'true';
+          }
+        } catch (_) {}
       }
 
       final merged = task.copyWith(

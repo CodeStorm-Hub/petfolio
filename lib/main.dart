@@ -1,7 +1,11 @@
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:marionette_flutter/marionette_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/router.dart';
@@ -9,7 +13,14 @@ import 'core/theme/theme.dart';
 import 'core/widgets/app_snack_bar.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final marionetteEnabled = kDebugMode &&
+      !Platform.environment.containsKey('FLUTTER_TEST') &&
+      !const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false);
+  if (marionetteEnabled) {
+    MarionetteBinding.ensureInitialized();
+  } else {
+    WidgetsFlutterBinding.ensureInitialized();
+  }
 
   // ── Google Fonts ──────────────────────────────────────────────────────────
   // Disable the runtime CDN fetch.  When the device has no network / DNS

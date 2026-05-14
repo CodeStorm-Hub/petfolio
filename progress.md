@@ -2,6 +2,52 @@
 
 ---
 
+## 2026-05-15 — Seven calendar days (May 9–15) Care automation
+
+- **`pet_care_repository.dart`** — `_appliesOnDay`: `daily` / `twice_daily` / `as_needed` tasks are shown for every calendar day on the strip (no longer hidden before `task.created_at`), matching `check_daily_completion` expected types.
+- **Supabase remote** — Applied migration `check_daily_completion_completion_date` (`check_daily_completion(uuid, date)`); previously only `(uuid)` existed, so `completion_date` from the app failed and streak never updated from strip completions.
+- **Marionette** — `flutter run -d emulator-5554`, connect VM service, Care tab: for each day `care_date_YYYY-MM-DD` then `care_task_check_*` taps; May 14 skipped redundant feeding tap; May 15 added feeding only.
+- **Post-run** — `care_logs` for Montu (`14378b2e-5961-4d07-ab9f-48246e839e10`) have feeding+training on May 9–13 and 15; May 14 also has walk/medication from earlier tests. After migration + navigation refresh, Care UI showed **7 day streak**; `care_streaks` / `pet_badges` aligned to seven completed strip days (service SQL used once to backfill streak row where RPC had not run during the earlier tap batch).
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-15 — Care streak QA (Marionette) + ring center + RPC calendar date
+
+- **`care_screen.dart`** — Streak hero: softer outer ring stroke; center shows **done / of total** when tasks exist, with **streak** on a sub-row; empty plan keeps flame + streak in center; today legend clarifies inner vs outer rings.
+- **`pet_care_repository.dart`** — After a successful complete, always calls `check_daily_completion` with `completion_date` = `logged_date` (local calendar string) so streaks update when finishing a day from the date strip, not only “device today.”
+- **`supabase/migrations/20260515193000_check_daily_completion_completion_date.sql`** + **remote `execute_sql`** — `check_daily_completion(uuid, date default null)`; `v_today` uses passed date or UTC fallback; grants on `(uuid, date)`.
+- **Marionette (emulator-5554)** — Care tab: May 14 shows chip `3/3`, list aligned; before change, center `0` conflicted with full inner ring.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-15 — Care streak hero synced to selected date + Fitness-style layout
+
+- **`care_dashboard_controller.dart`** — `fetchDailyGoalsHitForDates` week list is `_weekEndingOn(selectedDate)` so week dots match the same 7-day window as the date strip selection (not always ending calendar today).
+- **`care_screen.dart`** — `_StreakBanner` inner ring, done/total chip, task-type chips, and week row use `dashboard.tasks` + `selectedDay`; badge shows `TODAY` vs `MAY 14` style label; outer ring maps capped streak (28d) for a second progress track; `LayoutBuilder` + `ConstrainedBox(maxWidth: 560)` on wide windows; date strip in a solid bordered surface card per design system.
+- **Supabase `execute_sql`** — Montu `care_logs`: 2026-05-14 feeding/medication/walk; 2026-05-15 feeding only (cross-check for 3/3 vs 1/2 UI).
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-15 — Marionette + emulator QA; nutrition / home streak fixes
+
+- **`pubspec.yaml`** — `marionette_flutter` for MCP-driven UI automation (debug only; skipped under `FLUTTER_TEST` / `Platform.environment['FLUTTER_TEST']`).
+- **`main.dart`** — `MarionetteBinding.ensureInitialized()` when Marionette enabled, else `WidgetsFlutterBinding`.
+- **`router.dart`** — `ValueKey('shell_nav_…')` on each `NavigationDestination` for stable taps.
+- **`care_screen.dart`** — `ValueKey`s: `care_fab_add_task`, `care_nutrition_banner`, `care_medical_vault_banner`.
+- **`nutrition_screen.dart`** — weight chart: `minX`/`maxX`, bottom title `interval: 1` + integer guard against duplicate date labels; `_CalorieCard` takes `AsyncValue<List<HealthLog>>` so MER uses latest logged weight when data loads; display kg uses two decimals under 20 kg.
+- **`pet_profile_screen.dart`** — `_HeroCard` reads `careStreakRealtimeProvider(pet.id)` instead of hardcoded `28` for the big streak number.
+- **Validation** — Android emulator (`emulator-5554`) + Marionette MCP: Care tab, Nutrition, Medical vault; Supabase MCP row checks for `health_logs`, `medical_vault`, `care_logs`, `care_streaks`.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-05-16 — Orphan `care_logs` rows on historical days (e.g. May 14)
 
 - **`pet_care_repository.dart`** — `fetchTasksForDate` merges `care_logs` for the selected `logged_date` into synthetic `CareTask` rows (`id` prefix `log:`) when no scheduled `care_tasks` definition covers that `care_type` for that day; `toggleCompletion` / `deleteTask` handle `log:` ids (delete log row, no `care_tasks` lookup); `_loggedDayKey` normalizes `logged_date` from PostgREST.
