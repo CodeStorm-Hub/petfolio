@@ -8,6 +8,7 @@ import '../features/auth/presentation/controllers/auth_controller.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/registration_screen.dart';
 import '../features/care/presentation/screens/care_screen.dart';
+import '../features/care/presentation/screens/nutrition_screen.dart';
 import '../features/marketplace/data/models/product.dart';
 import '../features/marketplace/presentation/screens/cart_screen.dart';
 import '../features/marketplace/presentation/screens/marketplace_screen.dart';
@@ -74,6 +75,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
+      ),
+
+      // ── Care full-screen routes ──────────────────────────────────────────────
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/care/nutrition',
+        builder: (context, state) => const NutritionScreen(),
       ),
 
       // ── Marketplace full-screen routes (outside ShellRoute / no bottom nav) ─

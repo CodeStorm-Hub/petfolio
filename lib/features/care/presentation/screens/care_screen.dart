@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
@@ -153,6 +154,8 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                     species: species,
                     onAddTask: openAddSheet,
                   ),
+                  const SizedBox(height: 20),
+                  _NutritionBanner(pt: pt),
                 ],
               ),
             ),
@@ -1131,6 +1134,71 @@ String _defaultTitle(dbtask.CareTaskType type) {
     case dbtask.CareTaskType.nailTrim:   return 'Nail trim';
     case dbtask.CareTaskType.bath:       return 'Bath time';
     case dbtask.CareTaskType.other:      return 'New task';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Nutrition Banner
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _NutritionBanner extends StatelessWidget {
+  const _NutritionBanner({required this.pt});
+
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: () => context.push('/care/nutrition'),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius:
+              BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+          border: Border.all(color: pt.pillarHealth.withAlpha(80)),
+          boxShadow: pt.shadowE1,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: pt.pillarHealth.withAlpha(30),
+                borderRadius: BorderRadius.circular(
+                    PetfolioThemeExtension.radiusMd),
+              ),
+              child: Icon(Icons.monitor_weight_outlined,
+                  color: pt.pillarHealth, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Smart Nutrition & Weight',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Track weight history · View caloric needs',
+                    style: TextStyle(fontSize: 13, color: pt.ink300),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: pt.ink300),
+          ],
+        ),
+      ),
+    );
   }
 }
 
