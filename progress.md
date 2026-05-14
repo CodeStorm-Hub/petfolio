@@ -2,6 +2,94 @@
 
 ---
 
+## 2026-05-16 — Orphan `care_logs` rows on historical days (e.g. May 14)
+
+- **`pet_care_repository.dart`** — `fetchTasksForDate` merges `care_logs` for the selected `logged_date` into synthetic `CareTask` rows (`id` prefix `log:`) when no scheduled `care_tasks` definition covers that `care_type` for that day; `toggleCompletion` / `deleteTask` handle `log:` ids (delete log row, no `care_tasks` lookup); `_loggedDayKey` normalizes `logged_date` from PostgREST.
+- **`care_task_log.dart`** — `CareTask.isLogDerived` extension.
+- **`care_screen.dart`** — log-derived cards skip `Dismissible` swipe; checkbox only clears the log entry; sublabel `Activity log | This day`; `initState` defers `_init` via `Future.microtask` after first frame.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-16 — Per-day care completions (care_logs) + ring vs list
+
+- **`pet_care_repository.dart`** — `fetchTasksForDate` scopes tasks by definition + `care_logs` for that **local calendar day**; recurring toggles insert/delete `care_logs` (aligned with `check_daily_completion`); `once` still updates `care_tasks` + log; `fetchDailyGoalsHitForDates` uses logs only; `toggleCompletion(..., forDay)`.
+- **`care_dashboard_controller.dart`** — `DailyRoutineState.todayTasks` loaded in parallel so the streak **ring** always reflects **today** while the list reflects the **selected** date; toggle passes `forDay`.
+- **`care_screen.dart`** — streak banner uses `todayTasks` for ring/icons and clarifies copy when browsing past days.
+- **`supabase/migrations/20260516120000_care_logs_type_day.sql`** — `logged_date` backfill from `occurred_at`, widen `care_type` check, unique `(pet_id, care_type, logged_date)`.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-15 — Care dashboard Riverpod fix (tasks / add task / dates)
+
+- **`care_dashboard_controller.dart`** — `build()` no longer reads `state` when merging the streak stream (that caused uninitialized-provider crashes and stuck `AsyncLoading` tasks). Dashboard state is merged via a private **`_routine`** snapshot plus `state = _routine` after async `_load` / toggles.
+- **`care_controller.dart`** — `ref.listen(careDashboardProvider, …, fireImmediately: true)` replaces the microtask `ref.read(careDashboardProvider)` so the checklist notifier never reads the dashboard before it has emitted.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-15 — Freezed + json_serializable `_$XFromJson` fix
+
+- Removed class-level `@JsonSerializable(fieldRename: FieldRename.snake)` from `care_task`, `medical_record`, `health_log`, `pet` (with `@freezed` it duplicated `_$XFromJson` in `.freezed.dart` and `.g.dart`). Added root **`build.yaml`** with `json_serializable` **`field_rename: snake`** so generated `fromJson`/`toJson` keep Supabase-style keys.
+
+---
+
+## 2026-05-15 — Care streak Realtime (UI sync)
+
+- **`care_streak_stream_provider.dart`** — `StreamProvider.autoDispose.family` on `care_streaks` (`primaryKey: ['pet_id']`, `.eq('pet_id', petId)`), empty row → zero `CareStreak`.
+- **`care_dashboard_controller.dart`** — `build()` `ref.watch(careStreakRealtimeProvider(petId))` and merges streak into returned `DailyRoutineState` (no HTTP streak in `_load`, no stacked `ref.listen`); `_load` / `toggleTaskCompletion` only refresh tasks, week dots, badges.
+- **`supabase/migrations/20260515180000_care_streaks_realtime.sql`** — idempotent add of `public.care_streaks` to `supabase_realtime` publication when missing.
+
+**Applied:** remote project `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP `apply_migration` (`care_streaks_realtime`).
+
+**Realtime RLS:** client stream respects existing `care_streaks` SELECT policies (owner via `pets`); if a device shows no stream events, confirm the row exists for that pet after first completion and that the user session matches owner.
+
+**Next step:** None for this slice.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-15 — Care streaks & badges (SQL migration)
+
+- **`supabase/migrations/20260515140000_care_streaks_badges.sql`** — `care_streaks` (PK `pet_id`), `pet_badges` (PK `pet_id`, `badge_type`); RLS **SELECT** for pet owners only; **`check_daily_completion(uuid)`** `SECURITY DEFINER` + `search_path ''`: derives expected task types from `care_tasks` (`daily` / `twice_daily`) or fallback `feeding` / `walk` / `medication`; compares to `care_logs` for **UTC calendar date**; updates streak / `best_streak` / `last_completion_date`; inserts `7_day_hero` on first time `current_streak >= 7`; returns JSON summary (`total`, `completed`, `all_done`, streak fields, `badge_unlocked`). `GRANT EXECUTE` to `authenticated`; table **SELECT** only (writes via RPC).
+
+**Applied:** remote project `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP `apply_migration` (`care_streaks_badges`). Verified `care_streaks` / `pet_badges` (RLS on) and `check_daily_completion`.
+
+**Next step:** Wire Flutter: after checklist sync call `supabase.rpc('check_daily_completion', params: {'target_pet_id': petId})` when the third daily log lands (or on refresh). Optional: align `v_today` with app local date via a second argument in a follow-up migration.
+
+---
+
+## 2026-05-15 — Pet care repo: streaks, RPC on complete, task icons
+
+- **`pet_care_repository.dart`** — `PetCareRepository` (replaces `CareTaskRepository` name; `typedef CareTaskRepository` + `careTaskRepositoryProvider` alias preserved); `getPetStreak(petId)` reads `care_streaks` (empty row → zeros); `toggleCompletion` takes `petId`, calls `check_daily_completion` after marking complete (RPC errors swallowed so toggle still succeeds); create/update strip `category_icon` until DB column exists.
+- **`care_repository.dart`** — re-exports `pet_care_repository.dart`.
+- **`care_streak.dart`** — hand-written model + `fromJson` / `toJson` (no freezed) for `care_streaks` rows.
+- **`care_task.dart`** — `categoryIcon` (JSON `category_icon`), `resolvedCategoryIcon`, `categoryIconData`; `careTaskCategoryIconData` maps keys + aliases to `IconData`.
+- **`care_dashboard_controller.dart`** — passes `petId` into `toggleCompletion`.
+- **`care_screen.dart`** — task cards use `task.categoryIconData`.
+- **`analysis_options.yaml`** — exclude `*.g.dart` / `*.freezed.dart` from analyzer (resolves duplicate `_$XFromJson` between freezed + json_serializable outputs).
+
+**Next step:** Optional UI for `getPetStreak`; optional `category_icon` column on `care_tasks` if server-driven icons are required.
+
+---
+
+## 2026-05-15 — Care streak banner UI (Fitness / Snapchat style)
+
+- **`pet_care_repository.dart`** — `fetchPetBadgeTypes`, `fetchDailyGoalsHitForDates` (care_tasks daily expectations + `care_logs` + completed `care_tasks` per day); `toggleCompletion` returns `ToggleCompletionResult` (parses RPC `badge_unlocked`).
+- **`care_dashboard_controller.dart`** — `DailyRoutineState` adds `streak`, `weekGoalHit`, `badgeTypes`; `_load` parallel-fetches tasks/streak/badges/week; first-load badge baseline via `_hydratedBadgePets`; subsequent loads detect new `7_day_hero`; toggle still calls `AppSnackBar.showBadgeUnlocked` on RPC flag.
+- **`app_snack_bar.dart`** — `showBadgeUnlocked` floating snackbar (green + trophy).
+- **`care_task.dart`** — `careTaskTypeIconData` for icon chips.
+- **`care_screen.dart`** — `_StreakBanner` is a `ConsumerWidget`: progress ring (`CircularProgressIndicator` + fire + server streak), 7-day dot row from `weekGoalHit`, `Wrap` of unique `taskType` icons for today’s routine list; removed legacy `_DayCell` / `_LegendDot` / `_TaskGlyphPainter`.
+
+**Next step:** Optional full-screen badge overlay; optional confetti package.
+
+---
+
 ## 2026-05-15 — Medical record renewal getter + nutrition chart empty state
 
 - **`medical_record.dart`** — `renewalDate` (`nextDueAt ?? expiresAt`) and `isExpiringSoon` (date-only renewal within today…today+30).

@@ -31,6 +31,7 @@ mixin _$CareTask {
   DateTime? get completedAt => throw _privateConstructorUsedError;
   int get gamificationPoints => throw _privateConstructorUsedError;
   String? get notes => throw _privateConstructorUsedError;
+  String? get categoryIcon => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
@@ -60,6 +61,7 @@ abstract class $CareTaskCopyWith<$Res> {
     DateTime? completedAt,
     int gamificationPoints,
     String? notes,
+    String? categoryIcon,
     DateTime createdAt,
     DateTime updatedAt,
   });
@@ -90,6 +92,7 @@ class _$CareTaskCopyWithImpl<$Res, $Val extends CareTask>
     Object? completedAt = freezed,
     Object? gamificationPoints = null,
     Object? notes = freezed,
+    Object? categoryIcon = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -135,6 +138,10 @@ class _$CareTaskCopyWithImpl<$Res, $Val extends CareTask>
                 ? _value.notes
                 : notes // ignore: cast_nullable_to_non_nullable
                       as String?,
+            categoryIcon: freezed == categoryIcon
+                ? _value.categoryIcon
+                : categoryIcon // ignore: cast_nullable_to_non_nullable
+                      as String?,
             createdAt: null == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -169,6 +176,7 @@ abstract class _$$CareTaskImplCopyWith<$Res>
     DateTime? completedAt,
     int gamificationPoints,
     String? notes,
+    String? categoryIcon,
     DateTime createdAt,
     DateTime updatedAt,
   });
@@ -198,6 +206,7 @@ class __$$CareTaskImplCopyWithImpl<$Res>
     Object? completedAt = freezed,
     Object? gamificationPoints = null,
     Object? notes = freezed,
+    Object? categoryIcon = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -243,6 +252,10 @@ class __$$CareTaskImplCopyWithImpl<$Res>
             ? _value.notes
             : notes // ignore: cast_nullable_to_non_nullable
                   as String?,
+        categoryIcon: freezed == categoryIcon
+            ? _value.categoryIcon
+            : categoryIcon // ignore: cast_nullable_to_non_nullable
+                  as String?,
         createdAt: null == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -257,8 +270,7 @@ class __$$CareTaskImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable()
 class _$CareTaskImpl extends _CareTask {
   const _$CareTaskImpl({
     required this.id,
@@ -271,6 +283,7 @@ class _$CareTaskImpl extends _CareTask {
     this.completedAt,
     required this.gamificationPoints,
     this.notes,
+    this.categoryIcon,
     required this.createdAt,
     required this.updatedAt,
   }) : super._();
@@ -299,13 +312,15 @@ class _$CareTaskImpl extends _CareTask {
   @override
   final String? notes;
   @override
+  final String? categoryIcon;
+  @override
   final DateTime createdAt;
   @override
   final DateTime updatedAt;
 
   @override
   String toString() {
-    return 'CareTask(id: $id, petId: $petId, taskType: $taskType, title: $title, frequency: $frequency, scheduledTime: $scheduledTime, isCompleted: $isCompleted, completedAt: $completedAt, gamificationPoints: $gamificationPoints, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'CareTask(id: $id, petId: $petId, taskType: $taskType, title: $title, frequency: $frequency, scheduledTime: $scheduledTime, isCompleted: $isCompleted, completedAt: $completedAt, gamificationPoints: $gamificationPoints, notes: $notes, categoryIcon: $categoryIcon, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -329,6 +344,8 @@ class _$CareTaskImpl extends _CareTask {
             (identical(other.gamificationPoints, gamificationPoints) ||
                 other.gamificationPoints == gamificationPoints) &&
             (identical(other.notes, notes) || other.notes == notes) &&
+            (identical(other.categoryIcon, categoryIcon) ||
+                other.categoryIcon == categoryIcon) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -349,6 +366,7 @@ class _$CareTaskImpl extends _CareTask {
     completedAt,
     gamificationPoints,
     notes,
+    categoryIcon,
     createdAt,
     updatedAt,
   );
@@ -379,6 +397,7 @@ abstract class _CareTask extends CareTask {
     final DateTime? completedAt,
     required final int gamificationPoints,
     final String? notes,
+    final String? categoryIcon,
     required final DateTime createdAt,
     required final DateTime updatedAt,
   }) = _$CareTaskImpl;
@@ -407,6 +426,8 @@ abstract class _CareTask extends CareTask {
   int get gamificationPoints;
   @override
   String? get notes;
+  @override
+  String? get categoryIcon;
   @override
   DateTime get createdAt;
   @override

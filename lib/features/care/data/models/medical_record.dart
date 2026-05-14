@@ -15,7 +15,6 @@ enum MedicalRecordType {
 }
 
 @freezed
-@JsonSerializable(fieldRename: FieldRename.snake)
 class MedicalRecord with _$MedicalRecord {
   const MedicalRecord._();
 

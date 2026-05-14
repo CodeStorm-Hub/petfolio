@@ -13,7 +13,7 @@ import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_
 import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 
 import '../../data/models/care_task.dart' as dbtask;
-import '../../data/models/care_task_type.dart';
+import '../../data/models/care_task_log.dart';
 import '../controllers/care_controller.dart';
 import '../controllers/care_dashboard_controller.dart';
 
@@ -35,7 +35,9 @@ class _CareScreenState extends ConsumerState<CareScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _init());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.microtask(() => _init());
+    });
   }
 
   @override
@@ -143,7 +145,11 @@ class _CareScreenState extends ConsumerState<CareScreen> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
                 children: [
-                  _StreakBanner(care: care, dashboard: dashboard, species: species, outdoor: _outdoor),
+                  _StreakBanner(
+                    care: care,
+                    species: species,
+                    outdoor: _outdoor,
+                  ),
                   const SizedBox(height: 20),
                   _HorizontalDatePicker(
                     selectedDate: dashboard.selectedDate,
@@ -246,7 +252,7 @@ class _Header extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'CARE · ${pet.name.toUpperCase()}',
+                          'CARE | ${pet.name.toUpperCase()}',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
@@ -324,24 +330,53 @@ class _CircleButton extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Streak Banner (backed by ChecklistRepository — real data)
+// Streak Banner
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _StreakBanner extends StatelessWidget {
+class _StreakBanner extends ConsumerWidget {
   const _StreakBanner({
     required this.care,
-    required this.dashboard,
     required this.species,
     required this.outdoor,
   });
 
   final CareState care;
-  final DailyRoutineState dashboard;
   final PetSpecies species;
   final bool outdoor;
 
+  static const _dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+  static String _letterForDate(DateTime d) => _dayLetters[d.weekday - 1];
+
+  static List<dbtask.CareTaskType> _distinctTypes(List<dbtask.CareTask> tasks) {
+    final seen = <dbtask.CareTaskType>{};
+    final out = <dbtask.CareTaskType>[];
+    for (final t in tasks) {
+      if (seen.add(t.taskType)) out.add(t.taskType);
+    }
+    return out;
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dashboard = ref.watch(careDashboardProvider);
+    final calendarToday = DateUtils.dateOnly(DateTime.now());
+    final isViewingToday = dashboard.selectedDate == calendarToday;
+    final ringTasks = dashboard.todayTasks.valueOrNull ?? [];
+    final total = ringTasks.length;
+    final done = ringTasks.where((t) => t.isCompleted).length;
+    final progress = total == 0 ? 0.0 : (done / total).clamp(0.0, 1.0);
+
+    final streakCount = dashboard.streak.maybeWhen(
+      data: (s) => s.currentStreak,
+      orElse: () => care.streak,
+    );
+
+    final weekHits = dashboard.weekGoalHit.valueOrNull ?? List.filled(7, false);
+    final today = DateUtils.dateOnly(DateTime.now());
+    final weekDates =
+        List.generate(7, (i) => today.subtract(Duration(days: 6 - i)));
+
     final accent = species.accent;
     final darkAccent = Color.lerp(accent, Colors.black, 0.22)!;
 
@@ -387,7 +422,7 @@ class _StreakBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: Column(
@@ -402,228 +437,175 @@ class _StreakBanner extends StatelessWidget {
                               color: Colors.white,
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
-                            children: [
-                              Text(
-                                '${care.streak}',
-                                style: const TextStyle(
-                                  fontFamily: 'Sora',
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.03 * 48,
-                                  height: 1,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'days',
-                                style: TextStyle(fontSize: 14, color: Colors.white, height: 1),
-                              ),
-                            ],
+                          const SizedBox(height: 8),
+                          Text(
+                            isViewingToday
+                                ? "Ring fills as today's tasks are done"
+                                : "Rings track today's plan. Tasks below follow the date you pick.",
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white.withAlpha(210),
+                              height: 1.25,
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    Builder(builder: (_) {
-                      final tasks = dashboard.tasks.valueOrNull ?? [];
-                      final total = tasks.length;
-                      final done = tasks.where((t) => t.isCompleted).length;
-                      final label = total > 0 ? '$done / $total' : '${care.todayCount} / 3';
-                      return Container(
-                        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(46),
-                          borderRadius: BorderRadius.circular(14),
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(46),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text(
+                            'TODAY',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.08 * 10,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            total > 0 ? '$done / $total' : '—',
+                            style: const TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              height: 1.1,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Center(
+                  child: SizedBox(
+                    width: 132,
+                    height: 132,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox.expand(
+                          child: CircularProgressIndicator(
+                            value: progress,
+                            strokeWidth: 11,
+                            backgroundColor: Colors.white.withAlpha(36),
+                            color: Colors.white,
+                            strokeCap: StrokeCap.round,
+                          ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
-                              'TODAY',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.08 * 10,
-                                color: Colors.white,
-                              ),
+                            const Icon(
+                              Icons.local_fire_department_rounded,
+                              color: Colors.white,
+                              size: 32,
                             ),
                             Text(
-                              label,
+                              '$streakCount',
                               style: const TextStyle(
                                 fontFamily: 'Sora',
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                height: 1.1,
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
+                                height: 1,
                                 color: Colors.white,
                               ),
                             ),
                           ],
                         ),
-                      );
-                    }),
-                  ],
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 16),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(7, (i) {
-                    final d = care.week[i];
+                    final hit = i < weekHits.length && weekHits[i];
                     final isToday = i == 6;
-                    final isPast = i < 6;
-                    return Expanded(
-                      child: _DayCell(
-                        day: d,
-                        label: _dayLabel(i),
-                        isToday: isToday,
-                        isPast: isPast,
-                      ),
+                    final d = weekDates[i];
+                    return Column(
+                      children: [
+                        AnimatedContainer(
+                          duration: PetfolioThemeExtension.durationSm,
+                          width: isToday ? 14 : 11,
+                          height: isToday ? 14 : 11,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: hit
+                                ? Colors.white
+                                : Colors.white.withAlpha(28),
+                            border: Border.all(
+                              color: isToday
+                                  ? Colors.white
+                                  : Colors.white.withAlpha(100),
+                              width: isToday ? 2 : 1,
+                            ),
+                            boxShadow: hit
+                                ? [
+                                    BoxShadow(
+                                      color: Colors.black.withAlpha(50),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _letterForDate(d),
+                          style: TextStyle(
+                            fontFamily: 'Sora',
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: isToday
+                                ? Colors.white
+                                : Colors.white.withAlpha(178),
+                          ),
+                        ),
+                      ],
                     );
                   }),
                 ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    _LegendDot(task: CareTaskType.feed),
-                    const SizedBox(width: 12),
-                    _LegendDot(task: CareTaskType.walk),
-                    const SizedBox(width: 12),
-                    _LegendDot(task: CareTaskType.med),
-                  ],
-                ),
+                const SizedBox(height: 16),
+                if (_distinctTypes(ringTasks).isNotEmpty)
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: _distinctTypes(ringTasks).map((tp) {
+                      return Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(40),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: Colors.white.withAlpha(90),
+                          ),
+                        ),
+                        child: Icon(
+                          dbtask.careTaskTypeIconData(tp),
+                          size: 22,
+                          color: Colors.white,
+                        ),
+                      );
+                    }).toList(),
+                  ),
               ],
             ),
           ),
         ],
       ),
-    );
-  }
-
-  static const _dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-  String _dayLabel(int i) => _dayLabels[care.week[i].date.weekday - 1];
-}
-
-class _DayCell extends StatelessWidget {
-  const _DayCell({
-    required this.day,
-    required this.label,
-    required this.isToday,
-    required this.isPast,
-  });
-
-  final DayData day;
-  final String label;
-  final bool isToday;
-  final bool isPast;
-
-  @override
-  Widget build(BuildContext context) {
-    final allDone = day.allDone;
-    final isFuture = !isToday && !isPast;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: Column(
-        children: [
-          Container(
-            width: 38,
-            height: 60,
-            decoration: BoxDecoration(
-              color: isFuture
-                  ? Colors.white.withAlpha(25)
-                  : (allDone ? Colors.white : Colors.white.withAlpha(56)),
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: isToday
-                  ? [
-                      const BoxShadow(color: Colors.white, blurRadius: 0, spreadRadius: 2),
-                      BoxShadow(
-                        color: Colors.black.withAlpha(76),
-                        blurRadius: 14,
-                        offset: const Offset(0, 4),
-                        spreadRadius: -4,
-                      ),
-                    ]
-                  : null,
-            ),
-            padding: const EdgeInsets.all(5),
-            child: Column(
-              children: CareTaskType.values.map((t) {
-                final done = day.isDone(t);
-                return Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 1.5),
-                    decoration: BoxDecoration(
-                      color: done
-                          ? (allDone
-                              ? Colors.black.withAlpha(10)
-                              : Colors.white.withAlpha(242))
-                          : (isFuture ? Colors.transparent : Colors.white.withAlpha(30)),
-                      borderRadius: BorderRadius.circular(5),
-                      border: !done && !isFuture
-                          ? Border.all(color: Colors.white.withAlpha(71), width: 1)
-                          : null,
-                    ),
-                    child: done
-                        ? Center(
-                            child: CustomPaint(
-                              size: const Size(11, 11),
-                              painter: _TaskGlyphPainter(task: t, color: AppColors.ink950),
-                            ),
-                          )
-                        : null,
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontFamily: 'Sora',
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.04 * 11,
-              color: isToday ? Colors.white : Colors.white.withAlpha(178),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LegendDot extends StatelessWidget {
-  const _LegendDot({required this.task});
-  final CareTaskType task;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 18,
-          height: 18,
-          decoration: BoxDecoration(
-            color: Colors.white.withAlpha(242),
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: Center(
-            child: CustomPaint(
-              size: const Size(11, 11),
-              painter: _TaskGlyphPainter(task: task, color: AppColors.ink950),
-            ),
-          ),
-        ),
-        const SizedBox(width: 5),
-        Text(
-          task.name[0].toUpperCase() + task.name.substring(1),
-          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.white),
-        ),
-      ],
     );
   }
 }
@@ -850,136 +832,146 @@ class _CareTaskCard extends ConsumerWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
     final done = task.isCompleted;
+    final logOnly = task.isLogDerived;
+
+    Widget tile() {
+      return AnimatedContainer(
+        duration: PetfolioThemeExtension.durationSm,
+        decoration: BoxDecoration(
+          color: done ? pt.surface2 : cs.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: pt.line200, width: 0.5),
+          boxShadow: done
+              ? null
+              : [
+                  BoxShadow(
+                    color: pt.line200.withAlpha(128),
+                    blurRadius: 0,
+                    spreadRadius: 0.5,
+                  ),
+                  const BoxShadow(
+                    color: AppColors.shadowE1L,
+                    blurRadius: 2,
+                    offset: Offset(0, 1),
+                  ),
+                ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              AnimatedContainer(
+                duration: PetfolioThemeExtension.durationSm,
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: done ? species.accent.withAlpha(25) : pt.surface2,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  task.categoryIconData,
+                  size: 20,
+                  color: done ? species.accent : pt.ink500,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AnimatedDefaultTextStyle(
+                      duration: PetfolioThemeExtension.durationSm,
+                      style: TextStyle(
+                        fontFamily: 'Sora',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        color: done ? pt.ink300 : cs.onSurface,
+                        decoration: done ? TextDecoration.lineThrough : TextDecoration.none,
+                        decorationColor: pt.ink300,
+                      ),
+                      child: Text(task.title, overflow: TextOverflow.ellipsis),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _sublabel(task),
+                      style: TextStyle(fontSize: 12, color: pt.ink500),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: () {
+                  if (logOnly) {
+                    if (!done) return;
+                    ref
+                        .read(careDashboardProvider.notifier)
+                        .toggleTaskCompletion(task.id, isCompleted: false);
+                    return;
+                  }
+                  ref
+                      .read(careDashboardProvider.notifier)
+                      .toggleTaskCompletion(task.id, isCompleted: !done);
+                },
+                child: AnimatedContainer(
+                  duration: PetfolioThemeExtension.durationSm,
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: done ? AppColors.success : Colors.transparent,
+                    shape: BoxShape.circle,
+                    border: done ? null : Border.all(color: AppColors.ink300, width: 2),
+                  ),
+                  child: done
+                      ? const Icon(Icons.check, size: 16, color: Colors.white)
+                      : null,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Dismissible(
-        key: ValueKey(task.id),
-        direction: DismissDirection.startToEnd,
-        background: AnimatedContainer(
-          duration: PetfolioThemeExtension.durationSm,
-          decoration: BoxDecoration(
-            color: done ? pt.surface2 : AppColors.success,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.only(left: 22),
-          child: Icon(
-            done ? Icons.replay_rounded : Icons.check_circle_outline_rounded,
-            color: done ? pt.ink300 : Colors.white,
-            size: 28,
-          ),
-        ),
-        confirmDismiss: (_) async {
-          ref
-              .read(careDashboardProvider.notifier)
-              .toggleTaskCompletion(task.id, isCompleted: !done);
-          return false;
-        },
-        child: AnimatedContainer(
-          duration: PetfolioThemeExtension.durationSm,
-          decoration: BoxDecoration(
-            color: done ? pt.surface2 : cs.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: pt.line200, width: 0.5),
-            boxShadow: done
-                ? null
-                : [
-                    BoxShadow(
-                      color: pt.line200.withAlpha(128),
-                      blurRadius: 0,
-                      spreadRadius: 0.5,
-                    ),
-                    const BoxShadow(
-                      color: AppColors.shadowE1L,
-                      blurRadius: 2,
-                      offset: Offset(0, 1),
-                    ),
-                  ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                // Icon chip
-                AnimatedContainer(
-                  duration: PetfolioThemeExtension.durationSm,
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: done ? species.accent.withAlpha(25) : pt.surface2,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    _taskTypeIcon(task.taskType),
-                    size: 20,
-                    color: done ? species.accent : pt.ink500,
-                  ),
+      child: logOnly
+          ? tile()
+          : Dismissible(
+              key: ValueKey(task.id),
+              direction: DismissDirection.startToEnd,
+              background: AnimatedContainer(
+                duration: PetfolioThemeExtension.durationSm,
+                decoration: BoxDecoration(
+                  color: done ? pt.surface2 : AppColors.success,
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                const SizedBox(width: 12),
-
-                // Labels
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AnimatedDefaultTextStyle(
-                        duration: PetfolioThemeExtension.durationSm,
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                          color: done ? pt.ink300 : cs.onSurface,
-                          decoration: done ? TextDecoration.lineThrough : TextDecoration.none,
-                          decorationColor: pt.ink300,
-                        ),
-                        child: Text(task.title, overflow: TextOverflow.ellipsis),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        _sublabel(task),
-                        style: TextStyle(fontSize: 12, color: pt.ink500),
-                      ),
-                    ],
-                  ),
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.only(left: 22),
+                child: Icon(
+                  done ? Icons.replay_rounded : Icons.check_circle_outline_rounded,
+                  color: done ? pt.ink300 : Colors.white,
+                  size: 28,
                 ),
-                const SizedBox(width: 12),
-
-                // Checkbox button
-                GestureDetector(
-                  onTap: () => ref
-                      .read(careDashboardProvider.notifier)
-                      .toggleTaskCompletion(task.id, isCompleted: !done),
-                  child: AnimatedContainer(
-                    duration: PetfolioThemeExtension.durationSm,
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: done ? AppColors.success : Colors.transparent,
-                      shape: BoxShape.circle,
-                      border: done
-                          ? null
-                          : Border.all(color: AppColors.ink300, width: 2),
-                    ),
-                    child: done
-                        ? const Icon(Icons.check, size: 16, color: Colors.white)
-                        : null,
-                  ),
-                ),
-              ],
+              ),
+              confirmDismiss: (_) async {
+                ref
+                    .read(careDashboardProvider.notifier)
+                    .toggleTaskCompletion(task.id, isCompleted: !done);
+                return false;
+              },
+              child: tile(),
             ),
-          ),
-        ),
-      ),
     );
   }
 
   String _sublabel(dbtask.CareTask t) {
+    if (t.isLogDerived) return 'Activity log | This day';
     final parts = <String>[];
     if (t.scheduledTime != null) parts.add(t.scheduledTime!);
     parts.add(_frequencyLabel(t.frequency));
     if (t.gamificationPoints > 0) parts.add('+${t.gamificationPoints} pts');
-    return parts.join(' · ');
+    return parts.join(' | ');
   }
 
   String _frequencyLabel(dbtask.CareFrequency f) {
@@ -1642,69 +1634,6 @@ class _SheetLabel extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // Custom Painters
 // ─────────────────────────────────────────────────────────────────────────────
-
-class _TaskGlyphPainter extends CustomPainter {
-  const _TaskGlyphPainter({
-    required this.task,
-    required this.color,
-  });
-
-  final CareTaskType task;
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final s = size.width / 14;
-
-    switch (task) {
-      case CareTaskType.feed:
-        canvas.drawLine(Offset(3 * s, 2 * s), Offset(3 * s, 12 * s), paint);
-        canvas.drawLine(Offset(3 * s, 2 * s), Offset(2 * s, 5 * s), paint);
-        canvas.drawLine(Offset(3 * s, 5 * s), Offset(2 * s, 5 * s), paint);
-        canvas.drawLine(Offset(10.5 * s, 2 * s), Offset(10.5 * s, 6 * s), paint);
-        canvas.drawLine(Offset(10.5 * s, 6 * s), Offset(10.5 * s, 12 * s), paint);
-        canvas.drawLine(Offset(9.5 * s, 2 * s), Offset(9.5 * s, 6 * s), paint);
-      case CareTaskType.walk:
-        canvas.drawCircle(
-            Offset(9 * s, 2.5 * s), 1.3 * s, paint..style = PaintingStyle.stroke);
-        paint.style = PaintingStyle.stroke;
-        canvas.drawPath(
-          Path()
-            ..moveTo(7.5 * s, 5 * s)
-            ..lineTo(5.5 * s, 8.5 * s)
-            ..lineTo(7.5 * s, 9.9 * s)
-            ..lineTo(7 * s, 13.5 * s),
-          paint,
-        );
-        canvas.drawLine(Offset(9 * s, 8 * s), Offset(11 * s, 9.4 * s), paint);
-        canvas.drawLine(Offset(11 * s, 9.4 * s), Offset(9.7 * s, 12 * s), paint);
-      case CareTaskType.med:
-        final rect = RRect.fromRectAndRadius(
-          Rect.fromCenter(center: Offset(7 * s, 7 * s), width: 12 * s, height: 4 * s),
-          Radius.circular(2 * s),
-        );
-        final matrix = Matrix4.identity()
-          ..translateByDouble(7 * s, 7 * s, 0, 1)
-          ..rotateZ(-math.pi / 6)
-          ..translateByDouble(-7 * s, -7 * s, 0, 1);
-        canvas.save();
-        canvas.transform(matrix.storage);
-        canvas.drawRRect(rect, paint);
-        canvas.drawLine(Offset(7 * s, 5 * s), Offset(7 * s, 9 * s), paint);
-        canvas.restore();
-    }
-  }
-
-  @override
-  bool shouldRepaint(_TaskGlyphPainter old) => old.task != task || old.color != color;
-}
 
 class _ChevronPainter extends CustomPainter {
   const _ChevronPainter({required this.color});
