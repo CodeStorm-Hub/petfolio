@@ -56,7 +56,7 @@ class HealthVaultController
   /// row (which carries the DB-assigned id and timestamps). On failure the
   /// previous state is restored. The realtime stream will auto-reconcile if the
   /// insert succeeded before the error surface reached the UI.
-  Future<void> addRecord(MedicalRecord record) async {
+  Future<bool> addRecord(MedicalRecord record) async {
     final prevState = state;
 
     state = state.whenData((records) => [record, ...records]);
@@ -67,10 +67,12 @@ class HealthVaultController
             for (final r in records)
               if (r.id == record.id) created else r,
           ]);
+      return true;
     } catch (e, st) {
       debugPrint(
           '[HealthVaultController] addRecord failed, reverting: $e\n$st');
       state = prevState;
+      return false;
     }
   }
 

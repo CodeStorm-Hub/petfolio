@@ -30,11 +30,36 @@ class CareScreen extends ConsumerStatefulWidget {
 
 class _CareScreenState extends ConsumerState<CareScreen> {
   bool _outdoor = false;
+  bool _onboardingSuccessHandled = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _init());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_onboardingSuccessHandled) return;
+    final uri = GoRouterState.of(context).uri;
+    if (uri.queryParameters['onboardingComplete'] != '1') return;
+    _onboardingSuccessHandled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final pet = ref.read(activePetControllerProvider);
+      final name = pet?.name.trim();
+      final msg = (name != null && name.isNotEmpty)
+          ? 'Pet setup complete — welcome! Start tracking daily care for $name here.'
+          : 'Pet setup complete — welcome! Start tracking daily care here.';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
+      );
+      if (!mounted) return;
+      if (GoRouterState.of(context).uri.queryParameters['onboardingComplete'] == '1') {
+        context.go('/care');
+      }
+    });
   }
 
   Future<void> _init() async {
@@ -156,6 +181,8 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                   ),
                   const SizedBox(height: 20),
                   _NutritionBanner(pt: pt),
+                  const SizedBox(height: 12),
+                  _MedicalVaultBanner(pt: pt),
                 ],
               ),
             ),
@@ -1138,8 +1165,69 @@ String _defaultTitle(dbtask.CareTaskType type) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Nutrition Banner
+// Medical vault & nutrition entry banners
 // ─────────────────────────────────────────────────────────────────────────────
+
+class _MedicalVaultBanner extends StatelessWidget {
+  const _MedicalVaultBanner({required this.pt});
+
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: () => context.push('/care/medical-vault'),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius:
+              BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+          border: Border.all(color: pt.pillarHealth.withAlpha(80)),
+          boxShadow: pt.shadowE1,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: pt.pillarHealth.withAlpha(30),
+                borderRadius: BorderRadius.circular(
+                    PetfolioThemeExtension.radiusMd),
+              ),
+              child: Icon(Icons.folder_special_outlined,
+                  color: pt.pillarHealth, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Automated medical vault',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Vaccines · Medications · Vet visits',
+                    style: TextStyle(fontSize: 13, color: pt.ink300),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: pt.ink300),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class _NutritionBanner extends StatelessWidget {
   const _NutritionBanner({required this.pt});
