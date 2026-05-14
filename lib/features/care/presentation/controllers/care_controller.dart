@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/models/care_task.dart' as dbtask;
 import '../../data/models/care_task_type.dart';
 import '../../data/repositories/checklist_repository.dart';
+import 'care_dashboard_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // State
@@ -100,7 +102,13 @@ final careControllerProvider =
 class CareNotifier extends FamilyNotifier<CareState, String> {
   @override
   CareState build(String petId) {
-    // Seed with empty week — screen triggers loadLocal() on first frame.
+    // React to dashboard state changes → sync today's task completions into streak
+    ref.listen<DailyRoutineState>(careDashboardProvider(petId), (_, next) {
+      _onDashboardChange(next);
+    });
+    // Sync once after build in case the dashboard is already loaded (revisit scenario)
+    Future.microtask(() => _onDashboardChange(ref.read(careDashboardProvider(petId))));
+
     final today = DateUtils.dateOnly(DateTime.now());
     final emptyWeek = List.generate(
       7,
@@ -112,6 +120,32 @@ class CareNotifier extends FamilyNotifier<CareState, String> {
       ),
     );
     return CareState(petId: petId, week: emptyWeek, streak: 0);
+  }
+
+  // Maps the loaded care_tasks for today onto today's DayData in the streak week.
+  void _onDashboardChange(DailyRoutineState dashboard) {
+    final today = DateUtils.dateOnly(DateTime.now());
+    if (DateUtils.dateOnly(dashboard.selectedDate) != today) return;
+    final tasks = dashboard.tasks.valueOrNull;
+    if (tasks == null) return;
+    _overrideTodayFromTasks(tasks, today);
+  }
+
+  void _overrideTodayFromTasks(List<dbtask.CareTask> tasks, DateTime today) {
+    final feed = tasks.any(
+        (t) => t.taskType == dbtask.CareTaskType.feeding && t.isCompleted);
+    final walk = tasks.any(
+        (t) => t.taskType == dbtask.CareTaskType.walk && t.isCompleted);
+    final med = tasks.any(
+        (t) => t.taskType == dbtask.CareTaskType.medication && t.isCompleted);
+
+    final newWeek = List<DayData>.from(state.week);
+    newWeek[6] = DayData(date: today, feed: feed, walk: walk, med: med);
+    state = CareState(
+      petId: arg,
+      week: newWeek,
+      streak: CareState._computeStreak(newWeek),
+    );
   }
 
   ChecklistRepository get _repo => ref.read(checklistRepositoryProvider);
@@ -138,6 +172,22 @@ class CareNotifier extends FamilyNotifier<CareState, String> {
           walk: e.value[CareTaskType.walk] ?? false,
           med:  e.value[CareTaskType.med]  ?? false,
         )).toList();
+
+    // Overlay today from care_tasks (new task system takes precedence over care_logs)
+    final today = DateUtils.dateOnly(DateTime.now());
+    final dashboard = ref.read(careDashboardProvider(arg));
+    if (DateUtils.dateOnly(dashboard.selectedDate) == today && week.isNotEmpty) {
+      final tasks = dashboard.tasks.valueOrNull;
+      if (tasks != null) {
+        week[week.length - 1] = DayData(
+          date: today,
+          feed: tasks.any((t) => t.taskType == dbtask.CareTaskType.feeding && t.isCompleted),
+          walk: tasks.any((t) => t.taskType == dbtask.CareTaskType.walk && t.isCompleted),
+          med:  tasks.any((t) => t.taskType == dbtask.CareTaskType.medication && t.isCompleted),
+        );
+      }
+    }
+
     state = CareState(
       petId: arg,
       week: week,

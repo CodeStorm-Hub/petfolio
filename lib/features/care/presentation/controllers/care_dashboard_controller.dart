@@ -75,6 +75,11 @@ class CareDashboardNotifier
 
   Future<void> refresh() => _load(arg, state.selectedDate);
 
+  Future<void> createTask(CareTask task) async {
+    await _repo.createTask(task);
+    await _load(arg, state.selectedDate);
+  }
+
   Future<void> toggleTask(String taskId, {required bool isCompleted}) async {
     final prev = state.tasks.valueOrNull;
     if (prev == null) return;
