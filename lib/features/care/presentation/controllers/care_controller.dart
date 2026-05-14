@@ -103,11 +103,10 @@ class CareNotifier extends FamilyNotifier<CareState, String> {
   @override
   CareState build(String petId) {
     // React to dashboard state changes → sync today's task completions into streak
-    ref.listen<DailyRoutineState>(careDashboardProvider(petId), (_, next) {
+    ref.listen<DailyRoutineState>(careDashboardProvider, (_, next) {
       _onDashboardChange(next);
     });
-    // Sync once after build in case the dashboard is already loaded (revisit scenario)
-    Future.microtask(() => _onDashboardChange(ref.read(careDashboardProvider(petId))));
+    Future.microtask(() => _onDashboardChange(ref.read(careDashboardProvider)));
 
     final today = DateUtils.dateOnly(DateTime.now());
     final emptyWeek = List.generate(
@@ -175,7 +174,7 @@ class CareNotifier extends FamilyNotifier<CareState, String> {
 
     // Overlay today from care_tasks (new task system takes precedence over care_logs)
     final today = DateUtils.dateOnly(DateTime.now());
-    final dashboard = ref.read(careDashboardProvider(arg));
+    final dashboard = ref.read(careDashboardProvider);
     if (DateUtils.dateOnly(dashboard.selectedDate) == today && week.isNotEmpty) {
       final tasks = dashboard.tasks.valueOrNull;
       if (tasks != null) {

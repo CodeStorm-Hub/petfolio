@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/health_log.dart';
@@ -195,8 +196,14 @@ class _WeightTrendCard extends StatelessWidget {
           history.when(
             data: (logs) {
               final weights = logs.where((l) => l.weightKg != null).toList();
-              if (weights.isEmpty) {
-                return _EmptyChart(pt: pt);
+              if (weights.length < 2) {
+                return PetfolioEmptyState(
+                  icon: Icons.show_chart_rounded,
+                  title: 'Not enough data for a trend',
+                  subtitle: weights.isEmpty
+                      ? 'Log weight at least twice to see how $petName\'s weight changes over time.'
+                      : 'Add one more weight entry to plot a trend line.',
+                );
               }
               return _WeightLineChart(logs: weights, pt: pt);
             },
@@ -212,36 +219,6 @@ class _WeightTrendCard extends StatelessWidget {
                   style: TextStyle(color: cs.error),
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _EmptyChart extends StatelessWidget {
-  const _EmptyChart({required this.pt});
-
-  final PetfolioThemeExtension pt;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 150,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.bar_chart_rounded,
-              size: 48, color: pt.pillarHealth.withAlpha(80)),
-          const SizedBox(height: 8),
-          Text(
-            'No weight logs yet.\nTap "Log Weight" to get started.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: pt.ink300,
-              height: 1.5,
             ),
           ),
         ],

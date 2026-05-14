@@ -13,17 +13,6 @@ import '../../data/models/medical_record.dart';
 import '../controllers/health_vault_controller.dart';
 
 extension on MedicalRecord {
-  DateTime? get _renewalDate => nextDueAt ?? expiresAt;
-
-  bool get _renewalWithinNext30Days {
-    final raw = _renewalDate;
-    if (raw == null) return false;
-    final d = DateUtils.dateOnly(raw);
-    final today = DateUtils.dateOnly(DateTime.now());
-    final limit = today.add(const Duration(days: 30));
-    return !d.isBefore(today) && !d.isAfter(limit);
-  }
-
   bool get _inVaccinesSection => recordType == MedicalRecordType.vaccine;
 
   bool get _inMedicationsSection =>
@@ -66,7 +55,7 @@ class _MedicalVaultBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
-    final asyncRecords = ref.watch(healthVaultControllerProvider(petId));
+    final asyncRecords = ref.watch(healthVaultControllerProvider);
 
     return Scaffold(
       backgroundColor: pt.surface1,
@@ -281,7 +270,7 @@ class _MedicalRecordCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
-    final warn = record._renewalWithinNext30Days;
+    final warn = record.isExpiringSoon;
     final borderColor = warn ? pt.warning : pt.line200;
     final fill = warn ? pt.warning.withAlpha(22) : cs.surface;
 
@@ -298,7 +287,7 @@ class _MedicalRecordCard extends ConsumerWidget {
         child: const Icon(Icons.archive_outlined, color: Colors.white),
       ),
       confirmDismiss: (_) async {
-        await ref.read(healthVaultControllerProvider(record.petId).notifier).deactivateRecord(record.id);
+        await ref.read(healthVaultControllerProvider.notifier).deactivateRecord(record.id);
         return false;
       },
       child: AnimatedContainer(
@@ -459,7 +448,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
       updatedAt: now,
     );
     final ok = await ref
-        .read(healthVaultControllerProvider(widget.petId).notifier)
+        .read(healthVaultControllerProvider.notifier)
         .addRecord(record);
     if (!mounted) return;
     setState(() => _saving = false);

@@ -112,7 +112,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
     }
 
     final care = ref.watch(careControllerProvider(activePet.id));
-    final dashboard = ref.watch(careDashboardProvider(activePet.id));
+    final dashboard = ref.watch(careDashboardProvider);
     final species = activePet.speciesEnum;
 
     void openAddSheet() => showModalBottomSheet<void>(
@@ -148,7 +148,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                   _HorizontalDatePicker(
                     selectedDate: dashboard.selectedDate,
                     onDateSelected: (d) =>
-                        ref.read(careDashboardProvider(activePet.id).notifier).selectDate(d),
+                        ref.read(careDashboardProvider.notifier).selectDate(d),
                   ),
                   const SizedBox(height: 16),
                   Padding(
@@ -812,7 +812,7 @@ class _DailyTasksDashboard extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             TextButton.icon(
-              onPressed: () => ref.read(careDashboardProvider(petId).notifier).refresh(),
+              onPressed: () => ref.read(careDashboardProvider.notifier).refresh(),
               icon: const Icon(Icons.refresh_rounded, size: 16),
               label: const Text('Retry'),
             ),
@@ -872,8 +872,8 @@ class _CareTaskCard extends ConsumerWidget {
         ),
         confirmDismiss: (_) async {
           ref
-              .read(careDashboardProvider(petId).notifier)
-              .toggleTask(task.id, isCompleted: !done);
+              .read(careDashboardProvider.notifier)
+              .toggleTaskCompletion(task.id, isCompleted: !done);
           return false;
         },
         child: AnimatedContainer(
@@ -948,8 +948,8 @@ class _CareTaskCard extends ConsumerWidget {
                 // Checkbox button
                 GestureDetector(
                   onTap: () => ref
-                      .read(careDashboardProvider(petId).notifier)
-                      .toggleTask(task.id, isCompleted: !done),
+                      .read(careDashboardProvider.notifier)
+                      .toggleTaskCompletion(task.id, isCompleted: !done),
                   child: AnimatedContainer(
                     duration: PetfolioThemeExtension.durationSm,
                     width: 36,
@@ -1357,7 +1357,7 @@ class _AddCareTaskSheetState extends ConsumerState<_AddCareTaskSheet> {
         createdAt: now,
         updatedAt: now,
       );
-      await ref.read(careDashboardProvider(widget.petId).notifier).createTask(task);
+      await ref.read(careDashboardProvider.notifier).createTask(task);
       if (mounted) Navigator.of(context).pop();
     } catch (_) {
       if (mounted) {

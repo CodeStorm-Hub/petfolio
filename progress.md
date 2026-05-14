@@ -2,6 +2,38 @@
 
 ---
 
+## 2026-05-15 — Medical record renewal getter + nutrition chart empty state
+
+- **`medical_record.dart`** — `renewalDate` (`nextDueAt ?? expiresAt`) and `isExpiringSoon` (date-only renewal within today…today+30).
+- **`medical_vault_screen.dart`** — Warning styling uses `record.isExpiringSoon`; removed duplicate renewal logic from the private extension.
+- **`petfolio_empty_state.dart`** + **`widgets.dart`** — Reusable empty state (icon, title, subtitle).
+- **`nutrition_screen.dart`** — Weight trend shows `PetfolioEmptyState` when fewer than two weight logs (distinct copy for 0 vs 1); removed `_EmptyChart`.
+
+**Next step:** None.
+
+---
+
+## 2026-05-15 — Care task toggle: optimistic UI + AppSnackBar errors
+
+- **`app_snack_bar.dart`** + **`widgets.dart`** — `appSnackBarMessengerKey` + `AppSnackBar.showError` for app-wide floating snackbars.
+- **`main.dart`** — `scaffoldMessengerKey: appSnackBarMessengerKey` on `MaterialApp.router`.
+- **`care_dashboard_controller.dart`** — `toggleTaskCompletion`: optimistic list update, await `_repo.toggleCompletion`, on failure revert when still same active pet + `AppSnackBar.showError`.
+- **`care_screen.dart`** — call sites use `toggleTaskCompletion`.
+
+**Next step:** None.
+
+---
+
+## 2026-05-15 — Care dashboard & health vault scoped to active pet ID
+
+- **`care_dashboard_controller.dart`** — `careDashboardProvider` is a single `NotifierProvider` that `ref.watch(activePetIdProvider)`; null ID → `AsyncData([])` and today’s date; pet change → loading + `_load` for that pet with stale-response guards; mutations no-op when no active pet.
+- **`health_vault_controller.dart`** — `healthVaultControllerProvider` is a non-family `StreamNotifierProvider`; `build()` watches `activePetIdProvider`, null → `Stream.value([])`, else Supabase realtime stream for that `pet_id` (re-subscribes when ID changes).
+- **`care_controller.dart`**, **`care_screen.dart`**, **`medical_vault_screen.dart`** — Call sites updated (no `.family` argument).
+
+**Next step:** None required for this wiring; optional QA when switching pets on Care and Medical vault tabs.
+
+---
+
 ## 2026-05-14 — Care routing, onboarding → Care, care cleanup
 
 - **`lib/core/router.dart`** — Documented Care routes: shell `/care`, overlays `/care/nutrition`, `/care/medical-vault`. Redirect when `/onboarding` but user already has pets now sends **`/care`** (was `/home`). Deep link after successful onboarding: **`/care?onboardingComplete=1`** (handled in `CareScreen`).

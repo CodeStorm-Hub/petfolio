@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/app_snack_bar.dart';
+import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/care_task.dart';
 import '../../data/repositories/care_repository.dart';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// State
-// ─────────────────────────────────────────────────────────────────────────────
 
 class DailyRoutineState {
   const DailyRoutineState({
@@ -27,64 +25,94 @@ class DailyRoutineState {
       );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Provider
-// ─────────────────────────────────────────────────────────────────────────────
-
 final careDashboardProvider =
-    NotifierProvider.family<CareDashboardNotifier, DailyRoutineState, String>(
+    NotifierProvider<CareDashboardNotifier, DailyRoutineState>(
   CareDashboardNotifier.new,
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Notifier
-// ─────────────────────────────────────────────────────────────────────────────
+class CareDashboardNotifier extends Notifier<DailyRoutineState> {
+  String? _syncedPetId;
+  DateTime? _lastSelectedDate;
 
-class CareDashboardNotifier
-    extends FamilyNotifier<DailyRoutineState, String> {
   @override
-  DailyRoutineState build(String petId) {
+  DailyRoutineState build() {
+    final petId = ref.watch(activePetIdProvider);
     final today = DateUtils.dateOnly(DateTime.now());
-    Future.microtask(() => _load(petId, today));
-    return DailyRoutineState(
-      selectedDate: today,
-      tasks: const AsyncLoading(),
-    );
+
+    if (petId == null) {
+      _syncedPetId = null;
+      _lastSelectedDate = today;
+      return DailyRoutineState(
+        selectedDate: today,
+        tasks: const AsyncData([]),
+      );
+    }
+
+    if (petId != _syncedPetId) {
+      final previousPet = _syncedPetId;
+      _syncedPetId = petId;
+      final selectedDate =
+          previousPet == null ? today : (_lastSelectedDate ?? today);
+      _lastSelectedDate = selectedDate;
+      Future.microtask(() => _load(petId, selectedDate));
+      return DailyRoutineState(
+        selectedDate: selectedDate,
+        tasks: const AsyncLoading(),
+      );
+    }
+
+    return state;
   }
 
   CareTaskRepository get _repo => ref.read(careTaskRepositoryProvider);
 
   Future<void> _load(String petId, DateTime date) async {
+    if (ref.read(activePetIdProvider) != petId) return;
     state = state.copyWith(tasks: const AsyncLoading());
-    state = state.copyWith(
-      tasks: await AsyncValue.guard(
-        () => _repo.fetchTasksForDate(petId, date),
-      ),
+    final tasks = await AsyncValue.guard(
+      () => _repo.fetchTasksForDate(petId, date),
     );
+    if (ref.read(activePetIdProvider) != petId) return;
+    state = state.copyWith(tasks: tasks);
+    _lastSelectedDate = state.selectedDate;
   }
 
   Future<void> selectDate(DateTime date) async {
+    final petId = ref.read(activePetIdProvider);
+    if (petId == null) return;
     final normalized = DateUtils.dateOnly(date);
     if (normalized == state.selectedDate) return;
     state = state.copyWith(
       selectedDate: normalized,
       tasks: const AsyncLoading(),
     );
-    await _load(arg, normalized);
+    _lastSelectedDate = normalized;
+    await _load(petId, normalized);
   }
 
-  Future<void> refresh() => _load(arg, state.selectedDate);
+  Future<void> refresh() async {
+    final petId = ref.read(activePetIdProvider);
+    if (petId == null) return;
+    await _load(petId, state.selectedDate);
+  }
 
   Future<void> createTask(CareTask task) async {
+    final petId = ref.read(activePetIdProvider);
+    if (petId == null) return;
     await _repo.createTask(task);
-    await _load(arg, state.selectedDate);
+    if (ref.read(activePetIdProvider) != petId) return;
+    await _load(petId, state.selectedDate);
   }
 
-  Future<void> toggleTask(String taskId, {required bool isCompleted}) async {
+  Future<void> toggleTaskCompletion(
+    String taskId, {
+    required bool isCompleted,
+  }) async {
+    final petId = ref.read(activePetIdProvider);
+    if (petId == null) return;
     final prev = state.tasks.valueOrNull;
     if (prev == null) return;
 
-    // Optimistic update
     state = state.copyWith(
       tasks: AsyncData(
         prev
@@ -104,14 +132,18 @@ class CareDashboardNotifier
         taskId,
         isCompleted: isCompleted,
       );
+      if (ref.read(activePetIdProvider) != petId) return;
       final current = state.tasks.valueOrNull ?? prev;
       state = state.copyWith(
         tasks: AsyncData(
           current.map((t) => t.id == taskId ? updated : t).toList(),
         ),
       );
-    } catch (_) {
-      state = state.copyWith(tasks: AsyncData(prev));
+    } catch (e) {
+      if (ref.read(activePetIdProvider) == petId) {
+        state = state.copyWith(tasks: AsyncData(prev));
+        AppSnackBar.showError(e);
+      }
     }
   }
 }

@@ -2,32 +2,22 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/medical_record.dart';
 import '../../data/repositories/health_repository.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Provider
-// ─────────────────────────────────────────────────────────────────────────────
-
-final healthVaultControllerProvider = StreamNotifierProvider.family<
-    HealthVaultController, List<MedicalRecord>, String>(
+final healthVaultControllerProvider = StreamNotifierProvider<
+    HealthVaultController, List<MedicalRecord>>(
   HealthVaultController.new,
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Notifier
-// ─────────────────────────────────────────────────────────────────────────────
-
-class HealthVaultController
-    extends FamilyStreamNotifier<List<MedicalRecord>, String> {
-  /// Opens a Supabase realtime subscription for the active pet's medical vault.
-  ///
-  /// Emits whenever a row is inserted, updated, or deleted in `medical_vault`
-  /// for this pet (requires Supabase Realtime to be enabled for the table).
-  /// Active records are filtered client-side and sorted by next due date so
-  /// overdue items surface at the top.
+class HealthVaultController extends StreamNotifier<List<MedicalRecord>> {
   @override
-  Stream<List<MedicalRecord>> build(String petId) {
+  Stream<List<MedicalRecord>> build() {
+    final petId = ref.watch(activePetIdProvider);
+    if (petId == null) {
+      return Stream.value(<MedicalRecord>[]);
+    }
     return Supabase.instance.client
         .from('medical_vault')
         .stream(primaryKey: ['id'])
@@ -48,14 +38,6 @@ class HealthVaultController
 
   MedicalVaultRepository get _repo => ref.read(medicalVaultRepositoryProvider);
 
-  // ── Add ─────────────────────────────────────────────────────────────────────
-
-  /// Optimistically prepends [record] then awaits the Supabase insert.
-  ///
-  /// On success the optimistic entry is replaced with the server-authoritative
-  /// row (which carries the DB-assigned id and timestamps). On failure the
-  /// previous state is restored. The realtime stream will auto-reconcile if the
-  /// insert succeeded before the error surface reached the UI.
   Future<bool> addRecord(MedicalRecord record) async {
     final prevState = state;
 
@@ -75,8 +57,6 @@ class HealthVaultController
       return false;
     }
   }
-
-  // ── Update ──────────────────────────────────────────────────────────────────
 
   Future<void> updateRecord(MedicalRecord record) async {
     final prevState = state;
@@ -99,14 +79,6 @@ class HealthVaultController
     }
   }
 
-  // ── Deactivate (soft delete) ─────────────────────────────────────────────────
-
-  /// Soft-deletes by setting `is_active = false`.
-  ///
-  /// Optimistically removes the record from the active list immediately.
-  /// The realtime stream will not re-emit the deactivated row because it is
-  /// filtered out by `is_active == true` in [build]. On failure the record is
-  /// restored to the list at its original position.
   Future<void> deactivateRecord(String recordId) async {
     final prevState = state;
 
