@@ -1,14 +1,17 @@
 # Handoff
 
 ## State
-Onboarding UI refinement complete. `flutter analyze` → 0 issues. `onboarding_screen.dart` fully rewritten: steps reduced to 3 visible (Welcome → Species+Breed → PetDetails → Photo → Done). Species grid now 3-col compact (`mainAxisExtent: 56`), breed search uses AuthField-style focus glow + `OutlineInputBorder`. Steps 2/3/4/5 merged into `_PetDetailsStep` (scrollable: name + DOB picker + weight fields + activity tiles). All input fields match auth screen style. Activity overflow fixed via `_ActivityTile` (52dp horizontal rows, no grid).
+Care Dynamic Daily Routine Dashboard complete. `flutter analyze` → 0 issues.
+- `care_dashboard_controller.dart`: `DailyRoutineState` + `careDashboardProvider` (NotifierProvider.family) + `CareDashboardNotifier` (selectDate, refresh, toggleTask with optimistic updates)
+- `care_screen.dart` fully rewritten: `_HorizontalDatePicker` (14-day chips, auto-scroll to today), `_DailyTasksDashboard` (AsyncValue.when + skeleton/error/empty states), `_CareTaskCard` (Dismissible swipe + animated checkbox), `_EmptyRoutineState`. All mock vitals/checkup data removed.
+- Onboarding: `_totalSteps = 3` (internal 0-4), `_PetDetailsStep` merges Name/DOB/Weight/Activity, `_ActivityTile` rows fix overflow.
 
 ## Next
-1. Wire care engine controllers to consume `pet.dateOfBirth` and `pet.activityLevel` for personalised task defaults (`lib/features/care/presentation/controllers/`)
-2. Consolidate duplicate Pet models — `lib/features/care/data/models/pet.dart` (Freezed) duplicates `lib/features/pet_profile/data/models/pet.dart` (source of truth); update care imports and delete Freezed duplicate
-3. Verify `health_vitals` INSERT RLS policy allows pet owners to write — target weight write is silent/best-effort and may fail without an explicit policy
+1. Consolidate duplicate Pet models — `lib/features/care/data/models/pet.dart` (Freezed) duplicates `lib/features/pet_profile/data/models/pet.dart`; check `ActivityLevel` enum usages in care controllers before deleting
+2. Wire care controllers to consume `pet.dateOfBirth` and `pet.activityLevel` for personalised task defaults
+3. Verify `health_vitals` INSERT RLS policy allows pet owners to write
 
 ## Context
-- `_totalSteps = 3` in state; internal steps 0-4 (Welcome/SpeciesBreed/PetDetails/Photo/Done)
-- `_PetDetailsStep` owns name/DOB/weight/activity — parent state callbacks: `onNameChanged`, `onDobPick`, `onWeightChanged`, `onTargetChanged`, `onUnitToggle`, `onActivityPick`
-- `lib/features/care/data/models/pet.dart` Freezed model has `ActivityLevel` enum the care controllers depend on — check usages before deleting
+- `CareTaskType` name conflict: old `care_task_type.dart` (3 values) vs new `care_task.dart` (11 values). Care screen uses `import '../../data/models/care_task.dart' as dbtask;` to alias new type; streak banner uses unaliased old enum
+- `careDashboardProvider` is family-keyed by `petId` (String); consume via `ref.watch(careDashboardProvider(activePet.id))`
+- `careControllerProvider` (ChecklistRepository) still used for streak banner — two systems coexist intentionally

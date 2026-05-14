@@ -5,68 +5,108 @@ import '../../data/models/care_task.dart';
 import '../../data/repositories/care_repository.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────────────────────────────────────
+
+class DailyRoutineState {
+  const DailyRoutineState({
+    required this.selectedDate,
+    required this.tasks,
+  });
+
+  final DateTime selectedDate;
+  final AsyncValue<List<CareTask>> tasks;
+
+  DailyRoutineState copyWith({
+    DateTime? selectedDate,
+    AsyncValue<List<CareTask>>? tasks,
+  }) =>
+      DailyRoutineState(
+        selectedDate: selectedDate ?? this.selectedDate,
+        tasks: tasks ?? this.tasks,
+      );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Provider
 // ─────────────────────────────────────────────────────────────────────────────
 
-final careDashboardControllerProvider = AsyncNotifierProvider.family<
-    CareDashboardController, List<CareTask>, String>(
-  CareDashboardController.new,
+final careDashboardProvider =
+    NotifierProvider.family<CareDashboardNotifier, DailyRoutineState, String>(
+  CareDashboardNotifier.new,
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Notifier
 // ─────────────────────────────────────────────────────────────────────────────
 
-class CareDashboardController
-    extends FamilyAsyncNotifier<List<CareTask>, String> {
+class CareDashboardNotifier
+    extends FamilyNotifier<DailyRoutineState, String> {
   @override
-  Future<List<CareTask>> build(String petId) => _repo.fetchTasksForDate(
-        petId,
-        DateUtils.dateOnly(DateTime.now()),
-      );
+  DailyRoutineState build(String petId) {
+    final today = DateUtils.dateOnly(DateTime.now());
+    Future.microtask(() => _load(petId, today));
+    return DailyRoutineState(
+      selectedDate: today,
+      tasks: const AsyncLoading(),
+    );
+  }
 
   CareTaskRepository get _repo => ref.read(careTaskRepositoryProvider);
 
-  /// Optimistically marks a task complete or incomplete, then syncs to Supabase.
-  ///
-  /// Steps:
-  ///   1. Patch state immediately so the UI reflects the change on the next frame.
-  ///   2. Await the remote toggle; on success, replace the optimistic row with
-  ///      the DB-authoritative version (server-assigned timestamps).
-  ///   3. On any failure, restore the previous state so no phantom change remains.
-  Future<void> toggleCompletion(
-    String taskId, {
-    required bool isCompleted,
-  }) async {
-    final prevState = state;
-
-    state = state.whenData((tasks) => [
-          for (final t in tasks)
-            if (t.id == taskId)
-              isCompleted ? t.markCompleted() : t.reset()
-            else
-              t,
-        ]);
-
-    try {
-      final updated =
-          await _repo.toggleCompletion(taskId, isCompleted: isCompleted);
-
-      state = state.whenData((tasks) => [
-            for (final t in tasks)
-              if (t.id == updated.id) updated else t,
-          ]);
-    } catch (e, st) {
-      debugPrint(
-          '[CareDashboardController] toggleCompletion failed, reverting: $e\n$st');
-      state = prevState;
-    }
+  Future<void> _load(String petId, DateTime date) async {
+    state = state.copyWith(tasks: const AsyncLoading());
+    state = state.copyWith(
+      tasks: await AsyncValue.guard(
+        () => _repo.fetchTasksForDate(petId, date),
+      ),
+    );
   }
 
-  Future<void> refresh() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () => _repo.fetchTasksForDate(arg, DateUtils.dateOnly(DateTime.now())),
+  Future<void> selectDate(DateTime date) async {
+    final normalized = DateUtils.dateOnly(date);
+    if (normalized == state.selectedDate) return;
+    state = state.copyWith(
+      selectedDate: normalized,
+      tasks: const AsyncLoading(),
     );
+    await _load(arg, normalized);
+  }
+
+  Future<void> refresh() => _load(arg, state.selectedDate);
+
+  Future<void> toggleTask(String taskId, {required bool isCompleted}) async {
+    final prev = state.tasks.valueOrNull;
+    if (prev == null) return;
+
+    // Optimistic update
+    state = state.copyWith(
+      tasks: AsyncData(
+        prev
+            .map((t) => t.id == taskId
+                ? t.copyWith(
+                    isCompleted: isCompleted,
+                    completedAt: isCompleted ? DateTime.now() : null,
+                    updatedAt: DateTime.now(),
+                  )
+                : t)
+            .toList(),
+      ),
+    );
+
+    try {
+      final updated = await _repo.toggleCompletion(
+        taskId,
+        isCompleted: isCompleted,
+      );
+      final current = state.tasks.valueOrNull ?? prev;
+      state = state.copyWith(
+        tasks: AsyncData(
+          current.map((t) => t.id == taskId ? updated : t).toList(),
+        ),
+      );
+    } catch (_) {
+      state = state.copyWith(tasks: AsyncData(prev));
+    }
   }
 }
