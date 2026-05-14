@@ -16,6 +16,7 @@ import '../../data/models/care_task.dart' as dbtask;
 import '../../data/models/care_task_log.dart';
 import '../controllers/care_controller.dart';
 import '../controllers/care_dashboard_controller.dart';
+import '../utils/care_scheduled_time.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CareScreen
@@ -122,7 +123,10 @@ class _CareScreenState extends ConsumerState<CareScreen> {
           isScrollControlled: true,
           useSafeArea: true,
           backgroundColor: Colors.transparent,
-          builder: (_) => _AddCareTaskSheet(petId: activePet.id, petName: activePet.name),
+          builder: (_) => _CareTaskFormSheet(
+            petId: activePet.id,
+            petName: activePet.name,
+          ),
         );
 
     return Scaffold(
@@ -926,7 +930,14 @@ class _DailyTasksDashboard extends ConsumerWidget {
           ? _EmptyRoutineState(petName: petName, date: state.selectedDate, onAddTask: onAddTask)
           : Column(
               children: tasks
-                  .map((t) => _CareTaskCard(task: t, petId: petId, species: species))
+                  .map(
+                    (t) => _CareTaskCard(
+                      task: t,
+                      petId: petId,
+                      petName: petName,
+                      species: species,
+                    ),
+                  )
                   .toList(),
             ),
     );
@@ -941,12 +952,55 @@ class _CareTaskCard extends ConsumerWidget {
   const _CareTaskCard({
     required this.task,
     required this.petId,
+    required this.petName,
     required this.species,
   });
 
   final dbtask.CareTask task;
   final String petId;
+  final String petName;
   final PetSpecies species;
+
+  void _openEditSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _CareTaskFormSheet(
+        petId: petId,
+        petName: petName,
+        existing: task,
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete task'),
+        content: Text(
+          'Remove "${task.title}" from ${petName.isNotEmpty ? petName : "this pet"}\'s care plan? '
+          'Logs you already saved for this activity stay in history.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    try {
+      await ref.read(careDashboardProvider.notifier).deleteTask(task.id);
+    } catch (e) {
+      AppSnackBar.showError(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -954,6 +1008,7 @@ class _CareTaskCard extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final done = task.isCompleted;
     final logOnly = task.isLogDerived;
+    final canManage = !logOnly;
 
     Widget tile() {
       return AnimatedContainer(
@@ -1020,7 +1075,26 @@ class _CareTaskCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              if (canManage) ...[
+                PopupMenuButton<String>(
+                  key: ValueKey<String>('care_task_menu_${task.id}'),
+                  tooltip: 'Task options',
+                  padding: EdgeInsets.zero,
+                  icon: Icon(Icons.more_vert_rounded, color: pt.ink500, size: 22),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      _openEditSheet(context);
+                    } else if (value == 'delete') {
+                      _confirmDelete(context, ref);
+                    }
+                  },
+                  itemBuilder: (ctx) => [
+                    const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                    const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                  ],
+                ),
+                const SizedBox(width: 4),
+              ],
               GestureDetector(
                 key: ValueKey<String>('care_task_check_${task.id}'),
                 onTap: () {
@@ -1407,33 +1481,50 @@ class _NutritionBanner extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Add Care Task Sheet
+
+// Add / Edit Care Task Sheet
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _AddCareTaskSheet extends ConsumerStatefulWidget {
-  const _AddCareTaskSheet({required this.petId, required this.petName});
+class _CareTaskFormSheet extends ConsumerStatefulWidget {
+  const _CareTaskFormSheet({
+    required this.petId,
+    required this.petName,
+    this.existing,
+  });
 
   final String petId;
   final String petName;
+  final dbtask.CareTask? existing;
 
   @override
-  ConsumerState<_AddCareTaskSheet> createState() => _AddCareTaskSheetState();
+  ConsumerState<_CareTaskFormSheet> createState() => _CareTaskFormSheetState();
 }
 
-class _AddCareTaskSheetState extends ConsumerState<_AddCareTaskSheet> {
+class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
   var _type = dbtask.CareTaskType.feeding;
   var _frequency = dbtask.CareFrequency.daily;
-  late final TextEditingController _titleCtrl;
+  late TextEditingController _titleCtrl;
   final _titleFocus = FocusNode();
   bool _titleFocused = false;
   bool _userEditedTitle = false;
   TimeOfDay? _time;
   bool _saving = false;
 
+  bool get _isEdit => widget.existing != null;
+
   @override
   void initState() {
     super.initState();
-    _titleCtrl = TextEditingController(text: _defaultTitle(dbtask.CareTaskType.feeding));
+    final ex = widget.existing;
+    if (ex != null) {
+      _type = ex.taskType;
+      _frequency = ex.frequency;
+      _userEditedTitle = true;
+      _titleCtrl = TextEditingController(text: ex.title);
+      _time = parseCareScheduledTimeOfDay(ex.scheduledTime);
+    } else {
+      _titleCtrl = TextEditingController(text: _defaultTitle(dbtask.CareTaskType.feeding));
+    }
     _titleFocus.addListener(() {
       if (mounted) setState(() => _titleFocused = _titleFocus.hasFocus);
     });
@@ -1458,32 +1549,40 @@ class _AddCareTaskSheetState extends ConsumerState<_AddCareTaskSheet> {
     if (title.isEmpty || _saving) return;
     setState(() => _saving = true);
     try {
-      final now = DateTime.now();
-      final task = dbtask.CareTask(
-        id: '',
-        petId: widget.petId,
-        taskType: _type,
-        title: title,
-        frequency: _frequency,
-        scheduledTime: _time != null
-            ? '${_time!.hour.toString().padLeft(2, '0')}:${_time!.minute.toString().padLeft(2, '0')}'
-            : null,
-        isCompleted: false,
-        gamificationPoints: 10,
-        createdAt: now,
-        updatedAt: now,
-      );
-      await ref.read(careDashboardProvider.notifier).createTask(task);
+      final timeStr = _time != null
+          ? '${_time!.hour.toString().padLeft(2, '0')}:${_time!.minute.toString().padLeft(2, '0')}'
+          : null;
+      final ex = widget.existing;
+      if (ex != null) {
+        final updated = ex.copyWith(
+          taskType: _type,
+          title: title,
+          frequency: _frequency,
+          scheduledTime: timeStr,
+          updatedAt: DateTime.now(),
+        );
+        await ref.read(careDashboardProvider.notifier).updateTask(updated);
+      } else {
+        final now = DateTime.now();
+        final task = dbtask.CareTask(
+          id: '',
+          petId: widget.petId,
+          taskType: _type,
+          title: title,
+          frequency: _frequency,
+          scheduledTime: timeStr,
+          isCompleted: false,
+          gamificationPoints: 10,
+          createdAt: now,
+          updatedAt: now,
+        );
+        await ref.read(careDashboardProvider.notifier).createTask(task);
+      }
       if (mounted) Navigator.of(context).pop();
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         setState(() => _saving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not save task. Please try again.'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        AppSnackBar.showError(e);
       }
     }
   }
@@ -1518,7 +1617,7 @@ class _AddCareTaskSheetState extends ConsumerState<_AddCareTaskSheet> {
             Padding(
               padding: const EdgeInsets.only(bottom: 20),
               child: Text(
-                'New care task',
+                _isEdit ? 'Edit care task' : 'New care task',
                 style: TextStyle(
                   fontFamily: 'Sora',
                   fontWeight: FontWeight.w700,
@@ -1713,9 +1812,9 @@ class _AddCareTaskSheetState extends ConsumerState<_AddCareTaskSheet> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
-                    : const Text(
-                        'Add Task',
-                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                    : Text(
+                        _isEdit ? 'Save changes' : 'Add Task',
+                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                       ),
               ),
             ),

@@ -2,6 +2,18 @@
 
 ---
 
+## 2026-05-16 — Care task edit / delete + CRUD checks
+
+- **`care_screen.dart`** — `_CareTaskFormSheet` (add + edit): optional `existing` task; **PopupMenu** on each non–log-derived row (`care_task_menu_<id>`) for **Edit** / **Delete**; delete confirm dialog; edit reopens same bottom sheet with fields prefilled; save path calls `updateTask` or `createTask`.
+- **`care_dashboard_controller.dart`** — `updateTask`, `deleteTask` after repository calls reload the selected day (and week badges).
+- **`pet_care_repository.dart`** — `updateTask` PATCH payload drops `id`, `pet_id`, `created_at`, `updated_at`, `category_icon` so Postgres applies `set_updated_at` and RLS stays valid.
+- **`lib/features/care/presentation/utils/care_scheduled_time.dart`** — `parseCareScheduledTimeOfDay` for `scheduled_time` strings.
+- **Tests** — `test/care_scheduled_time_test.dart`, `test/care_task_model_crud_test.dart` (edit `copyWith` invariants).
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-05-15 — Seven calendar days (May 9–15) Care automation
 
 - **`pet_care_repository.dart`** — `_appliesOnDay`: `daily` / `twice_daily` / `as_needed` tasks are shown for every calendar day on the strip (no longer hidden before `task.created_at`), matching `check_daily_completion` expected types.

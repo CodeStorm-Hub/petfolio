@@ -414,7 +414,11 @@ class PetCareRepository {
     try {
       _requireAuth();
       final payload = Map<String, dynamic>.from(task.toJson())
-        ..remove('category_icon');
+        ..remove('category_icon')
+        ..remove('id')
+        ..remove('pet_id')
+        ..remove('created_at')
+        ..remove('updated_at');
       final row = await _client
           .from('care_tasks')
           .update(payload)

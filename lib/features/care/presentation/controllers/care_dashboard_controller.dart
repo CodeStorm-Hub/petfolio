@@ -217,6 +217,22 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
     await _load(petId, _routine.selectedDate);
   }
 
+  Future<void> updateTask(CareTask task) async {
+    final petId = ref.read(activePetIdProvider);
+    if (petId == null || task.petId != petId) return;
+    await _repo.updateTask(task);
+    if (ref.read(activePetIdProvider) != petId) return;
+    await _load(petId, _routine.selectedDate);
+  }
+
+  Future<void> deleteTask(String taskId) async {
+    final petId = ref.read(activePetIdProvider);
+    if (petId == null) return;
+    await _repo.deleteTask(taskId);
+    if (ref.read(activePetIdProvider) != petId) return;
+    await _load(petId, _routine.selectedDate);
+  }
+
   Future<void> toggleTaskCompletion(
     String taskId, {
     required bool isCompleted,
