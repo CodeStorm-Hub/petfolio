@@ -12,6 +12,7 @@ class Pet {
     required this.species,
     this.breed,
     this.avatarUrl,
+    this.bio,
     required this.createdAt,
   });
 
@@ -24,17 +25,19 @@ class Pet {
 
   final String? breed;
   final String? avatarUrl;
+  final String? bio;
   final DateTime createdAt;
 
   PetSpecies get speciesEnum => PetSpecies.fromId(species) ?? PetSpecies.dog;
 
-  Pet copyWith({String? name, String? breed, String? avatarUrl}) => Pet(
+  Pet copyWith({String? name, String? breed, String? avatarUrl, String? bio}) => Pet(
         id: id,
         ownerId: ownerId,
         name: name ?? this.name,
         species: species,
         breed: breed ?? this.breed,
         avatarUrl: avatarUrl ?? this.avatarUrl,
+        bio: bio ?? this.bio,
         createdAt: createdAt,
       );
 
@@ -45,6 +48,7 @@ class Pet {
         species: json['species'] as String,
         breed: json['breed'] as String?,
         avatarUrl: json['avatar_url'] as String?,
+        bio: json['bio'] as String?,
         createdAt: DateTime.parse(json['created_at'] as String),
       );
 
@@ -55,6 +59,7 @@ class Pet {
         'species': species,
         if (breed != null) 'breed': breed,
         if (avatarUrl != null) 'avatar_url': avatarUrl,
+        if (bio != null) 'bio': bio,
         'created_at': createdAt.toIso8601String(),
       };
 

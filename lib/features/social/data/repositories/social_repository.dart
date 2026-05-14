@@ -1,9 +1,12 @@
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../models/feed_post.dart';
+import '../models/pet_stats.dart';
 
 final socialRepositoryProvider = Provider<SocialRepository>(
   (ref) => SocialRepository(Supabase.instance.client),
@@ -40,6 +43,7 @@ class SocialRepository {
         .select('''
           id,
           content,
+          image_urls,
           like_count,
           comment_count,
           created_at,
@@ -57,6 +61,31 @@ class SocialRepository {
         .toList(growable: false);
   }
 
+  /// Fetches posts authored by a specific pet.
+  Future<List<FeedPost>> fetchPostsForPet(String petId, {required String activePetId}) async {
+    final rows = await _client
+        .from('posts')
+        .select('''
+          id,
+          content,
+          image_urls,
+          like_count,
+          comment_count,
+          created_at,
+          pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
+          author:users!posts_author_id_fkey(id, username, display_name, avatar_url),
+          post_likes(pet_id)
+        ''')
+        .eq('pet_id', petId)
+        .order('created_at', ascending: false)
+        .limit(50);
+
+    return (rows as List)
+        .cast<Map<String, dynamic>>()
+        .map((r) => _rowToFeedPost(r, activePetId))
+        .toList(growable: false);
+  }
+
   FeedPost _rowToFeedPost(Map<String, dynamic> r, String activePetId) {
     final pet = (r['pet'] as Map?)?.cast<String, dynamic>() ?? const {};
     final author = (r['author'] as Map?)?.cast<String, dynamic>() ?? const {};
@@ -65,7 +94,8 @@ class SocialRepository {
     final petName = (pet['name'] as String?) ?? 'Unknown';
     final petSpecies = (pet['species'] as String?) ?? 'dog';
     final breed = pet['breed'] as String?;
-    final handle = (author['username'] as String?) ??
+    final handle =
+        (author['username'] as String?) ??
         (author['display_name'] as String?) ??
         'petfolio_user';
 
@@ -90,6 +120,7 @@ class SocialRepository {
       gradientColors: palette.gradient,
       subjectColor: palette.subject,
       breed: breed,
+      imageUrls: (r['image_urls'] as List?)?.cast<String>() ?? const [],
     );
   }
 
@@ -111,22 +142,14 @@ class SocialRepository {
         return const _SpeciesPalette(
           accent: AppColors.meadow500,
           subject: Color(0xFF4F8C72),
-          gradient: [
-            Color(0xFFE3F1E9),
-            Color(0xFF9CCDB3),
-            AppColors.meadow500,
-          ],
+          gradient: [Color(0xFFE3F1E9), Color(0xFF9CCDB3), AppColors.meadow500],
         );
       case 'dog':
       default:
         return const _SpeciesPalette(
           accent: AppColors.blue500,
           subject: Color(0xFF1D4ED8),
-          gradient: [
-            Color(0xFFBFD7FF),
-            Color(0xFF6EA8FE),
-            AppColors.blue500,
-          ],
+          gradient: [Color(0xFFBFD7FF), Color(0xFF6EA8FE), AppColors.blue500],
         );
     }
   }
@@ -149,10 +172,11 @@ class SocialRepository {
     required bool liked,
   }) async {
     if (liked) {
-      await _client.from('post_likes').upsert(
-        {'post_id': postId, 'pet_id': petId, 'user_id': _uid},
-        onConflict: 'post_id, pet_id',
-      );
+      await _client.from('post_likes').upsert({
+        'post_id': postId,
+        'pet_id': petId,
+        'user_id': _uid,
+      }, onConflict: 'post_id, pet_id');
     } else {
       await _client
           .from('post_likes')
@@ -162,25 +186,43 @@ class SocialRepository {
     }
   }
 
-  // ── Memorial candles ──────────────────────────────────────────────────────
+  // ── Post Creation ─────────────────────────────────────────────────────────
 
-  Future<void> toggleCandle({
-    required String postId,
+  Future<String> uploadImage(Uint8List bytes, String extension) async {
+    final fileName = '${DateTime.now().millisecondsSinceEpoch}.$extension';
+    final path = 'posts/$fileName';
+
+    await _client.storage.from('post-images').uploadBinary(path, bytes);
+    return _client.storage.from('post-images').getPublicUrl(path);
+  }
+
+  Future<void> createPost({
     required String petId,
-    required bool lit,
+    required String caption,
+    List<String> imageUrls = const [],
   }) async {
-    if (lit) {
-      await _client.from('post_candles').upsert(
-        {'post_id': postId, 'pet_id': petId, 'user_id': _uid},
-        onConflict: 'post_id, pet_id',
-      );
-    } else {
-      await _client
-          .from('post_candles')
-          .delete()
-          .eq('post_id', postId)
-          .eq('pet_id', petId);
-    }
+    await _client.from('posts').insert({
+      'author_id': _uid,
+      'pet_id': petId,
+      'content': caption,
+      'image_urls': imageUrls,
+      'visibility': 'public',
+    });
+  }
+
+  /// Fetches real-time stats for a pet: posts, followers, and following counts.
+  Future<PetStats> fetchPetStats(String petId) async {
+    final results = await Future.wait([
+      _client.from('posts').select().eq('pet_id', petId).count(CountOption.exact),
+      _client.from('pet_follows').select().eq('following_pet_id', petId).count(CountOption.exact),
+      _client.from('pet_follows').select().eq('follower_pet_id', petId).count(CountOption.exact),
+    ]);
+
+    return PetStats(
+      postCount: results[0].count,
+      followerCount: results[1].count,
+      followingCount: results[2].count,
+    );
   }
 }
 

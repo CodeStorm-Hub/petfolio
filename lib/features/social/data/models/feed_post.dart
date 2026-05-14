@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Immutable model for a social feed post — regular or memorial variant.
+/// Immutable model for a social feed post.
 ///
-/// The like/candle states are kept local in Riverpod; Supabase is the
+/// The like state is kept local in Riverpod; Supabase is the
 /// eventual-consistency remote via optimistic writes in [SocialNotifier].
 class FeedPost {
   const FeedPost({
@@ -19,14 +19,11 @@ class FeedPost {
     required this.isLiked,
     required this.gradientColors,
     required this.subjectColor,
-    this.isMemorial = false,
     this.tag,
     this.isCarousel = false,
-    this.memorialDates,
-    this.candles = 0,
     this.tributes = 0,
     this.breed,
-    this.isCandleLit = false,
+    this.imageUrls = const [],
   });
 
   final String id;
@@ -49,56 +46,41 @@ class FeedPost {
   /// Base colour for the pet illustration blob.
   final Color subjectColor;
 
-  final bool isMemorial;
   final String? tag;
   final bool isCarousel;
-  final String? memorialDates;
-  final int candles;
   final int tributes;
   final String? breed;
 
-  /// Whether the active pet has lit a candle on this memorial.
-  final bool isCandleLit;
+  final List<String> imageUrls;
 
   // ── Optimistic copy helpers ───────────────────────────────────────────────
 
   FeedPost copyWithLike({required bool liked}) => _copy(
-        isLiked: liked,
-        likes: liked ? likes + 1 : (likes > 0 ? likes - 1 : 0),
-      );
-
-  FeedPost copyWithCandle({required bool lit}) => _copy(
-        isCandleLit: lit,
-        candles: lit ? candles + 1 : (candles > 0 ? candles - 1 : 0),
-      );
+    isLiked: liked,
+    likes: liked ? likes + 1 : (likes > 0 ? likes - 1 : 0),
+  );
 
   FeedPost _copy({
     bool? isLiked,
     int? likes,
-    bool? isCandleLit,
-    int? candles,
-  }) =>
-      FeedPost(
-        id: id,
-        handle: handle,
-        petName: petName,
-        petSpecies: petSpecies,
-        accentColor: accentColor,
-        fuzzyLocation: fuzzyLocation,
-        caption: caption,
-        likes: likes ?? this.likes,
-        comments: comments,
-        timeAgo: timeAgo,
-        isLiked: isLiked ?? this.isLiked,
-        gradientColors: gradientColors,
-        subjectColor: subjectColor,
-        isMemorial: isMemorial,
-        tag: tag,
-        isCarousel: isCarousel,
-        memorialDates: memorialDates,
-        candles: candles ?? this.candles,
-        tributes: tributes,
-        breed: breed,
-        isCandleLit: isCandleLit ?? this.isCandleLit,
-      );
+  }) => FeedPost(
+    id: id,
+    handle: handle,
+    petName: petName,
+    petSpecies: petSpecies,
+    accentColor: accentColor,
+    fuzzyLocation: fuzzyLocation,
+    caption: caption,
+    likes: likes ?? this.likes,
+    comments: comments,
+    timeAgo: timeAgo,
+    isLiked: isLiked ?? this.isLiked,
+    gradientColors: gradientColors,
+    subjectColor: subjectColor,
+    tag: tag,
+    isCarousel: isCarousel,
+    tributes: tributes,
+    breed: breed,
+    imageUrls: imageUrls,
+  );
 }

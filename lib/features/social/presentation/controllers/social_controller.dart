@@ -66,37 +66,6 @@ class SocialNotifier extends FamilyAsyncNotifier<List<FeedPost>, String> {
         liked: nowLiked,
       );
     } catch (_) {
-      // 3. Rollback — heart returns to its previous state.
-      state = AsyncData(prev);
-    }
-  }
-
-  // ── Memorial candle ───────────────────────────────────────────────────────
-
-  Future<void> toggleCandle(String postId) async {
-    final prev = state.valueOrNull;
-    if (prev == null) return;
-
-    final idx = prev.indexWhere((p) => p.id == postId);
-    if (idx == -1) return;
-
-    final post = prev[idx];
-    final nowLit = !post.isCandleLit;
-
-    // 1. Optimistic update.
-    final updated = List<FeedPost>.from(prev)
-      ..[idx] = post.copyWithCandle(lit: nowLit);
-    state = AsyncData(updated);
-
-    try {
-      // 2. Background write — throws on failure.
-      await _repo.toggleCandle(
-        postId: postId,
-        petId: arg,
-        lit: nowLit,
-      );
-    } catch (_) {
-      // 3. Rollback.
       state = AsyncData(prev);
     }
   }

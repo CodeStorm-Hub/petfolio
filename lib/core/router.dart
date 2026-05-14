@@ -15,8 +15,11 @@ import '../features/marketplace/presentation/screens/order_confirmation_screen.d
 import '../features/marketplace/presentation/screens/product_detail_screen.dart';
 import '../features/matching/presentation/screens/matching_screen.dart';
 import '../features/pet_profile/presentation/controllers/pet_list_controller.dart';
+import '../features/pet_profile/presentation/screens/edit_profile_screen.dart';
 import '../features/pet_profile/presentation/screens/onboarding_screen.dart';
 import '../features/pet_profile/presentation/screens/pet_profile_screen.dart';
+import '../features/social/presentation/screens/create_post_screen.dart';
+import '../features/social/presentation/screens/social_profile_screen.dart';
 import '../features/social/presentation/screens/social_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -96,6 +99,27 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => OrderConfirmationScreen(
           orderId: state.pathParameters['id']!,
         ),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/social/create',
+        builder: (context, state) => const CreatePostScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/social/profile/:petId',
+        builder: (context, state) => SocialProfileScreen(
+          petId: state.pathParameters['petId']!,
+        ),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/pet/:petId/edit',
+        builder: (context, state) {
+          final pets = ref.read(petListProvider).valueOrNull ?? [];
+          final pet = pets.firstWhere((p) => p.id == state.pathParameters['petId']);
+          return EditProfileScreen(pet: pet);
+        },
       ),
     ],
   );

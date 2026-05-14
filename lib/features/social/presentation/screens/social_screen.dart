@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -127,17 +129,10 @@ class _SocialView extends ConsumerWidget {
                             itemCount: posts.length,
                             itemBuilder: (ctx, i) {
                               final post = posts[i];
-                              final card = post.isMemorial
-                                  ? _MemorialPost(
-                                      post: post,
-                                      onCandle: () =>
-                                          notifier.toggleCandle(post.id),
-                                    )
-                                  : _RegularPost(
-                                      post: post,
-                                      onLike: () =>
-                                          notifier.toggleLike(post.id),
-                                    );
+                              final card = _RegularPost(
+                                post: post,
+                                onLike: () => notifier.toggleLike(post.id),
+                              );
                               return Padding(
                                 padding: EdgeInsets.only(
                                   bottom: i == posts.length - 1 ? 0 : 16,
@@ -153,6 +148,17 @@ class _SocialView extends ConsumerWidget {
               ),
             ),
           ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push('/social/create'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        icon: const Icon(Icons.add_photo_alternate_rounded),
+        label: const Text(
+          'Post',
+          style: TextStyle(fontWeight: FontWeight.w700, fontFamily: 'Sora'),
         ),
       ),
     );
@@ -179,21 +185,33 @@ class _SocialHeader extends StatelessWidget {
       child: Row(
         children: [
           // Active pet avatar
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: AppColors.sunset500,
-            child: Text(
-              initial,
-              style: GoogleFonts.sora(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
+          GestureDetector(
+            onTap: () => context.push('/social/profile/${pet.id}'),
+            child: CircleAvatar(
+              radius: 18,
+              backgroundColor: AppColors.sunset500,
+              child: Text(
+                initial,
+                style: GoogleFonts.sora(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
           const Spacer(),
           Text('Pack', style: tt.headlineMedium),
           const Spacer(),
+          IconButton.filled(
+            style: IconButton.styleFrom(
+              backgroundColor: pt.pillarSocial,
+              foregroundColor: Colors.white,
+            ),
+            icon: const Icon(Icons.add_rounded, size: 22),
+            onPressed: () => context.push('/social/create'),
+          ),
+          const SizedBox(width: 4),
           IconButton(
             icon: Icon(Icons.mail_outline_rounded, color: pt.ink500),
             onPressed: () {},
@@ -232,6 +250,7 @@ class _StoriesRow extends StatelessWidget {
               label: 'Your story',
               ringColors: const [AppColors.sunset500, AppColors.coral500],
               isAdd: true,
+              onTap: () => context.push('/social/create'),
             );
           }
           final post = posts[i - 1];
@@ -240,10 +259,7 @@ class _StoriesRow extends StatelessWidget {
           return _StoryItem(
             initial: initial,
             label: post.petName,
-            ringColors: post.isMemorial
-                ? const [AppColors.ink300, AppColors.ink500]
-                : [post.accentColor, post.gradientColors.last],
-            isMemorial: post.isMemorial,
+            ringColors: [post.accentColor, post.gradientColors.last],
           );
         },
       ),
@@ -257,23 +273,21 @@ class _StoryItem extends StatelessWidget {
     required this.label,
     required this.ringColors,
     this.isAdd = false,
-    this.isMemorial = false,
+    this.onTap,
   });
   final String initial;
   final String label;
   final List<Color> ringColors;
   final bool isAdd;
-  final bool isMemorial;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final surface = Theme.of(context).colorScheme.surface;
-    final avatarBg = isMemorial
-        ? AppColors.ink500
-        : (ringColors.isNotEmpty ? ringColors[0].withAlpha(180) : AppColors.blue500);
+    final avatarBg = ringColors.isNotEmpty ? ringColors[0].withAlpha(180) : AppColors.blue500;
 
     return GestureDetector(
-      onTap: () {},
+      onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -372,48 +386,10 @@ class _RegularPost extends StatelessWidget {
 // Memorial post
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _MemorialPost extends StatelessWidget {
-  const _MemorialPost({required this.post, required this.onCandle});
-  final FeedPost post;
-  final VoidCallback onCandle;
-
-  // Ivory paper colour from the design spec
-  static const _ivory = Color(0xFFFAF6EE);
-
-  @override
-  Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: _ivory,
-        borderRadius:
-            BorderRadius.circular(PetfolioThemeExtension.radius2xl),
-        boxShadow: pt.shadowE2,
-        border: Border.all(color: AppColors.line200, width: 0.5),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _PostHeader(post: post, isMemorial: true),
-          _MemorialPhoto(post: post),
-          _MemorialFooter(post: post, onCandle: onCandle),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Shared post header (avatar + handle + location + time)
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _PostHeader extends StatelessWidget {
-  const _PostHeader({required this.post, this.isMemorial = false});
+  const _PostHeader({required this.post});
   final FeedPost post;
-  final bool isMemorial;
 
   @override
   Widget build(BuildContext context) {
@@ -421,8 +397,6 @@ class _PostHeader extends StatelessWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final initial =
         post.petName.isNotEmpty ? post.petName[0].toUpperCase() : '?';
-    final avatarBg =
-        isMemorial ? AppColors.ink500 : post.accentColor;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
@@ -431,7 +405,7 @@ class _PostHeader extends StatelessWidget {
           // Avatar
           CircleAvatar(
             radius: 20,
-            backgroundColor: avatarBg,
+            backgroundColor: post.accentColor,
             child: Text(
               initial,
               style: GoogleFonts.sora(
@@ -447,39 +421,11 @@ class _PostHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      post.handle,
-                      style: tt.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (isMemorial) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.ink500.withAlpha(20),
-                          borderRadius: BorderRadius.circular(
-                            PetfolioThemeExtension.radiusPill,
-                          ),
-                        ),
-                        child: Text(
-                          'memorial',
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.ink500,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
+                Text(
+                  post.handle,
+                  style: tt.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 1),
                 Text(
@@ -529,24 +475,32 @@ class _PostPhoto extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Pet blob illustration
-            Center(
-              child: Container(
-                width: 150,
-                height: 160,
-                decoration: BoxDecoration(
-                  color: post.subjectColor.withAlpha(160),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(90),
-                    topRight: Radius.circular(75),
-                    bottomLeft: Radius.circular(60),
-                    bottomRight: Radius.circular(100),
-                  ),
+            // Pet blob illustration or Real Image
+            if (post.imageUrls.isNotEmpty)
+              Positioned.fill(
+                child: CachedNetworkImage(
+                  imageUrl: post.imageUrls.first,
+                  fit: BoxFit.cover,
                 ),
-                alignment: Alignment.center,
-                child: Text(emoji, style: const TextStyle(fontSize: 64)),
+              )
+            else
+              Center(
+                child: Container(
+                  width: 150,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    color: post.subjectColor.withAlpha(160),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(90),
+                      topRight: Radius.circular(75),
+                      bottomLeft: Radius.circular(60),
+                      bottomRight: Radius.circular(100),
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(emoji, style: const TextStyle(fontSize: 64)),
+                ),
               ),
-            ),
             // Carousel indicator
             if (post.isCarousel)
               Positioned(
@@ -697,166 +651,3 @@ class _RegularFooter extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Memorial photo — sepia-tinted gradient
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _MemorialPhoto extends StatelessWidget {
-  const _MemorialPhoto({required this.post});
-  final FeedPost post;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = post.gradientColors;
-    final emoji = switch (post.petSpecies) {
-      'cat' => '🐱',
-      'rabbit' => '🐰',
-      _ => '🐶',
-    };
-
-    return AspectRatio(
-      aspectRatio: 4 / 3,
-      child: ColorFiltered(
-        // Sepia filter: desaturate + warm tint
-        colorFilter: const ColorFilter.matrix([
-          0.393, 0.769, 0.189, 0, 0,
-          0.349, 0.686, 0.168, 0, 0,
-          0.272, 0.534, 0.131, 0, 0,
-          0,     0,     0,     1, 0,
-        ]),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: colors.length >= 2
-                  ? colors
-                  : [colors.first, colors.first],
-            ),
-          ),
-          child: Center(
-            child: Container(
-              width: 150,
-              height: 160,
-              decoration: BoxDecoration(
-                color: post.subjectColor.withAlpha(160),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(90),
-                  topRight: Radius.circular(75),
-                  bottomLeft: Radius.circular(60),
-                  bottomRight: Radius.circular(100),
-                ),
-              ),
-              alignment: Alignment.center,
-              child: Text(emoji, style: const TextStyle(fontSize: 64)),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Memorial footer — dates + candle button + tributes
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _MemorialFooter extends StatelessWidget {
-  const _MemorialFooter({required this.post, required this.onCandle});
-  final FeedPost post;
-  final VoidCallback onCandle;
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    const candleLit = Color(0xFFE07B39); // warm amber for lit candle
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Memorial dates badge
-          if (post.memorialDates != null)
-            Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.ink500.withAlpha(15),
-                borderRadius: BorderRadius.circular(
-                  PetfolioThemeExtension.radiusPill,
-                ),
-              ),
-              child: Text(
-                post.memorialDates!,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.ink700,
-                  letterSpacing: 0.3,
-                ),
-              ),
-            ),
-          // Caption
-          Text(
-            post.caption,
-            style: tt.bodySmall,
-            maxLines: 4,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 10),
-          // Action row
-          Row(
-            children: [
-              // Candle button
-              GestureDetector(
-                onTap: onCandle,
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 6),
-                  child: AnimatedSwitcher(
-                    duration: PetfolioThemeExtension.durationSm,
-                    transitionBuilder: (child, animation) => ScaleTransition(
-                      scale: animation,
-                      child: child,
-                    ),
-                    child: Text(
-                      post.isCandleLit ? '🕯️' : '🕯',
-                      key: ValueKey(post.isCandleLit),
-                      style: const TextStyle(fontSize: 22),
-                    ),
-                  ),
-                ),
-              ),
-              AnimatedSwitcher(
-                duration: PetfolioThemeExtension.durationSm,
-                child: Text(
-                  '${post.candles}',
-                  key: ValueKey(post.candles),
-                  style: tt.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: post.isCandleLit ? candleLit : pt.ink500,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              const Text('🌸', style: TextStyle(fontSize: 18)),
-              const SizedBox(width: 6),
-              Text(
-                '${post.tributes} tributes',
-                style: tt.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: pt.ink500,
-                ),
-              ),
-              const Spacer(),
-              Icon(Icons.share_outlined, size: 20, color: pt.ink500),
-            ],
-          ),
-          const SizedBox(height: 12),
-        ],
-      ),
-    );
-  }
-}
