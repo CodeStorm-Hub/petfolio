@@ -961,6 +961,46 @@ class _CareTaskCard extends ConsumerWidget {
   final String petName;
   final PetSpecies species;
 
+  void _openPlanFromLog(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _CareTaskFormSheet(
+        petId: petId,
+        petName: petName,
+        createSeed: task,
+      ),
+    );
+  }
+
+  Future<void> _confirmRemoveLog(BuildContext context, WidgetRef ref) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remove from this day'),
+        content: Text(
+          'Clear this completion for "${task.title}"? You can record it again later.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    try {
+      await ref.read(careDashboardProvider.notifier).deleteTask(task.id);
+    } catch (e) {
+      AppSnackBar.showError(e);
+    }
+  }
+
   void _openEditSheet(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
@@ -1008,7 +1048,6 @@ class _CareTaskCard extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final done = task.isCompleted;
     final logOnly = task.isLogDerived;
-    final canManage = !logOnly;
 
     Widget tile() {
       return AnimatedContainer(
@@ -1075,26 +1114,37 @@ class _CareTaskCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              if (canManage) ...[
-                PopupMenuButton<String>(
-                  key: ValueKey<String>('care_task_menu_${task.id}'),
-                  tooltip: 'Task options',
-                  padding: EdgeInsets.zero,
-                  icon: Icon(Icons.more_vert_rounded, color: pt.ink500, size: 22),
-                  onSelected: (value) {
+              PopupMenuButton<String>(
+                key: ValueKey<String>('care_task_menu_${task.id}'),
+                tooltip: 'Task options',
+                padding: EdgeInsets.zero,
+                icon: Icon(Icons.more_vert_rounded, color: pt.ink500, size: 22),
+                onSelected: (value) {
+                  if (logOnly) {
+                    if (value == 'add_plan') {
+                      _openPlanFromLog(context);
+                    } else if (value == 'remove_day') {
+                      _confirmRemoveLog(context, ref);
+                    }
+                  } else {
                     if (value == 'edit') {
                       _openEditSheet(context);
                     } else if (value == 'delete') {
                       _confirmDelete(context, ref);
                     }
-                  },
-                  itemBuilder: (ctx) => [
-                    const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                    const PopupMenuItem(value: 'delete', child: Text('Delete')),
-                  ],
-                ),
-                const SizedBox(width: 4),
-              ],
+                  }
+                },
+                itemBuilder: (ctx) => logOnly
+                    ? const [
+                        PopupMenuItem(value: 'add_plan', child: Text('Add to plan')),
+                        PopupMenuItem(value: 'remove_day', child: Text('Remove from day')),
+                      ]
+                    : const [
+                        PopupMenuItem(value: 'edit', child: Text('Edit')),
+                        PopupMenuItem(value: 'delete', child: Text('Delete')),
+                      ],
+              ),
+              const SizedBox(width: 4),
               GestureDetector(
                 key: ValueKey<String>('care_task_check_${task.id}'),
                 onTap: () {
@@ -1490,11 +1540,13 @@ class _CareTaskFormSheet extends ConsumerStatefulWidget {
     required this.petId,
     required this.petName,
     this.existing,
+    this.createSeed,
   });
 
   final String petId;
   final String petName;
   final dbtask.CareTask? existing;
+  final dbtask.CareTask? createSeed;
 
   @override
   ConsumerState<_CareTaskFormSheet> createState() => _CareTaskFormSheetState();
@@ -1511,17 +1563,26 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
   bool _saving = false;
 
   bool get _isEdit => widget.existing != null;
+  bool get _isPrefilledCreate =>
+      widget.existing == null && widget.createSeed != null;
 
   @override
   void initState() {
     super.initState();
     final ex = widget.existing;
+    final seed = widget.createSeed;
     if (ex != null) {
       _type = ex.taskType;
       _frequency = ex.frequency;
       _userEditedTitle = true;
       _titleCtrl = TextEditingController(text: ex.title);
       _time = parseCareScheduledTimeOfDay(ex.scheduledTime);
+    } else if (seed != null) {
+      _type = seed.taskType;
+      _frequency = dbtask.CareFrequency.daily;
+      _userEditedTitle = true;
+      _titleCtrl = TextEditingController(text: seed.title);
+      _time = parseCareScheduledTimeOfDay(seed.scheduledTime);
     } else {
       _titleCtrl = TextEditingController(text: _defaultTitle(dbtask.CareTaskType.feeding));
     }
@@ -1617,7 +1678,9 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
             Padding(
               padding: const EdgeInsets.only(bottom: 20),
               child: Text(
-                _isEdit ? 'Edit care task' : 'New care task',
+                _isEdit
+                    ? 'Edit care task'
+                    : (_isPrefilledCreate ? 'Add to plan' : 'New care task'),
                 style: TextStyle(
                   fontFamily: 'Sora',
                   fontWeight: FontWeight.w700,
@@ -1813,7 +1876,9 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
                     : Text(
-                        _isEdit ? 'Save changes' : 'Add Task',
+                        _isEdit
+                            ? 'Save changes'
+                            : (_isPrefilledCreate ? 'Save plan' : 'Add Task'),
                         style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                       ),
               ),
