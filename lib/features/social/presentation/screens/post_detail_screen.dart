@@ -482,16 +482,21 @@ class _CommentTile extends ConsumerWidget {
           CircleAvatar(
             radius: 16,
             backgroundColor: AppColors.coral500.withAlpha(200),
-            child: Text(
-              comment.petName.isNotEmpty
-                  ? comment.petName[0].toUpperCase()
-                  : '?',
-              style: GoogleFonts.sora(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
+            backgroundImage: comment.avatarUrl != null
+                ? CachedNetworkImageProvider(comment.avatarUrl!)
+                : null,
+            child: comment.avatarUrl == null
+                ? Text(
+                    comment.petName.isNotEmpty
+                        ? comment.petName[0].toUpperCase()
+                        : '?',
+                    style: GoogleFonts.sora(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  )
+                : null,
           ),
           const SizedBox(width: 10),
           // Content

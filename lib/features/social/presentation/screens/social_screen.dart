@@ -447,14 +447,19 @@ class _PostHeader extends StatelessWidget {
           CircleAvatar(
             radius: 20,
             backgroundColor: post.accentColor,
-            child: Text(
-              initial,
-              style: GoogleFonts.sora(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
+            backgroundImage: post.petAvatarUrl != null
+                ? CachedNetworkImageProvider(post.petAvatarUrl!)
+                : null,
+            child: post.petAvatarUrl == null
+                ? Text(
+                    initial,
+                    style: GoogleFonts.sora(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  )
+                : null,
           ),
           const SizedBox(width: 10),
           // Pet name + handle + timestamp

@@ -163,4 +163,31 @@ class SocialNotifier extends FamilyAsyncNotifier<List<FeedPost>, String> {
       state = AsyncData(prev);
     }
   }
+  /// Optimistically increments the comment count for a post.
+  /// Called when a user submits a new comment.
+  void incrementCommentCount(String postId) {
+    final prev = state.valueOrNull;
+    if (prev == null) return;
+
+    final idx = prev.indexWhere((p) => p.id == postId);
+    if (idx == -1) return;
+
+    final updated = List<FeedPost>.from(prev)
+      ..[idx] = prev[idx].copyWithIncrementedComment();
+    state = AsyncData(updated);
+  }
+
+  /// Optimistically decrements the comment count for a post.
+  /// Called when a user deletes a comment.
+  void decrementCommentCount(String postId) {
+    final prev = state.valueOrNull;
+    if (prev == null) return;
+
+    final idx = prev.indexWhere((p) => p.id == postId);
+    if (idx == -1) return;
+
+    final updated = List<FeedPost>.from(prev)
+      ..[idx] = prev[idx].copyWithDecrementedComment();
+    state = AsyncData(updated);
+  }
 }

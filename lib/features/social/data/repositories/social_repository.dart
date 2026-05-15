@@ -165,6 +165,7 @@ class SocialRepository {
       subjectColor: palette.subject,
       breed: breed,
       imageUrls: (r['image_urls'] as List?)?.cast<String>() ?? const [],
+      petAvatarUrl: pet['avatar_url'] as String?,
     );
   }
 

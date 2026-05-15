@@ -12,6 +12,7 @@ class Comment {
     required this.content,
     required this.createdAt,
     required this.isOwnComment,
+    this.avatarUrl,
   });
 
   final String id;
@@ -26,6 +27,7 @@ class Comment {
 
   final String content;
   final DateTime createdAt;
+  final String? avatarUrl;
 
   /// True when this comment belongs to the currently active pet.
   /// Used by the UI to show a delete affordance.
@@ -51,6 +53,7 @@ class Comment {
       content: json['content'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       isOwnComment: json['pet_id'] as String == activePetId,
+      avatarUrl: pet['avatar_url'] as String?,
     );
   }
 }
