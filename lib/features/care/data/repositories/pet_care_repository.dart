@@ -557,19 +557,17 @@ class PetCareRepository {
 
       var badgeUnlocked = false;
       if (isCompleted) {
-        try {
-          final raw = await _client.rpc(
-            'check_daily_completion',
-            params: {
-              'target_pet_id': petId,
-              'completion_date': dayStr,
-            },
-          );
-          if (raw is Map) {
-            final v = raw['badge_unlocked'];
-            badgeUnlocked = v == true || v == 'true';
-          }
-        } catch (_) {}
+        final raw = await _client.rpc(
+          'check_daily_completion',
+          params: {
+            'target_pet_id': petId,
+            'completion_date': dayStr,
+          },
+        );
+        if (raw is Map) {
+          final v = raw['badge_unlocked'];
+          badgeUnlocked = v == true || v == 'true';
+        }
       }
 
       final merged = task.copyWith(
