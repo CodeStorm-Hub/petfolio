@@ -3,7 +3,7 @@
 **Project:** petfolio (ID: jqyjvhwlcqcsuwcqgcwf)
 
 ## Table Summary
-- **9 tables** in the `public` schema
+- **12 tables** in the `public` schema (+ 3 added by `20260513192825_pet_care_health`)
 - **All tables have Row Level Security (RLS) enabled**
 
 ---
@@ -40,6 +40,7 @@
 | date_of_birth | date | YES | - | - |
 | gender | text | NO | 'unknown' | check: male/female/unknown |
 | weight_kg | numeric | YES | - | - |
+| activity_level | text | YES | - | check: sedentary/low/moderate/high/very_high |
 | avatar_url | text | YES | - | - |
 | bio | text | YES | - | - |
 | is_public | boolean | NO | true | - |
@@ -173,13 +174,101 @@
 
 ---
 
+---
+
+## 10. care_tasks
+**Primary Key:** id (uuid)
+**Added by:** `20260513192825_pet_care_health`
+
+| Column | Type | Nullable | Default | Constraints |
+|--------|------|----------|---------|-------------|
+| id | uuid | NO | gen_random_uuid() | PK |
+| pet_id | uuid | NO | - | FK to pets.id ON DELETE CASCADE |
+| task_type | text | NO | - | check: feeding/walk/grooming/medication/vet_visit/training/playtime/dental/nail_trim/bath/other |
+| title | text | NO | - | - |
+| frequency | text | NO | - | check: once/daily/twice_daily/weekly/biweekly/monthly/as_needed |
+| scheduled_time | time | YES | - | - |
+| is_completed | boolean | NO | false | - |
+| completed_at | timestamptz | YES | - | - |
+| gamification_points | integer | NO | 10 | check: >= 0 |
+| notes | text | YES | - | - |
+| created_at | timestamptz | NO | now() | - |
+| updated_at | timestamptz | NO | now() | auto-updated via trigger |
+
+**RLS Policies:** owner-only SELECT / INSERT / UPDATE / DELETE (pet ownership via `pets.owner_id`)
+
+---
+
+## 11. health_logs
+**Primary Key:** id (uuid)
+**Added by:** `20260513192825_pet_care_health`
+
+Narrative health events (symptoms, weight history, vet visit notes). Distinct from `health_vitals`, which stores structured numeric measurements.
+
+| Column | Type | Nullable | Default | Constraints |
+|--------|------|----------|---------|-------------|
+| id | uuid | NO | gen_random_uuid() | PK |
+| pet_id | uuid | NO | - | FK to pets.id ON DELETE CASCADE |
+| recorded_by | uuid | NO | - | FK to users.id |
+| log_type | text | NO | - | check: symptom/weight/vet_visit/medication/allergy/injury/general |
+| title | text | NO | - | - |
+| description | text | YES | - | - |
+| weight_kg | numeric | YES | - | check: > 0 |
+| severity | text | YES | - | check: mild/moderate/severe/critical |
+| vet_name | text | YES | - | - |
+| vet_clinic | text | YES | - | - |
+| diagnosis | text | YES | - | - |
+| treatment | text | YES | - | - |
+| follow_up_date | date | YES | - | - |
+| occurred_at | timestamptz | NO | now() | - |
+| created_at | timestamptz | NO | now() | - |
+| updated_at | timestamptz | NO | now() | auto-updated via trigger |
+
+**RLS Policies:** owner-only SELECT / UPDATE / DELETE; INSERT requires caller = recorded_by AND pet owner
+
+---
+
+## 12. medical_vault
+**Primary Key:** id (uuid)
+**Added by:** `20260513192825_pet_care_health`
+
+Vaccine and medication records with expiry / renewal date tracking.
+
+| Column | Type | Nullable | Default | Constraints |
+|--------|------|----------|---------|-------------|
+| id | uuid | NO | gen_random_uuid() | PK |
+| pet_id | uuid | NO | - | FK to pets.id ON DELETE CASCADE |
+| record_type | text | NO | - | check: vaccine/medication/allergy/surgery/parasite_prevention/other |
+| name | text | NO | - | - |
+| description | text | YES | - | - |
+| administered_by | text | YES | - | - |
+| administered_at | date | YES | - | - |
+| expires_at | date | YES | - | partial index for expiry queries |
+| next_due_at | date | YES | - | partial index for reminder queries |
+| batch_number | text | YES | - | - |
+| dosage | text | YES | - | - |
+| frequency | text | YES | - | - |
+| is_active | boolean | NO | true | - |
+| reminder_enabled | boolean | NO | true | - |
+| document_url | text | YES | - | - |
+| notes | text | YES | - | - |
+| created_at | timestamptz | NO | now() | - |
+| updated_at | timestamptz | NO | now() | auto-updated via trigger |
+
+**RLS Policies:** owner-only SELECT / INSERT / UPDATE / DELETE (pet ownership via `pets.owner_id`)
+
+---
+
 ## Entity Relationship Summary
 - **users** is the central entity, referenced by 10 other tables
-- **pets** belongs to users and is referenced by 5 tables
+- **pets** belongs to users and is referenced by 8 tables (including new care/health tables)
 - **match_requests** connects two users and their pets, and links to chat_threads
 - **chat_threads** connects two users and contains chat_messages
 - **posts** can optionally reference a pet
-- **care_logs** and **health_vitals** track pet care activities
+- **care_logs** and **health_vitals** track low-level care events and numeric vitals
+- **care_tasks** manages scheduled/recurring tasks with gamification
+- **health_logs** stores narrative health events and vet notes
+- **medical_vault** stores vaccine and medication records with expiry tracking
 
 ---
 
@@ -193,13 +282,17 @@ erDiagram
     users ||--o{ pets : "owns"
     users ||--o{ care_logs : "logs"
     users ||--o{ health_vitals : "records"
+    users ||--o{ health_logs : "records"
     users ||--o{ posts : "authors"
     users ||--o{ match_requests : "requests"
     users ||--o{ chat_threads : "participates"
     users ||--o{ chat_messages : "sends"
     users ||--o{ marketplace_orders : "orders"
     pets ||--o{ care_logs : "has"
+    pets ||--o{ care_tasks : "has"
     pets ||--o{ health_vitals : "has"
+    pets ||--o{ health_logs : "has"
+    pets ||--o{ medical_vault : "has"
     pets ||--o{ match_requests : "matches"
     pets ||--o{ posts : "featured in"
     match_requests ||--o{ chat_threads : "initiates"
@@ -317,6 +410,60 @@ erDiagram
         text currency DEFAULT('usd')
         text status CHECK(pending/confirmed/shipped/delivered/cancelled/refunded)
         jsonb shipping_address
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    care_tasks {
+        uuid id PK
+        uuid pet_id FK
+        text task_type CHECK(feeding/walk/grooming/medication/vet_visit/training/playtime/dental/nail_trim/bath/other)
+        text title
+        text frequency CHECK(once/daily/twice_daily/weekly/biweekly/monthly/as_needed)
+        time scheduled_time
+        boolean is_completed
+        timestamptz completed_at
+        integer gamification_points CHECK(>= 0)
+        text notes
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    health_logs {
+        uuid id PK
+        uuid pet_id FK
+        uuid recorded_by FK
+        text log_type CHECK(symptom/weight/vet_visit/medication/allergy/injury/general)
+        text title
+        text description
+        numeric weight_kg CHECK(> 0)
+        text severity CHECK(mild/moderate/severe/critical)
+        text vet_name
+        text vet_clinic
+        text diagnosis
+        text treatment
+        date follow_up_date
+        timestamptz occurred_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    medical_vault {
+        uuid id PK
+        uuid pet_id FK
+        text record_type CHECK(vaccine/medication/allergy/surgery/parasite_prevention/other)
+        text name
+        text administered_by
+        date administered_at
+        date expires_at
+        date next_due_at
+        text batch_number
+        text dosage
+        text frequency
+        boolean is_active
+        boolean reminder_enabled
+        text document_url
+        text notes
         timestamptz created_at
         timestamptz updated_at
     }

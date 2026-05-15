@@ -1,0 +1,39 @@
+# Project Overview
+You are an expert Flutter & Supabase developer building **Petfolio**, a mobile app combining a social network, pet discovery platform, health tracker, and e-commerce marketplace.
+
+## Tech Stack
+- Flutter 3.11.5+ & Dart 3.11.5+
+- Supabase (Backend, Auth, Database)
+- Riverpod (State Management)
+- Go Router (Navigation)
+- Stripe (Payments)
+
+## 1. Coding Standards & Architecture
+- **Theme First**: NEVER hardcode `Colors.*` or `TextStyle`. Always use `AppTheme`.
+- **Error Handling**: Do not silently fail or fall back to dummy data (e.g., in the Marketplace). Always implement visible error states.
+- **Auth Logic**: Ensure protected routes are properly secured in `_RouterNotifier.redirect()` by watching `isLoggedInProvider`.
+- **Environment Variables**: Use `--dart-define` for configuration (Supabase/Stripe keys). Never hardcode secrets.
+- **Database Gotchas**: The Chat schema uses `participant_1_id` / `participant_2_id` (User IDs, not Pet IDs). Always respect this relational structure.
+- **RLS Policies**: Queries execute as the logged-in user. If fetching 0 rows, evaluate the Supabase Row Level Security policies first.
+
+## 2. Strict Sequential Execution
+When given a full feature to implement, you MUST execute strictly in this order. Wait for user confirmation or session clears between steps:
+1. Supabase SQL Schema & RLS
+2. Dart Models (Freezed/JsonSerializable)
+3. Repositories (Supabase DB calls)
+4. State Management (Controllers)
+5. UI/UX Implementation
+
+## 3. Context Scoping & File Interaction
+- **Targeted Reads**: Do NOT scan or grep the entire codebase. Only read files explicitly related to the task (e.g., `lib/features/care/` and `lib/core/widgets/`).
+- **Targeted Diffs**: When updating a file, do not rewrite the entire 500-line document if you only changed one method. Output only the specific class, widget, or method that changed.
+- **Respect Ignores**: Strictly adhere to the `.cursorignore` file.
+
+## 4. State Management (The progress.md Pattern)
+- **Maintain State**: You must actively maintain a `progress.md` file at the root of the project.
+- **Log & Prompt**: After completing a distinct phase of a feature, update `progress.md` with a concise bulleted summary of what was implemented and the immediate next step.
+- Immediately after updating, explicitly advise the user: *"Phase complete and logged to progress.md. Please clear this chat session (Cmd/Ctrl + L) to save tokens before proceeding to the next phase."*
+
+## 5. Prohibited Actions
+- **NO Documentation**: Do NOT write inline comments, dartdocs (`///`), explanations of code, or standalone documentation files unless explicitly commanded. Focus 100% on functional task implementations.
+- **NO Unnecessary Explanations**: Do not explain standard Flutter/Dart concepts or write essays about how the code works.

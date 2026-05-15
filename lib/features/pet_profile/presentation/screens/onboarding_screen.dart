@@ -1,6 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,14 +7,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 
+import '../../data/models/pet.dart';
 import '../../data/models/pet_species.dart';
 import '../controllers/active_pet_controller.dart';
 import '../controllers/pet_list_controller.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// OnboardingScreen — 6-step progressive profiling
-// step 0: Welcome  1: Species  2: Name  3: Breed  4: Photo  5: Done
-// ─────────────────────────────────────────────────────────────────────────────
+// Steps: 0=Welcome  1=Species+Breed  2=PetDetails(merged)  3=Photo  4=Done
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -25,46 +22,57 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
-  static const _totalSteps = 4; // visible progress segments (steps 1-4)
+  static const _totalSteps = 3;
 
   int _step = 0;
   PetSpecies? _species;
-  String _name = '';
   String? _breed;
+  String _name = '';
+  DateTime? _dateOfBirth;
+  double? _weightKg;
+  double? _targetWeightKg;
+  bool _useKg = true;
+  String? _activityLevel;
   Uint8List? _photoBytes;
   bool _isSubmitting = false;
 
   void _next() => setState(() => _step++);
-  void _back() => setState(() => _step = (_step - 1).clamp(0, 5));
+  void _back() => setState(() => _step = (_step - 1).clamp(0, 4));
 
   Future<void> _complete() async {
     setState(() => _isSubmitting = true);
     try {
-      // Create the pet record first.
       final pet = await ref.read(petListProvider.notifier).addPet(
             name: _name,
             species: _species!.name,
             breed: _breed,
+            dateOfBirth: _dateOfBirth,
+            weightKg: _weightKg,
+            activityLevel: _activityLevel,
           );
 
-      // Upload photo and patch avatar_url if the user provided one.
+      Pet activePet = pet;
       if (_photoBytes != null) {
         final repo = ref.read(petRepositoryProvider);
         final url = await repo.uploadAvatar(_photoBytes!, pet.id);
         await repo.updateAvatarUrl(pet.id, url);
-        final updated = pet.copyWith(avatarUrl: url);
-        ref.read(petListProvider.notifier).updateLocal(updated);
-        await ref.read(activePetControllerProvider.notifier).setActivePet(updated);
-      } else {
-        await ref.read(activePetControllerProvider.notifier).setActivePet(pet);
+        activePet = pet.copyWith(avatarUrl: url);
+        ref.read(petListProvider.notifier).updateLocal(activePet);
+      }
+      await ref.read(activePetControllerProvider.notifier).setActivePet(activePet);
+
+      if (_targetWeightKg != null) {
+        try {
+          await ref.read(petRepositoryProvider).writeTargetWeight(pet.id, _targetWeightKg!);
+        } catch (_) {}
       }
 
-      if (mounted) context.go('/home');
+      if (mounted) {
+        context.go('/care?onboardingComplete=1');
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -82,17 +90,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         transitionBuilder: (child, anim) => FadeTransition(
           opacity: anim,
           child: SlideTransition(
-            position: Tween(
-              begin: const Offset(0.04, 0),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(parent: anim, curve: Curves.easeOut)),
+            position: Tween(begin: const Offset(0.04, 0), end: Offset.zero)
+                .animate(CurvedAnimation(parent: anim, curve: Curves.easeOut)),
             child: child,
           ),
         ),
-        child: KeyedSubtree(
-          key: ValueKey(_step),
-          child: _buildStep(context, pt),
-        ),
+        child: KeyedSubtree(key: ValueKey(_step), child: _buildStep(context, pt)),
       ),
     );
   }
@@ -102,42 +105,37 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       case 0:
         return _WelcomeStep(onStart: _next, onSkip: () => context.go('/home'));
       case 1:
-        return _SpeciesStep(
-          selected: _species,
+        return _SpeciesBreedStep(
+          species: _species,
+          breed: _breed,
+          onPickSpecies: (sp) => setState(() { _species = sp; _breed = null; }),
+          onPickBreed: (b) => setState(() => _breed = b),
+          onNext: _next,
           onBack: _back,
-          onPick: (sp) {
-            setState(() {
-              _species = sp;
-              _breed = null; // reset breed when species changes
-            });
-            _next();
-          },
           step: 1,
           total: _totalSteps,
         );
       case 2:
-        return _NameStep(
+        return _PetDetailsStep(
           name: _name,
+          dateOfBirth: _dateOfBirth,
+          weightKg: _weightKg,
+          targetWeightKg: _targetWeightKg,
+          useKg: _useKg,
+          activityLevel: _activityLevel,
           species: _species!,
-          onBack: _back,
-          onChange: (v) => setState(() => _name = v),
+          onNameChanged: (v) => setState(() => _name = v),
+          onDobPick: (d) => setState(() => _dateOfBirth = d),
+          onWeightChanged: (v) => setState(() => _weightKg = v),
+          onTargetChanged: (v) => setState(() => _targetWeightKg = v),
+          onUnitToggle: (v) => setState(() => _useKg = v),
+          onActivityPick: (level) => setState(() => _activityLevel = level),
           onNext: _next,
+          onBack: _back,
           step: 2,
           total: _totalSteps,
         );
       case 3:
-        return _BreedStep(
-          selected: _breed,
-          species: _species!,
-          onBack: _back,
-          onPick: (b) {
-            setState(() => _breed = b);
-            _next();
-          },
-          step: 3,
-          total: _totalSteps,
-        );
-      case 4:
         return _PhotoStep(
           name: _name,
           species: _species!,
@@ -145,14 +143,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           onBack: _back,
           onSetPhoto: (bytes) => setState(() => _photoBytes = bytes),
           onNext: _next,
-          step: 4,
+          step: 3,
           total: _totalSteps,
         );
-      case 5:
+      case 4:
         return _DoneStep(
           name: _name,
           species: _species!,
           breed: _breed,
+          dateOfBirth: _dateOfBirth,
+          weightKg: _weightKg,
+          activityLevel: _activityLevel,
           photoBytes: _photoBytes,
           onEnter: _complete,
           isLoading: _isSubmitting,
@@ -168,11 +169,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _OnboardingHeader extends StatelessWidget {
-  const _OnboardingHeader({
-    required this.step,
-    required this.total,
-    required this.onBack,
-  });
+  const _OnboardingHeader({required this.step, required this.total, required this.onBack});
 
   final int step;
   final int total;
@@ -189,7 +186,6 @@ class _OnboardingHeader extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
         child: Row(
           children: [
-            // Back button — 44 dp hit target
             GestureDetector(
               onTap: onBack,
               child: Container(
@@ -199,15 +195,8 @@ class _OnboardingHeader extends StatelessWidget {
                   color: cs.surface,
                   shape: BoxShape.circle,
                   boxShadow: [
-                    BoxShadow(
-                      color: AppColors.shadowE1L,
-                      blurRadius: 2,
-                      offset: const Offset(0, 1),
-                    ),
-                    BoxShadow(
-                        color: pt.line200,
-                        blurRadius: 0,
-                        spreadRadius: 0.5),
+                    BoxShadow(color: AppColors.shadowE1L, blurRadius: 2, offset: const Offset(0, 1)),
+                    BoxShadow(color: pt.line200, blurRadius: 0, spreadRadius: 0.5),
                   ],
                 ),
                 child: Center(
@@ -219,8 +208,6 @@ class _OnboardingHeader extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 14),
-
-            // Progress bar
             Expanded(
               child: Row(
                 children: [
@@ -241,8 +228,6 @@ class _OnboardingHeader extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 14),
-
-            // Step counter
             SizedBox(
               width: 32,
               child: Text(
@@ -304,11 +289,7 @@ class _StepFrame extends StatelessWidget {
                 const SizedBox(height: 10),
                 Text(
                   subtitle!,
-                  style: TextStyle(
-                    fontSize: 15,
-                    height: 1.45,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: TextStyle(fontSize: 15, height: 1.45, color: cs.onSurfaceVariant),
                 ),
               ],
             ],
@@ -353,8 +334,6 @@ class _WelcomeStep extends StatelessWidget {
         child: Column(
           children: [
             const Spacer(),
-
-            // ── Hero blobs ──────────────────────────────────────────────
             SizedBox(
               width: 220,
               height: 160,
@@ -368,8 +347,6 @@ class _WelcomeStep extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 28),
-
-            // ── Copy ────────────────────────────────────────────────────
             Text(
               'Welcome to\nPetFolio',
               textAlign: TextAlign.center,
@@ -381,10 +358,7 @@ class _WelcomeStep extends StatelessWidget {
               textAlign: TextAlign.center,
               style: tt.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
             ),
-
             const Spacer(),
-
-            // ── CTAs ─────────────────────────────────────────────────────
             PrimaryPillButton(
               label: 'Add your first pet',
               onPressed: onStart,
@@ -409,10 +383,7 @@ class _WelcomeStep extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              'You can add more pets anytime',
-              style: TextStyle(fontSize: 12, color: pt.ink500),
-            ),
+            Text('You can add more pets anytime', style: TextStyle(fontSize: 12, color: pt.ink500)),
           ],
         ),
       ),
@@ -453,11 +424,7 @@ class _Blob extends StatelessWidget {
             stops: const [0.0, 0.55, 1.0],
           ),
           boxShadow: [
-            BoxShadow(
-              color: color.withAlpha(90),
-              blurRadius: 30,
-              offset: const Offset(0, 10),
-            ),
+            BoxShadow(color: color.withAlpha(90), blurRadius: 30, offset: const Offset(0, 10)),
           ],
         ),
         alignment: Alignment.center,
@@ -477,47 +444,287 @@ class _Blob extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Step 1 — Choose species
+// Step 1 — Species + Breed (combined)
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _SpeciesStep extends StatelessWidget {
-  const _SpeciesStep({
-    required this.selected,
+class _SpeciesBreedStep extends StatefulWidget {
+  const _SpeciesBreedStep({
+    required this.species,
+    required this.breed,
+    required this.onPickSpecies,
+    required this.onPickBreed,
+    required this.onNext,
     required this.onBack,
-    required this.onPick,
     required this.step,
     required this.total,
   });
 
-  final PetSpecies? selected;
+  final PetSpecies? species;
+  final String? breed;
+  final ValueChanged<PetSpecies> onPickSpecies;
+  final ValueChanged<String> onPickBreed;
+  final VoidCallback onNext;
   final VoidCallback onBack;
-  final ValueChanged<PetSpecies> onPick;
   final int step, total;
 
   @override
+  State<_SpeciesBreedStep> createState() => _SpeciesBreedStepState();
+}
+
+class _SpeciesBreedStepState extends State<_SpeciesBreedStep> {
+  String _query = '';
+  late final TextEditingController _searchCtrl;
+  final _searchFocus = FocusNode();
+  bool _searchFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchCtrl = TextEditingController();
+    _searchFocus.addListener(() => setState(() => _searchFocused = _searchFocus.hasFocus));
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    _searchFocus.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(_SpeciesBreedStep old) {
+    super.didUpdateWidget(old);
+    if (old.species != widget.species) {
+      _query = '';
+      _searchCtrl.clear();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
+    final species = widget.species;
+    final breed = widget.breed;
+
+    final filtered = species == null
+        ? <String>[]
+        : (_query.isEmpty
+            ? species.breeds
+            : species.breeds
+                .where((b) => b.toLowerCase().contains(_query.toLowerCase()))
+                .toList());
+
+    final subtitle = species == null
+        ? 'Pick one. You can add more pets later.'
+        : "Now choose a breed — or tap \"Don't know yet\".";
+
     return Column(
       children: [
-        _OnboardingHeader(step: step, total: total, onBack: onBack),
+        _OnboardingHeader(step: widget.step, total: widget.total, onBack: widget.onBack),
         Expanded(
           child: _StepFrame(
-            eyebrow: 'Step $step of $total',
-            title: 'What kind of pet?',
-            subtitle: 'Pick one. You can add more pets later.',
-            child: GridView.count(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.95,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              children: PetSpecies.values
-                  .map((sp) => _SpeciesCard(
-                        species: sp,
-                        selected: selected == sp,
-                        onTap: () => onPick(sp),
-                      ))
-                  .toList(),
+            eyebrow: 'Step ${widget.step} of ${widget.total}',
+            title: 'About your pet',
+            subtitle: subtitle,
+            cta: PrimaryPillButton(
+              label: 'Continue',
+              onPressed: (species != null && breed != null) ? widget.onNext : null,
+              isFullWidth: true,
+              size: PillButtonSize.xl,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'SPECIES',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    color: pt.ink500,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // 3-column compact grid — all 6 species visible without scrolling
+                GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    mainAxisExtent: 56,
+                  ),
+                  itemCount: PetSpecies.values.length,
+                  itemBuilder: (_, i) => _CompactSpeciesCard(
+                    species: PetSpecies.values[i],
+                    selected: species == PetSpecies.values[i],
+                    onTap: () => widget.onPickSpecies(PetSpecies.values[i]),
+                  ),
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                ),
+
+                // Breed section (animated in after species pick)
+                AnimatedSize(
+                  duration: PetfolioThemeExtension.durationMd,
+                  curve: Curves.easeOut,
+                  child: species != null
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 24),
+                            Row(
+                              children: [
+                                Text(
+                                  'BREED',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.8,
+                                    color: pt.ink500,
+                                  ),
+                                ),
+                                const Spacer(),
+                                if (breed != null && !breed.startsWith("Don't"))
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: species.tint,
+                                      borderRadius: BorderRadius.circular(999),
+                                      border: Border.all(color: species.accent.withAlpha(80)),
+                                    ),
+                                    child: Text(
+                                      breed,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: species.accent,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+
+                            // AuthField-style breed search
+                            AnimatedContainer(
+                              duration: PetfolioThemeExtension.durationSm,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: _searchFocused
+                                    ? [
+                                        BoxShadow(
+                                          color: cs.primary.withAlpha(30),
+                                          blurRadius: 8,
+                                          spreadRadius: 0,
+                                        ),
+                                      ]
+                                    : [],
+                              ),
+                              child: TextField(
+                                controller: _searchCtrl,
+                                focusNode: _searchFocus,
+                                onChanged: (v) => setState(() => _query = v),
+                                style: TextStyle(fontSize: 15, color: cs.onSurface),
+                                decoration: InputDecoration(
+                                  labelText: 'Search breeds',
+                                  prefixIcon: Icon(
+                                    Icons.search_rounded,
+                                    size: 18,
+                                    color: _searchFocused ? cs.primary : pt.ink500,
+                                  ),
+                                  filled: true,
+                                  fillColor: _searchFocused ? cs.surface : pt.surface2,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 14,
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(color: pt.line200),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(color: cs.primary, width: 2),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+
+                            // Breed list
+                            if (filtered.isEmpty)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 20),
+                                child: Text(
+                                  'No breeds match "$_query".',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 14, color: pt.ink500),
+                                ),
+                              )
+                            else
+                              ...filtered.map((b) {
+                                final isSelected = breed == b;
+                                final isUnknown = b.startsWith("Don't");
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: GestureDetector(
+                                    onTap: () => widget.onPickBreed(b),
+                                    child: AnimatedContainer(
+                                      duration: PetfolioThemeExtension.durationSm,
+                                      height: 52,
+                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      decoration: BoxDecoration(
+                                        color: isSelected
+                                            ? species.tint
+                                            : (isUnknown ? pt.surface2 : cs.surface),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: isSelected ? species.accent : pt.line200,
+                                          width: isSelected ? 2 : 0.5,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              b,
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w500,
+                                                fontStyle: isUnknown
+                                                    ? FontStyle.italic
+                                                    : FontStyle.normal,
+                                                color: isUnknown
+                                                    ? cs.onSurfaceVariant
+                                                    : cs.onSurface,
+                                              ),
+                                            ),
+                                          ),
+                                          if (isSelected)
+                                            Container(
+                                              width: 20,
+                                              height: 20,
+                                              decoration: BoxDecoration(
+                                                color: species.accent,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: const Icon(Icons.check,
+                                                  size: 12, color: Colors.white),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }),
+                            const SizedBox(height: 8),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
             ),
           ),
         ),
@@ -526,8 +733,8 @@ class _SpeciesStep extends StatelessWidget {
   }
 }
 
-class _SpeciesCard extends StatelessWidget {
-  const _SpeciesCard({
+class _CompactSpeciesCard extends StatelessWidget {
+  const _CompactSpeciesCard({
     required this.species,
     required this.selected,
     required this.onTap,
@@ -546,65 +753,54 @@ class _SpeciesCard extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: PetfolioThemeExtension.durationSm,
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
           color: selected ? species.tint : cs.surface,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: selected
               ? [
                   BoxShadow(
-                    color: species.accent.withAlpha(85),
-                    blurRadius: 18,
-                    offset: const Offset(0, 6),
+                    color: species.accent.withAlpha(70),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
                   ),
                 ]
               : [
-                  BoxShadow(
-                    color: AppColors.shadowE1L,
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  ),
+                  BoxShadow(color: AppColors.shadowE1L, blurRadius: 2, offset: const Offset(0, 1)),
                 ],
           border: Border.all(
             color: selected ? species.accent : pt.line200,
             width: selected ? 2 : 0.5,
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            // Icon chip
             Container(
-              width: 44,
-              height: 44,
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
-                color: species.accent,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: species.accent.withAlpha(170),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                  const BoxShadow(
-                    color: Color(0x40FFFFFF),
-                    blurRadius: 0,
-                    spreadRadius: -1,
-                    offset: Offset(0, 1),
-                  ),
-                ],
+                color: selected ? species.accent : species.accent.withAlpha(30),
+                borderRadius: BorderRadius.circular(8),
               ),
               alignment: Alignment.center,
-              child: _SpeciesGlyph(species: species, color: Colors.white, size: 22),
+              child: _SpeciesGlyph(
+                species: species,
+                color: selected ? Colors.white : species.accent,
+                size: 16,
+              ),
             ),
-            const Spacer(),
-            Text(
-              species.label,
-              style: const TextStyle(
-                fontFamily: 'Sora',
-                fontWeight: FontWeight.w600,
-                fontSize: 20,
-                letterSpacing: -0.2,
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                species.label,
+                style: TextStyle(
+                  fontFamily: 'Sora',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                  color: selected ? species.accent : cs.onSurface,
+                  letterSpacing: -0.1,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -615,137 +811,416 @@ class _SpeciesCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Step 2 — Choose name
+// Step 2 — Pet Details (merged: name + DOB + weight + activity)
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _NameStep extends StatefulWidget {
-  const _NameStep({
+class _PetDetailsStep extends StatefulWidget {
+  const _PetDetailsStep({
     required this.name,
+    required this.dateOfBirth,
+    required this.weightKg,
+    required this.targetWeightKg,
+    required this.useKg,
+    required this.activityLevel,
     required this.species,
-    required this.onBack,
-    required this.onChange,
+    required this.onNameChanged,
+    required this.onDobPick,
+    required this.onWeightChanged,
+    required this.onTargetChanged,
+    required this.onUnitToggle,
+    required this.onActivityPick,
     required this.onNext,
+    required this.onBack,
     required this.step,
     required this.total,
   });
 
   final String name;
+  final DateTime? dateOfBirth;
+  final double? weightKg;
+  final double? targetWeightKg;
+  final bool useKg;
+  final String? activityLevel;
   final PetSpecies species;
-  final VoidCallback onBack;
-  final ValueChanged<String> onChange;
+  final ValueChanged<String> onNameChanged;
+  final ValueChanged<DateTime> onDobPick;
+  final ValueChanged<double?> onWeightChanged;
+  final ValueChanged<double?> onTargetChanged;
+  final ValueChanged<bool> onUnitToggle;
+  final ValueChanged<String> onActivityPick;
   final VoidCallback onNext;
+  final VoidCallback onBack;
   final int step, total;
 
   @override
-  State<_NameStep> createState() => _NameStepState();
+  State<_PetDetailsStep> createState() => _PetDetailsStepState();
 }
 
-class _NameStepState extends State<_NameStep> {
-  late final TextEditingController _ctrl;
+class _PetDetailsStepState extends State<_PetDetailsStep> {
+  late final TextEditingController _nameCtrl;
+  late final TextEditingController _currentWeightCtrl;
+  late final TextEditingController _targetWeightCtrl;
+  final _nameFocus = FocusNode();
+  final _currentWeightFocus = FocusNode();
+  final _targetWeightFocus = FocusNode();
+  bool _nameFocused = false;
+  bool _currentWeightFocused = false;
+  bool _targetWeightFocused = false;
+
+  static const _kgToLbs = 2.20462;
 
   @override
   void initState() {
     super.initState();
-    _ctrl = TextEditingController(text: widget.name);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context).requestFocus(_focus);
-    });
+    _nameCtrl = TextEditingController(text: widget.name);
+    _currentWeightCtrl = TextEditingController(
+      text: _formatWeight(widget.weightKg, widget.useKg),
+    );
+    _targetWeightCtrl = TextEditingController(
+      text: _formatWeight(widget.targetWeightKg, widget.useKg),
+    );
+    _nameFocus.addListener(() => setState(() => _nameFocused = _nameFocus.hasFocus));
+    _currentWeightFocus.addListener(
+      () => setState(() => _currentWeightFocused = _currentWeightFocus.hasFocus),
+    );
+    _targetWeightFocus.addListener(
+      () => setState(() => _targetWeightFocused = _targetWeightFocus.hasFocus),
+    );
   }
 
-  final _focus = FocusNode();
+  @override
+  void didUpdateWidget(_PetDetailsStep old) {
+    super.didUpdateWidget(old);
+    if (old.useKg != widget.useKg) {
+      _currentWeightCtrl.text = _formatWeight(widget.weightKg, widget.useKg);
+      _targetWeightCtrl.text = _formatWeight(widget.targetWeightKg, widget.useKg);
+    }
+  }
 
   @override
   void dispose() {
-    _ctrl.dispose();
-    _focus.dispose();
+    _nameCtrl.dispose();
+    _currentWeightCtrl.dispose();
+    _targetWeightCtrl.dispose();
+    _nameFocus.dispose();
+    _currentWeightFocus.dispose();
+    _targetWeightFocus.dispose();
     super.dispose();
+  }
+
+  String _formatWeight(double? kg, bool useKg) {
+    if (kg == null) return '';
+    final v = useKg ? kg : kg * _kgToLbs;
+    return v % 1 == 0 ? v.toStringAsFixed(0) : v.toStringAsFixed(1);
+  }
+
+  double? _parseToKg(String text, bool useKg) {
+    final v = double.tryParse(text);
+    if (v == null || v <= 0) return null;
+    return useKg ? v : v / _kgToLbs;
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: widget.dateOfBirth ?? DateTime(now.year - 2, now.month, now.day),
+      firstDate: DateTime(1990),
+      lastDate: now,
+      helpText: 'Date of birth',
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: Theme.of(context).colorScheme.copyWith(primary: AppColors.blue500),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null && mounted) widget.onDobPick(picked);
+  }
+
+  String _formatDate(DateTime d) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${months[d.month - 1]} ${d.day}, ${d.year}';
+  }
+
+  String _ageLabel(DateTime dob) {
+    final now = DateTime.now();
+    int years = now.year - dob.year;
+    int months = now.month - dob.month;
+    if (now.day < dob.day) months--;
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    if (years > 0 && months > 0) return '$years yr $months mo old';
+    if (years > 0) return '$years year${years > 1 ? 's' : ''} old';
+    if (months > 0) return '$months month${months > 1 ? 's' : ''} old';
+    return 'Just born';
+  }
+
+  Widget _sectionLabel(String text, PetfolioThemeExtension pt, {String? suffix}) {
+    return Row(
+      children: [
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.8,
+            color: pt.ink500,
+          ),
+        ),
+        if (suffix != null) ...[
+          const SizedBox(width: 6),
+          Text(suffix, style: TextStyle(fontSize: 11, color: pt.ink300)),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildNameField(ColorScheme cs, PetfolioThemeExtension pt) {
+    return AnimatedContainer(
+      duration: PetfolioThemeExtension.durationSm,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: _nameFocused || _nameCtrl.text.isNotEmpty
+            ? [BoxShadow(color: cs.primary.withAlpha(30), blurRadius: 8)]
+            : [],
+      ),
+      child: TextField(
+        controller: _nameCtrl,
+        focusNode: _nameFocus,
+        maxLength: 24,
+        buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
+        textCapitalization: TextCapitalization.words,
+        textInputAction: TextInputAction.next,
+        onChanged: (v) {
+          widget.onNameChanged(v);
+          setState(() {});
+        },
+        style: TextStyle(fontSize: 16, color: cs.onSurface),
+        decoration: InputDecoration(
+          labelText: "Pet's name",
+          filled: true,
+          fillColor: _nameFocused ? cs.surface : pt.surface2,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: pt.line200),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: cs.primary, width: 2),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWeightField({
+    required TextEditingController ctrl,
+    required FocusNode focus,
+    required bool focused,
+    required String label,
+    required String unit,
+    required ColorScheme cs,
+    required PetfolioThemeExtension pt,
+    required ValueChanged<String> onChanged,
+  }) {
+    return AnimatedContainer(
+      duration: PetfolioThemeExtension.durationSm,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: focused || ctrl.text.isNotEmpty
+            ? [BoxShadow(color: cs.primary.withAlpha(30), blurRadius: 8)]
+            : [],
+      ),
+      child: TextField(
+        controller: ctrl,
+        focusNode: focus,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,1}'))],
+        onChanged: onChanged,
+        style: TextStyle(fontSize: 16, color: cs.onSurface),
+        decoration: InputDecoration(
+          labelText: label,
+          suffixText: unit,
+          suffixStyle: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: pt.ink500,
+          ),
+          filled: true,
+          fillColor: focused ? cs.surface : pt.surface2,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: pt.line200),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: cs.primary, width: 2),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDobPicker(ColorScheme cs, PetfolioThemeExtension pt) {
+    final dob = widget.dateOfBirth;
+    return GestureDetector(
+      onTap: _pickDate,
+      child: AnimatedContainer(
+        duration: PetfolioThemeExtension.durationSm,
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: dob != null ? widget.species.tint : pt.surface2,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: dob != null ? widget.species.accent : pt.line200,
+            width: dob != null ? 2 : 1,
+          ),
+          boxShadow: dob != null
+              ? [BoxShadow(color: widget.species.accent.withAlpha(30), blurRadius: 8)]
+              : [],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: dob != null ? widget.species.accent : cs.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.calendar_month_rounded,
+                size: 18,
+                color: dob != null ? Colors.white : cs.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    dob != null ? _formatDate(dob) : 'Tap to set date of birth',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: dob != null ? widget.species.accent : cs.onSurfaceVariant,
+                    ),
+                  ),
+                  if (dob != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      _ageLabel(dob),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: widget.species.accent.withAlpha(180),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 18,
+              color: dob != null ? widget.species.accent.withAlpha(160) : pt.ink300,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
-    final ready = _ctrl.text.trim().isNotEmpty;
+    final nameReady = _nameCtrl.text.trim().isNotEmpty;
 
     return Column(
       children: [
-        _OnboardingHeader(
-            step: widget.step, total: widget.total, onBack: widget.onBack),
+        _OnboardingHeader(step: widget.step, total: widget.total, onBack: widget.onBack),
         Expanded(
           child: _StepFrame(
             eyebrow: 'Step ${widget.step} of ${widget.total}',
-            title:
-                "What's your ${widget.species.label.toLowerCase()}'s name?",
-            subtitle: 'Just a name for now — fill in the rest later.',
+            title: 'Your ${widget.species.label.toLowerCase()}\'s profile',
             cta: PrimaryPillButton(
-              label: 'Continue',
-              onPressed: ready ? widget.onNext : null,
+              label: nameReady ? 'Continue' : 'Skip for now',
+              onPressed: widget.onNext,
               isFullWidth: true,
               size: PillButtonSize.xl,
+              variant: nameReady ? PillButtonVariant.primary : PillButtonVariant.secondary,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Large name input (64 dp, Sora)
-                AnimatedContainer(
-                  duration: PetfolioThemeExtension.durationSm,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: cs.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: ready ? cs.primary.withAlpha(40) : AppColors.shadowE1L,
-                        blurRadius: 2,
-                        spreadRadius: ready ? 1.5 : 0,
-                      ),
-                    ],
-                    border: Border.all(
-                      color: ready ? cs.primary : pt.line200,
-                      width: ready ? 1.5 : 1.0,
-                    ),
-                  ),
-                  child: TextField(
-                    controller: _ctrl,
-                    focusNode: _focus,
-                    onChanged: (v) {
-                      widget.onChange(v);
-                      setState(() {});
-                    },
-                    onSubmitted: (_) {
-                      if (ready) widget.onNext();
-                    },
-                    maxLength: 24,
-                    buildCounter: (_, {required currentLength, required isFocused, maxLength}) =>
-                        null,
-                    textInputAction: TextInputAction.done,
-                    style: const TextStyle(
-                      fontFamily: 'Sora',
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.2,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'e.g. Luna',
-                      hintStyle: TextStyle(
-                        fontFamily: 'Sora',
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
-                        color: pt.ink300,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                    ),
-                  ),
+                // ── Name ────────────────────────────────────────────────
+                _sectionLabel('NAME', pt),
+                const SizedBox(height: 8),
+                _buildNameField(cs, pt),
+                const SizedBox(height: 24),
+
+                // ── Date of Birth ────────────────────────────────────────
+                _sectionLabel('DATE OF BIRTH', pt, suffix: 'optional'),
+                const SizedBox(height: 8),
+                _buildDobPicker(cs, pt),
+                const SizedBox(height: 24),
+
+                // ── Weight ───────────────────────────────────────────────
+                Row(
+                  children: [
+                    _sectionLabel('WEIGHT', pt, suffix: 'optional'),
+                    const Spacer(),
+                    _UnitToggle(useKg: widget.useKg, onToggle: widget.onUnitToggle),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                _buildWeightField(
+                  ctrl: _currentWeightCtrl,
+                  focus: _currentWeightFocus,
+                  focused: _currentWeightFocused,
+                  label: 'Current weight',
+                  unit: widget.useKg ? 'kg' : 'lbs',
+                  cs: cs,
+                  pt: pt,
+                  onChanged: (v) => widget.onWeightChanged(_parseToKg(v, widget.useKg)),
                 ),
                 const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: Text(
-                    '${_ctrl.text.length} / 24',
-                    style: TextStyle(fontSize: 13, color: pt.ink500),
+                _buildWeightField(
+                  ctrl: _targetWeightCtrl,
+                  focus: _targetWeightFocus,
+                  focused: _targetWeightFocused,
+                  label: 'Target weight',
+                  unit: widget.useKg ? 'kg' : 'lbs',
+                  cs: cs,
+                  pt: pt,
+                  onChanged: (v) => widget.onTargetChanged(_parseToKg(v, widget.useKg)),
+                ),
+                const SizedBox(height: 24),
+
+                // ── Activity Level ───────────────────────────────────────
+                _sectionLabel('ACTIVITY LEVEL', pt, suffix: 'optional'),
+                const SizedBox(height: 8),
+                ..._kActivityOptions.map(
+                  (opt) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _ActivityTile(
+                      option: opt,
+                      selected: widget.activityLevel == opt.id,
+                      onTap: () => widget.onActivityPick(opt.id),
+                    ),
                   ),
                 ),
+                const SizedBox(height: 8),
               ],
             ),
           ),
@@ -756,160 +1231,231 @@ class _NameStepState extends State<_NameStep> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Step 3 — Choose breed
+// Activity tile — compact horizontal row (no overflow)
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _BreedStep extends StatefulWidget {
-  const _BreedStep({
-    required this.selected,
-    required this.species,
-    required this.onBack,
-    required this.onPick,
-    required this.step,
-    required this.total,
-  });
-
-  final String? selected;
-  final PetSpecies species;
-  final VoidCallback onBack;
-  final ValueChanged<String> onPick;
-  final int step, total;
-
-  @override
-  State<_BreedStep> createState() => _BreedStepState();
+class _ActivityOption {
+  const _ActivityOption(this.id, this.label, this.description, this.icon, this.accent, this.tint);
+  final String id, label, description;
+  final IconData icon;
+  final Color accent, tint;
 }
 
-class _BreedStepState extends State<_BreedStep> {
-  String _query = '';
+const _kActivityOptions = [
+  _ActivityOption(
+    'sedentary',
+    'Couch Potato',
+    'Mostly resting, minimal movement',
+    Icons.weekend_rounded,
+    Color(0xFF60A5FA),
+    Color(0xFFEFF6FF),
+  ),
+  _ActivityOption(
+    'low',
+    'Easy Going',
+    'Short walks & light play',
+    Icons.directions_walk_rounded,
+    Color(0xFF34D399),
+    Color(0xFFF0FDF4),
+  ),
+  _ActivityOption(
+    'moderate',
+    'Active',
+    'Daily walks & regular play',
+    Icons.directions_run_rounded,
+    AppColors.meadow500,
+    Color(0xFFDCFCE7),
+  ),
+  _ActivityOption(
+    'high',
+    'Energetic',
+    'Long runs & vigorous exercise',
+    Icons.bolt_rounded,
+    AppColors.sunset500,
+    Color(0xFFFFF7ED),
+  ),
+  _ActivityOption(
+    'very_high',
+    'Athlete',
+    'Intense exercise every day',
+    Icons.fitness_center_rounded,
+    AppColors.coral500,
+    Color(0xFFFFF1F2),
+  ),
+];
+
+class _ActivityTile extends StatelessWidget {
+  const _ActivityTile({
+    required this.option,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final _ActivityOption option;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
-    final filtered = _query.isEmpty
-        ? widget.species.breeds
-        : widget.species.breeds
-            .where((b) => b.toLowerCase().contains(_query.toLowerCase()))
-            .toList();
-
-    return Column(
-      children: [
-        _OnboardingHeader(
-            step: widget.step, total: widget.total, onBack: widget.onBack),
-        Expanded(
-          child: _StepFrame(
-            eyebrow: 'Step ${widget.step} of ${widget.total}',
-            title: 'Breed?',
-            subtitle: "Pick one or tap \"Don't know yet\" — you can change this anytime.",
-            child: Column(
-              children: [
-                // Search bar
-                Container(
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: cs.surface,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: pt.line200, width: 0.5),
-                  ),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 16),
-                      Icon(Icons.search, size: 18, color: pt.ink500),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: TextField(
-                          onChanged: (v) => setState(() => _query = v),
-                          decoration: InputDecoration(
-                            hintText: 'Search breeds',
-                            hintStyle: TextStyle(
-                                fontSize: 16, color: pt.ink300),
-                            border: InputBorder.none,
-                          ),
-                          style: TextStyle(fontSize: 16, color: cs.onSurface),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Breed list
-                if (filtered.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24),
-                    child: Text(
-                      'No breeds match "$_query".\nTap "Don\'t know yet" — you can always edit later.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14, color: pt.ink500),
-                    ),
-                  )
-                else
-                  ...filtered.map((b) {
-                    final isSelected = widget.selected == b;
-                    final isUnknown = b.startsWith("Don't");
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: GestureDetector(
-                        onTap: () => widget.onPick(b),
-                        child: AnimatedContainer(
-                          duration: PetfolioThemeExtension.durationSm,
-                          height: 56,
-                          padding: const EdgeInsets.symmetric(horizontal: 18),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? widget.species.tint
-                                : (isUnknown ? pt.surface2 : cs.surface),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color:
-                                  isSelected ? widget.species.accent : pt.line200,
-                              width: isSelected ? 2 : 0.5,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  b,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    fontStyle: isUnknown
-                                        ? FontStyle.italic
-                                        : FontStyle.normal,
-                                    color: isUnknown ? cs.onSurfaceVariant : cs.onSurface,
-                                  ),
-                                ),
-                              ),
-                              if (isSelected)
-                                Container(
-                                  width: 22,
-                                  height: 22,
-                                  decoration: BoxDecoration(
-                                    color: widget.species.accent,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(Icons.check,
-                                      size: 14, color: Colors.white),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-              ],
-            ),
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: PetfolioThemeExtension.durationSm,
+        height: 52,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: selected ? option.tint : cs.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? option.accent : pt.line200,
+            width: selected ? 2 : 0.5,
           ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: option.accent.withAlpha(60),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : [
+                  BoxShadow(color: AppColors.shadowE1L, blurRadius: 2, offset: const Offset(0, 1)),
+                ],
         ),
-      ],
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: selected ? option.accent : option.accent.withAlpha(25),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                option.icon,
+                size: 16,
+                color: selected ? Colors.white : option.accent,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    option.label,
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: selected ? option.accent : cs.onSurface,
+                    ),
+                  ),
+                  Text(
+                    option.description,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: selected
+                          ? option.accent.withAlpha(180)
+                          : cs.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (selected)
+              Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(color: option.accent, shape: BoxShape.circle),
+                child: const Icon(Icons.check, size: 12, color: Colors.white),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Step 4 — Add photo (optional)
+// Unit toggle
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _UnitToggle extends StatelessWidget {
+  const _UnitToggle({required this.useKg, required this.onToggle});
+
+  final bool useKg;
+  final ValueChanged<bool> onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      height: 32,
+      decoration: BoxDecoration(
+        color: pt.surface2,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: pt.line200, width: 0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _UnitChip(label: 'kg', selected: useKg, cs: cs, pt: pt, onTap: () => onToggle(true)),
+          _UnitChip(label: 'lbs', selected: !useKg, cs: cs, pt: pt, onTap: () => onToggle(false)),
+        ],
+      ),
+    );
+  }
+}
+
+class _UnitChip extends StatelessWidget {
+  const _UnitChip({
+    required this.label,
+    required this.selected,
+    required this.cs,
+    required this.pt,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final ColorScheme cs;
+  final PetfolioThemeExtension pt;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: PetfolioThemeExtension.durationSm,
+        margin: const EdgeInsets.all(3),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+        decoration: BoxDecoration(
+          color: selected ? cs.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: selected ? Colors.white : pt.ink500,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Step 3 — Photo
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _PhotoStep extends StatelessWidget {
@@ -934,8 +1480,7 @@ class _PhotoStep extends StatelessWidget {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final file =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    final file = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
     if (file == null) return;
     final bytes = await file.readAsBytes();
     onSetPhoto(bytes);
@@ -990,7 +1535,6 @@ class _PhotoStep extends StatelessWidget {
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        // Photo or tinted placeholder
                         ClipRRect(
                           borderRadius: BorderRadius.circular(36),
                           child: Container(
@@ -1012,11 +1556,7 @@ class _PhotoStep extends StatelessWidget {
                                         blurRadius: 40,
                                         offset: const Offset(0, 18),
                                       ),
-                                      BoxShadow(
-                                        color: species.tint,
-                                        blurRadius: 0,
-                                        spreadRadius: 4,
-                                      ),
+                                      BoxShadow(color: species.tint, blurRadius: 0, spreadRadius: 4),
                                     ]
                                   : null,
                             ),
@@ -1030,17 +1570,8 @@ class _PhotoStep extends StatelessWidget {
                                         decoration: BoxDecoration(
                                           color: species.accent,
                                           shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withAlpha(30),
-                                              blurRadius: 0,
-                                              spreadRadius: -1,
-                                              offset: const Offset(0, 1),
-                                            ),
-                                          ],
                                         ),
-                                        child: const Icon(Icons.add,
-                                            color: Colors.white, size: 26),
+                                        child: const Icon(Icons.add, color: Colors.white, size: 26),
                                       ),
                                       const SizedBox(height: 12),
                                       Text(
@@ -1057,7 +1588,6 @@ class _PhotoStep extends StatelessWidget {
                                 : null,
                           ),
                         ),
-                        // Dashed border overlay (only when no photo)
                         if (photoBytes == null)
                           CustomPaint(
                             size: const Size(220, 220),
@@ -1087,7 +1617,7 @@ class _PhotoStep extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Step 5 — Done
+// Step 4 — Done
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _DoneStep extends StatelessWidget {
@@ -1095,6 +1625,9 @@ class _DoneStep extends StatelessWidget {
     required this.name,
     required this.species,
     this.breed,
+    this.dateOfBirth,
+    this.weightKg,
+    this.activityLevel,
     this.photoBytes,
     required this.onEnter,
     required this.isLoading,
@@ -1103,9 +1636,34 @@ class _DoneStep extends StatelessWidget {
   final String name;
   final PetSpecies species;
   final String? breed;
+  final DateTime? dateOfBirth;
+  final double? weightKg;
+  final String? activityLevel;
   final Uint8List? photoBytes;
   final VoidCallback onEnter;
   final bool isLoading;
+
+  String _ageLabel(DateTime dob) {
+    final now = DateTime.now();
+    int years = now.year - dob.year;
+    int months = now.month - dob.month;
+    if (now.day < dob.day) months--;
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    if (years > 0) return '$years yr${years > 1 ? 's' : ''}';
+    if (months > 0) return '$months mo';
+    return 'Newborn';
+  }
+
+  String? _activityLabel(String? id) {
+    try {
+      return _kActivityOptions.firstWhere((o) => o.id == id).label;
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1113,6 +1671,15 @@ class _DoneStep extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     final hasBreed = breed != null && !breed!.startsWith("Don't");
+    final hasDob = dateOfBirth != null;
+    final hasWeight = weightKg != null;
+    final hasActivity = activityLevel != null;
+
+    final chips = <String>[
+      if (hasBreed) breed!,
+      if (hasDob) _ageLabel(dateOfBirth!),
+      if (hasWeight) '${weightKg!.toStringAsFixed(1)} kg',
+    ];
 
     return Container(
       width: double.infinity,
@@ -1130,8 +1697,6 @@ class _DoneStep extends StatelessWidget {
           child: Column(
             children: [
               const Spacer(),
-
-              // ── Pet avatar ────────────────────────────────────────────
               Container(
                 width: 140,
                 height: 140,
@@ -1162,9 +1727,7 @@ class _DoneStep extends StatelessWidget {
                 child: photoBytes == null
                     ? Center(
                         child: Text(
-                          name.isNotEmpty
-                              ? name.substring(0, 1).toUpperCase()
-                              : species.emoji,
+                          name.isNotEmpty ? name.substring(0, 1).toUpperCase() : species.emoji,
                           style: TextStyle(
                             fontSize: name.isNotEmpty ? 52 : 40,
                             color: Colors.white,
@@ -1176,8 +1739,6 @@ class _DoneStep extends StatelessWidget {
                     : null,
               ),
               const SizedBox(height: 28),
-
-              // ── Name + profile created ────────────────────────────────
               Text(
                 'Hi, ${name.isNotEmpty ? name : 'friend'}.',
                 style: const TextStyle(
@@ -1189,41 +1750,66 @@ class _DoneStep extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 12),
-              Text(
-                [
-                  if (hasBreed) '$breed · ',
-                  'Profile created. You can fill in age, weight, vet info anytime from Health.',
-                ].join(),
-                style: TextStyle(
-                  fontSize: 16,
-                  height: 1.45,
-                  color: cs.onSurfaceVariant,
+              const SizedBox(height: 10),
+              if (chips.isNotEmpty)
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: chips
+                      .map((c) => Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: species.tint,
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(color: species.accent.withAlpha(60)),
+                            ),
+                            child: Text(
+                              c,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: species.accent,
+                              ),
+                            ),
+                          ))
+                      .toList(),
                 ),
+              const SizedBox(height: 14),
+              Text(
+                chips.isEmpty
+                    ? 'Profile created. Fill in health details anytime from the Health tab.'
+                    : 'Profile complete! You can add vet records and more from Health.',
+                style: TextStyle(fontSize: 15, height: 1.45, color: cs.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 28),
-
-              // ── Deferred items checklist ──────────────────────────────
               Column(
                 children: [
                   _ChecklistItem(label: 'Basic profile', done: true, color: pt.success),
                   const SizedBox(height: 8),
                   _ChecklistItem(
-                      label: 'Health & vaccinations · later',
-                      done: false,
-                      color: pt.ink300),
+                    label: hasDob && hasWeight ? 'Age & weight' : 'Age & weight · later',
+                    done: hasDob && hasWeight,
+                    color: hasDob && hasWeight ? pt.success : pt.ink300,
+                  ),
                   const SizedBox(height: 8),
                   _ChecklistItem(
-                      label: 'Daily care routine · later',
-                      done: false,
-                      color: pt.ink300),
+                    label: hasActivity
+                        ? 'Activity level · ${_activityLabel(activityLevel)}'
+                        : 'Activity level · later',
+                    done: hasActivity,
+                    color: hasActivity ? pt.success : pt.ink300,
+                  ),
+                  const SizedBox(height: 8),
+                  _ChecklistItem(
+                    label: 'Health & vaccinations · later',
+                    done: false,
+                    color: pt.ink300,
+                  ),
                 ],
               ),
-
               const Spacer(),
-
-              // ── Enter CTA ─────────────────────────────────────────────
               PrimaryPillButton(
                 label: 'Enter PetFolio',
                 onPressed: isLoading ? null : onEnter,
@@ -1265,10 +1851,7 @@ class _ChecklistItem extends StatelessWidget {
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(fontSize: 13, color: pt.ink500),
-          ),
+          Text(label, style: TextStyle(fontSize: 13, color: pt.ink500)),
         ],
       ),
     );
@@ -1276,10 +1859,9 @@ class _ChecklistItem extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CustomPainters
+// Custom painters
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Narrow left-chevron matching the 10×18 SVG in the design (M9 1L1 9l8 8).
 class _ChevronPainter extends CustomPainter {
   const _ChevronPainter({required this.color});
   final Color color;
@@ -1305,15 +1887,8 @@ class _ChevronPainter extends CustomPainter {
   bool shouldRepaint(_ChevronPainter old) => old.color != color;
 }
 
-/// Species-specific glyph icon — white filled shapes on the accent background.
-/// Mirrors the SPECIES_GLYPHS SVG paths from the design's avatars.jsx,
-/// drawn in a 16×16 coordinate space.
 class _SpeciesGlyph extends StatelessWidget {
-  const _SpeciesGlyph({
-    required this.species,
-    required this.color,
-    this.size = 22,
-  });
+  const _SpeciesGlyph({required this.species, required this.color, this.size = 22});
   final PetSpecies species;
   final Color color;
   final double size;
@@ -1334,18 +1909,17 @@ class _SpeciesGlyphPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Scale from 16×16 viewBox to actual canvas size.
     final s = size.width / 16;
-    final fill = Paint()..color = color..style = PaintingStyle.fill;
+    final fill = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
 
     switch (species) {
       case PetSpecies.dog:
-        // body + two ear blobs
         canvas.drawCircle(Offset(8 * s, 9 * s), 4 * s, fill);
         canvas.drawCircle(Offset(4 * s, 5 * s), 1.6 * s, fill);
         canvas.drawCircle(Offset(12 * s, 5 * s), 1.6 * s, fill);
       case PetSpecies.cat:
-        // body + pointed ears
         canvas.drawCircle(Offset(8 * s, 10 * s), 4 * s, fill);
         canvas.drawPath(
           Path()
@@ -1364,20 +1938,16 @@ class _SpeciesGlyphPainter extends CustomPainter {
           fill,
         );
       case PetSpecies.rabbit:
-        // body + tall oval ears
         canvas.drawCircle(Offset(8 * s, 11 * s), 3.5 * s, fill);
         canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(6 * s, 5 * s), width: 2.4 * s, height: 6 * s),
+          Rect.fromCenter(center: Offset(6 * s, 5 * s), width: 2.4 * s, height: 6 * s),
           fill,
         );
         canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(10 * s, 5 * s), width: 2.4 * s, height: 6 * s),
+          Rect.fromCenter(center: Offset(10 * s, 5 * s), width: 2.4 * s, height: 6 * s),
           fill,
         );
       case PetSpecies.bird:
-        // body + wing + tail accents
         canvas.drawCircle(Offset(8 * s, 9 * s), 3.5 * s, fill);
         canvas.drawPath(
           Path()
@@ -1396,10 +1966,8 @@ class _SpeciesGlyphPainter extends CustomPainter {
           fill,
         );
       case PetSpecies.fish:
-        // body ellipse + tail triangle
         canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(7 * s, 8 * s), width: 8 * s, height: 5 * s),
+          Rect.fromCenter(center: Offset(7 * s, 8 * s), width: 8 * s, height: 5 * s),
           fill,
         );
         canvas.drawPath(
@@ -1411,10 +1979,8 @@ class _SpeciesGlyphPainter extends CustomPainter {
           fill,
         );
       case PetSpecies.reptile:
-        // flat body ellipse + white eye dot
         canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(8 * s, 9 * s), width: 9 * s, height: 4.4 * s),
+          Rect.fromCenter(center: Offset(8 * s, 9 * s), width: 9 * s, height: 4.4 * s),
           fill,
         );
         canvas.drawCircle(
@@ -1426,11 +1992,9 @@ class _SpeciesGlyphPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_SpeciesGlyphPainter old) =>
-      old.species != species || old.color != color;
+  bool shouldRepaint(_SpeciesGlyphPainter old) => old.species != species || old.color != color;
 }
 
-/// Draws a dashed rounded-rect border. Used for the photo placeholder.
 class _DashedBorderPainter extends CustomPainter {
   const _DashedBorderPainter({
     required this.color,
@@ -1440,6 +2004,7 @@ class _DashedBorderPainter extends CustomPainter {
   final Color color;
   final double radius;
   final double strokeWidth;
+
   static const double _dashLength = 8;
   static const double _gapLength = 6;
 

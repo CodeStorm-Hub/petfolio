@@ -8,6 +8,8 @@ import '../features/auth/presentation/controllers/auth_controller.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/registration_screen.dart';
 import '../features/care/presentation/screens/care_screen.dart';
+import '../features/care/presentation/screens/medical_vault_screen.dart';
+import '../features/care/presentation/screens/nutrition_screen.dart';
 import '../features/marketplace/data/models/product.dart';
 import '../features/marketplace/presentation/screens/cart_screen.dart';
 import '../features/marketplace/presentation/screens/marketplace_screen.dart';
@@ -80,6 +82,19 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
+      ),
+
+      // Care: shell route /care; full-screen /care/nutrition, /care/medical-vault.
+      // After onboarding, app navigates to /care?onboardingComplete=1 (see CareScreen).
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/care/nutrition',
+        builder: (context, state) => const NutritionScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/care/medical-vault',
+        builder: (context, state) => const MedicalVaultScreen(),
       ),
 
       // ── Marketplace full-screen routes (outside ShellRoute / no bottom nav) ─
@@ -186,9 +201,8 @@ class _RouterNotifier extends ChangeNotifier {
       return '/onboarding';
     }
 
-    // ── After onboarding completes (pets now exist) → go to /home ───
     if (loc == '/onboarding' && pets != null && pets.isNotEmpty) {
-      return '/home';
+      return '/care';
     }
 
     return null; // no redirect

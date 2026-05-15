@@ -32,6 +32,9 @@ class PetRepository {
     String? breed,
     String? avatarUrl,
     String? bio,
+    DateTime? dateOfBirth,
+    double? weightKg,
+    String? activityLevel,
   }) async {
     final userId = _client.auth.currentUser!.id;
     final row = await _client.from('pets').insert({
@@ -44,6 +47,13 @@ class PetRepository {
       if (avatarUrl != null) 'avatar_url': avatarUrl,
       // ignore: use_null_aware_elements
       if (bio != null) 'bio': bio,
+      // ignore: use_null_aware_elements
+      if (dateOfBirth != null)
+        'date_of_birth': dateOfBirth.toIso8601String().split('T').first,
+      // ignore: use_null_aware_elements
+      if (weightKg != null) 'weight_kg': weightKg,
+      // ignore: use_null_aware_elements
+      if (activityLevel != null) 'activity_level': activityLevel,
     }).select().single();
     return Pet.fromJson(row);
   }
@@ -65,6 +75,18 @@ class PetRepository {
     
     final row = await _client.from('pets').update(updates).eq('id', id).select().single();
     return Pet.fromJson(row);
+  }
+
+  Future<void> writeTargetWeight(String petId, double targetWeightKg) async {
+    final userId = _client.auth.currentUser!.id;
+    await _client.from('health_vitals').insert({
+      'pet_id': petId,
+      'recorded_by': userId,
+      'vital_type': 'weight',
+      'value': targetWeightKg,
+      'unit': 'kg',
+      'notes': 'goal',
+    });
   }
 
   Future<void> updateAvatarUrl(String petId, String avatarUrl) async {

@@ -13,7 +13,7 @@ Static verification:
 - `flutter test`: fails. `test/widget_test.dart` is still Flutter's counter template and pumps `PetfolioApp` without `ProviderScope`.
 - `flutter build apk --debug`: passes.
 - Android install/launch: passes.
-- Android login with supplied credentials: blocked on emulator DNS. Host machine REST auth succeeds for `syed.reza181@gmail.com`; emulator app shows `SocketException: Failed host lookup: 'jqyjvhwlcqcsuwcqgcwf.supabase.co'`.
+- Android login with supplied credentials: blocked on emulator DNS. Host machine Supabase REST auth succeeds with test account; emulator app shows `SocketException: Failed host lookup: 'jqyjvhwlcqcsuwcqgcwf.supabase.co'`.
 
 ## Screens And Features
 
@@ -130,7 +130,7 @@ Commands run:
 - `flutter build apk --debug`: passed
 - `adb install -r build/app/outputs/flutter-apk/app-debug.apk`: passed
 - `adb shell am start -n com.example.petfolio/.MainActivity`: passed
-- Login UI was driven with `syed.reza181@gmail.com` and `123qweasd`.
+- Login UI was driven with test credentials.
 
 Observed:
 
