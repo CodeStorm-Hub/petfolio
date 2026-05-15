@@ -20,6 +20,7 @@ _$CareTaskImpl _$$CareTaskImplFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['completed_at'] as String),
       gamificationPoints: (json['gamification_points'] as num).toInt(),
       notes: json['notes'] as String?,
+      categoryIcon: json['category_icon'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
@@ -36,6 +37,7 @@ Map<String, dynamic> _$$CareTaskImplToJson(_$CareTaskImpl instance) =>
       'completed_at': instance.completedAt?.toIso8601String(),
       'gamification_points': instance.gamificationPoints,
       'notes': instance.notes,
+      'category_icon': instance.categoryIcon,
       'created_at': instance.createdAt.toIso8601String(),
       'updated_at': instance.updatedAt.toIso8601String(),
     };

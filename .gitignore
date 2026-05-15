@@ -119,3 +119,7 @@ app.*.symbols
 !/dev/ci/**/Gemfile.lock
 .env
 .env.local
+
+.cursor/hooks/state/
+tmp_window_dump.xml
+.claude/worktrees/

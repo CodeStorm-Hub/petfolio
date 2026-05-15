@@ -2,14 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:marionette_flutter/marionette_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'marionette_debug_gate_stub.dart'
+    if (dart.library.io) 'marionette_debug_gate_io.dart' as marionette_gate;
 import 'core/router.dart';
 import 'core/theme/theme.dart';
 import 'core/widgets/app_snack_bar.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final marionetteEnabled = marionette_gate.marionetteEnabledInThisBuild;
+  if (marionetteEnabled) {
+    MarionetteBinding.ensureInitialized();
+  } else {
+    WidgetsFlutterBinding.ensureInitialized();
+  }
 
   // ── Google Fonts ──────────────────────────────────────────────────────────
   // Disable the runtime CDN fetch.  When the device has no network / DNS

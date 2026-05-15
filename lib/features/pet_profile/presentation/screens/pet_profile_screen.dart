@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
+
+import 'package:petfolio/features/care/presentation/controllers/care_streak_stream_provider.dart';
 
 import '../../data/models/pet.dart';
 import '../controllers/active_pet_controller.dart';
 import '../controllers/pet_list_controller.dart';
 import '../widgets/pet_switcher_sheet.dart';
+// AppHeader (shell-wide top bar) is exported from core widgets.
+// Pet switcher sheet is wired locally so the core widget stays feature-free.
 
 /// The main "Home" tab — shows the active pet header and daily summary.
 ///
@@ -28,11 +33,26 @@ class PetProfileScreen extends ConsumerWidget {
         bottom: false, // Prevents duplicate padding above the navigation bar
         child: CustomScrollView(
           slivers: [
-            // ── Active pet header ──────────────────────────────────────
+            // ── Unified shell header ──────────────────────────────────
             SliverToBoxAdapter(
-              child: _ActivePetHeader(
-                activePet: activePet,
+              child: AppHeader(
+                eyebrow: 'Active pet',
                 onOpenSwitcher: () => PetSwitcherSheet.show(context),
+                actions: [
+                  AppHeaderAction(
+                    iconKey: const ValueKey<String>('home_action_outdoor'),
+                    icon: Icons.wb_sunny_outlined,
+                    tooltip: 'Outdoor mode',
+                    onTap: () {},
+                  ),
+                  AppHeaderAction(
+                    iconKey: const ValueKey<String>('home_action_notifications'),
+                    icon: Icons.notifications_outlined,
+                    tooltip: 'Notifications',
+                    badge: true,
+                    onTap: () {},
+                  ),
+                ],
               ),
             ),
 
@@ -86,33 +106,92 @@ class PetProfileScreen extends ConsumerWidget {
                 ),
               )
             else
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _HeroCard(pet: activePet),
-                    const SizedBox(height: 20),
-                    _SectionLabel(label: 'Today'),
-                    const SizedBox(height: 12),
-                    _ReminderCard(
-                      icon: Icons.medication_outlined,
-                      title: 'Heartworm tablet',
-                      subtitle: '9:00 AM · Daily',
-                      accentColor: activePet.speciesEnum.accent,
+              SliverFillRemaining(
+                child: DefaultTabController(
+                  length: 4,
+                  child: NestedScrollView(
+                    headerSliverBuilder: (context, innerBoxIsScrolled) {
+                      final cs = Theme.of(context).colorScheme;
+                      return [
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                            child: _HeroCard(pet: activePet),
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                            child: _PetStatsRow(pet: activePet),
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                            child: PrimaryPillButton(
+                              isFullWidth: true,
+                              leadingIcon:
+                                  const Icon(Icons.dynamic_feed_rounded),
+                              label: 'View Social Profile',
+                              onPressed: () => context.push(
+                                '/social/profile/${activePet.id}',
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                        SliverOverlapAbsorber(
+                          handle:
+                              NestedScrollView.sliverOverlapAbsorberHandleFor(
+                                  context),
+                          sliver: SliverPersistentHeader(
+                            pinned: true,
+                            delegate: _PetProfileTabBarDelegate(
+                              backgroundColor: pt.surface1,
+                              tabBar: TabBar(
+                                labelColor: cs.primary,
+                                unselectedLabelColor: pt.ink500,
+                                indicatorColor: cs.primary,
+                                labelStyle: const TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                                unselectedLabelStyle: const TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 13,
+                                ),
+                                tabs: const [
+                                  Tab(text: 'Overview'),
+                                  Tab(text: 'Health'),
+                                  Tab(text: 'Care'),
+                                  Tab(text: 'Awards'),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ];
+                    },
+                    body: TabBarView(
+                      children: [
+                        _ProfileOverviewTab(pet: activePet, pt: pt),
+                        _ProfilePlaceholderTab(
+                          title: 'Health',
+                          pt: pt,
+                        ),
+                        _ProfilePlaceholderTab(
+                          title: 'Care',
+                          pt: pt,
+                        ),
+                        _ProfilePlaceholderTab(
+                          title: 'Awards',
+                          pt: pt,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 10),
-                    _ReminderCard(
-                      icon: Icons.directions_walk_outlined,
-                      title: 'Evening walk with ${activePet.name}',
-                      subtitle: '2 / 3 walks today',
-                      accentColor: AppColors.meadow500,
-                      isPrimary: true,
-                    ),
-                    const SizedBox(height: 20),
-                    _SectionLabel(label: 'From the feed'),
-                    const SizedBox(height: 12),
-                    _FeedPlaceholder(pt: pt),
-                  ]),
+                  ),
                 ),
               ),
           ],
@@ -122,120 +201,93 @@ class PetProfileScreen extends ConsumerWidget {
   }
 }
 
-// ── Active pet header ─────────────────────────────────────────────────────────
+class _PetStatsRow extends StatelessWidget {
+  const _PetStatsRow({required this.pet});
 
-class _ActivePetHeader extends StatelessWidget {
-  const _ActivePetHeader({
-    required this.activePet,
-    required this.onOpenSwitcher,
-  });
-
-  final Pet? activePet;
-  final VoidCallback onOpenSwitcher;
+  final Pet pet;
 
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
+    final breed =
+        (pet.breed != null && pet.breed!.trim().isNotEmpty) ? pet.breed! : '—';
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 14, 16, 12),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: pt.line200, width: 0.5),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.shadowE1L,
+            blurRadius: 2,
+            offset: Offset(0, 1),
+          ),
+        ],
+      ),
       child: Row(
         children: [
-          // Pet selector — avatar + name + chevron
           Expanded(
-            child: GestureDetector(
-              onTap: onOpenSwitcher,
-              behavior: HitTestBehavior.opaque,
-              child: Row(
-                children: [
-                  activePet != null
-                      ? PetAvatar(
-                          imageUrl: activePet!.avatarUrl,
-                          size: PetAvatarSize.lg,
-                          initials: activePet!.name.isNotEmpty
-                              ? activePet!.name[0]
-                              : null,
-                          borderColor: activePet!.speciesEnum.accent,
-                          semanticLabel: activePet!.name,
-                          onTap: onOpenSwitcher,
-                        )
-                      : SkeletonLoader(
-                          width: 48,
-                          height: 48,
-                          borderRadius: 999,
-                        ),
-                  const SizedBox(width: 12),
-                  Expanded( // <-- Wrap this Column in an Expanded widget
-                  child:Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Active pet',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.08 * 11,
-                          color: pt.ink500,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          Flexible(
-                            child: activePet != null
-                                ? Text(
-                                    activePet!.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontFamily: 'Sora',
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 22,
-                                      letterSpacing: -0.2,
-                                    ),
-                                  )
-                                : SkeletonLoader(width: 100, height: 22),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(Icons.keyboard_arrow_down_rounded,
-                              size: 18, color: pt.ink500),
-                        ],
-                      ),
-                    ],
-                  ),
-                  ),
-                ],
-              ),
+            child: _StatChip(label: 'Breed', value: breed),
+          ),
+          Expanded(
+            child: _StatChip(label: 'Age', value: _petAgeLabel(pet)),
+          ),
+          Expanded(
+            child: _StatChip(
+              label: 'Weight',
+              value: pet.weightKg != null
+                  ? '${pet.weightKg!.toStringAsFixed(pet.weightKg! >= 10 ? 0 : 1)} kg'
+                  : '—',
             ),
           ),
-
-          // Outdoor-mode toggle (placeholder — no state yet)
-          _HeaderChip(
-            child: Icon(Icons.wb_sunny_outlined, size: 18, color: cs.onSurfaceVariant),
+          Expanded(
+            child: _StatChip(label: 'Sex', value: '—'),
           ),
-          const SizedBox(width: 0),
+        ],
+      ),
+    );
+  }
+}
 
-          // Notification bell
-          _HeaderChip(
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Icon(Icons.notifications_outlined, size: 20, color: cs.onSurfaceVariant),
-                Positioned(
-                  top: -2,
-                  right: -2,
-                  child: Container(
-                    width: 9,
-                    height: 9,
-                    decoration: BoxDecoration(
-                      color: AppColors.coral500,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: pt.surface1, width: 1.5),
-                    ),
-                  ),
-                ),
-              ],
+class _StatChip extends StatelessWidget {
+  const _StatChip({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label.toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.06 * 10,
+              color: pt.ink500,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: 'Sora',
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              height: 1.15,
             ),
           ),
         ],
@@ -244,44 +296,162 @@ class _ActivePetHeader extends StatelessWidget {
   }
 }
 
-class _HeaderChip extends StatelessWidget {
-  const _HeaderChip({required this.child});
-  final Widget child;
+String _petAgeLabel(Pet pet) {
+  final dob = pet.dateOfBirth;
+  if (dob == null) return '—';
+  final today = DateTime.now();
+  var years = today.year - dob.year;
+  var months = today.month - dob.month;
+  if (today.day < dob.day) months -= 1;
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+  if (years < 0) return '—';
+  if (years > 0) return years == 1 ? '1 yr' : '$years yrs';
+  if (months > 0) return '$months mo';
+  final days = today.difference(dob).inDays.clamp(0, 365);
+  return '${days}d';
+}
+
+class _PetProfileTabBarDelegate extends SliverPersistentHeaderDelegate {
+  _PetProfileTabBarDelegate({
+    required this.tabBar,
+    required this.backgroundColor,
+  });
+
+  final TabBar tabBar;
+  final Color backgroundColor;
+
+  @override
+  double get minExtent => tabBar.preferredSize.height;
+
+  @override
+  double get maxExtent => tabBar.preferredSize.height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Material(
+      color: backgroundColor,
+      elevation: overlapsContent ? 0.5 : 0,
+      shadowColor: AppColors.shadowE1L,
+      child: tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _PetProfileTabBarDelegate oldDelegate) {
+    return oldDelegate.tabBar != tabBar ||
+        oldDelegate.backgroundColor != backgroundColor;
+  }
+}
+
+class _ProfileOverviewTab extends StatelessWidget {
+  const _ProfileOverviewTab({
+    required this.pet,
+    required this.pt,
+  });
+
+  final Pet pet;
+  final PetfolioThemeExtension pt;
 
   @override
   Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      width: 44,
-      height: 44,
-      margin: const EdgeInsets.only(left: 8),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowE1L,
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-          BoxShadow(color: pt.line200, blurRadius: 0, spreadRadius: 0.5),
-        ],
-      ),
-      child: Center(child: child),
+    return Builder(
+      builder: (context) {
+        return CustomScrollView(
+          key: const PageStorageKey<String>('pet_profile_overview'),
+          slivers: [
+            SliverOverlapInjector(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  _SectionLabel(label: 'Today'),
+                  const SizedBox(height: 12),
+                  _ReminderCard(
+                    icon: Icons.medication_outlined,
+                    title: 'Heartworm tablet',
+                    subtitle: '9:00 AM · Daily',
+                    accentColor: pet.speciesEnum.accent,
+                  ),
+                  const SizedBox(height: 10),
+                  _ReminderCard(
+                    icon: Icons.directions_walk_outlined,
+                    title: 'Evening walk with ${pet.name}',
+                    subtitle: '2 / 3 walks today',
+                    accentColor: AppColors.meadow500,
+                    isPrimary: true,
+                  ),
+                  const SizedBox(height: 20),
+                  _SectionLabel(label: 'From the feed'),
+                  const SizedBox(height: 12),
+                  _FeedPlaceholder(pt: pt),
+                ]),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ProfilePlaceholderTab extends StatelessWidget {
+  const _ProfilePlaceholderTab({
+    required this.title,
+    required this.pt,
+  });
+
+  final String title;
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context) {
+    return Builder(
+      builder: (context) {
+        return CustomScrollView(
+          key: PageStorageKey<String>('pet_profile_tab_$title'),
+          slivers: [
+            SliverOverlapInjector(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Text(
+                  '$title — coming soon',
+                  style: TextStyle(fontSize: 15, color: pt.ink500),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
 
 // ── Hero card ─────────────────────────────────────────────────────────────────
 
-class _HeroCard extends StatelessWidget {
+class _HeroCard extends ConsumerWidget {
   const _HeroCard({required this.pet});
   final Pet pet;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final accent = pet.speciesEnum.accent;
+    final streakAsync = ref.watch(careStreakRealtimeProvider(pet.id));
+    final streakLabel = streakAsync.maybeWhen(
+      data: (s) => '${s.currentStreak}',
+      orElse: () => '0',
+    );
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
@@ -356,9 +526,9 @@ class _HeroCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
-                  const Text(
-                    '28',
-                    style: TextStyle(
+                  Text(
+                    streakLabel,
+                    style: const TextStyle(
                       fontFamily: 'Sora',
                       fontSize: 56,
                       fontWeight: FontWeight.w700,

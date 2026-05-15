@@ -103,11 +103,13 @@ class CareNotifier extends FamilyNotifier<CareState, String> {
   @override
   CareState build(String petId) {
     // React to dashboard state changes → sync today's task completions into streak
-    ref.listen<DailyRoutineState>(careDashboardProvider, (_, next) {
-      _onDashboardChange(next);
-    });
-    Future.microtask(() => _onDashboardChange(ref.read(careDashboardProvider)));
-
+    ref.listen<DailyRoutineState>(
+      careDashboardProvider,
+      (_, next) {
+        _onDashboardChange(next);
+      },
+      fireImmediately: true,
+    );
     final today = DateUtils.dateOnly(DateTime.now());
     final emptyWeek = List.generate(
       7,

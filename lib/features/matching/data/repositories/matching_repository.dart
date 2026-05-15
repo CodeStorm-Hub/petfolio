@@ -173,9 +173,8 @@ class MatchingRepository {
 
   /// Live stream of all `chat_threads` rows, ordered newest-first.
   ///
-  /// Supabase `.stream()` uses the Realtime engine: any INSERT/UPDATE/DELETE
-  /// immediately pushes a fresh list to every subscriber.
-  /// Caller filters client-side to only rows involving their [petId].
+  /// Rows use `participant_1_id` / `participant_2_id` (auth users). Consumers
+  /// filter by current user and `match_requests` pet involvement.
   Stream<List<Map<String, dynamic>>> chatThreadStream() {
     return _client
         .from('chat_threads')

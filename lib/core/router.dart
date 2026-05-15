@@ -17,6 +17,7 @@ import '../features/marketplace/presentation/screens/order_confirmation_screen.d
 import '../features/marketplace/presentation/screens/product_detail_screen.dart';
 import '../features/matching/presentation/screens/matching_screen.dart';
 import '../features/pet_profile/presentation/controllers/pet_list_controller.dart';
+import '../features/pet_profile/presentation/screens/manage_pets_screen.dart';
 import '../features/pet_profile/presentation/screens/edit_profile_screen.dart';
 import '../features/pet_profile/presentation/screens/onboarding_screen.dart';
 import '../features/pet_profile/presentation/screens/pet_profile_screen.dart';
@@ -81,7 +82,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/onboarding',
-        builder: (context, state) => const OnboardingScreen(),
+        builder: (context, state) {
+          // `?mode=add` means an authenticated user adding a second-or-later
+          // pet from the switcher. Skip the welcome step and rebound to /care
+          // (or wherever they came from) on completion.
+          final mode = state.uri.queryParameters['mode'];
+          return OnboardingScreen(addAnotherPet: mode == 'add');
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/pets/manage',
+        builder: (context, state) => const ManagePetsScreen(),
       ),
 
       // Care: shell route /care; full-screen /care/nutrition, /care/medical-vault.
@@ -148,9 +160,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/pet/:petId/edit',
         builder: (context, state) {
+          final petId = state.pathParameters['petId']!;
           final pets = ref.read(petListProvider).valueOrNull ?? [];
-          final pet = pets.firstWhere((p) => p.id == state.pathParameters['petId']);
-          return EditProfileScreen(pet: pet);
+          for (final p in pets) {
+            if (p.id == petId) return EditProfileScreen(pet: p);
+          }
+          return const _PetEditMissingScreen();
         },
       ),
     ],
@@ -201,8 +216,12 @@ class _RouterNotifier extends ChangeNotifier {
       return '/onboarding';
     }
 
+    // Honor "?mode=add" when an authenticated user with pets opens onboarding
+    // from the switcher; otherwise bounce them back to /care so we don't show
+    // the first-run welcome twice.
     if (loc == '/onboarding' && pets != null && pets.isNotEmpty) {
-      return '/care';
+      final mode = state.uri.queryParameters['mode'];
+      if (mode != 'add') return '/care';
     }
 
     return null; // no redirect
@@ -279,11 +298,38 @@ class AppShell extends StatelessWidget {
         destinations: [
           for (final d in _destinations)
             NavigationDestination(
+              key: ValueKey<String>('shell_nav_${d.path.replaceAll('/', '_')}'),
               icon: Icon(d.icon),
               selectedIcon: Icon(d.activeIcon),
               label: d.label,
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _PetEditMissingScreen extends StatelessWidget {
+  const _PetEditMissingScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Pet not found',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: () => context.go('/home'),
+              child: const Text('Back to Pets'),
+            ),
+          ],
+        ),
       ),
     );
   }

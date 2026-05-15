@@ -1,42 +1,40 @@
-/// A chat thread created when two pets mutually match.
-///
-/// Maps to the `chat_threads` table. The Supabase table stores
-/// `pet_id_1` / `pet_id_2`; this model resolves which one is "mine"
-/// and which is the "other" pet at construction time.
 class ChatThread {
   const ChatThread({
     required this.id,
-    required this.myPetId,
-    required this.otherPetId,
-    this.lastMessage,
+    this.matchRequestId,
+    required this.myUserId,
+    required this.otherUserId,
+    required this.activePetId,
     this.lastMessageAt,
     required this.createdAt,
   });
 
   final String id;
-  final String myPetId;
-  final String otherPetId;
-  final String? lastMessage;
+  final String? matchRequestId;
+  final String myUserId;
+  final String otherUserId;
+  final String activePetId;
   final DateTime? lastMessageAt;
   final DateTime createdAt;
 
   factory ChatThread.fromJson(
     Map<String, dynamic> json, {
-    required String myPetId,
+    required String myUserId,
+    required String activePetId,
   }) {
-    final isPet1 = json['pet_id_1'] == myPetId;
+    final p1 = json['participant_1_id'] as String;
+    final p2 = json['participant_2_id'] as String;
+    final other = p1 == myUserId ? p2 : p1;
     return ChatThread(
       id: json['id'] as String,
-      myPetId: myPetId,
-      otherPetId: isPet1
-          ? json['pet_id_2'] as String
-          : json['pet_id_1'] as String,
-      lastMessage: json['last_message'] as String?,
+      matchRequestId: json['match_request_id'] as String?,
+      myUserId: myUserId,
+      otherUserId: other,
+      activePetId: activePetId,
       lastMessageAt: json['last_message_at'] != null
           ? DateTime.tryParse(json['last_message_at'] as String)
           : null,
-      createdAt: DateTime.tryParse(
-              (json['created_at'] ?? json['matched_at'] ?? '') as String) ??
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
           DateTime.now(),
     );
   }

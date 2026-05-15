@@ -1,4 +1,6 @@
-import 'package:supabase/supabase.dart';
+import 'dart:io';
+
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   const url = 'https://jqyjvhwlcqcsuwcqgcwf.supabase.co';
@@ -7,13 +9,13 @@ void main() async {
   final client = SupabaseClient(url, key);
 
   try {
-    print('Connecting to Supabase...');
+    stdout.writeln('Connecting to Supabase...');
     final response = await client.from('posts').select().limit(1);
-    print('Connection successful! Found ${response.length} posts.');
+    stdout.writeln('Connection successful! Found ${response.length} posts.');
 
     final products = await client.from('products').select().limit(1);
-    print('Products table exists! Found ${products.length} products.');
+    stdout.writeln('Products table exists! Found ${products.length} products.');
   } catch (e) {
-    print('Connection failed or table does not exist: $e');
+    stdout.writeln('Connection failed or table does not exist: $e');
   }
 }

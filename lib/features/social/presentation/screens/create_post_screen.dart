@@ -125,7 +125,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           if (state.error != null)
             Container(
               padding: const EdgeInsets.all(12),
-              color: AppColors.coral500.withOpacity(0.1),
+              color: AppColors.coral500.withAlpha(26),
               width: double.infinity,
               child: Text(
                 state.error!,
