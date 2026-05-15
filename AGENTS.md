@@ -17,3 +17,4 @@
 - `analysis_options.yaml` excludes `*.g.dart` and `*.freezed.dart` from the analyzer to avoid duplicate generated JSON symbol noise.
 - `chat_threads` uses `participant_1_id` / `participant_2_id` (user ids) and `match_request_id`; the app maps rows after filtering by auth user and `match_requests` pet involvement (`chat_thread.dart`, `chat_threads_controller.dart`).
 - `pubspec.yaml` lists `riverpod_annotation` and `riverpod_generator`, but `lib/` does not use `@riverpod` generated providers; state is hand-written `Provider` / `NotifierProvider` / `StreamNotifierProvider` style.
+- Shell Pets tab mounts `PetProfileScreen` at `/home` for the active pet; per-pet social profile navigation uses `/social/profile/:petId` (typically `context.push`). `AppHeader` and the pet switcher shortcuts use `/home` for the management profile.
