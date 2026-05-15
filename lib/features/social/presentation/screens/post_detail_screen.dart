@@ -60,22 +60,36 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
     if (activePet == null) return;
 
     setState(() => _isSending = true);
-    _commentController.clear();
 
-    await ref
-        .read(commentListProvider(widget.postId).notifier)
-        .add(petId: activePet.id, content: text);
-
-    setState(() => _isSending = false);
-
-    // Scroll to the bottom after posting.
-    await Future.delayed(const Duration(milliseconds: 100));
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+    try {
+      await ref
+          .read(commentListProvider(widget.postId).notifier)
+          .add(petId: activePet.id, content: text);
+      
+      _commentController.clear();
+      
+      // Scroll to the bottom after posting.
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to post comment: ${e.toString()}'),
+            backgroundColor: AppColors.coral500,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSending = false);
+      }
     }
   }
 
@@ -84,8 +98,55 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final post = widget.post;
     final comments = ref.watch(commentListProvider(widget.postId));
+
+    // If the caller passed a FeedPost via router extra, use it immediately.
+    // Otherwise (deep link / hot-restart) fetch from Supabase.
+    final postAsync = widget.post != null
+        ? AsyncValue.data(widget.post!)
+        : ref.watch(postDetailProvider(widget.postId));
+
+    // Show a full-screen spinner while the post is loading from the network.
+    if (postAsync.isLoading) {
+      return Scaffold(
+        backgroundColor: pt.surface1,
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_rounded,
+                color: Theme.of(context).colorScheme.onSurface),
+            onPressed: () => context.pop(),
+          ),
+          title: Text('Post',
+              style: GoogleFonts.sora(
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.onSurface,
+              )),
+          centerTitle: true,
+        ),
+        body: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+      );
+    }
+
+    if (postAsync.hasError) {
+      return Scaffold(
+        backgroundColor: pt.surface1,
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_rounded,
+                color: Theme.of(context).colorScheme.onSurface),
+            onPressed: () => context.pop(),
+          ),
+        ),
+        body: const Center(child: Text('Failed to load post.')),
+      );
+    }
+
+    final post = postAsync.value!;
 
     return Scaffold(
       backgroundColor: pt.surface1,
@@ -99,7 +160,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          post?.petName ?? 'Post',
+          post.petName,
           style: GoogleFonts.sora(
             fontWeight: FontWeight.w700,
             fontSize: 16,
@@ -108,11 +169,10 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
         ),
         centerTitle: true,
         actions: [
-          if (post != null)
-            IconButton(
-              icon: Icon(Icons.more_horiz_rounded, color: pt.ink500),
-              onPressed: () => _showPostOptions(context, post),
-            ),
+          IconButton(
+            icon: Icon(Icons.more_horiz_rounded, color: pt.ink500),
+            onPressed: () => _showPostOptions(context, post),
+          ),
         ],
       ),
       body: Column(
@@ -123,20 +183,18 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
               controller: _scrollController,
               slivers: [
                 // Post image
-                if (post != null)
-                  SliverToBoxAdapter(child: _PostImages(post: post)),
+                SliverToBoxAdapter(child: _PostImages(post: post)),
 
                 // Caption
-                if (post != null && post.caption.isNotEmpty)
+                if (post.caption.isNotEmpty)
                   SliverToBoxAdapter(
                     child: _Caption(post: post, pt: pt),
                   ),
 
                 // Likes & stats bar
-                if (post != null)
-                  SliverToBoxAdapter(
-                    child: _StatsBar(post: post, pt: pt, postId: widget.postId),
-                  ),
+                SliverToBoxAdapter(
+                  child: _StatsBar(post: post, pt: pt, postId: widget.postId),
+                ),
 
                 // Comments header
                 SliverToBoxAdapter(

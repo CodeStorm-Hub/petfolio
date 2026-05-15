@@ -46,8 +46,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded,
-              color: Theme.of(context).colorScheme.onSurface),
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => context.pop(),
         ),
         title: Text(
@@ -61,7 +63,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         centerTitle: true,
       ),
       body: notificationsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator.adaptive()),
+        loading: () =>
+            const Center(child: CircularProgressIndicator.adaptive()),
         error: (e, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(32),
@@ -78,11 +81,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
           return ListView.separated(
             itemCount: notifications.length,
-            separatorBuilder: (_, __) => Divider(
-              height: 1,
-              color: pt.line200,
-              indent: 72,
-            ),
+            separatorBuilder: (_, _) =>
+                Divider(height: 1, color: pt.line200, indent: 72),
             itemBuilder: (ctx, i) =>
                 _NotificationTile(notification: notifications[i]),
           );
@@ -146,8 +146,7 @@ class _NotificationTile extends StatelessWidget {
           ? Colors.transparent
           : pt.pillarSocial.withAlpha(15),
       child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         leading: CircleAvatar(
           radius: 22,
           backgroundColor: _iconColor(notification.type).withAlpha(30),
@@ -159,8 +158,7 @@ class _NotificationTile extends StatelessWidget {
         title: Text(
           notification.summary,
           style: tt.bodyMedium?.copyWith(
-            fontWeight:
-                notification.isRead ? FontWeight.w400 : FontWeight.w600,
+            fontWeight: notification.isRead ? FontWeight.w400 : FontWeight.w600,
           ),
         ),
         subtitle: Text(

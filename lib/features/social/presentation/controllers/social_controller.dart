@@ -1,17 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../features/pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/feed_post.dart';
 import '../../data/repositories/social_repository.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Provider
+// Providers
 // ─────────────────────────────────────────────────────────────────────────────
 
 final socialControllerProvider =
     AsyncNotifierProvider.family<SocialNotifier, List<FeedPost>, String>(
   SocialNotifier.new,
 );
+
+/// Fetches a single post by ID — used as a fallback on deep links / restarts.
+final postDetailProvider =
+    FutureProvider.autoDispose.family<FeedPost, String>((ref, postId) async {
+  final activePetId = ref.watch(activePetIdProvider) ?? '';
+  return ref
+      .read(socialRepositoryProvider)
+      .fetchPostById(postId: postId, activePetId: activePetId);
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Notifier

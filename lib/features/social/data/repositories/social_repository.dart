@@ -37,7 +37,7 @@ class SocialRepository {
   /// Joins on `pets` for avatar/species/breed and on `users` for the handle.
   /// A nested `post_likes` selection lets us compute `isLiked` for the
   /// currently active pet without a second round-trip.
-  Future<List<FeedPost>> fetchFeed({required String activePetId}) async {
+  Future<List<FeedPost>> fetchFeed({String? activePetId}) async {
     final rows = await _client
         .from('posts')
         .select('''
@@ -61,7 +61,7 @@ class SocialRepository {
   }
 
   /// Fetches posts authored by a specific pet.
-  Future<List<FeedPost>> fetchPostsForPet(String petId, {required String activePetId}) async {
+  Future<List<FeedPost>> fetchPostsForPet(String petId, {String? activePetId}) async {
     final rows = await _client
         .from('posts')
         .select('''
@@ -84,7 +84,33 @@ class SocialRepository {
         .toList(growable: false);
   }
 
-  FeedPost _rowToFeedPost(Map<String, dynamic> r, String activePetId) {
+  /// Fetches a single post by its ID.
+  ///
+  /// Used when the user navigates directly to `/social/post/:postId` via a
+  /// deep link or hot-restart, where `state.extra` is null.
+  Future<FeedPost> fetchPostById({
+    required String postId,
+    String? activePetId,
+  }) async {
+    final row = await _client
+        .from('posts')
+        .select('''
+          id,
+          content,
+          image_urls,
+          created_at,
+          pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
+          author:users!posts_author_id_fkey(id, username, display_name, avatar_url),
+          post_likes(pet_id),
+          comments(id)
+        ''')
+        .eq('id', postId)
+        .single();
+
+    return _rowToFeedPost(Map<String, dynamic>.from(row as Map), activePetId);
+  }
+
+  FeedPost _rowToFeedPost(Map<String, dynamic> r, String? activePetId) {
     final pet = (r['pet'] as Map?)?.cast<String, dynamic>() ?? const {};
     final author = (r['author'] as Map?)?.cast<String, dynamic>() ?? const {};
     final likes = (r['post_likes'] as List?) ?? const [];

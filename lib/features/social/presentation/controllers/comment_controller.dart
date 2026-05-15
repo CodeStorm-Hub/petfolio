@@ -50,6 +50,7 @@ class CommentNotifier
   Future<void> add({required String petId, required String content}) async {
     if (content.trim().isEmpty) return;
 
+    final previousComments = state.valueOrNull ?? [];
     state = const AsyncLoading();
 
     try {
@@ -60,10 +61,12 @@ class CommentNotifier
         activePetId: petId, // the new comment is always "own"
       );
 
-      final current = state.valueOrNull ?? [];
-      state = AsyncData([...current, newComment]);
-    } catch (e, st) {
-      state = AsyncError(e, st);
+      state = AsyncData([...previousComments, newComment]);
+    } catch (e) {
+      // Restore previous state so the list doesn't disappear on error.
+      state = AsyncData(previousComments);
+      // Re-throw so the UI can show a snackbar or alert.
+      rethrow;
     }
   }
 
