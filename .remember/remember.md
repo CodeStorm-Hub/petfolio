@@ -1,17 +1,18 @@
 # Handoff
 
 ## State
-Care Dynamic Daily Routine Dashboard complete. `flutter analyze` → 0 issues.
-- `care_dashboard_controller.dart`: `DailyRoutineState` + `careDashboardProvider` (NotifierProvider.family) + `CareDashboardNotifier` (selectDate, refresh, toggleTask with optimistic updates)
-- `care_screen.dart` fully rewritten: `_HorizontalDatePicker` (14-day chips, auto-scroll to today), `_DailyTasksDashboard` (AsyncValue.when + skeleton/error/empty states), `_CareTaskCard` (Dismissible swipe + animated checkbox), `_EmptyRoutineState`. All mock vitals/checkup data removed.
-- Onboarding: `_totalSteps = 3` (internal 0-4), `_PetDetailsStep` merges Name/DOB/Weight/Activity, `_ActivityTile` rows fix overflow.
+Smart Nutrition & Weight Tracking feature complete. `flutter analyze` → 0 issues.
+- `lib/features/care/presentation/controllers/nutrition_controller.dart`: `NutritionState`, `nutritionProvider`, `NutritionNotifier` (logWeight, refresh)
+- `lib/features/care/presentation/screens/nutrition_screen.dart`: full screen — fl_chart LineChart weight history, NRC calorie card (RER = 70×kg^0.75×activity×species), `_LogWeightSheet` (kg/lbs toggle, notes, date picker)
+- `lib/core/router.dart`: `/care/nutrition` route added (`parentNavigatorKey: _rootNavigatorKey`)
+- `lib/features/care/presentation/screens/care_screen.dart`: `_NutritionBanner` card appended to ListView, navigates to `/care/nutrition`
 
 ## Next
-1. Consolidate duplicate Pet models — `lib/features/care/data/models/pet.dart` (Freezed) duplicates `lib/features/pet_profile/data/models/pet.dart`; check `ActivityLevel` enum usages in care controllers before deleting
-2. Wire care controllers to consume `pet.dateOfBirth` and `pet.activityLevel` for personalised task defaults
-3. Verify `health_vitals` INSERT RLS policy allows pet owners to write
+1. Consolidate duplicate Pet models — `lib/features/care/data/models/pet.dart` (Freezed) vs `lib/features/pet_profile/data/models/pet.dart`; check `ActivityLevel` enum usages before deleting
+2. Verify `health_vitals` / `health_logs` INSERT RLS policy allows pet owners to write (weight log is best-effort/silent on failure)
+3. Wire Symptom / Vet Visit logging into the nutrition screen or a new Health Log screen
 
 ## Context
-- `CareTaskType` name conflict: old `care_task_type.dart` (3 values) vs new `care_task.dart` (11 values). Care screen uses `import '../../data/models/care_task.dart' as dbtask;` to alias new type; streak banner uses unaliased old enum
-- `careDashboardProvider` is family-keyed by `petId` (String); consume via `ref.watch(careDashboardProvider(activePet.id))`
-- `careControllerProvider` (ChecklistRepository) still used for streak banner — two systems coexist intentionally
+- `fl_chart 0.69.2`: use `LineTouchTooltipData(getTooltipColor: ...)` not deprecated `tooltipBgColor`
+- Calorie factors: sedentary=1.2, low=1.4, moderate=1.6, high=1.8, very_high=2.0; cat modifier=0.9
+- `CareTaskType` name conflict still exists: old `care_task_type.dart` (3 values) vs new `care_task.dart` (11 values); care_screen uses `import '../../data/models/care_task.dart' as dbtask;`

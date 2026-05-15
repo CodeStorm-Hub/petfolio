@@ -10,6 +10,7 @@ class Pet {
     required this.species,
     this.breed,
     this.avatarUrl,
+    this.bio,
     this.dateOfBirth,
     this.weightKg,
     this.activityLevel,
@@ -22,6 +23,7 @@ class Pet {
   final String species;
   final String? breed;
   final String? avatarUrl;
+  final String? bio;
   final DateTime? dateOfBirth;
   final double? weightKg;
   final ActivityLevel? activityLevel;
@@ -60,6 +62,7 @@ class Pet {
     String? name,
     String? breed,
     String? avatarUrl,
+    String? bio,
     DateTime? dateOfBirth,
     double? weightKg,
     ActivityLevel? activityLevel,
@@ -71,6 +74,7 @@ class Pet {
         species: species,
         breed: breed ?? this.breed,
         avatarUrl: avatarUrl ?? this.avatarUrl,
+        bio: bio ?? this.bio,
         dateOfBirth: dateOfBirth ?? this.dateOfBirth,
         weightKg: weightKg ?? this.weightKg,
         activityLevel: activityLevel ?? this.activityLevel,
@@ -108,9 +112,10 @@ class Pet {
         species: json['species'] as String,
         breed: json['breed'] as String?,
         avatarUrl: json['avatar_url'] as String?,
-        dateOfBirth: json['date_of_birth'] == null
-            ? null
-            : DateTime.parse(json['date_of_birth'] as String),
+        bio: json['bio'] as String?,
+        dateOfBirth: json['date_of_birth'] != null
+            ? DateTime.parse(json['date_of_birth'] as String)
+            : null,
         weightKg: json['weight_kg'] != null
             ? (json['weight_kg'] as num).toDouble()
             : null,
@@ -125,7 +130,9 @@ class Pet {
         'species': species,
         if (breed != null) 'breed': breed,
         if (avatarUrl != null) 'avatar_url': avatarUrl,
-        if (dateOfBirth != null) 'date_of_birth': dateOfBirth!.toIso8601String(),
+        if (bio != null) 'bio': bio,
+        if (dateOfBirth != null)
+          'date_of_birth': dateOfBirth!.toIso8601String().split('T').first,
         if (weightKg != null) 'weight_kg': weightKg,
         if (activityLevel != null) 'activity_level': _activityLevelToJson(activityLevel),
         'created_at': createdAt.toIso8601String(),

@@ -2,6 +2,63 @@
 
 ---
 
+## 2026-05-15 — Medical record renewal getter + nutrition chart empty state
+
+- **`medical_record.dart`** — `renewalDate` (`nextDueAt ?? expiresAt`) and `isExpiringSoon` (date-only renewal within today…today+30).
+- **`medical_vault_screen.dart`** — Warning styling uses `record.isExpiringSoon`; removed duplicate renewal logic from the private extension.
+- **`petfolio_empty_state.dart`** + **`widgets.dart`** — Reusable empty state (icon, title, subtitle).
+- **`nutrition_screen.dart`** — Weight trend shows `PetfolioEmptyState` when fewer than two weight logs (distinct copy for 0 vs 1); removed `_EmptyChart`.
+
+**Next step:** None.
+
+---
+
+## 2026-05-15 — Care task toggle: optimistic UI + AppSnackBar errors
+
+- **`app_snack_bar.dart`** + **`widgets.dart`** — `appSnackBarMessengerKey` + `AppSnackBar.showError` for app-wide floating snackbars.
+- **`main.dart`** — `scaffoldMessengerKey: appSnackBarMessengerKey` on `MaterialApp.router`.
+- **`care_dashboard_controller.dart`** — `toggleTaskCompletion`: optimistic list update, await `_repo.toggleCompletion`, on failure revert when still same active pet + `AppSnackBar.showError`.
+- **`care_screen.dart`** — call sites use `toggleTaskCompletion`.
+
+**Next step:** None.
+
+---
+
+## 2026-05-15 — Care dashboard & health vault scoped to active pet ID
+
+- **`care_dashboard_controller.dart`** — `careDashboardProvider` is a single `NotifierProvider` that `ref.watch(activePetIdProvider)`; null ID → `AsyncData([])` and today’s date; pet change → loading + `_load` for that pet with stale-response guards; mutations no-op when no active pet.
+- **`health_vault_controller.dart`** — `healthVaultControllerProvider` is a non-family `StreamNotifierProvider`; `build()` watches `activePetIdProvider`, null → `Stream.value([])`, else Supabase realtime stream for that `pet_id` (re-subscribes when ID changes).
+- **`care_controller.dart`**, **`care_screen.dart`**, **`medical_vault_screen.dart`** — Call sites updated (no `.family` argument).
+
+**Next step:** None required for this wiring; optional QA when switching pets on Care and Medical vault tabs.
+
+---
+
+## 2026-05-14 — Care routing, onboarding → Care, care cleanup
+
+- **`lib/core/router.dart`** — Documented Care routes: shell `/care`, overlays `/care/nutrition`, `/care/medical-vault`. Redirect when `/onboarding` but user already has pets now sends **`/care`** (was `/home`). Deep link after successful onboarding: **`/care?onboardingComplete=1`** (handled in `CareScreen`).
+- **`onboarding_screen.dart`** — After successful `_complete`, **`context.go('/care?onboardingComplete=1')`** instead of `/home` (avoids circular import with `router.dart`).
+- **`care_screen.dart`** — `didChangeDependencies` + one-shot flag: reads `onboardingComplete=1`, shows floating **SnackBar**, then **`context.go('/care')`** to strip the query.
+- **`lib/features/care/data/models/care_task_type.dart`** — Removed unused PetSphere-style **mock** `label` / `sublabel` / `iconColor` / `iconTint` getters; enum `feed` / `walk` / `med` unchanged for checklist + streak wiring.
+
+**Scan note:** No separate mock asset files or deprecated screens under `lib/features/care/` beyond the trimmed enum.
+
+**Next step:** Optional — document `/care?onboardingComplete=1` in README for QA.
+
+---
+
+## 2026-05-14 — Automated Medical Vault UI (Care)
+
+- **`lib/core/widgets/app_bottom_sheet.dart`** — `AppBottomSheet.show` wraps `showModalBottomSheet` with transparent scrim, scroll-controlled sheet, and `PetfolioThemeExtension.surface1` top shell; exported from `widgets.dart`.
+- **`lib/features/care/presentation/screens/medical_vault_screen.dart`** — `MedicalVaultScreen` + public `AddMedicalRecordSheet`: three sections (Vaccines: `vaccine`; Medications: `medication`, `parasite_prevention`; Vet visits: `surgery`, `allergy`, `other`) fed by `ref.watch(healthVaultControllerProvider(petId))`. Cards use `pt.warning` border/fill/tint when **renewal** = `nextDueAt ?? expiresAt` falls between **today** and **today + 30 days** (date-only). FAB opens `AppBottomSheet` with the form; save calls `addRecord`. Swipe on a card triggers `deactivateRecord` (optimistic list update via stream).
+- **`lib/core/router.dart`** — full-screen route `/care/medical-vault` → `MedicalVaultScreen`.
+- **`lib/features/care/presentation/screens/care_screen.dart`** — `_MedicalVaultBanner` under daily tasks (same pattern as nutrition) navigates to the vault.
+- **`health_vault_controller.dart`** — `addRecord` returns `Future<bool>` so the sheet can show an error without popping on failure.
+
+**Next step:** Optional polish — record detail screen, edit flow, or push notifications when `reminder_enabled` and `next_due_at` align.
+
+---
+
 ## 2026-05-14 — CLAUDE.md Rules & Token Strategy Appended
 
 - Added **Project Rules & Token Optimization Strategy** section to `CLAUDE.md`

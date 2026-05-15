@@ -1,0 +1,74 @@
+# ==========================================
+# 1. SECURITY & SECRETS (CRITICAL)
+# ==========================================
+
+*.key
+*.pem
+credentials.json
+supabase/.temp/
+
+# ==========================================
+# 2. PETFOLIO SPECIFIC NOISE
+# ==========================================
+# Prevents AI from reading massive UI mockups & QA logs
+claude_design/
+docs/logs/
+qa-screens/
+redesign_stitch/
+stitch_petsphere_app_redesign/
+*.xml
+*.html
+*.jsx
+
+# ==========================================
+# 3. FLUTTER BUILD & CACHE
+# ==========================================
+build/
+.dart_tool/
+.pub-cache/
+.pub/
+
+# ==========================================
+# 4. CODE GENERATION
+# ==========================================
+# Forces AI to rely on your models, not the generated outputs
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+*.part.dart
+
+# ==========================================
+# 5. NATIVE PLATFORM DIRECTORIES
+# ==========================================
+android/
+ios/
+web/
+macos/
+windows/
+linux/
+
+# ==========================================
+# 6. ASSETS & MEDIA
+# ==========================================
+assets/
+google_fonts/
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.ttf
+*.mp4
+*.gif
+*.zip
+
+# ==========================================
+# 7. IDE & ENVIRONMENT
+# ==========================================
+.idea/
+.vscode/
+.claude/
+.cursor/hooks/
+*.iml
+.metadata
+pubspec.lock
+skills-lock.json

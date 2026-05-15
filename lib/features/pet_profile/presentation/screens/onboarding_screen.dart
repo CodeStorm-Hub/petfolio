@@ -67,7 +67,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         } catch (_) {}
       }
 
-      if (mounted) context.go('/home');
+      if (mounted) {
+        context.go('/care?onboardingComplete=1');
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));

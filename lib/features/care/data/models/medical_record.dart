@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'medical_record.freezed.dart';
@@ -45,6 +46,17 @@ class MedicalRecord with _$MedicalRecord {
   bool get isExpired {
     if (expiresAt == null) return false;
     return expiresAt!.isBefore(DateTime.now());
+  }
+
+  DateTime? get renewalDate => nextDueAt ?? expiresAt;
+
+  bool get isExpiringSoon {
+    final raw = renewalDate;
+    if (raw == null) return false;
+    final d = DateUtils.dateOnly(raw);
+    final today = DateUtils.dateOnly(DateTime.now());
+    final limit = today.add(const Duration(days: 30));
+    return !d.isBefore(today) && !d.isAfter(limit);
   }
 
   bool get isVaccine => recordType == MedicalRecordType.vaccine;

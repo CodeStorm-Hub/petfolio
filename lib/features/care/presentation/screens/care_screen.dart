@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
@@ -29,11 +30,36 @@ class CareScreen extends ConsumerStatefulWidget {
 
 class _CareScreenState extends ConsumerState<CareScreen> {
   bool _outdoor = false;
+  bool _onboardingSuccessHandled = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _init());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_onboardingSuccessHandled) return;
+    final uri = GoRouterState.of(context).uri;
+    if (uri.queryParameters['onboardingComplete'] != '1') return;
+    _onboardingSuccessHandled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final pet = ref.read(activePetControllerProvider);
+      final name = pet?.name.trim();
+      final msg = (name != null && name.isNotEmpty)
+          ? 'Pet setup complete — welcome! Start tracking daily care for $name here.'
+          : 'Pet setup complete — welcome! Start tracking daily care here.';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
+      );
+      if (!mounted) return;
+      if (GoRouterState.of(context).uri.queryParameters['onboardingComplete'] == '1') {
+        context.go('/care');
+      }
+    });
   }
 
   Future<void> _init() async {
@@ -86,11 +112,23 @@ class _CareScreenState extends ConsumerState<CareScreen> {
     }
 
     final care = ref.watch(careControllerProvider(activePet.id));
-    final dashboard = ref.watch(careDashboardProvider(activePet.id));
+    final dashboard = ref.watch(careDashboardProvider);
     final species = activePet.speciesEnum;
+
+    void openAddSheet() => showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          useSafeArea: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => _AddCareTaskSheet(petId: activePet.id, petName: activePet.name),
+        );
 
     return Scaffold(
       backgroundColor: _outdoor ? cs.surface : pt.surface1,
+      floatingActionButton: FloatingActionButton(
+        onPressed: openAddSheet,
+        child: const Icon(Icons.add_rounded),
+      ),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -105,12 +143,12 @@ class _CareScreenState extends ConsumerState<CareScreen> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
                 children: [
-                  _StreakBanner(care: care, species: species, outdoor: _outdoor),
+                  _StreakBanner(care: care, dashboard: dashboard, species: species, outdoor: _outdoor),
                   const SizedBox(height: 20),
                   _HorizontalDatePicker(
                     selectedDate: dashboard.selectedDate,
                     onDateSelected: (d) =>
-                        ref.read(careDashboardProvider(activePet.id).notifier).selectDate(d),
+                        ref.read(careDashboardProvider.notifier).selectDate(d),
                   ),
                   const SizedBox(height: 16),
                   Padding(
@@ -139,7 +177,12 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                     petId: activePet.id,
                     petName: activePet.name,
                     species: species,
+                    onAddTask: openAddSheet,
                   ),
+                  const SizedBox(height: 20),
+                  _NutritionBanner(pt: pt),
+                  const SizedBox(height: 12),
+                  _MedicalVaultBanner(pt: pt),
                 ],
               ),
             ),
@@ -287,11 +330,13 @@ class _CircleButton extends StatelessWidget {
 class _StreakBanner extends StatelessWidget {
   const _StreakBanner({
     required this.care,
+    required this.dashboard,
     required this.species,
     required this.outdoor,
   });
 
   final CareState care;
+  final DailyRoutineState dashboard;
   final PetSpecies species;
   final bool outdoor;
 
@@ -383,37 +428,43 @@ class _StreakBanner extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(46),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          const Text(
-                            'TODAY',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.08 * 10,
-                              color: Colors.white,
+                    Builder(builder: (_) {
+                      final tasks = dashboard.tasks.valueOrNull ?? [];
+                      final total = tasks.length;
+                      final done = tasks.where((t) => t.isCompleted).length;
+                      final label = total > 0 ? '$done / $total' : '${care.todayCount} / 3';
+                      return Container(
+                        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(46),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            const Text(
+                              'TODAY',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.08 * 10,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
-                          Text(
-                            '${care.todayCount} / 3',
-                            style: const TextStyle(
-                              fontFamily: 'Sora',
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              height: 1.1,
-                              color: Colors.white,
+                            Text(
+                              label,
+                              style: const TextStyle(
+                                fontFamily: 'Sora',
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                height: 1.1,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
+                          ],
+                        ),
+                      );
+                    }),
                   ],
                 ),
                 const SizedBox(height: 14),
@@ -722,12 +773,14 @@ class _DailyTasksDashboard extends ConsumerWidget {
     required this.petId,
     required this.petName,
     required this.species,
+    this.onAddTask,
   });
 
   final DailyRoutineState state;
   final String petId;
   final String petName;
   final PetSpecies species;
+  final VoidCallback? onAddTask;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -759,7 +812,7 @@ class _DailyTasksDashboard extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             TextButton.icon(
-              onPressed: () => ref.read(careDashboardProvider(petId).notifier).refresh(),
+              onPressed: () => ref.read(careDashboardProvider.notifier).refresh(),
               icon: const Icon(Icons.refresh_rounded, size: 16),
               label: const Text('Retry'),
             ),
@@ -767,7 +820,7 @@ class _DailyTasksDashboard extends ConsumerWidget {
         ),
       ),
       data: (tasks) => tasks.isEmpty
-          ? _EmptyRoutineState(petName: petName, date: state.selectedDate)
+          ? _EmptyRoutineState(petName: petName, date: state.selectedDate, onAddTask: onAddTask)
           : Column(
               children: tasks
                   .map((t) => _CareTaskCard(task: t, petId: petId, species: species))
@@ -819,8 +872,8 @@ class _CareTaskCard extends ConsumerWidget {
         ),
         confirmDismiss: (_) async {
           ref
-              .read(careDashboardProvider(petId).notifier)
-              .toggleTask(task.id, isCompleted: !done);
+              .read(careDashboardProvider.notifier)
+              .toggleTaskCompletion(task.id, isCompleted: !done);
           return false;
         },
         child: AnimatedContainer(
@@ -895,8 +948,8 @@ class _CareTaskCard extends ConsumerWidget {
                 // Checkbox button
                 GestureDetector(
                   onTap: () => ref
-                      .read(careDashboardProvider(petId).notifier)
-                      .toggleTask(task.id, isCompleted: !done),
+                      .read(careDashboardProvider.notifier)
+                      .toggleTaskCompletion(task.id, isCompleted: !done),
                   child: AnimatedContainer(
                     duration: PetfolioThemeExtension.durationSm,
                     width: 36,
@@ -1011,10 +1064,11 @@ class _TaskCardSkeleton extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _EmptyRoutineState extends StatelessWidget {
-  const _EmptyRoutineState({required this.petName, required this.date});
+  const _EmptyRoutineState({required this.petName, required this.date, this.onAddTask});
 
   final String petName;
   final DateTime date;
+  final VoidCallback? onAddTask;
 
   @override
   Widget build(BuildContext context) {
@@ -1056,10 +1110,533 @@ class _EmptyRoutineState extends StatelessWidget {
               style: TextStyle(fontSize: 13, color: pt.ink500, height: 1.4),
             ),
           ),
+          if (isToday && onAddTask != null) ...[
+            const SizedBox(height: 20),
+            OutlinedButton.icon(
+              onPressed: onAddTask,
+              icon: const Icon(Icons.add_rounded, size: 16),
+              label: const Text('Add first task'),
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Task type helpers (shared by card + sheet)
+// ─────────────────────────────────────────────────────────────────────────────
+
+String _typeLabel(dbtask.CareTaskType type) {
+  switch (type) {
+    case dbtask.CareTaskType.feeding:    return 'Feeding';
+    case dbtask.CareTaskType.walk:       return 'Walk';
+    case dbtask.CareTaskType.grooming:   return 'Grooming';
+    case dbtask.CareTaskType.medication: return 'Meds';
+    case dbtask.CareTaskType.vetVisit:   return 'Vet Visit';
+    case dbtask.CareTaskType.training:   return 'Training';
+    case dbtask.CareTaskType.playtime:   return 'Playtime';
+    case dbtask.CareTaskType.dental:     return 'Dental';
+    case dbtask.CareTaskType.nailTrim:   return 'Nail Trim';
+    case dbtask.CareTaskType.bath:       return 'Bath';
+    case dbtask.CareTaskType.other:      return 'Other';
+  }
+}
+
+String _defaultTitle(dbtask.CareTaskType type) {
+  switch (type) {
+    case dbtask.CareTaskType.feeding:    return 'Feeding time';
+    case dbtask.CareTaskType.walk:       return 'Walk';
+    case dbtask.CareTaskType.grooming:   return 'Grooming session';
+    case dbtask.CareTaskType.medication: return 'Medication';
+    case dbtask.CareTaskType.vetVisit:   return 'Vet visit';
+    case dbtask.CareTaskType.training:   return 'Training';
+    case dbtask.CareTaskType.playtime:   return 'Playtime';
+    case dbtask.CareTaskType.dental:     return 'Dental care';
+    case dbtask.CareTaskType.nailTrim:   return 'Nail trim';
+    case dbtask.CareTaskType.bath:       return 'Bath time';
+    case dbtask.CareTaskType.other:      return 'New task';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Medical vault & nutrition entry banners
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _MedicalVaultBanner extends StatelessWidget {
+  const _MedicalVaultBanner({required this.pt});
+
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: () => context.push('/care/medical-vault'),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius:
+              BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+          border: Border.all(color: pt.pillarHealth.withAlpha(80)),
+          boxShadow: pt.shadowE1,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: pt.pillarHealth.withAlpha(30),
+                borderRadius: BorderRadius.circular(
+                    PetfolioThemeExtension.radiusMd),
+              ),
+              child: Icon(Icons.folder_special_outlined,
+                  color: pt.pillarHealth, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Automated medical vault',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Vaccines · Medications · Vet visits',
+                    style: TextStyle(fontSize: 13, color: pt.ink300),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: pt.ink300),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NutritionBanner extends StatelessWidget {
+  const _NutritionBanner({required this.pt});
+
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: () => context.push('/care/nutrition'),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius:
+              BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+          border: Border.all(color: pt.pillarHealth.withAlpha(80)),
+          boxShadow: pt.shadowE1,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: pt.pillarHealth.withAlpha(30),
+                borderRadius: BorderRadius.circular(
+                    PetfolioThemeExtension.radiusMd),
+              ),
+              child: Icon(Icons.monitor_weight_outlined,
+                  color: pt.pillarHealth, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Smart Nutrition & Weight',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Track weight history · View caloric needs',
+                    style: TextStyle(fontSize: 13, color: pt.ink300),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: pt.ink300),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Add Care Task Sheet
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _AddCareTaskSheet extends ConsumerStatefulWidget {
+  const _AddCareTaskSheet({required this.petId, required this.petName});
+
+  final String petId;
+  final String petName;
+
+  @override
+  ConsumerState<_AddCareTaskSheet> createState() => _AddCareTaskSheetState();
+}
+
+class _AddCareTaskSheetState extends ConsumerState<_AddCareTaskSheet> {
+  var _type = dbtask.CareTaskType.feeding;
+  var _frequency = dbtask.CareFrequency.daily;
+  late final TextEditingController _titleCtrl;
+  final _titleFocus = FocusNode();
+  bool _titleFocused = false;
+  bool _userEditedTitle = false;
+  TimeOfDay? _time;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleCtrl = TextEditingController(text: _defaultTitle(dbtask.CareTaskType.feeding));
+    _titleFocus.addListener(() {
+      if (mounted) setState(() => _titleFocused = _titleFocus.hasFocus);
+    });
+  }
+
+  @override
+  void dispose() {
+    _titleCtrl.dispose();
+    _titleFocus.dispose();
+    super.dispose();
+  }
+
+  void _onTypeSelected(dbtask.CareTaskType t) {
+    setState(() {
+      _type = t;
+      if (!_userEditedTitle) _titleCtrl.text = _defaultTitle(t);
+    });
+  }
+
+  Future<void> _save() async {
+    final title = _titleCtrl.text.trim();
+    if (title.isEmpty || _saving) return;
+    setState(() => _saving = true);
+    try {
+      final now = DateTime.now();
+      final task = dbtask.CareTask(
+        id: '',
+        petId: widget.petId,
+        taskType: _type,
+        title: title,
+        frequency: _frequency,
+        scheduledTime: _time != null
+            ? '${_time!.hour.toString().padLeft(2, '0')}:${_time!.minute.toString().padLeft(2, '0')}'
+            : null,
+        isCompleted: false,
+        gamificationPoints: 10,
+        createdAt: now,
+        updatedAt: now,
+      );
+      await ref.read(careDashboardProvider.notifier).createTask(task);
+      if (mounted) Navigator.of(context).pop();
+    } catch (_) {
+      if (mounted) {
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not save task. Please try again.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
+    final bottom = MediaQuery.viewInsetsOf(context).bottom;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: pt.surface1,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: EdgeInsets.fromLTRB(20, 0, 20, math.max(bottom, 24) + 16),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(color: pt.line200, borderRadius: BorderRadius.circular(2)),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Text(
+                'New care task',
+                style: TextStyle(
+                  fontFamily: 'Sora',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: cs.onSurface,
+                ),
+              ),
+            ),
+
+            // ── Task type ───────────────────────────────────────────────────
+            _SheetLabel('Task type', pt),
+            const SizedBox(height: 10),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                mainAxisExtent: 72,
+              ),
+              itemCount: dbtask.CareTaskType.values.length,
+              itemBuilder: (_, i) {
+                final t = dbtask.CareTaskType.values[i];
+                final selected = t == _type;
+                return GestureDetector(
+                  onTap: () => _onTypeSelected(t),
+                  child: AnimatedContainer(
+                    duration: PetfolioThemeExtension.durationSm,
+                    decoration: BoxDecoration(
+                      color: selected ? cs.primary : pt.surface2,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: selected ? Colors.transparent : pt.line200,
+                        width: 0.5,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(_taskTypeIcon(t), size: 22,
+                            color: selected ? Colors.white : pt.ink500),
+                        const SizedBox(height: 5),
+                        Text(
+                          _typeLabel(t),
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: selected ? Colors.white : pt.ink500,
+                            height: 1,
+                          ),
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+
+            // ── Title ────────────────────────────────────────────────────────
+            _SheetLabel('Title', pt),
+            const SizedBox(height: 10),
+            AnimatedContainer(
+              duration: PetfolioThemeExtension.durationSm,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: _titleFocused
+                    ? [BoxShadow(color: cs.primary.withAlpha(30), blurRadius: 8)]
+                    : [],
+              ),
+              child: TextField(
+                controller: _titleCtrl,
+                focusNode: _titleFocus,
+                onChanged: (_) => _userEditedTitle = true,
+                textCapitalization: TextCapitalization.sentences,
+                style: TextStyle(fontSize: 15, color: cs.onSurface),
+                decoration: InputDecoration(
+                  hintText: 'e.g. Morning feeding',
+                  filled: true,
+                  fillColor: _titleFocused ? cs.surface : pt.surface2,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: pt.line200, width: 0.5),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: cs.primary, width: 2),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Frequency ────────────────────────────────────────────────────
+            _SheetLabel('How often?', pt),
+            const SizedBox(height: 10),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: dbtask.CareFrequency.values.map((f) {
+                  final selected = f == _frequency;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: GestureDetector(
+                      onTap: () => setState(() => _frequency = f),
+                      child: AnimatedContainer(
+                        duration: PetfolioThemeExtension.durationSm,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                        decoration: BoxDecoration(
+                          color: selected ? cs.primary : pt.surface2,
+                          borderRadius: BorderRadius.circular(40),
+                          border: Border.all(
+                            color: selected ? Colors.transparent : pt.line200,
+                            width: 0.5,
+                          ),
+                        ),
+                        child: Text(
+                          _freqLabel(f),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: selected ? Colors.white : pt.ink500,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Time (optional) ──────────────────────────────────────────────
+            _SheetLabel('Time (optional)', pt),
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: () async {
+                final picked = await showTimePicker(
+                  context: context,
+                  initialTime: _time ?? TimeOfDay.now(),
+                );
+                if (picked != null && mounted) setState(() => _time = picked);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: pt.surface2,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: pt.line200, width: 0.5),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.schedule_rounded, size: 18, color: pt.ink500),
+                    const SizedBox(width: 10),
+                    Text(
+                      _time != null ? _time!.format(context) : 'No time set',
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: _time != null ? cs.onSurface : pt.ink300,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (_time != null)
+                      GestureDetector(
+                        onTap: () => setState(() => _time = null),
+                        child: Icon(Icons.close_rounded, size: 16, color: pt.ink300),
+                      )
+                    else
+                      Icon(Icons.chevron_right_rounded, size: 18, color: pt.ink300),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 28),
+
+            // ── Save button ──────────────────────────────────────────────────
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: FilledButton(
+                onPressed: _saving ? null : _save,
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                child: _saving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Text(
+                        'Add Task',
+                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _freqLabel(dbtask.CareFrequency f) {
+    switch (f) {
+      case dbtask.CareFrequency.once:       return 'Once';
+      case dbtask.CareFrequency.daily:      return 'Daily';
+      case dbtask.CareFrequency.twiceDaily: return 'Twice daily';
+      case dbtask.CareFrequency.weekly:     return 'Weekly';
+      case dbtask.CareFrequency.biweekly:   return 'Every 2 wks';
+      case dbtask.CareFrequency.monthly:    return 'Monthly';
+      case dbtask.CareFrequency.asNeeded:   return 'As needed';
+    }
+  }
+}
+
+class _SheetLabel extends StatelessWidget {
+  const _SheetLabel(this.text, this.pt);
+  final String text;
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context) => Text(
+        text,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.08 * 12,
+          color: pt.ink500,
+        ),
+      );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
