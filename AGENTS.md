@@ -15,5 +15,5 @@
 - App-wide snackbars for notifier-triggered errors use `appSnackBarMessengerKey` on `MaterialApp.router` and `AppSnackBar.showError` from `lib/core/widgets/app_snack_bar.dart`.
 - `MedicalRecord` exposes `renewalDate` and `isExpiringSoon` (next 30 days, date-only) for vault warning styling.
 - `analysis_options.yaml` excludes `*.g.dart` and `*.freezed.dart` from the analyzer to avoid duplicate generated JSON symbol noise.
-- Matching chat models and controllers still assume `chat_threads.pet_id_1` / `pet_id_2` while the live database uses user participant columns, so chat remains incompatible until schemas and queries align.
+- `chat_threads` uses `participant_1_id` / `participant_2_id` (user ids) and `match_request_id`; the app maps rows after filtering by auth user and `match_requests` pet involvement (`chat_thread.dart`, `chat_threads_controller.dart`).
 - `pubspec.yaml` lists `riverpod_annotation` and `riverpod_generator`, but `lib/` does not use `@riverpod` generated providers; state is hand-written `Provider` / `NotifierProvider` / `StreamNotifierProvider` style.

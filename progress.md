@@ -471,3 +471,25 @@ Refactored the pet onboarding flow from 5 steps to 8 steps (6 visible in progres
 
 ### Next step
 Wire the care engine controllers to consume `pet.dateOfBirth` and `pet.activityLevel` for personalised task defaults. The care `Pet` model in `lib/features/care/data/models/pet.dart` is now a duplicate — consolidate with this model when wiring care controllers.
+
+### PR 4 Copilot review follow-ups (local)
+- Web-safe Marionette gate via `lib/marionette_debug_gate_{stub,io}.dart` conditional import; removed `dart:io` from `main.dart`
+- Social header Messages action navigates to `/matching`
+- `PetListNotifier.unarchive` sorts merged list by `displayOrder` then `createdAt` like `fetchPets`
+- `care_scheduled_time` uses explicit int bounds for `TimeOfDay`
+- `pet_care_repository` monthly `_appliesOnDay` uses calendar month/day with end-of-month clamping
+- Migration `20260516120000_care_logs_type_day.sql` deletes duplicate `(pet_id, care_type, logged_date)` before unique index
+- `.gitignore`: `.cursor/hooks/state/`, `tmp_window_dump.xml`, `.claude/worktrees/`
+
+### Supabase remote sync (MCP, 2026-05-16)
+- Verified project `jqyjvhwlcqcsuwcqgcwf`: tables/constraints match repo intent; `chat_threads` uses `participant_1_id` / `participant_2_id` (not pet columns in app code).
+- **Remote lacked** `pet_care_gamification` while `20260515000000_fix_gamification_missing_table.sql` existed — applied via MCP as migration `pet_care_gamification_table_and_rls` (full SELECT/INSERT/UPDATE/DELETE RLS + `set_updated_at` trigger). Repo file updated to match.
+- **Duplicate unique indexes** on `care_logs` (`care_logs_pet_care_day_uix` vs `care_logs_pet_care_type_logged_date_uq`) — dropped `care_logs_pet_care_day_uix` via MCP; added `20260517000000_drop_duplicate_care_logs_unique_index.sql` for clean local resets.
+- Hosted migration history uses timestamp+name keys that do not 1:1 match local filenames (some history was created from dashboard/MCP); prefer `supabase db pull` when rebaselining or rely on ordered SQL in `supabase/migrations/`.
+
+### App ↔ Supabase follow-ups (2026-05-16)
+- Social `fetchFeed` / `fetchPostsForPet` / `fetchPostById`: removed wrong `post_likes.pet_id` filter; `ChatThread` + `chatThreadsProvider` use `participant_1_id` / `participant_2_id` and `match_requests` pet scoping.
+- Router `/pet/:petId/edit`: no `firstWhen` throw; missing pet → `_PetEditMissingScreen`.
+- `npx supabase migration repair` batch run to align remote `schema_migrations` with local migration filenames; `npx supabase migration list` now matches. `npx supabase db pull` blocked here without Docker—run with Docker for shadow DB.
+
+Phase complete; consider `/remember` if you want this sync persisted outside `progress.md`.

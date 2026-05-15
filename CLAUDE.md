@@ -166,12 +166,12 @@ flutter pub run build_runner build --delete-conflicting-outputs
 ### Mock / Disconnected (Do Not Rely On)
 - **Social Feed** — entirely mock data; app doesn't fetch `posts` table (0 rows)
 - **Matching Discovery** — entirely mock swipe deck with sample data (0 match_requests in practice)
-- **Matching Chat** — critical schema mismatch: code expects `chat_threads.pet_id_1` and `chat_threads.pet_id_2`, but DB has `participant_1_id` and `participant_2_id` (user-based)
+- **Matching Chat** — `chat_threads` uses `participant_1_id` / `participant_2_id` (users); app models and `chatThreadsProvider` align with this and scope rows via `match_requests` for the active pet.
 - **Health Vitals** — table exists in DB with proper schema but no UI or repository implementation
 
 ### Critical Schema Mismatches
 1. **Chat Threads (Broken)**:
-   - ❌ Code expects: `chat_threads.pet_id_1`, `chat_threads.pet_id_2`
+   - ✓ Code uses: `chat_threads.participant_1_id`, `participant_2_id`, `match_request_id`
    - ✓ DB has: `chat_threads.participant_1_id`, `participant_2_id` (user participants)
    - DB also has: `match_request_id` (foreign key to accepted requests)
 
@@ -215,7 +215,7 @@ See `/docs/flutter_supabase_full_app_review_2026-05-13.md` **High Priority** and
 | `post_likes` | 0 | Social reactions (user/pet can like posts) | Exists, code partially connected |
 | `post_candles` | 0 | Memorial candles on posts (user/pet can light candles) | Exists, code partially connected |
 | `match_requests` | 1 | Pet matching requests (playdate/breeding/adoption) | Schema exists; code schema-incompatible |
-| `chat_threads` | 0 | Conversations between users (user participants, match_request_id) | Schema mismatch: code expects pet_id_1/pet_id_2 |
+| `chat_threads` | 0 | Conversations between users (user participants, match_request_id) | Client maps participants + match_request |
 | `chat_messages` | 0 | Messages in chat threads | Not implemented in app |
 
 ### Storage
@@ -391,7 +391,7 @@ If making schema changes:
 
 7. **Environment variables** — Supabase/Stripe keys are hardcoded in `main.dart` defaults; use `--dart-define` for production builds.
 
-8. **Chat schema mismatch** — Flutter code uses `pet_id_1`/`pet_id_2` but DB uses `participant_1_id`/`participant_2_id` (user participants). This is a blocking issue for chat features.
+8. **Chat thread creation** — ensure server/app logic inserts `chat_threads` with valid `participant_*_id` and `match_request_id` when UX adds threads; message UI still minimal.
 
 9. **RLS policies** — All queries run as the logged-in user. Public reads may require explicit policy configuration. Check Supabase dashboard if getting 0 rows on expected queries.
 

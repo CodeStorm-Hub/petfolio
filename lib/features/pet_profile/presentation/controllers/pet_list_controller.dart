@@ -142,8 +142,15 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
   Future<void> unarchive(String petId) async {
     final restored = await ref.read(petRepositoryProvider).unarchivePet(petId);
     final list = state.valueOrNull ?? const <Pet>[];
-    state = AsyncData([...list, restored]);
+    final merged = [...list, restored]..sort(_comparePetsListOrder);
+    state = AsyncData(merged);
   }
+}
+
+int _comparePetsListOrder(Pet a, Pet b) {
+  final byOrder = a.displayOrder.compareTo(b.displayOrder);
+  if (byOrder != 0) return byOrder;
+  return a.createdAt.compareTo(b.createdAt);
 }
 
 final petListProvider =

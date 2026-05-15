@@ -338,6 +338,14 @@ class PetCareRepository {
         return diff >= 0 && diff % 14 == 0;
       case CareFrequency.monthly:
         if (dayLocal.isBefore(start)) return false;
+        final lastDayOfMonth =
+            DateTime(dayLocal.year, dayLocal.month + 1, 0).day;
+        final anchorDay =
+            start.day > lastDayOfMonth ? lastDayOfMonth : start.day;
+        if (dayLocal.day != anchorDay) return false;
+        if (dayLocal.year == start.year && dayLocal.month == start.month) {
+          return !dayLocal.isBefore(start);
+        }
         return true;
     }
   }

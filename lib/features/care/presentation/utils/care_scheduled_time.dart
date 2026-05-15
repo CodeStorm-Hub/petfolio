@@ -7,5 +7,7 @@ TimeOfDay? parseCareScheduledTimeOfDay(String? raw) {
   final h = int.tryParse(parts[0]);
   final m = int.tryParse(parts[1]);
   if (h == null || m == null) return null;
-  return TimeOfDay(hour: h.clamp(0, 23), minute: m.clamp(0, 59));
+  final hour = h < 0 ? 0 : (h > 23 ? 23 : h);
+  final minute = m < 0 ? 0 : (m > 59 ? 59 : m);
+  return TimeOfDay(hour: hour, minute: minute);
 }

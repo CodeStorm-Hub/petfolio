@@ -160,9 +160,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/pet/:petId/edit',
         builder: (context, state) {
+          final petId = state.pathParameters['petId']!;
           final pets = ref.read(petListProvider).valueOrNull ?? [];
-          final pet = pets.firstWhere((p) => p.id == state.pathParameters['petId']);
-          return EditProfileScreen(pet: pet);
+          for (final p in pets) {
+            if (p.id == petId) return EditProfileScreen(pet: p);
+          }
+          return const _PetEditMissingScreen();
         },
       ),
     ],
@@ -301,6 +304,32 @@ class AppShell extends StatelessWidget {
               label: d.label,
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _PetEditMissingScreen extends StatelessWidget {
+  const _PetEditMissingScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Pet not found',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: () => context.go('/home'),
+              child: const Text('Back to Pets'),
+            ),
+          ],
+        ),
       ),
     );
   }

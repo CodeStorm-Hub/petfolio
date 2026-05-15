@@ -39,5 +39,26 @@ ALTER TABLE public.care_logs
     )
   );
 
+DELETE FROM public.care_logs cl
+WHERE
+  cl.id IN (
+    SELECT id
+    FROM (
+      SELECT
+        id,
+        ROW_NUMBER() OVER (
+          PARTITION BY pet_id, care_type, logged_date
+          ORDER BY
+            occurred_at ASC NULLS LAST,
+            id ASC
+        ) AS rn
+      FROM public.care_logs
+      WHERE
+        logged_date IS NOT NULL
+    ) deduped
+    WHERE
+      deduped.rn > 1
+  );
+
 CREATE UNIQUE INDEX IF NOT EXISTS care_logs_pet_care_type_logged_date_uq
   ON public.care_logs (pet_id, care_type, logged_date);

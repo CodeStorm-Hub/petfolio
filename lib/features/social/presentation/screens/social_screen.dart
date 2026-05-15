@@ -87,7 +87,7 @@ class _SocialView extends ConsumerWidget {
                   iconKey: const ValueKey<String>('social_action_messages'),
                   icon: Icons.mail_outline_rounded,
                   tooltip: 'Messages',
-                  onTap: () {},
+                  onTap: () => context.go('/matching'),
                 ),
               ],
             ),
