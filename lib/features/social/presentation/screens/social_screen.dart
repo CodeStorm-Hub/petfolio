@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -135,12 +134,14 @@ class _SocialView extends ConsumerWidget {
                                 padding: EdgeInsets.only(
                                   bottom: i == posts.length - 1 ? 0 : 16,
                                 ),
-                                child: _RegularPost(
-                                  post: post,
-                                  onLike: () => notifier.toggleLike(post.id),
-                                  onTapPost: () => context.push(
-                                    '/social/post/${post.id}',
-                                    extra: post,
+                                child: RepaintBoundary(
+                                  child: _RegularPost(
+                                    post: post,
+                                    onLike: () => notifier.toggleLike(post.id),
+                                    onTapPost: () => context.push(
+                                      '/social/post/${post.id}',
+                                      extra: post,
+                                    ),
                                   ),
                                 ),
                               );
@@ -197,7 +198,7 @@ class _SocialHeader extends ConsumerWidget {
               backgroundColor: AppColors.sunset500,
               child: Text(
                 initial,
-                style: GoogleFonts.sora(
+                style: tt.titleSmall?.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
@@ -305,6 +306,7 @@ class _StoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
     final surface = Theme.of(context).colorScheme.surface;
     final avatarBg = ringColors.isNotEmpty ? ringColors[0].withAlpha(180) : AppColors.blue500;
 
@@ -340,7 +342,7 @@ class _StoryItem extends StatelessWidget {
                     ? const Icon(Icons.add, color: Colors.white, size: 20)
                     : Text(
                         initial,
-                        style: GoogleFonts.sora(
+                        style: tt.titleSmall?.copyWith(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -354,7 +356,7 @@ class _StoryItem extends StatelessWidget {
             width: 62,
             child: Text(
               label,
-              style: GoogleFonts.inter(
+              style: tt.labelSmall?.copyWith(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
               ),
@@ -447,14 +449,19 @@ class _PostHeader extends StatelessWidget {
           CircleAvatar(
             radius: 20,
             backgroundColor: post.accentColor,
-            child: Text(
-              initial,
-              style: GoogleFonts.sora(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
+            backgroundImage: post.petAvatarUrl != null
+                ? CachedNetworkImageProvider(post.petAvatarUrl!)
+                : null,
+            child: post.petAvatarUrl == null
+                ? Text(
+                    initial,
+                    style: tt.titleSmall?.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  )
+                : null,
           ),
           const SizedBox(width: 10),
           // Pet name + handle + timestamp
@@ -540,6 +547,7 @@ class _PostPhotoState extends State<_PostPhoto>
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
     final post = widget.post;
     final colors = post.gradientColors;
     final emoji = switch (post.petSpecies) {
@@ -555,11 +563,13 @@ class _PostPhotoState extends State<_PostPhoto>
         aspectRatio: 4 / 3,
         child: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: colors.length >= 2 ? colors : [colors.first, colors.first],
-            ),
+            gradient: post.imageUrls.isNotEmpty 
+                ? null 
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: colors.length >= 2 ? colors : [colors.first, colors.first],
+                  ),
           ),
           child: Stack(
             fit: StackFit.expand,
@@ -570,6 +580,9 @@ class _PostPhotoState extends State<_PostPhoto>
                   child: CachedNetworkImage(
                     imageUrl: post.imageUrls.first,
                     fit: BoxFit.cover,
+                    // Optimization: Cap decoded image size in memory.
+                    memCacheWidth: 600,
+                    maxWidthDiskCache: 1000,
                   ),
                 )
               else
@@ -608,7 +621,7 @@ class _PostPhotoState extends State<_PostPhoto>
                     ),
                     child: Text(
                       '1 / 3',
-                      style: GoogleFonts.inter(
+                      style: tt.labelSmall?.copyWith(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
@@ -637,7 +650,7 @@ class _PostPhotoState extends State<_PostPhoto>
                     ),
                     child: Text(
                       post.tag!,
-                      style: GoogleFonts.inter(
+                      style: tt.labelMedium?.copyWith(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,

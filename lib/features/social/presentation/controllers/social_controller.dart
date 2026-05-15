@@ -23,6 +23,19 @@ final postDetailProvider =
       .fetchPostById(postId: postId, activePetId: activePetId);
 });
 
+/// Watches a specific post from the feed state for real-time updates.
+final postProvider = Provider.autoDispose.family<FeedPost?, String>((ref, postId) {
+  final activePetId = ref.watch(activePetIdProvider) ?? '';
+  final feed = ref.watch(socialControllerProvider(activePetId)).valueOrNull;
+  if (feed == null) return null;
+  
+  try {
+    return feed.firstWhere((p) => p.id == postId);
+  } catch (_) {
+    return null;
+  }
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Notifier
 // ─────────────────────────────────────────────────────────────────────────────
@@ -162,5 +175,32 @@ class SocialNotifier extends FamilyAsyncNotifier<List<FeedPost>, String> {
       // 3. Rollback on failure.
       state = AsyncData(prev);
     }
+  }
+  /// Optimistically increments the comment count for a post.
+  /// Called when a user submits a new comment.
+  void incrementCommentCount(String postId) {
+    final prev = state.valueOrNull;
+    if (prev == null) return;
+
+    final idx = prev.indexWhere((p) => p.id == postId);
+    if (idx == -1) return;
+
+    final updated = List<FeedPost>.from(prev)
+      ..[idx] = prev[idx].copyWithIncrementedComment();
+    state = AsyncData(updated);
+  }
+
+  /// Optimistically decrements the comment count for a post.
+  /// Called when a user deletes a comment.
+  void decrementCommentCount(String postId) {
+    final prev = state.valueOrNull;
+    if (prev == null) return;
+
+    final idx = prev.indexWhere((p) => p.id == postId);
+    if (idx == -1) return;
+
+    final updated = List<FeedPost>.from(prev)
+      ..[idx] = prev[idx].copyWithDecrementedComment();
+    state = AsyncData(updated);
   }
 }

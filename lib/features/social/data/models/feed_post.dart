@@ -25,6 +25,7 @@ class FeedPost {
     this.tributes = 0,
     this.breed,
     this.imageUrls = const [],
+    this.petAvatarUrl,
   });
 
   final String id;
@@ -58,6 +59,7 @@ class FeedPost {
   final String? breed;
 
   final List<String> imageUrls;
+  final String? petAvatarUrl;
 
   // ── Optimistic copy helpers ───────────────────────────────────────────────
 
@@ -74,6 +76,13 @@ class FeedPost {
     likes: likes,
     comments: comments,
   );
+
+  /// Returns a copy with incremented comment count (used for optimistic UI).
+  FeedPost copyWithIncrementedComment() => _copy(comments: comments + 1);
+
+  /// Returns a copy with decremented comment count (used for optimistic UI).
+  FeedPost copyWithDecrementedComment() =>
+      _copy(comments: comments > 0 ? comments - 1 : 0);
 
   FeedPost _copy({
     bool? isLiked,
@@ -100,5 +109,6 @@ class FeedPost {
     tributes: tributes,
     breed: breed,
     imageUrls: imageUrls,
+    petAvatarUrl: petAvatarUrl,
   );
 }

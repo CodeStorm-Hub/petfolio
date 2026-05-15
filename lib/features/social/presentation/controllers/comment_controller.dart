@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/comment.dart';
 import '../../data/repositories/comment_repository.dart';
+import 'social_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Provider
@@ -62,6 +63,9 @@ class CommentNotifier
       );
 
       state = AsyncData([...previousComments, newComment]);
+      
+      // Optimistically update the parent feed's comment count
+      ref.read(socialControllerProvider(petId).notifier).incrementCommentCount(arg);
     } catch (e) {
       // Restore previous state so the list doesn't disappear on error.
       state = AsyncData(previousComments);
@@ -81,6 +85,12 @@ class CommentNotifier
     try {
       // 2. Background delete.
       await _repo.deleteComment(commentId);
+      
+      // Optimistically update the parent feed's comment count
+      final activePetId = ref.read(activePetControllerProvider)?.id;
+      if (activePetId != null) {
+        ref.read(socialControllerProvider(activePetId).notifier).decrementCommentCount(arg);
+      }
     } catch (_) {
       // 3. Rollback on failure.
       state = AsyncData(prev);
