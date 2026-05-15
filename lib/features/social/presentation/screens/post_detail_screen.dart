@@ -100,11 +100,15 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final comments = ref.watch(commentListProvider(widget.postId));
 
-    // If the caller passed a FeedPost via router extra, use it immediately.
-    // Otherwise (deep link / hot-restart) fetch from Supabase.
-    final postAsync = widget.post != null
-        ? AsyncValue.data(widget.post!)
-        : ref.watch(postDetailProvider(widget.postId));
+    // Try to get the post from the feed provider first (for real-time updates).
+    final feedPost = ref.watch(postProvider(widget.postId));
+    
+    // If the feed has it, use it. Otherwise, use the one passed via extra or fetch it.
+    final postAsync = feedPost != null
+        ? AsyncValue.data(feedPost)
+        : (widget.post != null
+            ? AsyncValue.data(widget.post!)
+            : ref.watch(postDetailProvider(widget.postId)));
 
     // Show a full-screen spinner while the post is loading from the network.
     if (postAsync.isLoading) {
@@ -159,13 +163,36 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
               color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
-        title: Text(
-          post.petName,
-          style: GoogleFonts.sora(
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 14,
+              backgroundColor: post.accentColor,
+              backgroundImage: post.petAvatarUrl != null
+                  ? CachedNetworkImageProvider(post.petAvatarUrl!)
+                  : null,
+              child: post.petAvatarUrl == null
+                  ? Text(
+                      post.petName.isNotEmpty ? post.petName[0].toUpperCase() : '?',
+                      style: GoogleFonts.sora(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              post.petName,
+              style: GoogleFonts.sora(
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ],
         ),
         centerTitle: true,
         actions: [

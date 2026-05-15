@@ -23,6 +23,19 @@ final postDetailProvider =
       .fetchPostById(postId: postId, activePetId: activePetId);
 });
 
+/// Watches a specific post from the feed state for real-time updates.
+final postProvider = Provider.autoDispose.family<FeedPost?, String>((ref, postId) {
+  final activePetId = ref.watch(activePetIdProvider) ?? '';
+  final feed = ref.watch(socialControllerProvider(activePetId)).valueOrNull;
+  if (feed == null) return null;
+  
+  try {
+    return feed.firstWhere((p) => p.id == postId);
+  } catch (_) {
+    return null;
+  }
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Notifier
 // ─────────────────────────────────────────────────────────────────────────────
