@@ -1,16 +1,40 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../features/pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/feed_post.dart';
 import '../../data/repositories/social_repository.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Provider
+// Providers
 // ─────────────────────────────────────────────────────────────────────────────
 
 final socialControllerProvider =
     AsyncNotifierProvider.family<SocialNotifier, List<FeedPost>, String>(
   SocialNotifier.new,
 );
+
+/// Fetches a single post by ID — used as a fallback on deep links / restarts.
+final postDetailProvider =
+    FutureProvider.autoDispose.family<FeedPost, String>((ref, postId) async {
+  final activePetId = ref.watch(activePetIdProvider) ?? '';
+  return ref
+      .read(socialRepositoryProvider)
+      .fetchPostById(postId: postId, activePetId: activePetId);
+});
+
+/// Watches a specific post from the feed state for real-time updates.
+final postProvider = Provider.autoDispose.family<FeedPost?, String>((ref, postId) {
+  final activePetId = ref.watch(activePetIdProvider) ?? '';
+  final feed = ref.watch(socialControllerProvider(activePetId)).valueOrNull;
+  if (feed == null) return null;
+  
+  try {
+    return feed.firstWhere((p) => p.id == postId);
+  } catch (_) {
+    return null;
+  }
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Notifier
@@ -24,9 +48,49 @@ final socialControllerProvider =
 ///   3. Await the Supabase write — [SocialRepository] throws on failure.
 ///   4. On catch, restore the snapshot — UI reverts transparently.
 class SocialNotifier extends FamilyAsyncNotifier<List<FeedPost>, String> {
+  RealtimeChannel? _channel;
+
   @override
   Future<List<FeedPost>> build(String petId) async {
-    return _repo.fetchFeed(activePetId: petId);
+    final posts = await _repo.fetchFeed(activePetId: petId);
+
+    _channel?.unsubscribe();
+    _channel = Supabase.instance.client
+        .channel('public:posts')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'posts',
+          callback: (payload) {
+            final newRow = payload.newRecord;
+            final postId = newRow['id'] as String?;
+            if (postId == null) return;
+            
+            final likeCount = newRow['like_count'] as int?;
+            final commentCount = newRow['comment_count'] as int?;
+
+            final current = state.valueOrNull;
+            if (current == null) return;
+
+            final idx = current.indexWhere((p) => p.id == postId);
+            if (idx == -1) return;
+
+            final updated = List<FeedPost>.from(current);
+            updated[idx] = updated[idx].copyWithCounts(
+              likes: likeCount,
+              comments: commentCount,
+            );
+            
+            state = AsyncData(updated);
+          },
+        )
+        .subscribe();
+
+    ref.onDispose(() {
+      _channel?.unsubscribe();
+    });
+
+    return posts;
   }
 
   SocialRepository get _repo => ref.read(socialRepositoryProvider);
@@ -66,38 +130,77 @@ class SocialNotifier extends FamilyAsyncNotifier<List<FeedPost>, String> {
         liked: nowLiked,
       );
     } catch (_) {
-      // 3. Rollback — heart returns to its previous state.
       state = AsyncData(prev);
     }
   }
 
-  // ── Memorial candle ───────────────────────────────────────────────────────
+  // ── Edit caption ──────────────────────────────────────────────────────────
 
-  Future<void> toggleCandle(String postId) async {
+  /// Edits a post's caption with an optimistic update.
+  Future<void> updateCaption(String postId, String newCaption) async {
     final prev = state.valueOrNull;
     if (prev == null) return;
 
     final idx = prev.indexWhere((p) => p.id == postId);
     if (idx == -1) return;
 
-    final post = prev[idx];
-    final nowLit = !post.isCandleLit;
-
-    // 1. Optimistic update.
+    // 1. Optimistic update — caption changes immediately in the feed.
     final updated = List<FeedPost>.from(prev)
-      ..[idx] = post.copyWithCandle(lit: nowLit);
+      ..[idx] = prev[idx].copyWithCaption(newCaption);
     state = AsyncData(updated);
 
     try {
-      // 2. Background write — throws on failure.
-      await _repo.toggleCandle(
-        postId: postId,
-        petId: arg,
-        lit: nowLit,
-      );
+      // 2. Background write.
+      await _repo.updatePostCaption(postId: postId, newCaption: newCaption);
     } catch (_) {
-      // 3. Rollback.
+      // 3. Rollback on failure.
       state = AsyncData(prev);
     }
+  }
+
+  // ── Delete post ───────────────────────────────────────────────────────────
+
+  /// Removes a post from the feed with optimistic removal.
+  Future<void> deletePost(String postId) async {
+    final prev = state.valueOrNull;
+    if (prev == null) return;
+
+    // 1. Optimistic remove — post disappears from feed instantly.
+    state = AsyncData(prev.where((p) => p.id != postId).toList());
+
+    try {
+      // 2. Background delete.
+      await _repo.deletePost(postId);
+    } catch (_) {
+      // 3. Rollback on failure.
+      state = AsyncData(prev);
+    }
+  }
+  /// Optimistically increments the comment count for a post.
+  /// Called when a user submits a new comment.
+  void incrementCommentCount(String postId) {
+    final prev = state.valueOrNull;
+    if (prev == null) return;
+
+    final idx = prev.indexWhere((p) => p.id == postId);
+    if (idx == -1) return;
+
+    final updated = List<FeedPost>.from(prev)
+      ..[idx] = prev[idx].copyWithIncrementedComment();
+    state = AsyncData(updated);
+  }
+
+  /// Optimistically decrements the comment count for a post.
+  /// Called when a user deletes a comment.
+  void decrementCommentCount(String postId) {
+    final prev = state.valueOrNull;
+    if (prev == null) return;
+
+    final idx = prev.indexWhere((p) => p.id == postId);
+    if (idx == -1) return;
+
+    final updated = List<FeedPost>.from(prev)
+      ..[idx] = prev[idx].copyWithDecrementedComment();
+    state = AsyncData(updated);
   }
 }

@@ -76,6 +76,7 @@ class PetRepository {
     required String species,
     String? breed,
     String? avatarUrl,
+    String? bio,
     DateTime? dateOfBirth,
     double? weightKg,
     String? activityLevel,
@@ -90,6 +91,8 @@ class PetRepository {
       // ignore: use_null_aware_elements
       if (avatarUrl != null) 'avatar_url': avatarUrl,
       // ignore: use_null_aware_elements
+      if (bio != null) 'bio': bio,
+      // ignore: use_null_aware_elements
       if (dateOfBirth != null)
         'date_of_birth': dateOfBirth.toIso8601String().split('T').first,
       // ignore: use_null_aware_elements
@@ -97,6 +100,25 @@ class PetRepository {
       // ignore: use_null_aware_elements
       if (activityLevel != null) 'activity_level': activityLevel,
     }).select().single();
+    return Pet.fromJson(row);
+  }
+
+  Future<Pet> updatePet({
+    required String id,
+    String? name,
+    String? breed,
+    String? avatarUrl,
+    String? bio,
+  }) async {
+    final updates = <String, dynamic>{};
+    if (name != null) updates['name'] = name;
+    if (breed != null) updates['breed'] = breed;
+    if (avatarUrl != null) updates['avatar_url'] = avatarUrl;
+    if (bio != null) updates['bio'] = bio;
+    
+    if (updates.isEmpty) throw Exception('No fields to update');
+    
+    final row = await _client.from('pets').update(updates).eq('id', id).select().single();
     return Pet.fromJson(row);
   }
 

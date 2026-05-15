@@ -1,6 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -10,6 +12,7 @@ import '../../../pet_profile/presentation/controllers/active_pet_controller.dart
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
 import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/feed_post.dart';
+import '../controllers/notification_controller.dart';
 import '../controllers/social_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -140,22 +143,20 @@ class _SocialView extends ConsumerWidget {
                             itemCount: posts.length,
                             itemBuilder: (ctx, i) {
                               final post = posts[i];
-                              final card = post.isMemorial
-                                  ? _MemorialPost(
-                                      post: post,
-                                      onCandle: () =>
-                                          notifier.toggleCandle(post.id),
-                                    )
-                                  : _RegularPost(
-                                      post: post,
-                                      onLike: () =>
-                                          notifier.toggleLike(post.id),
-                                    );
                               return Padding(
                                 padding: EdgeInsets.only(
                                   bottom: i == posts.length - 1 ? 0 : 16,
                                 ),
-                                child: card,
+                                child: RepaintBoundary(
+                                  child: _RegularPost(
+                                    post: post,
+                                    onLike: () => notifier.toggleLike(post.id),
+                                    onTapPost: () => context.push(
+                                      '/social/post/${post.id}',
+                                      extra: post,
+                                    ),
+                                  ),
+                                ),
                               );
                             },
                           ),
@@ -167,6 +168,106 @@ class _SocialView extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push('/social/create'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        icon: const Icon(Icons.add_photo_alternate_rounded),
+        label: const Text(
+          'Post',
+          style: TextStyle(fontWeight: FontWeight.w700, fontFamily: 'Sora'),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Header
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _SocialHeader extends ConsumerWidget {
+  const _SocialHeader({required this.pet});
+  final Pet pet;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tt = Theme.of(context).textTheme;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final initial = pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?';
+    final unreadCount = ref.watch(unreadCountProvider);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 8, 8),
+      child: Row(
+        children: [
+          // Active pet avatar
+          GestureDetector(
+            onTap: () => context.push('/social/profile/${pet.id}'),
+            child: CircleAvatar(
+              radius: 18,
+              backgroundColor: AppColors.sunset500,
+              child: Text(
+                initial,
+                style: tt.titleSmall?.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          const Spacer(),
+          Text('Pack', style: tt.headlineMedium),
+          const Spacer(),
+          IconButton.filled(
+            style: IconButton.styleFrom(
+              backgroundColor: pt.pillarSocial,
+              foregroundColor: Colors.white,
+            ),
+            icon: const Icon(Icons.add_rounded, size: 22),
+            onPressed: () => context.push('/social/create'),
+          ),
+          const SizedBox(width: 4),
+          // Notification bell with animated unread badge
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              IconButton(
+                icon: Icon(Icons.notifications_none_rounded, color: pt.ink500),
+                onPressed: () => context.push('/social/notifications'),
+              ),
+              if (unreadCount > 0)
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: IgnorePointer(
+                    child: Container(
+                      width: 18,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: AppColors.coral500,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: pt.surface1, width: 1.5),
+                      ),
+                      child: Center(
+                        child: Text(
+                          unreadCount > 9 ? '9+' : '$unreadCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -185,35 +286,18 @@ class _StoriesRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 96,
-      child: ListView.separated(
+      child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        separatorBuilder: (_, _) => const SizedBox(width: 14),
-        // 1 "Your story" item + one per post
-        itemCount: 1 + posts.length,
-        itemBuilder: (ctx, i) {
-          if (i == 0) {
-            final initial =
-                pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?';
-            return _StoryItem(
-              initial: initial,
-              label: 'Your story',
-              ringColors: const [AppColors.sunset500, AppColors.coral500],
-              isAdd: true,
-            );
-          }
-          final post = posts[i - 1];
-          final initial =
-              post.petName.isNotEmpty ? post.petName[0].toUpperCase() : '?';
-          return _StoryItem(
-            initial: initial,
-            label: post.petName,
-            ringColors: post.isMemorial
-                ? const [AppColors.ink300, AppColors.ink500]
-                : [post.accentColor, post.gradientColors.last],
-            isMemorial: post.isMemorial,
-          );
-        },
+        children: [
+          _StoryItem(
+            initial: pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
+            label: 'Your story',
+            ringColors: const [AppColors.sunset500, AppColors.coral500],
+            isAdd: true,
+            onTap: () => context.push('/social/create'),
+          ),
+        ],
       ),
     );
   }
@@ -225,23 +309,22 @@ class _StoryItem extends StatelessWidget {
     required this.label,
     required this.ringColors,
     this.isAdd = false,
-    this.isMemorial = false,
+    this.onTap,
   });
   final String initial;
   final String label;
   final List<Color> ringColors;
   final bool isAdd;
-  final bool isMemorial;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
     final surface = Theme.of(context).colorScheme.surface;
-    final avatarBg = isMemorial
-        ? AppColors.ink500
-        : (ringColors.isNotEmpty ? ringColors[0].withAlpha(180) : AppColors.blue500);
+    final avatarBg = ringColors.isNotEmpty ? ringColors[0].withAlpha(180) : AppColors.blue500;
 
     return GestureDetector(
-      onTap: () {},
+      onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -272,7 +355,7 @@ class _StoryItem extends StatelessWidget {
                     ? const Icon(Icons.add, color: Colors.white, size: 20)
                     : Text(
                         initial,
-                        style: GoogleFonts.sora(
+                        style: tt.titleSmall?.copyWith(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -286,7 +369,7 @@ class _StoryItem extends StatelessWidget {
             width: 62,
             child: Text(
               label,
-              style: GoogleFonts.inter(
+              style: tt.labelSmall?.copyWith(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
               ),
@@ -306,9 +389,14 @@ class _StoryItem extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _RegularPost extends StatelessWidget {
-  const _RegularPost({required this.post, required this.onLike});
+  const _RegularPost({
+    required this.post,
+    required this.onLike,
+    required this.onTapPost,
+  });
   final FeedPost post;
   final VoidCallback onLike;
+  final VoidCallback onTapPost;
 
   @override
   Widget build(BuildContext context) {
@@ -328,8 +416,22 @@ class _RegularPost extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _PostHeader(post: post),
-          _PostPhoto(post: post),
-          _RegularFooter(post: post, onLike: onLike),
+          // The PostPhoto handles taps to navigate and double-taps to like.
+          _PostPhoto(
+            post: post,
+            onTap: onTapPost,
+            onDoubleTapLike: () {
+              if (!post.isLiked) onLike();
+            },
+          ),
+          _RegularFooter(
+            post: post,
+            onLike: onLike,
+            onComment: () => context.push(
+              '/social/post/${post.id}?focus=true',
+              extra: post,
+            ),
+          ),
         ],
       ),
     );
@@ -340,48 +442,10 @@ class _RegularPost extends StatelessWidget {
 // Memorial post
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _MemorialPost extends StatelessWidget {
-  const _MemorialPost({required this.post, required this.onCandle});
-  final FeedPost post;
-  final VoidCallback onCandle;
-
-  // Ivory paper colour from the design spec
-  static const _ivory = Color(0xFFFAF6EE);
-
-  @override
-  Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: _ivory,
-        borderRadius:
-            BorderRadius.circular(PetfolioThemeExtension.radius2xl),
-        boxShadow: pt.shadowE2,
-        border: Border.all(color: AppColors.line200, width: 0.5),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _PostHeader(post: post, isMemorial: true),
-          _MemorialPhoto(post: post),
-          _MemorialFooter(post: post, onCandle: onCandle),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Shared post header (avatar + handle + location + time)
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _PostHeader extends StatelessWidget {
-  const _PostHeader({required this.post, this.isMemorial = false});
+  const _PostHeader({required this.post});
   final FeedPost post;
-  final bool isMemorial;
 
   @override
   Widget build(BuildContext context) {
@@ -389,8 +453,6 @@ class _PostHeader extends StatelessWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final initial =
         post.petName.isNotEmpty ? post.petName[0].toUpperCase() : '?';
-    final avatarBg =
-        isMemorial ? AppColors.ink500 : post.accentColor;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
@@ -399,62 +461,39 @@ class _PostHeader extends StatelessWidget {
           // Avatar
           CircleAvatar(
             radius: 20,
-            backgroundColor: avatarBg,
-            child: Text(
-              initial,
-              style: GoogleFonts.sora(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
+            backgroundColor: post.accentColor,
+            backgroundImage: post.petAvatarUrl != null
+                ? CachedNetworkImageProvider(post.petAvatarUrl!)
+                : null,
+            child: post.petAvatarUrl == null
+                ? Text(
+                    initial,
+                    style: tt.titleSmall?.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  )
+                : null,
           ),
           const SizedBox(width: 10),
-          // Handle + location
+          // Pet name + handle + timestamp
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      post.handle,
-                      style: tt.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (isMemorial) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.ink500.withAlpha(20),
-                          borderRadius: BorderRadius.circular(
-                            PetfolioThemeExtension.radiusPill,
-                          ),
-                        ),
-                        child: Text(
-                          'memorial',
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.ink500,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
+                Text(
+                  post.petName,
+                  style: tt.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 1),
                 Text(
                   post.fuzzyLocation.isEmpty
-                      ? post.timeAgo
-                      : '${post.fuzzyLocation} · ${post.timeAgo}',
-                  style: tt.labelMedium?.copyWith(color: pt.ink500),
+                      ? '@${post.handle} · ${post.timeAgo}'
+                      : '@${post.handle} · ${post.fuzzyLocation} · ${post.timeAgo}',
+                  style: tt.labelSmall?.copyWith(color: pt.ink500),
                 ),
               ],
             ),
@@ -471,12 +510,58 @@ class _PostHeader extends StatelessWidget {
 // Regular post photo area
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _PostPhoto extends StatelessWidget {
-  const _PostPhoto({required this.post});
+class _PostPhoto extends StatefulWidget {
+  const _PostPhoto({
+    required this.post,
+    required this.onTap,
+    required this.onDoubleTapLike,
+  });
   final FeedPost post;
+  final VoidCallback onTap;
+  final VoidCallback onDoubleTapLike;
+
+  @override
+  State<_PostPhoto> createState() => _PostPhotoState();
+}
+
+class _PostPhotoState extends State<_PostPhoto>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _heartAnim;
+  bool _showHeart = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _heartAnim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+  }
+
+  @override
+  void dispose() {
+    _heartAnim.dispose();
+    super.dispose();
+  }
+
+  void _handleDoubleTap() {
+    widget.onDoubleTapLike();
+    setState(() => _showHeart = true);
+    _heartAnim.forward(from: 0).then((_) {
+      Future.delayed(const Duration(milliseconds: 400), () {
+        if (mounted) {
+          _heartAnim.reverse().then((_) {
+            if (mounted) setState(() => _showHeart = false);
+          });
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final post = widget.post;
     final colors = post.gradientColors;
     final emoji = switch (post.petSpecies) {
       'cat' => '🐱',
@@ -484,93 +569,126 @@ class _PostPhoto extends StatelessWidget {
       _ => '🐶',
     };
 
-    return AspectRatio(
-      aspectRatio: 4 / 3,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: colors.length >= 2 ? colors : [colors.first, colors.first],
+    return GestureDetector(
+      onTap: widget.onTap,
+      onDoubleTap: _handleDoubleTap,
+      child: AspectRatio(
+        aspectRatio: 4 / 3,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: post.imageUrls.isNotEmpty 
+                ? null 
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: colors.length >= 2 ? colors : [colors.first, colors.first],
+                  ),
           ),
-        ),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Pet blob illustration
-            Center(
-              child: Container(
-                width: 150,
-                height: 160,
-                decoration: BoxDecoration(
-                  color: post.subjectColor.withAlpha(160),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(90),
-                    topRight: Radius.circular(75),
-                    bottomLeft: Radius.circular(60),
-                    bottomRight: Radius.circular(100),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Pet blob illustration or Real Image
+              if (post.imageUrls.isNotEmpty)
+                Positioned.fill(
+                  child: CachedNetworkImage(
+                    imageUrl: post.imageUrls.first,
+                    fit: BoxFit.cover,
+                    // Optimization: Cap decoded image size in memory.
+                    memCacheWidth: 600,
+                    maxWidthDiskCache: 1000,
+                  ),
+                )
+              else
+                Center(
+                  child: Container(
+                    width: 150,
+                    height: 160,
+                    decoration: BoxDecoration(
+                      color: post.subjectColor.withAlpha(160),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(90),
+                        topRight: Radius.circular(75),
+                        bottomLeft: Radius.circular(60),
+                        bottomRight: Radius.circular(100),
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(emoji, style: const TextStyle(fontSize: 64)),
                   ),
                 ),
-                alignment: Alignment.center,
-                child: Text(emoji, style: const TextStyle(fontSize: 64)),
-              ),
-            ),
-            // Carousel indicator
-            if (post.isCarousel)
-              Positioned(
-                top: 12,
-                right: 12,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withAlpha(100),
-                    borderRadius: BorderRadius.circular(
-                      PetfolioThemeExtension.radiusPill,
+              // Carousel indicator
+              if (post.isCarousel)
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
                     ),
-                  ),
-                  child: Text(
-                    '1 / 3',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withAlpha(100),
+                      borderRadius: BorderRadius.circular(
+                        PetfolioThemeExtension.radiusPill,
+                      ),
                     ),
-                  ),
-                ),
-              ),
-            // Tag badge
-            if (post.tag != null)
-              Positioned(
-                bottom: 12,
-                left: 12,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(30),
-                    borderRadius: BorderRadius.circular(
-                      PetfolioThemeExtension.radiusPill,
-                    ),
-                    border: Border.all(
-                      color: Colors.white.withAlpha(80),
-                    ),
-                  ),
-                  child: Text(
-                    post.tag!,
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                    child: Text(
+                      '1 / 3',
+                      style: tt.labelSmall?.copyWith(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
+              // Tag badge
+              if (post.tag != null)
+                Positioned(
+                  bottom: 12,
+                  left: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withAlpha(30),
+                      borderRadius: BorderRadius.circular(
+                        PetfolioThemeExtension.radiusPill,
+                      ),
+                      border: Border.all(
+                        color: Colors.white.withAlpha(80),
+                      ),
+                    ),
+                    child: Text(
+                      post.tag!,
+                      style: tt.labelMedium?.copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              // Big Heart animation overlay
+              if (_showHeart)
+                Center(
+                  child: ScaleTransition(
+                    scale: CurvedAnimation(
+                      parent: _heartAnim,
+                      curve: Curves.easeOutBack,
+                      reverseCurve: Curves.easeIn,
+                    ),
+                    child: Icon(
+                      Icons.favorite_rounded,
+                      size: 100,
+                      color: Colors.white.withAlpha(220),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -582,9 +700,14 @@ class _PostPhoto extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _RegularFooter extends StatelessWidget {
-  const _RegularFooter({required this.post, required this.onLike});
+  const _RegularFooter({
+    required this.post,
+    required this.onLike,
+    required this.onComment,
+  });
   final FeedPost post;
   final VoidCallback onLike;
+  final VoidCallback onComment;
 
   @override
   Widget build(BuildContext context) {
@@ -597,234 +720,108 @@ class _RegularFooter extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Caption
-          Text(
-            post.caption,
-            style: tt.bodySmall,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 10),
+          if (post.caption.isNotEmpty)
+            Text(
+              post.caption,
+              style: tt.bodySmall,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          if (post.caption.isNotEmpty) const SizedBox(height: 10),
           // Action row
           Row(
             children: [
-              // Heart like button — instantly red on tap via optimistic update
+              // ── Like ─────────────────────────────────────────────────────
               GestureDetector(
                 onTap: onLike,
                 behavior: HitTestBehavior.opaque,
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 6),
-                  child: AnimatedSwitcher(
-                    duration: PetfolioThemeExtension.durationSm,
-                    transitionBuilder: (child, animation) => ScaleTransition(
-                      scale: animation,
-                      child: child,
-                    ),
-                    child: Icon(
-                      post.isLiked
-                          ? Icons.favorite_rounded
-                          : Icons.favorite_border_rounded,
-                      key: ValueKey(post.isLiked),
-                      color: post.isLiked
-                          ? AppColors.coral500
-                          : pt.ink500,
-                      size: 24,
-                    ),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AnimatedSwitcher(
+                        duration: PetfolioThemeExtension.durationSm,
+                        transitionBuilder: (child, animation) => ScaleTransition(
+                          scale: animation,
+                          child: child,
+                        ),
+                        child: Icon(
+                          post.isLiked
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          key: ValueKey(post.isLiked),
+                          color: post.isLiked ? AppColors.coral500 : pt.ink500,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      AnimatedSwitcher(
+                        duration: PetfolioThemeExtension.durationSm,
+                        child: Text(
+                          '${post.likes}',
+                          key: ValueKey(post.likes),
+                          style: tt.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: post.isLiked ? AppColors.coral500 : pt.ink500,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              AnimatedSwitcher(
-                duration: PetfolioThemeExtension.durationSm,
-                child: Text(
-                  '${post.likes}',
-                  key: ValueKey(post.likes),
-                  style: tt.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: post.isLiked ? AppColors.coral500 : pt.ink500,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Icon(Icons.chat_bubble_outline_rounded,
-                  size: 22, color: pt.ink500),
-              const SizedBox(width: 6),
-              Text(
-                '${post.comments}',
-                style: tt.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: pt.ink500,
-                ),
-              ),
-              const Spacer(),
-              Icon(Icons.share_outlined, size: 20, color: pt.ink500),
-            ],
-          ),
-          const SizedBox(height: 12),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Memorial photo — sepia-tinted gradient
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _MemorialPhoto extends StatelessWidget {
-  const _MemorialPhoto({required this.post});
-  final FeedPost post;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = post.gradientColors;
-    final emoji = switch (post.petSpecies) {
-      'cat' => '🐱',
-      'rabbit' => '🐰',
-      _ => '🐶',
-    };
-
-    return AspectRatio(
-      aspectRatio: 4 / 3,
-      child: ColorFiltered(
-        // Sepia filter: desaturate + warm tint
-        colorFilter: const ColorFilter.matrix([
-          0.393, 0.769, 0.189, 0, 0,
-          0.349, 0.686, 0.168, 0, 0,
-          0.272, 0.534, 0.131, 0, 0,
-          0,     0,     0,     1, 0,
-        ]),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: colors.length >= 2
-                  ? colors
-                  : [colors.first, colors.first],
-            ),
-          ),
-          child: Center(
-            child: Container(
-              width: 150,
-              height: 160,
-              decoration: BoxDecoration(
-                color: post.subjectColor.withAlpha(160),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(90),
-                  topRight: Radius.circular(75),
-                  bottomLeft: Radius.circular(60),
-                  bottomRight: Radius.circular(100),
-                ),
-              ),
-              alignment: Alignment.center,
-              child: Text(emoji, style: const TextStyle(fontSize: 64)),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Memorial footer — dates + candle button + tributes
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _MemorialFooter extends StatelessWidget {
-  const _MemorialFooter({required this.post, required this.onCandle});
-  final FeedPost post;
-  final VoidCallback onCandle;
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    const candleLit = Color(0xFFE07B39); // warm amber for lit candle
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Memorial dates badge
-          if (post.memorialDates != null)
-            Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.ink500.withAlpha(15),
-                borderRadius: BorderRadius.circular(
-                  PetfolioThemeExtension.radiusPill,
-                ),
-              ),
-              child: Text(
-                post.memorialDates!,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.ink700,
-                  letterSpacing: 0.3,
-                ),
-              ),
-            ),
-          // Caption
-          Text(
-            post.caption,
-            style: tt.bodySmall,
-            maxLines: 4,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 10),
-          // Action row
-          Row(
-            children: [
-              // Candle button
+              const SizedBox(width: 12),
+              // ── Comment ──────────────────────────────────────────────────
               GestureDetector(
-                onTap: onCandle,
+                onTap: onComment,
                 behavior: HitTestBehavior.opaque,
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 6),
-                  child: AnimatedSwitcher(
-                    duration: PetfolioThemeExtension.durationSm,
-                    transitionBuilder: (child, animation) => ScaleTransition(
-                      scale: animation,
-                      child: child,
-                    ),
-                    child: Text(
-                      post.isCandleLit ? '🕯️' : '🕯',
-                      key: ValueKey(post.isCandleLit),
-                      style: const TextStyle(fontSize: 22),
-                    ),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.chat_bubble_outline_rounded,
+                        size: 22,
+                        color: pt.ink500,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${post.comments}',
+                        style: tt.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: pt.ink500,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              AnimatedSwitcher(
-                duration: PetfolioThemeExtension.durationSm,
-                child: Text(
-                  '${post.candles}',
-                  key: ValueKey(post.candles),
-                  style: tt.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: post.isCandleLit ? candleLit : pt.ink500,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              const Text('🌸', style: TextStyle(fontSize: 18)),
-              const SizedBox(width: 6),
-              Text(
-                '${post.tributes} tributes',
-                style: tt.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: pt.ink500,
                 ),
               ),
               const Spacer(),
-              Icon(Icons.share_outlined, size: 20, color: pt.ink500),
+              // ── Share ─────────────────────────────────────────────────────
+              GestureDetector(
+                onTap: () {
+                  final text =
+                      "Check out ${post.petName}'s post on Petfolio! 🐾\nhttps://petfolio.app/social/post/${post.id}";
+                  SharePlus.instance.share(ShareParams(text: text));
+                },
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                  child: Icon(
+                    Icons.share_outlined,
+                    size: 22,
+                    color: pt.ink500,
+                  ),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
         ],
       ),
     );
   }
 }
+

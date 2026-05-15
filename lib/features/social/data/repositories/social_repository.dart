@@ -1,9 +1,12 @@
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../models/feed_post.dart';
+import '../models/pet_stats.dart';
 
 final socialRepositoryProvider = Provider<SocialRepository>(
   (ref) => SocialRepository(Supabase.instance.client),
@@ -14,7 +17,7 @@ final socialRepositoryProvider = Provider<SocialRepository>(
 /// [fetchFeed] returns the public timeline joined with the post's pet
 /// (avatar / species) and the author user (handle / display name).
 ///
-/// [toggleLike] and [toggleCandle] **throw** on failure so that
+/// [toggleLike] **throws** on failure so that
 /// [SocialNotifier] can catch the error and roll back the optimistic update.
 class SocialRepository {
   SocialRepository(this._client);
@@ -34,20 +37,27 @@ class SocialRepository {
   /// Joins on `pets` for avatar/species/breed and on `users` for the handle.
   /// A nested `post_likes` selection lets us compute `isLiked` for the
   /// currently active pet without a second round-trip.
-  Future<List<FeedPost>> fetchFeed({required String activePetId}) async {
-    final rows = await _client
+  Future<List<FeedPost>> fetchFeed({String? activePetId}) async {
+    var query = _client
         .from('posts')
         .select('''
           id,
           content,
+          image_urls,
+          created_at,
           like_count,
           comment_count,
-          created_at,
           pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
           author:users!posts_author_id_fkey(id, username, display_name, avatar_url),
           post_likes(pet_id)
         ''')
-        .eq('visibility', 'public')
+        .eq('visibility', 'public');
+
+    if (activePetId != null) {
+      query = query.eq('post_likes.pet_id', activePetId);
+    }
+
+    final rows = await query
         .order('created_at', ascending: false)
         .limit(50);
 
@@ -57,7 +67,69 @@ class SocialRepository {
         .toList(growable: false);
   }
 
-  FeedPost _rowToFeedPost(Map<String, dynamic> r, String activePetId) {
+  /// Fetches posts authored by a specific pet.
+  Future<List<FeedPost>> fetchPostsForPet(String petId, {String? activePetId}) async {
+    var query = _client
+        .from('posts')
+        .select('''
+          id,
+          content,
+          image_urls,
+          created_at,
+          like_count,
+          comment_count,
+          pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
+          author:users!posts_author_id_fkey(id, username, display_name, avatar_url),
+          post_likes(pet_id)
+        ''')
+        .eq('pet_id', petId);
+
+    if (activePetId != null) {
+      query = query.eq('post_likes.pet_id', activePetId);
+    }
+
+    final rows = await query
+        .order('created_at', ascending: false)
+        .limit(50);
+
+    return (rows as List)
+        .cast<Map<String, dynamic>>()
+        .map((r) => _rowToFeedPost(r, activePetId))
+        .toList(growable: false);
+  }
+
+  /// Fetches a single post by its ID.
+  ///
+  /// Used when the user navigates directly to `/social/post/:postId` via a
+  /// deep link or hot-restart, where `state.extra` is null.
+  Future<FeedPost> fetchPostById({
+    required String postId,
+    String? activePetId,
+  }) async {
+    var query = _client
+        .from('posts')
+        .select('''
+          id,
+          content,
+          image_urls,
+          created_at,
+          like_count,
+          comment_count,
+          pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
+          author:users!posts_author_id_fkey(id, username, display_name, avatar_url),
+          post_likes(pet_id)
+        ''');
+
+    if (activePetId != null) {
+      query = query.eq('post_likes.pet_id', activePetId);
+    }
+
+    final row = await query.eq('id', postId).single();
+
+    return _rowToFeedPost(Map<String, dynamic>.from(row as Map), activePetId);
+  }
+
+  FeedPost _rowToFeedPost(Map<String, dynamic> r, String? activePetId) {
     final pet = (r['pet'] as Map?)?.cast<String, dynamic>() ?? const {};
     final author = (r['author'] as Map?)?.cast<String, dynamic>() ?? const {};
     final likes = (r['post_likes'] as List?) ?? const [];
@@ -65,7 +137,8 @@ class SocialRepository {
     final petName = (pet['name'] as String?) ?? 'Unknown';
     final petSpecies = (pet['species'] as String?) ?? 'dog';
     final breed = pet['breed'] as String?;
-    final handle = (author['username'] as String?) ??
+    final handle =
+        (author['username'] as String?) ??
         (author['display_name'] as String?) ??
         'petfolio_user';
 
@@ -77,6 +150,7 @@ class SocialRepository {
 
     return FeedPost(
       id: r['id'] as String,
+      petId: (pet['id'] as String?) ?? '',
       handle: handle,
       petName: petName,
       petSpecies: petSpecies,
@@ -90,6 +164,8 @@ class SocialRepository {
       gradientColors: palette.gradient,
       subjectColor: palette.subject,
       breed: breed,
+      imageUrls: (r['image_urls'] as List?)?.cast<String>() ?? const [],
+      petAvatarUrl: pet['avatar_url'] as String?,
     );
   }
 
@@ -111,22 +187,14 @@ class SocialRepository {
         return const _SpeciesPalette(
           accent: AppColors.meadow500,
           subject: Color(0xFF4F8C72),
-          gradient: [
-            Color(0xFFE3F1E9),
-            Color(0xFF9CCDB3),
-            AppColors.meadow500,
-          ],
+          gradient: [Color(0xFFE3F1E9), Color(0xFF9CCDB3), AppColors.meadow500],
         );
       case 'dog':
       default:
         return const _SpeciesPalette(
           accent: AppColors.blue500,
           subject: Color(0xFF1D4ED8),
-          gradient: [
-            Color(0xFFBFD7FF),
-            Color(0xFF6EA8FE),
-            AppColors.blue500,
-          ],
+          gradient: [Color(0xFFBFD7FF), Color(0xFF6EA8FE), AppColors.blue500],
         );
     }
   }
@@ -149,10 +217,11 @@ class SocialRepository {
     required bool liked,
   }) async {
     if (liked) {
-      await _client.from('post_likes').upsert(
-        {'post_id': postId, 'pet_id': petId, 'user_id': _uid},
-        onConflict: 'post_id, pet_id',
-      );
+      await _client.from('post_likes').upsert({
+        'post_id': postId,
+        'pet_id': petId,
+        'user_id': _uid,
+      }, onConflict: 'post_id, pet_id');
     } else {
       await _client
           .from('post_likes')
@@ -162,25 +231,112 @@ class SocialRepository {
     }
   }
 
-  // ── Memorial candles ──────────────────────────────────────────────────────
+  // ── Post Creation ─────────────────────────────────────────────────────────
 
-  Future<void> toggleCandle({
-    required String postId,
+  Future<String> uploadImage(Uint8List bytes, String extension) async {
+    final fileName = '${DateTime.now().millisecondsSinceEpoch}.$extension';
+    final path = 'posts/$fileName';
+
+    await _client.storage.from('post-images').uploadBinary(path, bytes);
+    return _client.storage.from('post-images').getPublicUrl(path);
+  }
+
+  Future<void> createPost({
     required String petId,
-    required bool lit,
+    required String caption,
+    List<String> imageUrls = const [],
   }) async {
-    if (lit) {
-      await _client.from('post_candles').upsert(
-        {'post_id': postId, 'pet_id': petId, 'user_id': _uid},
-        onConflict: 'post_id, pet_id',
-      );
-    } else {
-      await _client
-          .from('post_candles')
-          .delete()
-          .eq('post_id', postId)
-          .eq('pet_id', petId);
-    }
+    await _client.from('posts').insert({
+      'author_id': _uid,
+      'pet_id': petId,
+      'content': caption,
+      'image_urls': imageUrls,
+      'visibility': 'public',
+    });
+  }
+
+  /// Fetches real-time stats for a pet: posts, followers, and following counts.
+  Future<PetStats> fetchPetStats(String petId) async {
+    final results = await Future.wait([
+      _client.from('posts').select().eq('pet_id', petId).count(CountOption.exact),
+      _client.from('pet_follows').select().eq('following_pet_id', petId).count(CountOption.exact),
+      _client.from('pet_follows').select().eq('follower_pet_id', petId).count(CountOption.exact),
+    ]);
+
+    return PetStats(
+      postCount: results[0].count,
+      followerCount: results[1].count,
+      followingCount: results[2].count,
+    );
+  }
+  // ── Follow system ─────────────────────────────────────────────────────────
+
+  /// Returns true if [followerPetId] is currently following [followingPetId].
+  Future<bool> isFollowing({
+    required String followerPetId,
+    required String followingPetId,
+  }) async {
+    final result = await _client
+        .from('pet_follows')
+        .select()
+        .eq('follower_pet_id', followerPetId)
+        .eq('following_pet_id', followingPetId)
+        .maybeSingle();
+    return result != null;
+  }
+
+  /// Creates a follow relationship — [followerPetId] follows [followingPetId].
+  Future<void> followPet({
+    required String followerPetId,
+    required String followingPetId,
+  }) async {
+    await _client.from('pet_follows').upsert(
+      {
+        'follower_pet_id': followerPetId,
+        'following_pet_id': followingPetId,
+      },
+      onConflict: 'follower_pet_id, following_pet_id',
+    );
+  }
+
+  /// Removes the follow relationship — [followerPetId] unfollows [followingPetId].
+  Future<void> unfollowPet({
+    required String followerPetId,
+    required String followingPetId,
+  }) async {
+    await _client
+        .from('pet_follows')
+        .delete()
+        .eq('follower_pet_id', followerPetId)
+        .eq('following_pet_id', followingPetId);
+  }
+
+  // ── Post Management ───────────────────────────────────────────────────────
+
+  /// Updates the caption of an existing post.
+  ///
+  /// The RLS policy on the `posts` table ensures only the post owner can
+  /// update it. Throws on failure.
+  Future<void> updatePostCaption({
+    required String postId,
+    required String newCaption,
+  }) async {
+    await _client
+        .from('posts')
+        .update({'content': newCaption.trim()})
+        .eq('id', postId)
+        .eq('author_id', _uid); // belt-and-suspenders guard
+  }
+
+  /// Permanently deletes a post by [postId].
+  ///
+  /// Cascades to its comments and likes via the DB foreign-key constraints.
+  Future<void> deletePost(String postId) async {
+    await _client
+        .from('posts')
+        .delete()
+        .eq('id', postId)
+        .eq('author_id', _uid); // belt-and-suspenders guard
   }
 }
 
