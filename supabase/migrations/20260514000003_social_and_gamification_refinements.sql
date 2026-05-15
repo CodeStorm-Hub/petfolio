@@ -8,7 +8,8 @@
 -- have a unique @handle (e.g. 'biscuit_paws').
 
 ALTER TABLE public.pets
-  ADD COLUMN IF NOT EXISTS handle TEXT UNIQUE;
+  ADD COLUMN IF NOT EXISTS handle TEXT UNIQUE,
+  ADD COLUMN IF NOT EXISTS accent_color TEXT DEFAULT '#FF6B9D';
 
 -- Seed handles for existing pets (if any) based on their names to prevent nulls
 UPDATE public.pets 

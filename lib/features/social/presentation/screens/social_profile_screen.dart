@@ -212,11 +212,13 @@ class SocialProfileScreen extends ConsumerWidget {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final post = posts[index];
+                      Widget child;
                       if (post.imageUrls.isNotEmpty) {
-                        return CachedNetworkImage(
+                        child = CachedNetworkImage(
                           imageUrl: post.imageUrls.first,
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(color: pt.surface2),
+                          placeholder: (context, url) =>
+                              Container(color: pt.surface2),
                           errorWidget: (context, url, error) => Container(
                             color: pt.surface2,
                             child: Icon(Icons.error_outline, color: pt.ink300),
@@ -224,7 +226,7 @@ class SocialProfileScreen extends ConsumerWidget {
                         );
                       } else {
                         // Text post placeholder
-                        return Container(
+                        child = Container(
                           color: post.accentColor.withAlpha(50),
                           padding: const EdgeInsets.all(8),
                           child: Center(
@@ -240,6 +242,14 @@ class SocialProfileScreen extends ConsumerWidget {
                           ),
                         );
                       }
+
+                      return GestureDetector(
+                        onTap: () => context.push(
+                          '/social/post/${post.id}',
+                          extra: post,
+                        ),
+                        child: child,
+                      );
                     },
                     childCount: posts.length,
                   ),

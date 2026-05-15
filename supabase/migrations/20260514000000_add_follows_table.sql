@@ -7,6 +7,9 @@ CREATE TABLE pet_follows (
   UNIQUE(follower_pet_id, following_pet_id)
 );
 
+-- Index for counting followers efficiently
+CREATE INDEX IF NOT EXISTS pet_follows_following_pet_id_idx ON public.pet_follows(following_pet_id);
+
 -- Enable RLS
 ALTER TABLE pet_follows ENABLE ROW LEVEL SECURITY;
 

@@ -38,19 +38,26 @@ class SocialRepository {
   /// A nested `post_likes` selection lets us compute `isLiked` for the
   /// currently active pet without a second round-trip.
   Future<List<FeedPost>> fetchFeed({String? activePetId}) async {
-    final rows = await _client
+    var query = _client
         .from('posts')
         .select('''
           id,
           content,
           image_urls,
           created_at,
+          like_count,
+          comment_count,
           pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
           author:users!posts_author_id_fkey(id, username, display_name, avatar_url),
-          post_likes(pet_id),
-          comments(id)
+          post_likes(pet_id)
         ''')
-        .eq('visibility', 'public')
+        .eq('visibility', 'public');
+
+    if (activePetId != null) {
+      query = query.eq('post_likes.pet_id', activePetId);
+    }
+
+    final rows = await query
         .order('created_at', ascending: false)
         .limit(50);
 
@@ -62,19 +69,26 @@ class SocialRepository {
 
   /// Fetches posts authored by a specific pet.
   Future<List<FeedPost>> fetchPostsForPet(String petId, {String? activePetId}) async {
-    final rows = await _client
+    var query = _client
         .from('posts')
         .select('''
           id,
           content,
           image_urls,
           created_at,
+          like_count,
+          comment_count,
           pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
           author:users!posts_author_id_fkey(id, username, display_name, avatar_url),
-          post_likes(pet_id),
-          comments(id)
+          post_likes(pet_id)
         ''')
-        .eq('pet_id', petId)
+        .eq('pet_id', petId);
+
+    if (activePetId != null) {
+      query = query.eq('post_likes.pet_id', activePetId);
+    }
+
+    final rows = await query
         .order('created_at', ascending: false)
         .limit(50);
 
@@ -92,20 +106,25 @@ class SocialRepository {
     required String postId,
     String? activePetId,
   }) async {
-    final row = await _client
+    var query = _client
         .from('posts')
         .select('''
           id,
           content,
           image_urls,
           created_at,
+          like_count,
+          comment_count,
           pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
           author:users!posts_author_id_fkey(id, username, display_name, avatar_url),
-          post_likes(pet_id),
-          comments(id)
-        ''')
-        .eq('id', postId)
-        .single();
+          post_likes(pet_id)
+        ''');
+
+    if (activePetId != null) {
+      query = query.eq('post_likes.pet_id', activePetId);
+    }
+
+    final row = await query.eq('id', postId).single();
 
     return _rowToFeedPost(Map<String, dynamic>.from(row as Map), activePetId);
   }
@@ -114,7 +133,6 @@ class SocialRepository {
     final pet = (r['pet'] as Map?)?.cast<String, dynamic>() ?? const {};
     final author = (r['author'] as Map?)?.cast<String, dynamic>() ?? const {};
     final likes = (r['post_likes'] as List?) ?? const [];
-    final comments = (r['comments'] as List?) ?? const [];
 
     final petName = (pet['name'] as String?) ?? 'Unknown';
     final petSpecies = (pet['species'] as String?) ?? 'dog';
@@ -139,8 +157,8 @@ class SocialRepository {
       accentColor: palette.accent,
       fuzzyLocation: '', // not modelled in DB yet
       caption: (r['content'] as String?) ?? '',
-      likes: likes.length,
-      comments: comments.length,
+      likes: (r['like_count'] as int?) ?? 0,
+      comments: (r['comment_count'] as int?) ?? 0,
       timeAgo: _timeAgo(DateTime.tryParse(r['created_at'] as String? ?? '')),
       isLiked: isLiked,
       gradientColors: palette.gradient,
