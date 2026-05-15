@@ -12,7 +12,6 @@ import '../../../pet_profile/presentation/controllers/active_pet_controller.dart
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
 import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/feed_post.dart';
-import '../controllers/notification_controller.dart';
 import '../controllers/social_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -179,95 +178,6 @@ class _SocialView extends ConsumerWidget {
           'Post',
           style: TextStyle(fontWeight: FontWeight.w700, fontFamily: 'Sora'),
         ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Header
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _SocialHeader extends ConsumerWidget {
-  const _SocialHeader({required this.pet});
-  final Pet pet;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tt = Theme.of(context).textTheme;
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final initial = pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?';
-    final unreadCount = ref.watch(unreadCountProvider);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 8, 8),
-      child: Row(
-        children: [
-          // Active pet avatar
-          GestureDetector(
-            onTap: () => context.push('/social/profile/${pet.id}'),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundColor: AppColors.sunset500,
-              child: Text(
-                initial,
-                style: tt.titleSmall?.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-          const Spacer(),
-          Text('Pack', style: tt.headlineMedium),
-          const Spacer(),
-          IconButton.filled(
-            style: IconButton.styleFrom(
-              backgroundColor: pt.pillarSocial,
-              foregroundColor: Colors.white,
-            ),
-            icon: const Icon(Icons.add_rounded, size: 22),
-            onPressed: () => context.push('/social/create'),
-          ),
-          const SizedBox(width: 4),
-          // Notification bell with animated unread badge
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              IconButton(
-                icon: Icon(Icons.notifications_none_rounded, color: pt.ink500),
-                onPressed: () => context.push('/social/notifications'),
-              ),
-              if (unreadCount > 0)
-                Positioned(
-                  top: 6,
-                  right: 6,
-                  child: IgnorePointer(
-                    child: Container(
-                      width: 18,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        color: AppColors.coral500,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: pt.surface1, width: 1.5),
-                      ),
-                      child: Center(
-                        child: Text(
-                          unreadCount > 9 ? '9+' : '$unreadCount',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ],
       ),
     );
   }
