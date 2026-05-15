@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/theme/theme.dart';
+import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
+import '../controllers/follow_controller.dart';
 import '../controllers/social_profile_controller.dart';
 
 class SocialProfileScreen extends ConsumerWidget {
@@ -14,25 +16,37 @@ class SocialProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // For now, assuming we are viewing the active pet's profile.
-    // If viewing another pet in the future, we would look it up from a pet list provider.
-    final pet = ref.watch(activePetControllerProvider);
+    final activePet = ref.watch(activePetControllerProvider);
     final postsAsync = ref.watch(socialProfilePostsProvider(petId));
     final statsAsync = ref.watch(petStatsProvider(petId));
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
-    // Handle case where pet is null or doesn't match
-    if (pet == null || pet.id != petId) {
+    // Determine if this profile belongs to the active pet (own profile)
+    // or to another pet (public profile).
+    final isOwnProfile = activePet?.id == petId;
+
+    // For own profile, we use the activePet data directly.
+    // For other profiles, we would need a separate pet-lookup provider.
+    // For now, we gracefully handle the case where active pet is null.
+    if (activePet == null) {
       return Scaffold(
         backgroundColor: pt.surface1,
-        appBar: AppBar(
-          backgroundColor: cs.surface,
-          leading: const BackButton(),
-        ),
+        appBar: AppBar(backgroundColor: cs.surface, leading: const BackButton()),
         body: const Center(child: CircularProgressIndicator.adaptive()),
       );
     }
+
+    // Use activePet for own profile; for other profiles,
+    // fall back to a placeholder until a pet-lookup provider is added.
+    final profilePetName = isOwnProfile ? activePet.name : 'Pet Profile';
+    final profilePetBreed = isOwnProfile ? activePet.breed : null;
+    final profilePetBio = isOwnProfile
+        ? (activePet.bio != null && activePet.bio!.isNotEmpty
+            ? activePet.bio!
+            : 'Living my best ${activePet.speciesEnum.name} life. 🐾')
+        : '';
+    final profileAvatarUrl = isOwnProfile ? activePet.avatarUrl : null;
 
     return Scaffold(
       backgroundColor: pt.surface1,
@@ -45,7 +59,7 @@ class SocialProfileScreen extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          pet.name,
+          profilePetName,
           style: TextStyle(
             fontFamily: 'Sora',
             fontWeight: FontWeight.w700,
@@ -74,18 +88,18 @@ class SocialProfileScreen extends ConsumerWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(color: pt.line200, width: 1.5),
-                          image: pet.avatarUrl != null && pet.avatarUrl!.isNotEmpty
+                          image: profileAvatarUrl != null && profileAvatarUrl.isNotEmpty
                               ? DecorationImage(
-                                  image: CachedNetworkImageProvider(pet.avatarUrl!),
+                                  image: CachedNetworkImageProvider(profileAvatarUrl),
                                   fit: BoxFit.cover,
                                 )
                               : null,
                           color: pt.surface2,
                         ),
-                        child: pet.avatarUrl == null || pet.avatarUrl!.isEmpty
+                        child: profileAvatarUrl == null || profileAvatarUrl.isEmpty
                             ? Center(
                                 child: Text(
-                                  pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
+                                  profilePetName.isNotEmpty ? profilePetName[0].toUpperCase() : '?',
                                   style: TextStyle(
                                     fontSize: 32,
                                     fontWeight: FontWeight.w600,
@@ -128,86 +142,34 @@ class SocialProfileScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Bio
                   Text(
-                    pet.name,
+                    profilePetName,
                     style: const TextStyle(
                       fontFamily: 'Sora',
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
                     ),
                   ),
-                  if (pet.breed != null)
+                  if (profilePetBreed != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(
-                        pet.breed!,
+                        profilePetBreed,
                         style: TextStyle(color: pt.ink500, fontSize: 14),
                       ),
                     ),
                   const SizedBox(height: 8),
                   Text(
-                    pet.bio != null && pet.bio!.isNotEmpty
-                        ? pet.bio!
-                        : 'Living my best ${pet.speciesEnum.name} life. 🐾',
+                    profilePetBio,
                     style: TextStyle(color: cs.onSurface, fontSize: 14),
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 36,
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: cs.onSurface,
-                              side: BorderSide(color: pt.line200),
-                              padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            onPressed: () => context.push('/pet/${pet.id}/edit'),
-                            child: const Text(
-                              'Edit Profile',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: SizedBox(
-                          height: 36,
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: cs.onSurface,
-                              side: BorderSide(color: pt.line200),
-                              padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            onPressed: () {
-                              final text = "Check out ${pet.name}'s profile on Petfolio! 🐾\n"
-                                  "https://petfolio.app/social/profile/${pet.id}";
-                              Share.share(text);
-                            },
-                            child: const Text(
-                              'Share Profile',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Action buttons: show Edit+Share for own profile,
+                  // or Follow+Share for other pets.
+                  if (isOwnProfile)
+                    _OwnProfileButtons(pet: activePet, pt: pt, cs: cs)
+                  else
+                    _OtherProfileButtons(petId: petId, pt: pt, cs: cs),
                 ],
               ),
             ),
@@ -307,6 +269,170 @@ class SocialProfileScreen extends ConsumerWidget {
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Own-profile action buttons (Edit Profile + Share Profile)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _OwnProfileButtons extends StatelessWidget {
+  const _OwnProfileButtons({
+    required this.pet,
+    required this.pt,
+    required this.cs,
+  });
+
+  final Pet pet;
+  final PetfolioThemeExtension pt;
+  final ColorScheme cs;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: SizedBox(
+            height: 36,
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: cs.onSurface,
+                side: BorderSide(color: pt.line200),
+                padding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () => context.push('/pet/${pet.id}/edit'),
+              child: const Text(
+                'Edit Profile',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: SizedBox(
+            height: 36,
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: cs.onSurface,
+                side: BorderSide(color: pt.line200),
+                padding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                final text =
+                    "Check out ${pet.name}'s profile on Petfolio! 🐾\n"
+                    "https://petfolio.app/social/profile/${pet.id}";
+                Share.share(text);
+              },
+              child: const Text(
+                'Share Profile',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Other-pet profile action buttons (Follow / Unfollow + Share)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _OtherProfileButtons extends ConsumerWidget {
+  const _OtherProfileButtons({
+    required this.petId,
+    required this.pt,
+    required this.cs,
+  });
+
+  final String petId;
+  final PetfolioThemeExtension pt;
+  final ColorScheme cs;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final followAsync = ref.watch(followStatusProvider(petId));
+    final isFollowing = followAsync.valueOrNull ?? false;
+
+    return Row(
+      children: [
+        Expanded(
+          child: SizedBox(
+            height: 36,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              child: followAsync.isLoading
+                  ? const Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : FilledButton(
+                      key: ValueKey(isFollowing),
+                      style: FilledButton.styleFrom(
+                        backgroundColor:
+                            isFollowing ? Colors.transparent : cs.primary,
+                        foregroundColor:
+                            isFollowing ? cs.onSurface : Colors.white,
+                        side: isFollowing
+                            ? BorderSide(color: pt.line200)
+                            : null,
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () =>
+                          ref.read(followStatusProvider(petId).notifier).toggle(),
+                      child: Text(
+                        isFollowing ? 'Following' : 'Follow',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: SizedBox(
+            height: 36,
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: cs.onSurface,
+                side: BorderSide(color: pt.line200),
+                padding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                final text =
+                    "Check out this pet's profile on Petfolio! 🐾\n"
+                    "https://petfolio.app/social/profile/$petId";
+                Share.share(text);
+              },
+              child: const Text(
+                'Share Profile',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              ),
+            ),
           ),
         ),
       ],

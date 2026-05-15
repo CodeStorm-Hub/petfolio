@@ -17,7 +17,7 @@ final socialRepositoryProvider = Provider<SocialRepository>(
 /// [fetchFeed] returns the public timeline joined with the post's pet
 /// (avatar / species) and the author user (handle / display name).
 ///
-/// [toggleLike] and [toggleCandle] **throw** on failure so that
+/// [toggleLike] **throws** on failure so that
 /// [SocialNotifier] can catch the error and roll back the optimistic update.
 class SocialRepository {
   SocialRepository(this._client);
@@ -44,12 +44,11 @@ class SocialRepository {
           id,
           content,
           image_urls,
-          like_count,
-          comment_count,
           created_at,
           pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
           author:users!posts_author_id_fkey(id, username, display_name, avatar_url),
-          post_likes(pet_id)
+          post_likes(pet_id),
+          comments(id)
         ''')
         .eq('visibility', 'public')
         .order('created_at', ascending: false)
@@ -69,12 +68,11 @@ class SocialRepository {
           id,
           content,
           image_urls,
-          like_count,
-          comment_count,
           created_at,
           pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
           author:users!posts_author_id_fkey(id, username, display_name, avatar_url),
-          post_likes(pet_id)
+          post_likes(pet_id),
+          comments(id)
         ''')
         .eq('pet_id', petId)
         .order('created_at', ascending: false)
@@ -90,6 +88,7 @@ class SocialRepository {
     final pet = (r['pet'] as Map?)?.cast<String, dynamic>() ?? const {};
     final author = (r['author'] as Map?)?.cast<String, dynamic>() ?? const {};
     final likes = (r['post_likes'] as List?) ?? const [];
+    final comments = (r['comments'] as List?) ?? const [];
 
     final petName = (pet['name'] as String?) ?? 'Unknown';
     final petSpecies = (pet['species'] as String?) ?? 'dog';
@@ -107,14 +106,15 @@ class SocialRepository {
 
     return FeedPost(
       id: r['id'] as String,
+      petId: (pet['id'] as String?) ?? '',
       handle: handle,
       petName: petName,
       petSpecies: petSpecies,
       accentColor: palette.accent,
       fuzzyLocation: '', // not modelled in DB yet
       caption: (r['content'] as String?) ?? '',
-      likes: (r['like_count'] as int?) ?? 0,
-      comments: (r['comment_count'] as int?) ?? 0,
+      likes: likes.length,
+      comments: comments.length,
       timeAgo: _timeAgo(DateTime.tryParse(r['created_at'] as String? ?? '')),
       isLiked: isLiked,
       gradientColors: palette.gradient,
@@ -223,6 +223,75 @@ class SocialRepository {
       followerCount: results[1].count,
       followingCount: results[2].count,
     );
+  }
+  // ── Follow system ─────────────────────────────────────────────────────────
+
+  /// Returns true if [followerPetId] is currently following [followingPetId].
+  Future<bool> isFollowing({
+    required String followerPetId,
+    required String followingPetId,
+  }) async {
+    final result = await _client
+        .from('pet_follows')
+        .select()
+        .eq('follower_pet_id', followerPetId)
+        .eq('following_pet_id', followingPetId)
+        .maybeSingle();
+    return result != null;
+  }
+
+  /// Creates a follow relationship — [followerPetId] follows [followingPetId].
+  Future<void> followPet({
+    required String followerPetId,
+    required String followingPetId,
+  }) async {
+    await _client.from('pet_follows').upsert(
+      {
+        'follower_pet_id': followerPetId,
+        'following_pet_id': followingPetId,
+      },
+      onConflict: 'follower_pet_id, following_pet_id',
+    );
+  }
+
+  /// Removes the follow relationship — [followerPetId] unfollows [followingPetId].
+  Future<void> unfollowPet({
+    required String followerPetId,
+    required String followingPetId,
+  }) async {
+    await _client
+        .from('pet_follows')
+        .delete()
+        .eq('follower_pet_id', followerPetId)
+        .eq('following_pet_id', followingPetId);
+  }
+
+  // ── Post Management ───────────────────────────────────────────────────────
+
+  /// Updates the caption of an existing post.
+  ///
+  /// The RLS policy on the `posts` table ensures only the post owner can
+  /// update it. Throws on failure.
+  Future<void> updatePostCaption({
+    required String postId,
+    required String newCaption,
+  }) async {
+    await _client
+        .from('posts')
+        .update({'content': newCaption.trim()})
+        .eq('id', postId)
+        .eq('author_id', _uid); // belt-and-suspenders guard
+  }
+
+  /// Permanently deletes a post by [postId].
+  ///
+  /// Cascades to its comments and likes via the DB foreign-key constraints.
+  Future<void> deletePost(String postId) async {
+    await _client
+        .from('posts')
+        .delete()
+        .eq('id', postId)
+        .eq('author_id', _uid); // belt-and-suspenders guard
   }
 }
 

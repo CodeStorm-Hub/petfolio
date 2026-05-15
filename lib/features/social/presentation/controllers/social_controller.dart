@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/models/feed_post.dart';
 import '../../data/repositories/social_repository.dart';
@@ -24,9 +25,49 @@ final socialControllerProvider =
 ///   3. Await the Supabase write — [SocialRepository] throws on failure.
 ///   4. On catch, restore the snapshot — UI reverts transparently.
 class SocialNotifier extends FamilyAsyncNotifier<List<FeedPost>, String> {
+  RealtimeChannel? _channel;
+
   @override
   Future<List<FeedPost>> build(String petId) async {
-    return _repo.fetchFeed(activePetId: petId);
+    final posts = await _repo.fetchFeed(activePetId: petId);
+
+    _channel?.unsubscribe();
+    _channel = Supabase.instance.client
+        .channel('public:posts')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'posts',
+          callback: (payload) {
+            final newRow = payload.newRecord;
+            final postId = newRow['id'] as String?;
+            if (postId == null) return;
+            
+            final likeCount = newRow['like_count'] as int?;
+            final commentCount = newRow['comment_count'] as int?;
+
+            final current = state.valueOrNull;
+            if (current == null) return;
+
+            final idx = current.indexWhere((p) => p.id == postId);
+            if (idx == -1) return;
+
+            final updated = List<FeedPost>.from(current);
+            updated[idx] = updated[idx].copyWithCounts(
+              likes: likeCount,
+              comments: commentCount,
+            );
+            
+            state = AsyncData(updated);
+          },
+        )
+        .subscribe();
+
+    ref.onDispose(() {
+      _channel?.unsubscribe();
+    });
+
+    return posts;
   }
 
   SocialRepository get _repo => ref.read(socialRepositoryProvider);
@@ -66,6 +107,49 @@ class SocialNotifier extends FamilyAsyncNotifier<List<FeedPost>, String> {
         liked: nowLiked,
       );
     } catch (_) {
+      state = AsyncData(prev);
+    }
+  }
+
+  // ── Edit caption ──────────────────────────────────────────────────────────
+
+  /// Edits a post's caption with an optimistic update.
+  Future<void> updateCaption(String postId, String newCaption) async {
+    final prev = state.valueOrNull;
+    if (prev == null) return;
+
+    final idx = prev.indexWhere((p) => p.id == postId);
+    if (idx == -1) return;
+
+    // 1. Optimistic update — caption changes immediately in the feed.
+    final updated = List<FeedPost>.from(prev)
+      ..[idx] = prev[idx].copyWithCaption(newCaption);
+    state = AsyncData(updated);
+
+    try {
+      // 2. Background write.
+      await _repo.updatePostCaption(postId: postId, newCaption: newCaption);
+    } catch (_) {
+      // 3. Rollback on failure.
+      state = AsyncData(prev);
+    }
+  }
+
+  // ── Delete post ───────────────────────────────────────────────────────────
+
+  /// Removes a post from the feed with optimistic removal.
+  Future<void> deletePost(String postId) async {
+    final prev = state.valueOrNull;
+    if (prev == null) return;
+
+    // 1. Optimistic remove — post disappears from feed instantly.
+    state = AsyncData(prev.where((p) => p.id != postId).toList());
+
+    try {
+      // 2. Background delete.
+      await _repo.deletePost(postId);
+    } catch (_) {
+      // 3. Rollback on failure.
       state = AsyncData(prev);
     }
   }

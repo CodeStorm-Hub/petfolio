@@ -18,7 +18,10 @@ import '../features/pet_profile/presentation/controllers/pet_list_controller.dar
 import '../features/pet_profile/presentation/screens/edit_profile_screen.dart';
 import '../features/pet_profile/presentation/screens/onboarding_screen.dart';
 import '../features/pet_profile/presentation/screens/pet_profile_screen.dart';
+import '../features/social/data/models/feed_post.dart';
 import '../features/social/presentation/screens/create_post_screen.dart';
+import '../features/social/presentation/screens/notifications_screen.dart';
+import '../features/social/presentation/screens/post_detail_screen.dart';
 import '../features/social/presentation/screens/social_profile_screen.dart';
 import '../features/social/presentation/screens/social_screen.dart';
 
@@ -104,6 +107,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/social/create',
         builder: (context, state) => const CreatePostScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/social/post/:postId',
+        builder: (context, state) => PostDetailScreen(
+          postId: state.pathParameters['postId']!,
+          post: state.extra as FeedPost?,
+          autofocusComment: state.uri.queryParameters['focus'] == 'true',
+        ),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/social/notifications',
+        builder: (context, state) => const NotificationsScreen(),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

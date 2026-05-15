@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 class FeedPost {
   const FeedPost({
     required this.id,
+    required this.petId,
     required this.handle,
     required this.petName,
     required this.petSpecies,
@@ -27,6 +28,11 @@ class FeedPost {
   });
 
   final String id;
+
+  /// The ID of the pet that authored this post.
+  /// Used to determine ownership so the UI can show edit/delete options.
+  final String petId;
+
   final String handle;
   final String petName;
   final String petSpecies;
@@ -60,19 +66,31 @@ class FeedPost {
     likes: liked ? likes + 1 : (likes > 0 ? likes - 1 : 0),
   );
 
+  /// Returns a copy with an updated caption (used for optimistic edit UI).
+  FeedPost copyWithCaption(String newCaption) => _copy(caption: newCaption);
+
+  /// Returns a copy with updated counts from a realtime subscription.
+  FeedPost copyWithCounts({int? likes, int? comments}) => _copy(
+    likes: likes,
+    comments: comments,
+  );
+
   FeedPost _copy({
     bool? isLiked,
     int? likes,
+    String? caption,
+    int? comments,
   }) => FeedPost(
     id: id,
+    petId: petId,
     handle: handle,
     petName: petName,
     petSpecies: petSpecies,
     accentColor: accentColor,
     fuzzyLocation: fuzzyLocation,
-    caption: caption,
+    caption: caption ?? this.caption,
     likes: likes ?? this.likes,
-    comments: comments,
+    comments: comments ?? this.comments,
     timeAgo: timeAgo,
     isLiked: isLiked ?? this.isLiked,
     gradientColors: gradientColors,
