@@ -62,6 +62,7 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
     required String species,
     String? breed,
     String? avatarUrl,
+    String? bio,
     DateTime? dateOfBirth,
     double? weightKg,
     String? activityLevel,
@@ -71,11 +72,31 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
           species: species,
           breed: breed,
           avatarUrl: avatarUrl,
+          bio: bio,
           dateOfBirth: dateOfBirth,
           weightKg: weightKg,
           activityLevel: activityLevel,
         );
     state = AsyncData([...state.valueOrNull ?? [], pet]);
+    return pet;
+  }
+
+  /// Updates a pet in Supabase and the local list.
+  Future<Pet> editPet({
+    required String id,
+    String? name,
+    String? breed,
+    String? avatarUrl,
+    String? bio,
+  }) async {
+    final pet = await ref.read(petRepositoryProvider).updatePet(
+          id: id,
+          name: name,
+          breed: breed,
+          avatarUrl: avatarUrl,
+          bio: bio,
+        );
+    updateLocal(pet);
     return pet;
   }
 

@@ -8,6 +8,7 @@ class Pet {
     required this.species,
     this.breed,
     this.avatarUrl,
+    this.bio,
     required this.createdAt,
     this.dateOfBirth,
     this.weightKg,
@@ -20,6 +21,7 @@ class Pet {
   final String species;
   final String? breed;
   final String? avatarUrl;
+  final String? bio;
   final DateTime createdAt;
   final DateTime? dateOfBirth;
   final double? weightKg;
@@ -31,6 +33,7 @@ class Pet {
     String? name,
     String? breed,
     String? avatarUrl,
+    String? bio,
     DateTime? dateOfBirth,
     double? weightKg,
     String? activityLevel,
@@ -42,6 +45,7 @@ class Pet {
         species: species,
         breed: breed ?? this.breed,
         avatarUrl: avatarUrl ?? this.avatarUrl,
+        bio: bio ?? this.bio,
         createdAt: createdAt,
         dateOfBirth: dateOfBirth ?? this.dateOfBirth,
         weightKg: weightKg ?? this.weightKg,
@@ -55,6 +59,7 @@ class Pet {
         species: json['species'] as String,
         breed: json['breed'] as String?,
         avatarUrl: json['avatar_url'] as String?,
+        bio: json['bio'] as String?,
         createdAt: DateTime.parse(json['created_at'] as String),
         dateOfBirth: json['date_of_birth'] != null
             ? DateTime.parse(json['date_of_birth'] as String)
@@ -72,6 +77,7 @@ class Pet {
         'species': species,
         if (breed != null) 'breed': breed,
         if (avatarUrl != null) 'avatar_url': avatarUrl,
+        if (bio != null) 'bio': bio,
         'created_at': createdAt.toIso8601String(),
         if (dateOfBirth != null)
           'date_of_birth': dateOfBirth!.toIso8601String().split('T').first,
