@@ -2,6 +2,14 @@
 
 ---
 
+## 2026-05-16 — Pet profile: stats row + social CTA + tab scaffold
+
+- **`lib/features/pet_profile/presentation/screens/pet_profile_screen.dart`** — Active-pet body is a `NestedScrollView` under `DefaultTabController`: hero streak card → **`_PetStatsRow`** (Breed, Age from DOB, Weight kg, Sex placeholder `—` — no sex field on `Pet`) → full-width **`PrimaryPillButton`** (`Icons.dynamic_feed_rounded`, “View Social Profile”) calling **`context.push('/social/profile/${activePet.id}')`** → pinned **TabBar** (Overview / Health / Care / Awards). Overview tab keeps Today + feed placeholder; other tabs are light “coming soon” placeholders with `SliverOverlapInjector` wiring. Added **`go_router`** import. **`router.dart`** unchanged (`/social/profile/:petId` → `SocialProfileScreen`).
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-05-16 — AppHeader: avatar → profile vs name + ▾ → pet switcher
 
 - **`lib/core/theme/app_theme.dart`** — `AppThemeSpacing` + `AppTheme.spacing` (xs/sm/md/lg on a 4dp grid) for consistent layout gaps.
