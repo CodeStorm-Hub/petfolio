@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
-import 'package:petfolio/features/pet_profile/data/models/pet.dart';
 import 'package:petfolio/features/pet_profile/data/models/pet_species.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart';
@@ -140,11 +139,23 @@ class _CareScreenState extends ConsumerState<CareScreen> {
         bottom: false,
         child: Column(
           children: [
-            _Header(
-              pet: activePet,
-              species: species,
-              outdoor: _outdoor,
-              onOutdoor: () => setState(() => _outdoor = !_outdoor),
+            AppHeader(
+              eyebrow: 'Care · ${activePet.name}',
+              onOpenSwitcher: () => PetSwitcherSheet.show(context),
+              onBack: Navigator.of(context).canPop()
+                  ? () => Navigator.of(context).maybePop()
+                  : null,
+              actions: [
+                AppHeaderAction(
+                  iconKey: const ValueKey<String>('care_action_outdoor'),
+                  icon: _outdoor
+                      ? Icons.wb_sunny
+                      : Icons.wb_sunny_outlined,
+                  tooltip: _outdoor ? 'Indoor mode' : 'Outdoor mode',
+                  filled: _outdoor,
+                  onTap: () => setState(() => _outdoor = !_outdoor),
+                ),
+              ],
             ),
             Expanded(
               child: LayoutBuilder(
@@ -229,136 +240,6 @@ class _CareScreenState extends ConsumerState<CareScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Header
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _Header extends ConsumerWidget {
-  const _Header({
-    required this.pet,
-    required this.species,
-    required this.outdoor,
-    required this.onOutdoor,
-  });
-
-  final Pet pet;
-  final PetSpecies species;
-  final bool outdoor;
-  final VoidCallback onOutdoor;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      child: Row(
-        children: [
-          _CircleButton(
-            onTap: () => Navigator.of(context).maybePop(),
-            child: CustomPaint(
-              size: const Size(10, 18),
-              painter: _ChevronPainter(color: cs.onSurfaceVariant),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => PetSwitcherSheet.show(context),
-              behavior: HitTestBehavior.opaque,
-              child: Row(
-                children: [
-                  PetAvatar(
-                    imageUrl: pet.avatarUrl,
-                    size: PetAvatarSize.sm,
-                    initials: pet.name.isNotEmpty ? pet.name[0] : null,
-                    borderColor: species.accent,
-                    semanticLabel: pet.name,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'CARE | ${pet.name.toUpperCase()}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.08 * 11,
-                            color: pt.ink500,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              pet.breed ?? species.label,
-                              style: const TextStyle(
-                                fontFamily: 'Sora',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 18,
-                                letterSpacing: -0.18,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(Icons.keyboard_arrow_down, size: 16, color: pt.ink500),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          _CircleButton(
-            onTap: onOutdoor,
-            filled: outdoor,
-            child: Icon(
-              Icons.wb_sunny_outlined,
-              size: 18,
-              color: outdoor ? Colors.white : cs.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CircleButton extends StatelessWidget {
-  const _CircleButton({required this.onTap, required this.child, this.filled = false});
-
-  final VoidCallback onTap;
-  final Widget child;
-  final bool filled;
-
-  @override
-  Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: filled ? AppColors.ink950 : cs.surface,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(color: AppColors.shadowE1L, blurRadius: 2, offset: const Offset(0, 1)),
-            BoxShadow(color: pt.line200.withAlpha(128), blurRadius: 0, spreadRadius: 0.5),
-          ],
-        ),
-        child: Center(child: child),
       ),
     );
   }
@@ -1919,31 +1800,3 @@ class _SheetLabel extends StatelessWidget {
       );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Custom Painters
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _ChevronPainter extends CustomPainter {
-  const _ChevronPainter({required this.color});
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    canvas.drawPath(
-      Path()
-        ..moveTo(size.width, 0)
-        ..lineTo(0, size.height / 2)
-        ..lineTo(size.width, size.height),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_ChevronPainter old) => old.color != color;
-}

@@ -12,6 +12,8 @@ class Pet {
     this.dateOfBirth,
     this.weightKg,
     this.activityLevel,
+    this.displayOrder = 0,
+    this.archivedAt,
   });
 
   final String id;
@@ -25,7 +27,16 @@ class Pet {
   final double? weightKg;
   final String? activityLevel;
 
+  /// Position in the switcher / manage list. Lower comes first.
+  final int displayOrder;
+
+  /// Soft-archive timestamp. When non-null, the pet is hidden everywhere by
+  /// default; care_logs history is preserved.
+  final DateTime? archivedAt;
+
   PetSpecies get speciesEnum => PetSpecies.fromId(species) ?? PetSpecies.dog;
+
+  bool get isArchived => archivedAt != null;
 
   Pet copyWith({
     String? name,
@@ -34,6 +45,8 @@ class Pet {
     DateTime? dateOfBirth,
     double? weightKg,
     String? activityLevel,
+    int? displayOrder,
+    Object? archivedAt = _sentinel,
   }) =>
       Pet(
         id: id,
@@ -46,6 +59,10 @@ class Pet {
         dateOfBirth: dateOfBirth ?? this.dateOfBirth,
         weightKg: weightKg ?? this.weightKg,
         activityLevel: activityLevel ?? this.activityLevel,
+        displayOrder: displayOrder ?? this.displayOrder,
+        archivedAt: identical(archivedAt, _sentinel)
+            ? this.archivedAt
+            : archivedAt as DateTime?,
       );
 
   factory Pet.fromJson(Map<String, dynamic> json) => Pet(
@@ -63,6 +80,10 @@ class Pet {
             ? (json['weight_kg'] as num).toDouble()
             : null,
         activityLevel: json['activity_level'] as String?,
+        displayOrder: (json['display_order'] as num?)?.toInt() ?? 0,
+        archivedAt: json['archived_at'] != null
+            ? DateTime.parse(json['archived_at'] as String)
+            : null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -77,6 +98,8 @@ class Pet {
           'date_of_birth': dateOfBirth!.toIso8601String().split('T').first,
         if (weightKg != null) 'weight_kg': weightKg,
         if (activityLevel != null) 'activity_level': activityLevel,
+        'display_order': displayOrder,
+        if (archivedAt != null) 'archived_at': archivedAt!.toIso8601String(),
       };
 
   @override
@@ -86,3 +109,5 @@ class Pet {
   @override
   int get hashCode => id.hashCode;
 }
+
+const _sentinel = Object();

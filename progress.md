@@ -2,6 +2,34 @@
 
 ---
 
+## 2026-05-15 — Unified `AppHeader` + Add another pet + Manage pets (reorder/archive)
+
+**Header redesign — shared component across all shell screens**
+- **`lib/core/widgets/app_header.dart`** — new `AppHeader` consumer widget. Slot-based layout: optional `onBack` chevron, `PetAvatar` (active pet) opening the switcher via injected `onOpenSwitcher` callback (avoids circular import with `router.dart` and `pet_switcher_sheet.dart`), `eyebrow` label (e.g. `Active pet`, `Care · Montu`, `Pack`, `Match · Nearby`, `Market · Shop`) + bold pet/screen title with chevron, then a row of `AppHeaderAction` icon buttons (tooltip, optional `badge` count, `filled` variant, optional `iconKey` for marionette/widget tests). `showDivider` and `dense` flags toggle bottom hairline and tighter vertical padding. Exported from `lib/core/widgets/widgets.dart`.
+- **`AppHeaderAction`** — value type: `{ icon, onTap, tooltip, badge?, filled, iconKey? }`. Badges render as coral pill over the icon (re-used by cart count in Market header).
+- **Adopted in** `pet_profile_screen.dart` (eyebrow `Active pet`, actions: outdoor toggle + notifications), `care_screen.dart` (eyebrow `Care · ${activePet.name}`, action: outdoor toggle, `onBack` pops to home), `social_screen.dart` (eyebrow `Pack`, action: messages), `matching_screen.dart` (eyebrow `Match · Nearby`, action: filters, `dense: true`), `marketplace_screen.dart` (eyebrow `Market · Shop`, action: cart with live `cart.itemCount` badge). All old `_ActivePetHeader` / `_Header` / `_SocialHeader` / `_DiscoveryHeader` / `_ShopHeader` private classes removed.
+
+**Add another pet flow**
+- **`lib/core/router.dart`** — `/onboarding` now reads `state.uri.queryParameters['mode']`. When `mode=add` for an authenticated user with existing pets, the redirect guard allows the route through (instead of bouncing to `/care`). Added `/pets/manage` route → `ManagePetsScreen`.
+- **`lib/features/pet_profile/presentation/screens/onboarding_screen.dart`** — constructor takes `bool addAnotherPet`. When true, `_step` starts at `1` (species + breed) skipping the welcome step, and `_back()` at step 1 calls `context.pop()` instead of stepping back to welcome — preserves the rest of the existing flow incl. DOB / weight / activity / photo capture and `createPet` write path.
+- **`pet_switcher_sheet.dart`** — `_AddPetButton.onTap` → `context.push('/onboarding?mode=add')`; `_ManageRow.onTap` → `context.push('/pets/manage')` (added `ValueKey('pet_switcher_manage')` for tests).
+
+**Manage pets (reorder + archive + undo)**
+- **`lib/features/pet_profile/data/models/pet.dart`** — added `displayOrder` (`int`, default 0) + `archivedAt` (`DateTime?`); `copyWith` uses a `_sentinel` so callers can pass `archivedAt: null` to clear it; added `isArchived` getter; JSON snake-case round-trip for both fields.
+- **`pet_repository.dart`** — `fetchPets({bool includeArchived = false})` filters `archived_at IS NULL` by default and orders by `display_order, created_at`; added `reorderPets(List<String> orderedPetIds)` (single batched update), `archivePet(id)` (sets `archived_at = now()`), `unarchivePet(id)` (clears it).
+- **`pet_list_controller.dart`** — `reorder(reordered)` optimistically updates the local list, persists via repository, rolls back on failure. `archive(id)` returns the archived `Pet` (for undo) and removes it from local state; `unarchive(id)` re-inserts at the saved `displayOrder`.
+- **`lib/features/pet_profile/presentation/screens/manage_pets_screen.dart`** — new screen. Reorderable list (`ReorderableListView.builder` with `ReorderableDragStartListener` handles), per-row `PopupMenuButton` with **Share access** (placeholder snackbar; intentionally non-functional until backend support) and **Archive pet** (confirm dialog → repo call → `SnackBar` with `Undo` action that calls `unarchive`). Active pet row gets the coral outline + `Active` chip to match the switcher sheet. Empty + error states. `AppHeader` with eyebrow `Manage · Pets`. `_AddPetCallout` row at the bottom routes to `/onboarding?mode=add` for parity with the switcher.
+- **`supabase/migrations/20260516200000_pets_display_order_archive.sql`** — adds `display_order INTEGER NOT NULL DEFAULT 0` and `archived_at TIMESTAMPTZ NULL` to `public.pets`, partial index `pets_owner_active_order_idx ON (owner_id, archived_at, display_order, created_at) WHERE archived_at IS NULL`, and a one-shot backfill via `ROW_NUMBER() OVER (PARTITION BY owner_id ORDER BY created_at)` for existing rows where `display_order = 0`. Existing RLS policies on `pets` cover the new columns (owner-only SELECT/UPDATE).
+
+**Verification**
+- `flutter analyze` — clean (only resolved: removed an unused `pet.dart` import in `care_screen.dart` after the header refactor).
+- `flutter test` — `care_scheduled_time_test.dart` (3) + `care_task_model_crud_test.dart` (1) pass. The pre-existing `test/widget_test.dart` placeholder still fails (missing `ProviderScope`) — known issue documented in `CLAUDE.md`, unchanged by this phase.
+- **Deferred**: live emulator + Marionette walkthrough of (a) each shell screen header, (b) end-to-end add-another-pet onboarding write, (c) reorder/archive/undo in Manage pets. The migration also still needs to be applied to the remote project via `apply_migration` before the Manage screen can persist `display_order` / `archived_at` in production.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-05-16 — Care task edit / delete + CRUD checks
 
 - **`care_screen.dart`** — `_CareTaskFormSheet` (add + edit): optional `existing` task; **PopupMenu** on each non–log-derived row (`care_task_menu_<id>`) for **Edit** / **Delete**; delete confirm dialog; edit reopens same bottom sheet with fields prefilled; save path calls `updateTask` or `createTask`.

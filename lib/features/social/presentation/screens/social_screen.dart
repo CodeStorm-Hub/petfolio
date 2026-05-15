@@ -4,9 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
+import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/feed_post.dart';
 import '../controllers/social_controller.dart';
 
@@ -75,7 +77,18 @@ class _SocialView extends ConsumerWidget {
         bottom: false,
         child: Column(
           children: [
-            _SocialHeader(pet: pet),
+            AppHeader(
+              eyebrow: 'Pack',
+              onOpenSwitcher: () => PetSwitcherSheet.show(context),
+              actions: [
+                AppHeaderAction(
+                  iconKey: const ValueKey<String>('social_action_messages'),
+                  icon: Icons.mail_outline_rounded,
+                  tooltip: 'Messages',
+                  onTap: () {},
+                ),
+              ],
+            ),
             Expanded(
               child: feedAsync.when(
                 skipLoadingOnReload: true,
@@ -154,51 +167,6 @@ class _SocialView extends ConsumerWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Header
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _SocialHeader extends StatelessWidget {
-  const _SocialHeader({required this.pet});
-  final Pet pet;
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final initial =
-        pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?';
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 8, 8),
-      child: Row(
-        children: [
-          // Active pet avatar
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: AppColors.sunset500,
-            child: Text(
-              initial,
-              style: GoogleFonts.sora(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          const Spacer(),
-          Text('Pack', style: tt.headlineMedium),
-          const Spacer(),
-          IconButton(
-            icon: Icon(Icons.mail_outline_rounded, color: pt.ink500),
-            onPressed: () {},
-          ),
-        ],
       ),
     );
   }

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/widgets.dart';
+import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/product.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/product_list_controller.dart';
@@ -33,9 +35,18 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
         bottom: false,
         child: Column(
           children: [
-            _ShopHeader(
-              cartCount: cart.itemCount,
-              onCartTap: () => context.push('/marketplace/cart'),
+            AppHeader(
+              eyebrow: 'Market · Shop',
+              onOpenSwitcher: () => PetSwitcherSheet.show(context),
+              actions: [
+                AppHeaderAction(
+                  iconKey: const ValueKey<String>('market_action_cart'),
+                  icon: Icons.shopping_bag_outlined,
+                  tooltip: 'Cart',
+                  badge: cart.itemCount > 0 ? cart.itemCount : null,
+                  onTap: () => context.push('/marketplace/cart'),
+                ),
+              ],
             ),
             _SearchBar(),
             _CategoryChips(
@@ -59,108 +70,6 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Shop header
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _ShopHeader extends StatelessWidget {
-  const _ShopHeader({required this.cartCount, required this.onCartTap});
-
-  final int cartCount;
-  final VoidCallback onCartTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
-      child: Row(
-        children: [
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'MARKET',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.88,
-                    color: AppColors.ink500,
-                  ),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  'Shop',
-                  style: TextStyle(
-                    fontFamily: 'Sora',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 22,
-                    letterSpacing: -0.22,
-                    color: AppColors.ink950,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          GestureDetector(
-            onTap: onCartTap,
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.surface0,
-                boxShadow: const [
-                  BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
-                  BoxShadow(
-                    color: Color(0x0A0B1220),
-                    offset: Offset(0, 1),
-                    blurRadius: 2,
-                  ),
-                ],
-              ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  const Center(
-                    child: Icon(Icons.shopping_bag_outlined,
-                        size: 20, color: AppColors.ink700),
-                  ),
-                  if (cartCount > 0)
-                    Positioned(
-                      top: 2,
-                      right: 2,
-                      child: Container(
-                        constraints: const BoxConstraints(minWidth: 16),
-                        height: 16,
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: AppColors.coral500,
-                          border: Border.all(color: Colors.white, width: 1.5),
-                        ),
-                        child: Center(
-                          child: Text(
-                            '$cartCount',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

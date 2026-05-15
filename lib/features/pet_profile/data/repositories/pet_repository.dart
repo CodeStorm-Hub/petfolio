@@ -9,21 +9,66 @@ class PetRepository {
 
   final SupabaseClient _client;
 
-  /// Fetches all pets owned by the currently authenticated user.
+  /// Fetches active (non-archived) pets owned by the currently authenticated user.
   ///
   /// The `pets` SELECT RLS policy allows `is_public = true` rows as well as
   /// owner rows, so we MUST add an explicit [owner_id] filter — otherwise we
   /// would receive every public pet in the database, not just the user's own.
-  Future<List<Pet>> fetchPets() async {
+  ///
+  /// Pets are ordered by [display_order] (set via [reorderPets]), then by
+  /// creation date as a stable tiebreaker.
+  Future<List<Pet>> fetchPets({bool includeArchived = false}) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) return [];
 
-    final rows = await _client
-        .from('pets')
-        .select()
-        .eq('owner_id', userId)
+    var query = _client.from('pets').select().eq('owner_id', userId);
+    if (!includeArchived) {
+      query = query.filter('archived_at', 'is', null);
+    }
+    final rows = await query
+        .order('display_order', ascending: true)
         .order('created_at', ascending: true);
     return rows.map(Pet.fromJson).toList();
+  }
+
+  /// Persists a new ordering for the user's pets. Caller passes pet IDs in the
+  /// order they should appear; the index becomes [display_order].
+  ///
+  /// Updates each row individually rather than via a CTE so RLS continues to
+  /// scope the change to the current user.
+  Future<void> reorderPets(List<String> orderedPetIds) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return;
+    for (var i = 0; i < orderedPetIds.length; i++) {
+      await _client
+          .from('pets')
+          .update({'display_order': i})
+          .eq('id', orderedPetIds[i])
+          .eq('owner_id', userId);
+    }
+  }
+
+  /// Soft-archive a pet. Sets [archived_at] to NOW so the row is filtered out
+  /// of [fetchPets] but care history is preserved for audit/recovery.
+  Future<Pet> archivePet(String petId) async {
+    final row = await _client
+        .from('pets')
+        .update({'archived_at': DateTime.now().toUtc().toIso8601String()})
+        .eq('id', petId)
+        .select()
+        .single();
+    return Pet.fromJson(row);
+  }
+
+  /// Restore a previously-archived pet.
+  Future<Pet> unarchivePet(String petId) async {
+    final row = await _client
+        .from('pets')
+        .update({'archived_at': null})
+        .eq('id', petId)
+        .select()
+        .single();
+    return Pet.fromJson(row);
   }
 
   Future<Pet> createPet({

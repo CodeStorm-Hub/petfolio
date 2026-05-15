@@ -10,6 +10,8 @@ import '../../data/models/pet.dart';
 import '../controllers/active_pet_controller.dart';
 import '../controllers/pet_list_controller.dart';
 import '../widgets/pet_switcher_sheet.dart';
+// AppHeader (shell-wide top bar) is exported from core widgets.
+// Pet switcher sheet is wired locally so the core widget stays feature-free.
 
 /// The main "Home" tab — shows the active pet header and daily summary.
 ///
@@ -30,11 +32,26 @@ class PetProfileScreen extends ConsumerWidget {
         bottom: false, // Prevents duplicate padding above the navigation bar
         child: CustomScrollView(
           slivers: [
-            // ── Active pet header ──────────────────────────────────────
+            // ── Unified shell header ──────────────────────────────────
             SliverToBoxAdapter(
-              child: _ActivePetHeader(
-                activePet: activePet,
+              child: AppHeader(
+                eyebrow: 'Active pet',
                 onOpenSwitcher: () => PetSwitcherSheet.show(context),
+                actions: [
+                  AppHeaderAction(
+                    iconKey: const ValueKey<String>('home_action_outdoor'),
+                    icon: Icons.wb_sunny_outlined,
+                    tooltip: 'Outdoor mode',
+                    onTap: () {},
+                  ),
+                  AppHeaderAction(
+                    iconKey: const ValueKey<String>('home_action_notifications'),
+                    icon: Icons.notifications_outlined,
+                    tooltip: 'Notifications',
+                    badge: true,
+                    onTap: () {},
+                  ),
+                ],
               ),
             ),
 
@@ -120,157 +137,6 @@ class PetProfileScreen extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-// ── Active pet header ─────────────────────────────────────────────────────────
-
-class _ActivePetHeader extends StatelessWidget {
-  const _ActivePetHeader({
-    required this.activePet,
-    required this.onOpenSwitcher,
-  });
-
-  final Pet? activePet;
-  final VoidCallback onOpenSwitcher;
-
-  @override
-  Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 14, 16, 12),
-      child: Row(
-        children: [
-          // Pet selector — avatar + name + chevron
-          Expanded(
-            child: GestureDetector(
-              onTap: onOpenSwitcher,
-              behavior: HitTestBehavior.opaque,
-              child: Row(
-                children: [
-                  activePet != null
-                      ? PetAvatar(
-                          imageUrl: activePet!.avatarUrl,
-                          size: PetAvatarSize.lg,
-                          initials: activePet!.name.isNotEmpty
-                              ? activePet!.name[0]
-                              : null,
-                          borderColor: activePet!.speciesEnum.accent,
-                          semanticLabel: activePet!.name,
-                          onTap: onOpenSwitcher,
-                        )
-                      : SkeletonLoader(
-                          width: 48,
-                          height: 48,
-                          borderRadius: 999,
-                        ),
-                  const SizedBox(width: 12),
-                  Expanded( // <-- Wrap this Column in an Expanded widget
-                  child:Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Active pet',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.08 * 11,
-                          color: pt.ink500,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          Flexible(
-                            child: activePet != null
-                                ? Text(
-                                    activePet!.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontFamily: 'Sora',
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 22,
-                                      letterSpacing: -0.2,
-                                    ),
-                                  )
-                                : SkeletonLoader(width: 100, height: 22),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(Icons.keyboard_arrow_down_rounded,
-                              size: 18, color: pt.ink500),
-                        ],
-                      ),
-                    ],
-                  ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Outdoor-mode toggle (placeholder — no state yet)
-          _HeaderChip(
-            child: Icon(Icons.wb_sunny_outlined, size: 18, color: cs.onSurfaceVariant),
-          ),
-          const SizedBox(width: 0),
-
-          // Notification bell
-          _HeaderChip(
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Icon(Icons.notifications_outlined, size: 20, color: cs.onSurfaceVariant),
-                Positioned(
-                  top: -2,
-                  right: -2,
-                  child: Container(
-                    width: 9,
-                    height: 9,
-                    decoration: BoxDecoration(
-                      color: AppColors.coral500,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: pt.surface1, width: 1.5),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeaderChip extends StatelessWidget {
-  const _HeaderChip({required this.child});
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      width: 44,
-      height: 44,
-      margin: const EdgeInsets.only(left: 8),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowE1L,
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-          BoxShadow(color: pt.line200, blurRadius: 0, spreadRadius: 0.5),
-        ],
-      ),
-      child: Center(child: child),
     );
   }
 }

@@ -17,6 +17,7 @@ import '../features/marketplace/presentation/screens/order_confirmation_screen.d
 import '../features/marketplace/presentation/screens/product_detail_screen.dart';
 import '../features/matching/presentation/screens/matching_screen.dart';
 import '../features/pet_profile/presentation/controllers/pet_list_controller.dart';
+import '../features/pet_profile/presentation/screens/manage_pets_screen.dart';
 import '../features/pet_profile/presentation/screens/onboarding_screen.dart';
 import '../features/pet_profile/presentation/screens/pet_profile_screen.dart';
 import '../features/social/presentation/screens/social_screen.dart';
@@ -75,7 +76,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/onboarding',
-        builder: (context, state) => const OnboardingScreen(),
+        builder: (context, state) {
+          // `?mode=add` means an authenticated user adding a second-or-later
+          // pet from the switcher. Skip the welcome step and rebound to /care
+          // (or wherever they came from) on completion.
+          final mode = state.uri.queryParameters['mode'];
+          return OnboardingScreen(addAnotherPet: mode == 'add');
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/pets/manage',
+        builder: (context, state) => const ManagePetsScreen(),
       ),
 
       // Care: shell route /care; full-screen /care/nutrition, /care/medical-vault.
@@ -160,8 +172,12 @@ class _RouterNotifier extends ChangeNotifier {
       return '/onboarding';
     }
 
+    // Honor "?mode=add" when an authenticated user with pets opens onboarding
+    // from the switcher; otherwise bounce them back to /care so we don't show
+    // the first-run welcome twice.
     if (loc == '/onboarding' && pets != null && pets.isNotEmpty) {
-      return '/care';
+      final mode = state.uri.queryParameters['mode'];
+      if (mode != 'add') return '/care';
     }
 
     return null; // no redirect

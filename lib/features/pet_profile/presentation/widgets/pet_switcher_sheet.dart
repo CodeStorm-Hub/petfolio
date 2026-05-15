@@ -178,13 +178,19 @@ class PetSwitcherSheet extends ConsumerWidget {
                       _AddPetButton(
                         onTap: () {
                           Navigator.of(context).pop();
-                          context.push('/onboarding');
+                          context.push('/onboarding?mode=add');
                         },
                       ),
 
                       // Manage row
                       const SizedBox(height: 14),
-                      _ManageRow(pt: pt),
+                      _ManageRow(
+                        pt: pt,
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          context.push('/pets/manage');
+                        },
+                      ),
                       const SizedBox(height: 24),
                     ],
                   ),
@@ -340,7 +346,9 @@ class _AddPetButton extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return GestureDetector(
+      key: const ValueKey<String>('pet_switcher_add_pet'),
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: CustomPaint(
         painter: _DashedRoundedBorderPainter(
           color: AppColors.blue400,
@@ -401,31 +409,34 @@ class _AddPetButton extends StatelessWidget {
 // ── Manage row ────────────────────────────────────────────────────────────────
 
 class _ManageRow extends StatelessWidget {
-  const _ManageRow({required this.pt});
+  const _ManageRow({required this.pt, required this.onTap});
   final PetfolioThemeExtension pt;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      decoration: BoxDecoration(
-        color: pt.surface2,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.settings_outlined, size: 18, color: pt.ink500),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Reorder, share access, archive a pet',
-              style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+    return GestureDetector(
+      key: const ValueKey<String>('pet_switcher_manage'),
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        decoration: BoxDecoration(
+          color: pt.surface2,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.settings_outlined, size: 18, color: pt.ink500),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Reorder, share access, archive a pet',
+                style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+              ),
             ),
-          ),
-          GestureDetector(
-            onTap: () {}, // TODO: manage screen
-            child: Text(
+            Text(
               'Manage',
               style: TextStyle(
                 fontFamily: 'Inter',
@@ -434,8 +445,10 @@ class _ManageRow extends StatelessWidget {
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 4),
+            Icon(Icons.chevron_right_rounded, size: 18, color: pt.ink300),
+          ],
+        ),
       ),
     );
   }

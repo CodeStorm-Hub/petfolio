@@ -88,6 +88,41 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
         if (p.id == updated.id) updated else p,
     ]);
   }
+
+  /// Optimistically reorders the in-memory list, then persists the new
+  /// [display_order] values. On failure the original list is restored and the
+  /// error is rethrown so the caller can surface it.
+  Future<void> reorder(List<Pet> reordered) async {
+    final previous = state.valueOrNull;
+    state = AsyncData([
+      for (var i = 0; i < reordered.length; i++)
+        reordered[i].copyWith(displayOrder: i),
+    ]);
+    try {
+      await ref
+          .read(petRepositoryProvider)
+          .reorderPets(reordered.map((p) => p.id).toList(growable: false));
+    } catch (e) {
+      if (previous != null) state = AsyncData(previous);
+      rethrow;
+    }
+  }
+
+  /// Soft-archives a pet and removes it from the active list. Returns the
+  /// archived pet so callers can offer an Undo affordance.
+  Future<Pet> archive(String petId) async {
+    final archived = await ref.read(petRepositoryProvider).archivePet(petId);
+    final list = state.valueOrNull ?? const <Pet>[];
+    state = AsyncData(list.where((p) => p.id != petId).toList());
+    return archived;
+  }
+
+  /// Restores a previously-archived pet back into the active list.
+  Future<void> unarchive(String petId) async {
+    final restored = await ref.read(petRepositoryProvider).unarchivePet(petId);
+    final list = state.valueOrNull ?? const <Pet>[];
+    state = AsyncData([...list, restored]);
+  }
 }
 
 final petListProvider =
