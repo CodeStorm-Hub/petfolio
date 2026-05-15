@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -98,6 +97,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
     final comments = ref.watch(commentListProvider(widget.postId));
 
     // Try to get the post from the feed provider first (for real-time updates).
@@ -124,11 +124,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
             onPressed: () => context.pop(),
           ),
           title: Text('Post',
-              style: GoogleFonts.sora(
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
-                color: Theme.of(context).colorScheme.onSurface,
-              )),
+              style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
           centerTitle: true,
         ),
         body: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
@@ -175,7 +171,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
               child: post.petAvatarUrl == null
                   ? Text(
                       post.petName.isNotEmpty ? post.petName[0].toUpperCase() : '?',
-                      style: GoogleFonts.sora(
+                      style: tt.headlineSmall?.copyWith(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
@@ -186,11 +182,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
             const SizedBox(width: 8),
             Text(
               post.petName,
-              style: GoogleFonts.sora(
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+              style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
             ),
           ],
         ),
@@ -229,11 +221,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                     child: Text(
                       'Comments',
-                      style: GoogleFonts.sora(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                      style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),
@@ -355,6 +343,8 @@ class _PostImagesState extends State<_PostImages> {
             itemBuilder: (ctx, i) => CachedNetworkImage(
               imageUrl: post.imageUrls[i],
               fit: BoxFit.cover,
+              memCacheWidth: 800, // Slightly higher for detail view
+              maxWidthDiskCache: 1200,
               placeholder: (ctx, _) => Container(
                 color: Theme.of(context).colorScheme.surface,
               ),
@@ -402,6 +392,7 @@ class _Caption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
       child: RichText(
@@ -409,19 +400,17 @@ class _Caption extends StatelessWidget {
           children: [
             TextSpan(
               text: post.petName,
-              style: GoogleFonts.sora(
+              style: tt.titleSmall?.copyWith(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             TextSpan(text: '  '),
             TextSpan(
               text: post.caption,
-              style: GoogleFonts.inter(
+              style: tt.bodySmall?.copyWith(
                 fontSize: 14,
                 height: 1.5,
-                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],
@@ -517,7 +506,7 @@ class _CommentTile extends ConsumerWidget {
                     comment.petName.isNotEmpty
                         ? comment.petName[0].toUpperCase()
                         : '?',
-                    style: GoogleFonts.sora(
+                    style: tt.titleSmall?.copyWith(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
