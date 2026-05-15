@@ -2,6 +2,16 @@
 
 ---
 
+## 2026-05-16 — AppHeader: avatar → profile vs name + ▾ → pet switcher
+
+- **`lib/core/theme/app_theme.dart`** — `AppThemeSpacing` + `AppTheme.spacing` (xs/sm/md/lg on a 4dp grid) for consistent layout gaps.
+- **`lib/core/widgets/app_header.dart`** — Split leading hit targets: **avatar** (`ValueKey` `app_header_pet_profile`) calls `context.go('/home')` (shell `PetProfileScreen` route). **Pet name + `Icons.keyboard_arrow_down`** (`app_header_pet_switcher`) retains `onOpenSwitcher`. Eyebrow label is non-interactive. Spacing between avatar and title block uses `AppTheme.spacing.md`; name–icon gap uses `spacing.xs`; chevron uses softly blended `onSurfaceVariant` over `surface`.
+- **`router.dart`** — no change; `/home` confirmed as the active pet profile shell route.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-05-15 — Unified `AppHeader` + Add another pet + Manage pets (reorder/archive)
 
 **Header redesign — shared component across all shell screens**

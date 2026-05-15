@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/pet_avatar.dart';
@@ -18,11 +19,11 @@ import 'package:petfolio/features/pet_profile/presentation/controllers/active_pe
 // (leading · content · trailing) but skinned to PetFolio tokens.
 //
 // Layout (left → right):
-//   [optional back]  [pet switcher: avatar + eyebrow + name + ▾]   [actions…]
+//   [optional back]  [avatar | eyebrow over name▾ cluster]   [actions…]
 //
 // Slot rules:
-//   • Pet switcher is the canonical leading element. Tapping anywhere on the
-//     avatar/text/chevron opens the PetSwitcherSheet — never a no-op.
+//   • Avatar opens the Pets tab (`/home`) for the active pet profile. Name +
+//     chevron opens the PetSwitcherSheet.
 //   • [eyebrow] is the screen's section label (CARE, PACK, MATCH, MARKET).
 //     "Home" intentionally uses "ACTIVE PET" to keep focus on the pet.
 //   • Up to two trailing [AppHeaderAction]s; primary action goes last (right
@@ -153,17 +154,19 @@ class _PetSwitcherTrigger extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final species = pet?.speciesEnum ?? PetSpecies.dog;
 
-    return GestureDetector(
-      key: const ValueKey<String>('app_header_pet_switcher'),
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Semantics(
-        button: true,
-        label:
-            pet != null ? 'Switch pet · current ${pet!.name}' : 'Choose a pet',
-        child: Row(
-          children: [
-            pet != null
+    final avatarTap = pet != null ? () => context.go('/home') : null;
+
+    return Row(
+      children: [
+        GestureDetector(
+          key: const ValueKey<String>('app_header_pet_profile'),
+          behavior: HitTestBehavior.opaque,
+          onTap: avatarTap,
+          child: Semantics(
+            button: pet != null,
+            label:
+                pet != null ? 'View ${pet!.name} profile' : 'Loading pet profile',
+            child: pet != null
                 ? PetAvatar(
                     imageUrl: pet!.avatarUrl,
                     size: PetAvatarSize.md,
@@ -172,25 +175,36 @@ class _PetSwitcherTrigger extends StatelessWidget {
                     semanticLabel: pet!.name,
                   )
                 : const SkeletonLoader(width: 40, height: 40, borderRadius: 999),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    eyebrow.toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.08 * 11,
-                      color: pt.ink500,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
+          ),
+        ),
+        SizedBox(width: AppTheme.spacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                eyebrow.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.08 * 11,
+                  color: pt.ink500,
+                ),
+              ),
+              SizedBox(height: AppTheme.spacing.xs / 2),
+              GestureDetector(
+                key: const ValueKey<String>('app_header_pet_switcher'),
+                behavior: HitTestBehavior.opaque,
+                onTap: onTap,
+                child: Semantics(
+                  button: true,
+                  label: pet != null
+                      ? 'Switch pet · current ${pet!.name}'
+                      : 'Choose a pet',
+                  child: Row(
                     children: [
                       Flexible(
                         child: pet != null
@@ -208,20 +222,23 @@ class _PetSwitcherTrigger extends StatelessWidget {
                               )
                             : const SkeletonLoader(width: 90, height: 19),
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: AppTheme.spacing.xs),
                       Icon(
-                        Icons.keyboard_arrow_down_rounded,
+                        Icons.keyboard_arrow_down,
                         size: 18,
-                        color: pt.ink500,
+                        color: Color.alphaBlend(
+                          cs.onSurfaceVariant.withValues(alpha: 0.38),
+                          cs.surface,
+                        ),
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }
