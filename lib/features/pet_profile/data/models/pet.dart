@@ -15,6 +15,8 @@ class Pet {
     this.weightKg,
     this.activityLevel,
     required this.createdAt,
+    this.displayOrder = 0,
+    this.archivedAt,
   });
 
   final String id;
@@ -28,8 +30,12 @@ class Pet {
   final double? weightKg;
   final ActivityLevel? activityLevel;
   final DateTime createdAt;
+  final int displayOrder;
+  final DateTime? archivedAt;
 
   PetSpecies get speciesEnum => PetSpecies.fromId(species) ?? PetSpecies.dog;
+
+  String? get activityLevelSnakeCase => _activityLevelToJson(activityLevel);
 
   int? get ageInYears {
     if (dateOfBirth == null) return null;
@@ -55,8 +61,11 @@ class Pet {
   int get _monthsSinceBirth {
     if (dateOfBirth == null) return 0;
     final now = DateTime.now();
-    return (now.year - dateOfBirth!.year) * 12 + (now.month - dateOfBirth!.month);
+    return (now.year - dateOfBirth!.year) * 12 +
+        (now.month - dateOfBirth!.month);
   }
+
+  bool get isArchived => archivedAt != null;
 
   Pet copyWith({
     String? name,
@@ -66,6 +75,8 @@ class Pet {
     DateTime? dateOfBirth,
     double? weightKg,
     ActivityLevel? activityLevel,
+    int? displayOrder,
+    Object? archivedAt = _sentinel,
   }) =>
       Pet(
         id: id,
@@ -79,6 +90,10 @@ class Pet {
         weightKg: weightKg ?? this.weightKg,
         activityLevel: activityLevel ?? this.activityLevel,
         createdAt: createdAt,
+        displayOrder: displayOrder ?? this.displayOrder,
+        archivedAt: identical(archivedAt, _sentinel)
+            ? this.archivedAt
+            : archivedAt as DateTime?,
       );
 
   static ActivityLevel? _activityLevelFromJson(String? value) {
@@ -121,6 +136,10 @@ class Pet {
             : null,
         activityLevel: _activityLevelFromJson(json['activity_level'] as String?),
         createdAt: DateTime.parse(json['created_at'] as String),
+        displayOrder: (json['display_order'] as num?)?.toInt() ?? 0,
+        archivedAt: json['archived_at'] != null
+            ? DateTime.parse(json['archived_at'] as String)
+            : null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -134,8 +153,11 @@ class Pet {
         if (dateOfBirth != null)
           'date_of_birth': dateOfBirth!.toIso8601String().split('T').first,
         if (weightKg != null) 'weight_kg': weightKg,
-        if (activityLevel != null) 'activity_level': _activityLevelToJson(activityLevel),
+        if (activityLevel != null)
+          'activity_level': _activityLevelToJson(activityLevel),
         'created_at': createdAt.toIso8601String(),
+        'display_order': displayOrder,
+        if (archivedAt != null) 'archived_at': archivedAt!.toIso8601String(),
       };
 
   @override
@@ -145,3 +167,5 @@ class Pet {
   @override
   int get hashCode => id.hashCode;
 }
+
+const _sentinel = Object();

@@ -15,7 +15,11 @@ import '../controllers/pet_list_controller.dart';
 // Steps: 0=Welcome  1=Species+Breed  2=PetDetails(merged)  3=Photo  4=Done
 
 class OnboardingScreen extends ConsumerStatefulWidget {
-  const OnboardingScreen({super.key});
+  const OnboardingScreen({super.key, this.addAnotherPet = false});
+
+  /// `true` when navigated from the pet switcher's "Add another pet" entry —
+  /// skips the first-run Welcome step and routes back to /care on completion.
+  final bool addAnotherPet;
 
   @override
   ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -24,7 +28,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   static const _totalSteps = 3;
 
-  int _step = 0;
+  late int _step = widget.addAnotherPet ? 1 : 0;
   PetSpecies? _species;
   String? _breed;
   String _name = '';
@@ -37,7 +41,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   bool _isSubmitting = false;
 
   void _next() => setState(() => _step++);
-  void _back() => setState(() => _step = (_step - 1).clamp(0, 4));
+  void _back() {
+    // In add-another-pet mode the welcome screen is hidden; backing out from
+    // the first real step closes onboarding rather than revealing step 0.
+    final floor = widget.addAnotherPet ? 1 : 0;
+    if (_step <= floor) {
+      if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+      return;
+    }
+    setState(() => _step = (_step - 1).clamp(0, 4));
+  }
 
   Future<void> _complete() async {
     setState(() => _isSubmitting = true);

@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -98,13 +97,18 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
     final comments = ref.watch(commentListProvider(widget.postId));
 
-    // If the caller passed a FeedPost via router extra, use it immediately.
-    // Otherwise (deep link / hot-restart) fetch from Supabase.
-    final postAsync = widget.post != null
-        ? AsyncValue.data(widget.post!)
-        : ref.watch(postDetailProvider(widget.postId));
+    // Try to get the post from the feed provider first (for real-time updates).
+    final feedPost = ref.watch(postProvider(widget.postId));
+    
+    // If the feed has it, use it. Otherwise, use the one passed via extra or fetch it.
+    final postAsync = feedPost != null
+        ? AsyncValue.data(feedPost)
+        : (widget.post != null
+            ? AsyncValue.data(widget.post!)
+            : ref.watch(postDetailProvider(widget.postId)));
 
     // Show a full-screen spinner while the post is loading from the network.
     if (postAsync.isLoading) {
@@ -120,11 +124,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
             onPressed: () => context.pop(),
           ),
           title: Text('Post',
-              style: GoogleFonts.sora(
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
-                color: Theme.of(context).colorScheme.onSurface,
-              )),
+              style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
           centerTitle: true,
         ),
         body: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
@@ -159,13 +159,32 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
               color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
-        title: Text(
-          post.petName,
-          style: GoogleFonts.sora(
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 14,
+              backgroundColor: post.accentColor,
+              backgroundImage: post.petAvatarUrl != null
+                  ? CachedNetworkImageProvider(post.petAvatarUrl!)
+                  : null,
+              child: post.petAvatarUrl == null
+                  ? Text(
+                      post.petName.isNotEmpty ? post.petName[0].toUpperCase() : '?',
+                      style: tt.headlineSmall?.copyWith(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              post.petName,
+              style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+            ),
+          ],
         ),
         centerTitle: true,
         actions: [
@@ -202,11 +221,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                     child: Text(
                       'Comments',
-                      style: GoogleFonts.sora(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                      style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),
@@ -328,6 +343,8 @@ class _PostImagesState extends State<_PostImages> {
             itemBuilder: (ctx, i) => CachedNetworkImage(
               imageUrl: post.imageUrls[i],
               fit: BoxFit.cover,
+              memCacheWidth: 800, // Slightly higher for detail view
+              maxWidthDiskCache: 1200,
               placeholder: (ctx, _) => Container(
                 color: Theme.of(context).colorScheme.surface,
               ),
@@ -375,6 +392,7 @@ class _Caption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
       child: RichText(
@@ -382,19 +400,17 @@ class _Caption extends StatelessWidget {
           children: [
             TextSpan(
               text: post.petName,
-              style: GoogleFonts.sora(
+              style: tt.titleSmall?.copyWith(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             TextSpan(text: '  '),
             TextSpan(
               text: post.caption,
-              style: GoogleFonts.inter(
+              style: tt.bodySmall?.copyWith(
                 fontSize: 14,
                 height: 1.5,
-                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],
@@ -482,16 +498,21 @@ class _CommentTile extends ConsumerWidget {
           CircleAvatar(
             radius: 16,
             backgroundColor: AppColors.coral500.withAlpha(200),
-            child: Text(
-              comment.petName.isNotEmpty
-                  ? comment.petName[0].toUpperCase()
-                  : '?',
-              style: GoogleFonts.sora(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
+            backgroundImage: comment.avatarUrl != null
+                ? CachedNetworkImageProvider(comment.avatarUrl!)
+                : null,
+            child: comment.avatarUrl == null
+                ? Text(
+                    comment.petName.isNotEmpty
+                        ? comment.petName[0].toUpperCase()
+                        : '?',
+                    style: tt.titleSmall?.copyWith(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  )
+                : null,
           ),
           const SizedBox(width: 10),
           // Content

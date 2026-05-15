@@ -2,6 +2,199 @@
 
 ---
 
+## 2026-05-16 — Pet profile: stats row + social CTA + tab scaffold
+
+- **`lib/features/pet_profile/presentation/screens/pet_profile_screen.dart`** — Active-pet body is a `NestedScrollView` under `DefaultTabController`: hero streak card → **`_PetStatsRow`** (Breed, Age from DOB, Weight kg, Sex placeholder `—` — no sex field on `Pet`) → full-width **`PrimaryPillButton`** (`Icons.dynamic_feed_rounded`, “View Social Profile”) calling **`context.push('/social/profile/${activePet.id}')`** → pinned **TabBar** (Overview / Health / Care / Awards). Overview tab keeps Today + feed placeholder; other tabs are light “coming soon” placeholders with `SliverOverlapInjector` wiring. Added **`go_router`** import. **`router.dart`** unchanged (`/social/profile/:petId` → `SocialProfileScreen`).
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-16 — AppHeader: avatar → profile vs name + ▾ → pet switcher
+
+- **`lib/core/theme/app_theme.dart`** — `AppThemeSpacing` + `AppTheme.spacing` (xs/sm/md/lg on a 4dp grid) for consistent layout gaps.
+- **`lib/core/widgets/app_header.dart`** — Split leading hit targets: **avatar** (`ValueKey` `app_header_pet_profile`) calls `context.go('/home')` (shell `PetProfileScreen` route). **Pet name + `Icons.keyboard_arrow_down`** (`app_header_pet_switcher`) retains `onOpenSwitcher`. Eyebrow label is non-interactive. Spacing between avatar and title block uses `AppTheme.spacing.md`; name–icon gap uses `spacing.xs`; chevron uses softly blended `onSurfaceVariant` over `surface`.
+- **`router.dart`** — no change; `/home` confirmed as the active pet profile shell route.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-15 — Unified `AppHeader` + Add another pet + Manage pets (reorder/archive)
+
+**Header redesign — shared component across all shell screens**
+- **`lib/core/widgets/app_header.dart`** — new `AppHeader` consumer widget. Slot-based layout: optional `onBack` chevron, `PetAvatar` (active pet) opening the switcher via injected `onOpenSwitcher` callback (avoids circular import with `router.dart` and `pet_switcher_sheet.dart`), `eyebrow` label (e.g. `Active pet`, `Care · Montu`, `Pack`, `Match · Nearby`, `Market · Shop`) + bold pet/screen title with chevron, then a row of `AppHeaderAction` icon buttons (tooltip, optional `badge` count, `filled` variant, optional `iconKey` for marionette/widget tests). `showDivider` and `dense` flags toggle bottom hairline and tighter vertical padding. Exported from `lib/core/widgets/widgets.dart`.
+- **`AppHeaderAction`** — value type: `{ icon, onTap, tooltip, badge?, filled, iconKey? }`. Badges render as coral pill over the icon (re-used by cart count in Market header).
+- **Adopted in** `pet_profile_screen.dart` (eyebrow `Active pet`, actions: outdoor toggle + notifications), `care_screen.dart` (eyebrow `Care · ${activePet.name}`, action: outdoor toggle, `onBack` pops to home), `social_screen.dart` (eyebrow `Pack`, action: messages), `matching_screen.dart` (eyebrow `Match · Nearby`, action: filters, `dense: true`), `marketplace_screen.dart` (eyebrow `Market · Shop`, action: cart with live `cart.itemCount` badge). All old `_ActivePetHeader` / `_Header` / `_SocialHeader` / `_DiscoveryHeader` / `_ShopHeader` private classes removed.
+
+**Add another pet flow**
+- **`lib/core/router.dart`** — `/onboarding` now reads `state.uri.queryParameters['mode']`. When `mode=add` for an authenticated user with existing pets, the redirect guard allows the route through (instead of bouncing to `/care`). Added `/pets/manage` route → `ManagePetsScreen`.
+- **`lib/features/pet_profile/presentation/screens/onboarding_screen.dart`** — constructor takes `bool addAnotherPet`. When true, `_step` starts at `1` (species + breed) skipping the welcome step, and `_back()` at step 1 calls `context.pop()` instead of stepping back to welcome — preserves the rest of the existing flow incl. DOB / weight / activity / photo capture and `createPet` write path.
+- **`pet_switcher_sheet.dart`** — `_AddPetButton.onTap` → `context.push('/onboarding?mode=add')`; `_ManageRow.onTap` → `context.push('/pets/manage')` (added `ValueKey('pet_switcher_manage')` for tests).
+
+**Manage pets (reorder + archive + undo)**
+- **`lib/features/pet_profile/data/models/pet.dart`** — added `displayOrder` (`int`, default 0) + `archivedAt` (`DateTime?`); `copyWith` uses a `_sentinel` so callers can pass `archivedAt: null` to clear it; added `isArchived` getter; JSON snake-case round-trip for both fields.
+- **`pet_repository.dart`** — `fetchPets({bool includeArchived = false})` filters `archived_at IS NULL` by default and orders by `display_order, created_at`; added `reorderPets(List<String> orderedPetIds)` (single batched update), `archivePet(id)` (sets `archived_at = now()`), `unarchivePet(id)` (clears it).
+- **`pet_list_controller.dart`** — `reorder(reordered)` optimistically updates the local list, persists via repository, rolls back on failure. `archive(id)` returns the archived `Pet` (for undo) and removes it from local state; `unarchive(id)` re-inserts at the saved `displayOrder`.
+- **`lib/features/pet_profile/presentation/screens/manage_pets_screen.dart`** — new screen. Reorderable list (`ReorderableListView.builder` with `ReorderableDragStartListener` handles), per-row `PopupMenuButton` with **Share access** (placeholder snackbar; intentionally non-functional until backend support) and **Archive pet** (confirm dialog → repo call → `SnackBar` with `Undo` action that calls `unarchive`). Active pet row gets the coral outline + `Active` chip to match the switcher sheet. Empty + error states. `AppHeader` with eyebrow `Manage · Pets`. `_AddPetCallout` row at the bottom routes to `/onboarding?mode=add` for parity with the switcher.
+- **`supabase/migrations/20260516200000_pets_display_order_archive.sql`** — adds `display_order INTEGER NOT NULL DEFAULT 0` and `archived_at TIMESTAMPTZ NULL` to `public.pets`, partial index `pets_owner_active_order_idx ON (owner_id, archived_at, display_order, created_at) WHERE archived_at IS NULL`, and a one-shot backfill via `ROW_NUMBER() OVER (PARTITION BY owner_id ORDER BY created_at)` for existing rows where `display_order = 0`. Existing RLS policies on `pets` cover the new columns (owner-only SELECT/UPDATE).
+
+**Verification**
+- `flutter analyze` — clean (only resolved: removed an unused `pet.dart` import in `care_screen.dart` after the header refactor).
+- `flutter test` — `care_scheduled_time_test.dart` (3) + `care_task_model_crud_test.dart` (1) pass. The pre-existing `test/widget_test.dart` placeholder still fails (missing `ProviderScope`) — known issue documented in `CLAUDE.md`, unchanged by this phase.
+- **Deferred**: live emulator + Marionette walkthrough of (a) each shell screen header, (b) end-to-end add-another-pet onboarding write, (c) reorder/archive/undo in Manage pets. The migration also still needs to be applied to the remote project via `apply_migration` before the Manage screen can persist `display_order` / `archived_at` in production.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-16 — Care task edit / delete + CRUD checks
+
+- **`care_screen.dart`** — `_CareTaskFormSheet` (add + edit): optional `existing` task; **PopupMenu** on each non–log-derived row (`care_task_menu_<id>`) for **Edit** / **Delete**; delete confirm dialog; edit reopens same bottom sheet with fields prefilled; save path calls `updateTask` or `createTask`.
+- **`care_screen.dart` (follow-up)** — Rows from **orphan `care_logs`** (`Activity log | This day`, id `log:…`) now get the same **⋮** menu with **Add to plan** (prefilled new `care_tasks` row via `createSeed`) and **Remove from day** (deletes that log); plan rows keep **Edit** / **Delete**.
+- **`care_dashboard_controller.dart`** — `updateTask`, `deleteTask` after repository calls reload the selected day (and week badges).
+- **`pet_care_repository.dart`** — `updateTask` PATCH payload drops `id`, `pet_id`, `created_at`, `updated_at`, `category_icon` so Postgres applies `set_updated_at` and RLS stays valid.
+- **`lib/features/care/presentation/utils/care_scheduled_time.dart`** — `parseCareScheduledTimeOfDay` for `scheduled_time` strings.
+- **Tests** — `test/care_scheduled_time_test.dart`, `test/care_task_model_crud_test.dart` (edit `copyWith` invariants).
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-15 — Seven calendar days (May 9–15) Care automation
+
+- **`pet_care_repository.dart`** — `_appliesOnDay`: `daily` / `twice_daily` / `as_needed` tasks are shown for every calendar day on the strip (no longer hidden before `task.created_at`), matching `check_daily_completion` expected types.
+- **Supabase remote** — Applied migration `check_daily_completion_completion_date` (`check_daily_completion(uuid, date)`); previously only `(uuid)` existed, so `completion_date` from the app failed and streak never updated from strip completions.
+- **Marionette** — `flutter run -d emulator-5554`, connect VM service, Care tab: for each day `care_date_YYYY-MM-DD` then `care_task_check_*` taps; May 14 skipped redundant feeding tap; May 15 added feeding only.
+- **Post-run** — `care_logs` for Montu (`14378b2e-5961-4d07-ab9f-48246e839e10`) have feeding+training on May 9–13 and 15; May 14 also has walk/medication from earlier tests. After migration + navigation refresh, Care UI showed **7 day streak**; `care_streaks` / `pet_badges` aligned to seven completed strip days (service SQL used once to backfill streak row where RPC had not run during the earlier tap batch).
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-15 — Care streak QA (Marionette) + ring center + RPC calendar date
+
+- **`care_screen.dart`** — Streak hero: softer outer ring stroke; center shows **done / of total** when tasks exist, with **streak** on a sub-row; empty plan keeps flame + streak in center; today legend clarifies inner vs outer rings.
+- **`pet_care_repository.dart`** — After a successful complete, always calls `check_daily_completion` with `completion_date` = `logged_date` (local calendar string) so streaks update when finishing a day from the date strip, not only “device today.”
+- **`supabase/migrations/20260515193000_check_daily_completion_completion_date.sql`** + **remote `execute_sql`** — `check_daily_completion(uuid, date default null)`; `v_today` uses passed date or UTC fallback; grants on `(uuid, date)`.
+- **Marionette (emulator-5554)** — Care tab: May 14 shows chip `3/3`, list aligned; before change, center `0` conflicted with full inner ring.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-15 — Care streak hero synced to selected date + Fitness-style layout
+
+- **`care_dashboard_controller.dart`** — `fetchDailyGoalsHitForDates` week list is `_weekEndingOn(selectedDate)` so week dots match the same 7-day window as the date strip selection (not always ending calendar today).
+- **`care_screen.dart`** — `_StreakBanner` inner ring, done/total chip, task-type chips, and week row use `dashboard.tasks` + `selectedDay`; badge shows `TODAY` vs `MAY 14` style label; outer ring maps capped streak (28d) for a second progress track; `LayoutBuilder` + `ConstrainedBox(maxWidth: 560)` on wide windows; date strip in a solid bordered surface card per design system.
+- **Supabase `execute_sql`** — Montu `care_logs`: 2026-05-14 feeding/medication/walk; 2026-05-15 feeding only (cross-check for 3/3 vs 1/2 UI).
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-15 — Marionette + emulator QA; nutrition / home streak fixes
+
+- **`pubspec.yaml`** — `marionette_flutter` for MCP-driven UI automation (debug only; skipped under `FLUTTER_TEST` / `Platform.environment['FLUTTER_TEST']`).
+- **`main.dart`** — `MarionetteBinding.ensureInitialized()` when Marionette enabled, else `WidgetsFlutterBinding`.
+- **`router.dart`** — `ValueKey('shell_nav_…')` on each `NavigationDestination` for stable taps.
+- **`care_screen.dart`** — `ValueKey`s: `care_fab_add_task`, `care_nutrition_banner`, `care_medical_vault_banner`.
+- **`nutrition_screen.dart`** — weight chart: `minX`/`maxX`, bottom title `interval: 1` + integer guard against duplicate date labels; `_CalorieCard` takes `AsyncValue<List<HealthLog>>` so MER uses latest logged weight when data loads; display kg uses two decimals under 20 kg.
+- **`pet_profile_screen.dart`** — `_HeroCard` reads `careStreakRealtimeProvider(pet.id)` instead of hardcoded `28` for the big streak number.
+- **Validation** — Android emulator (`emulator-5554`) + Marionette MCP: Care tab, Nutrition, Medical vault; Supabase MCP row checks for `health_logs`, `medical_vault`, `care_logs`, `care_streaks`.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-16 — Orphan `care_logs` rows on historical days (e.g. May 14)
+
+- **`pet_care_repository.dart`** — `fetchTasksForDate` merges `care_logs` for the selected `logged_date` into synthetic `CareTask` rows (`id` prefix `log:`) when no scheduled `care_tasks` definition covers that `care_type` for that day; `toggleCompletion` / `deleteTask` handle `log:` ids (delete log row, no `care_tasks` lookup); `_loggedDayKey` normalizes `logged_date` from PostgREST.
+- **`care_task_log.dart`** — `CareTask.isLogDerived` extension.
+- **`care_screen.dart`** — log-derived cards skip `Dismissible` swipe; checkbox only clears the log entry; sublabel `Activity log | This day`; `initState` defers `_init` via `Future.microtask` after first frame.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-16 — Per-day care completions (care_logs) + ring vs list
+
+- **`pet_care_repository.dart`** — `fetchTasksForDate` scopes tasks by definition + `care_logs` for that **local calendar day**; recurring toggles insert/delete `care_logs` (aligned with `check_daily_completion`); `once` still updates `care_tasks` + log; `fetchDailyGoalsHitForDates` uses logs only; `toggleCompletion(..., forDay)`.
+- **`care_dashboard_controller.dart`** — `DailyRoutineState.todayTasks` loaded in parallel so the streak **ring** always reflects **today** while the list reflects the **selected** date; toggle passes `forDay`.
+- **`care_screen.dart`** — streak banner uses `todayTasks` for ring/icons and clarifies copy when browsing past days.
+- **`supabase/migrations/20260516120000_care_logs_type_day.sql`** — `logged_date` backfill from `occurred_at`, widen `care_type` check, unique `(pet_id, care_type, logged_date)`.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-15 — Care dashboard Riverpod fix (tasks / add task / dates)
+
+- **`care_dashboard_controller.dart`** — `build()` no longer reads `state` when merging the streak stream (that caused uninitialized-provider crashes and stuck `AsyncLoading` tasks). Dashboard state is merged via a private **`_routine`** snapshot plus `state = _routine` after async `_load` / toggles.
+- **`care_controller.dart`** — `ref.listen(careDashboardProvider, …, fireImmediately: true)` replaces the microtask `ref.read(careDashboardProvider)` so the checklist notifier never reads the dashboard before it has emitted.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-15 — Freezed + json_serializable `_$XFromJson` fix
+
+- Removed class-level `@JsonSerializable(fieldRename: FieldRename.snake)` from `care_task`, `medical_record`, `health_log`, `pet` (with `@freezed` it duplicated `_$XFromJson` in `.freezed.dart` and `.g.dart`). Added root **`build.yaml`** with `json_serializable` **`field_rename: snake`** so generated `fromJson`/`toJson` keep Supabase-style keys.
+
+---
+
+## 2026-05-15 — Care streak Realtime (UI sync)
+
+- **`care_streak_stream_provider.dart`** — `StreamProvider.autoDispose.family` on `care_streaks` (`primaryKey: ['pet_id']`, `.eq('pet_id', petId)`), empty row → zero `CareStreak`.
+- **`care_dashboard_controller.dart`** — `build()` `ref.watch(careStreakRealtimeProvider(petId))` and merges streak into returned `DailyRoutineState` (no HTTP streak in `_load`, no stacked `ref.listen`); `_load` / `toggleTaskCompletion` only refresh tasks, week dots, badges.
+- **`supabase/migrations/20260515180000_care_streaks_realtime.sql`** — idempotent add of `public.care_streaks` to `supabase_realtime` publication when missing.
+
+**Applied:** remote project `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP `apply_migration` (`care_streaks_realtime`).
+
+**Realtime RLS:** client stream respects existing `care_streaks` SELECT policies (owner via `pets`); if a device shows no stream events, confirm the row exists for that pet after first completion and that the user session matches owner.
+
+**Next step:** None for this slice.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-15 — Care streaks & badges (SQL migration)
+
+- **`supabase/migrations/20260515140000_care_streaks_badges.sql`** — `care_streaks` (PK `pet_id`), `pet_badges` (PK `pet_id`, `badge_type`); RLS **SELECT** for pet owners only; **`check_daily_completion(uuid)`** `SECURITY DEFINER` + `search_path ''`: derives expected task types from `care_tasks` (`daily` / `twice_daily`) or fallback `feeding` / `walk` / `medication`; compares to `care_logs` for **UTC calendar date**; updates streak / `best_streak` / `last_completion_date`; inserts `7_day_hero` on first time `current_streak >= 7`; returns JSON summary (`total`, `completed`, `all_done`, streak fields, `badge_unlocked`). `GRANT EXECUTE` to `authenticated`; table **SELECT** only (writes via RPC).
+
+**Applied:** remote project `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP `apply_migration` (`care_streaks_badges`). Verified `care_streaks` / `pet_badges` (RLS on) and `check_daily_completion`.
+
+**Next step:** Wire Flutter: after checklist sync call `supabase.rpc('check_daily_completion', params: {'target_pet_id': petId})` when the third daily log lands (or on refresh). Optional: align `v_today` with app local date via a second argument in a follow-up migration.
+
+---
+
+## 2026-05-15 — Pet care repo: streaks, RPC on complete, task icons
+
+- **`pet_care_repository.dart`** — `PetCareRepository` (replaces `CareTaskRepository` name; `typedef CareTaskRepository` + `careTaskRepositoryProvider` alias preserved); `getPetStreak(petId)` reads `care_streaks` (empty row → zeros); `toggleCompletion` takes `petId`, calls `check_daily_completion` after marking complete (RPC errors swallowed so toggle still succeeds); create/update strip `category_icon` until DB column exists.
+- **`care_repository.dart`** — re-exports `pet_care_repository.dart`.
+- **`care_streak.dart`** — hand-written model + `fromJson` / `toJson` (no freezed) for `care_streaks` rows.
+- **`care_task.dart`** — `categoryIcon` (JSON `category_icon`), `resolvedCategoryIcon`, `categoryIconData`; `careTaskCategoryIconData` maps keys + aliases to `IconData`.
+- **`care_dashboard_controller.dart`** — passes `petId` into `toggleCompletion`.
+- **`care_screen.dart`** — task cards use `task.categoryIconData`.
+- **`analysis_options.yaml`** — exclude `*.g.dart` / `*.freezed.dart` from analyzer (resolves duplicate `_$XFromJson` between freezed + json_serializable outputs).
+
+**Next step:** Optional UI for `getPetStreak`; optional `category_icon` column on `care_tasks` if server-driven icons are required.
+
+---
+
+## 2026-05-15 — Care streak banner UI (Fitness / Snapchat style)
+
+- **`pet_care_repository.dart`** — `fetchPetBadgeTypes`, `fetchDailyGoalsHitForDates` (care_tasks daily expectations + `care_logs` + completed `care_tasks` per day); `toggleCompletion` returns `ToggleCompletionResult` (parses RPC `badge_unlocked`).
+- **`care_dashboard_controller.dart`** — `DailyRoutineState` adds `streak`, `weekGoalHit`, `badgeTypes`; `_load` parallel-fetches tasks/streak/badges/week; first-load badge baseline via `_hydratedBadgePets`; subsequent loads detect new `7_day_hero`; toggle still calls `AppSnackBar.showBadgeUnlocked` on RPC flag.
+- **`app_snack_bar.dart`** — `showBadgeUnlocked` floating snackbar (green + trophy).
+- **`care_task.dart`** — `careTaskTypeIconData` for icon chips.
+- **`care_screen.dart`** — `_StreakBanner` is a `ConsumerWidget`: progress ring (`CircularProgressIndicator` + fire + server streak), 7-day dot row from `weekGoalHit`, `Wrap` of unique `taskType` icons for today’s routine list; removed legacy `_DayCell` / `_LegendDot` / `_TaskGlyphPainter`.
+
+**Next step:** Optional full-screen badge overlay; optional confetti package.
+
+---
+
 ## 2026-05-15 — Medical record renewal getter + nutrition chart empty state
 
 - **`medical_record.dart`** — `renewalDate` (`nextDueAt ?? expiresAt`) and `isExpiringSoon` (date-only renewal within today…today+30).
@@ -278,3 +471,25 @@ Refactored the pet onboarding flow from 5 steps to 8 steps (6 visible in progres
 
 ### Next step
 Wire the care engine controllers to consume `pet.dateOfBirth` and `pet.activityLevel` for personalised task defaults. The care `Pet` model in `lib/features/care/data/models/pet.dart` is now a duplicate — consolidate with this model when wiring care controllers.
+
+### PR 4 Copilot review follow-ups (local)
+- Web-safe Marionette gate via `lib/marionette_debug_gate_{stub,io}.dart` conditional import; removed `dart:io` from `main.dart`
+- Social header Messages action navigates to `/matching`
+- `PetListNotifier.unarchive` sorts merged list by `displayOrder` then `createdAt` like `fetchPets`
+- `care_scheduled_time` uses explicit int bounds for `TimeOfDay`
+- `pet_care_repository` monthly `_appliesOnDay` uses calendar month/day with end-of-month clamping
+- Migration `20260516120000_care_logs_type_day.sql` deletes duplicate `(pet_id, care_type, logged_date)` before unique index
+- `.gitignore`: `.cursor/hooks/state/`, `tmp_window_dump.xml`, `.claude/worktrees/`
+
+### Supabase remote sync (MCP, 2026-05-16)
+- Verified project `jqyjvhwlcqcsuwcqgcwf`: tables/constraints match repo intent; `chat_threads` uses `participant_1_id` / `participant_2_id` (not pet columns in app code).
+- **Remote lacked** `pet_care_gamification` while `20260515000000_fix_gamification_missing_table.sql` existed — applied via MCP as migration `pet_care_gamification_table_and_rls` (full SELECT/INSERT/UPDATE/DELETE RLS + `set_updated_at` trigger). Repo file updated to match.
+- **Duplicate unique indexes** on `care_logs` (`care_logs_pet_care_day_uix` vs `care_logs_pet_care_type_logged_date_uq`) — dropped `care_logs_pet_care_day_uix` via MCP; added `20260517000000_drop_duplicate_care_logs_unique_index.sql` for clean local resets.
+- Hosted migration history uses timestamp+name keys that do not 1:1 match local filenames (some history was created from dashboard/MCP); prefer `supabase db pull` when rebaselining or rely on ordered SQL in `supabase/migrations/`.
+
+### App ↔ Supabase follow-ups (2026-05-16)
+- Social `fetchFeed` / `fetchPostsForPet` / `fetchPostById`: removed wrong `post_likes.pet_id` filter; `ChatThread` + `chatThreadsProvider` use `participant_1_id` / `participant_2_id` and `match_requests` pet scoping.
+- Router `/pet/:petId/edit`: no `firstWhen` throw; missing pet → `_PetEditMissingScreen`.
+- `npx supabase migration repair` batch run to align remote `schema_migrations` with local migration filenames; `npx supabase migration list` now matches. `npx supabase db pull` blocked here without Docker—run with Docker for shadow DB.
+
+Phase complete; consider `/remember` if you want this sync persisted outside `progress.md`.

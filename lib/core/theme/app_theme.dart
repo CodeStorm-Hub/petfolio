@@ -261,9 +261,18 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
 // ─────────────────────────────────────────────────────────────────────────────
 // AppTheme
 // ─────────────────────────────────────────────────────────────────────────────
+final class AppThemeSpacing {
+  const AppThemeSpacing();
+  double get xs => 4;
+  double get sm => 8;
+  double get md => 12;
+  double get lg => 16;
+}
+
 abstract final class AppTheme {
   static ThemeData light() => _build(Brightness.light);
   static ThemeData dark() => _build(Brightness.dark);
+  static const AppThemeSpacing spacing = AppThemeSpacing();
 
   static ThemeData _build(Brightness brightness) {
     final isDark = brightness == Brightness.dark;

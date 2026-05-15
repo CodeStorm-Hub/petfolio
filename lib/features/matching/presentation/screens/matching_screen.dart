@@ -7,8 +7,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
+import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/discovery_candidate.dart';
 import '../controllers/discovery_controller.dart';
 
@@ -74,7 +76,19 @@ class _DiscoveryView extends ConsumerWidget {
         bottom: false,
         child: Column(
           children: [
-            _DiscoveryHeader(state: state),
+            AppHeader(
+              eyebrow: 'Match · Nearby',
+              onOpenSwitcher: () => PetSwitcherSheet.show(context),
+              dense: true,
+              actions: [
+                AppHeaderAction(
+                  iconKey: const ValueKey<String>('match_action_filter'),
+                  icon: Icons.tune_rounded,
+                  tooltip: 'Filters',
+                  onTap: () {},
+                ),
+              ],
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
@@ -85,69 +99,6 @@ class _DiscoveryView extends ConsumerWidget {
             const SizedBox(height: 16),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Header
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _DiscoveryHeader extends StatelessWidget {
-  const _DiscoveryHeader({required this.state});
-  final DiscoveryState state;
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-      child: Row(
-        children: [
-          // Location chip
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: pt.surface2,
-              borderRadius:
-                  BorderRadius.circular(PetfolioThemeExtension.radiusPill),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.location_on_outlined, size: 14, color: pt.ink500),
-                const SizedBox(width: 4),
-                Text(
-                  'Nearby',
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: pt.ink500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Spacer(),
-          Text('Playdates', style: tt.headlineMedium),
-          const Spacer(),
-          // Filter button
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.tune_rounded, color: pt.ink500),
-            style: IconButton.styleFrom(
-              backgroundColor: pt.surface2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(
-                  PetfolioThemeExtension.radiusMd,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

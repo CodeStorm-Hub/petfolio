@@ -38,7 +38,7 @@ class SocialRepository {
   /// A nested `post_likes` selection lets us compute `isLiked` for the
   /// currently active pet without a second round-trip.
   Future<List<FeedPost>> fetchFeed({String? activePetId}) async {
-    var query = _client
+    final query = _client
         .from('posts')
         .select('''
           id,
@@ -51,15 +51,11 @@ class SocialRepository {
           author:users!posts_author_id_fkey(id, username, display_name, avatar_url),
           post_likes(pet_id)
         ''')
-        .eq('visibility', 'public');
-
-    if (activePetId != null) {
-      query = query.eq('post_likes.pet_id', activePetId);
-    }
-
-    final rows = await query
+        .eq('visibility', 'public')
         .order('created_at', ascending: false)
         .limit(50);
+
+    final rows = await query;
 
     return (rows as List)
         .cast<Map<String, dynamic>>()
@@ -84,10 +80,6 @@ class SocialRepository {
         ''')
         .eq('pet_id', petId);
 
-    if (activePetId != null) {
-      query = query.eq('post_likes.pet_id', activePetId);
-    }
-
     final rows = await query
         .order('created_at', ascending: false)
         .limit(50);
@@ -106,7 +98,7 @@ class SocialRepository {
     required String postId,
     String? activePetId,
   }) async {
-    var query = _client
+    final row = await _client
         .from('posts')
         .select('''
           id,
@@ -118,13 +110,9 @@ class SocialRepository {
           pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
           author:users!posts_author_id_fkey(id, username, display_name, avatar_url),
           post_likes(pet_id)
-        ''');
-
-    if (activePetId != null) {
-      query = query.eq('post_likes.pet_id', activePetId);
-    }
-
-    final row = await query.eq('id', postId).single();
+        ''')
+        .eq('id', postId)
+        .single();
 
     return _rowToFeedPost(Map<String, dynamic>.from(row as Map), activePetId);
   }
@@ -165,6 +153,7 @@ class SocialRepository {
       subjectColor: palette.subject,
       breed: breed,
       imageUrls: (r['image_urls'] as List?)?.cast<String>() ?? const [],
+      petAvatarUrl: pet['avatar_url'] as String?,
     );
   }
 

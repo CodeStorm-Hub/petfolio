@@ -309,8 +309,7 @@ class __$$HealthLogImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable()
 class _$HealthLogImpl extends _HealthLog {
   const _$HealthLogImpl({
     required this.id,

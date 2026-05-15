@@ -337,8 +337,7 @@ class __$$MedicalRecordImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable()
 class _$MedicalRecordImpl extends _MedicalRecord {
   const _$MedicalRecordImpl({
     required this.id,

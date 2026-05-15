@@ -20,6 +20,7 @@ class SocialProfileScreen extends ConsumerWidget {
     final postsAsync = ref.watch(socialProfilePostsProvider(petId));
     final statsAsync = ref.watch(petStatsProvider(petId));
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
 
     // Determine if this profile belongs to the active pet (own profile)
@@ -60,8 +61,7 @@ class SocialProfileScreen extends ConsumerWidget {
         ),
         title: Text(
           profilePetName,
-          style: TextStyle(
-            fontFamily: 'Sora',
+          style: tt.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 18,
             color: cs.onSurface,
@@ -121,6 +121,7 @@ class SocialProfileScreen extends ConsumerWidget {
                                 data: (s) => s.postCount.toString(),
                                 orElse: () => postsAsync.valueOrNull?.length.toString() ?? '-',
                               ),
+                              tt,
                             ),
                             _buildStatItem(
                               'Followers',
@@ -128,6 +129,7 @@ class SocialProfileScreen extends ConsumerWidget {
                                 data: (s) => s.followerCount.toString(),
                                 orElse: () => '-',
                               ),
+                              tt,
                             ),
                             _buildStatItem(
                               'Following',
@@ -135,6 +137,7 @@ class SocialProfileScreen extends ConsumerWidget {
                                 data: (s) => s.followingCount.toString(),
                                 orElse: () => '-',
                               ),
+                              tt,
                             ),
                           ],
                         ),
@@ -144,8 +147,7 @@ class SocialProfileScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     profilePetName,
-                    style: const TextStyle(
-                      fontFamily: 'Sora',
+                    style: tt.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
                     ),
@@ -217,6 +219,8 @@ class SocialProfileScreen extends ConsumerWidget {
                         child = CachedNetworkImage(
                           imageUrl: post.imageUrls.first,
                           fit: BoxFit.cover,
+                          memCacheWidth: 400, // Small grid thumbnails
+                          maxWidthDiskCache: 800,
                           placeholder: (context, url) =>
                               Container(color: pt.surface2),
                           errorWidget: (context, url, error) => Container(
@@ -262,14 +266,13 @@ class SocialProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
+  Widget _buildStatItem(String label, String value, TextTheme tt) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           value,
-          style: const TextStyle(
-            fontFamily: 'Sora',
+          style: tt.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
             fontSize: 18,
           ),
@@ -342,7 +345,7 @@ class _OwnProfileButtons extends StatelessWidget {
                 final text =
                     "Check out ${pet.name}'s profile on Petfolio! 🐾\n"
                     "https://petfolio.app/social/profile/${pet.id}";
-                Share.share(text);
+                SharePlus.instance.share(ShareParams(text: text));
               },
               child: const Text(
                 'Share Profile',
@@ -436,7 +439,7 @@ class _OtherProfileButtons extends ConsumerWidget {
                 final text =
                     "Check out this pet's profile on Petfolio! 🐾\n"
                     "https://petfolio.app/social/profile/$petId";
-                Share.share(text);
+                SharePlus.instance.share(ShareParams(text: text));
               },
               child: const Text(
                 'Share Profile',

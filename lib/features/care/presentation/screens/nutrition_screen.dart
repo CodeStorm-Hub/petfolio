@@ -78,7 +78,11 @@ class _NutritionBodyState extends ConsumerState<_NutritionBody> {
                   petName: widget.pet.name,
                 ),
                 const SizedBox(height: 16),
-                _CalorieCard(pt: pt, pet: widget.pet),
+                _CalorieCard(
+                  pt: pt,
+                  pet: widget.pet,
+                  history: nutrition.history,
+                ),
                 const SizedBox(height: 16),
                 _HistoryList(pt: pt, history: nutrition.history),
               ]),
@@ -252,6 +256,8 @@ class _WeightLineChart extends StatelessWidget {
         padding: const EdgeInsets.only(top: 16, right: 8),
         child: LineChart(
           LineChartData(
+            minX: 0,
+            maxX: (spots.length - 1).clamp(0, 1000000).toDouble(),
             minY: minY - padding,
             maxY: maxY + padding,
             lineBarsData: [
@@ -302,8 +308,12 @@ class _WeightLineChart extends StatelessWidget {
                 sideTitles: SideTitles(
                   showTitles: true,
                   reservedSize: 28,
+                  interval: 1,
                   getTitlesWidget: (value, meta) {
-                    final idx = value.toInt();
+                    final idx = value.round();
+                    if ((value - idx).abs() > 0.001) {
+                      return const SizedBox.shrink();
+                    }
                     if (idx < 0 || idx >= logs.length) {
                       return const SizedBox.shrink();
                     }
@@ -367,10 +377,27 @@ class _WeightLineChart extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _CalorieCard extends StatelessWidget {
-  const _CalorieCard({required this.pt, required this.pet});
+  const _CalorieCard({
+    required this.pt,
+    required this.pet,
+    required this.history,
+  });
 
   final PetfolioThemeExtension pt;
   final Pet pet;
+  final AsyncValue<List<HealthLog>> history;
+
+  static double? _latestLoggedWeightKg(AsyncValue<List<HealthLog>> history) {
+    return history.maybeWhen(
+      data: (list) {
+        final dated = list.where((l) => l.weightKg != null).toList()
+          ..sort((a, b) => b.occurredAt.compareTo(a.occurredAt));
+        if (dated.isEmpty) return null;
+        return dated.first.weightKg;
+      },
+      orElse: () => null,
+    );
+  }
 
   static const _activityFactors = {
     'sedentary': 1.2,
@@ -388,12 +415,12 @@ class _CalorieCard extends StatelessWidget {
     'very_high': 'Very High',
   };
 
-  int? _computeCalories(Pet pet) {
-    final kg = pet.weightKg;
+  int? _computeCalories(Pet pet, double? kgForMer) {
+    final kg = kgForMer;
     if (kg == null || kg <= 0) return null;
 
     final factor =
-        _activityFactors[pet.activityLevel?.toLowerCase()] ?? 1.6;
+        _activityFactors[pet.activityLevelSnakeCase] ?? 1.6;
     final speciesModifier =
         pet.species.toLowerCase() == 'cat' ? 0.9 : 1.0;
 
@@ -402,13 +429,18 @@ class _CalorieCard extends StatelessWidget {
     return mer.round();
   }
 
+  static String _formatDisplayKg(double kg) =>
+      kg < 20 ? kg.toStringAsFixed(2) : kg.toStringAsFixed(1);
+
   @override
   Widget build(BuildContext context) {
-    final calories = _computeCalories(pet);
+    final weightKgForMer =
+        _latestLoggedWeightKg(history) ?? pet.weightKg;
+    final calories = _computeCalories(pet, weightKgForMer);
     final activityLabel =
-        _activityLabels[pet.activityLevel?.toLowerCase()] ?? 'Moderate';
-    final weightStr = pet.weightKg != null
-        ? '${pet.weightKg!.toStringAsFixed(1)} kg'
+        _activityLabels[pet.activityLevelSnakeCase] ?? 'Moderate';
+    final weightStr = weightKgForMer != null
+        ? '${_formatDisplayKg(weightKgForMer)} kg'
         : 'Not set';
 
     return Container(

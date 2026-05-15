@@ -2,16 +2,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
+import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/feed_post.dart';
-import '../controllers/notification_controller.dart';
 import '../controllers/social_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -79,7 +79,18 @@ class _SocialView extends ConsumerWidget {
         bottom: false,
         child: Column(
           children: [
-            _SocialHeader(pet: pet),
+            AppHeader(
+              eyebrow: 'Pack',
+              onOpenSwitcher: () => PetSwitcherSheet.show(context),
+              actions: [
+                AppHeaderAction(
+                  iconKey: const ValueKey<String>('social_action_messages'),
+                  icon: Icons.mail_outline_rounded,
+                  tooltip: 'Messages',
+                  onTap: () => context.go('/matching'),
+                ),
+              ],
+            ),
             Expanded(
               child: feedAsync.when(
                 skipLoadingOnReload: true,
@@ -135,12 +146,14 @@ class _SocialView extends ConsumerWidget {
                                 padding: EdgeInsets.only(
                                   bottom: i == posts.length - 1 ? 0 : 16,
                                 ),
-                                child: _RegularPost(
-                                  post: post,
-                                  onLike: () => notifier.toggleLike(post.id),
-                                  onTapPost: () => context.push(
-                                    '/social/post/${post.id}',
-                                    extra: post,
+                                child: RepaintBoundary(
+                                  child: _RegularPost(
+                                    post: post,
+                                    onLike: () => notifier.toggleLike(post.id),
+                                    onTapPost: () => context.push(
+                                      '/social/post/${post.id}',
+                                      extra: post,
+                                    ),
                                   ),
                                 ),
                               );
@@ -165,95 +178,6 @@ class _SocialView extends ConsumerWidget {
           'Post',
           style: TextStyle(fontWeight: FontWeight.w700, fontFamily: 'Sora'),
         ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Header
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _SocialHeader extends ConsumerWidget {
-  const _SocialHeader({required this.pet});
-  final Pet pet;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tt = Theme.of(context).textTheme;
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final initial = pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?';
-    final unreadCount = ref.watch(unreadCountProvider);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 8, 8),
-      child: Row(
-        children: [
-          // Active pet avatar
-          GestureDetector(
-            onTap: () => context.push('/social/profile/${pet.id}'),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundColor: AppColors.sunset500,
-              child: Text(
-                initial,
-                style: GoogleFonts.sora(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-          const Spacer(),
-          Text('Pack', style: tt.headlineMedium),
-          const Spacer(),
-          IconButton.filled(
-            style: IconButton.styleFrom(
-              backgroundColor: pt.pillarSocial,
-              foregroundColor: Colors.white,
-            ),
-            icon: const Icon(Icons.add_rounded, size: 22),
-            onPressed: () => context.push('/social/create'),
-          ),
-          const SizedBox(width: 4),
-          // Notification bell with animated unread badge
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              IconButton(
-                icon: Icon(Icons.notifications_none_rounded, color: pt.ink500),
-                onPressed: () => context.push('/social/notifications'),
-              ),
-              if (unreadCount > 0)
-                Positioned(
-                  top: 6,
-                  right: 6,
-                  child: IgnorePointer(
-                    child: Container(
-                      width: 18,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        color: AppColors.coral500,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: pt.surface1, width: 1.5),
-                      ),
-                      child: Center(
-                        child: Text(
-                          unreadCount > 9 ? '9+' : '$unreadCount',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -305,6 +229,7 @@ class _StoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
     final surface = Theme.of(context).colorScheme.surface;
     final avatarBg = ringColors.isNotEmpty ? ringColors[0].withAlpha(180) : AppColors.blue500;
 
@@ -340,7 +265,7 @@ class _StoryItem extends StatelessWidget {
                     ? const Icon(Icons.add, color: Colors.white, size: 20)
                     : Text(
                         initial,
-                        style: GoogleFonts.sora(
+                        style: tt.titleSmall?.copyWith(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -354,7 +279,7 @@ class _StoryItem extends StatelessWidget {
             width: 62,
             child: Text(
               label,
-              style: GoogleFonts.inter(
+              style: tt.labelSmall?.copyWith(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
               ),
@@ -447,14 +372,19 @@ class _PostHeader extends StatelessWidget {
           CircleAvatar(
             radius: 20,
             backgroundColor: post.accentColor,
-            child: Text(
-              initial,
-              style: GoogleFonts.sora(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
+            backgroundImage: post.petAvatarUrl != null
+                ? CachedNetworkImageProvider(post.petAvatarUrl!)
+                : null,
+            child: post.petAvatarUrl == null
+                ? Text(
+                    initial,
+                    style: tt.titleSmall?.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  )
+                : null,
           ),
           const SizedBox(width: 10),
           // Pet name + handle + timestamp
@@ -540,6 +470,7 @@ class _PostPhotoState extends State<_PostPhoto>
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
     final post = widget.post;
     final colors = post.gradientColors;
     final emoji = switch (post.petSpecies) {
@@ -555,11 +486,13 @@ class _PostPhotoState extends State<_PostPhoto>
         aspectRatio: 4 / 3,
         child: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: colors.length >= 2 ? colors : [colors.first, colors.first],
-            ),
+            gradient: post.imageUrls.isNotEmpty 
+                ? null 
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: colors.length >= 2 ? colors : [colors.first, colors.first],
+                  ),
           ),
           child: Stack(
             fit: StackFit.expand,
@@ -570,6 +503,9 @@ class _PostPhotoState extends State<_PostPhoto>
                   child: CachedNetworkImage(
                     imageUrl: post.imageUrls.first,
                     fit: BoxFit.cover,
+                    // Optimization: Cap decoded image size in memory.
+                    memCacheWidth: 600,
+                    maxWidthDiskCache: 1000,
                   ),
                 )
               else
@@ -608,7 +544,7 @@ class _PostPhotoState extends State<_PostPhoto>
                     ),
                     child: Text(
                       '1 / 3',
-                      style: GoogleFonts.inter(
+                      style: tt.labelSmall?.copyWith(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
@@ -637,7 +573,7 @@ class _PostPhotoState extends State<_PostPhoto>
                     ),
                     child: Text(
                       post.tag!,
-                      style: GoogleFonts.inter(
+                      style: tt.labelMedium?.copyWith(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
