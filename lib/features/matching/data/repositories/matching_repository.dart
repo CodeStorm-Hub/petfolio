@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:petfolio/core/services/lat_lng.dart';
 import 'package:petfolio/core/services/location_providers.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../datasources/matching_supabase_data_source.dart';
+import '../models/chat_message.dart';
 import '../models/discovery_candidate.dart';
 import '../models/matching_discovery_row.dart';
 import '../models/pet_mutual_match.dart';
@@ -22,6 +26,34 @@ class MatchingRepository {
   final Ref _ref;
   final MatchingSupabaseDataSource _dataSource;
 
+  Future<bool> actorPetHasLocation(String petId) =>
+      _dataSource.petHasLocation(petId);
+
+  Future<void> syncActorLocationFromDevice(String activePetId) async {
+    final cached = _ref.read(deviceLatLngProvider);
+    final LatLng? coords = switch (cached) {
+      AsyncData(:final value) => value,
+      _ => null,
+    };
+    try {
+      final resolved = coords ??
+          await _ref
+              .read(deviceLatLngProvider.future)
+              .timeout(const Duration(seconds: 4));
+      await _dataSource.setPetLocationPoint(
+        petId: activePetId,
+        latitude: resolved.latitude,
+        longitude: resolved.longitude,
+      );
+    } catch (e, st) {
+      debugPrint('[MatchingRepository] setPetLocationPoint failed: $e $st');
+    }
+  }
+
+  void scheduleActorLocationSync(String activePetId) {
+    unawaited(syncActorLocationFromDevice(activePetId));
+  }
+
   Future<List<DiscoveryCandidate>> fetchCandidates({
     required String activePetId,
     int limit = 20,
@@ -31,19 +63,14 @@ class MatchingRepository {
     int? minAgeYears,
     int? maxAgeYears,
   }) async {
-    if (_dataSource.currentUserId == null) return [];
+    final uid = _dataSource.currentUserId;
+    if (uid == null) return [];
 
-    final device = _ref.read(deviceLatLngProvider);
-    if (device case AsyncData(:final value)) {
-      try {
-        await _dataSource.setPetLocationPoint(
-          petId: activePetId,
-          latitude: value.latitude,
-          longitude: value.longitude,
-        );
-      } catch (e, st) {
-        debugPrint('[MatchingRepository] setPetLocationPoint failed: $e $st');
-      }
+    final hasStoredLocation = await _dataSource.petHasLocation(activePetId);
+    if (hasStoredLocation) {
+      scheduleActorLocationSync(activePetId);
+    } else {
+      unawaited(syncActorLocationFromDevice(activePetId));
     }
 
     final species =
@@ -106,6 +133,27 @@ class MatchingRepository {
 
   Stream<List<Map<String, dynamic>>> chatThreadStream() =>
       _dataSource.chatThreadStream();
+
+  Future<MatchInboxSnapshot> fetchMatchInbox(String activePetId) =>
+      _dataSource.fetchMatchInboxSnapshot(activePetId);
+
+  Future<String> ensureChatThreadForMatch({
+    required String matchId,
+    required String actorPetId,
+  }) =>
+      _dataSource.ensureChatThreadForMatch(
+        matchId: matchId,
+        actorPetId: actorPetId,
+      );
+
+  Future<List<ChatMessage>> fetchMessages(String threadId) =>
+      _dataSource.fetchMessages(threadId);
+
+  Future<ChatMessage> sendMessage({
+    required String threadId,
+    required String content,
+  }) =>
+      _dataSource.sendMessage(threadId: threadId, content: content);
 
   DiscoveryCandidate _discoveryRowToCandidate(MatchingDiscoveryRow r) {
     final owner = r.owner;

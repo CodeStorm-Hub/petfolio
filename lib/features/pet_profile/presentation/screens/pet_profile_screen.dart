@@ -8,6 +8,7 @@ import 'package:petfolio/core/widgets/widgets.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_streak_stream_provider.dart';
 
 import '../../data/models/pet.dart';
+import '../../data/models/pet_gender.dart';
 import '../controllers/active_pet_controller.dart';
 import '../controllers/pet_list_controller.dart';
 import '../widgets/pet_switcher_sheet.dart';
@@ -244,7 +245,10 @@ class _PetStatsRow extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: _StatChip(label: 'Sex', value: '—'),
+            child: _StatChip(
+              label: 'Sex',
+              value: pet.gender == PetGender.unknown ? '—' : pet.gender.label,
+            ),
           ),
         ],
       ),

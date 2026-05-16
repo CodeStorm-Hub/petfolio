@@ -15,6 +15,8 @@ import '../features/marketplace/presentation/screens/cart_screen.dart';
 import '../features/marketplace/presentation/screens/marketplace_screen.dart';
 import '../features/marketplace/presentation/screens/order_confirmation_screen.dart';
 import '../features/marketplace/presentation/screens/product_detail_screen.dart';
+import '../features/matching/presentation/screens/chat_screen.dart';
+import '../features/matching/presentation/screens/matches_inbox_screen.dart';
 import '../features/matching/presentation/screens/matching_screen.dart';
 import '../features/pet_profile/presentation/controllers/pet_list_controller.dart';
 import '../features/pet_profile/presentation/screens/manage_pets_screen.dart';
@@ -155,6 +157,27 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => SocialProfileScreen(
           petId: state.pathParameters['petId']!,
         ),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/matching/inbox',
+        builder: (context, state) => const MatchesInboxScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/matching/chat/:threadId',
+        builder: (context, state) {
+          final query = state.uri.queryParameters;
+          final petNameRaw = query['petName'];
+          return ChatScreen(
+            threadId: state.pathParameters['threadId']!,
+            actorPetId: query['actorPetId'] ?? '',
+            matchId: query['matchId'],
+            otherPetName: petNameRaw != null
+                ? Uri.decodeComponent(petNameRaw)
+                : 'Match',
+          );
+        },
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

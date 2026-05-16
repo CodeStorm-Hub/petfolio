@@ -21,6 +21,7 @@ import '../../data/models/pet_mutual_match.dart';
 import '../controllers/discovery_candidates_controller.dart';
 import '../controllers/discovery_controller.dart';
 import '../controllers/mutual_match_realtime_provider.dart';
+import '../matching_navigation.dart';
 import '../widgets/match_celebration_overlay.dart';
 import '../widgets/match_preferences_sheet.dart';
 
@@ -251,6 +252,14 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
                   dense: true,
                   actions: [
                     AppHeaderAction(
+                      iconKey: const ValueKey<String>('match_action_inbox'),
+                      icon: Icons.chat_bubble_outline_rounded,
+                      tooltip: 'Matches & messages',
+                      onTap: overlayActive
+                          ? () {}
+                          : () => openMatchesInbox(context),
+                    ),
+                    AppHeaderAction(
                       iconKey: const ValueKey<String>('match_action_filter'),
                       icon: Icons.tune_rounded,
                       tooltip: 'Filters',
@@ -295,14 +304,15 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
                 matchedPetAvatarUrl:
                     _matchedPetAvatarUrl(ref, _celebrationMatch!),
                 onSendMessage: () {
-                  final label =
-                      _matchedPetLabel(ref, _celebrationMatch!);
+                  final match = _celebrationMatch!;
+                  final label = _matchedPetLabel(ref, match);
                   setState(() => _celebrationMatch = null);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      behavior: SnackBarBehavior.floating,
-                      content: Text('Messages with $label — coming soon'),
-                    ),
+                  openMatchChat(
+                    context,
+                    ref,
+                    matchId: match.id,
+                    actorPetId: petId,
+                    otherPetName: label,
                   );
                 },
                 onKeepSwiping: () => setState(() => _celebrationMatch = null),
@@ -508,7 +518,8 @@ class _EmptyDeck extends StatelessWidget {
         ? 'No pets nearby yet'
         : 'No more profiles nearby';
     final subtitle = locationReady
-        ? 'Other pets need a location on their profile to appear here. Try widening filters or check back later.'
+        ? 'Turn on Match Discovery for your pet and ask nearby owners to do the same. '
+            'Pets also need a saved location—open Match after allowing location access.'
         : 'Check back soon!';
 
     return Center(
@@ -1101,6 +1112,7 @@ class _ActionDock extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _DockButton(
+            key: const ValueKey<String>('match_action_pass'),
             size: 56,
             color: AppColors.ink300,
             icon: Icons.close_rounded,
@@ -1108,6 +1120,7 @@ class _ActionDock extends StatelessWidget {
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.pass),
           ),
           _DockButton(
+            key: const ValueKey<String>('match_action_greet'),
             size: 48,
             color: AppColors.blue500,
             icon: Icons.waving_hand_rounded,
@@ -1115,6 +1128,7 @@ class _ActionDock extends StatelessWidget {
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.greet),
           ),
           _DockButton(
+            key: const ValueKey<String>('match_action_like'),
             size: 64,
             color: AppColors.coral500,
             icon: Icons.pets_rounded,
@@ -1123,6 +1137,7 @@ class _ActionDock extends StatelessWidget {
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.match),
           ),
           _DockButton(
+            key: const ValueKey<String>('match_action_super'),
             size: 48,
             color: AppColors.mulberry500,
             icon: Icons.star_rounded,
@@ -1279,6 +1294,7 @@ class _DetailRow extends StatelessWidget {
 
 class _DockButton extends StatelessWidget {
   const _DockButton({
+    super.key,
     required this.size,
     required this.color,
     required this.icon,

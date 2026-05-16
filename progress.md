@@ -2,6 +2,37 @@
 
 ---
 
+## 2026-05-17 — Edit Pet Profile (full `pets` attributes + sectioned UX)
+
+- **`pet.dart` / `pet_gender.dart`** — `gender`, `isPublic` on model + JSON; `PetGender` enum (`male` / `female` / `unknown`).
+- **`pet_repository.dart`** — `updatePetProfile` persists name, breed, bio, avatar, DOB, gender, weight, activity, `is_public`.
+- **`edit_profile_screen.dart`** — Sectioned form (photo/name, about, details, activity, visibility & matching); sticky **Save changes**; SegmentedButton sex; activity chips; public + discoverable toggles; match location status + update-now + refresh-on-save.
+- **`edit_profile_controller.dart`** — Full submit + `syncMatchLocation`; `petMatchLocationProvider`.
+- **`pet_profile_screen.dart`** — Sex stat uses `pet.gender`.
+
+**Not in edit UI (system / other flows):** `owner_id`, `species` (set at onboarding), `handle`, `accent_color`, `display_order`, `archived_at`, `location` (GPS/RPC only), timestamps.
+
+**Next step:** Optional `handle` / accent color; wire onboarding to set `gender` on create.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-17 — Matching automation QA (`is_discoverable`, location check, E2E swipe)
+
+- **`matching_supabase_data_source.dart`** — `petHasLocation` uses `.not('location', 'is', null)` (geography is not returned in plain `select('location')`, which previously always looked empty); safer RPC row `Map.from` parsing.
+- **`matching_repository.dart`** — Discovery fetch no longer **awaits** GPS when stored location exists; background `scheduleActorLocationSync` only; 4s device timeout when sync runs.
+- **`discovery_candidates_controller.dart`** — Rebuild on `activePetId` / login changes; debug candidate count in debug builds.
+- **`matching_screen.dart`** — Marionette keys: `match_action_pass`, `match_action_like`, etc.
+- **Emulator QA (Marionette + DB)** — Snow (`e462295a`) deck shows **Montu**; like recorded in `swipes`; reciprocal like → `matches` row; empty deck after sole candidate swiped.
+- **Root causes fixed** — Client filter on `isDiscoverable` removed earlier; `set_pet_location_point` RPC; false-negative `petHasLocation` blocking on emulator GPS.
+
+**Next step:** Surface “add location” empty state when `petHasLocation` is false; celebration overlay on live reciprocal like (Realtime INSERT while on Match tab).
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-05-17 — Matching discovery: location, RPC, emulator QA
 
 - **Android/iOS** — `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` in `AndroidManifest.xml`; `NSLocationWhenInUseUsageDescription` in `Info.plist`.
@@ -578,3 +609,12 @@ Wire the care engine controllers to consume `pet.dateOfBirth` and `pet.activityL
 - `npx supabase migration repair` batch run to align remote `schema_migrations` with local migration filenames; `npx supabase migration list` now matches. `npx supabase db pull` blocked here without Docker—run with Docker for shadow DB.
 
 Phase complete; consider `/remember` if you want this sync persisted outside `progress.md`.
+
+## 2026-05-17 — Discovery visibility (data layer)
+
+- Migration `20260518120000_pets_is_discoverable.sql`: `pets.is_discoverable boolean NOT NULL DEFAULT false`; partial index; `matching_discovery_candidates` filters `c.is_discoverable IS TRUE` and returns `is_discoverable` in the row set. Applied to hosted project via MCP.
+- `lib/features/pet_profile/data/models/pet.dart`: `isDiscoverable` field, JSON `is_discoverable`, `copyWith`.
+- `MatchingDiscoveryRow`: `isDiscoverable` for RPC deserialization; `build_runner` regenerated.
+- `MatchingRepository.fetchCandidates`: `.where((row) => row.isDiscoverable)` before mapping.
+
+**Next step:** UI toggle + `PetRepository` update method to set `is_discoverable` on opt-in/opt-out.

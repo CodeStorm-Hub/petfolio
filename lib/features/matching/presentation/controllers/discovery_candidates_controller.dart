@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:petfolio/core/services/location_providers.dart';
 
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/discovery_candidate.dart';
 import '../../data/repositories/matching_repository.dart';
@@ -63,7 +65,18 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
       },
     );
 
+    ref.listen<String?>(activePetIdProvider, (previous, next) {
+      if (previous != next) {
+        ref.invalidateSelf();
+      }
+    });
+
     final myEpoch = ++_epoch;
+    final loggedIn = ref.watch(isLoggedInProvider);
+    if (!loggedIn) {
+      return const DiscoveryCandidatesBuffer(mayHaveMore: false);
+    }
+
     final petId = ref.watch(activePetIdProvider);
     if (petId == null) {
       return const DiscoveryCandidatesBuffer(
@@ -77,12 +90,6 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
         ref.invalidateSelf();
       }
     });
-    unawaited(
-      ref.read(deviceLatLngProvider.future).then(
-        (_) {},
-        onError: (_, _) {},
-      ),
-    );
 
     final prefs = ref.read(matchPreferenceControllerProvider);
     final repo = ref.read(matchingRepositoryProvider);
@@ -93,6 +100,17 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
       prefs: prefs,
       offset: 0,
     );
+    if (buffer.candidates.isEmpty) {
+      final hasLocation = await repo.actorPetHasLocation(petId);
+      if (!hasLocation) {
+        unawaited(repo.syncActorLocationFromDevice(petId));
+      }
+    }
+    if (kDebugMode) {
+      debugPrint(
+        '[DiscoveryCandidates] pet=$petId count=${buffer.candidates.length}',
+      );
+    }
     if (myEpoch != _epoch) {
       return buffer;
     }

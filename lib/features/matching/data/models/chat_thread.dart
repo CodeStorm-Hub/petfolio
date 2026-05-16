@@ -2,6 +2,7 @@ class ChatThread {
   const ChatThread({
     required this.id,
     this.matchRequestId,
+    this.mutualMatchId,
     required this.myUserId,
     required this.otherUserId,
     required this.activePetId,
@@ -11,6 +12,7 @@ class ChatThread {
 
   final String id;
   final String? matchRequestId;
+  final String? mutualMatchId;
   final String myUserId;
   final String otherUserId;
   final String activePetId;
@@ -28,6 +30,7 @@ class ChatThread {
     return ChatThread(
       id: json['id'] as String,
       matchRequestId: json['match_request_id'] as String?,
+      mutualMatchId: json['mutual_match_id'] as String?,
       myUserId: myUserId,
       otherUserId: other,
       activePetId: activePetId,
