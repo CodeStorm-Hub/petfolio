@@ -2,6 +2,19 @@
 
 ---
 
+## 2026-05-16 — Device location for PostGIS discovery
+
+- **`pubspec.yaml`** — `geolocator`, `permission_handler`.
+- **`lib/core/services/lat_lng.dart`** — Immutable `LatLng` (latitude / longitude).
+- **`lib/core/services/location_service.dart`** — `LocationService.acquireCurrentLatLng()` with `Geolocator` + `Permission.locationWhenInUse`; clear `ValidationException` messages for services off, denied, permanently denied, and read failures; web short-circuits.
+- **`lib/core/services/location_providers.dart`** — `locationServiceProvider`, `deviceLatLngProvider` (`AsyncNotifierProvider<DeviceLatLngNotifier, LatLng>`).
+- **`MatchingRepository`** — Takes `Ref`; before `matching_discovery_candidates`, when `deviceLatLngProvider` is `AsyncData`, upserts actor pet `pets.location` via existing `setPetLocationPoint` so RPC `origin` uses current coordinates.
+- **`discovery_controller.dart` / `discovery_candidates_controller.dart`** — `ref.watch(deviceLatLngProvider)` and `await deviceLatLngProvider.future` (errors swallowed) so discovery waits for the permission attempt before fetching.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-05-16 — Matching discovery Riverpod + discovery RPC pagination
 
 - **`match_preferences_state.dart`** — Freezed `MatchPreferencesState` (`selectedSpecies`, `maxDistanceMeters`, `ageMinYears` / `ageMaxYears`).
