@@ -161,7 +161,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/pet/:petId/edit',
         builder: (context, state) {
           final petId = state.pathParameters['petId']!;
-          final pets = ref.read(petListProvider).valueOrNull ?? [];
+          final pets = ref.read(petListProvider).value ?? [];
           for (final p in pets) {
             if (p.id == petId) return EditProfileScreen(pet: p);
           }
@@ -211,7 +211,7 @@ class _RouterNotifier extends ChangeNotifier {
     // ── Logged in but no pets → go to /onboarding ───────────────────
     // Only redirect when the pet list has finished loading AND is empty,
     // so we don't flash the onboarding screen on cold start.
-    final pets = _ref.read(petListProvider).valueOrNull;
+    final pets = _ref.read(petListProvider).value;
     if (pets != null && pets.isEmpty && loc != '/onboarding') {
       return '/onboarding';
     }

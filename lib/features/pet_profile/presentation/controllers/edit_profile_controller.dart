@@ -28,7 +28,7 @@ class EditProfileState {
   }
 }
 
-class EditProfileController extends AutoDisposeNotifier<EditProfileState> {
+class EditProfileController extends Notifier<EditProfileState> {
   @override
   EditProfileState build() => const EditProfileState();
 
@@ -88,6 +88,6 @@ class EditProfileController extends AutoDisposeNotifier<EditProfileState> {
 }
 
 final editProfileControllerProvider =
-    NotifierProvider.autoDispose<EditProfileController, EditProfileState>(
+    NotifierProvider<EditProfileController, EditProfileState>(
   EditProfileController.new,
 );

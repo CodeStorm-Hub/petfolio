@@ -13,15 +13,15 @@ import '../../data/repositories/notification_repository.dart';
 /// Backed by a Supabase Realtime stream, so the list auto-updates
 /// whenever a new notification row is inserted.
 final notificationsProvider =
-    StreamNotifierProvider.autoDispose<NotificationNotifier, List<AppNotification>>(
+    StreamNotifierProvider<NotificationNotifier, List<AppNotification>>(
   NotificationNotifier.new,
 );
 
 /// Derived provider: counts unread notifications for the badge.
-final unreadCountProvider = Provider.autoDispose<int>((ref) {
+final unreadCountProvider = Provider<int>((ref) {
   return ref
           .watch(notificationsProvider)
-          .valueOrNull
+          .value
           ?.where((n) => !n.isRead)
           .length ??
       0;
@@ -35,8 +35,7 @@ final unreadCountProvider = Provider.autoDispose<int>((ref) {
 ///
 /// Uses [StreamNotifier] so Flutter rebuilds automatically whenever
 /// the Supabase Realtime channel receives a new notification row.
-class NotificationNotifier
-    extends AutoDisposeStreamNotifier<List<AppNotification>> {
+class NotificationNotifier extends StreamNotifier<List<AppNotification>> {
   @override
   Stream<List<AppNotification>> build() {
     final activePet = ref.read(activePetControllerProvider);
@@ -54,7 +53,7 @@ class NotificationNotifier
     final activePet = ref.read(activePetControllerProvider);
     if (activePet == null) return;
 
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current == null) return;
 
     // Optimistic update: mark all as read locally.

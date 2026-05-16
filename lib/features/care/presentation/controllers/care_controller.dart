@@ -99,9 +99,13 @@ final careControllerProvider =
 // Notifier
 // ─────────────────────────────────────────────────────────────────────────────
 
-class CareNotifier extends FamilyNotifier<CareState, String> {
+class CareNotifier extends Notifier<CareState> {
+  CareNotifier(this.arg);
+  final String arg;
+
   @override
-  CareState build(String petId) {
+  CareState build() {
+    final petId = arg;
     // React to dashboard state changes → sync today's task completions into streak
     ref.listen<DailyRoutineState>(
       careDashboardProvider,
@@ -127,7 +131,7 @@ class CareNotifier extends FamilyNotifier<CareState, String> {
   void _onDashboardChange(DailyRoutineState dashboard) {
     final today = DateUtils.dateOnly(DateTime.now());
     if (DateUtils.dateOnly(dashboard.selectedDate) != today) return;
-    final tasks = dashboard.tasks.valueOrNull;
+    final tasks = dashboard.tasks.value;
     if (tasks == null) return;
     _overrideTodayFromTasks(tasks, today);
   }
@@ -178,7 +182,7 @@ class CareNotifier extends FamilyNotifier<CareState, String> {
     final today = DateUtils.dateOnly(DateTime.now());
     final dashboard = ref.read(careDashboardProvider);
     if (DateUtils.dateOnly(dashboard.selectedDate) == today && week.isNotEmpty) {
-      final tasks = dashboard.tasks.valueOrNull;
+      final tasks = dashboard.tasks.value;
       if (tasks != null) {
         week[week.length - 1] = DayData(
           date: today,

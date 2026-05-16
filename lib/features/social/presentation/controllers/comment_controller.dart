@@ -12,8 +12,8 @@ import 'social_controller.dart';
 /// Provides the comment list for a given post, keyed by [postId].
 ///
 /// Auto-disposes when the PostDetailScreen is closed, freeing memory.
-final commentListProvider = AsyncNotifierProvider.autoDispose
-    .family<CommentNotifier, List<Comment>, String>(
+final commentListProvider =
+    AsyncNotifierProvider.family<CommentNotifier, List<Comment>, String>(
   CommentNotifier.new,
 );
 
@@ -30,12 +30,12 @@ final commentListProvider = AsyncNotifierProvider.autoDispose
 ///
 /// [add] is non-optimistic because we need the server-generated
 /// timestamp and ID to display the comment correctly.
-class CommentNotifier
-    extends AutoDisposeFamilyAsyncNotifier<List<Comment>, String> {
-  // arg == postId
+class CommentNotifier extends AsyncNotifier<List<Comment>> {
+  CommentNotifier(this.arg);
+  final String arg;
 
   @override
-  Future<List<Comment>> build(String arg) {
+  Future<List<Comment>> build() {
     final activePetId = ref.read(activePetControllerProvider)?.id ?? '';
     return _repo.fetchComments(postId: arg, activePetId: activePetId);
   }
@@ -51,7 +51,7 @@ class CommentNotifier
   Future<void> add({required String petId, required String content}) async {
     if (content.trim().isEmpty) return;
 
-    final previousComments = state.valueOrNull ?? [];
+    final previousComments = state.value ?? [];
     state = const AsyncLoading();
 
     try {
@@ -76,7 +76,7 @@ class CommentNotifier
 
   /// Deletes a comment with optimistic removal from the list.
   Future<void> delete(String commentId) async {
-    final prev = state.valueOrNull;
+    final prev = state.value;
     if (prev == null) return;
 
     // 1. Optimistic remove.

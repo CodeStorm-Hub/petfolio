@@ -15,7 +15,7 @@ enum MedicalRecordType {
 }
 
 @freezed
-class MedicalRecord with _$MedicalRecord {
+abstract class MedicalRecord with _$MedicalRecord {
   const MedicalRecord._();
 
   const factory MedicalRecord({

@@ -94,12 +94,15 @@ final discoveryControllerProvider =
 /// These actions insert a row into `match_requests` (status='pending').
 /// Mutual matching (both parties swiped right) is handled server-side by a
 /// trigger or the accepting party's client.
-class DiscoveryNotifier extends FamilyNotifier<DiscoveryState, String> {
+class DiscoveryNotifier extends Notifier<DiscoveryState> {
+  DiscoveryNotifier(this.arg);
+  final String arg;
+
   @override
-  DiscoveryState build(String petId) {
+  DiscoveryState build() {
     // Warm the UI with sample cards instantly, then replace with live data.
-    Future.microtask(() => _fetchAndPopulate(petId));
-    return DiscoveryState(petId: petId, deck: _sampleDeck(), isLoading: true);
+    Future.microtask(() => _fetchAndPopulate(arg));
+    return DiscoveryState(petId: arg, deck: _sampleDeck(), isLoading: true);
   }
 
   MatchingRepository get _repo => ref.read(matchingRepositoryProvider);

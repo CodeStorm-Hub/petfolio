@@ -2,6 +2,30 @@
 
 ---
 
+## 2026-05-16 — Matching discovery Riverpod + discovery RPC pagination
+
+- **`match_preferences_state.dart`** — Freezed `MatchPreferencesState` (`selectedSpecies`, `maxDistanceMeters`, `ageMinYears` / `ageMaxYears`).
+- **`match_preference_controller.dart`** — `NotifierProvider<MatchPreferenceController, MatchPreferencesState>` (Riverpod 3 `Notifier`; `StateNotifier` / `StateNotifierProvider` are not available on this stack) with setters for species, distance, age range.
+- **`discovery_candidates_controller.dart`** — `AsyncNotifierProvider` + `DiscoveryCandidatesBuffer` (ordered `candidates`, `nextOffset`, `mayHaveMore`); `build()` watches `activePetIdProvider` and match preferences; `_ensureDepth` + `_replenishIfLow` keep at least five profiles when the API has more rows; `removeFront()` pops the stack and triggers replenishment; dedupe by `petId`; serialized prefetch via `_replenishLocked` + microtask retry.
+- **`MatchingRepository` / `MatchingSupabaseDataSource`** — `fetchCandidates` / RPC params: `offset`, optional `speciesFilters`, `minAgeYears` / `maxAgeYears`.
+- **`supabase/migrations/20260518110000_matching_discovery_pagination_filters.sql`** — Replaces `matching_discovery_candidates` with `p_offset`, `p_species`, `p_min_age_years`, `p_max_age_years` (drops prior 3-arg overload).
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-16 — Riverpod 3 migration + matching data layer + analyzer
+
+- **Riverpod 3** — Removed `FamilyNotifier` / `FamilyAsyncNotifier` / `AutoDispose*` usage: family notifiers now `extends Notifier` / `AsyncNotifier` / `StreamNotifier` with `Notifier(this.arg)` + `final String arg`; providers use `.family` without `.autoDispose` where applicable (`care`, `nutrition`, `discovery`, `social`, `follow`, `comment`, `notifications`, `create_post`, `edit_profile`, `care_streak_stream_provider`, `postDetail` / `postProvider`).
+- **`AsyncValue`** — Replaced `.valueOrNull` with `.value` across router, care, marketplace, social, pet list.
+- **`app_exception.dart`** — `AppException({required this.message})`; subclasses use `super.message` forwarding; `NetworkException(message: …)` at throw sites.
+- **`analysis_options.yaml`** — Stopped excluding `*.freezed.dart` so parts resolve; `@freezed` model bases marked **`abstract class`** (Freezed 3 + analyzer).
+- **Matching** — `supabase/migrations/20260517010000_matching_postgis_swipes_matches.sql` (PostGIS `pets.location`, `swipes`, `matches`, mutual-LIKE trigger, `matching_discovery_candidates` RPC with `ST_DWithin` + `LEFT JOIN swipes`); `20260518100000_swipes_update_policy.sql` (RLS `UPDATE` on `swipes` + `GRANT UPDATE` so PostgREST `upsert` works); `MatchingSupabaseDataSource`, `MatchingRepository`, Freezed models (`PetSwipe`, `PetMutualMatch`, `MatchingDiscoveryRow`, `PetGeoPoint`).
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-05-16 — Pet profile: stats row + social CTA + tab scaffold
 
 - **`lib/features/pet_profile/presentation/screens/pet_profile_screen.dart`** — Active-pet body is a `NestedScrollView` under `DefaultTabController`: hero streak card → **`_PetStatsRow`** (Breed, Age from DOB, Weight kg, Sex placeholder `—` — no sex field on `Pet`) → full-width **`PrimaryPillButton`** (`Icons.dynamic_feed_rounded`, “View Social Profile”) calling **`context.push('/social/profile/${activePet.id}')`** → pinned **TabBar** (Overview / Health / Care / Awards). Overview tab keeps Today + feed placeholder; other tabs are light “coming soon” placeholders with `SliverOverlapInjector` wiring. Added **`go_router`** import. **`router.dart`** unchanged (`/social/profile/:petId` → `SocialProfileScreen`).

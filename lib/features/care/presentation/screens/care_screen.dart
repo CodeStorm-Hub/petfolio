@@ -288,7 +288,7 @@ class _StreakBanner extends ConsumerWidget {
     final calendarToday = DateUtils.dateOnly(DateTime.now());
     final selectedDay = DateUtils.dateOnly(dashboard.selectedDate);
     final isViewingToday = selectedDay == calendarToday;
-    final ringTasks = dashboard.tasks.valueOrNull ?? [];
+    final ringTasks = dashboard.tasks.value ?? [];
     final total = ringTasks.length;
     final done = ringTasks.where((t) => t.isCompleted).length;
     final progress = total == 0 ? 0.0 : (done / total).clamp(0.0, 1.0);
@@ -300,7 +300,7 @@ class _StreakBanner extends ConsumerWidget {
     final streakNorm =
         (math.min(math.max(streakCount, 0), 28) / 28.0).clamp(0.0, 1.0);
 
-    final weekHits = dashboard.weekGoalHit.valueOrNull ?? List.filled(7, false);
+    final weekHits = dashboard.weekGoalHit.value ?? List.filled(7, false);
     final weekDates = _weekEndingOn(selectedDay);
 
     final accent = species.accent;

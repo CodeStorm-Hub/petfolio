@@ -77,7 +77,7 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
           weightKg: weightKg,
           activityLevel: activityLevel,
         );
-    state = AsyncData([...state.valueOrNull ?? [], pet]);
+    state = AsyncData([...state.value ?? [], pet]);
     return pet;
   }
 
@@ -102,7 +102,7 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
 
   /// Updates the in-memory copy of a pet (e.g. after avatar upload).
   void updateLocal(Pet updated) {
-    final list = state.valueOrNull;
+    final list = state.value;
     if (list == null) return;
     state = AsyncData([
       for (final p in list)
@@ -114,7 +114,7 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
   /// [display_order] values. On failure the original list is restored and the
   /// error is rethrown so the caller can surface it.
   Future<void> reorder(List<Pet> reordered) async {
-    final previous = state.valueOrNull;
+    final previous = state.value;
     state = AsyncData([
       for (var i = 0; i < reordered.length; i++)
         reordered[i].copyWith(displayOrder: i),
@@ -133,7 +133,7 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
   /// archived pet so callers can offer an Undo affordance.
   Future<Pet> archive(String petId) async {
     final archived = await ref.read(petRepositoryProvider).archivePet(petId);
-    final list = state.valueOrNull ?? const <Pet>[];
+    final list = state.value ?? const <Pet>[];
     state = AsyncData(list.where((p) => p.id != petId).toList());
     return archived;
   }
@@ -141,7 +141,7 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
   /// Restores a previously-archived pet back into the active list.
   Future<void> unarchive(String petId) async {
     final restored = await ref.read(petRepositoryProvider).unarchivePet(petId);
-    final list = state.valueOrNull ?? const <Pet>[];
+    final list = state.value ?? const <Pet>[];
     final merged = [...list, restored]..sort(_comparePetsListOrder);
     state = AsyncData(merged);
   }

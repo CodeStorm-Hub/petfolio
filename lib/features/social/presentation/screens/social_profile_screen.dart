@@ -119,7 +119,7 @@ class SocialProfileScreen extends ConsumerWidget {
                               'Posts',
                               statsAsync.maybeWhen(
                                 data: (s) => s.postCount.toString(),
-                                orElse: () => postsAsync.valueOrNull?.length.toString() ?? '-',
+                                orElse: () => postsAsync.value?.length.toString() ?? '-',
                               ),
                               tt,
                             ),
@@ -377,7 +377,7 @@ class _OtherProfileButtons extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final followAsync = ref.watch(followStatusProvider(petId));
-    final isFollowing = followAsync.valueOrNull ?? false;
+    final isFollowing = followAsync.value ?? false;
 
     return Row(
       children: [

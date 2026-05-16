@@ -16,7 +16,7 @@ final socialControllerProvider =
 
 /// Fetches a single post by ID — used as a fallback on deep links / restarts.
 final postDetailProvider =
-    FutureProvider.autoDispose.family<FeedPost, String>((ref, postId) async {
+    FutureProvider.family<FeedPost, String>((ref, postId) async {
   final activePetId = ref.watch(activePetIdProvider) ?? '';
   return ref
       .read(socialRepositoryProvider)
@@ -24,9 +24,9 @@ final postDetailProvider =
 });
 
 /// Watches a specific post from the feed state for real-time updates.
-final postProvider = Provider.autoDispose.family<FeedPost?, String>((ref, postId) {
+final postProvider = Provider.family<FeedPost?, String>((ref, postId) {
   final activePetId = ref.watch(activePetIdProvider) ?? '';
-  final feed = ref.watch(socialControllerProvider(activePetId)).valueOrNull;
+  final feed = ref.watch(socialControllerProvider(activePetId)).value;
   if (feed == null) return null;
   
   try {
@@ -47,11 +47,15 @@ final postProvider = Provider.autoDispose.family<FeedPost?, String>((ref, postId
 ///   2. Apply the optimistic update immediately → heart turns red on next frame.
 ///   3. Await the Supabase write — [SocialRepository] throws on failure.
 ///   4. On catch, restore the snapshot — UI reverts transparently.
-class SocialNotifier extends FamilyAsyncNotifier<List<FeedPost>, String> {
+class SocialNotifier extends AsyncNotifier<List<FeedPost>> {
+  SocialNotifier(this.arg);
+  final String arg;
+
   RealtimeChannel? _channel;
 
   @override
-  Future<List<FeedPost>> build(String petId) async {
+  Future<List<FeedPost>> build() async {
+    final petId = arg;
     final posts = await _repo.fetchFeed(activePetId: petId);
 
     _channel?.unsubscribe();
@@ -69,7 +73,7 @@ class SocialNotifier extends FamilyAsyncNotifier<List<FeedPost>, String> {
             final likeCount = newRow['like_count'] as int?;
             final commentCount = newRow['comment_count'] as int?;
 
-            final current = state.valueOrNull;
+            final current = state.value;
             if (current == null) return;
 
             final idx = current.indexWhere((p) => p.id == postId);
@@ -108,7 +112,7 @@ class SocialNotifier extends FamilyAsyncNotifier<List<FeedPost>, String> {
   // ── Paw like ──────────────────────────────────────────────────────────────
 
   Future<void> toggleLike(String postId) async {
-    final prev = state.valueOrNull;
+    final prev = state.value;
     if (prev == null) return;
 
     final idx = prev.indexWhere((p) => p.id == postId);
@@ -138,7 +142,7 @@ class SocialNotifier extends FamilyAsyncNotifier<List<FeedPost>, String> {
 
   /// Edits a post's caption with an optimistic update.
   Future<void> updateCaption(String postId, String newCaption) async {
-    final prev = state.valueOrNull;
+    final prev = state.value;
     if (prev == null) return;
 
     final idx = prev.indexWhere((p) => p.id == postId);
@@ -162,7 +166,7 @@ class SocialNotifier extends FamilyAsyncNotifier<List<FeedPost>, String> {
 
   /// Removes a post from the feed with optimistic removal.
   Future<void> deletePost(String postId) async {
-    final prev = state.valueOrNull;
+    final prev = state.value;
     if (prev == null) return;
 
     // 1. Optimistic remove — post disappears from feed instantly.
@@ -179,7 +183,7 @@ class SocialNotifier extends FamilyAsyncNotifier<List<FeedPost>, String> {
   /// Optimistically increments the comment count for a post.
   /// Called when a user submits a new comment.
   void incrementCommentCount(String postId) {
-    final prev = state.valueOrNull;
+    final prev = state.value;
     if (prev == null) return;
 
     final idx = prev.indexWhere((p) => p.id == postId);
@@ -193,7 +197,7 @@ class SocialNotifier extends FamilyAsyncNotifier<List<FeedPost>, String> {
   /// Optimistically decrements the comment count for a post.
   /// Called when a user deletes a comment.
   void decrementCommentCount(String postId) {
-    final prev = state.valueOrNull;
+    final prev = state.value;
     if (prev == null) return;
 
     final idx = prev.indexWhere((p) => p.id == postId);

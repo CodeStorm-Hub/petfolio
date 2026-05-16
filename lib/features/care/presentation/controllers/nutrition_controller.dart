@@ -29,10 +29,13 @@ final nutritionProvider =
 // Notifier
 // ─────────────────────────────────────────────────────────────────────────────
 
-class NutritionNotifier extends FamilyNotifier<NutritionState, String> {
+class NutritionNotifier extends Notifier<NutritionState> {
+  NutritionNotifier(this.arg);
+  final String arg;
+
   @override
-  NutritionState build(String petId) {
-    Future.microtask(() => _load(petId));
+  NutritionState build() {
+    Future.microtask(() => _load(arg));
     return const NutritionState(history: AsyncLoading());
   }
 

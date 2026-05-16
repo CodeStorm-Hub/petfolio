@@ -6,29 +6,28 @@ part of 'health_log.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$HealthLogImpl _$$HealthLogImplFromJson(Map<String, dynamic> json) =>
-    _$HealthLogImpl(
-      id: json['id'] as String,
-      petId: json['pet_id'] as String,
-      recordedBy: json['recorded_by'] as String,
-      logType: $enumDecode(_$HealthLogTypeEnumMap, json['log_type']),
-      title: json['title'] as String,
-      description: json['description'] as String?,
-      weightKg: (json['weight_kg'] as num?)?.toDouble(),
-      severity: $enumDecodeNullable(_$HealthSeverityEnumMap, json['severity']),
-      vetName: json['vet_name'] as String?,
-      vetClinic: json['vet_clinic'] as String?,
-      diagnosis: json['diagnosis'] as String?,
-      treatment: json['treatment'] as String?,
-      followUpDate: json['follow_up_date'] == null
-          ? null
-          : DateTime.parse(json['follow_up_date'] as String),
-      occurredAt: DateTime.parse(json['occurred_at'] as String),
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-    );
+_HealthLog _$HealthLogFromJson(Map<String, dynamic> json) => _HealthLog(
+  id: json['id'] as String,
+  petId: json['pet_id'] as String,
+  recordedBy: json['recorded_by'] as String,
+  logType: $enumDecode(_$HealthLogTypeEnumMap, json['log_type']),
+  title: json['title'] as String,
+  description: json['description'] as String?,
+  weightKg: (json['weight_kg'] as num?)?.toDouble(),
+  severity: $enumDecodeNullable(_$HealthSeverityEnumMap, json['severity']),
+  vetName: json['vet_name'] as String?,
+  vetClinic: json['vet_clinic'] as String?,
+  diagnosis: json['diagnosis'] as String?,
+  treatment: json['treatment'] as String?,
+  followUpDate: json['follow_up_date'] == null
+      ? null
+      : DateTime.parse(json['follow_up_date'] as String),
+  occurredAt: DateTime.parse(json['occurred_at'] as String),
+  createdAt: DateTime.parse(json['created_at'] as String),
+  updatedAt: DateTime.parse(json['updated_at'] as String),
+);
 
-Map<String, dynamic> _$$HealthLogImplToJson(_$HealthLogImpl instance) =>
+Map<String, dynamic> _$HealthLogToJson(_HealthLog instance) =>
     <String, dynamic>{
       'id': instance.id,
       'pet_id': instance.petId,

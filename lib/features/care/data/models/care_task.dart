@@ -31,7 +31,7 @@ enum CareFrequency {
 }
 
 @freezed
-class CareTask with _$CareTask {
+abstract class CareTask with _$CareTask {
   const CareTask._();
 
   const factory CareTask({
