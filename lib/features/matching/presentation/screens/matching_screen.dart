@@ -14,6 +14,7 @@ import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/discovery_candidate.dart';
 import '../controllers/discovery_candidates_controller.dart';
 import '../controllers/discovery_controller.dart';
+import '../widgets/match_preferences_sheet.dart';
 
 String _speciesLabel(String species) {
   return switch (species.toLowerCase()) {
@@ -97,7 +98,7 @@ class _DiscoveryView extends ConsumerWidget {
                   iconKey: const ValueKey<String>('match_action_filter'),
                   icon: Icons.tune_rounded,
                   tooltip: 'Filters',
-                  onTap: () {},
+                  onTap: () => MatchPreferencesSheet.show(context),
                 ),
               ],
             ),

@@ -15,6 +15,17 @@ class MatchPreferenceController extends Notifier<MatchPreferencesState> {
     state = state.copyWith(selectedSpecies: List<String>.unmodifiable(species));
   }
 
+  void toggleSpecies(String speciesId) {
+    final id = speciesId.toLowerCase();
+    final current = List<String>.from(state.selectedSpecies);
+    if (current.contains(id)) {
+      current.remove(id);
+    } else {
+      current.add(id);
+    }
+    setSelectedSpecies(current);
+  }
+
   void setMaxDistanceMeters(double meters) {
     state = state.copyWith(maxDistanceMeters: meters);
   }
@@ -25,3 +36,7 @@ class MatchPreferenceController extends Notifier<MatchPreferencesState> {
     state = state.copyWith(ageMinYears: lo, ageMaxYears: hi);
   }
 }
+
+const double kMatchMinDistanceMeters = 1609;
+const double kMatchMaxDistanceMeters = 80467;
+const int kMatchMaxAgeYears = 30;

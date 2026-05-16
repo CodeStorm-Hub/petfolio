@@ -2,6 +2,16 @@
 
 ---
 
+## 2026-05-16 — Matching discovery preferences UI
+
+- **`match_preferences_sheet.dart`** — Draggable bottom sheet from `MatchingScreen` filter action: multi-select species pills (`PetSpecies`), max-distance slider (1–50 mi), age `RangeSlider` (0–30 yrs); bound to `matchPreferenceControllerProvider`.
+- **`match_preference_controller.dart`** — `toggleSpecies()`; distance/age constants (`kMatchMinDistanceMeters`, `kMatchMaxDistanceMeters`, `kMatchMaxAgeYears`).
+- **`discovery_candidates_controller.dart`** — Preference changes debounced 450ms via `ref.listen` + `invalidateSelf()` (no `ref.watch` on prefs in `build()`), so slider drags do not flood `matching_discovery_candidates` RPC.
+
+**Next step:** Optional Marionette pass on filter sheet + deck refresh after prefs settle.
+
+---
+
 ## 2026-05-16 — Matching swipe stack + discovery buffer
 
 - **`matching_screen.dart`** — Deck data from `discoveryCandidatesControllerProvider` (loading / error + retry, empty deck); stack layers when a card is exiting use `buffer` after optimistic `removeFront`; pan tilt combines horizontal and vertical drag; exit uses design-system `Cubic(0.4, 0, 1, 1)` and `PetfolioThemeExtension.durationXs` opacity path when `MediaQuery.disableAnimationsOf`; species / breed / energy meta chips (`blue` / `mulberry` / `sunset` tokens); distance row; `Semantics` on pet visual; `_ActionDock` reads buffer for disabled state.

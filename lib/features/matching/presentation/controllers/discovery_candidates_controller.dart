@@ -11,6 +11,7 @@ import 'match_preferences_state.dart';
 
 const int _discoveryPageSize = 20;
 const int _discoveryBufferMin = 5;
+const Duration _prefsDebounceDuration = Duration(milliseconds: 450);
 
 final discoveryCandidatesControllerProvider =
     AsyncNotifierProvider<DiscoveryCandidatesController, DiscoveryCandidatesBuffer>(
@@ -43,12 +44,27 @@ class DiscoveryCandidatesBuffer {
 class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuffer> {
   int _epoch = 0;
   bool _replenishLocked = false;
+  Timer? _prefsDebounce;
 
   @override
   Future<DiscoveryCandidatesBuffer> build() async {
+    ref.onDispose(() => _prefsDebounce?.cancel());
+
+    ref.listen<MatchPreferencesState>(
+      matchPreferenceControllerProvider,
+      (previous, next) {
+        if (previous == next) return;
+        _prefsDebounce?.cancel();
+        _prefsDebounce = Timer(_prefsDebounceDuration, () {
+          if (ref.mounted) {
+            ref.invalidateSelf();
+          }
+        });
+      },
+    );
+
     final myEpoch = ++_epoch;
     final petId = ref.watch(activePetIdProvider);
-    ref.watch(matchPreferenceControllerProvider);
     if (petId == null) {
       return const DiscoveryCandidatesBuffer(
         mayHaveMore: false,
