@@ -2,7 +2,14 @@
 
 ---
 
-## 2026-05-16 — Device location for PostGIS discovery
+## 2026-05-16 — Matching swipe stack + discovery buffer
+
+- **`matching_screen.dart`** — Deck data from `discoveryCandidatesControllerProvider` (loading / error + retry, empty deck); stack layers when a card is exiting use `buffer` after optimistic `removeFront`; pan tilt combines horizontal and vertical drag; exit uses design-system `Cubic(0.4, 0, 1, 1)` and `PetfolioThemeExtension.durationXs` opacity path when `MediaQuery.disableAnimationsOf`; species / breed / energy meta chips (`blue` / `mulberry` / `sunset` tokens); distance row; `Semantics` on pet visual; `_ActionDock` reads buffer for disabled state.
+- **`discovery_controller.dart`** — Gesture-only `DiscoveryState` (`exitingCard`, `exitDurationMs`); `swipe` snapshots top card, sets exit, calls `removeFront()` + `MatchingRepository.recordSwipe` unawaited, clears exit after duration from `dart:ui` accessibility `disableAnimations`; removed duplicate fetch and demo deck.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
 
 - **`pubspec.yaml`** — `geolocator`, `permission_handler`.
 - **`lib/core/services/lat_lng.dart`** — Immutable `LatLng` (latitude / longitude).

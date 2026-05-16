@@ -12,7 +12,18 @@ import '../../../pet_profile/presentation/controllers/active_pet_controller.dart
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
 import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/discovery_candidate.dart';
+import '../controllers/discovery_candidates_controller.dart';
 import '../controllers/discovery_controller.dart';
+
+String _speciesLabel(String species) {
+  return switch (species.toLowerCase()) {
+    'cat' => 'Cat',
+    'rabbit' => 'Rabbit',
+    'bird' => 'Bird',
+    'reptile' => 'Reptile',
+    _ => 'Dog',
+  };
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entry point
@@ -66,6 +77,7 @@ class _DiscoveryView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final bufferAsync = ref.watch(discoveryCandidatesControllerProvider);
     final state = ref.watch(discoveryControllerProvider(petId));
     final notifier = ref.read(discoveryControllerProvider(petId).notifier);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
@@ -92,10 +104,48 @@ class _DiscoveryView extends ConsumerWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                child: _DiscoveryStack(state: state, notifier: notifier),
+                child: bufferAsync.when(
+                  skipLoadingOnReload: true,
+                  loading: () => const Center(
+                    child: CircularProgressIndicator.adaptive(),
+                  ),
+                  error: (error, stackTrace) => Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Could not load profiles',
+                          style: TextStyle(fontSize: 15, color: pt.ink500),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          onPressed: () => ref.invalidate(
+                            discoveryCandidatesControllerProvider,
+                          ),
+                          icon: const Icon(Icons.refresh_rounded, size: 16),
+                          label: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  data: (buf) {
+                    final deck = buf.candidates;
+                    final visible = state.isExiting && state.exitingCard != null;
+                    if (deck.isEmpty && !visible) {
+                      return const _EmptyDeck();
+                    }
+                    return _DiscoveryStack(
+                      buffer: deck,
+                      state: state,
+                      notifier: notifier,
+                    );
+                  },
+                ),
               ),
             ),
-            _ActionDock(state: state, notifier: notifier),
+            _ActionDock(state: state, notifier: notifier, bufferAsync: bufferAsync),
             const SizedBox(height: 16),
           ],
         ),
@@ -109,34 +159,61 @@ class _DiscoveryView extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _DiscoveryStack extends StatelessWidget {
-  const _DiscoveryStack({required this.state, required this.notifier});
+  const _DiscoveryStack({
+    required this.buffer,
+    required this.state,
+    required this.notifier,
+  });
+  final List<DiscoveryCandidate> buffer;
   final DiscoveryState state;
   final DiscoveryNotifier notifier;
 
   @override
   Widget build(BuildContext context) {
-    if (state.topCard == null) return const _EmptyDeck();
+    final hasFlying = state.isExiting && state.exitingCard != null;
+    if (!hasFlying && buffer.isEmpty) return const _EmptyDeck();
 
-    // As the top card is dragged, the next card scales up to fill its place.
     final dragProgress =
         (state.dragOffset.dx.abs().clamp(0.0, 90.0)) / 90.0;
+
+    final afterCard = buffer.length >= 3 ? buffer[2] : null;
+    final nextCard = buffer.length >= 2 ? buffer[1] : null;
+    final peekTop = hasFlying && buffer.isNotEmpty ? buffer.first : null;
+    final topLive = !hasFlying && buffer.isNotEmpty ? buffer.first : null;
 
     return Stack(
       alignment: Alignment.center,
       children: [
-        if (state.afterCard != null)
+        if (afterCard != null)
           _StackCard(
-            candidate: state.afterCard!,
+            candidate: afterCard,
             scale: 0.88,
             offsetY: 24,
           ),
-        if (state.nextCard != null)
+        if (nextCard != null)
           _StackCard(
-            candidate: state.nextCard!,
+            candidate: nextCard,
             scale: 0.94 + 0.06 * dragProgress,
             offsetY: 12.0 - 12.0 * dragProgress,
           ),
-        _SwipeCard(state: state, notifier: notifier),
+        if (peekTop != null)
+          _StackCard(
+            candidate: peekTop,
+            scale: 0.94 + 0.06 * dragProgress,
+            offsetY: 12.0 - 12.0 * dragProgress,
+          ),
+        if (hasFlying)
+          _SwipeCard(
+            state: state,
+            notifier: notifier,
+            interactiveTop: null,
+          )
+        else if (topLive != null)
+          _SwipeCard(
+            state: state,
+            notifier: notifier,
+            interactiveTop: topLive,
+          ),
       ],
     );
   }
@@ -198,17 +275,29 @@ class _StackCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _SwipeCard extends StatelessWidget {
-  const _SwipeCard({required this.state, required this.notifier});
+  const _SwipeCard({
+    required this.state,
+    required this.notifier,
+    required this.interactiveTop,
+  });
   final DiscoveryState state;
   final DiscoveryNotifier notifier;
+  final DiscoveryCandidate? interactiveTop;
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
-    final top = state.topCard!;
-    return state.isExiting
-        ? _buildExitAnimation(top, size)
-        : _buildDraggable(context, top, size);
+    if (state.isExiting && state.exitingCard != null) {
+      return _buildExitAnimation(
+        context,
+        state.exitingCard!,
+        size,
+        state.exitAction!,
+        state.exitDurationMs,
+      );
+    }
+    final top = interactiveTop!;
+    return _buildDraggable(context, top, size);
   }
 
   Widget _buildDraggable(
@@ -216,9 +305,9 @@ class _SwipeCard extends StatelessWidget {
     DiscoveryCandidate top,
     Size size,
   ) {
-    // Rotation: max ±25° clamped
-    final angle =
-        (state.dragOffset.dx / (size.width * 0.75)).clamp(-0.44, 0.44);
+    final dxNorm = state.dragOffset.dx / (size.width * 0.75);
+    final dyTilt = state.dragOffset.dy / (size.height * 1.2);
+    final angle = (dxNorm + dyTilt * 0.12).clamp(-0.44, 0.44);
 
     final matchOpacity = (state.dragOffset.dx / 80).clamp(0.0, 1.0);
     final passOpacity = (-state.dragOffset.dx / 80).clamp(0.0, 1.0);
@@ -230,70 +319,92 @@ class _SwipeCard extends StatelessWidget {
         angle: angle,
         alignment: Alignment.bottomCenter,
         child: GestureDetector(
-        onPanUpdate: (d) => notifier.onDragUpdate(d.delta),
-        onPanEnd: (_) => notifier.onDragEnd(),
-        onPanCancel: notifier.onDragCancel,
-        child: Stack(
-          children: [
-            _CardSurface(
-              candidate: top,
-              isExpanded: state.isExpanded,
-              onToggleExpand: notifier.toggleExpand,
-            ),
-            if (matchOpacity > 0.05)
-              Positioned(
-                top: 36,
-                left: 20,
-                child: Opacity(
-                  opacity: matchOpacity,
-                  child: _SwipeLabel(
-                    label: 'MATCH',
-                    color: AppColors.coral500,
-                  ),
-                ),
+          onPanUpdate: (d) => notifier.onDragUpdate(d.delta),
+          onPanEnd: (_) => notifier.onDragEnd(),
+          onPanCancel: notifier.onDragCancel,
+          child: Stack(
+            children: [
+              _CardSurface(
+                candidate: top,
+                isExpanded: state.isExpanded,
+                onToggleExpand: notifier.toggleExpand,
               ),
-            if (passOpacity > 0.05)
-              Positioned(
-                top: 36,
-                right: 20,
-                child: Opacity(
-                  opacity: passOpacity,
-                  child: _SwipeLabel(
-                    label: 'PASS',
-                    color: AppColors.ink500,
-                  ),
-                ),
-              ),
-            if (greetOpacity > 0.05)
-              Positioned(
-                top: 36,
-                left: 0,
-                right: 0,
-                child: Center(
+              if (matchOpacity > 0.05)
+                Positioned(
+                  top: 36,
+                  left: 20,
                   child: Opacity(
-                    opacity: greetOpacity,
+                    opacity: matchOpacity,
                     child: _SwipeLabel(
-                      label: 'WAVE  👋',
-                      color: AppColors.blue500,
+                      label: 'MATCH',
+                      color: AppColors.coral500,
                     ),
                   ),
                 ),
-              ),
-          ],
-        ),
+              if (passOpacity > 0.05)
+                Positioned(
+                  top: 36,
+                  right: 20,
+                  child: Opacity(
+                    opacity: passOpacity,
+                    child: _SwipeLabel(
+                      label: 'PASS',
+                      color: AppColors.ink500,
+                    ),
+                  ),
+                ),
+              if (greetOpacity > 0.05)
+                Positioned(
+                  top: 36,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Opacity(
+                      opacity: greetOpacity,
+                      child: _SwipeLabel(
+                        label: 'WAVE  👋',
+                        color: AppColors.blue500,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildExitAnimation(DiscoveryCandidate top, Size size) {
-    final (exitOffset, exitAngle) = _exitParams(state.exitAction!, size);
+  Widget _buildExitAnimation(
+    BuildContext context,
+    DiscoveryCandidate top,
+    Size size,
+    SwipeAction action,
+    int durationMs,
+  ) {
+    final (exitOffset, exitAngle) = _exitParams(action, size);
+    final curve = const Cubic(0.4, 0, 1, 1);
+    final fast = MediaQuery.disableAnimationsOf(context);
+
+    if (fast) {
+      return TweenAnimationBuilder<double>(
+        key: ValueKey<Object>(top.petId),
+        tween: Tween(begin: 1, end: 0),
+        duration: PetfolioThemeExtension.durationXs,
+        curve: curve,
+        builder: (ctx, t, child) => Opacity(
+          opacity: t,
+          child: child,
+        ),
+        child: _CardSurface(candidate: top),
+      );
+    }
 
     return TweenAnimationBuilder<double>(
-      key: ValueKey(state.exitAction),
+      key: ValueKey<Object>(top.petId),
       tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 280),
-      curve: Curves.easeIn,
+      duration: Duration(milliseconds: durationMs),
+      curve: curve,
       builder: (ctx, t, child) => Transform.translate(
         offset: exitOffset * t,
         child: Transform.rotate(
@@ -427,8 +538,10 @@ class _PetBlob extends StatelessWidget {
       _ => '🐶',
     };
 
-    return LayoutBuilder(
-      builder: (_, constraints) {
+    return Semantics(
+      label: '${candidate.name}, ${_speciesLabel(candidate.species)}',
+      child: LayoutBuilder(
+        builder: (_, constraints) {
         // Scale the blob with the available area, clamped for small/large screens.
         final w = (constraints.maxWidth * 0.52).clamp(120.0, 220.0);
         final h = w * 1.1;
@@ -481,7 +594,8 @@ class _PetBlob extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(emoji, style: TextStyle(fontSize: emojiSize)),
         );
-      },
+        },
+      ),
     );
   }
 }
@@ -570,39 +684,49 @@ class _InfoPanel extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            // ── Breed + distance ────────────────────────────────────────
             Row(
               children: [
-                Text(
-                  candidate.breed,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.white.withAlpha(180),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Container(
-                    width: 3,
-                    height: 3,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(120),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
                 Icon(
                   Icons.location_on_rounded,
                   size: 13,
                   color: Colors.white.withAlpha(180),
                 ),
                 const SizedBox(width: 2),
-                Text(
-                  candidate.distance,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.white.withAlpha(180),
+                Expanded(
+                  child: Text(
+                    candidate.distance,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: Colors.white.withAlpha(180),
+                    ),
                   ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                _MatchMetaChip(
+                  label: _speciesLabel(candidate.species),
+                  foreground: Colors.white,
+                  background: AppColors.blue500.withValues(alpha: 0.34),
+                  borderColor: Colors.white.withValues(alpha: 0.42),
+                ),
+                _MatchMetaChip(
+                  label: candidate.breed,
+                  foreground: Colors.white,
+                  background: AppColors.mulberry500.withValues(alpha: 0.42),
+                  borderColor: Colors.white.withValues(alpha: 0.45),
+                ),
+                _MatchMetaChip(
+                  label: candidate.energy,
+                  foreground: Colors.white,
+                  background: AppColors.sunset500.withValues(alpha: 0.88),
+                  borderColor: Colors.white.withValues(alpha: 0.48),
                 ),
               ],
             ),
@@ -657,13 +781,19 @@ class _InfoPanel extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ActionDock extends StatelessWidget {
-  const _ActionDock({required this.state, required this.notifier});
+  const _ActionDock({
+    required this.state,
+    required this.notifier,
+    required this.bufferAsync,
+  });
   final DiscoveryState state;
   final DiscoveryNotifier notifier;
+  final AsyncValue<DiscoveryCandidatesBuffer> bufferAsync;
 
   @override
   Widget build(BuildContext context) {
-    final disabled = state.isExiting || state.topCard == null;
+    final deck = bufferAsync.asData?.value.candidates ?? const <DiscoveryCandidate>[];
+    final disabled = state.isExiting || deck.isEmpty;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -710,6 +840,42 @@ class _ActionDock extends StatelessWidget {
             onTap: null, // Boost — premium feature placeholder
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _MatchMetaChip extends StatelessWidget {
+  const _MatchMetaChip({
+    required this.label,
+    required this.foreground,
+    required this.background,
+    required this.borderColor,
+  });
+  final String label;
+  final Color foreground;
+  final Color background;
+  final Color borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusSm),
+        border: Border.all(color: borderColor, width: 1),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: GoogleFonts.inter(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.2,
+          color: foreground,
+        ),
       ),
     );
   }
