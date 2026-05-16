@@ -12,6 +12,10 @@ final deviceLatLngProvider =
   DeviceLatLngNotifier.new,
 );
 
+final locationAccessProvider = FutureProvider<LocationAccessState>((ref) async {
+  return ref.watch(locationServiceProvider).readAccessState();
+});
+
 class DeviceLatLngNotifier extends AsyncNotifier<LatLng> {
   @override
   Future<LatLng> build() =>

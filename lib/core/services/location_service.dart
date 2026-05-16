@@ -1,12 +1,59 @@
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import 'package:petfolio/core/errors/app_exception.dart';
 
 import 'lat_lng.dart';
 
+enum LocationAccessState {
+  granted,
+  denied,
+  permanentlyDenied,
+  servicesDisabled,
+  unavailable,
+}
+
 class LocationService {
+  Future<LocationAccessState> readAccessState() async {
+    if (kIsWeb) return LocationAccessState.unavailable;
+
+    try {
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        return LocationAccessState.servicesDisabled;
+      }
+      return _mapGeolocatorPermission(await Geolocator.checkPermission());
+    } catch (_) {
+      return LocationAccessState.unavailable;
+    }
+  }
+
+  Future<LocationAccessState> requestWhenInUseAccess() async {
+    if (kIsWeb) return LocationAccessState.unavailable;
+
+    try {
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        return LocationAccessState.servicesDisabled;
+      }
+      return _mapGeolocatorPermission(await Geolocator.requestPermission());
+    } catch (_) {
+      return LocationAccessState.unavailable;
+    }
+  }
+
+  LocationAccessState _mapGeolocatorPermission(LocationPermission permission) {
+    switch (permission) {
+      case LocationPermission.always:
+      case LocationPermission.whileInUse:
+        return LocationAccessState.granted;
+      case LocationPermission.denied:
+        return LocationAccessState.denied;
+      case LocationPermission.deniedForever:
+        return LocationAccessState.permanentlyDenied;
+      case LocationPermission.unableToDetermine:
+        return LocationAccessState.denied;
+    }
+  }
+
   Future<LatLng> acquireCurrentLatLng() async {
     if (kIsWeb) {
       throw const ValidationException(
@@ -15,38 +62,37 @@ class LocationService {
       );
     }
 
-    final enabled = await Geolocator.isLocationServiceEnabled();
-    if (!enabled) {
-      throw const ValidationException(
-        message:
-            'Location services are turned off. Turn them on in system settings to match using your current position.',
-      );
-    }
-
-    final status = await Permission.locationWhenInUse.request();
-    if (status.isPermanentlyDenied) {
-      throw const ValidationException(
-        message:
-            'Location is blocked for this app. Open Settings to allow location, or discovery will use your pet profile location.',
-      );
-    }
-    if (status.isDenied) {
-      throw const ValidationException(
-        message:
-            'Location permission was denied. Discovery will use your pet profile location until you allow access.',
-      );
-    }
-    if (!status.isGranted) {
-      throw const ValidationException(
-        message:
-            'Location is not available. Discovery will use your pet profile location.',
-      );
+    final access = await readAccessState();
+    switch (access) {
+      case LocationAccessState.servicesDisabled:
+        throw const ValidationException(
+          message:
+              'Location services are turned off. Turn them on in system settings to match using your current position.',
+        );
+      case LocationAccessState.permanentlyDenied:
+        throw const ValidationException(
+          message:
+              'Location is blocked for this app. Open Settings to allow location, or discovery will use your pet profile location.',
+        );
+      case LocationAccessState.denied:
+        throw const ValidationException(
+          message:
+              'Location permission was denied. Discovery will use your pet profile location until you allow access.',
+        );
+      case LocationAccessState.unavailable:
+        throw const ValidationException(
+          message:
+              'Location is not available. Discovery will use your pet profile location.',
+        );
+      case LocationAccessState.granted:
+        break;
     }
 
     try {
       final pos = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 12),
         ),
       );
       return LatLng(latitude: pos.latitude, longitude: pos.longitude);

@@ -73,17 +73,12 @@ AS $$
       )
     )
     AND (
-      (p_min_age_years IS NULL AND p_max_age_years IS NULL)
+      c.date_of_birth IS NULL
       OR (
-        c.date_of_birth IS NOT NULL
-        AND (
-          p_min_age_years IS NULL
-          OR date_part('year', age(current_date, c.date_of_birth))::int >= p_min_age_years
-        )
-        AND (
-          p_max_age_years IS NULL
-          OR date_part('year', age(current_date, c.date_of_birth))::int <= p_max_age_years
-        )
+        (p_min_age_years IS NULL
+          OR date_part('year', age(current_date, c.date_of_birth))::int >= p_min_age_years)
+        AND (p_max_age_years IS NULL
+          OR date_part('year', age(current_date, c.date_of_birth))::int <= p_max_age_years)
       )
     )
   ORDER BY c.created_at DESC

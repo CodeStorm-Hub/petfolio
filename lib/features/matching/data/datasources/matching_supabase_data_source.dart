@@ -92,8 +92,12 @@ class MatchingSupabaseDataSource {
     required double latitude,
     required double longitude,
   }) async {
-    final ewkt = 'SRID=4326;POINT($longitude $latitude)';
-    await _client.from('pets').update({'location': ewkt}).eq('id', petId);
+    await _client.from('pets').update({
+      'location': {
+        'type': 'Point',
+        'coordinates': [longitude, latitude],
+      },
+    }).eq('id', petId);
   }
 
   Stream<List<Map<String, dynamic>>> chatThreadStream() {

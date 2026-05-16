@@ -71,10 +71,18 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
       );
     }
 
-    ref.watch(deviceLatLngProvider);
-    try {
-      await ref.read(deviceLatLngProvider.future);
-    } catch (_) {}
+    ref.listen(deviceLatLngProvider, (previous, next) {
+      if (previous == next) return;
+      if (next case AsyncData()) {
+        ref.invalidateSelf();
+      }
+    });
+    unawaited(
+      ref.read(deviceLatLngProvider.future).then(
+        (_) {},
+        onError: (_, _) {},
+      ),
+    );
 
     final prefs = ref.read(matchPreferenceControllerProvider);
     final repo = ref.read(matchingRepositoryProvider);

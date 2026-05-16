@@ -9,15 +9,15 @@
 
 ## Learned Workspace Facts
 
-- Care shell route is `/care`; full-screen care routes include `/care/nutrition` and `/care/medical-vault`.
-- Successful pet onboarding navigates to `/care?onboardingComplete=1`; `CareScreen` shows a one-shot success snackbar then normalizes the URL to `/care`.
+- Care routes: shell `/care`, full-screen `/care/nutrition` and `/care/medical-vault`; successful onboarding navigates to `/care?onboardingComplete=1`, shows a one-shot success snackbar, then normalizes the URL to `/care`.
 - `careDashboardProvider` and `healthVaultControllerProvider` are non-family providers that watch `activePetIdProvider`; a null active pet yields empty tasks or an empty medical list and skips remote loads.
 - Daily streak completion is driven by the `check_daily_completion` RPC (`target_pet_id`, optional `completion_date` matching `care_logs.logged_date`) against `care_tasks` and `care_logs`, with streak state in `care_streaks` and badges in `pet_badges`; the dashboard also listens to Supabase realtime on `care_streaks` via `careStreakRealtimeProvider` for immediate streak UI sync.
 - App-wide snackbars for notifier-triggered errors use `appSnackBarMessengerKey` on `MaterialApp.router` and `AppSnackBar.showError` from `lib/core/widgets/app_snack_bar.dart`.
-- `MedicalRecord` exposes `renewalDate` and `isExpiringSoon` (next 30 days, date-only) for vault warning styling.
-- `analysis_options.yaml` excludes `*.g.dart` and `*.freezed.dart` from the analyzer to avoid duplicate generated JSON symbol noise.
+- `analysis_options.yaml` excludes only `*.g.dart` from the analyzer (not `*.freezed.dart`; Freezed `part` files must be analyzed).
 - `chat_threads` uses `participant_1_id` / `participant_2_id` (user ids) and `match_request_id`; the app maps rows after filtering by auth user and `match_requests` pet involvement (`chat_thread.dart`, `chat_threads_controller.dart`).
 - Canonical pet records use `lib/features/pet_profile/data/models/pet.dart` (`ActivityLevel` maps to snake_case `activity_level` strings such as `very_high`; nutrition maps use `activityLevelSnakeCase`).
 - Marionette runs only in debug builds via conditional imports `marionette_debug_gate_stub.dart` / `marionette_debug_gate_io.dart` so `main.dart` avoids `dart:io` on web targets.
 - Social screen header Messages navigates to `/matching`.
-- `.gitignore` excludes `.cursor/hooks/state/`, `tmp_window_dump.xml`, and `.claude/worktrees/`.
+- PostGIS matching uses `swipes` / `matches` and `matching_discovery_candidates` RPC via `MatchingRepository`; canonical schema is in `supabase/migrations/` (root `schema.sql` is partial). `mutualMatchInsertStreamProvider` listens for Realtime `INSERT` on `public.matches`; `MatchCelebrationOverlay` on `MatchingScreen`.
+- Matching discovery location: `lib/core/services/location_service.dart` with `LocationAccessState`, `locationAccessProvider`, and `deviceLatLngProvider`; Android `ACCESS_FINE/COARSE_LOCATION` and iOS `NSLocationWhenInUseUsageDescription` / `NSLocationAlwaysUsageDescription` in native manifests; `MatchingScreen` shows a denied/services-off empty state with **Enable Location Services** (app settings when permanently denied).
+- `matchPreferenceControllerProvider` + `MatchPreferencesSheet` (Filters on `MatchingScreen`); `discoveryCandidatesControllerProvider` buffers candidates (replenish when stack drops below 5) and debounces preference refetches (~450ms via `ref.listen` + `invalidateSelf()` — do not `ref.watch` prefs in `build()` on slider drags). Riverpod 3: generated notifier subclasses omit type parameters (`extends _$Foo`, not `_$Foo<State>`); use `AsyncValue.value`, not `.valueOrNull`; prefs use `Notifier` / `NotifierProvider`.

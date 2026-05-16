@@ -2,6 +2,37 @@
 
 ---
 
+## 2026-05-17 — Matching discovery: location, RPC, emulator QA
+
+- **Android/iOS** — `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` in `AndroidManifest.xml`; `NSLocationWhenInUseUsageDescription` in `Info.plist`.
+- **`location_service.dart`** — Geolocator-based `LocationAccessState` (`granted`, `denied`, `permanentlyDenied`, `servicesDisabled`, `unavailable`); `locationAccessProvider`.
+- **`matching_screen.dart`** — `_LocationAccessEmpty` + enable flow; deck hidden while permission blocked; `_EmptyDeck` when RPC returns zero rows; resume refreshes location + discovery.
+- **`discovery_candidates_controller.dart`** — No await on GPS before first fetch; `ref.listen(deviceLatLngProvider)` invalidates when coords arrive.
+- **`matching_supabase_data_source.dart`** — `setPetLocationPoint` uses GeoJSON `{ type: Point, coordinates: [lng, lat] }` for `geography`.
+- **Supabase (hosted `jqyjvhwlcqcsuwcqgcwf`)** — Applied 7-arg `matching_discovery_candidates` (was 404); fixed age filter so pets with **`date_of_birth IS NULL`** are not excluded when min/max age defaults (0–30) are passed — **Fluffy** now appears in deck.
+- **Emulator QA** — `flutter run -d emulator-5554` + Marionette: Match tab shows Fluffy (“Within 0.5 miles”) after location grant; `flutter analyze lib/features/matching` — warnings only on `@JsonKey` in `matching_discovery_row.dart`.
+
+**Data note:** RPC requires both actor and candidate `pets.location IS NOT NULL`; only Montu + Fluffy had locations in test data.
+
+**Next step:** Commit migration sync; optional avatar load for Fluffy; wire mutual-match **Send a Message**; apply `20260517120000_matches_realtime.sql` if not on remote.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-17 — Real-time mutual match celebration
+
+- **`mutual_match_realtime_provider.dart`** — `mutualMatchInsertStreamProvider` (`StreamProvider.family<PetMutualMatch, String>`) subscribes to Supabase Realtime `INSERT` on `public.matches`, filters rows where `pet_a_id` or `pet_b_id` equals the active pet.
+- **`match_celebration_overlay.dart`** — Full-screen blurred backdrop with “It's a Match!”, dual avatars, **Send a Message** / **Keep Swiping** actions.
+- **`matching_screen.dart`** — `_DiscoveryView` listens for insert events, dedupes by match id, shows overlay and `IgnorePointer` on deck + dock while active.
+- **`20260517120000_matches_realtime.sql`** — Adds `matches` to `supabase_realtime` publication.
+
+**Next step:** Apply migration to hosted project (`npx supabase db push` or Supabase MCP); wire **Send a Message** when chat UI ships.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-05-16 — Matching discovery preferences UI
 
 - **`match_preferences_sheet.dart`** — Draggable bottom sheet from `MatchingScreen` filter action: multi-select species pills (`PetSpecies`), max-distance slider (1–50 mi), age `RangeSlider` (0–30 yrs); bound to `matchPreferenceControllerProvider`.

@@ -4,16 +4,24 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:permission_handler/permission_handler.dart';
 
+import '../../../../core/services/lat_lng.dart';
+import '../../../../core/services/location_providers.dart';
+import '../../../../core/services/location_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
 import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/discovery_candidate.dart';
+import '../../data/models/pet_mutual_match.dart';
 import '../controllers/discovery_candidates_controller.dart';
 import '../controllers/discovery_controller.dart';
+import '../controllers/mutual_match_realtime_provider.dart';
+import '../widgets/match_celebration_overlay.dart';
 import '../widgets/match_preferences_sheet.dart';
 
 String _speciesLabel(String species) {
@@ -24,6 +32,30 @@ String _speciesLabel(String species) {
     'reptile' => 'Reptile',
     _ => 'Dog',
   };
+}
+
+bool _isLocationBlocked(LocationAccessState? access) {
+  return switch (access) {
+    LocationAccessState.denied ||
+    LocationAccessState.permanentlyDenied ||
+    LocationAccessState.servicesDisabled ||
+    LocationAccessState.unavailable =>
+      true,
+    LocationAccessState.granted => false,
+    null => true,
+  };
+}
+
+LocationAccessState? _accessFromDeviceError(AsyncValue<LatLng> deviceLocation) {
+  if (!deviceLocation.hasError) return null;
+  final message = deviceLocation.error.toString().toLowerCase();
+  if (message.contains('blocked') || message.contains('permanently')) {
+    return LocationAccessState.permanentlyDenied;
+  }
+  if (message.contains('turned off') || message.contains('services')) {
+    return LocationAccessState.servicesDisabled;
+  }
+  return LocationAccessState.denied;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -72,86 +104,253 @@ class MatchingScreen extends ConsumerWidget {
 // Main view
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _DiscoveryView extends ConsumerWidget {
+class _DiscoveryView extends ConsumerStatefulWidget {
   const _DiscoveryView({required this.petId});
   final String petId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_DiscoveryView> createState() => _DiscoveryViewState();
+}
+
+class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
+    with WidgetsBindingObserver {
+  final Set<String> _shownMatchIds = {};
+  PetMutualMatch? _celebrationMatch;
+
+  String get petId => widget.petId;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refreshLocationState());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _refreshLocationState();
+    }
+  }
+
+  void _refreshLocationState() {
+    ref.invalidate(locationAccessProvider);
+    ref.invalidate(deviceLatLngProvider);
+    ref.invalidate(discoveryCandidatesControllerProvider);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen<AsyncValue<PetMutualMatch>>(
+      mutualMatchInsertStreamProvider(petId),
+      (previous, next) {
+        next.whenData((match) {
+          if (_shownMatchIds.contains(match.id)) return;
+          if (_celebrationMatch != null) return;
+          _shownMatchIds.add(match.id);
+          setState(() => _celebrationMatch = match);
+        });
+      },
+    );
+
     final bufferAsync = ref.watch(discoveryCandidatesControllerProvider);
+    final locationAccessAsync = ref.watch(locationAccessProvider);
+    final deviceLocationAsync = ref.watch(deviceLatLngProvider);
     final state = ref.watch(discoveryControllerProvider(petId));
     final notifier = ref.read(discoveryControllerProvider(petId).notifier);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final activePet = ref.watch(activePetControllerProvider);
+    final overlayActive = _celebrationMatch != null && activePet != null;
+
+    final locationAccess = locationAccessAsync.asData?.value;
+    final locationBlocked = _isLocationBlocked(locationAccess);
+
+    Future<void> enableLocation() async {
+      final access = locationAccess ?? await ref.read(locationServiceProvider).readAccessState();
+      if (access == LocationAccessState.permanentlyDenied ||
+          access == LocationAccessState.servicesDisabled) {
+        await openAppSettings();
+      } else {
+        await ref.read(locationServiceProvider).requestWhenInUseAccess();
+      }
+      _refreshLocationState();
+    }
+
+    Widget buildDiscoveryContent() {
+      if (locationBlocked) {
+        return _LocationAccessEmpty(
+          access: locationAccess ??
+              _accessFromDeviceError(deviceLocationAsync) ??
+              LocationAccessState.denied,
+          onEnable: overlayActive ? null : enableLocation,
+        );
+      }
+
+      return bufferAsync.when(
+        skipLoadingOnReload: true,
+        loading: () => const Center(
+          child: CircularProgressIndicator.adaptive(),
+        ),
+        error: (error, stackTrace) => Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
+              const SizedBox(height: 12),
+              Text(
+                'Could not load profiles',
+                style: TextStyle(fontSize: 15, color: pt.ink500),
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: overlayActive
+                    ? null
+                    : () => ref.invalidate(
+                          discoveryCandidatesControllerProvider,
+                        ),
+                icon: const Icon(Icons.refresh_rounded, size: 16),
+                label: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+        data: (buf) {
+          final deck = buf.candidates;
+          final visible = state.isExiting && state.exitingCard != null;
+          if (deck.isEmpty && !visible) {
+            return _EmptyDeck(
+              locationReady: locationAccess == LocationAccessState.granted,
+            );
+          }
+          return _DiscoveryStack(
+            buffer: deck,
+            state: state,
+            notifier: notifier,
+          );
+        },
+      );
+    }
 
     return Scaffold(
       backgroundColor: pt.surface1,
       body: SafeArea(
         bottom: false,
-        child: Column(
+        child: Stack(
           children: [
-            AppHeader(
-              eyebrow: 'Match · Nearby',
-              onOpenSwitcher: () => PetSwitcherSheet.show(context),
-              dense: true,
-              actions: [
-                AppHeaderAction(
-                  iconKey: const ValueKey<String>('match_action_filter'),
-                  icon: Icons.tune_rounded,
-                  tooltip: 'Filters',
-                  onTap: () => MatchPreferencesSheet.show(context),
+            Column(
+              children: [
+                AppHeader(
+                  eyebrow: 'Match · Nearby',
+                  onOpenSwitcher: () => PetSwitcherSheet.show(context),
+                  dense: true,
+                  actions: [
+                    AppHeaderAction(
+                      iconKey: const ValueKey<String>('match_action_filter'),
+                      icon: Icons.tune_rounded,
+                      tooltip: 'Filters',
+                      onTap: overlayActive
+                          ? () {}
+                          : () => MatchPreferencesSheet.show(context),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                child: bufferAsync.when(
-                  skipLoadingOnReload: true,
-                  loading: () => const Center(
-                    child: CircularProgressIndicator.adaptive(),
-                  ),
-                  error: (error, stackTrace) => Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Could not load profiles',
-                          style: TextStyle(fontSize: 15, color: pt.ink500),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                    child: IgnorePointer(
+                      ignoring: overlayActive,
+                      child: locationAccessAsync.when(
+                        skipLoadingOnReload: true,
+                        loading: () => const Center(
+                          child: CircularProgressIndicator.adaptive(),
                         ),
-                        const SizedBox(height: 16),
-                        FilledButton.icon(
-                          onPressed: () => ref.invalidate(
-                            discoveryCandidatesControllerProvider,
-                          ),
-                          icon: const Icon(Icons.refresh_rounded, size: 16),
-                          label: const Text('Retry'),
-                        ),
-                      ],
+                        error: (_, _) => buildDiscoveryContent(),
+                        data: (_) => buildDiscoveryContent(),
+                      ),
                     ),
                   ),
-                  data: (buf) {
-                    final deck = buf.candidates;
-                    final visible = state.isExiting && state.exitingCard != null;
-                    if (deck.isEmpty && !visible) {
-                      return const _EmptyDeck();
-                    }
-                    return _DiscoveryStack(
-                      buffer: deck,
+                ),
+                if (!locationBlocked)
+                  IgnorePointer(
+                    ignoring: overlayActive,
+                    child: _ActionDock(
                       state: state,
                       notifier: notifier,
-                    );
-                  },
-                ),
-              ),
+                      bufferAsync: bufferAsync,
+                    ),
+                  ),
+                const SizedBox(height: 16),
+              ],
             ),
-            _ActionDock(state: state, notifier: notifier, bufferAsync: bufferAsync),
-            const SizedBox(height: 16),
+            if (overlayActive)
+              MatchCelebrationOverlay(
+                activePet: activePet,
+                matchedPetName: _matchedPetLabel(ref, _celebrationMatch!),
+                matchedPetAvatarUrl:
+                    _matchedPetAvatarUrl(ref, _celebrationMatch!),
+                onSendMessage: () {
+                  final label =
+                      _matchedPetLabel(ref, _celebrationMatch!);
+                  setState(() => _celebrationMatch = null);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      behavior: SnackBarBehavior.floating,
+                      content: Text('Messages with $label — coming soon'),
+                    ),
+                  );
+                },
+                onKeepSwiping: () => setState(() => _celebrationMatch = null),
+              ),
           ],
         ),
       ),
     );
+  }
+
+  String _matchedPetLabel(WidgetRef ref, PetMutualMatch match) {
+    final otherId =
+        match.petAId == petId ? match.petBId : match.petAId;
+    final deck = ref
+        .read(discoveryCandidatesControllerProvider)
+        .asData
+        ?.value
+        .candidates;
+    if (deck != null) {
+      for (final c in deck) {
+        if (c.petId == otherId) return c.name;
+      }
+    }
+    final pets = ref.read(petListProvider).asData?.value ?? const <Pet>[];
+    for (final p in pets) {
+      if (p.id == otherId) return p.name;
+    }
+    return 'your match';
+  }
+
+  String? _matchedPetAvatarUrl(WidgetRef ref, PetMutualMatch match) {
+    final otherId =
+        match.petAId == petId ? match.petBId : match.petAId;
+    final deck = ref
+        .read(discoveryCandidatesControllerProvider)
+        .asData
+        ?.value
+        .candidates;
+    if (deck != null) {
+      for (final c in deck) {
+        if (c.petId == otherId) return c.avatarUrl;
+      }
+    }
+    final pets = ref.read(petListProvider).asData?.value ?? const <Pet>[];
+    for (final p in pets) {
+      if (p.id == otherId) return p.avatarUrl;
+    }
+    return null;
   }
 }
 
@@ -182,67 +381,157 @@ class _DiscoveryStack extends StatelessWidget {
     final peekTop = hasFlying && buffer.isNotEmpty ? buffer.first : null;
     final topLive = !hasFlying && buffer.isNotEmpty ? buffer.first : null;
 
+    final layers = <Widget>[
+      if (afterCard != null)
+        _StackCard(
+          candidate: afterCard,
+          scale: 0.88,
+          offsetY: 24,
+        ),
+      if (nextCard != null)
+        _StackCard(
+          candidate: nextCard,
+          scale: 0.94 + 0.06 * dragProgress,
+          offsetY: 12.0 - 12.0 * dragProgress,
+        ),
+      if (peekTop != null)
+        _StackCard(
+          candidate: peekTop,
+          scale: 0.94 + 0.06 * dragProgress,
+          offsetY: 12.0 - 12.0 * dragProgress,
+        ),
+      if (hasFlying)
+        _SwipeCard(
+          state: state,
+          notifier: notifier,
+          interactiveTop: null,
+        )
+      else if (topLive != null)
+        _SwipeCard(
+          state: state,
+          notifier: notifier,
+          interactiveTop: topLive,
+        ),
+    ];
+
+    if (layers.isEmpty) return const _EmptyDeck(locationReady: true);
+
     return Stack(
       alignment: Alignment.center,
-      children: [
-        if (afterCard != null)
-          _StackCard(
-            candidate: afterCard,
-            scale: 0.88,
-            offsetY: 24,
-          ),
-        if (nextCard != null)
-          _StackCard(
-            candidate: nextCard,
-            scale: 0.94 + 0.06 * dragProgress,
-            offsetY: 12.0 - 12.0 * dragProgress,
-          ),
-        if (peekTop != null)
-          _StackCard(
-            candidate: peekTop,
-            scale: 0.94 + 0.06 * dragProgress,
-            offsetY: 12.0 - 12.0 * dragProgress,
-          ),
-        if (hasFlying)
-          _SwipeCard(
-            state: state,
-            notifier: notifier,
-            interactiveTop: null,
-          )
-        else if (topLive != null)
-          _SwipeCard(
-            state: state,
-            notifier: notifier,
-            interactiveTop: topLive,
-          ),
-      ],
+      fit: StackFit.expand,
+      children: layers,
     );
   }
 }
 
-class _EmptyDeck extends StatelessWidget {
-  const _EmptyDeck();
+class _LocationAccessEmpty extends StatelessWidget {
+  const _LocationAccessEmpty({
+    required this.access,
+    required this.onEnable,
+  });
+
+  final LocationAccessState access;
+  final VoidCallback? onEnable;
 
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final tt = Theme.of(context).textTheme;
+    final permanentlyDenied =
+        access == LocationAccessState.permanentlyDenied;
+    final servicesDisabled = access == LocationAccessState.servicesDisabled;
+
+    final title = servicesDisabled
+        ? 'Turn on location services'
+        : permanentlyDenied
+            ? 'Location access is off'
+            : 'Location needed for nearby matches';
+    final subtitle = servicesDisabled
+        ? 'Enable location in your device settings so we can show pets near you.'
+        : permanentlyDenied
+            ? 'Allow location for PetFolio in Settings to discover pets around you.'
+            : 'We use your location to find playmates, breeding partners, and adoption matches nearby.';
+
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.pets_rounded, size: 64, color: pt.ink300),
-          const SizedBox(height: 16),
-          Text(
-            'No more profiles nearby',
-            style: tt.titleMedium?.copyWith(color: pt.ink500),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Check back soon!',
-            style: tt.bodySmall?.copyWith(color: pt.ink300),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.location_off_rounded, size: 64, color: pt.ink300),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: tt.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: pt.ink500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: tt.bodySmall?.copyWith(
+                color: pt.ink300,
+                height: 1.45,
+              ),
+            ),
+            const SizedBox(height: 24),
+            PrimaryPillButton(
+              label: 'Enable Location Services',
+              isFullWidth: true,
+              leadingIcon: const Icon(
+                Icons.location_on_rounded,
+                size: 20,
+                color: Colors.white,
+              ),
+              onPressed: onEnable,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyDeck extends StatelessWidget {
+  const _EmptyDeck({this.locationReady = false});
+
+  final bool locationReady;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
+    final title = locationReady
+        ? 'No pets nearby yet'
+        : 'No more profiles nearby';
+    final subtitle = locationReady
+        ? 'Other pets need a location on their profile to appear here. Try widening filters or check back later.'
+        : 'Check back soon!';
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.pets_rounded, size: 64, color: pt.ink300),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: tt.titleMedium?.copyWith(color: pt.ink500),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: tt.bodySmall?.copyWith(color: pt.ink300, height: 1.45),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -462,16 +751,25 @@ class _CardSurface extends StatelessWidget {
       if (colors.length > 1) colors[1],
       if (colors.length > 2) colors[2] else if (colors.isNotEmpty) colors.last,
     ];
+    final resolvedGradColors = gradColors.isEmpty
+        ? [
+            AppColors.sunset500.withValues(alpha: 0.45),
+            AppColors.coral500.withValues(alpha: 0.72),
+            AppColors.coral500,
+          ]
+        : gradColors;
 
     return ClipRRect(
       borderRadius:
           BorderRadius.circular(PetfolioThemeExtension.radius2xl),
       child: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: gradColors,
+            colors: resolvedGradColors,
           ),
         ),
         child: Stack(
