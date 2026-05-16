@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:petfolio/core/services/location_providers.dart';
 
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/discovery_candidate.dart';
@@ -53,6 +54,11 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
         mayHaveMore: false,
       );
     }
+
+    ref.watch(deviceLatLngProvider);
+    try {
+      await ref.read(deviceLatLngProvider.future);
+    } catch (_) {}
 
     final prefs = ref.read(matchPreferenceControllerProvider);
     final repo = ref.read(matchingRepositoryProvider);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:petfolio/core/services/location_providers.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../datasources/matching_supabase_data_source.dart';
@@ -10,13 +11,15 @@ import '../models/pet_swipe.dart';
 
 final matchingRepositoryProvider = Provider<MatchingRepository>(
   (ref) => MatchingRepository(
+    ref,
     MatchingSupabaseDataSource(Supabase.instance.client),
   ),
 );
 
 class MatchingRepository {
-  MatchingRepository(this._dataSource);
+  MatchingRepository(this._ref, this._dataSource);
 
+  final Ref _ref;
   final MatchingSupabaseDataSource _dataSource;
 
   Future<List<DiscoveryCandidate>> fetchCandidates({
@@ -29,6 +32,19 @@ class MatchingRepository {
     int? maxAgeYears,
   }) async {
     if (_dataSource.currentUserId == null) return [];
+
+    final device = _ref.read(deviceLatLngProvider);
+    if (device case AsyncData(:final value)) {
+      try {
+        await _dataSource.setPetLocationPoint(
+          petId: activePetId,
+          latitude: value.latitude,
+          longitude: value.longitude,
+        );
+      } catch (e, st) {
+        debugPrint('[MatchingRepository] setPetLocationPoint failed: $e $st');
+      }
+    }
 
     final species =
         (speciesFilters == null || speciesFilters.isEmpty) ? null : speciesFilters;

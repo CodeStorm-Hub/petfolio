@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:petfolio/core/services/location_providers.dart';
 
 import '../../data/models/discovery_candidate.dart';
 import '../../data/repositories/matching_repository.dart';
@@ -100,7 +101,7 @@ class DiscoveryNotifier extends Notifier<DiscoveryState> {
 
   @override
   DiscoveryState build() {
-    // Warm the UI with sample cards instantly, then replace with live data.
+    ref.watch(deviceLatLngProvider);
     Future.microtask(() => _fetchAndPopulate(arg));
     return DiscoveryState(petId: arg, deck: _sampleDeck(), isLoading: true);
   }
@@ -111,6 +112,9 @@ class DiscoveryNotifier extends Notifier<DiscoveryState> {
 
   Future<void> _fetchAndPopulate(String petId) async {
     try {
+      try {
+        await ref.read(deviceLatLngProvider.future);
+      } catch (_) {}
       final candidates = await _repo.fetchCandidates(activePetId: petId);
       if (candidates.isNotEmpty) {
         // Replace sample deck with real profiles.

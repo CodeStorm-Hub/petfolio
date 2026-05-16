@@ -16,11 +16,4 @@ class DeviceLatLngNotifier extends AsyncNotifier<LatLng> {
   @override
   Future<LatLng> build() =>
       ref.read(locationServiceProvider).acquireCurrentLatLng();
-
-  Future<void> refresh() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () => ref.read(locationServiceProvider).acquireCurrentLatLng(),
-    );
-  }
 }
