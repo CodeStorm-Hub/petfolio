@@ -6,8 +6,8 @@ part of 'medical_record.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$MedicalRecordImpl _$$MedicalRecordImplFromJson(Map<String, dynamic> json) =>
-    _$MedicalRecordImpl(
+_MedicalRecord _$MedicalRecordFromJson(Map<String, dynamic> json) =>
+    _MedicalRecord(
       id: json['id'] as String,
       petId: json['pet_id'] as String,
       recordType: $enumDecode(_$MedicalRecordTypeEnumMap, json['record_type']),
@@ -34,7 +34,7 @@ _$MedicalRecordImpl _$$MedicalRecordImplFromJson(Map<String, dynamic> json) =>
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
 
-Map<String, dynamic> _$$MedicalRecordImplToJson(_$MedicalRecordImpl instance) =>
+Map<String, dynamic> _$MedicalRecordToJson(_MedicalRecord instance) =>
     <String, dynamic>{
       'id': instance.id,
       'pet_id': instance.petId,

@@ -14,8 +14,8 @@ import 'social_profile_controller.dart';
 /// `false` = the active pet is NOT following [petId].
 ///
 /// Auto-disposes when the SocialProfileScreen is closed.
-final followStatusProvider = AsyncNotifierProvider.autoDispose
-    .family<FollowNotifier, bool, String>(
+final followStatusProvider =
+    AsyncNotifierProvider.family<FollowNotifier, bool, String>(
   FollowNotifier.new,
 );
 
@@ -29,11 +29,12 @@ final followStatusProvider = AsyncNotifierProvider.autoDispose
 ///   1. Flip the local boolean immediately — button changes on next frame.
 ///   2. Await the Supabase write. On error, flip back.
 ///   3. On success, invalidate [petStatsProvider] so follower count refreshes.
-class FollowNotifier extends AutoDisposeFamilyAsyncNotifier<bool, String> {
-  // arg == the petId being viewed (the target to follow/unfollow)
+class FollowNotifier extends AsyncNotifier<bool> {
+  FollowNotifier(this.arg);
+  final String arg;
 
   @override
-  Future<bool> build(String arg) async {
+  Future<bool> build() async {
     final activePet = ref.read(activePetControllerProvider);
     if (activePet == null) return false;
 
@@ -55,7 +56,7 @@ class FollowNotifier extends AutoDisposeFamilyAsyncNotifier<bool, String> {
     final activePet = ref.read(activePetControllerProvider);
     if (activePet == null) return;
 
-    final currentlyFollowing = state.valueOrNull ?? false;
+    final currentlyFollowing = state.value ?? false;
     final nowFollowing = !currentlyFollowing;
 
     // 1. Optimistic flip — button updates instantly.

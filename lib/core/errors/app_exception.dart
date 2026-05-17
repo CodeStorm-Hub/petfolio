@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 sealed class AppException implements Exception {
-  const AppException(this.message);
+  const AppException({required this.message});
 
   final String message;
 
@@ -10,25 +10,29 @@ sealed class AppException implements Exception {
 }
 
 final class NetworkException extends AppException {
-  const NetworkException([super.message = 'A network error occurred.']);
+  const NetworkException({super.message = 'A network error occurred.'});
 }
 
 final class NotAuthenticatedException extends AppException {
   const NotAuthenticatedException()
-      : super('User must be authenticated to perform this action.');
+      : super(
+            message:
+                'User must be authenticated to perform this action.');
 }
 
 final class NotFoundException extends AppException {
-  const NotFoundException([super.message = 'The requested resource was not found.']);
+  const NotFoundException({
+    super.message = 'The requested resource was not found.',
+  });
 }
 
 final class ValidationException extends AppException {
-  const ValidationException(super.message);
+  const ValidationException({required super.message});
 }
 
 final class DatabaseException extends AppException {
-  const DatabaseException(super.message);
+  const DatabaseException({required super.message});
 
   factory DatabaseException.fromPostgrest(PostgrestException e) =>
-      DatabaseException(e.message);
+      DatabaseException(message: e.message);
 }

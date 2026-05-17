@@ -48,7 +48,7 @@ class PetCareRepository {
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -119,7 +119,7 @@ class PetCareRepository {
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -139,7 +139,7 @@ class PetCareRepository {
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -206,7 +206,7 @@ class PetCareRepository {
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -392,7 +392,7 @@ class PetCareRepository {
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -414,7 +414,7 @@ class PetCareRepository {
       if (e.code == 'PGRST116') throw const NotFoundException();
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -440,7 +440,7 @@ class PetCareRepository {
       if (e.code == 'PGRST116') throw const NotFoundException();
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -458,7 +458,7 @@ class PetCareRepository {
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -590,7 +590,7 @@ class PetCareRepository {
       if (e.code == 'PGRST116') throw const NotFoundException();
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 }

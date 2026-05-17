@@ -6,41 +6,39 @@ part of 'care_task.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$CareTaskImpl _$$CareTaskImplFromJson(Map<String, dynamic> json) =>
-    _$CareTaskImpl(
-      id: json['id'] as String,
-      petId: json['pet_id'] as String,
-      taskType: $enumDecode(_$CareTaskTypeEnumMap, json['task_type']),
-      title: json['title'] as String,
-      frequency: $enumDecode(_$CareFrequencyEnumMap, json['frequency']),
-      scheduledTime: json['scheduled_time'] as String?,
-      isCompleted: json['is_completed'] as bool,
-      completedAt: json['completed_at'] == null
-          ? null
-          : DateTime.parse(json['completed_at'] as String),
-      gamificationPoints: (json['gamification_points'] as num).toInt(),
-      notes: json['notes'] as String?,
-      categoryIcon: json['category_icon'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-    );
+_CareTask _$CareTaskFromJson(Map<String, dynamic> json) => _CareTask(
+  id: json['id'] as String,
+  petId: json['pet_id'] as String,
+  taskType: $enumDecode(_$CareTaskTypeEnumMap, json['task_type']),
+  title: json['title'] as String,
+  frequency: $enumDecode(_$CareFrequencyEnumMap, json['frequency']),
+  scheduledTime: json['scheduled_time'] as String?,
+  isCompleted: json['is_completed'] as bool,
+  completedAt: json['completed_at'] == null
+      ? null
+      : DateTime.parse(json['completed_at'] as String),
+  gamificationPoints: (json['gamification_points'] as num).toInt(),
+  notes: json['notes'] as String?,
+  categoryIcon: json['category_icon'] as String?,
+  createdAt: DateTime.parse(json['created_at'] as String),
+  updatedAt: DateTime.parse(json['updated_at'] as String),
+);
 
-Map<String, dynamic> _$$CareTaskImplToJson(_$CareTaskImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'pet_id': instance.petId,
-      'task_type': _$CareTaskTypeEnumMap[instance.taskType]!,
-      'title': instance.title,
-      'frequency': _$CareFrequencyEnumMap[instance.frequency]!,
-      'scheduled_time': instance.scheduledTime,
-      'is_completed': instance.isCompleted,
-      'completed_at': instance.completedAt?.toIso8601String(),
-      'gamification_points': instance.gamificationPoints,
-      'notes': instance.notes,
-      'category_icon': instance.categoryIcon,
-      'created_at': instance.createdAt.toIso8601String(),
-      'updated_at': instance.updatedAt.toIso8601String(),
-    };
+Map<String, dynamic> _$CareTaskToJson(_CareTask instance) => <String, dynamic>{
+  'id': instance.id,
+  'pet_id': instance.petId,
+  'task_type': _$CareTaskTypeEnumMap[instance.taskType]!,
+  'title': instance.title,
+  'frequency': _$CareFrequencyEnumMap[instance.frequency]!,
+  'scheduled_time': instance.scheduledTime,
+  'is_completed': instance.isCompleted,
+  'completed_at': instance.completedAt?.toIso8601String(),
+  'gamification_points': instance.gamificationPoints,
+  'notes': instance.notes,
+  'category_icon': instance.categoryIcon,
+  'created_at': instance.createdAt.toIso8601String(),
+  'updated_at': instance.updatedAt.toIso8601String(),
+};
 
 const _$CareTaskTypeEnumMap = {
   CareTaskType.feeding: 'feeding',

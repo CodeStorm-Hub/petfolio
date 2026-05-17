@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,336 +9,293 @@ part of 'pet.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
-Pet _$PetFromJson(Map<String, dynamic> json) {
-  return _Pet.fromJson(json);
-}
 
 /// @nodoc
 mixin _$Pet {
-  String get id => throw _privateConstructorUsedError;
-  String get ownerId => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
-  String get species => throw _privateConstructorUsedError;
-  String? get breed => throw _privateConstructorUsedError;
-  String? get avatarUrl => throw _privateConstructorUsedError;
-  DateTime? get dateOfBirth => throw _privateConstructorUsedError;
-  ActivityLevel? get activityLevel => throw _privateConstructorUsedError;
-  DateTime get createdAt => throw _privateConstructorUsedError;
+
+ String get id; String get ownerId; String get name; String get species; String? get breed; String? get avatarUrl; DateTime? get dateOfBirth; ActivityLevel? get activityLevel; DateTime get createdAt;
+/// Create a copy of Pet
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$PetCopyWith<Pet> get copyWith => _$PetCopyWithImpl<Pet>(this as Pet, _$identity);
 
   /// Serializes this Pet to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of Pet
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $PetCopyWith<Pet> get copyWith => throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Pet&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.name, name) || other.name == name)&&(identical(other.species, species) || other.species == species)&&(identical(other.breed, breed) || other.breed == breed)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.dateOfBirth, dateOfBirth) || other.dateOfBirth == dateOfBirth)&&(identical(other.activityLevel, activityLevel) || other.activityLevel == activityLevel)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,ownerId,name,species,breed,avatarUrl,dateOfBirth,activityLevel,createdAt);
+
+@override
+String toString() {
+  return 'Pet(id: $id, ownerId: $ownerId, name: $name, species: $species, breed: $breed, avatarUrl: $avatarUrl, dateOfBirth: $dateOfBirth, activityLevel: $activityLevel, createdAt: $createdAt)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $PetCopyWith<$Res> {
-  factory $PetCopyWith(Pet value, $Res Function(Pet) then) =
-      _$PetCopyWithImpl<$Res, Pet>;
-  @useResult
-  $Res call({
-    String id,
-    String ownerId,
-    String name,
-    String species,
-    String? breed,
-    String? avatarUrl,
-    DateTime? dateOfBirth,
-    ActivityLevel? activityLevel,
-    DateTime createdAt,
-  });
+abstract mixin class $PetCopyWith<$Res>  {
+  factory $PetCopyWith(Pet value, $Res Function(Pet) _then) = _$PetCopyWithImpl;
+@useResult
+$Res call({
+ String id, String ownerId, String name, String species, String? breed, String? avatarUrl, DateTime? dateOfBirth, ActivityLevel? activityLevel, DateTime createdAt
+});
+
+
+
+
+}
+/// @nodoc
+class _$PetCopyWithImpl<$Res>
+    implements $PetCopyWith<$Res> {
+  _$PetCopyWithImpl(this._self, this._then);
+
+  final Pet _self;
+  final $Res Function(Pet) _then;
+
+/// Create a copy of Pet
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? ownerId = null,Object? name = null,Object? species = null,Object? breed = freezed,Object? avatarUrl = freezed,Object? dateOfBirth = freezed,Object? activityLevel = freezed,Object? createdAt = null,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,ownerId: null == ownerId ? _self.ownerId : ownerId // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,species: null == species ? _self.species : species // ignore: cast_nullable_to_non_nullable
+as String,breed: freezed == breed ? _self.breed : breed // ignore: cast_nullable_to_non_nullable
+as String?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
+as String?,dateOfBirth: freezed == dateOfBirth ? _self.dateOfBirth : dateOfBirth // ignore: cast_nullable_to_non_nullable
+as DateTime?,activityLevel: freezed == activityLevel ? _self.activityLevel : activityLevel // ignore: cast_nullable_to_non_nullable
+as ActivityLevel?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,
+  ));
 }
 
-/// @nodoc
-class _$PetCopyWithImpl<$Res, $Val extends Pet> implements $PetCopyWith<$Res> {
-  _$PetCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of Pet
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? ownerId = null,
-    Object? name = null,
-    Object? species = null,
-    Object? breed = freezed,
-    Object? avatarUrl = freezed,
-    Object? dateOfBirth = freezed,
-    Object? activityLevel = freezed,
-    Object? createdAt = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            ownerId: null == ownerId
-                ? _value.ownerId
-                : ownerId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            name: null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                      as String,
-            species: null == species
-                ? _value.species
-                : species // ignore: cast_nullable_to_non_nullable
-                      as String,
-            breed: freezed == breed
-                ? _value.breed
-                : breed // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            avatarUrl: freezed == avatarUrl
-                ? _value.avatarUrl
-                : avatarUrl // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            dateOfBirth: freezed == dateOfBirth
-                ? _value.dateOfBirth
-                : dateOfBirth // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            activityLevel: freezed == activityLevel
-                ? _value.activityLevel
-                : activityLevel // ignore: cast_nullable_to_non_nullable
-                      as ActivityLevel?,
-            createdAt: null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
-          )
-          as $Val,
-    );
-  }
 }
 
-/// @nodoc
-abstract class _$$PetImplCopyWith<$Res> implements $PetCopyWith<$Res> {
-  factory _$$PetImplCopyWith(_$PetImpl value, $Res Function(_$PetImpl) then) =
-      __$$PetImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String id,
-    String ownerId,
-    String name,
-    String species,
-    String? breed,
-    String? avatarUrl,
-    DateTime? dateOfBirth,
-    ActivityLevel? activityLevel,
-    DateTime createdAt,
-  });
+
+/// Adds pattern-matching-related methods to [Pet].
+extension PetPatterns on Pet {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _Pet value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _Pet() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _Pet value)  $default,){
+final _that = this;
+switch (_that) {
+case _Pet():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _Pet value)?  $default,){
+final _that = this;
+switch (_that) {
+case _Pet() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String ownerId,  String name,  String species,  String? breed,  String? avatarUrl,  DateTime? dateOfBirth,  ActivityLevel? activityLevel,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _Pet() when $default != null:
+return $default(_that.id,_that.ownerId,_that.name,_that.species,_that.breed,_that.avatarUrl,_that.dateOfBirth,_that.activityLevel,_that.createdAt);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String ownerId,  String name,  String species,  String? breed,  String? avatarUrl,  DateTime? dateOfBirth,  ActivityLevel? activityLevel,  DateTime createdAt)  $default,) {final _that = this;
+switch (_that) {
+case _Pet():
+return $default(_that.id,_that.ownerId,_that.name,_that.species,_that.breed,_that.avatarUrl,_that.dateOfBirth,_that.activityLevel,_that.createdAt);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String ownerId,  String name,  String species,  String? breed,  String? avatarUrl,  DateTime? dateOfBirth,  ActivityLevel? activityLevel,  DateTime createdAt)?  $default,) {final _that = this;
+switch (_that) {
+case _Pet() when $default != null:
+return $default(_that.id,_that.ownerId,_that.name,_that.species,_that.breed,_that.avatarUrl,_that.dateOfBirth,_that.activityLevel,_that.createdAt);case _:
+  return null;
+
+}
 }
 
-/// @nodoc
-class __$$PetImplCopyWithImpl<$Res> extends _$PetCopyWithImpl<$Res, _$PetImpl>
-    implements _$$PetImplCopyWith<$Res> {
-  __$$PetImplCopyWithImpl(_$PetImpl _value, $Res Function(_$PetImpl) _then)
-    : super(_value, _then);
-
-  /// Create a copy of Pet
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? ownerId = null,
-    Object? name = null,
-    Object? species = null,
-    Object? breed = freezed,
-    Object? avatarUrl = freezed,
-    Object? dateOfBirth = freezed,
-    Object? activityLevel = freezed,
-    Object? createdAt = null,
-  }) {
-    return _then(
-      _$PetImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        ownerId: null == ownerId
-            ? _value.ownerId
-            : ownerId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        name: null == name
-            ? _value.name
-            : name // ignore: cast_nullable_to_non_nullable
-                  as String,
-        species: null == species
-            ? _value.species
-            : species // ignore: cast_nullable_to_non_nullable
-                  as String,
-        breed: freezed == breed
-            ? _value.breed
-            : breed // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        avatarUrl: freezed == avatarUrl
-            ? _value.avatarUrl
-            : avatarUrl // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        dateOfBirth: freezed == dateOfBirth
-            ? _value.dateOfBirth
-            : dateOfBirth // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        activityLevel: freezed == activityLevel
-            ? _value.activityLevel
-            : activityLevel // ignore: cast_nullable_to_non_nullable
-                  as ActivityLevel?,
-        createdAt: null == createdAt
-            ? _value.createdAt
-            : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
-      ),
-    );
-  }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$PetImpl extends _Pet {
-  const _$PetImpl({
-    required this.id,
-    required this.ownerId,
-    required this.name,
-    required this.species,
-    this.breed,
-    this.avatarUrl,
-    this.dateOfBirth,
-    this.activityLevel,
-    required this.createdAt,
-  }) : super._();
 
-  factory _$PetImpl.fromJson(Map<String, dynamic> json) =>
-      _$$PetImplFromJson(json);
+class _Pet extends Pet {
+  const _Pet({required this.id, required this.ownerId, required this.name, required this.species, this.breed, this.avatarUrl, this.dateOfBirth, this.activityLevel, required this.createdAt}): super._();
+  factory _Pet.fromJson(Map<String, dynamic> json) => _$PetFromJson(json);
 
-  @override
-  final String id;
-  @override
-  final String ownerId;
-  @override
-  final String name;
-  @override
-  final String species;
-  @override
-  final String? breed;
-  @override
-  final String? avatarUrl;
-  @override
-  final DateTime? dateOfBirth;
-  @override
-  final ActivityLevel? activityLevel;
-  @override
-  final DateTime createdAt;
+@override final  String id;
+@override final  String ownerId;
+@override final  String name;
+@override final  String species;
+@override final  String? breed;
+@override final  String? avatarUrl;
+@override final  DateTime? dateOfBirth;
+@override final  ActivityLevel? activityLevel;
+@override final  DateTime createdAt;
 
-  @override
-  String toString() {
-    return 'Pet(id: $id, ownerId: $ownerId, name: $name, species: $species, breed: $breed, avatarUrl: $avatarUrl, dateOfBirth: $dateOfBirth, activityLevel: $activityLevel, createdAt: $createdAt)';
-  }
+/// Create a copy of Pet
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PetCopyWith<_Pet> get copyWith => __$PetCopyWithImpl<_Pet>(this, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$PetImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.ownerId, ownerId) || other.ownerId == ownerId) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.species, species) || other.species == species) &&
-            (identical(other.breed, breed) || other.breed == breed) &&
-            (identical(other.avatarUrl, avatarUrl) ||
-                other.avatarUrl == avatarUrl) &&
-            (identical(other.dateOfBirth, dateOfBirth) ||
-                other.dateOfBirth == dateOfBirth) &&
-            (identical(other.activityLevel, activityLevel) ||
-                other.activityLevel == activityLevel) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    ownerId,
-    name,
-    species,
-    breed,
-    avatarUrl,
-    dateOfBirth,
-    activityLevel,
-    createdAt,
-  );
-
-  /// Create a copy of Pet
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$PetImplCopyWith<_$PetImpl> get copyWith =>
-      __$$PetImplCopyWithImpl<_$PetImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$PetImplToJson(this);
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$PetToJson(this, );
 }
 
-abstract class _Pet extends Pet {
-  const factory _Pet({
-    required final String id,
-    required final String ownerId,
-    required final String name,
-    required final String species,
-    final String? breed,
-    final String? avatarUrl,
-    final DateTime? dateOfBirth,
-    final ActivityLevel? activityLevel,
-    required final DateTime createdAt,
-  }) = _$PetImpl;
-  const _Pet._() : super._();
-
-  factory _Pet.fromJson(Map<String, dynamic> json) = _$PetImpl.fromJson;
-
-  @override
-  String get id;
-  @override
-  String get ownerId;
-  @override
-  String get name;
-  @override
-  String get species;
-  @override
-  String? get breed;
-  @override
-  String? get avatarUrl;
-  @override
-  DateTime? get dateOfBirth;
-  @override
-  ActivityLevel? get activityLevel;
-  @override
-  DateTime get createdAt;
-
-  /// Create a copy of Pet
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$PetImplCopyWith<_$PetImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Pet&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.name, name) || other.name == name)&&(identical(other.species, species) || other.species == species)&&(identical(other.breed, breed) || other.breed == breed)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.dateOfBirth, dateOfBirth) || other.dateOfBirth == dateOfBirth)&&(identical(other.activityLevel, activityLevel) || other.activityLevel == activityLevel)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,ownerId,name,species,breed,avatarUrl,dateOfBirth,activityLevel,createdAt);
+
+@override
+String toString() {
+  return 'Pet(id: $id, ownerId: $ownerId, name: $name, species: $species, breed: $breed, avatarUrl: $avatarUrl, dateOfBirth: $dateOfBirth, activityLevel: $activityLevel, createdAt: $createdAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$PetCopyWith<$Res> implements $PetCopyWith<$Res> {
+  factory _$PetCopyWith(_Pet value, $Res Function(_Pet) _then) = __$PetCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String ownerId, String name, String species, String? breed, String? avatarUrl, DateTime? dateOfBirth, ActivityLevel? activityLevel, DateTime createdAt
+});
+
+
+
+
+}
+/// @nodoc
+class __$PetCopyWithImpl<$Res>
+    implements _$PetCopyWith<$Res> {
+  __$PetCopyWithImpl(this._self, this._then);
+
+  final _Pet _self;
+  final $Res Function(_Pet) _then;
+
+/// Create a copy of Pet
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? ownerId = null,Object? name = null,Object? species = null,Object? breed = freezed,Object? avatarUrl = freezed,Object? dateOfBirth = freezed,Object? activityLevel = freezed,Object? createdAt = null,}) {
+  return _then(_Pet(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,ownerId: null == ownerId ? _self.ownerId : ownerId // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,species: null == species ? _self.species : species // ignore: cast_nullable_to_non_nullable
+as String,breed: freezed == breed ? _self.breed : breed // ignore: cast_nullable_to_non_nullable
+as String?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
+as String?,dateOfBirth: freezed == dateOfBirth ? _self.dateOfBirth : dateOfBirth // ignore: cast_nullable_to_non_nullable
+as DateTime?,activityLevel: freezed == activityLevel ? _self.activityLevel : activityLevel // ignore: cast_nullable_to_non_nullable
+as ActivityLevel?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,
+  ));
+}
+
+
+}
+
+// dart format on

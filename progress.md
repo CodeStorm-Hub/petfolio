@@ -2,6 +2,146 @@
 
 ---
 
+## 2026-05-17 — PR #7 review fixes (Copilot thread)
+
+- **Schema** — Removed useless `pets_discoverable_location_idx` from `20260518120000_pets_is_discoverable.sql`; added `20260518210000_drop_pets_discoverable_location_idx.sql` (applied to `jqyjvhwlcqcsuwcqgcwf` via MCP). Trimmed `20260518200000_pr6_review_fixes.sql` to `REVOKE`/`GRANT` only on `ensure_chat_thread_for_match`.
+- **`AGENTS.md`** — State management rule now requires Riverpod (was incorrectly “forbidden”).
+- **Matching** — `ChatConversationController`: resolve thread once; RPC only when `threadId` is empty. `MatchesInboxController.refresh()` uses `invalidateSelf()`. `DiscoveryNotifier` no longer watches `deviceLatLngProvider` (avoids swipe-state reset). `fetchCandidates` syncs GPS only when pet has no stored location; removed dead `scheduleActorLocationSync`.
+- **Edit profile** — `copyWith(clearError: true)` preserves errors; submit uses current `isDiscoverable` for location sync on save.
+- **Errors** — `debugPrint` on inbox load failure and `openMatchChat` catch paths.
+
+**Next step:** Push to `pet-matching` / update PR #7; optional follow-up PR for bundled major dependency bumps in `pubspec.yaml`.
+
+---
+
+## 2026-05-17 — PR #6 review fixes (matching inbox + swipes)
+
+- **`pet_swipe.dart`** — `SwipeTableAction.dbValue` so all actions persist with correct DB strings.
+- **`matching_supabase_data_source.dart`** — `insertSwipe` uses `action.dbValue` (fixes GREET/SUPER_PAW stored as PASS); inbox rows skip missing/unparseable `matched_at` instead of `DateTime.now()` fallback.
+- **`20260518170000_get_match_inbox_rpc.sql`** — `get_match_inbox`: actor pet ownership guard (`owner_id = auth.uid()`), `LEFT JOIN LATERAL` for latest message per thread (replaces full-table `DISTINCT ON`).
+- **`20260518180000_chat_threads_race_condition.sql`** — `REVOKE ALL … FROM PUBLIC` on `ensure_chat_thread_for_match` before `GRANT` to `authenticated`.
+- **`20260518200000_pr6_review_fixes.sql`** — Applied to hosted `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.
+
+**Next step:** Push fixes to PR #6 branch; optional widget test for swipe action → DB value mapping.
+
+---
+
+## 2026-05-17 — Edit Pet Profile (full `pets` attributes + sectioned UX)
+
+- **`pet.dart` / `pet_gender.dart`** — `gender`, `isPublic` on model + JSON; `PetGender` enum (`male` / `female` / `unknown`).
+- **`pet_repository.dart`** — `updatePetProfile` persists name, breed, bio, avatar, DOB, gender, weight, activity, `is_public`.
+- **`edit_profile_screen.dart`** — Sectioned form (photo/name, about, details, activity, visibility & matching); sticky **Save changes**; SegmentedButton sex; activity chips; public + discoverable toggles; match location status + update-now + refresh-on-save.
+- **`edit_profile_controller.dart`** — Full submit + `syncMatchLocation`; `petMatchLocationProvider`.
+- **`pet_profile_screen.dart`** — Sex stat uses `pet.gender`.
+
+**Not in edit UI (system / other flows):** `owner_id`, `species` (set at onboarding), `handle`, `accent_color`, `display_order`, `archived_at`, `location` (GPS/RPC only), timestamps.
+
+**Next step:** Optional `handle` / accent color; wire onboarding to set `gender` on create.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-17 — Matching automation QA (`is_discoverable`, location check, E2E swipe)
+
+- **`matching_supabase_data_source.dart`** — `petHasLocation` uses `.not('location', 'is', null)` (geography is not returned in plain `select('location')`, which previously always looked empty); safer RPC row `Map.from` parsing.
+- **`matching_repository.dart`** — Discovery fetch no longer **awaits** GPS when stored location exists; background `scheduleActorLocationSync` only; 4s device timeout when sync runs.
+- **`discovery_candidates_controller.dart`** — Rebuild on `activePetId` / login changes; debug candidate count in debug builds.
+- **`matching_screen.dart`** — Marionette keys: `match_action_pass`, `match_action_like`, etc.
+- **Emulator QA (Marionette + DB)** — Snow (`e462295a`) deck shows **Montu**; like recorded in `swipes`; reciprocal like → `matches` row; empty deck after sole candidate swiped.
+- **Root causes fixed** — Client filter on `isDiscoverable` removed earlier; `set_pet_location_point` RPC; false-negative `petHasLocation` blocking on emulator GPS.
+
+**Next step:** Surface “add location” empty state when `petHasLocation` is false; celebration overlay on live reciprocal like (Realtime INSERT while on Match tab).
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-17 — Matching discovery: location, RPC, emulator QA
+
+- **Android/iOS** — `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` in `AndroidManifest.xml`; `NSLocationWhenInUseUsageDescription` in `Info.plist`.
+- **`location_service.dart`** — Geolocator-based `LocationAccessState` (`granted`, `denied`, `permanentlyDenied`, `servicesDisabled`, `unavailable`); `locationAccessProvider`.
+- **`matching_screen.dart`** — `_LocationAccessEmpty` + enable flow; deck hidden while permission blocked; `_EmptyDeck` when RPC returns zero rows; resume refreshes location + discovery.
+- **`discovery_candidates_controller.dart`** — No await on GPS before first fetch; `ref.listen(deviceLatLngProvider)` invalidates when coords arrive.
+- **`matching_supabase_data_source.dart`** — `setPetLocationPoint` uses GeoJSON `{ type: Point, coordinates: [lng, lat] }` for `geography`.
+- **Supabase (hosted `jqyjvhwlcqcsuwcqgcwf`)** — Applied 7-arg `matching_discovery_candidates` (was 404); fixed age filter so pets with **`date_of_birth IS NULL`** are not excluded when min/max age defaults (0–30) are passed — **Fluffy** now appears in deck.
+- **Emulator QA** — `flutter run -d emulator-5554` + Marionette: Match tab shows Fluffy (“Within 0.5 miles”) after location grant; `flutter analyze lib/features/matching` — warnings only on `@JsonKey` in `matching_discovery_row.dart`.
+
+**Data note:** RPC requires both actor and candidate `pets.location IS NOT NULL`; only Montu + Fluffy had locations in test data.
+
+**Next step:** Commit migration sync; optional avatar load for Fluffy; wire mutual-match **Send a Message**; apply `20260517120000_matches_realtime.sql` if not on remote.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-17 — Real-time mutual match celebration
+
+- **`mutual_match_realtime_provider.dart`** — `mutualMatchInsertStreamProvider` (`StreamProvider.family<PetMutualMatch, String>`) subscribes to Supabase Realtime `INSERT` on `public.matches`, filters rows where `pet_a_id` or `pet_b_id` equals the active pet.
+- **`match_celebration_overlay.dart`** — Full-screen blurred backdrop with “It's a Match!”, dual avatars, **Send a Message** / **Keep Swiping** actions.
+- **`matching_screen.dart`** — `_DiscoveryView` listens for insert events, dedupes by match id, shows overlay and `IgnorePointer` on deck + dock while active.
+- **`20260517120000_matches_realtime.sql`** — Adds `matches` to `supabase_realtime` publication.
+
+**Next step:** Apply migration to hosted project (`npx supabase db push` or Supabase MCP); wire **Send a Message** when chat UI ships.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-16 — Matching discovery preferences UI
+
+- **`match_preferences_sheet.dart`** — Draggable bottom sheet from `MatchingScreen` filter action: multi-select species pills (`PetSpecies`), max-distance slider (1–50 mi), age `RangeSlider` (0–30 yrs); bound to `matchPreferenceControllerProvider`.
+- **`match_preference_controller.dart`** — `toggleSpecies()`; distance/age constants (`kMatchMinDistanceMeters`, `kMatchMaxDistanceMeters`, `kMatchMaxAgeYears`).
+- **`discovery_candidates_controller.dart`** — Preference changes debounced 450ms via `ref.listen` + `invalidateSelf()` (no `ref.watch` on prefs in `build()`), so slider drags do not flood `matching_discovery_candidates` RPC.
+
+**Next step:** Optional Marionette pass on filter sheet + deck refresh after prefs settle.
+
+---
+
+## 2026-05-16 — Matching swipe stack + discovery buffer
+
+- **`matching_screen.dart`** — Deck data from `discoveryCandidatesControllerProvider` (loading / error + retry, empty deck); stack layers when a card is exiting use `buffer` after optimistic `removeFront`; pan tilt combines horizontal and vertical drag; exit uses design-system `Cubic(0.4, 0, 1, 1)` and `PetfolioThemeExtension.durationXs` opacity path when `MediaQuery.disableAnimationsOf`; species / breed / energy meta chips (`blue` / `mulberry` / `sunset` tokens); distance row; `Semantics` on pet visual; `_ActionDock` reads buffer for disabled state.
+- **`discovery_controller.dart`** — Gesture-only `DiscoveryState` (`exitingCard`, `exitDurationMs`); `swipe` snapshots top card, sets exit, calls `removeFront()` + `MatchingRepository.recordSwipe` unawaited, clears exit after duration from `dart:ui` accessibility `disableAnimations`; removed duplicate fetch and demo deck.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+- **`pubspec.yaml`** — `geolocator`, `permission_handler`.
+- **`lib/core/services/lat_lng.dart`** — Immutable `LatLng` (latitude / longitude).
+- **`lib/core/services/location_service.dart`** — `LocationService.acquireCurrentLatLng()` with `Geolocator` + `Permission.locationWhenInUse`; clear `ValidationException` messages for services off, denied, permanently denied, and read failures; web short-circuits.
+- **`lib/core/services/location_providers.dart`** — `locationServiceProvider`, `deviceLatLngProvider` (`AsyncNotifierProvider<DeviceLatLngNotifier, LatLng>`).
+- **`MatchingRepository`** — Takes `Ref`; before `matching_discovery_candidates`, when `deviceLatLngProvider` is `AsyncData`, upserts actor pet `pets.location` via existing `setPetLocationPoint` so RPC `origin` uses current coordinates.
+- **`discovery_controller.dart` / `discovery_candidates_controller.dart`** — `ref.watch(deviceLatLngProvider)` and `await deviceLatLngProvider.future` (errors swallowed) so discovery waits for the permission attempt before fetching.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-16 — Matching discovery Riverpod + discovery RPC pagination
+
+- **`match_preferences_state.dart`** — Freezed `MatchPreferencesState` (`selectedSpecies`, `maxDistanceMeters`, `ageMinYears` / `ageMaxYears`).
+- **`match_preference_controller.dart`** — `NotifierProvider<MatchPreferenceController, MatchPreferencesState>` (Riverpod 3 `Notifier`; `StateNotifier` / `StateNotifierProvider` are not available on this stack) with setters for species, distance, age range.
+- **`discovery_candidates_controller.dart`** — `AsyncNotifierProvider` + `DiscoveryCandidatesBuffer` (ordered `candidates`, `nextOffset`, `mayHaveMore`); `build()` watches `activePetIdProvider` and match preferences; `_ensureDepth` + `_replenishIfLow` keep at least five profiles when the API has more rows; `removeFront()` pops the stack and triggers replenishment; dedupe by `petId`; serialized prefetch via `_replenishLocked` + microtask retry.
+- **`MatchingRepository` / `MatchingSupabaseDataSource`** — `fetchCandidates` / RPC params: `offset`, optional `speciesFilters`, `minAgeYears` / `maxAgeYears`.
+- **`supabase/migrations/20260518110000_matching_discovery_pagination_filters.sql`** — Replaces `matching_discovery_candidates` with `p_offset`, `p_species`, `p_min_age_years`, `p_max_age_years` (drops prior 3-arg overload).
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-16 — Riverpod 3 migration + matching data layer + analyzer
+
+- **Riverpod 3** — Removed `FamilyNotifier` / `FamilyAsyncNotifier` / `AutoDispose*` usage: family notifiers now `extends Notifier` / `AsyncNotifier` / `StreamNotifier` with `Notifier(this.arg)` + `final String arg`; providers use `.family` without `.autoDispose` where applicable (`care`, `nutrition`, `discovery`, `social`, `follow`, `comment`, `notifications`, `create_post`, `edit_profile`, `care_streak_stream_provider`, `postDetail` / `postProvider`).
+- **`AsyncValue`** — Replaced `.valueOrNull` with `.value` across router, care, marketplace, social, pet list.
+- **`app_exception.dart`** — `AppException({required this.message})`; subclasses use `super.message` forwarding; `NetworkException(message: …)` at throw sites.
+- **`analysis_options.yaml`** — Stopped excluding `*.freezed.dart` so parts resolve; `@freezed` model bases marked **`abstract class`** (Freezed 3 + analyzer).
+- **Matching** — `supabase/migrations/20260517010000_matching_postgis_swipes_matches.sql` (PostGIS `pets.location`, `swipes`, `matches`, mutual-LIKE trigger, `matching_discovery_candidates` RPC with `ST_DWithin` + `LEFT JOIN swipes`); `20260518100000_swipes_update_policy.sql` (RLS `UPDATE` on `swipes` + `GRANT UPDATE` so PostgREST `upsert` works); `MatchingSupabaseDataSource`, `MatchingRepository`, Freezed models (`PetSwipe`, `PetMutualMatch`, `MatchingDiscoveryRow`, `PetGeoPoint`).
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-05-16 — Pet profile: stats row + social CTA + tab scaffold
 
 - **`lib/features/pet_profile/presentation/screens/pet_profile_screen.dart`** — Active-pet body is a `NestedScrollView` under `DefaultTabController`: hero streak card → **`_PetStatsRow`** (Breed, Age from DOB, Weight kg, Sex placeholder `—` — no sex field on `Pet`) → full-width **`PrimaryPillButton`** (`Icons.dynamic_feed_rounded`, “View Social Profile”) calling **`context.push('/social/profile/${activePet.id}')`** → pinned **TabBar** (Overview / Health / Care / Awards). Overview tab keeps Today + feed placeholder; other tabs are light “coming soon” placeholders with `SliverOverlapInjector` wiring. Added **`go_router`** import. **`router.dart`** unchanged (`/social/profile/:petId` → `SocialProfileScreen`).
@@ -493,3 +633,70 @@ Wire the care engine controllers to consume `pet.dateOfBirth` and `pet.activityL
 - `npx supabase migration repair` batch run to align remote `schema_migrations` with local migration filenames; `npx supabase migration list` now matches. `npx supabase db pull` blocked here without Docker—run with Docker for shadow DB.
 
 Phase complete; consider `/remember` if you want this sync persisted outside `progress.md`.
+
+## 2026-05-17 — Discovery visibility (data layer)
+
+- Migration `20260518120000_pets_is_discoverable.sql`: `pets.is_discoverable boolean NOT NULL DEFAULT false`; partial index; `matching_discovery_candidates` filters `c.is_discoverable IS TRUE` and returns `is_discoverable` in the row set. Applied to hosted project via MCP.
+- `lib/features/pet_profile/data/models/pet.dart`: `isDiscoverable` field, JSON `is_discoverable`, `copyWith`.
+- `MatchingDiscoveryRow`: `isDiscoverable` for RPC deserialization; `build_runner` regenerated.
+- `MatchingRepository.fetchCandidates`: `.where((row) => row.isDiscoverable)` before mapping.
+
+**Next step:** UI toggle + `PetRepository` update method to set `is_discoverable` on opt-in/opt-out.
+
+---
+
+## 2026-05-17 — Fix Multi-Pet Discovery Bug (SQL)
+
+- **`supabase/migrations/20260518160000_matching_discovery_exclude_own_pets.sql`** — Modified `matching_discovery_candidates` RPC: updated `origin` CTE to select `p.owner_id` and added `AND c.owner_id != o.owner_id` to the WHERE clause to ensure a user never sees their own pets in the discovery feed.
+- **Supabase Remote** — Applied migration `matching_discovery_exclude_own_pets` to hosted project `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.
+
+**Next step:** None.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-17 — Resolve Inbox N+1 Over-fetching (SQL & Dart)
+
+- **`supabase/migrations/20260518170000_get_match_inbox_rpc.sql`** — Created `get_match_inbox` RPC: uses `DISTINCT ON (thread_id)` to join `matches`, `chat_threads`, `pets`, and the latest `chat_messages` on the server side; added `idx_chat_messages_thread_created_at` index to eliminate full table scans.
+- **Supabase Remote** — Applied migration `get_match_inbox_rpc` to hosted project `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.
+- **`matching_supabase_data_source.dart`** — Replaced `fetchMatchInboxSnapshot` with a single, lightweight call to `get_match_inbox` RPC; removed the N+1 `_latestMessagePreviews` method.
+
+**Next step:** None.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-17 — Fix Chat Thread Race Condition (SQL)
+
+- **`supabase/migrations/20260518180000_chat_threads_race_condition.sql`** — Rewrote `ensure_chat_thread_for_match` RPC to utilize an `INSERT ... ON CONFLICT DO NOTHING` block with a fallback `SELECT` to safely guarantee chat thread creation without unique constraint violations or race conditions.
+- **Supabase Remote** — Applied migration `chat_threads_race_condition` to hosted project `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.
+
+**Next step:** None.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-17 — Prevent Presentation Leak in Repository (Dart)
+
+- **`matching_repository.dart`** — Refactored `MatchingRepository.fetchCandidates` to return raw domain data (`List<MatchingDiscoveryRow>`) directly from the data source, removing all presentation-layer concerns, hardcoded hex colors, default bio strings, and aesthetic traits from the data layer.
+- **`discovery_candidates_controller.dart`** — Moved `_discoveryRowToCandidate` and all color palette/default string helper methods into `DiscoveryCandidatesController`, maintaining clean separation of concerns and feature-first architecture.
+
+**Next step:** None.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-17 — Map Advanced Swipe Actions (SQL & Dart)
+
+- **`supabase/migrations/20260518190000_swipes_advanced_actions.sql`** — Updated `public.swipes` table action check constraint to accept `GREET` and `SUPER_PAW` enum values; updated `swipes_target_actor_like_idx` index and `swipes_after_insert_mutual_match` trigger to correctly identify and process mutual matches from any positive like action (`LIKE`, `GREET`, `SUPER_PAW`).
+- **Supabase Remote** — Applied migration `swipes_advanced_actions` to hosted project `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.
+- **`pet_swipe.dart` & `pet_swipe.g.dart`** — Added `greet` and `superPaw` enum values and JSON mapping to `SwipeTableAction`.
+- **`matching_repository.dart`** — Updated `recordSwipe` to correctly map UI intents (`greet`, `superPaw`, `pass`, `match`) to their respective `SwipeTableAction` database representations.
+
+**Next step:** None.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.

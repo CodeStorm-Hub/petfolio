@@ -4,15 +4,60 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:permission_handler/permission_handler.dart';
 
+import '../../../../core/services/lat_lng.dart';
+import '../../../../core/services/location_providers.dart';
+import '../../../../core/services/location_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
 import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/discovery_candidate.dart';
+import '../../data/models/pet_mutual_match.dart';
+import '../controllers/discovery_candidates_controller.dart';
 import '../controllers/discovery_controller.dart';
+import '../controllers/mutual_match_realtime_provider.dart';
+import '../matching_navigation.dart';
+import '../widgets/match_celebration_overlay.dart';
+import '../widgets/match_preferences_sheet.dart';
+
+String _speciesLabel(String species) {
+  return switch (species.toLowerCase()) {
+    'cat' => 'Cat',
+    'rabbit' => 'Rabbit',
+    'bird' => 'Bird',
+    'reptile' => 'Reptile',
+    _ => 'Dog',
+  };
+}
+
+bool _isLocationBlocked(LocationAccessState? access) {
+  return switch (access) {
+    LocationAccessState.denied ||
+    LocationAccessState.permanentlyDenied ||
+    LocationAccessState.servicesDisabled ||
+    LocationAccessState.unavailable =>
+      true,
+    LocationAccessState.granted => false,
+    null => true,
+  };
+}
+
+LocationAccessState? _accessFromDeviceError(AsyncValue<LatLng> deviceLocation) {
+  if (!deviceLocation.hasError) return null;
+  final message = deviceLocation.error.toString().toLowerCase();
+  if (message.contains('blocked') || message.contains('permanently')) {
+    return LocationAccessState.permanentlyDenied;
+  }
+  if (message.contains('turned off') || message.contains('services')) {
+    return LocationAccessState.servicesDisabled;
+  }
+  return LocationAccessState.denied;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entry point
@@ -60,47 +105,262 @@ class MatchingScreen extends ConsumerWidget {
 // Main view
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _DiscoveryView extends ConsumerWidget {
+class _DiscoveryView extends ConsumerStatefulWidget {
   const _DiscoveryView({required this.petId});
   final String petId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_DiscoveryView> createState() => _DiscoveryViewState();
+}
+
+class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
+    with WidgetsBindingObserver {
+  final Set<String> _shownMatchIds = {};
+  PetMutualMatch? _celebrationMatch;
+
+  String get petId => widget.petId;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refreshLocationState());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _refreshLocationState();
+    }
+  }
+
+  void _refreshLocationState() {
+    ref.invalidate(locationAccessProvider);
+    ref.invalidate(deviceLatLngProvider);
+    ref.invalidate(discoveryCandidatesControllerProvider);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen<AsyncValue<PetMutualMatch>>(
+      mutualMatchInsertStreamProvider(petId),
+      (previous, next) {
+        next.whenData((match) {
+          if (_shownMatchIds.contains(match.id)) return;
+          if (_celebrationMatch != null) return;
+          _shownMatchIds.add(match.id);
+          setState(() => _celebrationMatch = match);
+        });
+      },
+    );
+
+    final bufferAsync = ref.watch(discoveryCandidatesControllerProvider);
+    final locationAccessAsync = ref.watch(locationAccessProvider);
+    final deviceLocationAsync = ref.watch(deviceLatLngProvider);
     final state = ref.watch(discoveryControllerProvider(petId));
     final notifier = ref.read(discoveryControllerProvider(petId).notifier);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final activePet = ref.watch(activePetControllerProvider);
+    final overlayActive = _celebrationMatch != null && activePet != null;
+
+    final locationAccess = locationAccessAsync.asData?.value;
+    final locationBlocked = _isLocationBlocked(locationAccess);
+
+    Future<void> enableLocation() async {
+      final access = locationAccess ?? await ref.read(locationServiceProvider).readAccessState();
+      if (access == LocationAccessState.permanentlyDenied ||
+          access == LocationAccessState.servicesDisabled) {
+        await openAppSettings();
+      } else {
+        await ref.read(locationServiceProvider).requestWhenInUseAccess();
+      }
+      _refreshLocationState();
+    }
+
+    Widget buildDiscoveryContent() {
+      if (locationBlocked) {
+        return _LocationAccessEmpty(
+          access: locationAccess ??
+              _accessFromDeviceError(deviceLocationAsync) ??
+              LocationAccessState.denied,
+          onEnable: overlayActive ? null : enableLocation,
+        );
+      }
+
+      return bufferAsync.when(
+        skipLoadingOnReload: true,
+        loading: () => const Center(
+          child: CircularProgressIndicator.adaptive(),
+        ),
+        error: (error, stackTrace) => Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
+              const SizedBox(height: 12),
+              Text(
+                'Could not load profiles',
+                style: TextStyle(fontSize: 15, color: pt.ink500),
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: overlayActive
+                    ? null
+                    : () => ref.invalidate(
+                          discoveryCandidatesControllerProvider,
+                        ),
+                icon: const Icon(Icons.refresh_rounded, size: 16),
+                label: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+        data: (buf) {
+          final deck = buf.candidates;
+          final visible = state.isExiting && state.exitingCard != null;
+          if (deck.isEmpty && !visible) {
+            return _EmptyDeck(
+              locationReady: locationAccess == LocationAccessState.granted,
+            );
+          }
+          return _DiscoveryStack(
+            buffer: deck,
+            state: state,
+            notifier: notifier,
+          );
+        },
+      );
+    }
 
     return Scaffold(
       backgroundColor: pt.surface1,
       body: SafeArea(
         bottom: false,
-        child: Column(
+        child: Stack(
           children: [
-            AppHeader(
-              eyebrow: 'Match · Nearby',
-              onOpenSwitcher: () => PetSwitcherSheet.show(context),
-              dense: true,
-              actions: [
-                AppHeaderAction(
-                  iconKey: const ValueKey<String>('match_action_filter'),
-                  icon: Icons.tune_rounded,
-                  tooltip: 'Filters',
-                  onTap: () {},
+            Column(
+              children: [
+                AppHeader(
+                  eyebrow: 'Match · Nearby',
+                  onOpenSwitcher: () => PetSwitcherSheet.show(context),
+                  dense: true,
+                  actions: [
+                    AppHeaderAction(
+                      iconKey: const ValueKey<String>('match_action_inbox'),
+                      icon: Icons.chat_bubble_outline_rounded,
+                      tooltip: 'Matches & messages',
+                      onTap: overlayActive
+                          ? () {}
+                          : () => openMatchesInbox(context),
+                    ),
+                    AppHeaderAction(
+                      iconKey: const ValueKey<String>('match_action_filter'),
+                      icon: Icons.tune_rounded,
+                      tooltip: 'Filters',
+                      onTap: overlayActive
+                          ? () {}
+                          : () => MatchPreferencesSheet.show(context),
+                    ),
+                  ],
                 ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                    child: IgnorePointer(
+                      ignoring: overlayActive,
+                      child: locationAccessAsync.when(
+                        skipLoadingOnReload: true,
+                        loading: () => const Center(
+                          child: CircularProgressIndicator.adaptive(),
+                        ),
+                        error: (_, _) => buildDiscoveryContent(),
+                        data: (_) => buildDiscoveryContent(),
+                      ),
+                    ),
+                  ),
+                ),
+                if (!locationBlocked)
+                  IgnorePointer(
+                    ignoring: overlayActive,
+                    child: _ActionDock(
+                      state: state,
+                      notifier: notifier,
+                      bufferAsync: bufferAsync,
+                    ),
+                  ),
+                const SizedBox(height: 16),
               ],
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                child: _DiscoveryStack(state: state, notifier: notifier),
+            if (overlayActive)
+              MatchCelebrationOverlay(
+                activePet: activePet,
+                matchedPetName: _matchedPetLabel(ref, _celebrationMatch!),
+                matchedPetAvatarUrl:
+                    _matchedPetAvatarUrl(ref, _celebrationMatch!),
+                onSendMessage: () {
+                  final match = _celebrationMatch!;
+                  final label = _matchedPetLabel(ref, match);
+                  setState(() => _celebrationMatch = null);
+                  openMatchChat(
+                    context,
+                    ref,
+                    matchId: match.id,
+                    actorPetId: petId,
+                    otherPetName: label,
+                  );
+                },
+                onKeepSwiping: () => setState(() => _celebrationMatch = null),
               ),
-            ),
-            _ActionDock(state: state, notifier: notifier),
-            const SizedBox(height: 16),
           ],
         ),
       ),
     );
+  }
+
+  String _matchedPetLabel(WidgetRef ref, PetMutualMatch match) {
+    final otherId =
+        match.petAId == petId ? match.petBId : match.petAId;
+    final deck = ref
+        .read(discoveryCandidatesControllerProvider)
+        .asData
+        ?.value
+        .candidates;
+    if (deck != null) {
+      for (final c in deck) {
+        if (c.petId == otherId) return c.name;
+      }
+    }
+    final pets = ref.read(petListProvider).asData?.value ?? const <Pet>[];
+    for (final p in pets) {
+      if (p.id == otherId) return p.name;
+    }
+    return 'your match';
+  }
+
+  String? _matchedPetAvatarUrl(WidgetRef ref, PetMutualMatch match) {
+    final otherId =
+        match.petAId == petId ? match.petBId : match.petAId;
+    final deck = ref
+        .read(discoveryCandidatesControllerProvider)
+        .asData
+        ?.value
+        .candidates;
+    if (deck != null) {
+      for (final c in deck) {
+        if (c.petId == otherId) return c.avatarUrl;
+      }
+    }
+    final pets = ref.read(petListProvider).asData?.value ?? const <Pet>[];
+    for (final p in pets) {
+      if (p.id == otherId) return p.avatarUrl;
+    }
+    return null;
   }
 }
 
@@ -109,62 +369,180 @@ class _DiscoveryView extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _DiscoveryStack extends StatelessWidget {
-  const _DiscoveryStack({required this.state, required this.notifier});
+  const _DiscoveryStack({
+    required this.buffer,
+    required this.state,
+    required this.notifier,
+  });
+  final List<DiscoveryCandidate> buffer;
   final DiscoveryState state;
   final DiscoveryNotifier notifier;
 
   @override
   Widget build(BuildContext context) {
-    if (state.topCard == null) return const _EmptyDeck();
+    final hasFlying = state.isExiting && state.exitingCard != null;
+    if (!hasFlying && buffer.isEmpty) return const _EmptyDeck();
 
-    // As the top card is dragged, the next card scales up to fill its place.
     final dragProgress =
         (state.dragOffset.dx.abs().clamp(0.0, 90.0)) / 90.0;
 
+    final afterCard = buffer.length >= 3 ? buffer[2] : null;
+    final nextCard = buffer.length >= 2 ? buffer[1] : null;
+    final peekTop = hasFlying && buffer.isNotEmpty ? buffer.first : null;
+    final topLive = !hasFlying && buffer.isNotEmpty ? buffer.first : null;
+
+    final layers = <Widget>[
+      if (afterCard != null)
+        _StackCard(
+          candidate: afterCard,
+          scale: 0.88,
+          offsetY: 24,
+        ),
+      if (nextCard != null)
+        _StackCard(
+          candidate: nextCard,
+          scale: 0.94 + 0.06 * dragProgress,
+          offsetY: 12.0 - 12.0 * dragProgress,
+        ),
+      if (peekTop != null)
+        _StackCard(
+          candidate: peekTop,
+          scale: 0.94 + 0.06 * dragProgress,
+          offsetY: 12.0 - 12.0 * dragProgress,
+        ),
+      if (hasFlying)
+        _SwipeCard(
+          state: state,
+          notifier: notifier,
+          interactiveTop: null,
+        )
+      else if (topLive != null)
+        _SwipeCard(
+          state: state,
+          notifier: notifier,
+          interactiveTop: topLive,
+        ),
+    ];
+
+    if (layers.isEmpty) return const _EmptyDeck(locationReady: true);
+
     return Stack(
       alignment: Alignment.center,
-      children: [
-        if (state.afterCard != null)
-          _StackCard(
-            candidate: state.afterCard!,
-            scale: 0.88,
-            offsetY: 24,
-          ),
-        if (state.nextCard != null)
-          _StackCard(
-            candidate: state.nextCard!,
-            scale: 0.94 + 0.06 * dragProgress,
-            offsetY: 12.0 - 12.0 * dragProgress,
-          ),
-        _SwipeCard(state: state, notifier: notifier),
-      ],
+      fit: StackFit.expand,
+      children: layers,
     );
   }
 }
 
-class _EmptyDeck extends StatelessWidget {
-  const _EmptyDeck();
+class _LocationAccessEmpty extends StatelessWidget {
+  const _LocationAccessEmpty({
+    required this.access,
+    required this.onEnable,
+  });
+
+  final LocationAccessState access;
+  final VoidCallback? onEnable;
 
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final tt = Theme.of(context).textTheme;
+    final permanentlyDenied =
+        access == LocationAccessState.permanentlyDenied;
+    final servicesDisabled = access == LocationAccessState.servicesDisabled;
+
+    final title = servicesDisabled
+        ? 'Turn on location services'
+        : permanentlyDenied
+            ? 'Location access is off'
+            : 'Location needed for nearby matches';
+    final subtitle = servicesDisabled
+        ? 'Enable location in your device settings so we can show pets near you.'
+        : permanentlyDenied
+            ? 'Allow location for PetFolio in Settings to discover pets around you.'
+            : 'We use your location to find playmates, breeding partners, and adoption matches nearby.';
+
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.pets_rounded, size: 64, color: pt.ink300),
-          const SizedBox(height: 16),
-          Text(
-            'No more profiles nearby',
-            style: tt.titleMedium?.copyWith(color: pt.ink500),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Check back soon!',
-            style: tt.bodySmall?.copyWith(color: pt.ink300),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.location_off_rounded, size: 64, color: pt.ink300),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: tt.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: pt.ink500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: tt.bodySmall?.copyWith(
+                color: pt.ink300,
+                height: 1.45,
+              ),
+            ),
+            const SizedBox(height: 24),
+            PrimaryPillButton(
+              label: 'Enable Location Services',
+              isFullWidth: true,
+              leadingIcon: const Icon(
+                Icons.location_on_rounded,
+                size: 20,
+                color: Colors.white,
+              ),
+              onPressed: onEnable,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyDeck extends StatelessWidget {
+  const _EmptyDeck({this.locationReady = false});
+
+  final bool locationReady;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
+    final title = locationReady
+        ? 'No pets nearby yet'
+        : 'No more profiles nearby';
+    final subtitle = locationReady
+        ? 'Turn on Match Discovery for your pet and ask nearby owners to do the same. '
+            'Pets also need a saved location—open Match after allowing location access.'
+        : 'Check back soon!';
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.pets_rounded, size: 64, color: pt.ink300),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: tt.titleMedium?.copyWith(color: pt.ink500),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: tt.bodySmall?.copyWith(color: pt.ink300, height: 1.45),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -198,17 +576,29 @@ class _StackCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _SwipeCard extends StatelessWidget {
-  const _SwipeCard({required this.state, required this.notifier});
+  const _SwipeCard({
+    required this.state,
+    required this.notifier,
+    required this.interactiveTop,
+  });
   final DiscoveryState state;
   final DiscoveryNotifier notifier;
+  final DiscoveryCandidate? interactiveTop;
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
-    final top = state.topCard!;
-    return state.isExiting
-        ? _buildExitAnimation(top, size)
-        : _buildDraggable(context, top, size);
+    if (state.isExiting && state.exitingCard != null) {
+      return _buildExitAnimation(
+        context,
+        state.exitingCard!,
+        size,
+        state.exitAction!,
+        state.exitDurationMs,
+      );
+    }
+    final top = interactiveTop!;
+    return _buildDraggable(context, top, size);
   }
 
   Widget _buildDraggable(
@@ -216,9 +606,9 @@ class _SwipeCard extends StatelessWidget {
     DiscoveryCandidate top,
     Size size,
   ) {
-    // Rotation: max ±25° clamped
-    final angle =
-        (state.dragOffset.dx / (size.width * 0.75)).clamp(-0.44, 0.44);
+    final dxNorm = state.dragOffset.dx / (size.width * 0.75);
+    final dyTilt = state.dragOffset.dy / (size.height * 1.2);
+    final angle = (dxNorm + dyTilt * 0.12).clamp(-0.44, 0.44);
 
     final matchOpacity = (state.dragOffset.dx / 80).clamp(0.0, 1.0);
     final passOpacity = (-state.dragOffset.dx / 80).clamp(0.0, 1.0);
@@ -230,70 +620,92 @@ class _SwipeCard extends StatelessWidget {
         angle: angle,
         alignment: Alignment.bottomCenter,
         child: GestureDetector(
-        onPanUpdate: (d) => notifier.onDragUpdate(d.delta),
-        onPanEnd: (_) => notifier.onDragEnd(),
-        onPanCancel: notifier.onDragCancel,
-        child: Stack(
-          children: [
-            _CardSurface(
-              candidate: top,
-              isExpanded: state.isExpanded,
-              onToggleExpand: notifier.toggleExpand,
-            ),
-            if (matchOpacity > 0.05)
-              Positioned(
-                top: 36,
-                left: 20,
-                child: Opacity(
-                  opacity: matchOpacity,
-                  child: _SwipeLabel(
-                    label: 'MATCH',
-                    color: AppColors.coral500,
-                  ),
-                ),
+          onPanUpdate: (d) => notifier.onDragUpdate(d.delta),
+          onPanEnd: (_) => notifier.onDragEnd(),
+          onPanCancel: notifier.onDragCancel,
+          child: Stack(
+            children: [
+              _CardSurface(
+                candidate: top,
+                isExpanded: state.isExpanded,
+                onToggleExpand: notifier.toggleExpand,
               ),
-            if (passOpacity > 0.05)
-              Positioned(
-                top: 36,
-                right: 20,
-                child: Opacity(
-                  opacity: passOpacity,
-                  child: _SwipeLabel(
-                    label: 'PASS',
-                    color: AppColors.ink500,
-                  ),
-                ),
-              ),
-            if (greetOpacity > 0.05)
-              Positioned(
-                top: 36,
-                left: 0,
-                right: 0,
-                child: Center(
+              if (matchOpacity > 0.05)
+                Positioned(
+                  top: 36,
+                  left: 20,
                   child: Opacity(
-                    opacity: greetOpacity,
+                    opacity: matchOpacity,
                     child: _SwipeLabel(
-                      label: 'WAVE  👋',
-                      color: AppColors.blue500,
+                      label: 'MATCH',
+                      color: AppColors.coral500,
                     ),
                   ),
                 ),
-              ),
-          ],
-        ),
+              if (passOpacity > 0.05)
+                Positioned(
+                  top: 36,
+                  right: 20,
+                  child: Opacity(
+                    opacity: passOpacity,
+                    child: _SwipeLabel(
+                      label: 'PASS',
+                      color: AppColors.ink500,
+                    ),
+                  ),
+                ),
+              if (greetOpacity > 0.05)
+                Positioned(
+                  top: 36,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Opacity(
+                      opacity: greetOpacity,
+                      child: _SwipeLabel(
+                        label: 'WAVE  👋',
+                        color: AppColors.blue500,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildExitAnimation(DiscoveryCandidate top, Size size) {
-    final (exitOffset, exitAngle) = _exitParams(state.exitAction!, size);
+  Widget _buildExitAnimation(
+    BuildContext context,
+    DiscoveryCandidate top,
+    Size size,
+    SwipeAction action,
+    int durationMs,
+  ) {
+    final (exitOffset, exitAngle) = _exitParams(action, size);
+    final curve = const Cubic(0.4, 0, 1, 1);
+    final fast = MediaQuery.disableAnimationsOf(context);
+
+    if (fast) {
+      return TweenAnimationBuilder<double>(
+        key: ValueKey<Object>(top.petId),
+        tween: Tween(begin: 1, end: 0),
+        duration: PetfolioThemeExtension.durationXs,
+        curve: curve,
+        builder: (ctx, t, child) => Opacity(
+          opacity: t,
+          child: child,
+        ),
+        child: _CardSurface(candidate: top),
+      );
+    }
 
     return TweenAnimationBuilder<double>(
-      key: ValueKey(state.exitAction),
+      key: ValueKey<Object>(top.petId),
       tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 280),
-      curve: Curves.easeIn,
+      duration: Duration(milliseconds: durationMs),
+      curve: curve,
       builder: (ctx, t, child) => Transform.translate(
         offset: exitOffset * t,
         child: Transform.rotate(
@@ -350,16 +762,25 @@ class _CardSurface extends StatelessWidget {
       if (colors.length > 1) colors[1],
       if (colors.length > 2) colors[2] else if (colors.isNotEmpty) colors.last,
     ];
+    final resolvedGradColors = gradColors.isEmpty
+        ? [
+            AppColors.sunset500.withValues(alpha: 0.45),
+            AppColors.coral500.withValues(alpha: 0.72),
+            AppColors.coral500,
+          ]
+        : gradColors;
 
     return ClipRRect(
       borderRadius:
           BorderRadius.circular(PetfolioThemeExtension.radius2xl),
       child: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: gradColors,
+            colors: resolvedGradColors,
           ),
         ),
         child: Stack(
@@ -427,8 +848,10 @@ class _PetBlob extends StatelessWidget {
       _ => '🐶',
     };
 
-    return LayoutBuilder(
-      builder: (_, constraints) {
+    return Semantics(
+      label: '${candidate.name}, ${_speciesLabel(candidate.species)}',
+      child: LayoutBuilder(
+        builder: (_, constraints) {
         // Scale the blob with the available area, clamped for small/large screens.
         final w = (constraints.maxWidth * 0.52).clamp(120.0, 220.0);
         final h = w * 1.1;
@@ -481,7 +904,8 @@ class _PetBlob extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(emoji, style: TextStyle(fontSize: emojiSize)),
         );
-      },
+        },
+      ),
     );
   }
 }
@@ -570,39 +994,49 @@ class _InfoPanel extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            // ── Breed + distance ────────────────────────────────────────
             Row(
               children: [
-                Text(
-                  candidate.breed,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.white.withAlpha(180),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Container(
-                    width: 3,
-                    height: 3,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(120),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
                 Icon(
                   Icons.location_on_rounded,
                   size: 13,
                   color: Colors.white.withAlpha(180),
                 ),
                 const SizedBox(width: 2),
-                Text(
-                  candidate.distance,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.white.withAlpha(180),
+                Expanded(
+                  child: Text(
+                    candidate.distance,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: Colors.white.withAlpha(180),
+                    ),
                   ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                _MatchMetaChip(
+                  label: _speciesLabel(candidate.species),
+                  foreground: Colors.white,
+                  background: AppColors.blue500.withValues(alpha: 0.34),
+                  borderColor: Colors.white.withValues(alpha: 0.42),
+                ),
+                _MatchMetaChip(
+                  label: candidate.breed,
+                  foreground: Colors.white,
+                  background: AppColors.mulberry500.withValues(alpha: 0.42),
+                  borderColor: Colors.white.withValues(alpha: 0.45),
+                ),
+                _MatchMetaChip(
+                  label: candidate.energy,
+                  foreground: Colors.white,
+                  background: AppColors.sunset500.withValues(alpha: 0.88),
+                  borderColor: Colors.white.withValues(alpha: 0.48),
                 ),
               ],
             ),
@@ -657,13 +1091,19 @@ class _InfoPanel extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ActionDock extends StatelessWidget {
-  const _ActionDock({required this.state, required this.notifier});
+  const _ActionDock({
+    required this.state,
+    required this.notifier,
+    required this.bufferAsync,
+  });
   final DiscoveryState state;
   final DiscoveryNotifier notifier;
+  final AsyncValue<DiscoveryCandidatesBuffer> bufferAsync;
 
   @override
   Widget build(BuildContext context) {
-    final disabled = state.isExiting || state.topCard == null;
+    final deck = bufferAsync.asData?.value.candidates ?? const <DiscoveryCandidate>[];
+    final disabled = state.isExiting || deck.isEmpty;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -672,6 +1112,7 @@ class _ActionDock extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _DockButton(
+            key: const ValueKey<String>('match_action_pass'),
             size: 56,
             color: AppColors.ink300,
             icon: Icons.close_rounded,
@@ -679,6 +1120,7 @@ class _ActionDock extends StatelessWidget {
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.pass),
           ),
           _DockButton(
+            key: const ValueKey<String>('match_action_greet'),
             size: 48,
             color: AppColors.blue500,
             icon: Icons.waving_hand_rounded,
@@ -686,6 +1128,7 @@ class _ActionDock extends StatelessWidget {
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.greet),
           ),
           _DockButton(
+            key: const ValueKey<String>('match_action_like'),
             size: 64,
             color: AppColors.coral500,
             icon: Icons.pets_rounded,
@@ -694,6 +1137,7 @@ class _ActionDock extends StatelessWidget {
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.match),
           ),
           _DockButton(
+            key: const ValueKey<String>('match_action_super'),
             size: 48,
             color: AppColors.mulberry500,
             icon: Icons.star_rounded,
@@ -710,6 +1154,42 @@ class _ActionDock extends StatelessWidget {
             onTap: null, // Boost — premium feature placeholder
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _MatchMetaChip extends StatelessWidget {
+  const _MatchMetaChip({
+    required this.label,
+    required this.foreground,
+    required this.background,
+    required this.borderColor,
+  });
+  final String label;
+  final Color foreground;
+  final Color background;
+  final Color borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusSm),
+        border: Border.all(color: borderColor, width: 1),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: GoogleFonts.inter(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.2,
+          color: foreground,
+        ),
       ),
     );
   }
@@ -814,6 +1294,7 @@ class _DetailRow extends StatelessWidget {
 
 class _DockButton extends StatelessWidget {
   const _DockButton({
+    super.key,
     required this.size,
     required this.color,
     required this.icon,

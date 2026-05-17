@@ -239,7 +239,7 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
   }) async {
     final petId = ref.read(activePetIdProvider);
     if (petId == null) return;
-    final prev = _routine.tasks.valueOrNull;
+    final prev = _routine.tasks.value;
     if (prev == null) return;
 
     final nextList = prev
@@ -268,7 +268,7 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
         forDay: _routine.selectedDate,
       );
       if (ref.read(activePetIdProvider) != petId) return;
-      final current = _routine.tasks.valueOrNull ?? prev;
+      final current = _routine.tasks.value ?? prev;
       final nextAfter = current
           .map((t) => t.id == taskId ? outcome.task : t)
           .toList();

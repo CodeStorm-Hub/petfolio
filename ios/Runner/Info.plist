@@ -28,6 +28,10 @@
 	<string>PetFolio needs access to your photo library to set your pet's profile photo.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>PetFolio needs access to your camera to take your pet's profile photo.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>PetFolio uses your location to show nearby pets for playdates, breeding, and adoption matches.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>PetFolio uses your location to keep nearby pet matches up to date while you use the app.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>

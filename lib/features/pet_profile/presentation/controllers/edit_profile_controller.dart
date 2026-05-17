@@ -1,7 +1,10 @@
 import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:petfolio/features/matching/data/repositories/matching_repository.dart';
 
 import '../../data/models/pet.dart';
+import '../../data/models/pet_gender.dart';
 import 'pet_list_controller.dart';
 
 class EditProfileState {
@@ -9,36 +12,56 @@ class EditProfileState {
     this.isSubmitting = false,
     this.errorMessage,
     this.newImage,
+    this.isSyncingLocation = false,
   });
 
   final bool isSubmitting;
   final String? errorMessage;
   final File? newImage;
+  final bool isSyncingLocation;
 
   EditProfileState copyWith({
     bool? isSubmitting,
     String? errorMessage,
+    bool clearError = false,
     File? newImage,
+    bool? isSyncingLocation,
   }) {
     return EditProfileState(
       isSubmitting: isSubmitting ?? this.isSubmitting,
-      errorMessage: errorMessage ?? this.errorMessage,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       newImage: newImage ?? this.newImage,
+      isSyncingLocation: isSyncingLocation ?? this.isSyncingLocation,
     );
   }
 }
 
-class EditProfileController extends AutoDisposeNotifier<EditProfileState> {
+class EditProfileController extends Notifier<EditProfileState> {
   @override
   EditProfileState build() => const EditProfileState();
 
   void setImage(File file) {
-    state = state.copyWith(newImage: file, errorMessage: null);
+    state = state.copyWith(newImage: file, clearError: true);
   }
 
   void clearError() {
     if (state.errorMessage != null) {
-      state = state.copyWith(errorMessage: null);
+      state = state.copyWith(clearError: true);
+    }
+  }
+
+  Future<bool> syncMatchLocation(String petId) async {
+    state = state.copyWith(isSyncingLocation: true, clearError: true);
+    try {
+      await ref.read(matchingRepositoryProvider).syncActorLocationFromDevice(petId);
+      state = state.copyWith(isSyncingLocation: false);
+      return true;
+    } catch (_) {
+      state = state.copyWith(
+        isSyncingLocation: false,
+        errorMessage: 'Could not update match location. Check location permissions.',
+      );
+      return false;
     }
   }
 
@@ -47,37 +70,58 @@ class EditProfileController extends AutoDisposeNotifier<EditProfileState> {
     required String name,
     required String breed,
     required String bio,
+    required DateTime? dateOfBirth,
+    required PetGender gender,
+    required double? weightKg,
+    required String? activityLevel,
+    required bool isPublic,
+    required bool isDiscoverable,
+    bool syncLocationIfDiscoverable = false,
   }) async {
-    if (name.trim().isEmpty) {
-      state = state.copyWith(errorMessage: 'Name cannot be empty.');
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) {
+      state = state.copyWith(errorMessage: 'Name is required.');
+      return false;
+    }
+    if (trimmed.length > 80) {
+      state = state.copyWith(errorMessage: 'Name must be 80 characters or fewer.');
       return false;
     }
 
-    state = state.copyWith(isSubmitting: true, errorMessage: null);
+    state = state.copyWith(isSubmitting: true, clearError: true);
 
     try {
-      String? avatarUrl = originalPet.avatarUrl;
+      var avatarUrl = originalPet.avatarUrl;
 
-      // 1. Upload new image if selected
       if (state.newImage != null) {
         final repo = ref.read(petRepositoryProvider);
         final bytes = await state.newImage!.readAsBytes();
         avatarUrl = await repo.uploadAvatar(bytes, originalPet.id);
       }
 
-      // 2. Update pet
       final listNotifier = ref.read(petListProvider.notifier);
-      await listNotifier.editPet(
+      await listNotifier.editPetProfile(
         id: originalPet.id,
-        name: name.trim(),
+        name: trimmed,
         breed: breed.trim().isEmpty ? null : breed.trim(),
         avatarUrl: avatarUrl,
         bio: bio.trim().isEmpty ? null : bio.trim(),
+        dateOfBirth: dateOfBirth,
+        gender: gender,
+        weightKg: weightKg,
+        activityLevel: activityLevel,
+        isPublic: isPublic,
       );
+
+      if (syncLocationIfDiscoverable && isDiscoverable) {
+        await ref
+            .read(matchingRepositoryProvider)
+            .syncActorLocationFromDevice(originalPet.id);
+      }
 
       state = state.copyWith(isSubmitting: false);
       return true;
-    } catch (e) {
+    } catch (_) {
       state = state.copyWith(
         isSubmitting: false,
         errorMessage: 'Failed to update profile. Please try again.',
@@ -88,6 +132,11 @@ class EditProfileController extends AutoDisposeNotifier<EditProfileState> {
 }
 
 final editProfileControllerProvider =
-    NotifierProvider.autoDispose<EditProfileController, EditProfileState>(
+    NotifierProvider<EditProfileController, EditProfileState>(
   EditProfileController.new,
 );
+
+final petMatchLocationProvider =
+    FutureProvider.autoDispose.family<bool, String>((ref, petId) {
+  return ref.read(matchingRepositoryProvider).actorPetHasLocation(petId);
+});

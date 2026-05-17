@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../data/models/pet.dart';
+import '../../data/models/pet_gender.dart';
 import '../../data/repositories/pet_repository.dart';
 
 final petRepositoryProvider = Provider<PetRepository>(
@@ -77,32 +78,75 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
           weightKg: weightKg,
           activityLevel: activityLevel,
         );
-    state = AsyncData([...state.valueOrNull ?? [], pet]);
+    state = AsyncData([...state.value ?? [], pet]);
     return pet;
   }
 
-  /// Updates a pet in Supabase and the local list.
-  Future<Pet> editPet({
+  Future<Pet> editPetProfile({
     required String id,
-    String? name,
+    required String name,
     String? breed,
     String? avatarUrl,
     String? bio,
+    DateTime? dateOfBirth,
+    required PetGender gender,
+    double? weightKg,
+    String? activityLevel,
+    required bool isPublic,
   }) async {
-    final pet = await ref.read(petRepositoryProvider).updatePet(
+    final pet = await ref.read(petRepositoryProvider).updatePetProfile(
           id: id,
           name: name,
           breed: breed,
           avatarUrl: avatarUrl,
           bio: bio,
+          dateOfBirth: dateOfBirth,
+          gender: gender,
+          weightKg: weightKg,
+          activityLevel: activityLevel,
+          isPublic: isPublic,
         );
     updateLocal(pet);
     return pet;
   }
 
+  Future<void> setDiscoverable({
+    required String petId,
+    required bool discoverable,
+  }) async {
+    final previous = state.value;
+    if (previous == null) return;
+
+    Pet? priorPet;
+    for (final p in previous) {
+      if (p.id == petId) {
+        priorPet = p;
+        break;
+      }
+    }
+    if (priorPet == null) return;
+
+    final optimistic = priorPet.copyWith(isDiscoverable: discoverable);
+    state = AsyncData([
+      for (final p in previous)
+        if (p.id == petId) optimistic else p,
+    ]);
+
+    try {
+      final updated = await ref.read(petRepositoryProvider).updateDiscoverable(
+            petId: petId,
+            discoverable: discoverable,
+          );
+      updateLocal(updated);
+    } catch (e) {
+      state = AsyncData(previous);
+      rethrow;
+    }
+  }
+
   /// Updates the in-memory copy of a pet (e.g. after avatar upload).
   void updateLocal(Pet updated) {
-    final list = state.valueOrNull;
+    final list = state.value;
     if (list == null) return;
     state = AsyncData([
       for (final p in list)
@@ -114,7 +158,7 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
   /// [display_order] values. On failure the original list is restored and the
   /// error is rethrown so the caller can surface it.
   Future<void> reorder(List<Pet> reordered) async {
-    final previous = state.valueOrNull;
+    final previous = state.value;
     state = AsyncData([
       for (var i = 0; i < reordered.length; i++)
         reordered[i].copyWith(displayOrder: i),
@@ -133,7 +177,7 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
   /// archived pet so callers can offer an Undo affordance.
   Future<Pet> archive(String petId) async {
     final archived = await ref.read(petRepositoryProvider).archivePet(petId);
-    final list = state.valueOrNull ?? const <Pet>[];
+    final list = state.value ?? const <Pet>[];
     state = AsyncData(list.where((p) => p.id != petId).toList());
     return archived;
   }
@@ -141,7 +185,7 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
   /// Restores a previously-archived pet back into the active list.
   Future<void> unarchive(String petId) async {
     final restored = await ref.read(petRepositoryProvider).unarchivePet(petId);
-    final list = state.valueOrNull ?? const <Pet>[];
+    final list = state.value ?? const <Pet>[];
     final merged = [...list, restored]..sort(_comparePetsListOrder);
     state = AsyncData(merged);
   }

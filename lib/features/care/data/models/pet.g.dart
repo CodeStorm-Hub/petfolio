@@ -6,7 +6,7 @@ part of 'pet.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$PetImpl _$$PetImplFromJson(Map<String, dynamic> json) => _$PetImpl(
+_Pet _$PetFromJson(Map<String, dynamic> json) => _Pet(
   id: json['id'] as String,
   ownerId: json['owner_id'] as String,
   name: json['name'] as String,
@@ -23,7 +23,7 @@ _$PetImpl _$$PetImplFromJson(Map<String, dynamic> json) => _$PetImpl(
   createdAt: DateTime.parse(json['created_at'] as String),
 );
 
-Map<String, dynamic> _$$PetImplToJson(_$PetImpl instance) => <String, dynamic>{
+Map<String, dynamic> _$PetToJson(_Pet instance) => <String, dynamic>{
   'id': instance.id,
   'owner_id': instance.ownerId,
   'name': instance.name,

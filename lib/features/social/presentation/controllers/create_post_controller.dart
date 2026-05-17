@@ -30,7 +30,7 @@ class CreatePostState {
   }
 }
 
-class CreatePostNotifier extends AutoDisposeNotifier<CreatePostState> {
+class CreatePostNotifier extends Notifier<CreatePostState> {
   @override
   CreatePostState build() => CreatePostState();
 
@@ -72,6 +72,6 @@ class CreatePostNotifier extends AutoDisposeNotifier<CreatePostState> {
 }
 
 final createPostControllerProvider =
-    NotifierProvider.autoDispose<CreatePostNotifier, CreatePostState>(
+    NotifierProvider<CreatePostNotifier, CreatePostState>(
   CreatePostNotifier.new,
 );

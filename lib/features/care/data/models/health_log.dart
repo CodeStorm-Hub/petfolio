@@ -18,7 +18,7 @@ enum HealthLogType {
 enum HealthSeverity { mild, moderate, severe, critical }
 
 @freezed
-class HealthLog with _$HealthLog {
+abstract class HealthLog with _$HealthLog {
   const HealthLog._();
 
   const factory HealthLog({

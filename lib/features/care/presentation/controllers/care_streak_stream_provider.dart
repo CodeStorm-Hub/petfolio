@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/models/care_streak.dart';
 
 final careStreakRealtimeProvider =
-    StreamProvider.autoDispose.family<CareStreak, String>((ref, petId) {
+    StreamProvider.family<CareStreak, String>((ref, petId) {
   return Supabase.instance.client
       .from('care_streaks')
       .stream(primaryKey: ['pet_id'])

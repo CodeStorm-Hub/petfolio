@@ -40,7 +40,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   Product? get _product =>
       widget.product ??
-      ref.read(productListProvider).valueOrNull?.firstWhere(
+      ref.read(productListProvider).value?.firstWhere(
             (p) => p.id == widget.productId,
             orElse: () => throw StateError('Product not found'),
           );

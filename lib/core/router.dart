@@ -15,6 +15,8 @@ import '../features/marketplace/presentation/screens/cart_screen.dart';
 import '../features/marketplace/presentation/screens/marketplace_screen.dart';
 import '../features/marketplace/presentation/screens/order_confirmation_screen.dart';
 import '../features/marketplace/presentation/screens/product_detail_screen.dart';
+import '../features/matching/presentation/screens/chat_screen.dart';
+import '../features/matching/presentation/screens/matches_inbox_screen.dart';
 import '../features/matching/presentation/screens/matching_screen.dart';
 import '../features/pet_profile/presentation/controllers/pet_list_controller.dart';
 import '../features/pet_profile/presentation/screens/manage_pets_screen.dart';
@@ -158,10 +160,31 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
+        path: '/matching/inbox',
+        builder: (context, state) => const MatchesInboxScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/matching/chat/:threadId',
+        builder: (context, state) {
+          final query = state.uri.queryParameters;
+          final petNameRaw = query['petName'];
+          return ChatScreen(
+            threadId: state.pathParameters['threadId']!,
+            actorPetId: query['actorPetId'] ?? '',
+            matchId: query['matchId'],
+            otherPetName: petNameRaw != null
+                ? Uri.decodeComponent(petNameRaw)
+                : 'Match',
+          );
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/pet/:petId/edit',
         builder: (context, state) {
           final petId = state.pathParameters['petId']!;
-          final pets = ref.read(petListProvider).valueOrNull ?? [];
+          final pets = ref.read(petListProvider).value ?? [];
           for (final p in pets) {
             if (p.id == petId) return EditProfileScreen(pet: p);
           }
@@ -211,7 +234,7 @@ class _RouterNotifier extends ChangeNotifier {
     // ── Logged in but no pets → go to /onboarding ───────────────────
     // Only redirect when the pet list has finished loading AND is empty,
     // so we don't flash the onboarding screen on cold start.
-    final pets = _ref.read(petListProvider).valueOrNull;
+    final pets = _ref.read(petListProvider).value;
     if (pets != null && pets.isEmpty && loc != '/onboarding') {
       return '/onboarding';
     }

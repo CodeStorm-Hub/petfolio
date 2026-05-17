@@ -15,14 +15,14 @@ final productListProvider =
 /// Derived provider: products filtered by category (client-side).
 final filteredProductsProvider =
     Provider.family<List<Product>, ProductCategory>((ref, cat) {
-  final all = ref.watch(productListProvider).valueOrNull ?? [];
+  final all = ref.watch(productListProvider).value ?? [];
   if (cat == ProductCategory.all) return all;
   return all.where((p) => p.category == cat).toList();
 });
 
 /// Subscribable products only.
 final subscribableProductsProvider = Provider<List<Product>>((ref) {
-  final all = ref.watch(productListProvider).valueOrNull ?? [];
+  final all = ref.watch(productListProvider).value ?? [];
   return all.where((p) => p.subscribable).toList();
 });
 

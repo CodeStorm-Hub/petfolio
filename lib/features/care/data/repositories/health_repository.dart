@@ -54,7 +54,7 @@ class HealthRepository {
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -76,7 +76,7 @@ class HealthRepository {
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -98,7 +98,7 @@ class HealthRepository {
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -122,7 +122,7 @@ class HealthRepository {
       if (e.code == 'PGRST116') throw const NotFoundException();
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -144,7 +144,7 @@ class HealthRepository {
       if (e.code == 'PGRST116') throw const NotFoundException();
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -159,7 +159,7 @@ class HealthRepository {
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 }
@@ -196,7 +196,7 @@ class MedicalVaultRepository {
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -217,7 +217,7 @@ class MedicalVaultRepository {
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -239,7 +239,7 @@ class MedicalVaultRepository {
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -261,7 +261,7 @@ class MedicalVaultRepository {
       if (e.code == 'PGRST116') throw const NotFoundException();
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -283,7 +283,7 @@ class MedicalVaultRepository {
       if (e.code == 'PGRST116') throw const NotFoundException();
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -298,7 +298,7 @@ class MedicalVaultRepository {
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 
@@ -322,7 +322,7 @@ class MedicalVaultRepository {
       if (e.code == 'PGRST116') throw const NotFoundException();
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw NetworkException(message: e.toString());
     }
   }
 }

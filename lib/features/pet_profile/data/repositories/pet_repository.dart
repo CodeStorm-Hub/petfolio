@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/pet.dart';
+import '../models/pet_gender.dart';
 
 class PetRepository {
   const PetRepository(this._client);
@@ -103,22 +104,49 @@ class PetRepository {
     return Pet.fromJson(row);
   }
 
-  Future<Pet> updatePet({
+  Future<Pet> updateDiscoverable({
+    required String petId,
+    required bool discoverable,
+  }) async {
+    final row = await _client
+        .from('pets')
+        .update({'is_discoverable': discoverable})
+        .eq('id', petId)
+        .select()
+        .single();
+    return Pet.fromJson(row);
+  }
+
+  Future<Pet> updatePetProfile({
     required String id,
-    String? name,
+    required String name,
     String? breed,
     String? avatarUrl,
     String? bio,
+    DateTime? dateOfBirth,
+    required PetGender gender,
+    double? weightKg,
+    String? activityLevel,
+    required bool isPublic,
   }) async {
-    final updates = <String, dynamic>{};
-    if (name != null) updates['name'] = name;
-    if (breed != null) updates['breed'] = breed;
-    if (avatarUrl != null) updates['avatar_url'] = avatarUrl;
-    if (bio != null) updates['bio'] = bio;
-    
-    if (updates.isEmpty) throw Exception('No fields to update');
-    
-    final row = await _client.from('pets').update(updates).eq('id', id).select().single();
+    final updates = <String, dynamic>{
+      'name': name.trim(),
+      'breed': breed?.trim().isEmpty ?? true ? null : breed!.trim(),
+      'bio': bio?.trim().isEmpty ?? true ? null : bio!.trim(),
+      'date_of_birth':
+          dateOfBirth?.toIso8601String().split('T').first,
+      'gender': gender.dbValue,
+      'weight_kg': weightKg,
+      'activity_level':
+          activityLevel == null || activityLevel.isEmpty ? null : activityLevel,
+      'is_public': isPublic,
+    };
+    if (avatarUrl != null) {
+      updates['avatar_url'] = avatarUrl;
+    }
+
+    final row =
+        await _client.from('pets').update(updates).eq('id', id).select().single();
     return Pet.fromJson(row);
   }
 

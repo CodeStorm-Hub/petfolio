@@ -1,3 +1,4 @@
+import 'package:petfolio/features/pet_profile/data/models/pet_gender.dart';
 import 'package:petfolio/features/pet_profile/data/models/pet_species.dart';
 
 class Pet {
@@ -11,10 +12,13 @@ class Pet {
     this.bio,
     required this.createdAt,
     this.dateOfBirth,
+    this.gender = PetGender.unknown,
     this.weightKg,
     this.activityLevel,
+    this.isPublic = true,
     this.displayOrder = 0,
     this.archivedAt,
+    this.isDiscoverable = false,
   });
 
   final String id;
@@ -26,8 +30,10 @@ class Pet {
   final String? bio;
   final DateTime createdAt;
   final DateTime? dateOfBirth;
+  final PetGender gender;
   final double? weightKg;
   final String? activityLevel;
+  final bool isPublic;
 
   /// Position in the switcher / manage list. Lower comes first.
   final int displayOrder;
@@ -35,6 +41,8 @@ class Pet {
   /// Soft-archive timestamp. When non-null, the pet is hidden everywhere by
   /// default; care_logs history is preserved.
   final DateTime? archivedAt;
+
+  final bool isDiscoverable;
 
   PetSpecies get speciesEnum => PetSpecies.fromId(species) ?? PetSpecies.dog;
 
@@ -46,10 +54,13 @@ class Pet {
     String? avatarUrl,
     String? bio,
     DateTime? dateOfBirth,
+    PetGender? gender,
     double? weightKg,
     String? activityLevel,
+    bool? isPublic,
     int? displayOrder,
     Object? archivedAt = _sentinel,
+    bool? isDiscoverable,
   }) =>
       Pet(
         id: id,
@@ -61,12 +72,15 @@ class Pet {
         bio: bio ?? this.bio,
         createdAt: createdAt,
         dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+        gender: gender ?? this.gender,
         weightKg: weightKg ?? this.weightKg,
         activityLevel: activityLevel ?? this.activityLevel,
+        isPublic: isPublic ?? this.isPublic,
         displayOrder: displayOrder ?? this.displayOrder,
         archivedAt: identical(archivedAt, _sentinel)
             ? this.archivedAt
             : archivedAt as DateTime?,
+        isDiscoverable: isDiscoverable ?? this.isDiscoverable,
       );
 
   factory Pet.fromJson(Map<String, dynamic> json) => Pet(
@@ -81,14 +95,17 @@ class Pet {
         dateOfBirth: json['date_of_birth'] != null
             ? DateTime.parse(json['date_of_birth'] as String)
             : null,
+        gender: PetGender.fromDb(json['gender'] as String?),
         weightKg: json['weight_kg'] != null
             ? (json['weight_kg'] as num).toDouble()
             : null,
         activityLevel: json['activity_level'] as String?,
+        isPublic: json['is_public'] as bool? ?? true,
         displayOrder: (json['display_order'] as num?)?.toInt() ?? 0,
         archivedAt: json['archived_at'] != null
             ? DateTime.parse(json['archived_at'] as String)
             : null,
+        isDiscoverable: json['is_discoverable'] as bool? ?? false,
       );
 
   Map<String, dynamic> toJson() => {
@@ -102,10 +119,13 @@ class Pet {
         'created_at': createdAt.toIso8601String(),
         if (dateOfBirth != null)
           'date_of_birth': dateOfBirth!.toIso8601String().split('T').first,
+        'gender': gender.dbValue,
         if (weightKg != null) 'weight_kg': weightKg,
         if (activityLevel != null) 'activity_level': activityLevel,
+        'is_public': isPublic,
         'display_order': displayOrder,
         if (archivedAt != null) 'archived_at': archivedAt!.toIso8601String(),
+        'is_discoverable': isDiscoverable,
       };
 
   @override

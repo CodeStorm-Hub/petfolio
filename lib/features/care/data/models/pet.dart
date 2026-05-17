@@ -8,7 +8,7 @@ part 'pet.g.dart';
 enum ActivityLevel { sedentary, low, moderate, high, veryHigh }
 
 @freezed
-class Pet with _$Pet {
+abstract class Pet with _$Pet {
   const Pet._();
 
   const factory Pet({
