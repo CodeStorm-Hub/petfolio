@@ -52,22 +52,23 @@ class MyShopNotifier extends AsyncNotifier<Shop?> {
   }
 
   /// Calls the stripe-onboard-vendor Edge Function and returns the KYC URL.
-  /// Returns null and sets error state on failure.
-  Future<String?> startOnboarding() async {
+  Future<String> startOnboarding() async {
     final shop = state.value;
-    if (shop == null) return null;
-    try {
-      return await _repo.startOnboarding(shop.id);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-      return null;
+    if (shop == null) {
+      throw const StripeOnboardingException('Create your shop before setting up payments.');
     }
+    return _repo.startOnboarding(shop.id);
   }
 
   /// Re-fetches the shop row after the user returns from Stripe KYC.
   /// The webhook may have already set is_verified; this polls for the update.
   Future<void> refreshAfterOnboarding() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _repo.fetchMyShop());
+    final previous = state;
+    try {
+      final shop = await _repo.fetchMyShop();
+      state = AsyncValue.data(shop);
+    } catch (e, st) {
+      state = previous.hasValue ? previous : AsyncValue.error(e, st);
+    }
   }
 }

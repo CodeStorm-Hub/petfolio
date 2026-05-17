@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/widgets/app_snack_bar.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/my_shop_controller.dart';
 import '../../controllers/vendor_orders_controller.dart';
@@ -10,11 +11,37 @@ import '../../controllers/vendor_products_controller.dart';
 import '../../../data/models/marketplace_order.dart';
 import '../../../data/models/shop.dart';
 
-class SellerDashboardScreen extends ConsumerWidget {
+class SellerDashboardScreen extends ConsumerStatefulWidget {
   const SellerDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SellerDashboardScreen> createState() =>
+      _SellerDashboardScreenState();
+}
+
+class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(myShopProvider.notifier).refreshAfterOnboarding();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final shopAsync = ref.watch(myShopProvider);
 
     return Scaffold(
@@ -232,10 +259,15 @@ class _OnboardingBanner extends ConsumerWidget {
             const SizedBox(width: 8),
             GestureDetector(
               onTap: () async {
-                final url =
-                    await ref.read(myShopProvider.notifier).startOnboarding();
-                if (url != null && context.mounted) {
-                  context.push('/seller/onboarding?url=${Uri.encodeComponent(url)}');
+                try {
+                  final url =
+                      await ref.read(myShopProvider.notifier).startOnboarding();
+                  if (!context.mounted) return;
+                  context.push(
+                    '/seller/onboarding?url=${Uri.encodeComponent(url)}',
+                  );
+                } catch (e) {
+                  if (context.mounted) AppSnackBar.showError(e);
                 }
               },
               child: const Text(

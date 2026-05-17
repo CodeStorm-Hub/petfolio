@@ -90,23 +90,62 @@ class ShopRepository {
     return Shop.fromJson(row);
   }
 
-  /// Calls the stripe-onboard-vendor Edge Function.
+  /// Calls the `stripe-onboard-vendor` Edge Function (not a Postgres RPC).
   /// Returns the Stripe account-link URL to open in the user's browser.
   Future<String> startOnboarding(String shopId) async {
-    final response = await _client.functions.invoke(
-      'stripe-onboard-vendor',
-      body: {'shopId': shopId},
-    );
+    try {
+      final response = await _client.functions.invoke(
+        'stripe-onboard-vendor',
+        body: {'shopId': shopId},
+      );
 
-    if (response.status != 200) {
-      throw Exception(
-        'stripe-onboard-vendor error ${response.status}: ${response.data}',
+      final data = _functionResponseMap(response.data);
+      final status = response.status;
+
+      if (status >= 400) {
+        throw StripeOnboardingException(_errorMessageFromPayload(data, status));
+      }
+
+      final url = data['accountLinkUrl'] as String?;
+      if (url == null || url.isEmpty) {
+        throw const StripeOnboardingException(
+          'Stripe onboarding did not return a link. Please try again.',
+        );
+      }
+      return url;
+    } on FunctionException catch (e) {
+      throw StripeOnboardingException(
+        _errorMessageFromPayload(_functionResponseMap(e.details), e.status),
       );
     }
-
-    final url =
-        (response.data as Map<String, dynamic>)['accountLinkUrl'] as String?;
-    if (url == null) throw Exception('Missing accountLinkUrl in response');
-    return url;
   }
+
+  /// Alias used in architecture docs.
+  Future<String> startStripeOnboarding(String shopId) =>
+      startOnboarding(shopId);
+
+  Map<String, dynamic> _functionResponseMap(Object? data) {
+    if (data == null) return {};
+    if (data is Map<String, dynamic>) return data;
+    if (data is Map) return Map<String, dynamic>.from(data);
+    return {};
+  }
+
+  String _errorMessageFromPayload(Map<String, dynamic> data, int status) {
+    final error = data['error'];
+    if (error is String && error.trim().isNotEmpty) return error;
+    if (error is Map && error['message'] is String) {
+      return error['message'] as String;
+    }
+    return 'Stripe onboarding failed (HTTP $status). Please try again.';
+  }
+}
+
+class StripeOnboardingException implements Exception {
+  const StripeOnboardingException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
 }
