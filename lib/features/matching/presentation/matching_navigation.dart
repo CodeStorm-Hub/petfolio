@@ -25,7 +25,8 @@ Future<void> openMatchChat(
     context.push(
       '/matching/chat/$resolved?matchId=$matchId&petName=$name&actorPetId=$actorPetId',
     );
-  } catch (_) {
+  } catch (e, st) {
+    debugPrint('[openMatchChat] ensureChatThreadForMatch failed: $e\n$st');
     if (context.mounted) {
       AppSnackBar.showError('Could not open chat. Try again.');
     }

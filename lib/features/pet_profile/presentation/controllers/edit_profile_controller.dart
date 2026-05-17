@@ -23,12 +23,13 @@ class EditProfileState {
   EditProfileState copyWith({
     bool? isSubmitting,
     String? errorMessage,
+    bool clearError = false,
     File? newImage,
     bool? isSyncingLocation,
   }) {
     return EditProfileState(
       isSubmitting: isSubmitting ?? this.isSubmitting,
-      errorMessage: errorMessage,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       newImage: newImage ?? this.newImage,
       isSyncingLocation: isSyncingLocation ?? this.isSyncingLocation,
     );
@@ -40,17 +41,17 @@ class EditProfileController extends Notifier<EditProfileState> {
   EditProfileState build() => const EditProfileState();
 
   void setImage(File file) {
-    state = state.copyWith(newImage: file, errorMessage: null);
+    state = state.copyWith(newImage: file, clearError: true);
   }
 
   void clearError() {
     if (state.errorMessage != null) {
-      state = state.copyWith(errorMessage: null);
+      state = state.copyWith(clearError: true);
     }
   }
 
   Future<bool> syncMatchLocation(String petId) async {
-    state = state.copyWith(isSyncingLocation: true, errorMessage: null);
+    state = state.copyWith(isSyncingLocation: true, clearError: true);
     try {
       await ref.read(matchingRepositoryProvider).syncActorLocationFromDevice(petId);
       state = state.copyWith(isSyncingLocation: false);
@@ -74,6 +75,7 @@ class EditProfileController extends Notifier<EditProfileState> {
     required double? weightKg,
     required String? activityLevel,
     required bool isPublic,
+    required bool isDiscoverable,
     bool syncLocationIfDiscoverable = false,
   }) async {
     final trimmed = name.trim();
@@ -86,7 +88,7 @@ class EditProfileController extends Notifier<EditProfileState> {
       return false;
     }
 
-    state = state.copyWith(isSubmitting: true, errorMessage: null);
+    state = state.copyWith(isSubmitting: true, clearError: true);
 
     try {
       var avatarUrl = originalPet.avatarUrl;
@@ -111,7 +113,7 @@ class EditProfileController extends Notifier<EditProfileState> {
         isPublic: isPublic,
       );
 
-      if (syncLocationIfDiscoverable && originalPet.isDiscoverable) {
+      if (syncLocationIfDiscoverable && isDiscoverable) {
         await ref
             .read(matchingRepositoryProvider)
             .syncActorLocationFromDevice(originalPet.id);

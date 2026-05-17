@@ -19,7 +19,7 @@ class MatchesInboxController extends AsyncNotifier<MatchInboxSnapshot> {
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() => build());
+    ref.invalidateSelf();
+    await future;
   }
 }

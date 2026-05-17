@@ -85,7 +85,11 @@ class _MatchesInboxView extends ConsumerWidget {
                 loading: () => const Center(
                   child: CircularProgressIndicator.adaptive(),
                 ),
-                error: (_, _) => Center(
+                error: (error, stackTrace) {
+                  debugPrint(
+                    '[MatchesInboxScreen] fetchMatchInbox failed: $error\n$stackTrace',
+                  );
+                  return Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -105,7 +109,8 @@ class _MatchesInboxView extends ConsumerWidget {
                       ),
                     ],
                   ),
-                ),
+                );
+                },
                 data: (snapshot) {
                   final empty = snapshot.newMatches.isEmpty &&
                       snapshot.conversations.isEmpty;

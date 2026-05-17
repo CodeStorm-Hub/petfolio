@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petfolio/core/services/location_providers.dart';
 
 import '../../data/models/discovery_candidate.dart';
 import '../../data/repositories/matching_repository.dart';
@@ -58,10 +57,7 @@ class DiscoveryNotifier extends Notifier<DiscoveryState> {
   final String arg;
 
   @override
-  DiscoveryState build() {
-    ref.watch(deviceLatLngProvider);
-    return DiscoveryState(petId: arg);
-  }
+  DiscoveryState build() => DiscoveryState(petId: arg);
 
   MatchingRepository get _repo => ref.read(matchingRepositoryProvider);
 

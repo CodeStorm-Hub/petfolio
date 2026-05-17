@@ -180,7 +180,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           weightKg: weight,
           activityLevel: _activityLevel,
           isPublic: _isPublic,
-          syncLocationIfDiscoverable: _syncLocationOnSave && pet.isDiscoverable,
+          isDiscoverable: pet.isDiscoverable,
+          syncLocationIfDiscoverable: _syncLocationOnSave,
         );
 
     if (success && mounted) {

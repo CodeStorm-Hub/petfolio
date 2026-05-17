@@ -49,10 +49,6 @@ class MatchingRepository {
     }
   }
 
-  void scheduleActorLocationSync(String activePetId) {
-    unawaited(syncActorLocationFromDevice(activePetId));
-  }
-
   Future<List<MatchingDiscoveryRow>> fetchCandidates({
     required String activePetId,
     int limit = 20,
@@ -66,9 +62,7 @@ class MatchingRepository {
     if (uid == null) return [];
 
     final hasStoredLocation = await _dataSource.petHasLocation(activePetId);
-    if (hasStoredLocation) {
-      scheduleActorLocationSync(activePetId);
-    } else {
+    if (!hasStoredLocation) {
       unawaited(syncActorLocationFromDevice(activePetId));
     }
 

@@ -1,10 +1,6 @@
 ALTER TABLE public.pets
   ADD COLUMN IF NOT EXISTS is_discoverable boolean NOT NULL DEFAULT false;
 
-CREATE INDEX IF NOT EXISTS pets_discoverable_location_idx
-  ON public.pets (is_discoverable, archived_at)
-  WHERE is_discoverable IS TRUE AND archived_at IS NULL;
-
 DROP FUNCTION IF EXISTS public.matching_discovery_candidates(uuid, double precision, integer);
 DROP FUNCTION IF EXISTS public.matching_discovery_candidates(
   uuid,

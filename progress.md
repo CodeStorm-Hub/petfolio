@@ -2,6 +2,18 @@
 
 ---
 
+## 2026-05-17 — PR #7 review fixes (Copilot thread)
+
+- **Schema** — Removed useless `pets_discoverable_location_idx` from `20260518120000_pets_is_discoverable.sql`; added `20260518210000_drop_pets_discoverable_location_idx.sql` (applied to `jqyjvhwlcqcsuwcqgcwf` via MCP). Trimmed `20260518200000_pr6_review_fixes.sql` to `REVOKE`/`GRANT` only on `ensure_chat_thread_for_match`.
+- **`AGENTS.md`** — State management rule now requires Riverpod (was incorrectly “forbidden”).
+- **Matching** — `ChatConversationController`: resolve thread once; RPC only when `threadId` is empty. `MatchesInboxController.refresh()` uses `invalidateSelf()`. `DiscoveryNotifier` no longer watches `deviceLatLngProvider` (avoids swipe-state reset). `fetchCandidates` syncs GPS only when pet has no stored location; removed dead `scheduleActorLocationSync`.
+- **Edit profile** — `copyWith(clearError: true)` preserves errors; submit uses current `isDiscoverable` for location sync on save.
+- **Errors** — `debugPrint` on inbox load failure and `openMatchChat` catch paths.
+
+**Next step:** Push to `pet-matching` / update PR #7; optional follow-up PR for bundled major dependency bumps in `pubspec.yaml`.
+
+---
+
 ## 2026-05-17 — PR #6 review fixes (matching inbox + swipes)
 
 - **`pet_swipe.dart`** — `SwipeTableAction.dbValue` so all actions persist with correct DB strings.

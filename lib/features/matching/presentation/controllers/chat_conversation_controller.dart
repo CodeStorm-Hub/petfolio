@@ -26,13 +26,18 @@ class ChatConversationController extends AsyncNotifier<List<ChatMessage>> {
   @override
   Future<List<ChatMessage>> build() async {
     final repo = ref.watch(matchingRepositoryProvider);
-    _resolvedThreadId = arg.threadId;
 
-    if (arg.matchId != null && arg.matchId!.isNotEmpty) {
-      _resolvedThreadId = await repo.ensureChatThreadForMatch(
-        matchId: arg.matchId!,
-        actorPetId: arg.actorPetId,
-      );
+    if (_resolvedThreadId == null) {
+      var threadId = arg.threadId;
+      if (threadId.isEmpty &&
+          arg.matchId != null &&
+          arg.matchId!.isNotEmpty) {
+        threadId = await repo.ensureChatThreadForMatch(
+          matchId: arg.matchId!,
+          actorPetId: arg.actorPetId,
+        );
+      }
+      _resolvedThreadId = threadId;
     }
 
     return repo.fetchMessages(_resolvedThreadId!);

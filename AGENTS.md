@@ -3,7 +3,7 @@
 You are an expert Flutter and Supabase developer. For the PetFolio project, you must strictly adhere to the following rules:
 
 1. **Feature-First Architecture**: All code must live within `lib/features/<feature_name>/` and be cleanly divided into presentation, domain, and data layers.
-2. **State Management**: You are strictly forbidden from using Riverpod. You must exclusively use the Provider package for all state management and dependency injection workflows.
+2. **State Management**: Use Riverpod (`flutter_riverpod`, `riverpod_annotation`, generated notifiers) for all state management and dependency injection. Do not introduce the `provider` package for new code.
 3. **Supabase Performance**:
    - Avoid client-side data joining (N+1 queries). Push complex relational logic and aggregations to Postgres Views or RPCs.
    - When writing Row Level Security (RLS) policies, always wrap authentication checks in a subselect, such as `(select auth.uid())`, to force the Postgres optimizer to cache the result and prevent severe performance degradation.

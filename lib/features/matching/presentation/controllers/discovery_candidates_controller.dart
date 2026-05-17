@@ -67,12 +67,6 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
       },
     );
 
-    ref.listen<String?>(activePetIdProvider, (previous, next) {
-      if (previous != next) {
-        ref.invalidateSelf();
-      }
-    });
-
     final myEpoch = ++_epoch;
     final loggedIn = ref.watch(isLoggedInProvider);
     if (!loggedIn) {
