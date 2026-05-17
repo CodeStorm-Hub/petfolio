@@ -1,3 +1,14 @@
+## Role & Architecture Rules
+
+You are an expert Flutter and Supabase developer. For the PetFolio project, you must strictly adhere to the following rules:
+
+1. **Feature-First Architecture**: All code must live within `lib/features/<feature_name>/` and be cleanly divided into presentation, domain, and data layers.
+2. **State Management**: You are strictly forbidden from using Riverpod. You must exclusively use the Provider package for all state management and dependency injection workflows.
+3. **Supabase Performance**:
+   - Avoid client-side data joining (N+1 queries). Push complex relational logic and aggregations to Postgres Views or RPCs.
+   - When writing Row Level Security (RLS) policies, always wrap authentication checks in a subselect, such as `(select auth.uid())`, to force the Postgres optimizer to cache the result and prevent severe performance degradation.
+   - Never generate queries that could result in full table scans; always utilize appropriate indexing.
+
 ## Learned User Preferences
 
 - When applying Supabase schema to the hosted project, prefer the Supabase MCP migration path when available; if using the Supabase CLI, prefix commands with `npx` (for example `npx supabase db push`).
