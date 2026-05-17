@@ -9,6 +9,10 @@ enum SwipeTableAction {
   like,
   @JsonValue('PASS')
   pass,
+  @JsonValue('GREET')
+  greet,
+  @JsonValue('SUPER_PAW')
+  superPaw,
 }
 
 @freezed
