@@ -23,6 +23,18 @@ Stripe Connect marketplace per handoff + `docs/multi-vendor-marketplace-blueprin
 
 ---
 
+## 2026-05-18 — Stripe Connect webhook ops & seller verification fix
+
+- **`stripe-webhook/index.ts`** — Routes Connect vs platform events to `STRIPE_CONNECT_WEBHOOK_SECRET` / `STRIPE_WEBHOOK_SECRET`; `account.updated` requires `charges_enabled` + `payouts_enabled`, updates `shops` by `stripe_connect_account_id`.
+- **`shop_repository.dart`** — `startOnboarding` uses `functions.invoke('stripe-onboard-vendor', body: {shopId})` (not `.rpc()`); `StripeOnboardingException` + `AppSnackBar` on seller dashboard (no `myShopProvider` error poison).
+- **`seller_dashboard_screen.dart`** — `AppLifecycleState.resumed` → `refreshAfterOnboarding()` for instant verified UI after KYC.
+- **Hosted terminal setup** — Deployed `stripe-webhook` to `jqyjvhwlcqcsuwcqgcwf`; installed Stripe CLI; recreated Connect webhook (`--connect true`, `account.updated`); set `STRIPE_CONNECT_WEBHOOK_SECRET`; verified **CodeStorm PAW** → `is_verified=true`.
+- **Root cause** — Prior `account.updated` endpoint was a **platform** webhook (`connect: false`), so Connect Express events never reached Supabase.
+
+**Local dev:** Requires Docker (`npx supabase start`) before `functions serve` + `stripe listen --forward-connect-to`.
+
+---
+
 ## 2026-05-17 — PR #7 review fixes (Copilot thread)
 
 - **Schema** — Removed useless `pets_discoverable_location_idx` from `20260518120000_pets_is_discoverable.sql`; added `20260518210000_drop_pets_discoverable_location_idx.sql` (applied to `jqyjvhwlcqcsuwcqgcwf` via MCP). Trimmed `20260518200000_pr6_review_fixes.sql` to `REVOKE`/`GRANT` only on `ensure_chat_thread_for_match`.
