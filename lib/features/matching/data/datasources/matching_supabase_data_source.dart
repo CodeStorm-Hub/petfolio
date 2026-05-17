@@ -75,7 +75,7 @@ class MatchingSupabaseDataSource {
       {
         'actor_id': actorPetId,
         'target_id': targetPetId,
-        'action': action == SwipeTableAction.like ? 'LIKE' : 'PASS',
+        'action': action.dbValue,
       },
       onConflict: 'actor_id,target_id',
     );
@@ -165,60 +165,37 @@ class MatchingSupabaseDataSource {
       return const MatchInboxSnapshot(newMatches: [], conversations: []);
     }
 
-    final matches = await fetchMatchesForPet(actorPetId);
-    if (matches.isEmpty) {
+    final raw = await _client.rpc(
+      'get_match_inbox',
+      params: {'p_actor_pet_id': actorPetId},
+    );
+    if (raw == null) {
       return const MatchInboxSnapshot(newMatches: [], conversations: []);
     }
 
-    final otherPetIds = <String>[];
-    for (final m in matches) {
-      otherPetIds.add(m.petAId == actorPetId ? m.petBId : m.petAId);
-    }
-
-    final petsById = await fetchPetsByIds(otherPetIds);
-    final threadRows = await fetchParticipantThreads();
-    final threadsByMatchId = <String, Map<String, dynamic>>{};
-    for (final row in threadRows) {
-      final mid = row['mutual_match_id'] as String?;
-      if (mid != null) threadsByMatchId[mid] = row;
-    }
-
-    final threadIdsWithMessages = threadRows
-        .where((r) => r['last_message_at'] != null)
-        .map((r) => r['id'] as String)
-        .toList();
-
-    final previewByThread = await _latestMessagePreviews(threadIdsWithMessages);
-
+    final list = raw as List;
     final items = <MatchInboxItem>[];
-    for (final match in matches) {
-      final otherPetId =
-          match.petAId == actorPetId ? match.petBId : match.petAId;
-      final pet = petsById[otherPetId];
-      final thread = threadsByMatchId[match.id];
-      final threadId = thread?['id'] as String?;
-      final lastAtRaw = thread?['last_message_at'] as String?;
-      final lastAt =
-          lastAtRaw != null ? DateTime.tryParse(lastAtRaw) : null;
-      final preview =
-          threadId != null ? previewByThread[threadId] : null;
-
+    for (final row in list) {
+      final map = Map<String, dynamic>.from(row as Map);
+      final matchedAtRaw = map['matched_at'] as String?;
+      if (matchedAtRaw == null) continue;
+      final matchedAt = DateTime.tryParse(matchedAtRaw);
+      if (matchedAt == null) continue;
+      final lastAtRaw = map['last_message_at'] as String?;
       items.add(
         MatchInboxItem(
-          matchId: match.id,
-          otherPetId: otherPetId,
-          otherPetName: pet?['name'] as String? ?? 'Pet',
-          otherPetAvatarUrl: pet?['avatar_url'] as String?,
-          otherPetBreed: pet?['breed'] as String?,
-          matchedAt: match.createdAt,
-          threadId: threadId,
-          lastMessageAt: lastAt,
-          lastMessagePreview: preview,
+          matchId: map['match_id'] as String,
+          otherPetId: map['other_pet_id'] as String,
+          otherPetName: map['other_pet_name'] as String? ?? 'Pet',
+          otherPetAvatarUrl: map['other_pet_avatar_url'] as String?,
+          otherPetBreed: map['other_pet_breed'] as String?,
+          matchedAt: matchedAt,
+          threadId: map['thread_id'] as String?,
+          lastMessageAt: lastAtRaw != null ? DateTime.tryParse(lastAtRaw) : null,
+          lastMessagePreview: map['last_message_preview'] as String?,
         ),
       );
     }
-
-    items.sort((a, b) => b.matchedAt.compareTo(a.matchedAt));
 
     final newMatches = <MatchInboxItem>[];
     final conversations = <MatchInboxItem>[];
@@ -230,6 +207,7 @@ class MatchingSupabaseDataSource {
       }
     }
 
+    newMatches.sort((a, b) => b.matchedAt.compareTo(a.matchedAt));
     conversations.sort((a, b) {
       final at = a.lastMessageAt ?? a.matchedAt;
       final bt = b.lastMessageAt ?? b.matchedAt;
@@ -240,28 +218,6 @@ class MatchingSupabaseDataSource {
       newMatches: newMatches,
       conversations: conversations,
     );
-  }
-
-  Future<Map<String, String>> _latestMessagePreviews(
-    List<String> threadIds,
-  ) async {
-    if (threadIds.isEmpty) return {};
-
-    final rows = await _client
-        .from('chat_messages')
-        .select('thread_id, content, created_at')
-        .inFilter('thread_id', threadIds)
-        .order('created_at', ascending: false);
-
-    final out = <String, String>{};
-    for (final row in rows as List) {
-      final map = Map<String, dynamic>.from(row as Map);
-      final tid = map['thread_id'] as String;
-      if (out.containsKey(tid)) continue;
-      final content = (map['content'] as String?)?.trim() ?? '';
-      if (content.isNotEmpty) out[tid] = content;
-    }
-    return out;
   }
 
   Future<String> ensureChatThreadForMatch({

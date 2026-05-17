@@ -2,6 +2,18 @@
 
 ---
 
+## 2026-05-17 — PR #6 review fixes (matching inbox + swipes)
+
+- **`pet_swipe.dart`** — `SwipeTableAction.dbValue` so all actions persist with correct DB strings.
+- **`matching_supabase_data_source.dart`** — `insertSwipe` uses `action.dbValue` (fixes GREET/SUPER_PAW stored as PASS); inbox rows skip missing/unparseable `matched_at` instead of `DateTime.now()` fallback.
+- **`20260518170000_get_match_inbox_rpc.sql`** — `get_match_inbox`: actor pet ownership guard (`owner_id = auth.uid()`), `LEFT JOIN LATERAL` for latest message per thread (replaces full-table `DISTINCT ON`).
+- **`20260518180000_chat_threads_race_condition.sql`** — `REVOKE ALL … FROM PUBLIC` on `ensure_chat_thread_for_match` before `GRANT` to `authenticated`.
+- **`20260518200000_pr6_review_fixes.sql`** — Applied to hosted `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.
+
+**Next step:** Push fixes to PR #6 branch; optional widget test for swipe action → DB value mapping.
+
+---
+
 ## 2026-05-17 — Edit Pet Profile (full `pets` attributes + sectioned UX)
 
 - **`pet.dart` / `pet_gender.dart`** — `gender`, `isPublic` on model + JSON; `PetGender` enum (`male` / `female` / `unknown`).
@@ -618,3 +630,61 @@ Phase complete; consider `/remember` if you want this sync persisted outside `pr
 - `MatchingRepository.fetchCandidates`: `.where((row) => row.isDiscoverable)` before mapping.
 
 **Next step:** UI toggle + `PetRepository` update method to set `is_discoverable` on opt-in/opt-out.
+
+---
+
+## 2026-05-17 — Fix Multi-Pet Discovery Bug (SQL)
+
+- **`supabase/migrations/20260518160000_matching_discovery_exclude_own_pets.sql`** — Modified `matching_discovery_candidates` RPC: updated `origin` CTE to select `p.owner_id` and added `AND c.owner_id != o.owner_id` to the WHERE clause to ensure a user never sees their own pets in the discovery feed.
+- **Supabase Remote** — Applied migration `matching_discovery_exclude_own_pets` to hosted project `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.
+
+**Next step:** None.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-17 — Resolve Inbox N+1 Over-fetching (SQL & Dart)
+
+- **`supabase/migrations/20260518170000_get_match_inbox_rpc.sql`** — Created `get_match_inbox` RPC: uses `DISTINCT ON (thread_id)` to join `matches`, `chat_threads`, `pets`, and the latest `chat_messages` on the server side; added `idx_chat_messages_thread_created_at` index to eliminate full table scans.
+- **Supabase Remote** — Applied migration `get_match_inbox_rpc` to hosted project `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.
+- **`matching_supabase_data_source.dart`** — Replaced `fetchMatchInboxSnapshot` with a single, lightweight call to `get_match_inbox` RPC; removed the N+1 `_latestMessagePreviews` method.
+
+**Next step:** None.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-17 — Fix Chat Thread Race Condition (SQL)
+
+- **`supabase/migrations/20260518180000_chat_threads_race_condition.sql`** — Rewrote `ensure_chat_thread_for_match` RPC to utilize an `INSERT ... ON CONFLICT DO NOTHING` block with a fallback `SELECT` to safely guarantee chat thread creation without unique constraint violations or race conditions.
+- **Supabase Remote** — Applied migration `chat_threads_race_condition` to hosted project `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.
+
+**Next step:** None.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-17 — Prevent Presentation Leak in Repository (Dart)
+
+- **`matching_repository.dart`** — Refactored `MatchingRepository.fetchCandidates` to return raw domain data (`List<MatchingDiscoveryRow>`) directly from the data source, removing all presentation-layer concerns, hardcoded hex colors, default bio strings, and aesthetic traits from the data layer.
+- **`discovery_candidates_controller.dart`** — Moved `_discoveryRowToCandidate` and all color palette/default string helper methods into `DiscoveryCandidatesController`, maintaining clean separation of concerns and feature-first architecture.
+
+**Next step:** None.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-17 — Map Advanced Swipe Actions (SQL & Dart)
+
+- **`supabase/migrations/20260518190000_swipes_advanced_actions.sql`** — Updated `public.swipes` table action check constraint to accept `GREET` and `SUPER_PAW` enum values; updated `swipes_target_actor_like_idx` index and `swipes_after_insert_mutual_match` trigger to correctly identify and process mutual matches from any positive like action (`LIKE`, `GREET`, `SUPER_PAW`).
+- **Supabase Remote** — Applied migration `swipes_advanced_actions` to hosted project `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.
+- **`pet_swipe.dart` & `pet_swipe.g.dart`** — Added `greet` and `superPaw` enum values and JSON mapping to `SwipeTableAction`.
+- **`matching_repository.dart`** — Updated `recordSwipe` to correctly map UI intents (`greet`, `superPaw`, `pass`, `match`) to their respective `SwipeTableAction` database representations.
+
+**Next step:** None.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.

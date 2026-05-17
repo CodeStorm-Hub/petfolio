@@ -25,4 +25,6 @@ Map<String, dynamic> _$PetSwipeToJson(_PetSwipe instance) => <String, dynamic>{
 const _$SwipeTableActionEnumMap = {
   SwipeTableAction.like: 'LIKE',
   SwipeTableAction.pass: 'PASS',
+  SwipeTableAction.greet: 'GREET',
+  SwipeTableAction.superPaw: 'SUPER_PAW',
 };

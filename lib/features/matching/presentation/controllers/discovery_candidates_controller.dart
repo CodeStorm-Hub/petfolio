@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:petfolio/core/services/location_providers.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/discovery_candidate.dart';
+import '../../data/models/matching_discovery_row.dart';
 import '../../data/repositories/matching_repository.dart';
 import 'match_preference_controller.dart';
 import 'match_preferences_state.dart';
@@ -259,10 +261,128 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
       minAgeYears: prefs.ageMinYears,
       maxAgeYears: prefs.ageMaxYears,
     );
+    final candidates = rows.map(_discoveryRowToCandidate).toList(growable: false);
     return DiscoveryCandidatesBuffer(
-      candidates: rows,
+      candidates: candidates,
       nextOffset: offset + rows.length,
       mayHaveMore: rows.length >= _discoveryPageSize,
     );
   }
+
+  DiscoveryCandidate _discoveryRowToCandidate(MatchingDiscoveryRow r) {
+    final owner = r.owner;
+    final ownerName =
+        (owner?.displayName?.trim().isNotEmpty ?? false)
+            ? owner!.displayName!
+            : (owner?.username ?? '?');
+    final ownerInitial =
+        ownerName.isNotEmpty ? ownerName[0].toUpperCase() : '?';
+
+    final species = r.species.toLowerCase();
+    final (gradient, subject) = _paletteFor(species);
+
+    return DiscoveryCandidate(
+      petId: r.id,
+      ownerUserId: owner?.id,
+      name: r.name,
+      age: _ageString(r.dateOfBirth),
+      species: species,
+      breed: r.breed ?? _defaultBreed(species),
+      distance: _distanceLabel(r.distanceMeters),
+      ownerInitial: ownerInitial,
+      verified: false,
+      traits: _traitsFor(species),
+      bio: r.bio ?? _defaultBio(species),
+      playStyle: _defaultPlayStyle(species),
+      energy: _defaultEnergy(species),
+      bestWith: _defaultBestWith(species),
+      vaccinated: true,
+      gradientColors: gradient,
+      subjectColor: subject,
+      avatarUrl: r.avatarUrl,
+    );
+  }
+
+  static String _distanceLabel(double? meters) {
+    if (meters == null || meters.isNaN) return 'Nearby';
+    final mi = meters / 1609.34;
+    if (mi <= 0.5) return 'Within 0.5 miles';
+    if (mi <= 1) return 'Within 1 mile';
+    if (mi <= 2) return 'Within 2 miles';
+    if (mi <= 5) return 'Within 5 miles';
+    if (mi <= 10) return 'Within 10 miles';
+    return 'Over 10 miles';
+  }
+
+  static String _ageString(DateTime? dob) {
+    if (dob == null) return '';
+    final now = DateTime.now();
+    final years = now.year -
+        dob.year -
+        ((now.month < dob.month ||
+                (now.month == dob.month && now.day < dob.day))
+            ? 1
+            : 0);
+    if (years < 1) {
+      final months = (now.year - dob.year) * 12 + now.month - dob.month;
+      return '${months}mo';
+    }
+    return '${years}yr';
+  }
+
+  static (List<Color>, Color) _paletteFor(String species) {
+    switch (species) {
+      case 'cat':
+        return (
+          [const Color(0xFFDDD3C3), const Color(0xFFB8A78F), const Color(0xFF7C6750)],
+          const Color(0xFF5C4A36),
+        );
+      case 'rabbit':
+        return (
+          [const Color(0xFFE3F1E9), const Color(0xFF9CCDB3), const Color(0xFF6BAF92)],
+          const Color(0xFF4F8C72),
+        );
+      default:
+        return (
+          [const Color(0xFFF4B57A), const Color(0xFFE89669), const Color(0xFFBC6249)],
+          const Color(0xFF6B3F2A),
+        );
+    }
+  }
+
+  static String _defaultBreed(String species) => switch (species) {
+        'cat' => 'Domestic Shorthair',
+        'rabbit' => 'Mixed Breed',
+        _ => 'Mixed Breed',
+      };
+
+  static String _defaultBio(String species) => switch (species) {
+        'cat' => 'Loves sunny windowsills and the occasional treat.',
+        'rabbit' => 'Binkies on demand. Very photogenic.',
+        _ => 'Always ready for an adventure (and a nap after).',
+      };
+
+  static List<String> _traitsFor(String species) => switch (species) {
+        'cat' => ['Indoor', 'Treat-motivated', 'Calm energy'],
+        'rabbit' => ['Gentle', 'Curious', 'Kid-friendly'],
+        _ => ['Friendly', 'Playful', 'Good on lead'],
+      };
+
+  static String _defaultPlayStyle(String species) => switch (species) {
+        'cat' => 'Wand toys, gentle chase',
+        'rabbit' => 'Explore and binky',
+        _ => 'Fetch, chase, or parallel walks',
+      };
+
+  static String _defaultEnergy(String species) => switch (species) {
+        'cat' => 'Low – Medium',
+        'rabbit' => 'Medium · bursts of energy',
+        _ => 'Medium · 45–60 min daily',
+      };
+
+  static String _defaultBestWith(String species) => switch (species) {
+        'cat' => 'Other calm cats',
+        'rabbit' => 'Calm pets, gentle kids',
+        _ => 'Most dogs, supervised with small pets',
+      };
 }
