@@ -53,13 +53,14 @@ class CartItem {
   // ── JSON (for persisting to Supabase line_items column) ───────────────────
 
   Map<String, dynamic> toJson() => {
-        'product_id':      product.id,
-        'product_name':    product.name,
-        'quantity':        quantity,
-        'unit_cents':      unitCents,
+        'product_id':       product.id,
+        'product_name':     product.name,
+        'shop_id':          product.shopId,
+        'quantity':         quantity,
+        'unit_cents':       unitCents,
         'line_total_cents': lineTotalCents,
-        'is_subscribed':   isSubscribed,
-        'frequency_weeks': frequencyWeeks,
+        'is_subscribed':    isSubscribed,
+        'frequency_weeks':  frequencyWeeks,
       };
 }
 
@@ -91,4 +92,24 @@ class CartState {
 
   List<Map<String, dynamic>> toLineItemsJson() =>
       items.map((i) => i.toJson()).toList();
+
+  /// Items grouped by shopId. Preserves insertion order of first item per shop.
+  Map<String, List<CartItem>> get itemsByShop {
+    final result = <String, List<CartItem>>{};
+    for (final item in items) {
+      result.putIfAbsent(item.product.shopId, () => []).add(item);
+    }
+    return result;
+  }
+
+  /// Total in cents for a single vendor's items.
+  int totalCentsForShop(String shopId) => items
+      .where((i) => i.product.shopId == shopId)
+      .fold(0, (s, e) => s + e.lineTotalCents);
+
+  /// Line-items JSON snapshot for a single vendor's items.
+  List<Map<String, dynamic>> lineItemsJsonForShop(String shopId) => items
+      .where((i) => i.product.shopId == shopId)
+      .map((i) => i.toJson())
+      .toList();
 }

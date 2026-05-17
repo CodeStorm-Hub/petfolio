@@ -52,6 +52,10 @@ class Product {
     required this.glyphType,
     required this.gradientStart,
     required this.gradientEnd,
+    required this.shopId,
+    required this.shopName,
+    required this.imageUrls,
+    required this.inventoryCount,
   });
 
   final String          id;
@@ -64,11 +68,16 @@ class Product {
   final int    priceCents;
   final String currency;
 
-  final bool            subscribable;
+  final bool             subscribable;
   final ProductGlyphType glyphType;
 
   final Color gradientStart;
   final Color gradientEnd;
+
+  final String       shopId;
+  final String       shopName;
+  final List<String> imageUrls;
+  final int          inventoryCount;
 
   // ── Computed ───────────────────────────────────────────────────────────────
 
@@ -85,17 +94,21 @@ class Product {
   // ── JSON factory ───────────────────────────────────────────────────────────
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
-        id:            json['id'] as String,
-        name:          json['name'] as String,
-        brand:         json['brand'] as String,
-        variant:       (json['variant'] as String?) ?? '',
-        category:      ProductCategory.fromString((json['category'] as String?) ?? 'food'),
-        priceCents:    json['price_cents'] as int,
-        currency:      (json['currency'] as String?) ?? 'usd',
-        subscribable:  (json['subscribable'] as bool?) ?? false,
-        glyphType:     _parseGlyph((json['glyph'] as String?) ?? ''),
-        gradientStart: _hexColor((json['gradient_start'] as String?) ?? '#F4B57A'),
-        gradientEnd:   _hexColor((json['gradient_end']   as String?) ?? '#C46A4F'),
+        id:             json['id'] as String,
+        name:           json['name'] as String,
+        brand:          json['brand'] as String,
+        variant:        (json['variant'] as String?) ?? '',
+        category:       ProductCategory.fromString((json['category'] as String?) ?? 'food'),
+        priceCents:     json['price_cents'] as int,
+        currency:       (json['currency'] as String?) ?? 'usd',
+        subscribable:   (json['subscribable'] as bool?) ?? false,
+        glyphType:      _parseGlyph((json['glyph'] as String?) ?? ''),
+        gradientStart:  _hexColor((json['gradient_start'] as String?) ?? '#F4B57A'),
+        gradientEnd:    _hexColor((json['gradient_end']   as String?) ?? '#C46A4F'),
+        shopId:         (json['shop_id'] as String?) ?? '',
+        shopName:       (json['shops'] as Map<String, dynamic>?)?['shop_name'] as String? ?? '',
+        imageUrls:      (json['image_urls'] as List<dynamic>?)?.cast<String>() ?? [],
+        inventoryCount: (json['inventory_count'] as int?) ?? 0,
       );
 
   static ProductGlyphType _parseGlyph(String s) => switch (s) {

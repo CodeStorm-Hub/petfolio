@@ -1,12 +1,19 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/repositories/order_repository.dart';
+import 'buyer_orders_controller.dart';
 import 'cart_controller.dart';
-import 'package:flutter/material.dart';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+const _petfolioOfficialShopId = 'cccccccc-0000-0000-0000-cccccccccccc';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Checkout status
@@ -28,28 +35,38 @@ class CheckoutState {
   const CheckoutState({
     required this.status,
     this.orderId,
+    this.activeShopId,
     this.errorMessage,
   });
 
   final CheckoutStatus status;
   final String? orderId;
 
-  /// Non-null only on [CheckoutStatus.failure].  Null on user cancel.
+  /// Which vendor's checkout is currently in progress.
+  /// Used by the UI to show a loading indicator on the correct "Pay" button.
+  final String? activeShopId;
+
+  /// Non-null only on [CheckoutStatus.failure]. Null on user cancel.
   final String? errorMessage;
 
   bool get isLoading =>
       status == CheckoutStatus.loadingIntent ||
       status == CheckoutStatus.awaitingSheet;
 
+  /// True when [shopId]'s checkout flow is in progress.
+  bool isLoadingShop(String shopId) => isLoading && activeShopId == shopId;
+
   CheckoutState copyWith({
     CheckoutStatus? status,
     String? orderId,
+    String? activeShopId,
     String? errorMessage,
     bool clearError = false,
   }) =>
       CheckoutState(
         status:       status       ?? this.status,
         orderId:      orderId      ?? this.orderId,
+        activeShopId: activeShopId ?? this.activeShopId,
         errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       );
 }
@@ -65,11 +82,6 @@ final checkoutProvider =
 // Notifier
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Drives the full checkout flow:
-///   idle → loadingIntent → awaitingSheet → success | failure
-///
-/// Cancel path (user swipes down Payment Sheet):
-///   awaitingSheet → idle  (silent; order row is cancelled in Supabase)
 class CheckoutNotifier extends Notifier<CheckoutState> {
   @override
   CheckoutState build() => const CheckoutState(status: CheckoutStatus.idle);
@@ -78,10 +90,16 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
 
   // ── Public API ─────────────────────────────────────────────────────────────
 
-  /// Entry point called by the "Pay" button.
-  Future<void> startCheckout() async {
+  /// Per-vendor checkout — the main entry point called by vendor group "Pay" buttons.
+  ///
+  /// Flow: idle → loadingIntent → awaitingSheet → success | failure
+  /// Cancel: awaitingSheet → idle (pending order row is cancelled)
+  Future<void> startCheckoutForShop(String shopId) async {
+    if (isLoading) return;
+
     final cart = ref.read(cartProvider);
-    if (cart.isEmpty) return;
+    final shopItems = cart.itemsByShop[shopId] ?? [];
+    if (shopItems.isEmpty) return;
 
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) {
@@ -92,22 +110,26 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
       return;
     }
 
-    state = const CheckoutState(status: CheckoutStatus.loadingIntent);
+    state = CheckoutState(
+      status: CheckoutStatus.loadingIntent,
+      activeShopId: shopId,
+    );
 
     String? orderId;
 
     try {
-      // 1. Insert pending order row → get idempotency UUID.
+      // 1. Insert pending order row for this vendor.
       orderId = await _repo.insertPendingOrder(
         buyerId: user.id,
-        cart: cart,
+        shopId:  shopId,
+        cart:    cart,
       );
       state = state.copyWith(orderId: orderId);
 
       // 2. Call Edge Function → get Stripe client_secret.
       final clientSecret = await _repo.createPaymentIntent(orderId);
 
-      // 3. Initialize the Payment Sheet.
+      // 3. Initialize Payment Sheet.
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: clientSecret,
@@ -118,69 +140,53 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
 
       state = state.copyWith(status: CheckoutStatus.awaitingSheet);
 
-      // 4. Present the Payment Sheet — this suspends until dismissed.
+      // 4. Present Payment Sheet — suspends until dismissed.
       await Stripe.instance.presentPaymentSheet();
 
-      // 5. Success path.
-      await _repo.confirmOrder(orderId);
-      ref.read(cartProvider.notifier).clear();
+      // 5. Success — remove only this vendor's items from the cart.
+      ref.read(cartProvider.notifier).clearShopCart(shopId);
+      ref.invalidate(buyerOrdersProvider);
       state = state.copyWith(
         status: CheckoutStatus.success,
         clearError: true,
       );
     } on StripeException catch (e) {
       if (e.error.code == FailureCode.Canceled) {
-        // User dismissed — silent cancel, clean up the pending row.
         if (orderId != null) unawaited(_repo.cancelOrder(orderId));
         state = const CheckoutState(status: CheckoutStatus.idle);
       } else {
         if (orderId != null) unawaited(_repo.cancelOrder(orderId));
         state = CheckoutState(
-          status: CheckoutStatus.failure,
+          status:       CheckoutStatus.failure,
+          activeShopId: shopId,
           errorMessage: e.error.localizedMessage ?? 'Payment failed.',
         );
       }
+    } on ShopNotVerifiedException catch (e) {
+      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
+      state = CheckoutState(
+        status:       CheckoutStatus.failure,
+        activeShopId: shopId,
+        errorMessage: e.toString(),
+      );
     } catch (e) {
       if (orderId != null) unawaited(_repo.cancelOrder(orderId));
       state = CheckoutState(
-        status: CheckoutStatus.failure,
+        status:       CheckoutStatus.failure,
+        activeShopId: shopId,
         errorMessage: e.toString(),
       );
     }
   }
 
-  /// Totals the current cart and calls the `create-payment-intent` Edge
-  /// Function, logging both the outgoing request and the response.
-  ///
-  /// This method does **not** launch the Stripe Payment Sheet — it is a
-  /// diagnostic / integration-verification helper that confirms the Edge
-  /// Function is reachable and returns a valid payload.
-  Future<void> requestPaymentIntent() async {
-    final cart = ref.read(cartProvider);
-    final totalCents = cart.totalCents;
-    final itemCount = cart.itemCount;
+  /// Legacy single-vendor checkout for the PetFolio Official shop.
+  /// Kept for backward compatibility until Phase 6 screens migrate to
+  /// per-vendor "Pay" buttons.
+  Future<void> startCheckout() => startCheckoutForShop(_petfolioOfficialShopId);
 
-    debugPrint(
-      '[CheckoutNotifier] requestPaymentIntent – '
-      'amountCents=$totalCents, items=$itemCount',
-    );
-
-    try {
-      final response = await Supabase.instance.client.functions.invoke(
-        'create-payment-intent',
-        body: {
-          'amountCents': totalCents,
-          'currency': 'usd',
-          'itemCount': itemCount,
-        },
-      );
-      debugPrint(
-        '[CheckoutNotifier] Edge Function response: ${response.data}',
-      );
-    } catch (e) {
-      debugPrint('[CheckoutNotifier] requestPaymentIntent failed: $e');
-    }
-  }
+  bool get isLoading =>
+      state.status == CheckoutStatus.loadingIntent ||
+      state.status == CheckoutStatus.awaitingSheet;
 
   /// Reset back to idle (e.g. after displaying an error snackbar).
   void reset() => state = const CheckoutState(status: CheckoutStatus.idle);

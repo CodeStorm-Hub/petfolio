@@ -20,14 +20,30 @@ class ProductRepository {
 
   final SupabaseClient _client;
 
-  /// Fetch all active products.  Throws [PostgrestException] on failure.
+  /// Fetch all active products across all shops.
   Future<List<Product>> fetchProducts() async {
     final rows = await _client
         .from('products')
-        .select()
+        .select('*, shops!inner(shop_name)')
         .eq('active', true)
         .order('created_at');
 
-    return (rows as List).map((r) => Product.fromJson(r as Map<String, dynamic>)).toList();
+    return (rows as List)
+        .map((r) => Product.fromJson(r as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Fetch active products for one shop — used by storefront screen.
+  Future<List<Product>> fetchProductsByShop(String shopId) async {
+    final rows = await _client
+        .from('products')
+        .select('*, shops!inner(shop_name)')
+        .eq('shop_id', shopId)
+        .eq('active', true)
+        .order('created_at');
+
+    return (rows as List)
+        .map((r) => Product.fromJson(r as Map<String, dynamic>))
+        .toList();
   }
 }

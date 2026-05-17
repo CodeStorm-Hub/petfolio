@@ -6,8 +6,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/product.dart';
+import '../../data/models/shop.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/product_list_controller.dart';
+import '../controllers/shop_list_controller.dart';
 import '../widgets/product_card.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -195,6 +197,8 @@ class _ShopBody extends ConsumerWidget {
 
     return CustomScrollView(
       slivers: [
+        if (selectedCat == ProductCategory.all)
+          const SliverToBoxAdapter(child: _DiscoverShopsSection()),
         // Reorder strip
         if (selectedCat == ProductCategory.all && subscribable.isNotEmpty)
           SliverToBoxAdapter(
@@ -284,6 +288,135 @@ class _ShopBody extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Discover shops
+// ─────────────────────────────────────────────────────────────────────────────
+
+const _discoverShopsRowHeight = 100.0;
+
+class _DiscoverShopsSection extends ConsumerWidget {
+  const _DiscoverShopsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final shopsAsync = ref.watch(shopListProvider);
+
+    return shopsAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.fromLTRB(16, 4, 16, 10),
+        child: SizedBox(
+          height: _discoverShopsRowHeight,
+          child: Row(
+            children: [
+              SkeletonLoader(
+                  width: 88, height: _discoverShopsRowHeight, borderRadius: 16),
+              SizedBox(width: 10),
+              SkeletonLoader(
+                  width: 88, height: _discoverShopsRowHeight, borderRadius: 16),
+              SizedBox(width: 10),
+              SkeletonLoader(
+                  width: 88, height: _discoverShopsRowHeight, borderRadius: 16),
+            ],
+          ),
+        ),
+      ),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (shops) {
+        if (shops.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _SectionHeader(
+              title: 'Discover Shops',
+              subtitle: 'Independent pet sellers',
+            ),
+            SizedBox(
+              height: _discoverShopsRowHeight,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: shops.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 10),
+                itemBuilder: (_, i) => _ShopDiscoverCard(
+                  shop: shops[i],
+                  onTap: () => context.push('/shop/${shops[i].id}'),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ShopDiscoverCard extends StatelessWidget {
+  const _ShopDiscoverCard({required this.shop, required this.onTap});
+
+  final Shop shop;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 88,
+        height: _discoverShopsRowHeight,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: AppColors.surface0,
+            boxShadow: const [
+              BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: AppColors.surface2,
+                  image: shop.logoUrl != null
+                      ? DecorationImage(
+                          image: NetworkImage(shop.logoUrl!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child: shop.logoUrl == null
+                    ? const Icon(Icons.storefront_rounded,
+                        color: AppColors.ink500, size: 22)
+                    : null,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                shop.shopName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Sora',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11,
+                  height: 1.2,
+                  color: AppColors.ink950,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

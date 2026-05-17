@@ -2,48 +2,36 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/cart_item.dart';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Provider
-// ─────────────────────────────────────────────────────────────────────────────
+import '../models/marketplace_order.dart';
 
 final orderRepositoryProvider = Provider<OrderRepository>(
   (_) => OrderRepository(Supabase.instance.client),
 );
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Repository
-// ─────────────────────────────────────────────────────────────────────────────
-
-// Remote table: public.marketplace_orders
-// Columns used:
-//   id                       uuid  PK
-//   buyer_id                 uuid  (auth.uid of the purchaser)
-//   title                    text  (required, short human label for the order)
-//   amount_cents             bigint (total in smallest currency unit, e.g. 1998 = $19.98)
-//   currency                 text  default 'usd'
-//   status                   text  pending | confirmed | cancelled | ...
-//   stripe_payment_intent_id text  nullable
-//   line_items               jsonb (cart snapshot)
 
 class OrderRepository {
   const OrderRepository(this._client);
 
   final SupabaseClient _client;
 
-  /// Insert a pending order and return its id.
+  // ── Write ──────────────────────────────────────────────────────────────────
+
+  /// Insert a pending order row for a single vendor and return its id.
+  /// [shopId] is required because the orders table has a NOT NULL FK to shops.
   Future<String> insertPendingOrder({
     required String buyerId,
+    required String shopId,
     required CartState cart,
   }) async {
     final row = await _client
         .from('marketplace_orders')
         .insert({
           'buyer_id':    buyerId,
+          'shop_id':     shopId,
           'title':       'PetFolio Order',
           'status':      'pending',
-          'amount_cents': cart.totalCents,
-          'line_items':  cart.toLineItemsJson(),
+          'amount_cents': cart.totalCentsForShop(shopId),
+          'currency':    'usd',
+          'line_items':  cart.lineItemsJsonForShop(shopId),
         })
         .select('id')
         .single();
@@ -60,6 +48,10 @@ class OrderRepository {
     );
 
     if (response.status != 200) {
+      final code = (response.data as Map<String, dynamic>?)?['code'] as String?;
+      if (code == 'SHOP_NOT_VERIFIED') {
+        throw const ShopNotVerifiedException();
+      }
       throw Exception('Edge Function error ${response.status}: ${response.data}');
     }
 
@@ -69,29 +61,98 @@ class OrderRepository {
     return clientSecret;
   }
 
-  /// Mark the order as confirmed after the Payment Sheet succeeds.
-  Future<void> confirmOrder(String orderId) async {
-    await _client
-        .from('marketplace_orders')
-        .update({'status': 'confirmed'})
-        .eq('id', orderId);
-  }
+  /// No-op — the stripe-webhook Edge Function transitions pending → processing
+  /// when payment_intent.succeeded fires. Kept so the existing checkout
+  /// controller compiles until Phase 5 removes the call.
+  Future<void> confirmOrder(String orderId) async {}
 
-  /// Mark the order as cancelled (user dismissed Payment Sheet).
+  /// Cancel a pending order (user dismissed Payment Sheet).
   Future<void> cancelOrder(String orderId) async {
     await _client
         .from('marketplace_orders')
         .update({'status': 'cancelled'})
+        .eq('id', orderId)
+        .eq('status', 'pending');
+  }
+
+  // ── Vendor fulfillment ─────────────────────────────────────────────────────
+
+  /// Vendor advances an order status (e.g. processing → shipped).
+  Future<void> updateOrderStatus({
+    required String orderId,
+    required OrderStatus status,
+  }) async {
+    await _client
+        .from('marketplace_orders')
+        .update({'status': status.name})
         .eq('id', orderId);
   }
 
-  /// Fetch a confirmed order for the confirmation screen.
-  Future<Map<String, dynamic>> fetchOrder(String orderId) async {
+  /// Vendor pastes tracking info after shipping.
+  Future<void> updateOrderTracking({
+    required String orderId,
+    required String trackingNumber,
+    required String trackingUrl,
+    required String carrier,
+  }) async {
+    await _client
+        .from('marketplace_orders')
+        .update({
+          'shipping_tracking_number': trackingNumber,
+          'shipping_tracking_url':    trackingUrl,
+          'shipping_carrier':         carrier,
+          'shipped_at':               DateTime.now().toIso8601String(),
+          'status':                   OrderStatus.shipped.name,
+        })
+        .eq('id', orderId);
+  }
+
+  // ── Read ───────────────────────────────────────────────────────────────────
+
+  /// Buyer's full order history, newest first.
+  Future<List<MarketplaceOrder>> fetchBuyerOrders() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return [];
+
+    final rows = await _client
+        .from('marketplace_orders')
+        .select()
+        .eq('buyer_id', userId)
+        .order('created_at', ascending: false);
+
+    return (rows as List)
+        .map((r) => MarketplaceOrder.fromJson(r as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Vendor's incoming orders for their shop, newest first.
+  Future<List<MarketplaceOrder>> fetchVendorOrders(String shopId) async {
+    final rows = await _client
+        .from('marketplace_orders')
+        .select()
+        .eq('shop_id', shopId)
+        .order('created_at', ascending: false);
+
+    return (rows as List)
+        .map((r) => MarketplaceOrder.fromJson(r as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Fetch a single order by id.
+  Future<MarketplaceOrder> fetchOrder(String orderId) async {
     final row = await _client
         .from('marketplace_orders')
         .select()
         .eq('id', orderId)
         .single();
-    return row;
+    return MarketplaceOrder.fromJson(row);
   }
+}
+
+class ShopNotVerifiedException implements Exception {
+  const ShopNotVerifiedException();
+
+  @override
+  String toString() =>
+      'This seller has not completed their payment setup yet.';
 }

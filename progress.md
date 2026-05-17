@@ -2,6 +2,27 @@
 
 ---
 
+## 2026-05-18 — Multi-vendor marketplace (full `docs/claude-handoff.md` implementation)
+
+Stripe Connect marketplace per handoff + `docs/multi-vendor-marketplace-blueprint.md`: destination charges, per-vendor checkout, mixed cart grouped by shop, vendor onboarding via native browser.
+
+| Phase | Delivered |
+|-------|-----------|
+| **1 — DB** | `20260519000000_shops_table.sql`, `…010000_products_vendor_columns.sql` (PetFolio Official admin/shop UUIDs + product migration), `…020000_orders_vendor_columns.sql`, `…030000_marketplace_images_bucket.sql` |
+| **2 — Edge Functions** | `create-payment-intent` (Connect `transfer_data` + platform fee), `stripe-onboard-vendor`, `stripe-webhook` (`account.updated`, `payment_intent.succeeded/failed`) |
+| **3 — Models** | `shop.dart`, `marketplace_order.dart` (+ `OrderStatus`, `LineItem`); `product.dart` (`shopId`, `shopName`, `imageUrls`, `inventoryCount`); `cart_item.dart` (`itemsByShop`, `totalCentsForShop`, `clearShopCart`) |
+| **4 — Repos** | `shop_repository`, `vendor_product_repository`; updated `product_repository`, `order_repository` (`insertPendingOrder(shopId)`, buyer/vendor orders, tracking, `ShopNotVerifiedException`) |
+| **5 — Controllers** | `myShopProvider`, `shopListProvider`, `shopProductsProvider`, `vendorProductsProvider`, `vendorOrdersProvider`, `buyerOrdersProvider`; `checkoutProvider.startCheckoutForShop` + `activeShopId`; `cartProvider.clearShopCart` |
+| **6 — UI & routes** | Vendor: dashboard, setup, products CRUD, order queue/detail, Stripe onboarding screen. Buyer: shop storefront, order list/detail (`url_launcher` track). Updated cart (per-vendor pay), marketplace (**Discover Shops**), profile **Seller Dashboard** card. `router.dart`: `/shop/:id`, `/seller/*`, `/profile/orders`, `/marketplace/orders/:id`. `pubspec`: `url_launcher`. `shopByIdProvider` for storefront route. |
+
+**Polish:** Discover Shops row overflow fixed (card height + single-line labels). `flutter analyze` — no issues.
+
+**Ops (if not on hosted):** `npx supabase db push`, deploy functions, set `STRIPE_WEBHOOK_SECRET` + `PUBLIC_APP_URL`, register Stripe webhook.
+
+**Next step:** E2E — multi-shop cart checkout, vendor Stripe return → `myShopProvider` refresh, vendor mark shipped, buyer track package.
+
+---
+
 ## 2026-05-17 — PR #7 review fixes (Copilot thread)
 
 - **Schema** — Removed useless `pets_discoverable_location_idx` from `20260518120000_pets_is_discoverable.sql`; added `20260518210000_drop_pets_discoverable_location_idx.sql` (applied to `jqyjvhwlcqcsuwcqgcwf` via MCP). Trimmed `20260518200000_pr6_review_fixes.sql` to `REVOKE`/`GRANT` only on `ensure_chat_thread_for_match`.

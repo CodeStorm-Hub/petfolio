@@ -1,0 +1,33 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'shop.freezed.dart';
+part 'shop.g.dart';
+
+@freezed
+abstract class Shop with _$Shop {
+  const Shop._();
+
+  const factory Shop({
+    required String id,
+    required String ownerId,
+    required String shopName,
+    required String slug,
+    String? description,
+    String? logoUrl,
+    String? bannerUrl,
+    required bool isActive,
+    required bool isVerified,
+    String? stripeConnectAccountId,
+    required bool stripeOnboardingComplete,
+    required int platformFeePercent,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+  }) = _Shop;
+
+  factory Shop.fromJson(Map<String, dynamic> json) => _$ShopFromJson(json);
+
+  bool get needsOnboarding => stripeConnectAccountId == null;
+
+  bool get canAcceptPayments =>
+      isVerified && (stripeConnectAccountId != null || platformFeePercent == 0);
+}
