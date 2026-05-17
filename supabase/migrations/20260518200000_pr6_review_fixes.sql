@@ -1,6 +1,3 @@
-CREATE INDEX IF NOT EXISTS idx_chat_messages_thread_created_at
-  ON public.chat_messages USING btree (thread_id, created_at DESC);
-
 DROP FUNCTION IF EXISTS public.get_match_inbox(uuid);
 
 CREATE OR REPLACE FUNCTION public.get_match_inbox(p_actor_pet_id uuid)
@@ -53,4 +50,5 @@ AS $$
   WHERE m.pet_a_id = p_actor_pet_id OR m.pet_b_id = p_actor_pet_id;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.get_match_inbox(uuid) TO authenticated;
+REVOKE ALL ON FUNCTION public.ensure_chat_thread_for_match(uuid, uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.ensure_chat_thread_for_match(uuid, uuid) TO authenticated;

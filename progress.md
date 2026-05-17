@@ -2,6 +2,18 @@
 
 ---
 
+## 2026-05-17 — PR #6 review fixes (matching inbox + swipes)
+
+- **`pet_swipe.dart`** — `SwipeTableAction.dbValue` so all actions persist with correct DB strings.
+- **`matching_supabase_data_source.dart`** — `insertSwipe` uses `action.dbValue` (fixes GREET/SUPER_PAW stored as PASS); inbox rows skip missing/unparseable `matched_at` instead of `DateTime.now()` fallback.
+- **`20260518170000_get_match_inbox_rpc.sql`** — `get_match_inbox`: actor pet ownership guard (`owner_id = auth.uid()`), `LEFT JOIN LATERAL` for latest message per thread (replaces full-table `DISTINCT ON`).
+- **`20260518180000_chat_threads_race_condition.sql`** — `REVOKE ALL … FROM PUBLIC` on `ensure_chat_thread_for_match` before `GRANT` to `authenticated`.
+- **`20260518200000_pr6_review_fixes.sql`** — Applied to hosted `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.
+
+**Next step:** Push fixes to PR #6 branch; optional widget test for swipe action → DB value mapping.
+
+---
+
 ## 2026-05-17 — Edit Pet Profile (full `pets` attributes + sectioned UX)
 
 - **`pet.dart` / `pet_gender.dart`** — `gender`, `isPublic` on model + JSON; `PetGender` enum (`male` / `female` / `unknown`).

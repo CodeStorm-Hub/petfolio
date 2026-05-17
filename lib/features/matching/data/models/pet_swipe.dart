@@ -12,7 +12,14 @@ enum SwipeTableAction {
   @JsonValue('GREET')
   greet,
   @JsonValue('SUPER_PAW')
-  superPaw,
+  superPaw;
+
+  String get dbValue => switch (this) {
+        SwipeTableAction.like => 'LIKE',
+        SwipeTableAction.pass => 'PASS',
+        SwipeTableAction.greet => 'GREET',
+        SwipeTableAction.superPaw => 'SUPER_PAW',
+      };
 }
 
 @freezed

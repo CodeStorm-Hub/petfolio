@@ -75,7 +75,7 @@ class MatchingSupabaseDataSource {
       {
         'actor_id': actorPetId,
         'target_id': targetPetId,
-        'action': action == SwipeTableAction.like ? 'LIKE' : 'PASS',
+        'action': action.dbValue,
       },
       onConflict: 'actor_id,target_id',
     );
@@ -178,6 +178,9 @@ class MatchingSupabaseDataSource {
     for (final row in list) {
       final map = Map<String, dynamic>.from(row as Map);
       final matchedAtRaw = map['matched_at'] as String?;
+      if (matchedAtRaw == null) continue;
+      final matchedAt = DateTime.tryParse(matchedAtRaw);
+      if (matchedAt == null) continue;
       final lastAtRaw = map['last_message_at'] as String?;
       items.add(
         MatchInboxItem(
@@ -186,7 +189,7 @@ class MatchingSupabaseDataSource {
           otherPetName: map['other_pet_name'] as String? ?? 'Pet',
           otherPetAvatarUrl: map['other_pet_avatar_url'] as String?,
           otherPetBreed: map['other_pet_breed'] as String?,
-          matchedAt: matchedAtRaw != null ? DateTime.parse(matchedAtRaw) : DateTime.now(),
+          matchedAt: matchedAt,
           threadId: map['thread_id'] as String?,
           lastMessageAt: lastAtRaw != null ? DateTime.tryParse(lastAtRaw) : null,
           lastMessagePreview: map['last_message_preview'] as String?,
