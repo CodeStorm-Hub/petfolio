@@ -2,6 +2,61 @@
 
 ---
 
+## 2026-05-19 — Shop Profile Edit (full stack: DB → model → repo → controller → UI)
+
+### Database
+- **Migration `20260519060000_expand_shop_attributes.sql`** — `ALTER TABLE public.shops` adds 9 nullable columns: `business_email`, `business_phone`, `address_street`, `address_city`, `address_state`, `address_zip`, `return_policy`, `shipping_policy`, `social_links (jsonb, default '{}')`. Applied to `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.
+- **`shops` storage bucket** — Created public bucket (5 MB, jpeg/png/webp) with 3 RLS policies: public SELECT, authenticated INSERT and UPDATE scoped to `shops.owner_id = auth.uid()` via path prefix `{shopId}/%`.
+
+### Data layer
+- **`shop.dart`** — Added 9 new nullable Freezed fields (`businessEmail`, `businessPhone`, `addressStreet`, `addressCity`, `addressState`, `addressZip`, `returnPolicy`, `shippingPolicy`, `socialLinks`). No `@JsonKey` needed — Freezed's `FieldRename.snake` convention maps automatically. Ran `build_runner` to regenerate `shop.freezed.dart` + `shop.g.dart`.
+- **`shop_repository.dart`** — `updateShop` extended with all 9 new optional parameters (null-guarded, for sparse updates). Added `saveShopProfile(Shop shop)` — unconditionally writes all 13 profile + branding columns including `null` values, so clearing a field in the form correctly NULLs the DB column.
+
+### Controller
+- **`edit_shop_controller.dart`** *(new)* — `AsyncNotifierProvider.autoDispose<EditShopNotifier, Shop>`. `build()` uses `ref.read(myShopProvider.future)` (not `watch`) to avoid circular rebuild on invalidation. `saveShopDetails({required Shop, Uint8List? newLogo, Uint8List? newBanner})`: uploads images to `shops` bucket at `{shopId}/logo` and `{shopId}/banner` with `upsert: true`, gets public URL, `copyWith`-merges URLs onto the shop, calls `saveShopProfile`. `ref.invalidate(myShopProvider)` is placed **outside** the `AsyncValue.guard` closure and only fires on success.
+
+### UI
+- **`edit_shop_screen.dart`** *(new)* — `ConsumerStatefulWidget` with `SingleTickerProviderStateMixin`. `DefaultTabController` with 3 tabs:
+  - **Branding** — 140px `_BannerPicker` (overlay chip), 80×80 `_LogoPicker` (edit badge), Shop Name, Description fields.
+  - **Contact Info** — Business Email (email keyboard), Phone (phone keyboard), Street, City, State + ZIP (side-by-side).
+  - **Policies** — Return Policy and Shipping Policy (`maxLines: 6`).
+  - `_populate(shop)` guarded by `_initialised` flag so controllers fill once on first load and are not reset by subsequent `myShopProvider` rebuilds. `PrimaryPillButton` at `FloatingActionButtonLocation.centerFloat` with `isLoading` bound to controller loading state. On success: bytes cleared, URL state updated, success `SnackBar` shown. On error: `SnackBar` with `AppColors.danger` background.
+- **`router.dart`** — Added `GoRoute(path: '/seller/edit-shop')` → `EditShopScreen` under `_rootNavigatorKey`.
+- **`seller_dashboard_screen.dart`** — Header edit `IconButton` and "Edit shop" quick action row both updated from `/seller/setup` → `/seller/edit-shop`.
+
+### Bug fixes (save not persisting)
+Three root causes identified and resolved:
+1. **Missing bucket** — `_uploadShopAsset` threw `StorageException` inside `AsyncValue.guard`; guard caught it, error state was overwritten with `prev` (old data), screen read `hasError = false` → showed success snackbar while DB write never ran. Fixed by creating the `shops` bucket.
+2. **Circular `ref.watch`** — `editShopControllerProvider.build()` watched `myShopProvider.future`; `ref.invalidate(myShopProvider)` inside the guard triggered `build()` to re-run mid-save, overwriting the saved state with `AsyncLoading` before `_save()` could read the result. Fixed by `ref.watch` → `ref.read` in `build()` and moving invalidation outside the guard.
+3. **Null-guard skipping DB writes** — `updateShop` used `if (field != null)` for every profile column; empty-string → null conversions from the form meant cleared fields were omitted from the `UPDATE` payload entirely. Fixed by `saveShopProfile` which always sends all columns.
+
+`flutter analyze` — **No issues found.**
+
+**Next step:** ~~Surface `business_email`, `business_phone`, and address on the public shop storefront screen; optionally wire `social_links` to a social media links editor UI.~~ ✅ Done — see entry below.
+
+---
+
+## 2026-05-19 — Shop Storefront: Contact Info + Social Links
+
+### Storefront (`shop_storefront_screen.dart`)
+- Added `url_launcher` import.
+- New `_ContactInfoSection` widget inserted between the shop header row and the PRODUCTS label. Renders only when at least one contact field or social link is non-null. Contains:
+  - `_ContactRow` for `businessEmail` (opens `mailto:` via `launchUrl`).
+  - `_ContactRow` for `businessPhone` (opens `tel:` via `launchUrl`).
+  - `_ContactRow` for address — builds multi-line string from street / city+state / zip, non-tappable.
+  - `_SocialLinksRow` → `_SocialBtn` circle icons for keys `website`, `instagram`, `facebook`, `tiktok`, `youtube` from `shop.socialLinks`; each opens the URL in external browser via `LaunchMode.externalApplication`. Icons: `language`, `camera_alt_outlined`, `facebook`, `music_note`, `play_circle_outline`.
+
+### Edit screen (`edit_shop_screen.dart`)
+- Added 5 `TextEditingController`s: `_websiteCtrl`, `_instagramCtrl`, `_facebookCtrl`, `_tiktokCtrl`, `_youtubeCtrl`.
+- All 5 added to the dispose loop.
+- `_populate(shop)` now reads `shop.socialLinks` map to pre-fill all 5 controllers.
+- `_save(shop)` builds a `Map<String, String> socialLinks` from non-empty controllers; passes `socialLinks.isEmpty ? null : socialLinks` to `copyWith`.
+- `_ContactTab` accepts 5 new controller params; new **Social Links** section appended at the bottom with URL-keyboard text fields for website, Instagram, Facebook, TikTok, YouTube.
+
+`flutter analyze` — **No issues found.**
+
+---
+
 ## 2026-05-19 — COD checkout + Admin Panel
 
 ### COD buyer checkout

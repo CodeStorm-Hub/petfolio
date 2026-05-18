@@ -42,6 +42,13 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen>
   final _returnCtrl   = TextEditingController();
   final _shippingCtrl = TextEditingController();
 
+  // Social links
+  final _websiteCtrl   = TextEditingController();
+  final _instagramCtrl = TextEditingController();
+  final _facebookCtrl  = TextEditingController();
+  final _tiktokCtrl    = TextEditingController();
+  final _youtubeCtrl   = TextEditingController();
+
   bool _initialised = false;
 
   @override
@@ -57,6 +64,7 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen>
       _shopNameCtrl, _descriptionCtrl,
       _emailCtrl, _phoneCtrl, _streetCtrl, _cityCtrl, _stateCtrl, _zipCtrl,
       _returnCtrl, _shippingCtrl,
+      _websiteCtrl, _instagramCtrl, _facebookCtrl, _tiktokCtrl, _youtubeCtrl,
     ]) {
       c.dispose();
     }
@@ -78,6 +86,12 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen>
     _zipCtrl.text         = shop.addressZip     ?? '';
     _returnCtrl.text      = shop.returnPolicy   ?? '';
     _shippingCtrl.text    = shop.shippingPolicy ?? '';
+    final links = shop.socialLinks ?? {};
+    _websiteCtrl.text   = (links['website']   as String?) ?? '';
+    _instagramCtrl.text = (links['instagram'] as String?) ?? '';
+    _facebookCtrl.text  = (links['facebook']  as String?) ?? '';
+    _tiktokCtrl.text    = (links['tiktok']    as String?) ?? '';
+    _youtubeCtrl.text   = (links['youtube']   as String?) ?? '';
   }
 
   Future<void> _pickImage({required bool isLogo}) async {
@@ -97,19 +111,28 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen>
   }
 
   Future<void> _save(Shop current) async {
+    String? v(String raw) => raw.trim().isEmpty ? null : raw.trim();
+
+    final socialLinks = <String, String>{
+      if (_websiteCtrl.text.trim().isNotEmpty)   'website':   _websiteCtrl.text.trim(),
+      if (_instagramCtrl.text.trim().isNotEmpty) 'instagram': _instagramCtrl.text.trim(),
+      if (_facebookCtrl.text.trim().isNotEmpty)  'facebook':  _facebookCtrl.text.trim(),
+      if (_tiktokCtrl.text.trim().isNotEmpty)    'tiktok':    _tiktokCtrl.text.trim(),
+      if (_youtubeCtrl.text.trim().isNotEmpty)   'youtube':   _youtubeCtrl.text.trim(),
+    };
+
     final updated = current.copyWith(
       shopName:       _shopNameCtrl.text.trim(),
-      description:    _descriptionCtrl.text.trim().isEmpty
-                        ? null
-                        : _descriptionCtrl.text.trim(),
-      businessEmail:  _emailCtrl.text.trim().isEmpty   ? null : _emailCtrl.text.trim(),
-      businessPhone:  _phoneCtrl.text.trim().isEmpty   ? null : _phoneCtrl.text.trim(),
-      addressStreet:  _streetCtrl.text.trim().isEmpty  ? null : _streetCtrl.text.trim(),
-      addressCity:    _cityCtrl.text.trim().isEmpty    ? null : _cityCtrl.text.trim(),
-      addressState:   _stateCtrl.text.trim().isEmpty   ? null : _stateCtrl.text.trim(),
-      addressZip:     _zipCtrl.text.trim().isEmpty     ? null : _zipCtrl.text.trim(),
-      returnPolicy:   _returnCtrl.text.trim().isEmpty  ? null : _returnCtrl.text.trim(),
-      shippingPolicy: _shippingCtrl.text.trim().isEmpty ? null : _shippingCtrl.text.trim(),
+      description:    v(_descriptionCtrl.text),
+      businessEmail:  v(_emailCtrl.text),
+      businessPhone:  v(_phoneCtrl.text),
+      addressStreet:  v(_streetCtrl.text),
+      addressCity:    v(_cityCtrl.text),
+      addressState:   v(_stateCtrl.text),
+      addressZip:     v(_zipCtrl.text),
+      returnPolicy:   v(_returnCtrl.text),
+      shippingPolicy: v(_shippingCtrl.text),
+      socialLinks:    socialLinks.isEmpty ? null : socialLinks,
     );
 
     await ref.read(editShopControllerProvider.notifier).saveShopDetails(
@@ -201,12 +224,17 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen>
                 onPickBanner: () => _pickImage(isLogo: false),
               ),
               _ContactTab(
-                emailCtrl:  _emailCtrl,
-                phoneCtrl:  _phoneCtrl,
-                streetCtrl: _streetCtrl,
-                cityCtrl:   _cityCtrl,
-                stateCtrl:  _stateCtrl,
-                zipCtrl:    _zipCtrl,
+                emailCtrl:    _emailCtrl,
+                phoneCtrl:    _phoneCtrl,
+                streetCtrl:   _streetCtrl,
+                cityCtrl:     _cityCtrl,
+                stateCtrl:    _stateCtrl,
+                zipCtrl:      _zipCtrl,
+                websiteCtrl:   _websiteCtrl,
+                instagramCtrl: _instagramCtrl,
+                facebookCtrl:  _facebookCtrl,
+                tiktokCtrl:    _tiktokCtrl,
+                youtubeCtrl:   _youtubeCtrl,
               ),
               _PoliciesTab(
                 returnCtrl:   _returnCtrl,
@@ -445,6 +473,11 @@ class _ContactTab extends StatelessWidget {
     required this.cityCtrl,
     required this.stateCtrl,
     required this.zipCtrl,
+    required this.websiteCtrl,
+    required this.instagramCtrl,
+    required this.facebookCtrl,
+    required this.tiktokCtrl,
+    required this.youtubeCtrl,
   });
 
   final TextEditingController emailCtrl;
@@ -453,6 +486,11 @@ class _ContactTab extends StatelessWidget {
   final TextEditingController cityCtrl;
   final TextEditingController stateCtrl;
   final TextEditingController zipCtrl;
+  final TextEditingController websiteCtrl;
+  final TextEditingController instagramCtrl;
+  final TextEditingController facebookCtrl;
+  final TextEditingController tiktokCtrl;
+  final TextEditingController youtubeCtrl;
 
   @override
   Widget build(BuildContext context) {
@@ -510,6 +548,43 @@ class _ContactTab extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 24),
+          _SectionLabel('Social Links'),
+          const SizedBox(height: 8),
+          _FormField(
+            controller: websiteCtrl,
+            label: 'Website',
+            hint:  'https://yourshop.com',
+            keyboardType: TextInputType.url,
+          ),
+          const SizedBox(height: 16),
+          _FormField(
+            controller: instagramCtrl,
+            label: 'Instagram',
+            hint:  'https://instagram.com/yourshop',
+            keyboardType: TextInputType.url,
+          ),
+          const SizedBox(height: 16),
+          _FormField(
+            controller: facebookCtrl,
+            label: 'Facebook',
+            hint:  'https://facebook.com/yourshop',
+            keyboardType: TextInputType.url,
+          ),
+          const SizedBox(height: 16),
+          _FormField(
+            controller: tiktokCtrl,
+            label: 'TikTok',
+            hint:  'https://tiktok.com/@yourshop',
+            keyboardType: TextInputType.url,
+          ),
+          const SizedBox(height: 16),
+          _FormField(
+            controller: youtubeCtrl,
+            label: 'YouTube',
+            hint:  'https://youtube.com/@yourshop',
+            keyboardType: TextInputType.url,
           ),
         ],
       ),

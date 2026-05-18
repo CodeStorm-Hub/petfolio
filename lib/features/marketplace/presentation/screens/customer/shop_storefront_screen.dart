@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
@@ -204,6 +205,8 @@ class ShopStorefrontScreen extends ConsumerWidget {
 
           const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
+          SliverToBoxAdapter(child: _ContactInfoSection(shop: shop)),
+
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(16, 6, 16, 6),
@@ -259,6 +262,149 @@ class ShopStorefrontScreen extends ConsumerWidget {
                   ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ContactInfoSection extends StatelessWidget {
+  const _ContactInfoSection({required this.shop});
+  final Shop shop;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasEmail   = shop.businessEmail != null;
+    final hasPhone   = shop.businessPhone != null;
+    final hasAddress = shop.addressStreet != null || shop.addressCity != null;
+    final hasSocial  = shop.socialLinks != null && shop.socialLinks!.isNotEmpty;
+
+    if (!hasEmail && !hasPhone && !hasAddress && !hasSocial) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Divider(color: AppColors.line100, height: 20),
+          if (hasEmail)
+            _ContactRow(
+              icon:  Icons.email_outlined,
+              label: shop.businessEmail!,
+              onTap: () => launchUrl(Uri.parse('mailto:${shop.businessEmail}')),
+            ),
+          if (hasPhone)
+            _ContactRow(
+              icon:  Icons.phone_outlined,
+              label: shop.businessPhone!,
+              onTap: () => launchUrl(Uri.parse('tel:${shop.businessPhone}')),
+            ),
+          if (hasAddress)
+            _ContactRow(
+              icon:  Icons.location_on_outlined,
+              label: [
+                shop.addressStreet,
+                [shop.addressCity, shop.addressState]
+                    .whereType<String>()
+                    .where((s) => s.isNotEmpty)
+                    .join(', '),
+                shop.addressZip,
+              ].whereType<String>().where((s) => s.isNotEmpty).join('\n'),
+              onTap: null,
+            ),
+          if (hasSocial) ...[
+            const SizedBox(height: 8),
+            _SocialLinksRow(links: shop.socialLinks!),
+          ],
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+}
+
+class _ContactRow extends StatelessWidget {
+  const _ContactRow({
+    required this.icon,
+    required this.label,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final row = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 15, color: AppColors.ink500),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              style: tt.bodySmall!.copyWith(color: AppColors.ink700),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (onTap == null) return row;
+    return GestureDetector(onTap: onTap, child: row);
+  }
+}
+
+class _SocialLinksRow extends StatelessWidget {
+  const _SocialLinksRow({required this.links});
+  final Map<String, dynamic> links;
+
+  static const _meta = <String, IconData>{
+    'website':   Icons.language,
+    'instagram': Icons.camera_alt_outlined,
+    'facebook':  Icons.facebook,
+    'tiktok':    Icons.music_note,
+    'youtube':   Icons.play_circle_outline,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final buttons = _meta.entries
+        .where((e) =>
+            links[e.key] is String &&
+            (links[e.key] as String).trim().isNotEmpty)
+        .map((e) => _SocialBtn(icon: e.value, url: links[e.key] as String))
+        .toList();
+    if (buttons.isEmpty) return const SizedBox.shrink();
+    return Row(children: buttons);
+  }
+}
+
+class _SocialBtn extends StatelessWidget {
+  const _SocialBtn({required this.icon, required this.url});
+  final IconData icon;
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+      ),
+      child: Container(
+        width: 36,
+        height: 36,
+        margin: const EdgeInsets.only(right: 8),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppColors.blue500.withAlpha(20),
+        ),
+        child: Icon(icon, size: 18, color: AppColors.blue500),
       ),
     );
   }

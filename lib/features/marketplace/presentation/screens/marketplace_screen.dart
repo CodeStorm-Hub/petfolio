@@ -390,23 +390,30 @@ class _ShopDiscoverCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: 44,
+                  height: 44,
                   color: AppColors.surface2,
-                  image: shop.logoUrl != null
-                      ? DecorationImage(
-                          image: NetworkImage(shop.logoUrl!),
+                  child: shop.logoUrl != null
+                      ? Image.network(
+                          shop.logoUrl!,
                           fit: BoxFit.cover,
+                          width: 44,
+                          height: 44,
+                          errorBuilder: (context, error, stack) => const Icon(
+                            Icons.storefront_rounded,
+                            color: AppColors.ink500,
+                            size: 22,
+                          ),
                         )
-                      : null,
+                      : const Icon(
+                          Icons.storefront_rounded,
+                          color: AppColors.ink500,
+                          size: 22,
+                        ),
                 ),
-                child: shop.logoUrl == null
-                    ? const Icon(Icons.storefront_rounded,
-                        color: AppColors.ink500, size: 22)
-                    : null,
               ),
               const SizedBox(height: 6),
               Text(
