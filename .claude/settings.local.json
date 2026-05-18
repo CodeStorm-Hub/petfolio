@@ -41,7 +41,8 @@
       "Bash(flutter analyze *)",
       "Skill(feature-dev:feature-dev)",
       "Skill(feature-dev:feature-dev:*)",
-      "mcp__5d4f3e29-8e00-4c0a-a2e0-3f9d9a2735f2__apply_migration"
+      "mcp__5d4f3e29-8e00-4c0a-a2e0-3f9d9a2735f2__apply_migration",
+      "mcp__5d4f3e29-8e00-4c0a-a2e0-3f9d9a2735f2__list_migrations"
     ]
   }
 }

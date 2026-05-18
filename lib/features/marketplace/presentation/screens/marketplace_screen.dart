@@ -7,6 +7,7 @@ import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/product.dart';
 import '../../data/models/shop.dart';
+import '../../../admin/presentation/controllers/admin_auth_controller.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/product_list_controller.dart';
 import '../controllers/shop_list_controller.dart';
@@ -30,6 +31,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
   Widget build(BuildContext context) {
     final productsAsync = ref.watch(productListProvider);
     final cart = ref.watch(cartProvider);
+    final isAdmin = ref.watch(isAdminProvider);
 
     return Scaffold(
       backgroundColor: AppColors.surface1,
@@ -41,6 +43,13 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
               eyebrow: 'Market · Shop',
               onOpenSwitcher: () => PetSwitcherSheet.show(context),
               actions: [
+                if (isAdmin)
+                  AppHeaderAction(
+                    iconKey: const ValueKey<String>('market_action_admin'),
+                    icon: Icons.admin_panel_settings_outlined,
+                    tooltip: 'Admin',
+                    onTap: () => context.push('/admin'),
+                  ),
                 AppHeaderAction(
                   iconKey: const ValueKey<String>('market_action_cart'),
                   icon: Icons.shopping_bag_outlined,
