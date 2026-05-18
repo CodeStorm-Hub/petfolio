@@ -49,6 +49,22 @@ class AdminRepository {
   Future<String> getSignedDocUrl(String path) =>
       _client.storage.from('kyc-documents').createSignedUrl(path, 60);
 
+  Future<String> getSecureDocumentUrl(String storagePath) {
+    final path = _resolveStoragePath(storagePath);
+    return _client.storage.from('kyc-documents').createSignedUrl(path, 60);
+  }
+
+  static String _resolveStoragePath(String value) {
+    if (!value.startsWith('http')) return value;
+    final uri = Uri.parse(value);
+    final segments = uri.pathSegments;
+    final bucketIndex = segments.indexOf('kyc-documents');
+    if (bucketIndex != -1 && bucketIndex < segments.length - 1) {
+      return segments.sublist(bucketIndex + 1).join('/');
+    }
+    return value;
+  }
+
   // ── COD reconciliation ────────────────────────────────────────────────────
 
   Future<List<MarketplaceOrder>> fetchDeliveredCodOrders() async {

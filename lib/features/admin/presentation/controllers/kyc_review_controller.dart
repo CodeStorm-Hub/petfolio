@@ -32,4 +32,7 @@ class KycReviewNotifier extends AsyncNotifier<List<Shop>> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(_repo.fetchSubmittedKycShops);
   }
+
+  Future<String> getDocumentUrl(String storagePath) =>
+      _repo.getSecureDocumentUrl(storagePath);
 }
