@@ -296,7 +296,7 @@ as int,
 /// @nodoc
 mixin _$MarketplaceOrder {
 
- String get id; String get buyerId; String get shopId; String get title; int get amountCents; String get currency; OrderStatus get status; String? get stripePaymentIntentId; List<LineItem> get lineItems; String? get shippingTrackingNumber; String? get shippingTrackingUrl; String? get shippingCarrier; DateTime? get shippedAt; DateTime get createdAt; DateTime? get updatedAt;
+ String get id; String get buyerId; String get shopId; String get title; int get amountCents; String get currency; OrderStatus get status; PaymentMethod get paymentMethod; PaymentStatus get paymentStatus; String? get stripePaymentIntentId; List<LineItem> get lineItems; String? get shippingTrackingNumber; String? get shippingTrackingUrl; String? get shippingCarrier; DateTime? get shippedAt; DateTime get createdAt; DateTime? get updatedAt;
 /// Create a copy of MarketplaceOrder
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -309,16 +309,16 @@ $MarketplaceOrderCopyWith<MarketplaceOrder> get copyWith => _$MarketplaceOrderCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MarketplaceOrder&&(identical(other.id, id) || other.id == id)&&(identical(other.buyerId, buyerId) || other.buyerId == buyerId)&&(identical(other.shopId, shopId) || other.shopId == shopId)&&(identical(other.title, title) || other.title == title)&&(identical(other.amountCents, amountCents) || other.amountCents == amountCents)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.status, status) || other.status == status)&&(identical(other.stripePaymentIntentId, stripePaymentIntentId) || other.stripePaymentIntentId == stripePaymentIntentId)&&const DeepCollectionEquality().equals(other.lineItems, lineItems)&&(identical(other.shippingTrackingNumber, shippingTrackingNumber) || other.shippingTrackingNumber == shippingTrackingNumber)&&(identical(other.shippingTrackingUrl, shippingTrackingUrl) || other.shippingTrackingUrl == shippingTrackingUrl)&&(identical(other.shippingCarrier, shippingCarrier) || other.shippingCarrier == shippingCarrier)&&(identical(other.shippedAt, shippedAt) || other.shippedAt == shippedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MarketplaceOrder&&(identical(other.id, id) || other.id == id)&&(identical(other.buyerId, buyerId) || other.buyerId == buyerId)&&(identical(other.shopId, shopId) || other.shopId == shopId)&&(identical(other.title, title) || other.title == title)&&(identical(other.amountCents, amountCents) || other.amountCents == amountCents)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.status, status) || other.status == status)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.paymentStatus, paymentStatus) || other.paymentStatus == paymentStatus)&&(identical(other.stripePaymentIntentId, stripePaymentIntentId) || other.stripePaymentIntentId == stripePaymentIntentId)&&const DeepCollectionEquality().equals(other.lineItems, lineItems)&&(identical(other.shippingTrackingNumber, shippingTrackingNumber) || other.shippingTrackingNumber == shippingTrackingNumber)&&(identical(other.shippingTrackingUrl, shippingTrackingUrl) || other.shippingTrackingUrl == shippingTrackingUrl)&&(identical(other.shippingCarrier, shippingCarrier) || other.shippingCarrier == shippingCarrier)&&(identical(other.shippedAt, shippedAt) || other.shippedAt == shippedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,buyerId,shopId,title,amountCents,currency,status,stripePaymentIntentId,const DeepCollectionEquality().hash(lineItems),shippingTrackingNumber,shippingTrackingUrl,shippingCarrier,shippedAt,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,buyerId,shopId,title,amountCents,currency,status,paymentMethod,paymentStatus,stripePaymentIntentId,const DeepCollectionEquality().hash(lineItems),shippingTrackingNumber,shippingTrackingUrl,shippingCarrier,shippedAt,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'MarketplaceOrder(id: $id, buyerId: $buyerId, shopId: $shopId, title: $title, amountCents: $amountCents, currency: $currency, status: $status, stripePaymentIntentId: $stripePaymentIntentId, lineItems: $lineItems, shippingTrackingNumber: $shippingTrackingNumber, shippingTrackingUrl: $shippingTrackingUrl, shippingCarrier: $shippingCarrier, shippedAt: $shippedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'MarketplaceOrder(id: $id, buyerId: $buyerId, shopId: $shopId, title: $title, amountCents: $amountCents, currency: $currency, status: $status, paymentMethod: $paymentMethod, paymentStatus: $paymentStatus, stripePaymentIntentId: $stripePaymentIntentId, lineItems: $lineItems, shippingTrackingNumber: $shippingTrackingNumber, shippingTrackingUrl: $shippingTrackingUrl, shippingCarrier: $shippingCarrier, shippedAt: $shippedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -329,7 +329,7 @@ abstract mixin class $MarketplaceOrderCopyWith<$Res>  {
   factory $MarketplaceOrderCopyWith(MarketplaceOrder value, $Res Function(MarketplaceOrder) _then) = _$MarketplaceOrderCopyWithImpl;
 @useResult
 $Res call({
- String id, String buyerId, String shopId, String title, int amountCents, String currency, OrderStatus status, String? stripePaymentIntentId, List<LineItem> lineItems, String? shippingTrackingNumber, String? shippingTrackingUrl, String? shippingCarrier, DateTime? shippedAt, DateTime createdAt, DateTime? updatedAt
+ String id, String buyerId, String shopId, String title, int amountCents, String currency, OrderStatus status, PaymentMethod paymentMethod, PaymentStatus paymentStatus, String? stripePaymentIntentId, List<LineItem> lineItems, String? shippingTrackingNumber, String? shippingTrackingUrl, String? shippingCarrier, DateTime? shippedAt, DateTime createdAt, DateTime? updatedAt
 });
 
 
@@ -346,7 +346,7 @@ class _$MarketplaceOrderCopyWithImpl<$Res>
 
 /// Create a copy of MarketplaceOrder
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? buyerId = null,Object? shopId = null,Object? title = null,Object? amountCents = null,Object? currency = null,Object? status = null,Object? stripePaymentIntentId = freezed,Object? lineItems = null,Object? shippingTrackingNumber = freezed,Object? shippingTrackingUrl = freezed,Object? shippingCarrier = freezed,Object? shippedAt = freezed,Object? createdAt = null,Object? updatedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? buyerId = null,Object? shopId = null,Object? title = null,Object? amountCents = null,Object? currency = null,Object? status = null,Object? paymentMethod = null,Object? paymentStatus = null,Object? stripePaymentIntentId = freezed,Object? lineItems = null,Object? shippingTrackingNumber = freezed,Object? shippingTrackingUrl = freezed,Object? shippingCarrier = freezed,Object? shippedAt = freezed,Object? createdAt = null,Object? updatedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,buyerId: null == buyerId ? _self.buyerId : buyerId // ignore: cast_nullable_to_non_nullable
@@ -355,7 +355,9 @@ as String,title: null == title ? _self.title : title // ignore: cast_nullable_to
 as String,amountCents: null == amountCents ? _self.amountCents : amountCents // ignore: cast_nullable_to_non_nullable
 as int,currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as OrderStatus,stripePaymentIntentId: freezed == stripePaymentIntentId ? _self.stripePaymentIntentId : stripePaymentIntentId // ignore: cast_nullable_to_non_nullable
+as OrderStatus,paymentMethod: null == paymentMethod ? _self.paymentMethod : paymentMethod // ignore: cast_nullable_to_non_nullable
+as PaymentMethod,paymentStatus: null == paymentStatus ? _self.paymentStatus : paymentStatus // ignore: cast_nullable_to_non_nullable
+as PaymentStatus,stripePaymentIntentId: freezed == stripePaymentIntentId ? _self.stripePaymentIntentId : stripePaymentIntentId // ignore: cast_nullable_to_non_nullable
 as String?,lineItems: null == lineItems ? _self.lineItems : lineItems // ignore: cast_nullable_to_non_nullable
 as List<LineItem>,shippingTrackingNumber: freezed == shippingTrackingNumber ? _self.shippingTrackingNumber : shippingTrackingNumber // ignore: cast_nullable_to_non_nullable
 as String?,shippingTrackingUrl: freezed == shippingTrackingUrl ? _self.shippingTrackingUrl : shippingTrackingUrl // ignore: cast_nullable_to_non_nullable
@@ -448,10 +450,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String buyerId,  String shopId,  String title,  int amountCents,  String currency,  OrderStatus status,  String? stripePaymentIntentId,  List<LineItem> lineItems,  String? shippingTrackingNumber,  String? shippingTrackingUrl,  String? shippingCarrier,  DateTime? shippedAt,  DateTime createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String buyerId,  String shopId,  String title,  int amountCents,  String currency,  OrderStatus status,  PaymentMethod paymentMethod,  PaymentStatus paymentStatus,  String? stripePaymentIntentId,  List<LineItem> lineItems,  String? shippingTrackingNumber,  String? shippingTrackingUrl,  String? shippingCarrier,  DateTime? shippedAt,  DateTime createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MarketplaceOrder() when $default != null:
-return $default(_that.id,_that.buyerId,_that.shopId,_that.title,_that.amountCents,_that.currency,_that.status,_that.stripePaymentIntentId,_that.lineItems,_that.shippingTrackingNumber,_that.shippingTrackingUrl,_that.shippingCarrier,_that.shippedAt,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.buyerId,_that.shopId,_that.title,_that.amountCents,_that.currency,_that.status,_that.paymentMethod,_that.paymentStatus,_that.stripePaymentIntentId,_that.lineItems,_that.shippingTrackingNumber,_that.shippingTrackingUrl,_that.shippingCarrier,_that.shippedAt,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -469,10 +471,10 @@ return $default(_that.id,_that.buyerId,_that.shopId,_that.title,_that.amountCent
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String buyerId,  String shopId,  String title,  int amountCents,  String currency,  OrderStatus status,  String? stripePaymentIntentId,  List<LineItem> lineItems,  String? shippingTrackingNumber,  String? shippingTrackingUrl,  String? shippingCarrier,  DateTime? shippedAt,  DateTime createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String buyerId,  String shopId,  String title,  int amountCents,  String currency,  OrderStatus status,  PaymentMethod paymentMethod,  PaymentStatus paymentStatus,  String? stripePaymentIntentId,  List<LineItem> lineItems,  String? shippingTrackingNumber,  String? shippingTrackingUrl,  String? shippingCarrier,  DateTime? shippedAt,  DateTime createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _MarketplaceOrder():
-return $default(_that.id,_that.buyerId,_that.shopId,_that.title,_that.amountCents,_that.currency,_that.status,_that.stripePaymentIntentId,_that.lineItems,_that.shippingTrackingNumber,_that.shippingTrackingUrl,_that.shippingCarrier,_that.shippedAt,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.buyerId,_that.shopId,_that.title,_that.amountCents,_that.currency,_that.status,_that.paymentMethod,_that.paymentStatus,_that.stripePaymentIntentId,_that.lineItems,_that.shippingTrackingNumber,_that.shippingTrackingUrl,_that.shippingCarrier,_that.shippedAt,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -489,10 +491,10 @@ return $default(_that.id,_that.buyerId,_that.shopId,_that.title,_that.amountCent
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String buyerId,  String shopId,  String title,  int amountCents,  String currency,  OrderStatus status,  String? stripePaymentIntentId,  List<LineItem> lineItems,  String? shippingTrackingNumber,  String? shippingTrackingUrl,  String? shippingCarrier,  DateTime? shippedAt,  DateTime createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String buyerId,  String shopId,  String title,  int amountCents,  String currency,  OrderStatus status,  PaymentMethod paymentMethod,  PaymentStatus paymentStatus,  String? stripePaymentIntentId,  List<LineItem> lineItems,  String? shippingTrackingNumber,  String? shippingTrackingUrl,  String? shippingCarrier,  DateTime? shippedAt,  DateTime createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _MarketplaceOrder() when $default != null:
-return $default(_that.id,_that.buyerId,_that.shopId,_that.title,_that.amountCents,_that.currency,_that.status,_that.stripePaymentIntentId,_that.lineItems,_that.shippingTrackingNumber,_that.shippingTrackingUrl,_that.shippingCarrier,_that.shippedAt,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.buyerId,_that.shopId,_that.title,_that.amountCents,_that.currency,_that.status,_that.paymentMethod,_that.paymentStatus,_that.stripePaymentIntentId,_that.lineItems,_that.shippingTrackingNumber,_that.shippingTrackingUrl,_that.shippingCarrier,_that.shippedAt,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -504,7 +506,7 @@ return $default(_that.id,_that.buyerId,_that.shopId,_that.title,_that.amountCent
 @JsonSerializable()
 
 class _MarketplaceOrder extends MarketplaceOrder {
-  const _MarketplaceOrder({required this.id, required this.buyerId, required this.shopId, required this.title, required this.amountCents, required this.currency, required this.status, this.stripePaymentIntentId, required final  List<LineItem> lineItems, this.shippingTrackingNumber, this.shippingTrackingUrl, this.shippingCarrier, this.shippedAt, required this.createdAt, this.updatedAt}): _lineItems = lineItems,super._();
+  const _MarketplaceOrder({required this.id, required this.buyerId, required this.shopId, required this.title, required this.amountCents, required this.currency, required this.status, this.paymentMethod = PaymentMethod.stripe, this.paymentStatus = PaymentStatus.pending, this.stripePaymentIntentId, required final  List<LineItem> lineItems, this.shippingTrackingNumber, this.shippingTrackingUrl, this.shippingCarrier, this.shippedAt, required this.createdAt, this.updatedAt}): _lineItems = lineItems,super._();
   factory _MarketplaceOrder.fromJson(Map<String, dynamic> json) => _$MarketplaceOrderFromJson(json);
 
 @override final  String id;
@@ -514,6 +516,8 @@ class _MarketplaceOrder extends MarketplaceOrder {
 @override final  int amountCents;
 @override final  String currency;
 @override final  OrderStatus status;
+@override@JsonKey() final  PaymentMethod paymentMethod;
+@override@JsonKey() final  PaymentStatus paymentStatus;
 @override final  String? stripePaymentIntentId;
  final  List<LineItem> _lineItems;
 @override List<LineItem> get lineItems {
@@ -542,16 +546,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MarketplaceOrder&&(identical(other.id, id) || other.id == id)&&(identical(other.buyerId, buyerId) || other.buyerId == buyerId)&&(identical(other.shopId, shopId) || other.shopId == shopId)&&(identical(other.title, title) || other.title == title)&&(identical(other.amountCents, amountCents) || other.amountCents == amountCents)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.status, status) || other.status == status)&&(identical(other.stripePaymentIntentId, stripePaymentIntentId) || other.stripePaymentIntentId == stripePaymentIntentId)&&const DeepCollectionEquality().equals(other._lineItems, _lineItems)&&(identical(other.shippingTrackingNumber, shippingTrackingNumber) || other.shippingTrackingNumber == shippingTrackingNumber)&&(identical(other.shippingTrackingUrl, shippingTrackingUrl) || other.shippingTrackingUrl == shippingTrackingUrl)&&(identical(other.shippingCarrier, shippingCarrier) || other.shippingCarrier == shippingCarrier)&&(identical(other.shippedAt, shippedAt) || other.shippedAt == shippedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MarketplaceOrder&&(identical(other.id, id) || other.id == id)&&(identical(other.buyerId, buyerId) || other.buyerId == buyerId)&&(identical(other.shopId, shopId) || other.shopId == shopId)&&(identical(other.title, title) || other.title == title)&&(identical(other.amountCents, amountCents) || other.amountCents == amountCents)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.status, status) || other.status == status)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.paymentStatus, paymentStatus) || other.paymentStatus == paymentStatus)&&(identical(other.stripePaymentIntentId, stripePaymentIntentId) || other.stripePaymentIntentId == stripePaymentIntentId)&&const DeepCollectionEquality().equals(other._lineItems, _lineItems)&&(identical(other.shippingTrackingNumber, shippingTrackingNumber) || other.shippingTrackingNumber == shippingTrackingNumber)&&(identical(other.shippingTrackingUrl, shippingTrackingUrl) || other.shippingTrackingUrl == shippingTrackingUrl)&&(identical(other.shippingCarrier, shippingCarrier) || other.shippingCarrier == shippingCarrier)&&(identical(other.shippedAt, shippedAt) || other.shippedAt == shippedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,buyerId,shopId,title,amountCents,currency,status,stripePaymentIntentId,const DeepCollectionEquality().hash(_lineItems),shippingTrackingNumber,shippingTrackingUrl,shippingCarrier,shippedAt,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,buyerId,shopId,title,amountCents,currency,status,paymentMethod,paymentStatus,stripePaymentIntentId,const DeepCollectionEquality().hash(_lineItems),shippingTrackingNumber,shippingTrackingUrl,shippingCarrier,shippedAt,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'MarketplaceOrder(id: $id, buyerId: $buyerId, shopId: $shopId, title: $title, amountCents: $amountCents, currency: $currency, status: $status, stripePaymentIntentId: $stripePaymentIntentId, lineItems: $lineItems, shippingTrackingNumber: $shippingTrackingNumber, shippingTrackingUrl: $shippingTrackingUrl, shippingCarrier: $shippingCarrier, shippedAt: $shippedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'MarketplaceOrder(id: $id, buyerId: $buyerId, shopId: $shopId, title: $title, amountCents: $amountCents, currency: $currency, status: $status, paymentMethod: $paymentMethod, paymentStatus: $paymentStatus, stripePaymentIntentId: $stripePaymentIntentId, lineItems: $lineItems, shippingTrackingNumber: $shippingTrackingNumber, shippingTrackingUrl: $shippingTrackingUrl, shippingCarrier: $shippingCarrier, shippedAt: $shippedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -562,7 +566,7 @@ abstract mixin class _$MarketplaceOrderCopyWith<$Res> implements $MarketplaceOrd
   factory _$MarketplaceOrderCopyWith(_MarketplaceOrder value, $Res Function(_MarketplaceOrder) _then) = __$MarketplaceOrderCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String buyerId, String shopId, String title, int amountCents, String currency, OrderStatus status, String? stripePaymentIntentId, List<LineItem> lineItems, String? shippingTrackingNumber, String? shippingTrackingUrl, String? shippingCarrier, DateTime? shippedAt, DateTime createdAt, DateTime? updatedAt
+ String id, String buyerId, String shopId, String title, int amountCents, String currency, OrderStatus status, PaymentMethod paymentMethod, PaymentStatus paymentStatus, String? stripePaymentIntentId, List<LineItem> lineItems, String? shippingTrackingNumber, String? shippingTrackingUrl, String? shippingCarrier, DateTime? shippedAt, DateTime createdAt, DateTime? updatedAt
 });
 
 
@@ -579,7 +583,7 @@ class __$MarketplaceOrderCopyWithImpl<$Res>
 
 /// Create a copy of MarketplaceOrder
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? buyerId = null,Object? shopId = null,Object? title = null,Object? amountCents = null,Object? currency = null,Object? status = null,Object? stripePaymentIntentId = freezed,Object? lineItems = null,Object? shippingTrackingNumber = freezed,Object? shippingTrackingUrl = freezed,Object? shippingCarrier = freezed,Object? shippedAt = freezed,Object? createdAt = null,Object? updatedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? buyerId = null,Object? shopId = null,Object? title = null,Object? amountCents = null,Object? currency = null,Object? status = null,Object? paymentMethod = null,Object? paymentStatus = null,Object? stripePaymentIntentId = freezed,Object? lineItems = null,Object? shippingTrackingNumber = freezed,Object? shippingTrackingUrl = freezed,Object? shippingCarrier = freezed,Object? shippedAt = freezed,Object? createdAt = null,Object? updatedAt = freezed,}) {
   return _then(_MarketplaceOrder(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,buyerId: null == buyerId ? _self.buyerId : buyerId // ignore: cast_nullable_to_non_nullable
@@ -588,7 +592,9 @@ as String,title: null == title ? _self.title : title // ignore: cast_nullable_to
 as String,amountCents: null == amountCents ? _self.amountCents : amountCents // ignore: cast_nullable_to_non_nullable
 as int,currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as OrderStatus,stripePaymentIntentId: freezed == stripePaymentIntentId ? _self.stripePaymentIntentId : stripePaymentIntentId // ignore: cast_nullable_to_non_nullable
+as OrderStatus,paymentMethod: null == paymentMethod ? _self.paymentMethod : paymentMethod // ignore: cast_nullable_to_non_nullable
+as PaymentMethod,paymentStatus: null == paymentStatus ? _self.paymentStatus : paymentStatus // ignore: cast_nullable_to_non_nullable
+as PaymentStatus,stripePaymentIntentId: freezed == stripePaymentIntentId ? _self.stripePaymentIntentId : stripePaymentIntentId // ignore: cast_nullable_to_non_nullable
 as String?,lineItems: null == lineItems ? _self._lineItems : lineItems // ignore: cast_nullable_to_non_nullable
 as List<LineItem>,shippingTrackingNumber: freezed == shippingTrackingNumber ? _self.shippingTrackingNumber : shippingTrackingNumber // ignore: cast_nullable_to_non_nullable
 as String?,shippingTrackingUrl: freezed == shippingTrackingUrl ? _self.shippingTrackingUrl : shippingTrackingUrl // ignore: cast_nullable_to_non_nullable

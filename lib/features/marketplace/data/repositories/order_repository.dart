@@ -44,14 +44,13 @@ class OrderRepository {
   Future<String> createPaymentIntent(String orderId) async {
     final response = await _client.functions.invoke(
       'create-payment-intent',
-      body: {'orderId': orderId},
+      body: {'orderId': orderId, 'payment_method': 'stripe'},
     );
 
     if (response.status != 200) {
-      final code = (response.data as Map<String, dynamic>?)?['code'] as String?;
-      if (code == 'SHOP_NOT_VERIFIED') {
-        throw const ShopNotVerifiedException();
-      }
+      final data = response.data as Map<String, dynamic>?;
+      final code = data?['code'] as String?;
+      if (code == 'SHOP_NOT_VERIFIED') throw const ShopNotVerifiedException();
       throw Exception('Edge Function error ${response.status}: ${response.data}');
     }
 
@@ -59,6 +58,34 @@ class OrderRepository {
         (response.data as Map<String, dynamic>)['clientSecret'] as String?;
     if (clientSecret == null) throw Exception('Missing clientSecret in response');
     return clientSecret;
+  }
+
+  /// Validate a CoD order via the Edge Function (inventory check, shop active
+  /// guard) and stamp payment_method='cod' on the row server-side.
+  /// Returns the confirmed orderId on success.
+  Future<String> confirmCodOrder(String orderId) async {
+    final response = await _client.functions.invoke(
+      'create-payment-intent',
+      body: {'orderId': orderId, 'payment_method': 'cod'},
+    );
+
+    if (response.status != 200) {
+      final data = response.data as Map<String, dynamic>?;
+      final code = data?['code'] as String?;
+      final message = data?['error'] as String?;
+      if (code == 'SHOP_INACTIVE') throw const ShopInactiveException();
+      if (code == 'INSUFFICIENT_STOCK') {
+        throw InsufficientStockException(
+          productName: message ?? 'A product',
+          available: (data?['available'] as num?)?.toInt() ?? 0,
+          requested: (data?['requested'] as num?)?.toInt() ?? 0,
+        );
+      }
+      throw Exception('CoD confirmation failed ${response.status}: ${response.data}');
+    }
+
+    final data = response.data as Map<String, dynamic>;
+    return data['orderId'] as String? ?? orderId;
   }
 
   /// No-op — the stripe-webhook Edge Function transitions pending → processing
@@ -155,4 +182,27 @@ class ShopNotVerifiedException implements Exception {
   @override
   String toString() =>
       'This seller has not completed their payment setup yet.';
+}
+
+class ShopInactiveException implements Exception {
+  const ShopInactiveException();
+
+  @override
+  String toString() => 'This shop is currently inactive.';
+}
+
+class InsufficientStockException implements Exception {
+  const InsufficientStockException({
+    required this.productName,
+    required this.available,
+    required this.requested,
+  });
+
+  final String productName;
+  final int available;
+  final int requested;
+
+  @override
+  String toString() =>
+      'Only $available of "$productName" available (requested $requested).';
 }

@@ -23,6 +23,12 @@ enum OrderStatus {
       this != OrderStatus.cancelled && this != OrderStatus.delivered;
 }
 
+@JsonEnum()
+enum PaymentMethod { stripe, cod }
+
+@JsonEnum()
+enum PaymentStatus { pending, paid, collected }
+
 @freezed
 abstract class LineItem with _$LineItem {
   const factory LineItem({
@@ -51,6 +57,8 @@ abstract class MarketplaceOrder with _$MarketplaceOrder {
     required int amountCents,
     required String currency,
     required OrderStatus status,
+    @Default(PaymentMethod.stripe) PaymentMethod paymentMethod,
+    @Default(PaymentStatus.pending) PaymentStatus paymentStatus,
     String? stripePaymentIntentId,
     required List<LineItem> lineItems,
     String? shippingTrackingNumber,
@@ -69,4 +77,6 @@ abstract class MarketplaceOrder with _$MarketplaceOrder {
 
   bool get hasTracking =>
       shippingTrackingNumber != null && shippingTrackingNumber!.isNotEmpty;
+
+  bool get isCod => paymentMethod == PaymentMethod.cod;
 }

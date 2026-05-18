@@ -19,6 +19,12 @@ _Shop _$ShopFromJson(Map<String, dynamic> json) => _Shop(
   stripeConnectAccountId: json['stripe_connect_account_id'] as String?,
   stripeOnboardingComplete: json['stripe_onboarding_complete'] as bool,
   platformFeePercent: (json['platform_fee_percent'] as num).toInt(),
+  payoutMethod: $enumDecode(_$PayoutMethodEnumMap, json['payout_method']),
+  kycStatus: $enumDecode(_$KycStatusEnumMap, json['kyc_status']),
+  tradeLicenseUrl: json['trade_license_url'] as String?,
+  nationalIdUrl: json['national_id_url'] as String?,
+  rejectionReason: json['rejection_reason'] as String?,
+  bankAccountDetails: json['bank_account_details'] as Map<String, dynamic>?,
   createdAt: DateTime.parse(json['created_at'] as String),
   updatedAt: DateTime.parse(json['updated_at'] as String),
 );
@@ -36,6 +42,24 @@ Map<String, dynamic> _$ShopToJson(_Shop instance) => <String, dynamic>{
   'stripe_connect_account_id': instance.stripeConnectAccountId,
   'stripe_onboarding_complete': instance.stripeOnboardingComplete,
   'platform_fee_percent': instance.platformFeePercent,
+  'payout_method': _$PayoutMethodEnumMap[instance.payoutMethod]!,
+  'kyc_status': _$KycStatusEnumMap[instance.kycStatus]!,
+  'trade_license_url': instance.tradeLicenseUrl,
+  'national_id_url': instance.nationalIdUrl,
+  'rejection_reason': instance.rejectionReason,
+  'bank_account_details': instance.bankAccountDetails,
   'created_at': instance.createdAt.toIso8601String(),
   'updated_at': instance.updatedAt.toIso8601String(),
+};
+
+const _$PayoutMethodEnumMap = {
+  PayoutMethod.stripe: 'stripe',
+  PayoutMethod.manual: 'manual',
+};
+
+const _$KycStatusEnumMap = {
+  KycStatus.pending: 'pending',
+  KycStatus.submitted: 'submitted',
+  KycStatus.approved: 'approved',
+  KycStatus.rejected: 'rejected',
 };

@@ -2,6 +2,46 @@
 
 ---
 
+## 2026-05-19 — Marketplace data layer: models + repository (CoD + KYC)
+
+- **`shop.dart`** — added `PayoutMethod` enum (`stripe|manual`), `KycStatus` enum (`pending|submitted|approved|rejected`); new fields `payoutMethod`, `kycStatus`, `tradeLicenseUrl`, `nationalIdUrl`, `rejectionReason`, `bankAccountDetails`; updated `needsOnboarding` / `canAcceptPayments` getters for manual payout path; added `kycApproved`.
+- **`marketplace_order.dart`** — added `PaymentMethod` enum (`stripe|cod`), `PaymentStatus` enum (`pending|paid|collected`); fields `paymentMethod` (`@Default(stripe)`) and `paymentStatus` (`@Default(pending)`); added `isCod` getter.
+- **`vendor_ledger.dart`** — new Freezed model mapping `vendor_ledgers` table; `LedgerStatus` enum (`pendingClearance|available|paid`); `earningsFormatted` getter.
+- **`order_repository.dart`** — `createPaymentIntent` now passes `payment_method: 'stripe'`; new `confirmCodOrder(orderId)` calls the edge function with `payment_method: 'cod'` and surfaces `ShopInactiveException` / `InsufficientStockException` with structured fields; added both exception classes.
+- **`build_runner`** — regenerated; 30 outputs written; `flutter analyze lib/features/marketplace/data/` — no issues.
+
+**Next step:** Wire `CheckoutNotifier` / checkout UI to branch on payment method — skip Payment Sheet for CoD, call `confirmCodOrder` instead of `createPaymentIntent`.
+
+---
+
+## 2026-05-19 — Edge Function: Stripe + CoD payment branching
+
+**File:** `supabase/functions/create-payment-intent/index.ts`
+
+- Accepts `{ orderId, payment_method }` — `payment_method` defaults to `'stripe'` for backwards compat.
+- **Stripe path** — existing Destination Charge logic unchanged; also stamps `payment_method = 'stripe'` on the order row.
+- **CoD path** — bypasses Stripe; validates order ownership, `order.status === 'pending'`, `shop.is_active`, and per-item inventory (`inventory_count >= quantity`, `active` flag); stamps `payment_method = 'cod'`; returns `{ paymentMethod, orderId, amountCents, currency }`.
+- Shared pre-flight covers `409 CONFLICT` on non-pending orders and structured inventory error codes (`PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `INSUFFICIENT_STOCK`).
+
+**Next step:** Flutter — update `CheckoutNotifier` / `OrderRepository` to pass `payment_method` in the function call and handle the CoD response (skip Payment Sheet, write order directly).
+
+---
+
+## 2026-05-19 — Vendor KYC, CoD payments, ledger & admin RLS
+
+**Migration:** `supabase/migrations/20260519040000_vendor_kyc_ledger.sql` — applied to `jqyjvhwlcqcsuwcqgcwf`.
+
+- **`shops`** — added `payout_method` (`stripe|manual`), `kyc_status` (`pending|submitted|approved|rejected`), `trade_license_url`, `national_id_url`, `rejection_reason`, `bank_account_details (jsonb)`.
+- **`marketplace_orders`** — added `payment_method` (`stripe|cod`), `payment_status` (`pending|paid|collected`).
+- **`vendor_ledgers`** — new table: `shop_id`, `order_id`, `order_total_cents`, `platform_fee_cents`, `vendor_earnings_cents`, `status` (`pending_clearance|available|paid`); FK + indexes + RLS.
+- **`kyc-documents` bucket** — private storage bucket (10 MB, JPEG/PNG/WebP/PDF).
+- **`public.is_admin()`** — helper reads `app_metadata.is_admin` from JWT.
+- **RLS** — admin full access on `shops`, `marketplace_orders`, `vendor_ledgers`; shop owners read their own ledger rows; `kyc-documents` restricted to file owner (by `{user_id}/` prefix) and admins.
+
+**Next step:** Flutter — `Shop` model KYC fields, KYC upload UI, CoD payment flow, admin dashboard screens.
+
+---
+
 ## 2026-05-18 — Multi-vendor marketplace (full `docs/claude-handoff.md` implementation)
 
 Stripe Connect marketplace per handoff + `docs/multi-vendor-marketplace-blueprint.md`: destination charges, per-vendor checkout, mixed cart grouped by shop, vendor onboarding via native browser.

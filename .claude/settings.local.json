@@ -34,7 +34,11 @@
       "mcp__a49efab9-a231-407c-993d-51ec761da6e2__stripe_api_search",
       "mcp__a49efab9-a231-407c-993d-51ec761da6e2__stripe_api_details",
       "Bash(stripe login *)",
-      "Bash(dart run *)"
+      "Bash(dart run *)",
+      "mcp__claude_ai_Supabase__list_tables",
+      "mcp__claude_ai_Supabase__apply_migration",
+      "mcp__claude_ai_Supabase__execute_sql",
+      "Bash(flutter analyze *)"
     ]
   }
 }

@@ -35,6 +35,12 @@ _MarketplaceOrder _$MarketplaceOrderFromJson(Map<String, dynamic> json) =>
       amountCents: (json['amount_cents'] as num).toInt(),
       currency: json['currency'] as String,
       status: $enumDecode(_$OrderStatusEnumMap, json['status']),
+      paymentMethod:
+          $enumDecodeNullable(_$PaymentMethodEnumMap, json['payment_method']) ??
+          PaymentMethod.stripe,
+      paymentStatus:
+          $enumDecodeNullable(_$PaymentStatusEnumMap, json['payment_status']) ??
+          PaymentStatus.pending,
       stripePaymentIntentId: json['stripe_payment_intent_id'] as String?,
       lineItems: (json['line_items'] as List<dynamic>)
           .map((e) => LineItem.fromJson(e as Map<String, dynamic>))
@@ -60,6 +66,8 @@ Map<String, dynamic> _$MarketplaceOrderToJson(_MarketplaceOrder instance) =>
       'amount_cents': instance.amountCents,
       'currency': instance.currency,
       'status': _$OrderStatusEnumMap[instance.status]!,
+      'payment_method': _$PaymentMethodEnumMap[instance.paymentMethod]!,
+      'payment_status': _$PaymentStatusEnumMap[instance.paymentStatus]!,
       'stripe_payment_intent_id': instance.stripePaymentIntentId,
       'line_items': instance.lineItems,
       'shipping_tracking_number': instance.shippingTrackingNumber,
@@ -76,4 +84,15 @@ const _$OrderStatusEnumMap = {
   OrderStatus.shipped: 'shipped',
   OrderStatus.delivered: 'delivered',
   OrderStatus.cancelled: 'cancelled',
+};
+
+const _$PaymentMethodEnumMap = {
+  PaymentMethod.stripe: 'stripe',
+  PaymentMethod.cod: 'cod',
+};
+
+const _$PaymentStatusEnumMap = {
+  PaymentStatus.pending: 'pending',
+  PaymentStatus.paid: 'paid',
+  PaymentStatus.collected: 'collected',
 };
