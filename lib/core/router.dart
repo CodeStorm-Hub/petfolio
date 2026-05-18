@@ -24,6 +24,7 @@ import '../features/marketplace/presentation/screens/vendor/seller_dashboard_scr
 import '../features/marketplace/presentation/screens/vendor/shop_setup_screen.dart';
 import '../features/admin/presentation/controllers/admin_auth_controller.dart';
 import '../features/admin/presentation/screens/admin_screen.dart';
+import '../features/marketplace/presentation/screens/vendor/edit_shop_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/manual_kyc_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/stripe_onboarding_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/vendor_order_detail_screen.dart';
@@ -191,6 +192,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           final url = state.uri.queryParameters['url'] ?? '';
           return StripeOnboardingScreen(accountLinkUrl: url);
         },
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/seller/edit-shop',
+        builder: (context, state) => const EditShopScreen(),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

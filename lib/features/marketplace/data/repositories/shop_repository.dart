@@ -76,17 +76,60 @@ class ShopRepository {
     String? description,
     String? logoUrl,
     String? bannerUrl,
+    String? businessEmail,
+    String? businessPhone,
+    String? addressStreet,
+    String? addressCity,
+    String? addressState,
+    String? addressZip,
+    String? returnPolicy,
+    String? shippingPolicy,
+    Map<String, dynamic>? socialLinks,
   }) async {
     final row = await _client
         .from('shops')
         .update({
-          if (shopName    != null) 'shop_name':   shopName,
-          if (description != null) 'description': description,
-          if (logoUrl     != null) 'logo_url':    logoUrl,
-          if (bannerUrl   != null) 'banner_url':  bannerUrl,
+          if (shopName       != null) 'shop_name':        shopName,
+          if (description    != null) 'description':      description,
+          if (logoUrl        != null) 'logo_url':         logoUrl,
+          if (bannerUrl      != null) 'banner_url':       bannerUrl,
+          if (businessEmail  != null) 'business_email':   businessEmail,
+          if (businessPhone  != null) 'business_phone':   businessPhone,
+          if (addressStreet  != null) 'address_street':   addressStreet,
+          if (addressCity    != null) 'address_city':     addressCity,
+          if (addressState   != null) 'address_state':    addressState,
+          if (addressZip     != null) 'address_zip':      addressZip,
+          if (returnPolicy   != null) 'return_policy':    returnPolicy,
+          if (shippingPolicy != null) 'shipping_policy':  shippingPolicy,
+          if (socialLinks    != null) 'social_links':     socialLinks,
           'updated_at': DateTime.now().toIso8601String(),
         })
         .eq('id', id)
+        .select()
+        .single();
+    return Shop.fromJson(row);
+  }
+
+  Future<Shop> saveShopProfile(Shop shop) async {
+    final row = await _client
+        .from('shops')
+        .update({
+          'shop_name':       shop.shopName,
+          'description':     shop.description,
+          'logo_url':        shop.logoUrl,
+          'banner_url':      shop.bannerUrl,
+          'business_email':  shop.businessEmail,
+          'business_phone':  shop.businessPhone,
+          'address_street':  shop.addressStreet,
+          'address_city':    shop.addressCity,
+          'address_state':   shop.addressState,
+          'address_zip':     shop.addressZip,
+          'return_policy':   shop.returnPolicy,
+          'shipping_policy': shop.shippingPolicy,
+          'social_links':    shop.socialLinks,
+          'updated_at':      DateTime.now().toIso8601String(),
+        })
+        .eq('id', shop.id)
         .select()
         .single();
     return Shop.fromJson(row);

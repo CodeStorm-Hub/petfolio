@@ -156,7 +156,7 @@ class _DashboardBody extends ConsumerWidget {
                 IconButton(
                   icon: const Icon(Icons.edit_outlined,
                       size: 20, color: AppColors.ink500),
-                  onPressed: () => context.push('/seller/setup'),
+                  onPressed: () => context.push('/seller/edit-shop'),
                 ),
               ],
             ),
@@ -526,7 +526,7 @@ class _QuickActions extends StatelessWidget {
       (
         icon: Icons.storefront_outlined,
         label: 'Edit shop',
-        route: '/seller/setup',
+        route: '/seller/edit-shop',
       ),
     ];
 
