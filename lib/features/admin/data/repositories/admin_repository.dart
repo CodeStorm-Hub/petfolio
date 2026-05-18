@@ -44,6 +44,11 @@ class AdminRepository {
     }).eq('id', shopId);
   }
 
+  // ── KYC document signed URLs ──────────────────────────────────────────────
+
+  Future<String> getSignedDocUrl(String path) =>
+      _client.storage.from('kyc-documents').createSignedUrl(path, 60);
+
   // ── COD reconciliation ────────────────────────────────────────────────────
 
   Future<List<MarketplaceOrder>> fetchDeliveredCodOrders() async {

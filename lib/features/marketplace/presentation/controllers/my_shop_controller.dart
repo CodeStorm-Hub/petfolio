@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/shop.dart';
+import '../../data/repositories/kyc_repository.dart';
 import '../../data/repositories/shop_repository.dart';
 
 final myShopProvider =
@@ -42,7 +43,7 @@ class MyShopNotifier extends AsyncNotifier<Shop?> {
     final prev = state;
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
-      () => _repo.submitKyc(
+      () => ref.read(kycRepositoryProvider).submitKyc(
         shopId: shop.id,
         bankDetails: bankDetails,
         nidBytes: nidBytes,

@@ -3,132 +3,67 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
-import '../../controllers/my_shop_controller.dart';
+import '../../controllers/manual_kyc_controller.dart';
 
-class ManualKycScreen extends ConsumerStatefulWidget {
+class ManualKycScreen extends ConsumerWidget {
   const ManualKycScreen({super.key});
 
   @override
-  ConsumerState<ManualKycScreen> createState() => _ManualKycScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final kycState = ref.watch(manualKycControllerProvider);
+    final notifier = ref.read(manualKycControllerProvider.notifier);
 
-class _ManualKycScreenState extends ConsumerState<ManualKycScreen> {
-  final _formKey1 = GlobalKey<FormState>();
-  final _formKey3 = GlobalKey<FormState>();
-
-  // Step 1 — business info
-  final _bizNameCtrl    = TextEditingController();
-  final _bizAddressCtrl = TextEditingController();
-  final _bizPhoneCtrl   = TextEditingController();
-
-  // Step 2 — documents
-  Uint8List? _nidBytes;
-  Uint8List? _tradeLicenseBytes;
-
-  // Step 3 — bank details
-  final _holderCtrl  = TextEditingController();
-  final _accountCtrl = TextEditingController();
-  final _bankCtrl    = TextEditingController();
-  final _branchCtrl  = TextEditingController();
-
-  int _step = 0;
-  bool _submitting = false;
-
-  @override
-  void dispose() {
-    _bizNameCtrl.dispose();
-    _bizAddressCtrl.dispose();
-    _bizPhoneCtrl.dispose();
-    _holderCtrl.dispose();
-    _accountCtrl.dispose();
-    _bankCtrl.dispose();
-    _branchCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _pickImage(bool isNid) async {
-    final picker = ImagePicker();
-    final file = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
+    ref.listen<String?>(
+      manualKycControllerProvider.select((s) => s.docError),
+      (_, error) {
+        if (error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error), backgroundColor: AppColors.danger),
+          );
+        }
+      },
     );
-    if (file == null) return;
-    final bytes = await file.readAsBytes();
-    setState(() {
-      if (isNid) {
-        _nidBytes = bytes;
-      } else {
-        _tradeLicenseBytes = bytes;
-      }
-    });
-  }
 
-  void _nextStep() {
-    if (_step == 0 && !_formKey1.currentState!.validate()) return;
-    if (_step == 1 && _nidBytes == null && _tradeLicenseBytes == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Upload at least one document to continue.'),
-          backgroundColor: AppColors.danger,
-        ),
-      );
-      return;
-    }
-    setState(() => _step++);
-  }
-
-  Future<void> _submit() async {
-    if (!_formKey3.currentState!.validate()) return;
-    setState(() => _submitting = true);
-
-    final ok = await ref.read(myShopProvider.notifier).submitKyc(
-          bankDetails: {
-            'account_holder': _holderCtrl.text.trim(),
-            'account_number': _accountCtrl.text.trim(),
-            'bank_name':      _bankCtrl.text.trim(),
-            'branch':         _branchCtrl.text.trim(),
-          },
-          nidBytes:          _nidBytes,
-          tradeLicenseBytes: _tradeLicenseBytes,
-        );
-
-    if (!mounted) return;
-    setState(() => _submitting = false);
-
-    if (ok) {
-      context.go('/seller');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Submission failed. Please try again.'),
-          backgroundColor: AppColors.danger,
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface1,
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
-            _Header(step: _step, onBack: _step == 0 ? () => context.pop() : () => setState(() => _step--)),
-            _StepIndicator(step: _step),
+            _Header(
+              step: kycState.step,
+              onBack: kycState.step == 0
+                  ? () => context.pop()
+                  : notifier.prevStep,
+            ),
+            _StepIndicator(step: kycState.step),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
                 child: [
-                  _Step1(formKey: _formKey1, nameCtrl: _bizNameCtrl, addressCtrl: _bizAddressCtrl, phoneCtrl: _bizPhoneCtrl),
-                  _Step2(nidBytes: _nidBytes, tradeLicenseBytes: _tradeLicenseBytes, onPick: _pickImage),
-                  _Step3(formKey: _formKey3, holderCtrl: _holderCtrl, accountCtrl: _accountCtrl, bankCtrl: _bankCtrl, branchCtrl: _branchCtrl),
-                ][_step],
+                  _Step1(
+                    formKey:     notifier.formKey1,
+                    nameCtrl:    notifier.bizNameCtrl,
+                    addressCtrl: notifier.bizAddressCtrl,
+                    phoneCtrl:   notifier.bizPhoneCtrl,
+                  ),
+                  _Step2(
+                    nidBytes:          kycState.nidBytes,
+                    tradeLicenseBytes: kycState.tradeLicenseBytes,
+                    onPickNid:         notifier.pickNidImage,
+                    onPickTrade:       notifier.pickTradeLicenseImage,
+                  ),
+                  _Step3(
+                    formKey:    notifier.formKey3,
+                    holderCtrl: notifier.holderCtrl,
+                    accountCtrl: notifier.accountCtrl,
+                    bankCtrl:   notifier.bankCtrl,
+                    branchCtrl: notifier.branchCtrl,
+                  ),
+                ][kycState.step],
               ),
             ),
           ],
@@ -138,11 +73,28 @@ class _ManualKycScreenState extends ConsumerState<ManualKycScreen> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: PrimaryPillButton(
-            label: _step < 2 ? 'Continue' : 'Submit documents',
+            label: kycState.step < 2 ? 'Continue' : 'Submit documents',
             size: PillButtonSize.xl,
             isFullWidth: true,
-            isLoading: _submitting,
-            onPressed: _submitting ? null : (_step < 2 ? _nextStep : _submit),
+            isLoading: kycState.submitting,
+            onPressed: kycState.submitting
+                ? null
+                : () async {
+                    if (kycState.step < 2) {
+                      notifier.nextStep();
+                    } else {
+                      final ok = await notifier.submit();
+                      if (ok && context.mounted) context.go('/seller');
+                      if (!ok && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Submission failed. Please try again.'),
+                            backgroundColor: AppColors.danger,
+                          ),
+                        );
+                      }
+                    }
+                  },
           ),
         ),
       ),
@@ -270,12 +222,14 @@ class _Step2 extends StatelessWidget {
   const _Step2({
     required this.nidBytes,
     required this.tradeLicenseBytes,
-    required this.onPick,
+    required this.onPickNid,
+    required this.onPickTrade,
   });
 
   final Uint8List? nidBytes;
   final Uint8List? tradeLicenseBytes;
-  final void Function(bool isNid) onPick;
+  final VoidCallback onPickNid;
+  final VoidCallback onPickTrade;
 
   @override
   Widget build(BuildContext context) {
@@ -291,14 +245,14 @@ class _Step2 extends StatelessWidget {
           label: 'National ID (NID)',
           icon: Icons.badge_outlined,
           hasFile: nidBytes != null,
-          onTap: () => onPick(true),
+          onTap: onPickNid,
         ),
         const SizedBox(height: 12),
         _DocPicker(
           label: 'Trade License',
           icon: Icons.description_outlined,
           hasFile: tradeLicenseBytes != null,
-          onTap: () => onPick(false),
+          onTap: onPickTrade,
         ),
       ],
     );

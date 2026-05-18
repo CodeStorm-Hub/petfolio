@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../marketplace/data/models/shop.dart';
+import '../../data/repositories/admin_repository.dart';
 import '../controllers/admin_auth_controller.dart';
 import '../controllers/cod_orders_controller.dart';
 import '../controllers/kyc_review_controller.dart';
@@ -370,11 +371,11 @@ class _KycCardState extends ConsumerState<_KycCard> {
           Row(
             children: [
               if (shop.nationalIdUrl != null)
-                _DocButton(label: 'View NID', url: shop.nationalIdUrl!),
+                _DocButton(label: 'View NID', storagePath: shop.nationalIdUrl!),
               if (shop.nationalIdUrl != null && shop.tradeLicenseUrl != null)
                 const SizedBox(width: 8),
               if (shop.tradeLicenseUrl != null)
-                _DocButton(label: 'View License', url: shop.tradeLicenseUrl!),
+                _DocButton(label: 'View License', storagePath: shop.tradeLicenseUrl!),
             ],
           ),
           const SizedBox(height: 16),
@@ -444,17 +445,43 @@ class _BankRow extends StatelessWidget {
   }
 }
 
-class _DocButton extends StatelessWidget {
-  const _DocButton({required this.label, required this.url});
+class _DocButton extends ConsumerStatefulWidget {
+  const _DocButton({required this.label, required this.storagePath});
   final String label;
-  final String url;
+  final String storagePath;
+
+  @override
+  ConsumerState<_DocButton> createState() => _DocButtonState();
+}
+
+class _DocButtonState extends ConsumerState<_DocButton> {
+  bool _loading = false;
+
+  Future<void> _open() async {
+    setState(() => _loading = true);
+    try {
+      final url = await ref
+          .read(adminRepositoryProvider)
+          .getSignedDocUrl(widget.storagePath);
+      if (!mounted) return;
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return OutlinedButton.icon(
-      onPressed: () => launchUrl(Uri.parse(url)),
-      icon: const Icon(Icons.open_in_new_rounded, size: 14),
-      label: Text(label, style: const TextStyle(fontSize: 12)),
+      onPressed: _loading ? null : _open,
+      icon: _loading
+          ? const SizedBox(
+              width: 12,
+              height: 12,
+              child: CircularProgressIndicator(strokeWidth: 1.5),
+            )
+          : const Icon(Icons.open_in_new_rounded, size: 14),
+      label: Text(widget.label, style: const TextStyle(fontSize: 12)),
       style: OutlinedButton.styleFrom(
         visualDensity: VisualDensity.compact,
         side: const BorderSide(color: AppColors.line200),
