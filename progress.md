@@ -2,6 +2,42 @@
 
 ---
 
+## 2026-05-19 — COD checkout + Admin Panel
+
+### COD buyer checkout
+- **`checkout_controller.dart`** — added `startCodCheckoutForShop`: inserts pending order, calls `confirmCodOrder` Edge Function (inventory + shop-active guard), clears cart on success; handles `ShopInactiveException` / `InsufficientStockException`.
+- **`cart_screen.dart`** — `_VendorGroup` converted to `ConsumerStatefulWidget` with local `PaymentMethod _method` state; added `_PaymentSelector` (Credit Card / Cash on Delivery animated chips); COD tap opens `_CodConfirmSheet` (itemized summary + "Pay when you receive" notice); Stripe tap keeps existing Payment Sheet flow. `PaymentMethod` reused from `marketplace_order.dart` — no duplicate enum.
+
+### Admin panel (`lib/features/admin/`)
+- **`admin_repository.dart`** — KYC: fetch submitted shops, approve (sets `is_verified=true`), reject (stores reason). COD: fetch delivered+unpaid COD orders, mark cash received (updates `payment_status='collected'` + ledger `status='available'`). Payouts: fetch `available` ledger entries grouped by shop, mark paid. Overview: parallel metric counts (pending KYC, COD to collect, vendors with balance).
+- **`admin_auth_controller.dart`** — `isAdminProvider`: checks `currentUser.appMetadata['role'] == 'admin'`.
+- **`kyc_review_controller.dart`** — `AsyncNotifierProvider<List<Shop>>`; approve/reject remove the shop from local list optimistically.
+- **`cod_orders_controller.dart`** — `AsyncNotifierProvider<List<MarketplaceOrder>>`; mark-received removes order optimistically.
+- **`ledger_controller.dart`** — `AsyncNotifierProvider<List<VendorPayoutGroup>>`; `VendorPayoutGroup` wraps shop + ledger list with `totalFormatted`; `overviewMetricsProvider` (`FutureProvider`).
+- **`admin_screen.dart`** — `NavigationRail` shell (4 tabs: Overview, KYC, COD, Payouts); non-admin users see a lock screen. KYC panel: approve/reject buttons + doc viewer (signed URL via `url_launcher`) + reject reason dialog. COD panel: "Cash Received" per order. Payouts panel: expandable bank info + "Mark as Paid" per vendor.
+- **`router.dart`** — `/admin` route added (root navigator); redirect blocks non-admins to `/home`.
+
+**Note:** Admin role set via Supabase `auth.users.app_metadata.role = 'admin'` (not a Flutter-side concept). `flutter analyze` — no issues.
+
+**Next step:** Supabase RLS — ensure admin-only policies cover `shops`, `marketplace_orders`, `vendor_ledgers` for the admin service role or a DB function with `SECURITY DEFINER`. Apply `is_admin()` helper from the existing KYC migration.
+
+---
+
+## 2026-05-19 — Vendor KYC: branching onboarding (International vs Bangladesh)
+
+- **`shop_repository.dart`** — `createShop` accepts `payoutMethod`; new `submitKyc` uploads NID/Trade License bytes to private `kyc-documents` bucket (signed 1-year URLs) then patches `kyc_status: 'submitted'` + `bank_account_details`.
+- **`my_shop_controller.dart`** — `createShop` passes `payoutMethod`; new `submitKyc` with optimistic rollback on failure.
+- **`shop_setup_screen.dart`** — added `_LocationTile` radio toggle (International → Stripe, Bangladesh → Manual) on new-shop creation; routes to `/seller/kyc` post-create for manual, otherwise `context.pop()` as before.
+- **`manual_kyc_screen.dart`** *(new)* — 3-step `ConsumerStatefulWidget`: Step 1 business info (name/address/phone), Step 2 document pickers (NID + Trade License, at least one required), Step 3 bank details (holder/account/bank/branch); submits via `myShopProvider.notifier.submitKyc` → `context.go('/seller')`.
+- **`router.dart`** — added `/seller/kyc` → `ManualKycScreen`.
+- **`seller_dashboard_screen.dart`** — added `_KycPendingBanner` ("Documents under review") for `manual + submitted` and `_KycRejectedBanner` (rejection reason + resubmit link) for `manual + rejected`; existing Stripe banner unchanged (gated on `needsOnboarding`).
+
+**Prerequisite:** `kyc-documents` Storage bucket must exist in Supabase as **private** before end-to-end testing. `flutter analyze` — no issues.
+
+**Next step:** Admin review flow (approve/reject KYC) + update `kyc_status` from admin dashboard or Edge Function webhook.
+
+---
+
 ## 2026-05-19 — Marketplace data layer: models + repository (CoD + KYC)
 
 - **`shop.dart`** — added `PayoutMethod` enum (`stripe|manual`), `KycStatus` enum (`pending|submitted|approved|rejected`); new fields `payoutMethod`, `kycStatus`, `tradeLicenseUrl`, `nationalIdUrl`, `rejectionReason`, `bankAccountDetails`; updated `needsOnboarding` / `canAcceptPayments` getters for manual payout path; added `kycApproved`.

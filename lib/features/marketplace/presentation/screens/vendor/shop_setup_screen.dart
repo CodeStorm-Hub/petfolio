@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
+import '../../../data/models/shop.dart';
 import '../../controllers/my_shop_controller.dart';
 
 class ShopSetupScreen extends ConsumerStatefulWidget {
@@ -20,6 +21,7 @@ class _ShopSetupScreenState extends ConsumerState<ShopSetupScreen> {
   late final TextEditingController _descCtrl;
   bool _saving = false;
   bool _isEdit = false;
+  PayoutMethod _selectedPayout = PayoutMethod.stripe;
 
   @override
   void initState() {
@@ -29,6 +31,7 @@ class _ShopSetupScreenState extends ConsumerState<ShopSetupScreen> {
     _nameCtrl = TextEditingController(text: shop?.shopName ?? '');
     _slugCtrl = TextEditingController(text: shop?.slug ?? '');
     _descCtrl = TextEditingController(text: shop?.description ?? '');
+    if (shop != null) _selectedPayout = shop.payoutMethod;
   }
 
   @override
@@ -55,21 +58,27 @@ class _ShopSetupScreenState extends ConsumerState<ShopSetupScreen> {
             name: _nameCtrl.text.trim(),
             slug: slug,
             description: _descCtrl.text.trim(),
+            payoutMethod: _selectedPayout,
           );
     }
 
     if (!mounted) return;
     setState(() => _saving = false);
 
-    if (ok) {
-      context.pop();
-    } else {
+    if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to save shop. Please try again.'),
           backgroundColor: AppColors.danger,
         ),
       );
+      return;
+    }
+
+    if (!_isEdit && _selectedPayout == PayoutMethod.manual) {
+      context.pushReplacement('/seller/kyc');
+    } else {
+      context.pop();
     }
   }
 
@@ -142,6 +151,28 @@ class _ShopSetupScreenState extends ConsumerState<ShopSetupScreen> {
                         hint: 'Tell buyers what makes your shop special…',
                         maxLines: 4,
                       ),
+                      if (!_isEdit) ...[
+                        const SizedBox(height: 24),
+                        _Label('Payment location'),
+                        const SizedBox(height: 10),
+                        _LocationTile(
+                          title: 'International',
+                          subtitle: 'Receive payouts via Stripe',
+                          icon: Icons.public_rounded,
+                          selected: _selectedPayout == PayoutMethod.stripe,
+                          onTap: () => setState(
+                              () => _selectedPayout = PayoutMethod.stripe),
+                        ),
+                        const SizedBox(height: 10),
+                        _LocationTile(
+                          title: 'Bangladesh',
+                          subtitle: 'Receive payouts via bank transfer',
+                          icon: Icons.account_balance_rounded,
+                          selected: _selectedPayout == PayoutMethod.manual,
+                          onTap: () => setState(
+                              () => _selectedPayout = PayoutMethod.manual),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -160,6 +191,89 @@ class _ShopSetupScreenState extends ConsumerState<ShopSetupScreen> {
             isLoading: _saving,
             onPressed: _saving ? null : _save,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LocationTile extends StatelessWidget {
+  const _LocationTile({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: AppColors.surface0,
+          border: Border.all(
+            color: selected ? AppColors.blue500 : AppColors.line200,
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: selected
+                    ? AppColors.blue500.withAlpha(20)
+                    : AppColors.surface2,
+              ),
+              child: Icon(
+                icon,
+                size: 18,
+                color: selected ? AppColors.blue500 : AppColors.ink300,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: selected ? AppColors.blue500 : AppColors.ink950,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                        fontSize: 12, color: AppColors.ink500),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              selected
+                  ? Icons.radio_button_checked_rounded
+                  : Icons.radio_button_unchecked_rounded,
+              size: 20,
+              color: selected ? AppColors.blue500 : AppColors.ink300,
+            ),
+          ],
         ),
       ),
     );

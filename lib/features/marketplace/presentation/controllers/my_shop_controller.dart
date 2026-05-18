@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/shop.dart';
@@ -16,12 +18,42 @@ class MyShopNotifier extends AsyncNotifier<Shop?> {
     required String name,
     required String slug,
     String? description,
+    PayoutMethod payoutMethod = PayoutMethod.stripe,
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
-      () => _repo.createShop(name: name, slug: slug, description: description),
+      () => _repo.createShop(
+        name: name,
+        slug: slug,
+        description: description,
+        payoutMethod: payoutMethod,
+      ),
     );
     return state.hasValue && state.value != null;
+  }
+
+  Future<bool> submitKyc({
+    required Map<String, String> bankDetails,
+    Uint8List? nidBytes,
+    Uint8List? tradeLicenseBytes,
+  }) async {
+    final shop = state.value;
+    if (shop == null) return false;
+    final prev = state;
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => _repo.submitKyc(
+        shopId: shop.id,
+        bankDetails: bankDetails,
+        nidBytes: nidBytes,
+        tradeLicenseBytes: tradeLicenseBytes,
+      ),
+    );
+    if (state.hasError) {
+      state = prev;
+      return false;
+    }
+    return true;
   }
 
   Future<bool> updateShop({

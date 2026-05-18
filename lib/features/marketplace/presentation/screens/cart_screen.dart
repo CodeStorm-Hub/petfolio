@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/primary_pill_button.dart';
 import '../../data/models/cart_item.dart';
+import '../../data/models/marketplace_order.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/checkout_controller.dart';
 import '../controllers/shop_list_controller.dart';
@@ -18,7 +19,6 @@ class CartScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cart = ref.watch(cartProvider);
-    final checkout = ref.watch(checkoutProvider);
     final shopsAsync = ref.watch(shopListProvider);
     final verifiedShopIds = shopsAsync.value?.map((s) => s.id).toSet() ?? {};
 
@@ -96,13 +96,8 @@ class CartScreen extends ConsumerWidget {
                                 ? entry.value.first.product.shopName
                                 : 'Shop',
                             items: entry.value,
-                            cart: cart,
-                            checkout: checkout,
                             canCheckout: entry.key == _petfolioOfficialShopId ||
                                 verifiedShopIds.contains(entry.key),
-                            onCheckout: () => ref
-                                .read(checkoutProvider.notifier)
-                                .startCheckoutForShop(entry.key),
                           ),
                       ],
                     ),
@@ -114,30 +109,60 @@ class CartScreen extends ConsumerWidget {
   }
 }
 
-class _VendorGroup extends StatelessWidget {
+class _VendorGroup extends ConsumerStatefulWidget {
   const _VendorGroup({
     required this.shopId,
     required this.shopName,
     required this.items,
-    required this.cart,
-    required this.checkout,
     required this.canCheckout,
-    required this.onCheckout,
   });
 
   final String shopId;
   final String shopName;
   final List<CartItem> items;
-  final CartState cart;
-  final CheckoutState checkout;
   final bool canCheckout;
-  final VoidCallback onCheckout;
+
+  @override
+  ConsumerState<_VendorGroup> createState() => _VendorGroupState();
+}
+
+class _VendorGroupState extends ConsumerState<_VendorGroup> {
+  PaymentMethod _method = PaymentMethod.stripe;
+
+  void _handleCheckout(int subtotalCents) {
+    if (_method == PaymentMethod.cod) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        builder: (_) => _CodConfirmSheet(
+          shopName: widget.shopName,
+          items: widget.items,
+          subtotalCents: subtotalCents,
+          onConfirm: () {
+            Navigator.pop(context);
+            ref
+                .read(checkoutProvider.notifier)
+                .startCodCheckoutForShop(widget.shopId);
+          },
+        ),
+      );
+    } else {
+      ref
+          .read(checkoutProvider.notifier)
+          .startCheckoutForShop(widget.shopId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final subtotalCents = cart.totalCentsForShop(shopId);
+    final cart = ref.watch(cartProvider);
+    final checkout = ref.watch(checkoutProvider);
+    final subtotalCents = cart.totalCentsForShop(widget.shopId);
     final subtotal = '\$${(subtotalCents / 100).toStringAsFixed(2)}';
-    final isLoading = checkout.isLoadingShop(shopId);
+    final isLoading = checkout.isLoadingShop(widget.shopId);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -166,7 +191,7 @@ class _VendorGroup extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      shopName,
+                      widget.shopName,
                       style: const TextStyle(
                         fontFamily: 'Sora',
                         fontWeight: FontWeight.w700,
@@ -176,7 +201,7 @@ class _VendorGroup extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${items.fold<int>(0, (s, i) => s + i.quantity)} items',
+                    '${widget.items.fold<int>(0, (s, i) => s + i.quantity)} items',
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.ink500,
@@ -185,7 +210,7 @@ class _VendorGroup extends StatelessWidget {
                 ],
               ),
             ),
-            if (!canCheckout)
+            if (!widget.canCheckout)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                 child: Container(
@@ -212,9 +237,9 @@ class _VendorGroup extends StatelessWidget {
                   ),
                 ),
               ),
-            for (final item in items) CartLineItem(item: item),
+            for (final item in widget.items) CartLineItem(item: item),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -234,18 +259,261 @@ class _VendorGroup extends StatelessWidget {
                 ],
               ),
             ),
+            _PaymentSelector(
+              selected: _method,
+              onChanged: (m) => setState(() => _method = m),
+            ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: PrimaryPillButton(
-                label: 'Checkout $shopName',
+                label: _method == PaymentMethod.cod
+                    ? 'Place Order (COD)'
+                    : 'Checkout ${widget.shopName}',
                 size: PillButtonSize.lg,
                 isFullWidth: true,
                 isLoading: isLoading,
-                onPressed: canCheckout && !isLoading ? onCheckout : null,
+                onPressed: widget.canCheckout && !isLoading
+                    ? () => _handleCheckout(subtotalCents)
+                    : null,
                 leadingIcon: isLoading
                     ? null
-                    : const Icon(Icons.lock_outline_rounded, size: 18),
+                    : Icon(
+                        _method == PaymentMethod.cod
+                            ? Icons.payments_outlined
+                            : Icons.lock_outline_rounded,
+                        size: 18,
+                      ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PaymentSelector extends StatelessWidget {
+  const _PaymentSelector({
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final PaymentMethod selected;
+  final ValueChanged<PaymentMethod> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: _PaymentChip(
+              label: 'Credit Card',
+              icon: Icons.credit_card_rounded,
+              selected: selected == PaymentMethod.stripe,
+              onTap: () => onChanged(PaymentMethod.stripe),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _PaymentChip(
+              label: 'Cash on Delivery',
+              icon: Icons.payments_outlined,
+              selected: selected == PaymentMethod.cod,
+              onTap: () => onChanged(PaymentMethod.cod),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PaymentChip extends StatelessWidget {
+  const _PaymentChip({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: selected
+              ? AppColors.blue500.withAlpha(15)
+              : AppColors.surface1,
+          border: Border.all(
+            color: selected ? AppColors.blue500 : AppColors.line200,
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: selected ? AppColors.blue500 : AppColors.ink500,
+            ),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: selected ? AppColors.blue500 : AppColors.ink700,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CodConfirmSheet extends StatelessWidget {
+  const _CodConfirmSheet({
+    required this.shopName,
+    required this.items,
+    required this.subtotalCents,
+    required this.onConfirm,
+  });
+
+  final String shopName;
+  final List<CartItem> items;
+  final int subtotalCents;
+  final VoidCallback onConfirm;
+
+  @override
+  Widget build(BuildContext context) {
+    final subtotal = '\$${(subtotalCents / 100).toStringAsFixed(2)}';
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  color: AppColors.line200,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Confirm Order',
+              style: TextStyle(
+                fontFamily: 'Sora',
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+                color: AppColors.ink950,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              shopName,
+              style: const TextStyle(fontSize: 13, color: AppColors.ink500),
+            ),
+            const SizedBox(height: 16),
+            for (final item in items)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '${item.product.name} × ${item.quantity}',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.ink700,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '\$${((item.product.priceCents * item.quantity) / 100).toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.ink950,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            const Divider(height: 24, color: AppColors.line200),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Total',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    color: AppColors.ink950,
+                  ),
+                ),
+                Text(
+                  subtotal,
+                  style: const TextStyle(
+                    fontFamily: 'Sora',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    color: AppColors.ink950,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: const Color(0xFFFFF3CD),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.payments_outlined,
+                      size: 16, color: AppColors.warning),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Pay when you receive your order.',
+                      style: TextStyle(fontSize: 12, color: AppColors.ink700),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            PrimaryPillButton(
+              label: 'Place Order',
+              size: PillButtonSize.xl,
+              isFullWidth: true,
+              onPressed: onConfirm,
+              leadingIcon:
+                  const Icon(Icons.check_circle_outline_rounded, size: 18),
             ),
           ],
         ),

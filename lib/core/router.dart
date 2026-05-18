@@ -22,6 +22,9 @@ import '../features/marketplace/presentation/screens/product_detail_screen.dart'
 import '../features/marketplace/presentation/screens/vendor/add_edit_product_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/seller_dashboard_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/shop_setup_screen.dart';
+import '../features/admin/presentation/controllers/admin_auth_controller.dart';
+import '../features/admin/presentation/screens/admin_screen.dart';
+import '../features/marketplace/presentation/screens/vendor/manual_kyc_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/stripe_onboarding_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/vendor_order_detail_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/vendor_order_queue_screen.dart';
@@ -191,6 +194,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
+        path: '/seller/kyc',
+        builder: (context, state) => const ManualKycScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/seller/products',
         builder: (context, state) => const VendorProductListScreen(),
       ),
@@ -218,6 +226,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           orderId: state.pathParameters['id']!,
           order: state.extra as MarketplaceOrder?,
         ),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/admin',
+        builder: (context, state) => const AdminScreen(),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
@@ -332,6 +345,12 @@ class _RouterNotifier extends ChangeNotifier {
     if (loc == '/onboarding' && pets != null && pets.isNotEmpty) {
       final mode = state.uri.queryParameters['mode'];
       if (mode != 'add') return '/care';
+    }
+
+    // ── Admin route — only users with role=admin in appMetadata ─────────────
+    if (loc.startsWith('/admin')) {
+      final isAdmin = _ref.read(isAdminProvider);
+      if (!isAdmin) return '/home';
     }
 
     return null; // no redirect

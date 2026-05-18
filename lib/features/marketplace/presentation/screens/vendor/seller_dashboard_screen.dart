@@ -163,10 +163,20 @@ class _DashboardBody extends ConsumerWidget {
           ),
         ),
 
-        // Onboarding banner
+        // Stripe onboarding banner (International vendors only)
         if (shop.needsOnboarding)
           SliverToBoxAdapter(
             child: _OnboardingBanner(shopId: shop.id),
+          ),
+
+        // KYC status banners (Bangladesh / manual payout vendors)
+        if (shop.payoutMethod == PayoutMethod.manual &&
+            shop.kycStatus == KycStatus.submitted)
+          const SliverToBoxAdapter(child: _KycPendingBanner()),
+        if (shop.payoutMethod == PayoutMethod.manual &&
+            shop.kycStatus == KycStatus.rejected)
+          SliverToBoxAdapter(
+            child: _KycRejectedBanner(reason: shop.rejectionReason),
           ),
 
         // Shop card
@@ -347,30 +357,85 @@ class _ShopCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                color: shop.isVerified
-                    ? AppColors.success.withAlpha(20)
-                    : AppColors.warning.withAlpha(20),
-              ),
-              child: Text(
-                shop.isVerified ? 'Verified' : 'Pending',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: shop.isVerified
-                      ? AppColors.success
-                      : AppColors.warning,
-                ),
-              ),
-            ),
+            _ShopStatusChip(shop: shop),
           ],
         ),
       ),
     );
+  }
+}
+
+class _ShopStatusChip extends StatelessWidget {
+  const _ShopStatusChip({required this.shop});
+
+  final Shop shop;
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, color, icon, tappable) = _resolve();
+
+    final chip = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        color: color.withAlpha(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 11, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+          if (tappable) ...[
+            const SizedBox(width: 2),
+            Icon(Icons.chevron_right_rounded, size: 13, color: color),
+          ],
+        ],
+      ),
+    );
+
+    if (!tappable) return chip;
+
+    return GestureDetector(
+      onTap: () => context.push('/seller/kyc'),
+      child: chip,
+    );
+  }
+
+  (String, Color, IconData, bool) _resolve() {
+    if (shop.isVerified) {
+      return ('Verified', AppColors.success, Icons.check_circle_outline_rounded, false);
+    }
+    if (shop.payoutMethod == PayoutMethod.manual) {
+      return switch (shop.kycStatus) {
+        KycStatus.submitted => (
+            'Under Review',
+            AppColors.blue500,
+            Icons.hourglass_top_rounded,
+            false,
+          ),
+        KycStatus.rejected => (
+            'Rejected',
+            AppColors.danger,
+            Icons.cancel_outlined,
+            true,
+          ),
+        _ => (
+            'Complete KYC',
+            AppColors.warning,
+            Icons.upload_file_outlined,
+            true,
+          ),
+      };
+    }
+    return ('Pending', AppColors.warning, Icons.schedule_rounded, false);
   }
 }
 
@@ -514,6 +579,97 @@ class _ActionRow extends StatelessWidget {
             const Spacer(),
             const Icon(Icons.chevron_right_rounded,
                 size: 20, color: AppColors.ink300),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _KycPendingBanner extends StatelessWidget {
+  const _KycPendingBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: const Color(0xFFFFF3CD),
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.hourglass_top_rounded, color: AppColors.warning, size: 22),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Documents under review. We\'ll notify you once verified.',
+                style: TextStyle(fontSize: 13, color: AppColors.ink700),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _KycRejectedBanner extends StatelessWidget {
+  const _KycRejectedBanner({required this.reason});
+
+  final String? reason;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: AppColors.danger.withAlpha(20),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.cancel_outlined, color: AppColors.danger, size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Documents rejected.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.danger,
+                    ),
+                  ),
+                  if (reason != null && reason!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      reason!,
+                      style: const TextStyle(fontSize: 13, color: AppColors.ink700),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => context.push('/seller/kyc'),
+                    child: const Text(
+                      'Resubmit documents',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.danger,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

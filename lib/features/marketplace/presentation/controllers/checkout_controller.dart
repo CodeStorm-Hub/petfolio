@@ -179,9 +179,72 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
     }
   }
 
+  /// Cash-on-Delivery checkout — inserts order then validates via Edge Function.
+  Future<void> startCodCheckoutForShop(String shopId) async {
+    if (isLoading) return;
+
+    final cart = ref.read(cartProvider);
+    final shopItems = cart.itemsByShop[shopId] ?? [];
+    if (shopItems.isEmpty) return;
+
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      state = const CheckoutState(
+        status: CheckoutStatus.failure,
+        errorMessage: 'You must be logged in to checkout.',
+      );
+      return;
+    }
+
+    state = CheckoutState(
+      status: CheckoutStatus.loadingIntent,
+      activeShopId: shopId,
+    );
+
+    String? orderId;
+
+    try {
+      orderId = await _repo.insertPendingOrder(
+        buyerId: user.id,
+        shopId: shopId,
+        cart: cart,
+      );
+      state = state.copyWith(orderId: orderId);
+
+      final confirmedOrderId = await _repo.confirmCodOrder(orderId);
+
+      ref.read(cartProvider.notifier).clearShopCart(shopId);
+      ref.invalidate(buyerOrdersProvider);
+      state = state.copyWith(
+        status: CheckoutStatus.success,
+        orderId: confirmedOrderId,
+        clearError: true,
+      );
+    } on ShopInactiveException catch (e) {
+      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
+      state = CheckoutState(
+        status: CheckoutStatus.failure,
+        activeShopId: shopId,
+        errorMessage: e.toString(),
+      );
+    } on InsufficientStockException catch (e) {
+      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
+      state = CheckoutState(
+        status: CheckoutStatus.failure,
+        activeShopId: shopId,
+        errorMessage: e.toString(),
+      );
+    } catch (e) {
+      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
+      state = CheckoutState(
+        status: CheckoutStatus.failure,
+        activeShopId: shopId,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
   /// Legacy single-vendor checkout for the PetFolio Official shop.
-  /// Kept for backward compatibility until Phase 6 screens migrate to
-  /// per-vendor "Pay" buttons.
   Future<void> startCheckout() => startCheckoutForShop(_petfolioOfficialShopId);
 
   bool get isLoading =>

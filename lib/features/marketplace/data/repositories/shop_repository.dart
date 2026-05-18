@@ -1,4 +1,6 @@
 // ignore_for_file: use_null_aware_elements
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -53,19 +55,63 @@ class ShopRepository {
     required String name,
     required String slug,
     String? description,
+    PayoutMethod payoutMethod = PayoutMethod.stripe,
   }) async {
     final userId = _client.auth.currentUser!.id;
     final row = await _client
         .from('shops')
         .insert({
-          'owner_id':  userId,
-          'shop_name': name,
-          'slug':      slug,
+          'owner_id':     userId,
+          'shop_name':    name,
+          'slug':         slug,
+          'payout_method': payoutMethod.name,
           if (description != null) 'description': description,
         })
         .select()
         .single();
     return Shop.fromJson(row);
+  }
+
+  Future<Shop> submitKyc({
+    required String shopId,
+    required Map<String, String> bankDetails,
+    Uint8List? nidBytes,
+    Uint8List? tradeLicenseBytes,
+  }) async {
+    String? nidUrl;
+    String? tradeLicenseUrl;
+
+    if (nidBytes != null) {
+      nidUrl = await _uploadKycDoc(nidBytes, shopId, 'nid');
+    }
+    if (tradeLicenseBytes != null) {
+      tradeLicenseUrl = await _uploadKycDoc(tradeLicenseBytes, shopId, 'trade_license');
+    }
+
+    final row = await _client
+        .from('shops')
+        .update({
+          'kyc_status':           'submitted',
+          'bank_account_details': bankDetails,
+          if (nidUrl != null)          'national_id_url':    nidUrl,
+          if (tradeLicenseUrl != null) 'trade_license_url':  tradeLicenseUrl,
+          'updated_at': DateTime.now().toIso8601String(),
+        })
+        .eq('id', shopId)
+        .select()
+        .single();
+    return Shop.fromJson(row);
+  }
+
+  Future<String> _uploadKycDoc(Uint8List bytes, String shopId, String docType) async {
+    final userId = _client.auth.currentUser!.id;
+    final path = '$userId/$shopId/$docType.jpg';
+    await _client.storage.from('kyc-documents').uploadBinary(
+      path,
+      bytes,
+      fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
+    );
+    return await _client.storage.from('kyc-documents').createSignedUrl(path, 31536000);
   }
 
   Future<Shop> updateShop({
