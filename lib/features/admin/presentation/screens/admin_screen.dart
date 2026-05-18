@@ -21,8 +21,10 @@ class AdminScreen extends ConsumerWidget {
               const Icon(Icons.lock_outline_rounded,
                   size: 48, color: AppColors.ink300),
               const SizedBox(height: 16),
-              const Text('Admin access required',
-                  style: TextStyle(fontSize: 16, color: AppColors.ink700)),
+              Text(
+                'Admin access required',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               const SizedBox(height: 20),
               FilledButton(
                 onPressed: () => context.go('/home'),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../widgets/admin_dashboard_tab.dart';
 import '../widgets/financial_ledger_tab.dart';
 import '../widgets/kyc_approvals_tab.dart';
@@ -111,15 +112,8 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
       backgroundColor: AppColors.surface1,
       appBar: AppBar(
         backgroundColor: AppColors.surface0,
-        title: Text(
-          _destinations[_selectedIndex].label,
-          style: const TextStyle(
-            fontFamily: 'Sora',
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-            color: AppColors.ink950,
-          ),
-        ),
+        // Title inherits appBarTheme.titleTextStyle (Sora 20sp w600) from AppTheme
+        title: Text(_destinations[_selectedIndex].label),
         leading: Builder(
           builder: (ctx) => IconButton(
             icon: const Icon(Icons.menu_rounded),
@@ -156,19 +150,21 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
                   ),
                   title: Text(
                     d.label,
-                    style: TextStyle(
-                      fontWeight: _tab == d.tab
-                          ? FontWeight.w600
-                          : FontWeight.normal,
-                      color: _tab == d.tab
-                          ? AppColors.blue500
-                          : AppColors.ink700,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          fontWeight: _tab == d.tab
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                          color: _tab == d.tab
+                              ? AppColors.blue500
+                              : AppColors.ink700,
+                        ),
                   ),
                   selected: _tab == d.tab,
                   selectedTileColor: AppColors.blue500.withAlpha(12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(
+                      PetfolioThemeExtension.radiusMd,
+                    ),
                   ),
                   onTap: () {
                     setState(() => _tab = d.tab);
@@ -204,13 +200,11 @@ class _AdminBadge extends StatelessWidget {
                 size: 20, color: AppColors.blue500),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Admin',
-            style: TextStyle(
-              fontSize: 11,
-              color: AppColors.blue500,
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                  color: AppColors.blue500,
+                ),
           ),
         ],
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../marketplace/data/models/shop.dart';
 import '../controllers/kyc_review_controller.dart';
 import 'admin_shared_widgets.dart';
@@ -91,11 +92,15 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
 
   Future<String?> _showRejectDialog(BuildContext context) {
     final ctrl = TextEditingController();
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
     return showDialog<String>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusXl),
+        ),
         title: Row(
           children: [
             Container(
@@ -103,20 +108,14 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
               height: 36,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.danger.withAlpha(15),
+                color: cs.error.withAlpha(15),
               ),
-              child: const Icon(Icons.cancel_outlined,
-                  size: 18, color: AppColors.danger),
+              child: Icon(Icons.cancel_outlined, size: 18, color: cs.error),
             ),
             const SizedBox(width: 12),
-            const Text(
+            Text(
               'Reject KYC',
-              style: TextStyle(
-                fontFamily: 'Sora',
-                fontWeight: FontWeight.w700,
-                fontSize: 17,
-                color: AppColors.ink950,
-              ),
+              style: tt.headlineSmall!.copyWith(fontWeight: FontWeight.w700),
             ),
           ],
         ),
@@ -125,8 +124,9 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Provide a reason for rejecting ${widget.shop.shopName}. The vendor will see this message.',
-              style: const TextStyle(fontSize: 13, color: AppColors.ink500),
+              'Provide a reason for rejecting ${widget.shop.shopName}. '
+              'The vendor will see this message.',
+              style: tt.bodySmall,
             ),
             const SizedBox(height: 16),
             TextField(
@@ -138,17 +138,22 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
                 filled: true,
                 fillColor: AppColors.surface1,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.line200),
+                  borderRadius:
+                      BorderRadius.circular(PetfolioThemeExtension.radiusMd),
+                  borderSide:
+                      const BorderSide(color: AppColors.line200),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.line200),
+                  borderRadius:
+                      BorderRadius.circular(PetfolioThemeExtension.radiusMd),
+                  borderSide:
+                      const BorderSide(color: AppColors.line200),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius:
+                      BorderRadius.circular(PetfolioThemeExtension.radiusMd),
                   borderSide:
-                      const BorderSide(color: AppColors.danger, width: 1.5),
+                      BorderSide(color: cs.error, width: 1.5),
                 ),
               ),
             ),
@@ -167,7 +172,9 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
                       side: const BorderSide(color: AppColors.line200),
                       foregroundColor: AppColors.ink700,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(
+                          PetfolioThemeExtension.radiusMd,
+                        ),
                       ),
                     ),
                     child: const Text('Cancel'),
@@ -178,9 +185,11 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
                   child: FilledButton(
                     onPressed: () => Navigator.pop(ctx, ctrl.text),
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.danger,
+                      backgroundColor: cs.error,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(
+                          PetfolioThemeExtension.radiusMd,
+                        ),
                       ),
                     ),
                     child: const Text('Reject'),
@@ -200,18 +209,15 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
     final bank = shop.bankAccountDetails;
     final hasNid = shop.nationalIdUrl != null;
     final hasLicense = shop.tradeLicenseUrl != null;
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: AppColors.surface0,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.ink950.withAlpha(8),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusXl),
+        color: cs.surface,
+        boxShadow: pt.shadowE1,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,11 +238,9 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
                         shop.shopName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.w700,
+                        style: tt.headlineSmall!.copyWith(
                           fontSize: 15,
-                          color: AppColors.ink950,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -290,14 +294,9 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Documents',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.ink500,
-                      letterSpacing: 0.6,
-                    ),
+                  Text(
+                    'DOCUMENTS',
+                    style: tt.labelSmall,
                   ),
                   const SizedBox(height: 8),
                   Wrap(
@@ -334,13 +333,14 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
                     icon: const Icon(Icons.close_rounded, size: 15),
                     label: const Text('Reject'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.danger,
+                      foregroundColor: cs.error,
                       side: BorderSide(
-                        color:
-                            _busy ? AppColors.line200 : AppColors.danger,
+                        color: _busy ? AppColors.line200 : cs.error,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(
+                          PetfolioThemeExtension.radiusMd,
+                        ),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -362,11 +362,12 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
                         : const Icon(Icons.check_rounded, size: 15),
                     label: const Text('Approve'),
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF16A34A),
-                      disabledBackgroundColor:
-                          Color(0xFF16A34A).withAlpha(80),
+                      backgroundColor: AppColors.success,
+                      disabledBackgroundColor: AppColors.success.withAlpha(80),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(
+                          PetfolioThemeExtension.radiusMd,
+                        ),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -381,7 +382,7 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
   }
 }
 
-// ── Shop avatar with network image + fallback ──────────────────────────────────
+// ── Shop avatar ────────────────────────────────────────────────────────────────
 
 class _ShopAvatar extends StatelessWidget {
   const _ShopAvatar({required this.logoUrl, required this.name});
@@ -395,7 +396,8 @@ class _ShopAvatar extends StatelessWidget {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius:
+            BorderRadius.circular(PetfolioThemeExtension.radiusMd),
         color: AppColors.blue500.withAlpha(15),
         border: Border.all(color: AppColors.line200),
       ),
@@ -411,11 +413,12 @@ class _ShopAvatar extends StatelessWidget {
   }
 
   Widget get _fallback => const Center(
-        child: Icon(Icons.storefront_outlined, size: 22, color: AppColors.blue500),
+        child: Icon(Icons.storefront_outlined,
+            size: 22, color: AppColors.blue500),
       );
 }
 
-// ── Bank detail row with icon ──────────────────────────────────────────────────
+// ── Bank detail row ────────────────────────────────────────────────────────────
 
 class _BankDetailRow extends StatelessWidget {
   const _BankDetailRow({
@@ -431,6 +434,7 @@ class _BankDetailRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (value == null || value!.isEmpty) return const SizedBox.shrink();
+    final tt = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -439,18 +443,14 @@ class _BankDetailRow extends StatelessWidget {
           const SizedBox(width: 8),
           SizedBox(
             width: 88,
-            child: Text(
-              label,
-              style: const TextStyle(fontSize: 12, color: AppColors.ink500),
-            ),
+            child: Text(label, style: tt.labelMedium),
           ),
           Expanded(
             child: Text(
               value!,
-              style: const TextStyle(
-                fontSize: 12,
+              style: tt.labelMedium!.copyWith(
                 fontWeight: FontWeight.w600,
-                color: AppColors.ink700,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ),

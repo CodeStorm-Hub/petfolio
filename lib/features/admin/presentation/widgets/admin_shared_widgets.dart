@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_theme.dart';
 
 class AdminPanelScaffold extends StatelessWidget {
   const AdminPanelScaffold({
@@ -16,6 +17,7 @@ class AdminPanelScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -25,11 +27,9 @@ class AdminPanelScaffold extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  fontFamily: 'Sora',
-                  fontWeight: FontWeight.w700,
+                style: tt.headlineMedium!.copyWith(
                   fontSize: 22,
-                  color: AppColors.ink950,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const Spacer(),
@@ -65,16 +65,12 @@ class AdminStatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusPill),
         color: color.withAlpha(20),
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
+        style: Theme.of(context).textTheme.labelSmall!.copyWith(color: color),
       ),
     );
   }
@@ -94,8 +90,10 @@ class AdminEmptyState extends StatelessWidget {
         children: [
           Icon(icon, size: 48, color: AppColors.ink300),
           const SizedBox(height: 16),
-          Text(message,
-              style: const TextStyle(fontSize: 14, color: AppColors.ink500)),
+          Text(
+            message,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ],
       ),
     );
@@ -116,9 +114,13 @@ class AdminErrorState extends StatelessWidget {
           const Icon(Icons.error_outline_rounded,
               size: 40, color: AppColors.danger),
           const SizedBox(height: 12),
-          Text(message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, color: AppColors.ink700)),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
         ],
       ),
     );
@@ -134,22 +136,22 @@ class AdminBankRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (value == null) return const SizedBox.shrink();
+    final tt = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
           SizedBox(
             width: 72,
-            child: Text(label,
-                style: const TextStyle(fontSize: 12, color: AppColors.ink500)),
+            child: Text(label, style: tt.labelMedium),
           ),
           Expanded(
             child: Text(
               value!,
-              style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.ink950),
+              style: tt.labelMedium!.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
           ),
         ],

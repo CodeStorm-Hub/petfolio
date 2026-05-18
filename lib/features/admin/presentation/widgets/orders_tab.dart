@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../controllers/cod_orders_controller.dart';
 import 'admin_shared_widgets.dart';
 
@@ -25,7 +26,8 @@ class OrdersTab extends ConsumerWidget {
               )
             : ListView.separated(
                 itemCount: orders.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
                 itemBuilder: (context, i) {
                   final order = orders[i];
                   return _CodOrderCard(
@@ -71,12 +73,16 @@ class _CodOrderCardState extends State<_CodOrderCard> {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: AppColors.surface0,
-        boxShadow: const [BoxShadow(color: AppColors.line200, spreadRadius: 0.5)],
+        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+        color: cs.surface,
+        boxShadow: pt.shadowE1,
       ),
       child: Row(
         children: [
@@ -84,7 +90,8 @@ class _CodOrderCardState extends State<_CodOrderCard> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius:
+                  BorderRadius.circular(PetfolioThemeExtension.radiusMd),
               color: AppColors.blue500.withAlpha(15),
             ),
             child: const Icon(Icons.payments_outlined,
@@ -97,16 +104,16 @@ class _CodOrderCardState extends State<_CodOrderCard> {
               children: [
                 Text(
                   widget.amountFormatted,
-                  style: const TextStyle(
-                    fontFamily: 'Sora',
-                    fontWeight: FontWeight.w700,
+                  style: tt.headlineSmall!.copyWith(
                     fontSize: 16,
-                    color: AppColors.ink950,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 Text(
-                  '${widget.itemCount} item${widget.itemCount == 1 ? '' : 's'} · ${_fmtDate(widget.createdAt)}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.ink500),
+                  '${widget.itemCount} '
+                  'item${widget.itemCount == 1 ? '' : 's'} '
+                  '· ${_fmtDate(widget.createdAt)}',
+                  style: tt.labelMedium,
                 ),
               ],
             ),

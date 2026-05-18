@@ -121,6 +121,44 @@ class AdminRepository {
         .eq('status', LedgerStatus.available.name);
   }
 
+  // ── Dashboard ─────────────────────────────────────────────────────────────
+
+  Future<int> fetchActiveShopCount() async {
+    final rows =
+        await _client.from('shops').select('id').eq('is_active', true);
+    return (rows as List).length;
+  }
+
+  Future<int> fetchPlatformRevenueCents() async {
+    final rows = await _client
+        .from('vendor_ledgers')
+        .select('platform_fee_cents')
+        .eq('status', LedgerStatus.paid.name);
+    return (rows as List).fold<int>(
+      0,
+      (sum, r) => sum + (r['platform_fee_cents'] as int),
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> fetchRecentShops({int limit = 5}) async {
+    final rows = await _client
+        .from('shops')
+        .select('id, shop_name, kyc_status, created_at')
+        .order('created_at', ascending: false)
+        .limit(limit);
+    return (rows as List).cast<Map<String, dynamic>>();
+  }
+
+  Future<List<Map<String, dynamic>>> fetchRecentOrders({int limit = 5}) async {
+    final rows = await _client
+        .from('marketplace_orders')
+        .select('id, created_at, status')
+        .eq('status', OrderStatus.delivered.name)
+        .order('created_at', ascending: false)
+        .limit(limit);
+    return (rows as List).cast<Map<String, dynamic>>();
+  }
+
   // ── Overview ──────────────────────────────────────────────────────────────
 
   Future<AdminOverviewMetrics> fetchOverviewMetrics() async {

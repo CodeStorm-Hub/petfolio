@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../controllers/ledger_controller.dart';
 import 'admin_shared_widgets.dart';
 
@@ -25,7 +26,8 @@ class FinancialLedgerTab extends ConsumerWidget {
               )
             : ListView.separated(
                 itemCount: groups.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
                 itemBuilder: (context, i) => _PayoutCard(group: groups[i]),
               ),
       ),
@@ -55,13 +57,16 @@ class _PayoutCardState extends ConsumerState<_PayoutCard> {
   Widget build(BuildContext context) {
     final group = widget.group;
     final bank = group.shop.bankAccountDetails;
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: AppColors.surface0,
-        boxShadow: const [BoxShadow(color: AppColors.line200, spreadRadius: 0.5)],
+        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+        color: cs.surface,
+        boxShadow: pt.shadowE1,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,28 +79,22 @@ class _PayoutCardState extends ConsumerState<_PayoutCard> {
                   children: [
                     Text(
                       group.shop.shopName,
-                      style: const TextStyle(
-                        fontFamily: 'Sora',
-                        fontWeight: FontWeight.w700,
+                      style: tt.headlineSmall!.copyWith(
                         fontSize: 15,
-                        color: AppColors.ink950,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     Text(
-                      '${group.ledgers.length} order${group.ledgers.length == 1 ? '' : 's'}',
-                      style: const TextStyle(fontSize: 12, color: AppColors.ink500),
+                      '${group.ledgers.length} '
+                      'order${group.ledgers.length == 1 ? '' : 's'}',
+                      style: tt.labelMedium,
                     ),
                   ],
                 ),
               ),
               Text(
                 group.totalFormatted,
-                style: const TextStyle(
-                  fontFamily: 'Sora',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                  color: AppColors.ink950,
-                ),
+                style: tt.headlineSmall!.copyWith(fontWeight: FontWeight.w700),
               ),
             ],
           ),
@@ -105,8 +104,10 @@ class _PayoutCardState extends ConsumerState<_PayoutCard> {
               onTap: () => setState(() => _expanded = !_expanded),
               child: Row(
                 children: [
-                  const Text('Bank details',
-                      style: TextStyle(fontSize: 12, color: AppColors.blue500)),
+                  Text(
+                    'Bank details',
+                    style: tt.labelMedium!.copyWith(color: AppColors.blue500),
+                  ),
                   const SizedBox(width: 4),
                   Icon(
                     _expanded
@@ -120,10 +121,22 @@ class _PayoutCardState extends ConsumerState<_PayoutCard> {
             ),
             if (_expanded) ...[
               const SizedBox(height: 8),
-              AdminBankRow(label: 'Holder', value: bank['account_holder']?.toString()),
-              AdminBankRow(label: 'Account', value: bank['account_number']?.toString()),
-              AdminBankRow(label: 'Bank', value: bank['bank_name']?.toString()),
-              AdminBankRow(label: 'Branch', value: bank['branch']?.toString()),
+              AdminBankRow(
+                label: 'Holder',
+                value: bank['account_holder']?.toString(),
+              ),
+              AdminBankRow(
+                label: 'Account',
+                value: bank['account_number']?.toString(),
+              ),
+              AdminBankRow(
+                label: 'Bank',
+                value: bank['bank_name']?.toString(),
+              ),
+              AdminBankRow(
+                label: 'Branch',
+                value: bank['branch']?.toString(),
+              ),
             ],
           ],
           const SizedBox(height: 12),
