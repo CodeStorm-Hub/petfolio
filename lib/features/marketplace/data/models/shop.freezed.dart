@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Shop {
 
- String get id; String get ownerId; String get shopName; String get slug; String? get description; String? get logoUrl; String? get bannerUrl; bool get isActive; bool get isVerified; String? get stripeConnectAccountId; bool get stripeOnboardingComplete; int get platformFeePercent; PayoutMethod get payoutMethod; KycStatus get kycStatus; String? get tradeLicenseUrl; String? get nationalIdUrl; String? get rejectionReason; Map<String, dynamic>? get bankAccountDetails;@JsonKey(name: 'business_email') String? get businessEmail;@JsonKey(name: 'business_phone') String? get businessPhone;@JsonKey(name: 'address_street') String? get addressStreet;@JsonKey(name: 'address_city') String? get addressCity;@JsonKey(name: 'address_state') String? get addressState;@JsonKey(name: 'address_zip') String? get addressZip;@JsonKey(name: 'return_policy') String? get returnPolicy;@JsonKey(name: 'shipping_policy') String? get shippingPolicy;@JsonKey(name: 'social_links') Map<String, dynamic>? get socialLinks; DateTime get createdAt; DateTime get updatedAt;
+ String get id; String get ownerId; String get shopName; String get slug; String? get description; String? get logoUrl; String? get bannerUrl; bool get isActive; bool get isVerified; String? get stripeConnectAccountId; bool get stripeOnboardingComplete; int get platformFeePercent; PayoutMethod get payoutMethod; KycStatus get kycStatus; String? get tradeLicenseUrl; String? get nationalIdUrl; String? get rejectionReason; Map<String, dynamic>? get bankAccountDetails; String? get businessEmail; String? get businessPhone; String? get addressStreet; String? get addressCity; String? get addressState; String? get addressZip; String? get returnPolicy; String? get shippingPolicy; Map<String, dynamic>? get socialLinks; DateTime get createdAt; DateTime get updatedAt;
 /// Create a copy of Shop
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $ShopCopyWith<$Res>  {
   factory $ShopCopyWith(Shop value, $Res Function(Shop) _then) = _$ShopCopyWithImpl;
 @useResult
 $Res call({
- String id, String ownerId, String shopName, String slug, String? description, String? logoUrl, String? bannerUrl, bool isActive, bool isVerified, String? stripeConnectAccountId, bool stripeOnboardingComplete, int platformFeePercent, PayoutMethod payoutMethod, KycStatus kycStatus, String? tradeLicenseUrl, String? nationalIdUrl, String? rejectionReason, Map<String, dynamic>? bankAccountDetails,@JsonKey(name: 'business_email') String? businessEmail,@JsonKey(name: 'business_phone') String? businessPhone,@JsonKey(name: 'address_street') String? addressStreet,@JsonKey(name: 'address_city') String? addressCity,@JsonKey(name: 'address_state') String? addressState,@JsonKey(name: 'address_zip') String? addressZip,@JsonKey(name: 'return_policy') String? returnPolicy,@JsonKey(name: 'shipping_policy') String? shippingPolicy,@JsonKey(name: 'social_links') Map<String, dynamic>? socialLinks, DateTime createdAt, DateTime updatedAt
+ String id, String ownerId, String shopName, String slug, String? description, String? logoUrl, String? bannerUrl, bool isActive, bool isVerified, String? stripeConnectAccountId, bool stripeOnboardingComplete, int platformFeePercent, PayoutMethod payoutMethod, KycStatus kycStatus, String? tradeLicenseUrl, String? nationalIdUrl, String? rejectionReason, Map<String, dynamic>? bankAccountDetails, String? businessEmail, String? businessPhone, String? addressStreet, String? addressCity, String? addressState, String? addressZip, String? returnPolicy, String? shippingPolicy, Map<String, dynamic>? socialLinks, DateTime createdAt, DateTime updatedAt
 });
 
 
@@ -181,7 +181,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String ownerId,  String shopName,  String slug,  String? description,  String? logoUrl,  String? bannerUrl,  bool isActive,  bool isVerified,  String? stripeConnectAccountId,  bool stripeOnboardingComplete,  int platformFeePercent,  PayoutMethod payoutMethod,  KycStatus kycStatus,  String? tradeLicenseUrl,  String? nationalIdUrl,  String? rejectionReason,  Map<String, dynamic>? bankAccountDetails, @JsonKey(name: 'business_email')  String? businessEmail, @JsonKey(name: 'business_phone')  String? businessPhone, @JsonKey(name: 'address_street')  String? addressStreet, @JsonKey(name: 'address_city')  String? addressCity, @JsonKey(name: 'address_state')  String? addressState, @JsonKey(name: 'address_zip')  String? addressZip, @JsonKey(name: 'return_policy')  String? returnPolicy, @JsonKey(name: 'shipping_policy')  String? shippingPolicy, @JsonKey(name: 'social_links')  Map<String, dynamic>? socialLinks,  DateTime createdAt,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String ownerId,  String shopName,  String slug,  String? description,  String? logoUrl,  String? bannerUrl,  bool isActive,  bool isVerified,  String? stripeConnectAccountId,  bool stripeOnboardingComplete,  int platformFeePercent,  PayoutMethod payoutMethod,  KycStatus kycStatus,  String? tradeLicenseUrl,  String? nationalIdUrl,  String? rejectionReason,  Map<String, dynamic>? bankAccountDetails,  String? businessEmail,  String? businessPhone,  String? addressStreet,  String? addressCity,  String? addressState,  String? addressZip,  String? returnPolicy,  String? shippingPolicy,  Map<String, dynamic>? socialLinks,  DateTime createdAt,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Shop() when $default != null:
 return $default(_that.id,_that.ownerId,_that.shopName,_that.slug,_that.description,_that.logoUrl,_that.bannerUrl,_that.isActive,_that.isVerified,_that.stripeConnectAccountId,_that.stripeOnboardingComplete,_that.platformFeePercent,_that.payoutMethod,_that.kycStatus,_that.tradeLicenseUrl,_that.nationalIdUrl,_that.rejectionReason,_that.bankAccountDetails,_that.businessEmail,_that.businessPhone,_that.addressStreet,_that.addressCity,_that.addressState,_that.addressZip,_that.returnPolicy,_that.shippingPolicy,_that.socialLinks,_that.createdAt,_that.updatedAt);case _:
@@ -202,7 +202,7 @@ return $default(_that.id,_that.ownerId,_that.shopName,_that.slug,_that.descripti
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String ownerId,  String shopName,  String slug,  String? description,  String? logoUrl,  String? bannerUrl,  bool isActive,  bool isVerified,  String? stripeConnectAccountId,  bool stripeOnboardingComplete,  int platformFeePercent,  PayoutMethod payoutMethod,  KycStatus kycStatus,  String? tradeLicenseUrl,  String? nationalIdUrl,  String? rejectionReason,  Map<String, dynamic>? bankAccountDetails, @JsonKey(name: 'business_email')  String? businessEmail, @JsonKey(name: 'business_phone')  String? businessPhone, @JsonKey(name: 'address_street')  String? addressStreet, @JsonKey(name: 'address_city')  String? addressCity, @JsonKey(name: 'address_state')  String? addressState, @JsonKey(name: 'address_zip')  String? addressZip, @JsonKey(name: 'return_policy')  String? returnPolicy, @JsonKey(name: 'shipping_policy')  String? shippingPolicy, @JsonKey(name: 'social_links')  Map<String, dynamic>? socialLinks,  DateTime createdAt,  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String ownerId,  String shopName,  String slug,  String? description,  String? logoUrl,  String? bannerUrl,  bool isActive,  bool isVerified,  String? stripeConnectAccountId,  bool stripeOnboardingComplete,  int platformFeePercent,  PayoutMethod payoutMethod,  KycStatus kycStatus,  String? tradeLicenseUrl,  String? nationalIdUrl,  String? rejectionReason,  Map<String, dynamic>? bankAccountDetails,  String? businessEmail,  String? businessPhone,  String? addressStreet,  String? addressCity,  String? addressState,  String? addressZip,  String? returnPolicy,  String? shippingPolicy,  Map<String, dynamic>? socialLinks,  DateTime createdAt,  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _Shop():
 return $default(_that.id,_that.ownerId,_that.shopName,_that.slug,_that.description,_that.logoUrl,_that.bannerUrl,_that.isActive,_that.isVerified,_that.stripeConnectAccountId,_that.stripeOnboardingComplete,_that.platformFeePercent,_that.payoutMethod,_that.kycStatus,_that.tradeLicenseUrl,_that.nationalIdUrl,_that.rejectionReason,_that.bankAccountDetails,_that.businessEmail,_that.businessPhone,_that.addressStreet,_that.addressCity,_that.addressState,_that.addressZip,_that.returnPolicy,_that.shippingPolicy,_that.socialLinks,_that.createdAt,_that.updatedAt);case _:
@@ -222,7 +222,7 @@ return $default(_that.id,_that.ownerId,_that.shopName,_that.slug,_that.descripti
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String ownerId,  String shopName,  String slug,  String? description,  String? logoUrl,  String? bannerUrl,  bool isActive,  bool isVerified,  String? stripeConnectAccountId,  bool stripeOnboardingComplete,  int platformFeePercent,  PayoutMethod payoutMethod,  KycStatus kycStatus,  String? tradeLicenseUrl,  String? nationalIdUrl,  String? rejectionReason,  Map<String, dynamic>? bankAccountDetails, @JsonKey(name: 'business_email')  String? businessEmail, @JsonKey(name: 'business_phone')  String? businessPhone, @JsonKey(name: 'address_street')  String? addressStreet, @JsonKey(name: 'address_city')  String? addressCity, @JsonKey(name: 'address_state')  String? addressState, @JsonKey(name: 'address_zip')  String? addressZip, @JsonKey(name: 'return_policy')  String? returnPolicy, @JsonKey(name: 'shipping_policy')  String? shippingPolicy, @JsonKey(name: 'social_links')  Map<String, dynamic>? socialLinks,  DateTime createdAt,  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String ownerId,  String shopName,  String slug,  String? description,  String? logoUrl,  String? bannerUrl,  bool isActive,  bool isVerified,  String? stripeConnectAccountId,  bool stripeOnboardingComplete,  int platformFeePercent,  PayoutMethod payoutMethod,  KycStatus kycStatus,  String? tradeLicenseUrl,  String? nationalIdUrl,  String? rejectionReason,  Map<String, dynamic>? bankAccountDetails,  String? businessEmail,  String? businessPhone,  String? addressStreet,  String? addressCity,  String? addressState,  String? addressZip,  String? returnPolicy,  String? shippingPolicy,  Map<String, dynamic>? socialLinks,  DateTime createdAt,  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Shop() when $default != null:
 return $default(_that.id,_that.ownerId,_that.shopName,_that.slug,_that.description,_that.logoUrl,_that.bannerUrl,_that.isActive,_that.isVerified,_that.stripeConnectAccountId,_that.stripeOnboardingComplete,_that.platformFeePercent,_that.payoutMethod,_that.kycStatus,_that.tradeLicenseUrl,_that.nationalIdUrl,_that.rejectionReason,_that.bankAccountDetails,_that.businessEmail,_that.businessPhone,_that.addressStreet,_that.addressCity,_that.addressState,_that.addressZip,_that.returnPolicy,_that.shippingPolicy,_that.socialLinks,_that.createdAt,_that.updatedAt);case _:
@@ -237,7 +237,7 @@ return $default(_that.id,_that.ownerId,_that.shopName,_that.slug,_that.descripti
 @JsonSerializable()
 
 class _Shop extends Shop {
-  const _Shop({required this.id, required this.ownerId, required this.shopName, required this.slug, this.description, this.logoUrl, this.bannerUrl, required this.isActive, required this.isVerified, this.stripeConnectAccountId, required this.stripeOnboardingComplete, required this.platformFeePercent, required this.payoutMethod, required this.kycStatus, this.tradeLicenseUrl, this.nationalIdUrl, this.rejectionReason, final  Map<String, dynamic>? bankAccountDetails, @JsonKey(name: 'business_email') this.businessEmail, @JsonKey(name: 'business_phone') this.businessPhone, @JsonKey(name: 'address_street') this.addressStreet, @JsonKey(name: 'address_city') this.addressCity, @JsonKey(name: 'address_state') this.addressState, @JsonKey(name: 'address_zip') this.addressZip, @JsonKey(name: 'return_policy') this.returnPolicy, @JsonKey(name: 'shipping_policy') this.shippingPolicy, @JsonKey(name: 'social_links') final  Map<String, dynamic>? socialLinks, required this.createdAt, required this.updatedAt}): _bankAccountDetails = bankAccountDetails,_socialLinks = socialLinks,super._();
+  const _Shop({required this.id, required this.ownerId, required this.shopName, required this.slug, this.description, this.logoUrl, this.bannerUrl, required this.isActive, required this.isVerified, this.stripeConnectAccountId, required this.stripeOnboardingComplete, required this.platformFeePercent, required this.payoutMethod, required this.kycStatus, this.tradeLicenseUrl, this.nationalIdUrl, this.rejectionReason, final  Map<String, dynamic>? bankAccountDetails, this.businessEmail, this.businessPhone, this.addressStreet, this.addressCity, this.addressState, this.addressZip, this.returnPolicy, this.shippingPolicy, final  Map<String, dynamic>? socialLinks, required this.createdAt, required this.updatedAt}): _bankAccountDetails = bankAccountDetails,_socialLinks = socialLinks,super._();
   factory _Shop.fromJson(Map<String, dynamic> json) => _$ShopFromJson(json);
 
 @override final  String id;
@@ -266,16 +266,16 @@ class _Shop extends Shop {
   return EqualUnmodifiableMapView(value);
 }
 
-@override@JsonKey(name: 'business_email') final  String? businessEmail;
-@override@JsonKey(name: 'business_phone') final  String? businessPhone;
-@override@JsonKey(name: 'address_street') final  String? addressStreet;
-@override@JsonKey(name: 'address_city') final  String? addressCity;
-@override@JsonKey(name: 'address_state') final  String? addressState;
-@override@JsonKey(name: 'address_zip') final  String? addressZip;
-@override@JsonKey(name: 'return_policy') final  String? returnPolicy;
-@override@JsonKey(name: 'shipping_policy') final  String? shippingPolicy;
+@override final  String? businessEmail;
+@override final  String? businessPhone;
+@override final  String? addressStreet;
+@override final  String? addressCity;
+@override final  String? addressState;
+@override final  String? addressZip;
+@override final  String? returnPolicy;
+@override final  String? shippingPolicy;
  final  Map<String, dynamic>? _socialLinks;
-@override@JsonKey(name: 'social_links') Map<String, dynamic>? get socialLinks {
+@override Map<String, dynamic>? get socialLinks {
   final value = _socialLinks;
   if (value == null) return null;
   if (_socialLinks is EqualUnmodifiableMapView) return _socialLinks;
@@ -319,7 +319,7 @@ abstract mixin class _$ShopCopyWith<$Res> implements $ShopCopyWith<$Res> {
   factory _$ShopCopyWith(_Shop value, $Res Function(_Shop) _then) = __$ShopCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String ownerId, String shopName, String slug, String? description, String? logoUrl, String? bannerUrl, bool isActive, bool isVerified, String? stripeConnectAccountId, bool stripeOnboardingComplete, int platformFeePercent, PayoutMethod payoutMethod, KycStatus kycStatus, String? tradeLicenseUrl, String? nationalIdUrl, String? rejectionReason, Map<String, dynamic>? bankAccountDetails,@JsonKey(name: 'business_email') String? businessEmail,@JsonKey(name: 'business_phone') String? businessPhone,@JsonKey(name: 'address_street') String? addressStreet,@JsonKey(name: 'address_city') String? addressCity,@JsonKey(name: 'address_state') String? addressState,@JsonKey(name: 'address_zip') String? addressZip,@JsonKey(name: 'return_policy') String? returnPolicy,@JsonKey(name: 'shipping_policy') String? shippingPolicy,@JsonKey(name: 'social_links') Map<String, dynamic>? socialLinks, DateTime createdAt, DateTime updatedAt
+ String id, String ownerId, String shopName, String slug, String? description, String? logoUrl, String? bannerUrl, bool isActive, bool isVerified, String? stripeConnectAccountId, bool stripeOnboardingComplete, int platformFeePercent, PayoutMethod payoutMethod, KycStatus kycStatus, String? tradeLicenseUrl, String? nationalIdUrl, String? rejectionReason, Map<String, dynamic>? bankAccountDetails, String? businessEmail, String? businessPhone, String? addressStreet, String? addressCity, String? addressState, String? addressZip, String? returnPolicy, String? shippingPolicy, Map<String, dynamic>? socialLinks, DateTime createdAt, DateTime updatedAt
 });
 
 

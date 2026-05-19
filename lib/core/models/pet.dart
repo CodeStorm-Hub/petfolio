@@ -1,11 +1,25 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:petfolio/features/pet_profile/data/models/pet_gender.dart';
 import 'package:petfolio/features/pet_profile/data/models/pet_species.dart';
 
 part 'pet.freezed.dart';
 part 'pet.g.dart';
 
-@JsonEnum(fieldRename: FieldRename.snake)
-enum ActivityLevel { sedentary, low, moderate, high, veryHigh }
+// ── PetGender JSON converter ──────────────────────────────────────────────────
+// build.yaml sets field_rename: snake globally, so all camelCase fields are
+// mapped to snake_case automatically — no @JsonKey(name:) needed here.
+
+class _PetGenderConverter implements JsonConverter<PetGender, String?> {
+  const _PetGenderConverter();
+
+  @override
+  PetGender fromJson(String? json) => PetGender.fromDb(json);
+
+  @override
+  String toJson(PetGender object) => object.dbValue;
+}
+
+// ── Pet ───────────────────────────────────────────────────────────────────────
 
 @freezed
 abstract class Pet with _$Pet {
@@ -18,14 +32,26 @@ abstract class Pet with _$Pet {
     required String species,
     String? breed,
     String? avatarUrl,
-    DateTime? dateOfBirth,
-    ActivityLevel? activityLevel,
+    String? bio,
     required DateTime createdAt,
+    DateTime? dateOfBirth,
+    @_PetGenderConverter() @Default(PetGender.unknown) PetGender gender,
+    double? weightKg,
+    String? activityLevel,
+    @Default(true) bool isPublic,
+    @Default(0) int displayOrder,
+    DateTime? archivedAt,
+    @Default(false) bool isDiscoverable,
+    String? handle,
+    String? accentColor,
+    DateTime? updatedAt,
   }) = _Pet;
 
   factory Pet.fromJson(Map<String, dynamic> json) => _$PetFromJson(json);
 
   PetSpecies get speciesEnum => PetSpecies.fromId(species) ?? PetSpecies.dog;
+
+  bool get isArchived => archivedAt != null;
 
   int? get ageInYears {
     if (dateOfBirth == null) return null;

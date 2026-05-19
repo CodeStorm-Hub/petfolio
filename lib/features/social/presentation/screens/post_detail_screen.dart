@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/errors/app_exception.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/comment.dart';
 import '../../data/models/feed_post.dart';
+import '../../data/repositories/social_repository.dart';
 import '../controllers/comment_controller.dart';
 import '../controllers/social_controller.dart';
 
@@ -688,7 +691,11 @@ class _PostOptionsSheet extends ConsumerWidget {
               ListTile(
                 leading: const Icon(Icons.flag_outlined),
                 title: const Text('Report Post'),
-                onTap: () => Navigator.pop(context),
+                onTap: () {
+                  final repo = ref.read(socialRepositoryProvider);
+                  Navigator.pop(context);
+                  _showReportDialog(context, repo, post);
+                },
               ),
             ],
           ],
@@ -756,6 +763,103 @@ class _PostOptionsSheet extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showReportDialog(
+    BuildContext context,
+    SocialRepository repo,
+    FeedPost post,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => _ReportPostDialog(repo: repo, post: post),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Report Post dialog
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ReportPostDialog extends StatefulWidget {
+  const _ReportPostDialog({required this.repo, required this.post});
+  final SocialRepository repo;
+  final FeedPost post;
+
+  @override
+  State<_ReportPostDialog> createState() => _ReportPostDialogState();
+}
+
+class _ReportPostDialogState extends State<_ReportPostDialog> {
+  static const _reasons = [
+    'Spam or misleading',
+    'Inappropriate content',
+    'Harassment or bullying',
+    'Animal abuse or neglect',
+    'Other',
+  ];
+
+  String? _selected;
+  bool _loading = false;
+
+  Future<void> _submit() async {
+    if (_selected == null) return;
+    setState(() => _loading = true);
+    try {
+      await widget.repo.reportPost(
+        postId: widget.post.id,
+        reason: _selected!,
+      );
+      if (mounted) Navigator.pop(context);
+      AppSnackBar.show('Report submitted. Thank you.');
+    } on AppException catch (e) {
+      if (mounted) Navigator.pop(context);
+      AppSnackBar.showError(e);
+    } catch (e) {
+      if (mounted) Navigator.pop(context);
+      AppSnackBar.showError(e);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Report Post'),
+      content: SingleChildScrollView(
+        child: RadioGroup<String>(
+          groupValue: _selected,
+          onChanged: (v) { if (!_loading) setState(() => _selected = v); },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: _reasons
+                .map(
+                  (r) => RadioListTile<String>(
+                    value: r,
+                    title: Text(r),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _loading ? null : () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: (_selected == null || _loading) ? null : _submit,
+          child: _loading
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Submit'),
+        ),
+      ],
     );
   }
 }

@@ -87,12 +87,29 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Search bar (decorative — filtering is category-based in this version)
+// Search bar
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _SearchBar extends StatelessWidget {
+class _SearchBar extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<_SearchBar> createState() => _SearchBarState();
+}
+
+class _SearchBarState extends ConsumerState<_SearchBar> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final hasText = ref.watch(
+      marketplaceSearchQueryProvider.select((q) => q.isNotEmpty),
+    );
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
       child: Container(
@@ -104,19 +121,46 @@ class _SearchBar extends StatelessWidget {
             BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
           ],
         ),
-        child: const Row(
+        child: Row(
           children: [
-            SizedBox(width: 14),
-            Icon(Icons.search_rounded, size: 18, color: AppColors.ink500),
-            SizedBox(width: 10),
+            const SizedBox(width: 14),
+            const Icon(Icons.search_rounded, size: 18, color: AppColors.ink500),
+            const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                'Search food, gear, treats…',
-                style: TextStyle(fontSize: 14, color: AppColors.ink500),
+              child: TextField(
+                controller: _controller,
+                onChanged: (v) =>
+                    ref.read(marketplaceSearchQueryProvider.notifier).set(v),
+                style: const TextStyle(fontSize: 14, color: AppColors.ink950),
+                decoration: const InputDecoration(
+                  hintText: 'Search food, gear, treats…',
+                  hintStyle:
+                      TextStyle(fontSize: 14, color: AppColors.ink500),
+                  isDense: true,
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
               ),
             ),
-            Icon(Icons.tune_rounded, size: 18, color: AppColors.ink500),
-            SizedBox(width: 14),
+            GestureDetector(
+              onTap: hasText
+                  ? () {
+                      _controller.clear();
+                      ref
+                          .read(marketplaceSearchQueryProvider.notifier)
+                          .clear();
+                    }
+                  : null,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Icon(
+                  hasText ? Icons.close_rounded : Icons.tune_rounded,
+                  size: 18,
+                  color: AppColors.ink500,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
           ],
         ),
       ),

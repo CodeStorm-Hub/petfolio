@@ -2,6 +2,17 @@
 
 ---
 
+## 2026-05-20 — Report Post feature (DB → repo → UI)
+
+- **`supabase/migrations/20260520000000_add_reported_posts.sql`** — `reported_posts` table: `id`, `post_id` FK → posts (cascade), `reporter_id` FK → auth.users (cascade), `reason` (1–500 chars check), `created_at`, unique `(post_id, reporter_id)`; RLS: INSERT `reporter_id = auth.uid()`, SELECT own rows. Already applied to `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.
+- **`lib/core/widgets/app_snack_bar.dart`** — Added `AppSnackBar.show(String message)` for neutral/success floating snackbars.
+- **`lib/features/social/data/repositories/social_repository.dart`** — Added `reportPost({required postId, required reason})`: inserts into `reported_posts`; maps PostgrestException code `23505` → `ValidationException('You have already reported this post.')`.
+- **`lib/features/social/presentation/screens/post_detail_screen.dart`** — Added `_ReportPostDialog` (`StatefulWidget`) with 5 predefined reasons via `RadioGroup`/`RadioListTile`; loading state on submit; calls `reportPost`, shows `AppSnackBar.show` on success or `AppSnackBar.showError` on failure. Updated `_PostOptionsSheet` "Report Post" `onTap` to capture repo before sheet pop, then show dialog.
+
+`flutter analyze` — **No issues found.** `flutter test` — **5/5 pass.**
+
+---
+
 ## 2026-05-19 — Shop Profile Edit (full stack: DB → model → repo → controller → UI)
 
 ### Database

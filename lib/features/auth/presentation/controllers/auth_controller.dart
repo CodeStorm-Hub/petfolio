@@ -25,3 +25,62 @@ final isLoggedInProvider = Provider<bool>((ref) {
     error: (_, _) => false,
   );
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Password reset
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum PasswordResetStatus { idle, loading, sent, failure }
+
+class PasswordResetState {
+  const PasswordResetState({
+    this.status = PasswordResetStatus.idle,
+    this.error,
+  });
+
+  final PasswordResetStatus status;
+  final String? error;
+
+  bool get isLoading => status == PasswordResetStatus.loading;
+  bool get isSent => status == PasswordResetStatus.sent;
+
+  PasswordResetState copyWith({
+    PasswordResetStatus? status,
+    String? error,
+    bool clearError = false,
+  }) =>
+      PasswordResetState(
+        status: status ?? this.status,
+        error: clearError ? null : (error ?? this.error),
+      );
+}
+
+final passwordResetProvider =
+    NotifierProvider<PasswordResetNotifier, PasswordResetState>(
+  PasswordResetNotifier.new,
+);
+
+class PasswordResetNotifier extends Notifier<PasswordResetState> {
+  @override
+  PasswordResetState build() => const PasswordResetState();
+
+  Future<void> send(String email) async {
+    state = const PasswordResetState(status: PasswordResetStatus.loading);
+    try {
+      await ref.read(authRepositoryProvider).resetPassword(email);
+      state = const PasswordResetState(status: PasswordResetStatus.sent);
+    } on AuthException catch (e) {
+      state = PasswordResetState(
+        status: PasswordResetStatus.failure,
+        error: e.message,
+      );
+    } catch (e) {
+      state = PasswordResetState(
+        status: PasswordResetStatus.failure,
+        error: e.toString(),
+      );
+    }
+  }
+
+  void reset() => state = const PasswordResetState();
+}

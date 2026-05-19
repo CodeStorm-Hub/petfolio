@@ -17,4 +17,7 @@ class AuthRepository {
       _client.auth.signUp(email: email, password: password);
 
   Future<void> signOut() => _client.auth.signOut();
+
+  Future<void> resetPassword(String email) =>
+      _client.auth.resetPasswordForEmail(email.trim());
 }

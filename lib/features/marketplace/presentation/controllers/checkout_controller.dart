@@ -5,7 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../data/repositories/order_repository.dart';
+import '../../data/repositories/order_repository.dart'
+    show
+        InsufficientStockException,
+        OrderRepository,
+        orderRepositoryProvider,
+        PaymentTimeoutException,
+        ShopInactiveException,
+        ShopNotVerifiedException;
 import 'buyer_orders_controller.dart';
 import 'cart_controller.dart';
 
@@ -37,17 +44,22 @@ class CheckoutState {
     this.orderId,
     this.activeShopId,
     this.errorMessage,
+    this.verificationPending = false,
   });
 
   final CheckoutStatus status;
   final String? orderId;
 
   /// Which vendor's checkout is currently in progress.
-  /// Used by the UI to show a loading indicator on the correct "Pay" button.
   final String? activeShopId;
 
   /// Non-null only on [CheckoutStatus.failure]. Null on user cancel.
   final String? errorMessage;
+
+  /// True when Stripe confirmed but the backend webhook has not yet updated
+  /// the order row within the polling window.  The charge still went through;
+  /// the UI should prompt the user to check their Orders screen.
+  final bool verificationPending;
 
   bool get isLoading =>
       status == CheckoutStatus.loadingIntent ||
@@ -61,12 +73,14 @@ class CheckoutState {
     String? orderId,
     String? activeShopId,
     String? errorMessage,
+    bool? verificationPending,
     bool clearError = false,
   }) =>
       CheckoutState(
-        status:       status       ?? this.status,
-        orderId:      orderId      ?? this.orderId,
-        activeShopId: activeShopId ?? this.activeShopId,
+        status:              status              ?? this.status,
+        orderId:             orderId             ?? this.orderId,
+        activeShopId:        activeShopId        ?? this.activeShopId,
+        verificationPending: verificationPending ?? this.verificationPending,
         errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       );
 }
@@ -143,11 +157,28 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
       // 4. Present Payment Sheet — suspends until dismissed.
       await Stripe.instance.presentPaymentSheet();
 
-      // 5. Success — remove only this vendor's items from the cart.
+      // 5. Verify backend received the webhook and updated the order row.
+      //    pollOrderConfirmation throws PaymentTimeoutException after 15 s if
+      //    the webhook is delayed — treated as a soft success below.
+      try {
+        await _repo.pollOrderConfirmation(orderId);
+      } on PaymentTimeoutException {
+        ref.read(cartProvider.notifier).clearShopCart(shopId);
+        ref.invalidate(buyerOrdersProvider);
+        state = state.copyWith(
+          status: CheckoutStatus.success,
+          verificationPending: true,
+          clearError: true,
+        );
+        return;
+      }
+
+      // 6. Backend confirmed — full success.
       ref.read(cartProvider.notifier).clearShopCart(shopId);
       ref.invalidate(buyerOrdersProvider);
       state = state.copyWith(
         status: CheckoutStatus.success,
+        verificationPending: false,
         clearError: true,
       );
     } on StripeException catch (e) {

@@ -8,6 +8,17 @@ final GlobalKey<ScaffoldMessengerState> appSnackBarMessengerKey =
 class AppSnackBar {
   AppSnackBar._();
 
+  static void show(String message) {
+    final messenger = appSnackBarMessengerKey.currentState;
+    if (messenger == null) return;
+    messenger.showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        content: Text(message),
+      ),
+    );
+  }
+
   static void showError(Object error) {
     final messenger = appSnackBarMessengerKey.currentState;
     if (messenger == null) return;

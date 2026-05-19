@@ -174,6 +174,42 @@ class OrderRepository {
         .single();
     return MarketplaceOrder.fromJson(row);
   }
+
+  /// Poll until the backend confirms payment (webhook updated the row) or
+  /// [timeout] elapses.  Throws [PaymentTimeoutException] on timeout so the
+  /// caller can distinguish "still pending" from a hard failure.
+  Future<MarketplaceOrder> pollOrderConfirmation(
+    String orderId, {
+    Duration timeout = const Duration(seconds: 15),
+    Duration interval = const Duration(seconds: 2),
+  }) async {
+    final deadline = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(deadline)) {
+      final order = await fetchOrder(orderId);
+      if (order.paymentStatus == PaymentStatus.paid ||
+          order.status == OrderStatus.processing) {
+        return order;
+      }
+      if (order.status == OrderStatus.cancelled) {
+        throw Exception('Order was cancelled during verification.');
+      }
+      await Future<void>.delayed(interval);
+    }
+    throw const PaymentTimeoutException();
+  }
+}
+
+/// Stripe confirmed the payment but the backend webhook has not updated the
+/// order row within the polling window.  The charge almost certainly went
+/// through — callers should treat this as a soft success and tell the user
+/// to check their orders.
+class PaymentTimeoutException implements Exception {
+  const PaymentTimeoutException();
+
+  @override
+  String toString() =>
+      'Your payment was accepted but confirmation is still processing. '
+      'Check your Orders for the final status.';
 }
 
 class ShopNotVerifiedException implements Exception {

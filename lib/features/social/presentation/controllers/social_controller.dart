@@ -5,16 +5,48 @@ import '../../../../features/pet_profile/presentation/controllers/active_pet_con
 import '../../data/models/feed_post.dart';
 import '../../data/repositories/social_repository.dart';
 
+const int _feedPageSize = 15;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Feed state
+// ─────────────────────────────────────────────────────────────────────────────
+
+class SocialFeedState {
+  const SocialFeedState({
+    this.posts = const [],
+    this.isLoadingMore = false,
+    this.hasMore = true,
+    this.nextOffset = 0,
+  });
+
+  final List<FeedPost> posts;
+  final bool isLoadingMore;
+  final bool hasMore;
+  final int nextOffset;
+
+  SocialFeedState copyWith({
+    List<FeedPost>? posts,
+    bool? isLoadingMore,
+    bool? hasMore,
+    int? nextOffset,
+  }) =>
+      SocialFeedState(
+        posts: posts ?? this.posts,
+        isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+        hasMore: hasMore ?? this.hasMore,
+        nextOffset: nextOffset ?? this.nextOffset,
+      );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Providers
 // ─────────────────────────────────────────────────────────────────────────────
 
 final socialControllerProvider =
-    AsyncNotifierProvider.family<SocialNotifier, List<FeedPost>, String>(
+    AsyncNotifierProvider.family<SocialNotifier, SocialFeedState, String>(
   SocialNotifier.new,
 );
 
-/// Fetches a single post by ID — used as a fallback on deep links / restarts.
 final postDetailProvider =
     FutureProvider.family<FeedPost, String>((ref, postId) async {
   final activePetId = ref.watch(activePetIdProvider) ?? '';
@@ -23,14 +55,12 @@ final postDetailProvider =
       .fetchPostById(postId: postId, activePetId: activePetId);
 });
 
-/// Watches a specific post from the feed state for real-time updates.
 final postProvider = Provider.family<FeedPost?, String>((ref, postId) {
   final activePetId = ref.watch(activePetIdProvider) ?? '';
-  final feed = ref.watch(socialControllerProvider(activePetId)).value;
-  if (feed == null) return null;
-  
+  final feedState = ref.watch(socialControllerProvider(activePetId)).value;
+  if (feedState == null) return null;
   try {
-    return feed.firstWhere((p) => p.id == postId);
+    return feedState.posts.firstWhere((p) => p.id == postId);
   } catch (_) {
     return null;
   }
@@ -40,23 +70,20 @@ final postProvider = Provider.family<FeedPost?, String>((ref, postId) {
 // Notifier
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Manages the social feed for a given [petId].
-///
-/// Optimistic UI pattern (paw like / candle):
-///   1. Snapshot the current state.
-///   2. Apply the optimistic update immediately → heart turns red on next frame.
-///   3. Await the Supabase write — [SocialRepository] throws on failure.
-///   4. On catch, restore the snapshot — UI reverts transparently.
-class SocialNotifier extends AsyncNotifier<List<FeedPost>> {
+class SocialNotifier extends AsyncNotifier<SocialFeedState> {
   SocialNotifier(this.arg);
   final String arg;
 
   RealtimeChannel? _channel;
 
   @override
-  Future<List<FeedPost>> build() async {
+  Future<SocialFeedState> build() async {
     final petId = arg;
-    final posts = await _repo.fetchFeed(activePetId: petId);
+    final posts = await _repo.fetchFeed(
+      activePetId: petId,
+      limit: _feedPageSize,
+      offset: 0,
+    );
 
     _channel?.unsubscribe();
     _channel = Supabase.instance.client
@@ -69,23 +96,23 @@ class SocialNotifier extends AsyncNotifier<List<FeedPost>> {
             final newRow = payload.newRecord;
             final postId = newRow['id'] as String?;
             if (postId == null) return;
-            
+
             final likeCount = newRow['like_count'] as int?;
             final commentCount = newRow['comment_count'] as int?;
 
             final current = state.value;
             if (current == null) return;
 
-            final idx = current.indexWhere((p) => p.id == postId);
+            final idx = current.posts.indexWhere((p) => p.id == postId);
             if (idx == -1) return;
 
-            final updated = List<FeedPost>.from(current);
+            final updated = List<FeedPost>.from(current.posts);
             updated[idx] = updated[idx].copyWithCounts(
               likes: likeCount,
               comments: commentCount,
             );
-            
-            state = AsyncData(updated);
+
+            state = AsyncData(current.copyWith(posts: updated));
           },
         )
         .subscribe();
@@ -94,117 +121,147 @@ class SocialNotifier extends AsyncNotifier<List<FeedPost>> {
       _channel?.unsubscribe();
     });
 
-    return posts;
+    return SocialFeedState(
+      posts: posts,
+      hasMore: posts.length >= _feedPageSize,
+      nextOffset: posts.length,
+    );
   }
 
   SocialRepository get _repo => ref.read(socialRepositoryProvider);
 
-  /// Pull-to-refresh entry point.
   Future<void> refresh() async {
     state = const AsyncLoading();
     try {
-      state = AsyncData(await _repo.fetchFeed(activePetId: arg));
+      final posts = await _repo.fetchFeed(
+        activePetId: arg,
+        limit: _feedPageSize,
+        offset: 0,
+      );
+      state = AsyncData(SocialFeedState(
+        posts: posts,
+        hasMore: posts.length >= _feedPageSize,
+        nextOffset: posts.length,
+      ));
     } catch (e, st) {
       state = AsyncError(e, st);
+    }
+  }
+
+  Future<void> loadMore() async {
+    final current = state.value;
+    if (current == null || current.isLoadingMore || !current.hasMore) return;
+
+    state = AsyncData(current.copyWith(isLoadingMore: true));
+
+    try {
+      final more = await _repo.fetchFeed(
+        activePetId: arg,
+        limit: _feedPageSize,
+        offset: current.nextOffset,
+      );
+
+      if (!ref.mounted) return;
+
+      final existingIds = current.posts.map((p) => p.id).toSet();
+      final newPosts =
+          more.where((p) => !existingIds.contains(p.id)).toList();
+
+      state = AsyncData(current.copyWith(
+        posts: [...current.posts, ...newPosts],
+        isLoadingMore: false,
+        hasMore: more.length >= _feedPageSize,
+        nextOffset: current.nextOffset + more.length,
+      ));
+    } catch (_) {
+      if (ref.mounted) {
+        final cur = state.value;
+        if (cur != null) state = AsyncData(cur.copyWith(isLoadingMore: false));
+      }
     }
   }
 
   // ── Paw like ──────────────────────────────────────────────────────────────
 
   Future<void> toggleLike(String postId) async {
-    final prev = state.value;
-    if (prev == null) return;
+    final current = state.value;
+    if (current == null) return;
 
-    final idx = prev.indexWhere((p) => p.id == postId);
+    final idx = current.posts.indexWhere((p) => p.id == postId);
     if (idx == -1) return;
 
-    final post = prev[idx];
+    final post = current.posts[idx];
     final nowLiked = !post.isLiked;
 
-    // 1. Optimistic update — the heart turns red instantly.
-    final updated = List<FeedPost>.from(prev)
+    final updated = List<FeedPost>.from(current.posts)
       ..[idx] = post.copyWithLike(liked: nowLiked);
-    state = AsyncData(updated);
+    state = AsyncData(current.copyWith(posts: updated));
 
     try {
-      // 2. Background write — throws on failure.
-      await _repo.toggleLike(
-        postId: postId,
-        petId: arg,
-        liked: nowLiked,
-      );
+      await _repo.toggleLike(postId: postId, petId: arg, liked: nowLiked);
     } catch (_) {
-      state = AsyncData(prev);
+      state = AsyncData(current);
     }
   }
 
   // ── Edit caption ──────────────────────────────────────────────────────────
 
-  /// Edits a post's caption with an optimistic update.
   Future<void> updateCaption(String postId, String newCaption) async {
-    final prev = state.value;
-    if (prev == null) return;
+    final current = state.value;
+    if (current == null) return;
 
-    final idx = prev.indexWhere((p) => p.id == postId);
+    final idx = current.posts.indexWhere((p) => p.id == postId);
     if (idx == -1) return;
 
-    // 1. Optimistic update — caption changes immediately in the feed.
-    final updated = List<FeedPost>.from(prev)
-      ..[idx] = prev[idx].copyWithCaption(newCaption);
-    state = AsyncData(updated);
+    final updated = List<FeedPost>.from(current.posts)
+      ..[idx] = current.posts[idx].copyWithCaption(newCaption);
+    state = AsyncData(current.copyWith(posts: updated));
 
     try {
-      // 2. Background write.
       await _repo.updatePostCaption(postId: postId, newCaption: newCaption);
     } catch (_) {
-      // 3. Rollback on failure.
-      state = AsyncData(prev);
+      state = AsyncData(current);
     }
   }
 
   // ── Delete post ───────────────────────────────────────────────────────────
 
-  /// Removes a post from the feed with optimistic removal.
   Future<void> deletePost(String postId) async {
-    final prev = state.value;
-    if (prev == null) return;
+    final current = state.value;
+    if (current == null) return;
 
-    // 1. Optimistic remove — post disappears from feed instantly.
-    state = AsyncData(prev.where((p) => p.id != postId).toList());
+    state = AsyncData(current.copyWith(
+      posts: current.posts.where((p) => p.id != postId).toList(),
+    ));
 
     try {
-      // 2. Background delete.
       await _repo.deletePost(postId);
     } catch (_) {
-      // 3. Rollback on failure.
-      state = AsyncData(prev);
+      state = AsyncData(current);
     }
   }
-  /// Optimistically increments the comment count for a post.
-  /// Called when a user submits a new comment.
-  void incrementCommentCount(String postId) {
-    final prev = state.value;
-    if (prev == null) return;
 
-    final idx = prev.indexWhere((p) => p.id == postId);
+  void incrementCommentCount(String postId) {
+    final current = state.value;
+    if (current == null) return;
+
+    final idx = current.posts.indexWhere((p) => p.id == postId);
     if (idx == -1) return;
 
-    final updated = List<FeedPost>.from(prev)
-      ..[idx] = prev[idx].copyWithIncrementedComment();
-    state = AsyncData(updated);
+    final updated = List<FeedPost>.from(current.posts)
+      ..[idx] = current.posts[idx].copyWithIncrementedComment();
+    state = AsyncData(current.copyWith(posts: updated));
   }
 
-  /// Optimistically decrements the comment count for a post.
-  /// Called when a user deletes a comment.
   void decrementCommentCount(String postId) {
-    final prev = state.value;
-    if (prev == null) return;
+    final current = state.value;
+    if (current == null) return;
 
-    final idx = prev.indexWhere((p) => p.id == postId);
+    final idx = current.posts.indexWhere((p) => p.id == postId);
     if (idx == -1) return;
 
-    final updated = List<FeedPost>.from(prev)
-      ..[idx] = prev[idx].copyWithDecrementedComment();
-    state = AsyncData(updated);
+    final updated = List<FeedPost>.from(current.posts)
+      ..[idx] = current.posts[idx].copyWithDecrementedComment();
+    state = AsyncData(current.copyWith(posts: updated));
   }
 }

@@ -9,6 +9,146 @@ import 'package:petfolio/core/widgets/widgets.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/auth_widgets.dart';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Forgot-password bottom sheet
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ForgotPasswordSheet extends ConsumerStatefulWidget {
+  const _ForgotPasswordSheet();
+
+  @override
+  ConsumerState<_ForgotPasswordSheet> createState() =>
+      _ForgotPasswordSheetState();
+}
+
+class _ForgotPasswordSheetState extends ConsumerState<_ForgotPasswordSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailCtrl = TextEditingController();
+
+  static final _emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    ref.read(passwordResetProvider.notifier).reset();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    await ref.read(passwordResetProvider.notifier).send(_emailCtrl.text);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final resetState = ref.watch(passwordResetProvider);
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        24,
+        24,
+        24,
+        24 + MediaQuery.viewInsetsOf(context).bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Reset password', style: tt.titleLarge),
+                    const SizedBox(height: 4),
+                    Text(
+                      "We'll send a reset link to your email.",
+                      style: tt.bodyMedium?.copyWith(color: pt.ink500),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close_rounded),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          if (resetState.isSent) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: cs.primaryContainer,
+                borderRadius: BorderRadius.circular(
+                    PetfolioThemeExtension.radiusMd),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.mark_email_read_outlined,
+                      color: cs.primary, size: 22),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Check your inbox — a reset link is on its way.',
+                      style: tt.bodyMedium?.copyWith(
+                          color: cs.onPrimaryContainer),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            PrimaryPillButton(
+              label: 'Done',
+              onPressed: () => Navigator.of(context).pop(),
+              isFullWidth: true,
+              size: PillButtonSize.lg,
+            ),
+          ] else ...[
+            Form(
+              key: _formKey,
+              child: AuthField(
+                controller: _emailCtrl,
+                label: 'Email',
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.done,
+                autocorrect: false,
+                onSubmitted: (_) => _submit(),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) return 'Email is required';
+                  if (!_emailRegex.hasMatch(v.trim())) {
+                    return 'Enter a valid email address';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            if (resetState.status == PasswordResetStatus.failure &&
+                resetState.error != null) ...[
+              const SizedBox(height: 12),
+              AuthErrorBanner(message: resetState.error!),
+            ],
+            const SizedBox(height: 20),
+            PrimaryPillButton(
+              label: 'Send reset link',
+              onPressed: resetState.isLoading ? null : _submit,
+              isLoading: resetState.isLoading,
+              isFullWidth: true,
+              size: PillButtonSize.lg,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -46,6 +186,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _showForgotPasswordSheet(BuildContext context) {
+    AppBottomSheet.show<void>(
+      context,
+      builder: (_) => const _ForgotPasswordSheet(),
+    );
   }
 
   Future<void> _submit() async {
@@ -177,6 +324,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             }
                             return null;
                           },
+                        ),
+
+                        // Forgot password
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () => _showForgotPasswordSheet(context),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 4, vertical: 8),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(
+                              'Forgot password?',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: pt.ink500,
+                              ),
+                            ),
+                          ),
                         ),
 
                         // Error banner
