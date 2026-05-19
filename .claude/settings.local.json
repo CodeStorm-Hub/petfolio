@@ -51,7 +51,11 @@
       "Skill(supabase:supabase)",
       "Skill(supabase:supabase:*)",
       "Bash(flutter test *)",
-      "Bash(flutter --version)"
+      "Bash(flutter --version)",
+      "Skill(superpowers:receiving-code-review)",
+      "Skill(superpowers:receiving-code-review:*)",
+      "Bash(gh api *)",
+      "Bash(idx_shops_kyc_status)"
     ]
   }
 }

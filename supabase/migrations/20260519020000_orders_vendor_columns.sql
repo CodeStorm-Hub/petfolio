@@ -18,6 +18,13 @@ ALTER TABLE public.marketplace_orders
 
 -- ── 2. Migrate existing order(s) to PetFolio Official shop ───────────────────
 
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM public.shops WHERE id = 'cccccccc-0000-0000-0000-cccccccccccc') THEN
+    RAISE EXCEPTION 'PetFolio Official shop seed (cccccccc-0000-0000-0000-cccccccccccc) not found — run 20260519000000_shops_table.sql first';
+  END IF;
+END $$;
+
 UPDATE public.marketplace_orders
   SET shop_id = 'cccccccc-0000-0000-0000-cccccccccccc'
   WHERE shop_id IS NULL;
@@ -67,23 +74,59 @@ CREATE POLICY "orders: vendor can select shop orders"
     )
   );
 
--- Buyer can cancel their own pending order (payment-sheet dismissal path).
--- The WITH CHECK only allows setting status = 'cancelled', nothing else.
-CREATE POLICY "orders: buyer can cancel pending"
-  ON public.marketplace_orders FOR UPDATE TO authenticated
-  USING  ((select auth.uid()) = buyer_id AND status = 'pending')
-  WITH CHECK ((select auth.uid()) = buyer_id AND status = 'cancelled');
+-- Buyer order cancellation is routed through a SECURITY DEFINER RPC that only
+-- touches the status column, preventing column-injection via the UPDATE policy.
+CREATE OR REPLACE FUNCTION public.cancel_order(p_order_id uuid)
+  RETURNS void
+  LANGUAGE plpgsql
+  SECURITY DEFINER
+  SET search_path = public
+AS $$
+BEGIN
+  UPDATE public.marketplace_orders
+    SET status = 'cancelled'
+  WHERE id = p_order_id
+    AND buyer_id = auth.uid()
+    AND status = 'pending';
 
--- Vendor can update status and tracking fields on their shop's orders.
-CREATE POLICY "orders: vendor can update shop orders"
-  ON public.marketplace_orders FOR UPDATE TO authenticated
-  USING (
-    (select auth.uid()) = (
-      SELECT owner_id FROM public.shops WHERE id = shop_id
-    )
-  )
-  WITH CHECK (
-    (select auth.uid()) = (
-      SELECT owner_id FROM public.shops WHERE id = shop_id
-    )
-  );
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Order not found or cannot be cancelled';
+  END IF;
+END;
+$$;
+
+-- Vendor order updates are routed through a SECURITY DEFINER RPC that only
+-- allows mutating status and tracking fields, preventing financial field injection.
+CREATE OR REPLACE FUNCTION public.vendor_update_order(
+  p_order_id        uuid,
+  p_status          text,
+  p_tracking_number text DEFAULT NULL,
+  p_tracking_url    text DEFAULT NULL,
+  p_carrier         text DEFAULT NULL
+)
+  RETURNS void
+  LANGUAGE plpgsql
+  SECURITY DEFINER
+  SET search_path = public
+AS $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.marketplace_orders o
+    JOIN public.shops s ON s.id = o.shop_id
+    WHERE o.id = p_order_id
+      AND s.owner_id = auth.uid()
+  ) THEN
+    RAISE EXCEPTION 'Not authorized to update this order';
+  END IF;
+
+  UPDATE public.marketplace_orders
+    SET
+      status                   = p_status,
+      shipping_tracking_number = COALESCE(p_tracking_number, shipping_tracking_number),
+      shipping_tracking_url    = COALESCE(p_tracking_url,    shipping_tracking_url),
+      shipping_carrier         = COALESCE(p_carrier,         shipping_carrier),
+      shipped_at               = CASE WHEN p_status = 'shipped' THEN now() ELSE shipped_at END
+  WHERE id = p_order_id;
+END;
+$$;

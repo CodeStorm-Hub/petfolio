@@ -21,7 +21,7 @@ ON CONFLICT (id) DO NOTHING;
 -- All product images are public — no auth needed to view them.
 
 CREATE POLICY "marketplace-images: public read"
-  ON storage.objects FOR SELECT
+  ON storage.objects FOR SELECT TO anon, authenticated
   USING (bucket_id = 'marketplace-images');
 
 -- ── 3. Authenticated upload ───────────────────────────────────────────────────
