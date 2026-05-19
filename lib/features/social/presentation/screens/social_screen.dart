@@ -60,22 +60,50 @@ class SocialScreen extends ConsumerWidget {
 // Main view
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _SocialView extends ConsumerWidget {
+class _SocialView extends ConsumerStatefulWidget {
   const _SocialView({required this.pet});
   final Pet pet;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final feedAsync = ref.watch(socialControllerProvider(pet.id));
-    final notifier = ref.read(socialControllerProvider(pet.id).notifier);
+  ConsumerState<_SocialView> createState() => _SocialViewState();
+}
+
+class _SocialViewState extends ConsumerState<_SocialView> {
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController()..addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final pos = _scrollController.position;
+    if (pos.maxScrollExtent <= 0) return;
+    if (pos.pixels >= pos.maxScrollExtent - 300) {
+      ref
+          .read(socialControllerProvider(widget.pet.id).notifier)
+          .loadMore();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final feedAsync = ref.watch(socialControllerProvider(widget.pet.id));
+    final notifier =
+        ref.read(socialControllerProvider(widget.pet.id).notifier);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Scaffold(
       backgroundColor: pt.surface1,
       body: SafeArea(
-        // bottom: false — the shell scaffold's BottomNavigationBar already
-        // insets the body; adding another safe-area bottom pad would create
-        // a double gap above the home indicator.
         bottom: false,
         child: Column(
           children: [
@@ -113,17 +141,17 @@ class _SocialView extends ConsumerWidget {
                     ],
                   ),
                 ),
-                data: (posts) => RefreshIndicator.adaptive(
+                data: (feedState) => RefreshIndicator.adaptive(
                   onRefresh: notifier.refresh,
                   child: CustomScrollView(
-                    // Keep scroll physics active even when posts is empty so
-                    // RefreshIndicator still works.
+                    controller: _scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
                     slivers: [
                       SliverToBoxAdapter(
-                        child: _StoriesRow(posts: posts, pet: pet),
+                        child: _StoriesRow(
+                            posts: feedState.posts, pet: widget.pet),
                       ),
-                      if (posts.isEmpty)
+                      if (feedState.posts.isEmpty)
                         SliverFillRemaining(
                           hasScrollBody: false,
                           child: Center(
@@ -135,21 +163,21 @@ class _SocialView extends ConsumerWidget {
                         )
                       else
                         SliverPadding(
-                          padding: const EdgeInsets.only(top: 8, bottom: 32),
-                          // SliverList.builder lazily builds children as they
-                          // scroll into view — optimal for long feeds.
+                          padding: const EdgeInsets.only(top: 8),
                           sliver: SliverList.builder(
-                            itemCount: posts.length,
+                            itemCount: feedState.posts.length,
                             itemBuilder: (ctx, i) {
-                              final post = posts[i];
+                              final post = feedState.posts[i];
                               return Padding(
                                 padding: EdgeInsets.only(
-                                  bottom: i == posts.length - 1 ? 0 : 16,
+                                  bottom:
+                                      i == feedState.posts.length - 1 ? 0 : 16,
                                 ),
                                 child: RepaintBoundary(
                                   child: _RegularPost(
                                     post: post,
-                                    onLike: () => notifier.toggleLike(post.id),
+                                    onLike: () =>
+                                        notifier.toggleLike(post.id),
                                     onTapPost: () => context.push(
                                       '/social/post/${post.id}',
                                       extra: post,
@@ -160,6 +188,17 @@ class _SocialView extends ConsumerWidget {
                             },
                           ),
                         ),
+                      if (feedState.isLoadingMore)
+                        const SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Center(
+                              child: CircularProgressIndicator.adaptive(
+                                  strokeWidth: 2),
+                            ),
+                          ),
+                        ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 32)),
                     ],
                   ),
                 ),

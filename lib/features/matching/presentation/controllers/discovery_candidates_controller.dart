@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:petfolio/core/errors/app_exception.dart';
 import 'package:petfolio/core/services/location_providers.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
@@ -16,6 +17,27 @@ import 'match_preferences_state.dart';
 const int _discoveryPageSize = 20;
 const int _discoveryBufferMin = 5;
 const Duration _prefsDebounceDuration = Duration(milliseconds: 450);
+
+// One-shot error bus for location-sync failures.  The controller posts here
+// when syncActorLocationFromDevice throws; the screen listens and shows a
+// snackbar, then the notifier auto-clears via a microtask so the next error
+// can fire independently.
+final locationSyncErrorProvider =
+    NotifierProvider<_LocationSyncErrorNotifier, AppException?>(
+  _LocationSyncErrorNotifier.new,
+);
+
+class _LocationSyncErrorNotifier extends Notifier<AppException?> {
+  @override
+  AppException? build() => null;
+
+  void post(AppException e) {
+    state = e;
+    Future.microtask(() {
+      if (ref.mounted) state = null;
+    });
+  }
+}
 
 final discoveryCandidatesControllerProvider =
     AsyncNotifierProvider<DiscoveryCandidatesController, DiscoveryCandidatesBuffer>(
@@ -99,7 +121,11 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
     if (buffer.candidates.isEmpty) {
       final hasLocation = await repo.actorPetHasLocation(petId);
       if (!hasLocation) {
-        unawaited(repo.syncActorLocationFromDevice(petId));
+        try {
+          await repo.syncActorLocationFromDevice(petId);
+        } on AppException catch (e) {
+          ref.read(locationSyncErrorProvider.notifier).post(e);
+        }
       }
     }
     if (kDebugMode) {

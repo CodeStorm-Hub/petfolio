@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:petfolio/core/errors/app_exception.dart';
 import 'package:petfolio/features/matching/data/repositories/matching_repository.dart';
 
 import '../../data/models/pet.dart';
@@ -56,6 +57,12 @@ class EditProfileController extends Notifier<EditProfileState> {
       await ref.read(matchingRepositoryProvider).syncActorLocationFromDevice(petId);
       state = state.copyWith(isSyncingLocation: false);
       return true;
+    } on AppException catch (e) {
+      state = state.copyWith(
+        isSyncingLocation: false,
+        errorMessage: e.message,
+      );
+      return false;
     } catch (_) {
       state = state.copyWith(
         isSyncingLocation: false,
@@ -112,15 +119,6 @@ class EditProfileController extends Notifier<EditProfileState> {
         activityLevel: activityLevel,
         isPublic: isPublic,
       );
-
-      if (syncLocationIfDiscoverable && isDiscoverable) {
-        await ref
-            .read(matchingRepositoryProvider)
-            .syncActorLocationFromDevice(originalPet.id);
-      }
-
-      state = state.copyWith(isSubmitting: false);
-      return true;
     } catch (_) {
       state = state.copyWith(
         isSubmitting: false,
@@ -128,6 +126,23 @@ class EditProfileController extends Notifier<EditProfileState> {
       );
       return false;
     }
+
+    // Location sync is best-effort: a failure must not undo a successful save.
+    if (syncLocationIfDiscoverable && isDiscoverable) {
+      try {
+        await ref
+            .read(matchingRepositoryProvider)
+            .syncActorLocationFromDevice(originalPet.id);
+      } on AppException catch (e) {
+        state = state.copyWith(isSubmitting: false, errorMessage: e.message);
+        return true; // profile saved — surface location error as non-fatal banner
+      } catch (_) {
+        // silent — GPS failure must not block profile save confirmation
+      }
+    }
+
+    state = state.copyWith(isSubmitting: false);
+    return true;
   }
 }
 

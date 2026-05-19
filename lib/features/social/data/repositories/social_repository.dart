@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/errors/app_exception.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../models/feed_post.dart';
 import '../models/pet_stats.dart';
@@ -37,7 +38,11 @@ class SocialRepository {
   /// Joins on `pets` for avatar/species/breed and on `users` for the handle.
   /// A nested `post_likes` selection lets us compute `isLiked` for the
   /// currently active pet without a second round-trip.
-  Future<List<FeedPost>> fetchFeed({String? activePetId}) async {
+  Future<List<FeedPost>> fetchFeed({
+    String? activePetId,
+    int limit = 15,
+    int offset = 0,
+  }) async {
     final query = _client
         .from('posts')
         .select('''
@@ -53,7 +58,7 @@ class SocialRepository {
         ''')
         .eq('visibility', 'public')
         .order('created_at', ascending: false)
-        .limit(50);
+        .range(offset, offset + limit - 1);
 
     final rows = await query;
 
@@ -325,6 +330,26 @@ class SocialRepository {
         .delete()
         .eq('id', postId)
         .eq('author_id', _uid); // belt-and-suspenders guard
+  }
+
+  Future<void> reportPost({
+    required String postId,
+    required String reason,
+  }) async {
+    try {
+      await _client.from('reported_posts').insert({
+        'post_id': postId,
+        'reporter_id': _uid,
+        'reason': reason,
+      });
+    } on PostgrestException catch (e) {
+      if (e.code == '23505') {
+        throw const ValidationException(
+          message: 'You have already reported this post.',
+        );
+      }
+      throw DatabaseException.fromPostgrest(e);
+    }
   }
 }
 

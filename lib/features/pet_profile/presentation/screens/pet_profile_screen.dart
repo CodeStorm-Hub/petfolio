@@ -140,6 +140,12 @@ class PetProfileScreen extends ConsumerWidget {
                             ),
                           ),
                         ),
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                            child: _SellerDashboardCard(pt: pt),
+                          ),
+                        ),
                         const SliverToBoxAdapter(child: SizedBox(height: 16)),
                         SliverOverlapAbsorber(
                           handle:
@@ -195,6 +201,72 @@ class PetProfileScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SellerDashboardCard extends StatelessWidget {
+  const _SellerDashboardCard({required this.pt});
+
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: () => context.push('/seller'),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: pt.line200, width: 0.5),
+          boxShadow: const [
+            BoxShadow(
+              color: AppColors.shadowE1L,
+              blurRadius: 2,
+              offset: Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.meadow500.withAlpha(34),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.storefront_rounded,
+                  color: AppColors.meadow500, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Seller Dashboard',
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Manage your shop, products, and orders',
+                    style: TextStyle(fontSize: 13, color: pt.ink500),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: pt.ink300, size: 22),
           ],
         ),
       ),

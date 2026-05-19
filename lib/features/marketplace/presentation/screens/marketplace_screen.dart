@@ -6,8 +6,11 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/product.dart';
+import '../../data/models/shop.dart';
+import '../../../admin/presentation/controllers/admin_auth_controller.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/product_list_controller.dart';
+import '../controllers/shop_list_controller.dart';
 import '../widgets/product_card.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -28,6 +31,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
   Widget build(BuildContext context) {
     final productsAsync = ref.watch(productListProvider);
     final cart = ref.watch(cartProvider);
+    final isAdmin = ref.watch(isAdminProvider);
 
     return Scaffold(
       backgroundColor: AppColors.surface1,
@@ -39,6 +43,13 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
               eyebrow: 'Market · Shop',
               onOpenSwitcher: () => PetSwitcherSheet.show(context),
               actions: [
+                if (isAdmin)
+                  AppHeaderAction(
+                    iconKey: const ValueKey<String>('market_action_admin'),
+                    icon: Icons.admin_panel_settings_outlined,
+                    tooltip: 'Admin',
+                    onTap: () => context.push('/admin'),
+                  ),
                 AppHeaderAction(
                   iconKey: const ValueKey<String>('market_action_cart'),
                   icon: Icons.shopping_bag_outlined,
@@ -76,12 +87,29 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Search bar (decorative — filtering is category-based in this version)
+// Search bar
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _SearchBar extends StatelessWidget {
+class _SearchBar extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<_SearchBar> createState() => _SearchBarState();
+}
+
+class _SearchBarState extends ConsumerState<_SearchBar> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final hasText = ref.watch(
+      marketplaceSearchQueryProvider.select((q) => q.isNotEmpty),
+    );
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
       child: Container(
@@ -93,19 +121,46 @@ class _SearchBar extends StatelessWidget {
             BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
           ],
         ),
-        child: const Row(
+        child: Row(
           children: [
-            SizedBox(width: 14),
-            Icon(Icons.search_rounded, size: 18, color: AppColors.ink500),
-            SizedBox(width: 10),
+            const SizedBox(width: 14),
+            const Icon(Icons.search_rounded, size: 18, color: AppColors.ink500),
+            const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                'Search food, gear, treats…',
-                style: TextStyle(fontSize: 14, color: AppColors.ink500),
+              child: TextField(
+                controller: _controller,
+                onChanged: (v) =>
+                    ref.read(marketplaceSearchQueryProvider.notifier).set(v),
+                style: const TextStyle(fontSize: 14, color: AppColors.ink950),
+                decoration: const InputDecoration(
+                  hintText: 'Search food, gear, treats…',
+                  hintStyle:
+                      TextStyle(fontSize: 14, color: AppColors.ink500),
+                  isDense: true,
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
               ),
             ),
-            Icon(Icons.tune_rounded, size: 18, color: AppColors.ink500),
-            SizedBox(width: 14),
+            GestureDetector(
+              onTap: hasText
+                  ? () {
+                      _controller.clear();
+                      ref
+                          .read(marketplaceSearchQueryProvider.notifier)
+                          .clear();
+                    }
+                  : null,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Icon(
+                  hasText ? Icons.close_rounded : Icons.tune_rounded,
+                  size: 18,
+                  color: AppColors.ink500,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
           ],
         ),
       ),
@@ -195,6 +250,8 @@ class _ShopBody extends ConsumerWidget {
 
     return CustomScrollView(
       slivers: [
+        if (selectedCat == ProductCategory.all)
+          const SliverToBoxAdapter(child: _DiscoverShopsSection()),
         // Reorder strip
         if (selectedCat == ProductCategory.all && subscribable.isNotEmpty)
           SliverToBoxAdapter(
@@ -284,6 +341,142 @@ class _ShopBody extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Discover shops
+// ─────────────────────────────────────────────────────────────────────────────
+
+const _discoverShopsRowHeight = 100.0;
+
+class _DiscoverShopsSection extends ConsumerWidget {
+  const _DiscoverShopsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final shopsAsync = ref.watch(shopListProvider);
+
+    return shopsAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.fromLTRB(16, 4, 16, 10),
+        child: SizedBox(
+          height: _discoverShopsRowHeight,
+          child: Row(
+            children: [
+              SkeletonLoader(
+                  width: 88, height: _discoverShopsRowHeight, borderRadius: 16),
+              SizedBox(width: 10),
+              SkeletonLoader(
+                  width: 88, height: _discoverShopsRowHeight, borderRadius: 16),
+              SizedBox(width: 10),
+              SkeletonLoader(
+                  width: 88, height: _discoverShopsRowHeight, borderRadius: 16),
+            ],
+          ),
+        ),
+      ),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (shops) {
+        if (shops.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _SectionHeader(
+              title: 'Discover Shops',
+              subtitle: 'Independent pet sellers',
+            ),
+            SizedBox(
+              height: _discoverShopsRowHeight,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: shops.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 10),
+                itemBuilder: (_, i) => _ShopDiscoverCard(
+                  shop: shops[i],
+                  onTap: () => context.push('/shop/${shops[i].id}'),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ShopDiscoverCard extends StatelessWidget {
+  const _ShopDiscoverCard({required this.shop, required this.onTap});
+
+  final Shop shop;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 88,
+        height: _discoverShopsRowHeight,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: AppColors.surface0,
+            boxShadow: const [
+              BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  color: AppColors.surface2,
+                  child: shop.logoUrl != null
+                      ? Image.network(
+                          shop.logoUrl!,
+                          fit: BoxFit.cover,
+                          width: 44,
+                          height: 44,
+                          errorBuilder: (context, error, stack) => const Icon(
+                            Icons.storefront_rounded,
+                            color: AppColors.ink500,
+                            size: 22,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.storefront_rounded,
+                          color: AppColors.ink500,
+                          size: 22,
+                        ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                shop.shopName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Sora',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11,
+                  height: 1.2,
+                  color: AppColors.ink950,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

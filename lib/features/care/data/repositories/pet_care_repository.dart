@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/errors/app_exception.dart';
+import '../../../../core/services/notification_service.dart';
 import '../models/care_streak.dart';
 import '../models/care_task.dart';
 import '../models/care_task_log.dart';
@@ -407,7 +408,9 @@ class PetCareRepository {
           .insert(payload)
           .select()
           .single();
-      return CareTask.fromJson(row);
+      final saved = CareTask.fromJson(row);
+      _scheduleNotificationIfNeeded(saved);
+      return saved;
     } on AppException {
       rethrow;
     } on PostgrestException catch (e) {
@@ -433,7 +436,9 @@ class PetCareRepository {
           .eq('id', task.id)
           .select()
           .single();
-      return CareTask.fromJson(row);
+      final saved = CareTask.fromJson(row);
+      _scheduleNotificationIfNeeded(saved);
+      return saved;
     } on AppException {
       rethrow;
     } on PostgrestException catch (e) {
@@ -453,6 +458,7 @@ class PetCareRepository {
         return;
       }
       await _client.from('care_tasks').delete().eq('id', taskId);
+      NotificationService.instance.cancelForTask(taskId).ignore();
     } on AppException {
       rethrow;
     } on PostgrestException catch (e) {
@@ -460,6 +466,27 @@ class PetCareRepository {
     } catch (e) {
       throw NetworkException(message: e.toString());
     }
+  }
+
+  static void _scheduleNotificationIfNeeded(CareTask task) {
+    final raw = task.scheduledTime;
+    if (raw == null || raw.isEmpty) return;
+    final parts = raw.split(':');
+    if (parts.length < 2) return;
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return;
+
+    final tod = TimeOfDay(hour: hour, minute: minute);
+    final repeating = task.frequency == CareFrequency.daily ||
+        task.frequency == CareFrequency.twiceDaily;
+
+    NotificationService.instance.scheduleTaskReminder(
+      taskId: task.id,
+      title: task.title,
+      tod: tod,
+      repeating: repeating,
+    ).ignore();
   }
 
   Future<ToggleCompletionResult> toggleCompletion(

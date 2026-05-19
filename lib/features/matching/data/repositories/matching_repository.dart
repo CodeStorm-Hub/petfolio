@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petfolio/core/services/lat_lng.dart';
+import 'package:petfolio/core/errors/app_exception.dart';
 import 'package:petfolio/core/services/location_providers.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -28,24 +28,27 @@ class MatchingRepository {
   Future<bool> actorPetHasLocation(String petId) =>
       _dataSource.petHasLocation(petId);
 
+  /// Syncs the device's current GPS position to the pet's `location` column.
+  ///
+  /// Always acquires a fresh fix directly from [LocationService] — bypasses
+  /// the cached [deviceLatLngProvider] to avoid stale-future and double-timeout
+  /// issues (the provider's 4 s outer wrapper fires before the GPS's 12 s limit
+  /// on devices that need more time, particularly emulators).
+  ///
+  /// Throws [ValidationException] when location permission is denied or the
+  /// GPS read fails, and [DatabaseException] on a Supabase write failure.
   Future<void> syncActorLocationFromDevice(String activePetId) async {
-    final cached = _ref.read(deviceLatLngProvider);
-    final LatLng? coords = switch (cached) {
-      AsyncData(:final value) => value,
-      _ => null,
-    };
+    final coords =
+        await _ref.read(locationServiceProvider).acquireCurrentLatLng();
+
     try {
-      final resolved = coords ??
-          await _ref
-              .read(deviceLatLngProvider.future)
-              .timeout(const Duration(seconds: 4));
       await _dataSource.setPetLocationPoint(
         petId: activePetId,
-        latitude: resolved.latitude,
-        longitude: resolved.longitude,
+        latitude: coords.latitude,
+        longitude: coords.longitude,
       );
-    } catch (e, st) {
-      debugPrint('[MatchingRepository] setPetLocationPoint failed: $e $st');
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
     }
   }
 
@@ -63,7 +66,11 @@ class MatchingRepository {
 
     final hasStoredLocation = await _dataSource.petHasLocation(activePetId);
     if (!hasStoredLocation) {
-      unawaited(syncActorLocationFromDevice(activePetId));
+      // Best-effort background sync — errors are surfaced by the controller
+      // layer (DiscoveryCandidatesController) which awaits a separate call.
+      unawaited(
+        syncActorLocationFromDevice(activePetId).catchError((_) {}),
+      );
     }
 
     final species =

@@ -96,6 +96,15 @@ class CartNotifier extends Notifier<CartState> {
     state = CartState(items: items);
   }
 
-  /// Empty the cart (called after a successful checkout).
+  /// Remove all items belonging to a specific vendor (called after per-vendor checkout).
+  void clearShopCart(String shopId) {
+    state = CartState(
+      items: state.items
+          .where((i) => i.product.shopId != shopId)
+          .toList(),
+    );
+  }
+
+  /// Empty the entire cart.
   void clear() => state = CartState.empty;
 }

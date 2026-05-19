@@ -62,7 +62,14 @@ class LocationService {
       );
     }
 
-    final access = await readAccessState();
+    var access = await readAccessState();
+
+    // First call — permission may simply not have been requested yet.
+    // Request it rather than failing immediately.
+    if (access == LocationAccessState.denied) {
+      access = await requestWhenInUseAccess();
+    }
+
     switch (access) {
       case LocationAccessState.servicesDisabled:
         throw const ValidationException(
@@ -89,10 +96,18 @@ class LocationService {
     }
 
     try {
+      // Fast path: use the OS-cached fix if available — no GPS warm-up needed.
+      final last = await Geolocator.getLastKnownPosition();
+      if (last != null) {
+        return LatLng(latitude: last.latitude, longitude: last.longitude);
+      }
+
+      // Slow path: request a fresh fix with a generous timeout so cold-start
+      // GPS (and emulators with a mock location set) have time to respond.
       final pos = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.medium,
-          timeLimit: Duration(seconds: 12),
+          timeLimit: Duration(seconds: 20),
         ),
       );
       return LatLng(latitude: pos.latitude, longitude: pos.longitude);

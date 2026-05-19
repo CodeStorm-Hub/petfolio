@@ -8,8 +8,32 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'marionette_debug_gate_stub.dart'
     if (dart.library.io) 'marionette_debug_gate_io.dart' as marionette_gate;
 import 'core/router.dart';
+import 'core/services/notification_service.dart';
 import 'core/theme/theme.dart';
 import 'core/widgets/app_snack_bar.dart';
+
+const _supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+const _supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+const _stripePublishableKey = String.fromEnvironment('STRIPE_PUBLISHABLE_KEY');
+
+void _assertEnvVars() {
+  final missing = <String>[
+    if (_supabaseUrl.isEmpty) 'SUPABASE_URL',
+    if (_supabaseAnonKey.isEmpty) 'SUPABASE_ANON_KEY',
+    if (_stripePublishableKey.isEmpty) 'STRIPE_PUBLISHABLE_KEY',
+  ];
+  if (missing.isNotEmpty) {
+    throw StateError(
+      'Missing required --dart-define variables: ${missing.join(', ')}.\n'
+      'Run the app with:\n'
+      '  flutter run \\\n'
+      '    --dart-define=SUPABASE_URL=<url> \\\n'
+      '    --dart-define=SUPABASE_ANON_KEY=<key> \\\n'
+      '    --dart-define=STRIPE_PUBLISHABLE_KEY=<key>\n'
+      'Or use: flutter run --dart-define-from-file=.env',
+    );
+  }
+}
 
 Future<void> main() async {
   final marionetteEnabled = marionette_gate.marionetteEnabledInThisBuild;
@@ -19,35 +43,20 @@ Future<void> main() async {
     WidgetsFlutterBinding.ensureInitialized();
   }
 
-  // ── Google Fonts ──────────────────────────────────────────────────────────
-  // Disable the runtime CDN fetch.  When the device has no network / DNS
-  // (common on freshly-booted Android emulators) `google_fonts` would
-  // otherwise throw an UNHANDLED `ClientException: Failed host lookup
-  // 'fonts.gstatic.com'` for every TextStyle rebuild — flooding the log and
-  // breaking hot reload.  With `allowRuntimeFetching = false` the package
-  // silently falls back to the platform default font instead.
+  _assertEnvVars();
+
   GoogleFonts.config.allowRuntimeFetching = false;
 
-  // ── Stripe ────────────────────────────────────────────────────────────────
-  // Publishable key is injected at build time:
-  //   flutter run --dart-define=STRIPE_PUBLISHABLE_KEY=pk_test_...
-  Stripe.publishableKey = const String.fromEnvironment(
-    'STRIPE_PUBLISHABLE_KEY',
-    defaultValue: 'pk_test_51TQvlrPcVRApxzIxJ8RmKYA1WEw7k8zubumbIfsDjRSGgDyAcSU22RhsZRtKIP1lAZ0wtGjpLfzjI4fozMZxGSlo006zuZrbon',
-  );
+  Stripe.publishableKey = _stripePublishableKey;
   Stripe.merchantIdentifier = 'merchant.com.petfolio';
   await Stripe.instance.applySettings();
 
   await Supabase.initialize(
-    url: const String.fromEnvironment(
-      'SUPABASE_URL',
-      defaultValue: 'https://jqyjvhwlcqcsuwcqgcwf.supabase.co',
-    ),
-    anonKey: const String.fromEnvironment(
-      'SUPABASE_ANON_KEY',
-      defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxeWp2aHdsY3Fjc3V3Y3FnY3dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjI4MjgsImV4cCI6MjA5NDA5ODgyOH0.3bF68bNG0IwAc50YbOC3sem4k8O-d1vkvNNqBt1HbRw',
-    ),
+    url: _supabaseUrl,
+    anonKey: _supabaseAnonKey,
   );
+
+  await NotificationService.instance.initialize();
 
   runApp(const ProviderScope(child: PetfolioApp()));
 }

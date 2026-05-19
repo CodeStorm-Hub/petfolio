@@ -2,6 +2,181 @@
 
 ---
 
+## 2026-05-20 — Report Post feature (DB → repo → UI)
+
+- **`supabase/migrations/20260520000000_add_reported_posts.sql`** — `reported_posts` table: `id`, `post_id` FK → posts (cascade), `reporter_id` FK → auth.users (cascade), `reason` (1–500 chars check), `created_at`, unique `(post_id, reporter_id)`; RLS: INSERT `reporter_id = auth.uid()`, SELECT own rows. Already applied to `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.
+- **`lib/core/widgets/app_snack_bar.dart`** — Added `AppSnackBar.show(String message)` for neutral/success floating snackbars.
+- **`lib/features/social/data/repositories/social_repository.dart`** — Added `reportPost({required postId, required reason})`: inserts into `reported_posts`; maps PostgrestException code `23505` → `ValidationException('You have already reported this post.')`.
+- **`lib/features/social/presentation/screens/post_detail_screen.dart`** — Added `_ReportPostDialog` (`StatefulWidget`) with 5 predefined reasons via `RadioGroup`/`RadioListTile`; loading state on submit; calls `reportPost`, shows `AppSnackBar.show` on success or `AppSnackBar.showError` on failure. Updated `_PostOptionsSheet` "Report Post" `onTap` to capture repo before sheet pop, then show dialog.
+
+`flutter analyze` — **No issues found.** `flutter test` — **5/5 pass.**
+
+---
+
+## 2026-05-19 — Shop Profile Edit (full stack: DB → model → repo → controller → UI)
+
+### Database
+- **Migration `20260519060000_expand_shop_attributes.sql`** — `ALTER TABLE public.shops` adds 9 nullable columns: `business_email`, `business_phone`, `address_street`, `address_city`, `address_state`, `address_zip`, `return_policy`, `shipping_policy`, `social_links (jsonb, default '{}')`. Applied to `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.
+- **`shops` storage bucket** — Created public bucket (5 MB, jpeg/png/webp) with 3 RLS policies: public SELECT, authenticated INSERT and UPDATE scoped to `shops.owner_id = auth.uid()` via path prefix `{shopId}/%`.
+
+### Data layer
+- **`shop.dart`** — Added 9 new nullable Freezed fields (`businessEmail`, `businessPhone`, `addressStreet`, `addressCity`, `addressState`, `addressZip`, `returnPolicy`, `shippingPolicy`, `socialLinks`). No `@JsonKey` needed — Freezed's `FieldRename.snake` convention maps automatically. Ran `build_runner` to regenerate `shop.freezed.dart` + `shop.g.dart`.
+- **`shop_repository.dart`** — `updateShop` extended with all 9 new optional parameters (null-guarded, for sparse updates). Added `saveShopProfile(Shop shop)` — unconditionally writes all 13 profile + branding columns including `null` values, so clearing a field in the form correctly NULLs the DB column.
+
+### Controller
+- **`edit_shop_controller.dart`** *(new)* — `AsyncNotifierProvider.autoDispose<EditShopNotifier, Shop>`. `build()` uses `ref.read(myShopProvider.future)` (not `watch`) to avoid circular rebuild on invalidation. `saveShopDetails({required Shop, Uint8List? newLogo, Uint8List? newBanner})`: uploads images to `shops` bucket at `{shopId}/logo` and `{shopId}/banner` with `upsert: true`, gets public URL, `copyWith`-merges URLs onto the shop, calls `saveShopProfile`. `ref.invalidate(myShopProvider)` is placed **outside** the `AsyncValue.guard` closure and only fires on success.
+
+### UI
+- **`edit_shop_screen.dart`** *(new)* — `ConsumerStatefulWidget` with `SingleTickerProviderStateMixin`. `DefaultTabController` with 3 tabs:
+  - **Branding** — 140px `_BannerPicker` (overlay chip), 80×80 `_LogoPicker` (edit badge), Shop Name, Description fields.
+  - **Contact Info** — Business Email (email keyboard), Phone (phone keyboard), Street, City, State + ZIP (side-by-side).
+  - **Policies** — Return Policy and Shipping Policy (`maxLines: 6`).
+  - `_populate(shop)` guarded by `_initialised` flag so controllers fill once on first load and are not reset by subsequent `myShopProvider` rebuilds. `PrimaryPillButton` at `FloatingActionButtonLocation.centerFloat` with `isLoading` bound to controller loading state. On success: bytes cleared, URL state updated, success `SnackBar` shown. On error: `SnackBar` with `AppColors.danger` background.
+- **`router.dart`** — Added `GoRoute(path: '/seller/edit-shop')` → `EditShopScreen` under `_rootNavigatorKey`.
+- **`seller_dashboard_screen.dart`** — Header edit `IconButton` and "Edit shop" quick action row both updated from `/seller/setup` → `/seller/edit-shop`.
+
+### Bug fixes (save not persisting)
+Three root causes identified and resolved:
+1. **Missing bucket** — `_uploadShopAsset` threw `StorageException` inside `AsyncValue.guard`; guard caught it, error state was overwritten with `prev` (old data), screen read `hasError = false` → showed success snackbar while DB write never ran. Fixed by creating the `shops` bucket.
+2. **Circular `ref.watch`** — `editShopControllerProvider.build()` watched `myShopProvider.future`; `ref.invalidate(myShopProvider)` inside the guard triggered `build()` to re-run mid-save, overwriting the saved state with `AsyncLoading` before `_save()` could read the result. Fixed by `ref.watch` → `ref.read` in `build()` and moving invalidation outside the guard.
+3. **Null-guard skipping DB writes** — `updateShop` used `if (field != null)` for every profile column; empty-string → null conversions from the form meant cleared fields were omitted from the `UPDATE` payload entirely. Fixed by `saveShopProfile` which always sends all columns.
+
+`flutter analyze` — **No issues found.**
+
+**Next step:** ~~Surface `business_email`, `business_phone`, and address on the public shop storefront screen; optionally wire `social_links` to a social media links editor UI.~~ ✅ Done — see entry below.
+
+---
+
+## 2026-05-19 — Shop Storefront: Contact Info + Social Links
+
+### Storefront (`shop_storefront_screen.dart`)
+- Added `url_launcher` import.
+- New `_ContactInfoSection` widget inserted between the shop header row and the PRODUCTS label. Renders only when at least one contact field or social link is non-null. Contains:
+  - `_ContactRow` for `businessEmail` (opens `mailto:` via `launchUrl`).
+  - `_ContactRow` for `businessPhone` (opens `tel:` via `launchUrl`).
+  - `_ContactRow` for address — builds multi-line string from street / city+state / zip, non-tappable.
+  - `_SocialLinksRow` → `_SocialBtn` circle icons for keys `website`, `instagram`, `facebook`, `tiktok`, `youtube` from `shop.socialLinks`; each opens the URL in external browser via `LaunchMode.externalApplication`. Icons: `language`, `camera_alt_outlined`, `facebook`, `music_note`, `play_circle_outline`.
+
+### Edit screen (`edit_shop_screen.dart`)
+- Added 5 `TextEditingController`s: `_websiteCtrl`, `_instagramCtrl`, `_facebookCtrl`, `_tiktokCtrl`, `_youtubeCtrl`.
+- All 5 added to the dispose loop.
+- `_populate(shop)` now reads `shop.socialLinks` map to pre-fill all 5 controllers.
+- `_save(shop)` builds a `Map<String, String> socialLinks` from non-empty controllers; passes `socialLinks.isEmpty ? null : socialLinks` to `copyWith`.
+- `_ContactTab` accepts 5 new controller params; new **Social Links** section appended at the bottom with URL-keyboard text fields for website, Instagram, Facebook, TikTok, YouTube.
+
+`flutter analyze` — **No issues found.**
+
+---
+
+## 2026-05-19 — COD checkout + Admin Panel
+
+### COD buyer checkout
+- **`checkout_controller.dart`** — added `startCodCheckoutForShop`: inserts pending order, calls `confirmCodOrder` Edge Function (inventory + shop-active guard), clears cart on success; handles `ShopInactiveException` / `InsufficientStockException`.
+- **`cart_screen.dart`** — `_VendorGroup` converted to `ConsumerStatefulWidget` with local `PaymentMethod _method` state; added `_PaymentSelector` (Credit Card / Cash on Delivery animated chips); COD tap opens `_CodConfirmSheet` (itemized summary + "Pay when you receive" notice); Stripe tap keeps existing Payment Sheet flow. `PaymentMethod` reused from `marketplace_order.dart` — no duplicate enum.
+
+### Admin panel (`lib/features/admin/`)
+- **`admin_repository.dart`** — KYC: fetch submitted shops, approve (sets `is_verified=true`), reject (stores reason). COD: fetch delivered+unpaid COD orders, mark cash received (updates `payment_status='collected'` + ledger `status='available'`). Payouts: fetch `available` ledger entries grouped by shop, mark paid. Overview: parallel metric counts (pending KYC, COD to collect, vendors with balance).
+- **`admin_auth_controller.dart`** — `isAdminProvider`: checks `currentUser.appMetadata['role'] == 'admin'`.
+- **`kyc_review_controller.dart`** — `AsyncNotifierProvider<List<Shop>>`; approve/reject remove the shop from local list optimistically.
+- **`cod_orders_controller.dart`** — `AsyncNotifierProvider<List<MarketplaceOrder>>`; mark-received removes order optimistically.
+- **`ledger_controller.dart`** — `AsyncNotifierProvider<List<VendorPayoutGroup>>`; `VendorPayoutGroup` wraps shop + ledger list with `totalFormatted`; `overviewMetricsProvider` (`FutureProvider`).
+- **`admin_screen.dart`** — `NavigationRail` shell (4 tabs: Overview, KYC, COD, Payouts); non-admin users see a lock screen. KYC panel: approve/reject buttons + doc viewer (signed URL via `url_launcher`) + reject reason dialog. COD panel: "Cash Received" per order. Payouts panel: expandable bank info + "Mark as Paid" per vendor.
+- **`router.dart`** — `/admin` route added (root navigator); redirect blocks non-admins to `/home`.
+
+**Note:** Admin role set via Supabase `auth.users.app_metadata.role = 'admin'` (not a Flutter-side concept). `flutter analyze` — no issues.
+
+**Next step:** Supabase RLS — ensure admin-only policies cover `shops`, `marketplace_orders`, `vendor_ledgers` for the admin service role or a DB function with `SECURITY DEFINER`. Apply `is_admin()` helper from the existing KYC migration.
+
+---
+
+## 2026-05-19 — Vendor KYC: branching onboarding (International vs Bangladesh)
+
+- **`shop_repository.dart`** — `createShop` accepts `payoutMethod`; new `submitKyc` uploads NID/Trade License bytes to private `kyc-documents` bucket (signed 1-year URLs) then patches `kyc_status: 'submitted'` + `bank_account_details`.
+- **`my_shop_controller.dart`** — `createShop` passes `payoutMethod`; new `submitKyc` with optimistic rollback on failure.
+- **`shop_setup_screen.dart`** — added `_LocationTile` radio toggle (International → Stripe, Bangladesh → Manual) on new-shop creation; routes to `/seller/kyc` post-create for manual, otherwise `context.pop()` as before.
+- **`manual_kyc_screen.dart`** *(new)* — 3-step `ConsumerStatefulWidget`: Step 1 business info (name/address/phone), Step 2 document pickers (NID + Trade License, at least one required), Step 3 bank details (holder/account/bank/branch); submits via `myShopProvider.notifier.submitKyc` → `context.go('/seller')`.
+- **`router.dart`** — added `/seller/kyc` → `ManualKycScreen`.
+- **`seller_dashboard_screen.dart`** — added `_KycPendingBanner` ("Documents under review") for `manual + submitted` and `_KycRejectedBanner` (rejection reason + resubmit link) for `manual + rejected`; existing Stripe banner unchanged (gated on `needsOnboarding`).
+
+**Prerequisite:** `kyc-documents` Storage bucket must exist in Supabase as **private** before end-to-end testing. `flutter analyze` — no issues.
+
+**Next step:** Admin review flow (approve/reject KYC) + update `kyc_status` from admin dashboard or Edge Function webhook.
+
+---
+
+## 2026-05-19 — Marketplace data layer: models + repository (CoD + KYC)
+
+- **`shop.dart`** — added `PayoutMethod` enum (`stripe|manual`), `KycStatus` enum (`pending|submitted|approved|rejected`); new fields `payoutMethod`, `kycStatus`, `tradeLicenseUrl`, `nationalIdUrl`, `rejectionReason`, `bankAccountDetails`; updated `needsOnboarding` / `canAcceptPayments` getters for manual payout path; added `kycApproved`.
+- **`marketplace_order.dart`** — added `PaymentMethod` enum (`stripe|cod`), `PaymentStatus` enum (`pending|paid|collected`); fields `paymentMethod` (`@Default(stripe)`) and `paymentStatus` (`@Default(pending)`); added `isCod` getter.
+- **`vendor_ledger.dart`** — new Freezed model mapping `vendor_ledgers` table; `LedgerStatus` enum (`pendingClearance|available|paid`); `earningsFormatted` getter.
+- **`order_repository.dart`** — `createPaymentIntent` now passes `payment_method: 'stripe'`; new `confirmCodOrder(orderId)` calls the edge function with `payment_method: 'cod'` and surfaces `ShopInactiveException` / `InsufficientStockException` with structured fields; added both exception classes.
+- **`build_runner`** — regenerated; 30 outputs written; `flutter analyze lib/features/marketplace/data/` — no issues.
+
+**Next step:** Wire `CheckoutNotifier` / checkout UI to branch on payment method — skip Payment Sheet for CoD, call `confirmCodOrder` instead of `createPaymentIntent`.
+
+---
+
+## 2026-05-19 — Edge Function: Stripe + CoD payment branching
+
+**File:** `supabase/functions/create-payment-intent/index.ts`
+
+- Accepts `{ orderId, payment_method }` — `payment_method` defaults to `'stripe'` for backwards compat.
+- **Stripe path** — existing Destination Charge logic unchanged; also stamps `payment_method = 'stripe'` on the order row.
+- **CoD path** — bypasses Stripe; validates order ownership, `order.status === 'pending'`, `shop.is_active`, and per-item inventory (`inventory_count >= quantity`, `active` flag); stamps `payment_method = 'cod'`; returns `{ paymentMethod, orderId, amountCents, currency }`.
+- Shared pre-flight covers `409 CONFLICT` on non-pending orders and structured inventory error codes (`PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `INSUFFICIENT_STOCK`).
+
+**Next step:** Flutter — update `CheckoutNotifier` / `OrderRepository` to pass `payment_method` in the function call and handle the CoD response (skip Payment Sheet, write order directly).
+
+---
+
+## 2026-05-19 — Vendor KYC, CoD payments, ledger & admin RLS
+
+**Migration:** `supabase/migrations/20260519040000_vendor_kyc_ledger.sql` — applied to `jqyjvhwlcqcsuwcqgcwf`.
+
+- **`shops`** — added `payout_method` (`stripe|manual`), `kyc_status` (`pending|submitted|approved|rejected`), `trade_license_url`, `national_id_url`, `rejection_reason`, `bank_account_details (jsonb)`.
+- **`marketplace_orders`** — added `payment_method` (`stripe|cod`), `payment_status` (`pending|paid|collected`).
+- **`vendor_ledgers`** — new table: `shop_id`, `order_id`, `order_total_cents`, `platform_fee_cents`, `vendor_earnings_cents`, `status` (`pending_clearance|available|paid`); FK + indexes + RLS.
+- **`kyc-documents` bucket** — private storage bucket (10 MB, JPEG/PNG/WebP/PDF).
+- **`public.is_admin()`** — helper reads `app_metadata.is_admin` from JWT.
+- **RLS** — admin full access on `shops`, `marketplace_orders`, `vendor_ledgers`; shop owners read their own ledger rows; `kyc-documents` restricted to file owner (by `{user_id}/` prefix) and admins.
+
+**Next step:** Flutter — `Shop` model KYC fields, KYC upload UI, CoD payment flow, admin dashboard screens.
+
+---
+
+## 2026-05-18 — Multi-vendor marketplace (full `docs/claude-handoff.md` implementation)
+
+Stripe Connect marketplace per handoff + `docs/multi-vendor-marketplace-blueprint.md`: destination charges, per-vendor checkout, mixed cart grouped by shop, vendor onboarding via native browser.
+
+| Phase | Delivered |
+|-------|-----------|
+| **1 — DB** | `20260519000000_shops_table.sql`, `…010000_products_vendor_columns.sql` (PetFolio Official admin/shop UUIDs + product migration), `…020000_orders_vendor_columns.sql`, `…030000_marketplace_images_bucket.sql` |
+| **2 — Edge Functions** | `create-payment-intent` (Connect `transfer_data` + platform fee), `stripe-onboard-vendor`, `stripe-webhook` (`account.updated`, `payment_intent.succeeded/failed`) |
+| **3 — Models** | `shop.dart`, `marketplace_order.dart` (+ `OrderStatus`, `LineItem`); `product.dart` (`shopId`, `shopName`, `imageUrls`, `inventoryCount`); `cart_item.dart` (`itemsByShop`, `totalCentsForShop`, `clearShopCart`) |
+| **4 — Repos** | `shop_repository`, `vendor_product_repository`; updated `product_repository`, `order_repository` (`insertPendingOrder(shopId)`, buyer/vendor orders, tracking, `ShopNotVerifiedException`) |
+| **5 — Controllers** | `myShopProvider`, `shopListProvider`, `shopProductsProvider`, `vendorProductsProvider`, `vendorOrdersProvider`, `buyerOrdersProvider`; `checkoutProvider.startCheckoutForShop` + `activeShopId`; `cartProvider.clearShopCart` |
+| **6 — UI & routes** | Vendor: dashboard, setup, products CRUD, order queue/detail, Stripe onboarding screen. Buyer: shop storefront, order list/detail (`url_launcher` track). Updated cart (per-vendor pay), marketplace (**Discover Shops**), profile **Seller Dashboard** card. `router.dart`: `/shop/:id`, `/seller/*`, `/profile/orders`, `/marketplace/orders/:id`. `pubspec`: `url_launcher`. `shopByIdProvider` for storefront route. |
+
+**Polish:** Discover Shops row overflow fixed (card height + single-line labels). `flutter analyze` — no issues.
+
+**Ops (if not on hosted):** `npx supabase db push`, deploy functions, set `STRIPE_WEBHOOK_SECRET` + `PUBLIC_APP_URL`, register Stripe webhook.
+
+**Next step:** E2E — multi-shop cart checkout, vendor Stripe return → `myShopProvider` refresh, vendor mark shipped, buyer track package.
+
+---
+
+## 2026-05-18 — Stripe Connect webhook ops & seller verification fix
+
+- **`stripe-webhook/index.ts`** — Routes Connect vs platform events to `STRIPE_CONNECT_WEBHOOK_SECRET` / `STRIPE_WEBHOOK_SECRET`; `account.updated` requires `charges_enabled` + `payouts_enabled`, updates `shops` by `stripe_connect_account_id`.
+- **`shop_repository.dart`** — `startOnboarding` uses `functions.invoke('stripe-onboard-vendor', body: {shopId})` (not `.rpc()`); `StripeOnboardingException` + `AppSnackBar` on seller dashboard (no `myShopProvider` error poison).
+- **`seller_dashboard_screen.dart`** — `AppLifecycleState.resumed` → `refreshAfterOnboarding()` for instant verified UI after KYC.
+- **Hosted terminal setup** — Deployed `stripe-webhook` to `jqyjvhwlcqcsuwcqgcwf`; installed Stripe CLI; recreated Connect webhook (`--connect true`, `account.updated`); set `STRIPE_CONNECT_WEBHOOK_SECRET`; verified **CodeStorm PAW** → `is_verified=true`.
+- **Root cause** — Prior `account.updated` endpoint was a **platform** webhook (`connect: false`), so Connect Express events never reached Supabase.
+
+**Local dev:** Requires Docker (`npx supabase start`) before `functions serve` + `stripe listen --forward-connect-to`.
+
+---
+
 ## 2026-05-17 — PR #7 review fixes (Copilot thread)
 
 - **Schema** — Removed useless `pets_discoverable_location_idx` from `20260518120000_pets_is_discoverable.sql`; added `20260518210000_drop_pets_discoverable_location_idx.sql` (applied to `jqyjvhwlcqcsuwcqgcwf` via MCP). Trimmed `20260518200000_pr6_review_fixes.sql` to `REVOKE`/`GRANT` only on `ensure_chat_thread_for_match`.
