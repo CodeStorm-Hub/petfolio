@@ -165,23 +165,28 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
     Set<String> badges = {};
     try {
       badges = await badgesFuture;
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('[CareDashboard] badge fetch failed: $e');
+    }
 
-    List<bool> weekHit = List.filled(7, false);
+    AsyncValue<List<bool>> weekGoalHit;
     try {
       final raw = await weekFuture;
-      weekHit = List<bool>.generate(
+      weekGoalHit = AsyncData(List<bool>.generate(
         7,
         (i) => i < raw.length ? raw[i] : false,
-      );
-    } catch (_) {}
+      ));
+    } catch (e, st) {
+      debugPrint('[CareDashboard] week goal fetch failed: $e');
+      weekGoalHit = AsyncError(e, st);
+    }
 
     _applyBadgeDelta(petId, badges);
 
     _routine = _routine.copyWith(
       tasks: tasks,
       todayTasks: todayTasks,
-      weekGoalHit: AsyncData(weekHit),
+      weekGoalHit: weekGoalHit,
       badgeTypes: badges,
     );
     state = _routine;
@@ -279,7 +284,12 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
             : _routine.todayTasks,
       );
       state = _routine;
-      if (outcome.badgeUnlocked) {
+      if (outcome.badgeUnlocked && outcome.unlockedBadges.isNotEmpty) {
+        for (final badge in outcome.unlockedBadges) {
+          AppSnackBar.showBadgeUnlocked(badge);
+        }
+        _badgeBaseline = {..._badgeBaseline, ...outcome.unlockedBadges};
+      } else if (outcome.badgeUnlocked) {
         AppSnackBar.showBadgeUnlocked();
         _badgeBaseline = {..._badgeBaseline, '7_day_hero'};
       }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 
 import '../../data/models/pet.dart';
 import '../controllers/active_pet_controller.dart';
@@ -191,6 +192,8 @@ class PetSwitcherSheet extends ConsumerWidget {
                           context.push('/pets/manage');
                         },
                       ),
+                      const SizedBox(height: 10),
+                      _SignOutRow(pt: pt),
                       const SizedBox(height: 24),
                     ],
                   ),
@@ -451,6 +454,74 @@ class _ManageRow extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// ── Sign-out row ──────────────────────────────────────────────────────────────
+
+class _SignOutRow extends ConsumerWidget {
+  const _SignOutRow({required this.pt});
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return GestureDetector(
+      key: const ValueKey<String>('pet_switcher_sign_out'),
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _confirmSignOut(context, ref),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        decoration: BoxDecoration(
+          color: AppColors.coral500.withAlpha(14),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.logout_rounded, size: 18, color: AppColors.coral500),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Sign out',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: AppColors.coral500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sign out?'),
+        content: const Text('You will be returned to the login screen.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.coral500,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Sign out'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      Navigator.of(context).pop();
+      await ref.read(authRepositoryProvider).signOut();
+    }
   }
 }
 

@@ -20,6 +20,8 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
   httpClient: Stripe.createFetchHttpClient(),
 });
 
+// ─── Webhook routing ──────────────────────────────────────────────────────────
+
 const CONNECT_EVENT_TYPES = new Set([
   'account.updated',
   'account.application.authorized',
@@ -39,16 +41,19 @@ type WebhookRoute = 'connect' | 'platform';
 
 function routeWebhook(payload: Record<string, unknown>): WebhookRoute {
   const type = typeof payload.type === 'string' ? payload.type : '';
-
   if (CONNECT_EVENT_TYPES.has(type)) return 'connect';
   if (PLATFORM_EVENT_TYPES.has(type)) return 'platform';
-
   if (typeof payload.account === 'string' && payload.account.startsWith('acct_')) {
     return 'connect';
   }
-
   return 'platform';
 }
+
+// ─── Signature verification ───────────────────────────────────────────────────
+//
+// Primary secret is chosen based on the routed event type. If primary fails,
+// the fallback secret is tried so a single endpoint can receive both webhook
+// types during Stripe Dashboard configuration.
 
 async function constructVerifiedEvent(
   body: string,
@@ -56,9 +61,9 @@ async function constructVerifiedEvent(
   route: WebhookRoute,
 ): Promise<Stripe.Event> {
   const platformSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET') ?? '';
-  const connectSecret = Deno.env.get('STRIPE_CONNECT_WEBHOOK_SECRET') ?? '';
+  const connectSecret  = Deno.env.get('STRIPE_CONNECT_WEBHOOK_SECRET') ?? '';
 
-  const primary = route === 'connect' ? connectSecret : platformSecret;
+  const primary  = route === 'connect' ? connectSecret  : platformSecret;
   const fallback = route === 'connect' ? platformSecret : connectSecret;
 
   if (!primary) {
@@ -74,9 +79,7 @@ async function constructVerifiedEvent(
   } catch (primaryErr) {
     if (!fallback) throw primaryErr;
     try {
-      console.warn(
-        `Primary ${route} secret failed for routed event; trying alternate secret`,
-      );
+      console.warn(`Primary ${route} secret failed; trying alternate secret`);
       return await stripe.webhooks.constructEventAsync(body, signature, fallback);
     } catch {
       throw primaryErr;
@@ -84,9 +87,12 @@ async function constructVerifiedEvent(
   }
 }
 
+// ─── Handler ──────────────────────────────────────────────────────────────────
+
 serve(async (req) => {
+  // Stripe requires the raw body for signature verification — read it first.
   const body = await req.text();
-  const sig = req.headers.get('stripe-signature') ?? '';
+  const sig  = req.headers.get('stripe-signature') ?? '';
 
   let payload: Record<string, unknown>;
   try {
@@ -105,18 +111,19 @@ serve(async (req) => {
     return new Response('Webhook signature invalid', { status: 400 });
   }
 
+  // Service-role client — bypasses RLS. Never exposed to users.
   const admin = createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_URL')              ?? '',
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
   );
 
   try {
     switch (event.type) {
+
+      // ── Connect: vendor Stripe account activated ────────────────────────────
       case 'account.updated': {
         if (route !== 'connect') {
-          console.warn(
-            `account.updated verified as ${route}; expected connect route`,
-          );
+          console.warn(`account.updated verified as ${route}; expected connect route`);
         }
 
         const account = event.data.object as Stripe.Account;
@@ -124,12 +131,12 @@ serve(async (req) => {
           (typeof event.account === 'string' && event.account) || account.id;
 
         const ready =
-          account.charges_enabled === true &&
-          account.payouts_enabled === true;
+          account.charges_enabled === true && account.payouts_enabled === true;
 
         if (!ready) {
           console.log(
-            `account.updated ${connectAccountId}: not ready (charges=${account.charges_enabled}, payouts=${account.payouts_enabled})`,
+            `account.updated ${connectAccountId}: not ready ` +
+            `(charges=${account.charges_enabled}, payouts=${account.payouts_enabled})`,
           );
           break;
         }
@@ -137,9 +144,9 @@ serve(async (req) => {
         const { data, error } = await admin
           .from('shops')
           .update({
-            is_verified: true,
+            is_verified:                true,
             stripe_onboarding_complete: true,
-            updated_at: new Date().toISOString(),
+            updated_at:                 new Date().toISOString(),
           })
           .eq('stripe_connect_account_id', connectAccountId)
           .select('id');
@@ -161,32 +168,111 @@ serve(async (req) => {
         break;
       }
 
+      // ── Platform: payment confirmed ─────────────────────────────────────────
       case 'payment_intent.succeeded': {
-        const pi = event.data.object as Stripe.PaymentIntent;
+        const pi      = event.data.object as Stripe.PaymentIntent;
         const orderId = pi.metadata?.order_id;
-        if (!orderId) break;
 
-        const { error } = await admin
+        if (!orderId) {
+          // PaymentIntent not created by this app (e.g. Stripe test event).
+          console.warn('payment_intent.succeeded: no order_id in metadata, skipping');
+          break;
+        }
+
+        // Transition the order from pending → processing and mark payment paid.
+        // The .eq('status', 'pending') guard makes this update idempotent:
+        // if the webhook fires twice, the second call matches no row.
+        const { data: orderRow, error: updateErr } = await admin
           .from('marketplace_orders')
-          .update({ status: 'processing' })
+          .update({
+            status:         'processing',
+            payment_status: 'paid',
+            updated_at:     new Date().toISOString(),
+          })
           .eq('id', orderId)
-          .eq('status', 'pending');
+          .eq('status', 'pending')
+          .select('id, shop_id, amount_cents')
+          .maybeSingle();
 
-        if (error) {
-          console.error('payment_intent.succeeded: DB update failed', error);
+        if (updateErr) {
+          console.error('payment_intent.succeeded: order update failed', updateErr);
           return new Response('DB update failed', { status: 500 });
         }
+
+        if (!orderRow) {
+          // Row not found or already transitioned — safe to acknowledge.
+          console.log(
+            `payment_intent.succeeded: order ${orderId} already processed or not found`,
+          );
+          break;
+        }
+
+        console.log(
+          `payment_intent.succeeded: order ${orderId} → processing, payment_status → paid`,
+        );
+
+        // Create the vendor ledger entry so the payout flow can proceed.
+        // Resolve the shop's platform fee to calculate the split.
+        const { data: shop } = await admin
+          .from('shops')
+          .select('platform_fee_percent')
+          .eq('id', orderRow.shop_id)
+          .maybeSingle();
+
+        const feePercent        = shop?.platform_fee_percent ?? 10;
+        const platformFeeCents  = Math.floor((orderRow.amount_cents * feePercent) / 100);
+        const vendorEarningsCents = orderRow.amount_cents - platformFeeCents;
+
+        const { error: ledgerErr } = await admin
+          .from('vendor_ledgers')
+          .insert({
+            shop_id:               orderRow.shop_id,
+            order_id:              orderId,
+            order_total_cents:     orderRow.amount_cents,
+            platform_fee_cents:    platformFeeCents,
+            vendor_earnings_cents: vendorEarningsCents,
+            status:                'pending_clearance',
+          });
+
+        if (ledgerErr) {
+          // Code 23505 = unique_violation: ledger already exists (replayed webhook).
+          // Not fatal — the order transition succeeded; just log and continue.
+          if ((ledgerErr as { code?: string }).code === '23505') {
+            console.warn(
+              `payment_intent.succeeded: ledger already exists for order ${orderId}`,
+            );
+          } else {
+            console.error(
+              'payment_intent.succeeded: ledger insert failed (non-fatal)',
+              ledgerErr,
+            );
+          }
+        } else {
+          console.log(
+            `payment_intent.succeeded: ledger created for order ${orderId} ` +
+            `(vendor +${vendorEarningsCents}¢, platform +${platformFeeCents}¢)`,
+          );
+        }
+
         break;
       }
 
+      // ── Platform: payment failed ────────────────────────────────────────────
       case 'payment_intent.payment_failed': {
-        const pi = event.data.object as Stripe.PaymentIntent;
+        const pi      = event.data.object as Stripe.PaymentIntent;
         const orderId = pi.metadata?.order_id;
-        if (!orderId) break;
+
+        if (!orderId) {
+          console.warn('payment_intent.payment_failed: no order_id in metadata, skipping');
+          break;
+        }
 
         const { error } = await admin
           .from('marketplace_orders')
-          .update({ status: 'cancelled' })
+          .update({
+            status:     'cancelled',
+            updated_at: new Date().toISOString(),
+          })
           .eq('id', orderId)
           .eq('status', 'pending');
 
@@ -194,6 +280,8 @@ serve(async (req) => {
           console.error('payment_intent.payment_failed: DB update failed', error);
           return new Response('DB update failed', { status: 500 });
         }
+
+        console.log(`payment_intent.payment_failed: order ${orderId} cancelled`);
         break;
       }
 
@@ -206,7 +294,7 @@ serve(async (req) => {
   }
 
   return new Response(JSON.stringify({ received: true, route }), {
-    status: 200,
+    status:  200,
     headers: { 'Content-Type': 'application/json' },
   });
 });

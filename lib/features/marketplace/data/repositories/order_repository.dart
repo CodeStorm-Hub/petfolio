@@ -15,28 +15,35 @@ class OrderRepository {
 
   // ── Write ──────────────────────────────────────────────────────────────────
 
-  /// Insert a pending order row for a single vendor and return its id.
-  /// [shopId] is required because the orders table has a NOT NULL FK to shops.
+  /// Atomically validates the shop and inventory, creates the order row, and
+  /// decrements product inventory — all in one Postgres transaction via RPC.
+  /// Returns the new order id.
   Future<String> insertPendingOrder({
     required String buyerId,
     required String shopId,
     required CartState cart,
   }) async {
-    final row = await _client
-        .from('marketplace_orders')
-        .insert({
-          'buyer_id':    buyerId,
-          'shop_id':     shopId,
-          'title':       'PetFolio Order',
-          'status':      'pending',
-          'amount_cents': cart.totalCentsForShop(shopId),
-          'currency':    'usd',
-          'line_items':  cart.lineItemsJsonForShop(shopId),
-        })
-        .select('id')
-        .single();
-
-    return row['id'] as String;
+    try {
+      final result = await _client.rpc('process_checkout', params: {
+        'p_buyer_id':   buyerId,
+        'p_shop_id':    shopId,
+        'p_cart_items': cart.lineItemsJsonForShop(shopId),
+      });
+      return result as String;
+    } on PostgrestException catch (e) {
+      final msg = e.message;
+      if (msg.contains('SHOP_INACTIVE')) throw const ShopInactiveException();
+      if (msg.contains('SHOP_NOT_VERIFIED')) throw const ShopNotVerifiedException();
+      if (msg.contains('INSUFFICIENT_STOCK:')) {
+        final parts = msg.split(':');
+        throw InsufficientStockException(
+          productName: parts.length > 1 ? parts[1] : 'A product',
+          available:   parts.length > 2 ? int.tryParse(parts[2]) ?? 0 : 0,
+          requested:   parts.length > 3 ? int.tryParse(parts[3]) ?? 0 : 0,
+        );
+      }
+      rethrow;
+    }
   }
 
   /// Call the Edge Function to create (or retrieve) a Stripe PaymentIntent.

@@ -12,10 +12,12 @@ class ToggleCompletionResult {
   const ToggleCompletionResult({
     required this.task,
     required this.badgeUnlocked,
+    this.unlockedBadges = const [],
   });
 
   final CareTask task;
   final bool badgeUnlocked;
+  final List<String> unlockedBadges;
 }
 
 final petCareRepositoryProvider = Provider<PetCareRepository>(
@@ -590,18 +592,24 @@ class PetCareRepository {
         }
       }
 
-      var badgeUnlocked = false;
+      var badgeUnlocked   = false;
+      var unlockedBadges  = <String>[];
+
       if (isCompleted) {
         final raw = await _client.rpc(
           'check_daily_completion',
           params: {
-            'target_pet_id': petId,
+            'target_pet_id':  petId,
             'completion_date': dayStr,
           },
         );
         if (raw is Map) {
           final v = raw['badge_unlocked'];
           badgeUnlocked = v == true || v == 'true';
+          final arr = raw['unlocked_badges'];
+          if (arr is List) {
+            unlockedBadges = arr.whereType<String>().toList();
+          }
         }
       }
 
@@ -610,7 +618,11 @@ class PetCareRepository {
         completedAt: isCompleted ? DateTime.now() : null,
         updatedAt: DateTime.now(),
       );
-      return ToggleCompletionResult(task: merged, badgeUnlocked: badgeUnlocked);
+      return ToggleCompletionResult(
+        task: merged,
+        badgeUnlocked: badgeUnlocked,
+        unlockedBadges: unlockedBadges,
+      );
     } on AppException {
       rethrow;
     } on PostgrestException catch (e) {

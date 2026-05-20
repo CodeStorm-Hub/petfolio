@@ -55,7 +55,9 @@
       "Skill(superpowers:receiving-code-review)",
       "Skill(superpowers:receiving-code-review:*)",
       "Bash(gh api *)",
-      "Bash(idx_shops_kyc_status)"
+      "Bash(idx_shops_kyc_status)",
+      "Skill(find-skills)",
+      "Skill(find-skills:*)"
     ]
   }
 }

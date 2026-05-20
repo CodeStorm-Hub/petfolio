@@ -5,7 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 
+import 'package:petfolio/features/care/data/models/care_task.dart';
+import 'package:petfolio/features/care/data/models/medical_record.dart';
+import 'package:petfolio/features/care/presentation/controllers/care_dashboard_controller.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_streak_stream_provider.dart';
+import 'package:petfolio/features/care/presentation/controllers/health_vault_controller.dart';
 
 import '../../data/models/pet.dart';
 import '../../data/models/pet_gender.dart';
@@ -184,14 +188,8 @@ class PetProfileScreen extends ConsumerWidget {
                     body: TabBarView(
                       children: [
                         _ProfileOverviewTab(pet: activePet, pt: pt),
-                        _ProfilePlaceholderTab(
-                          title: 'Health',
-                          pt: pt,
-                        ),
-                        _ProfilePlaceholderTab(
-                          title: 'Care',
-                          pt: pt,
-                        ),
+                        _ProfileHealthTab(pt: pt),
+                        _ProfileCareTab(pt: pt),
                         _ProfilePlaceholderTab(
                           title: 'Awards',
                           pt: pt,
@@ -874,6 +872,364 @@ class _FeedPlaceholder extends StatelessWidget {
       ),
     );
   }
+}
+
+// ── Profile Care Tab ──────────────────────────────────────────────────────────
+
+class _ProfileCareTab extends ConsumerWidget {
+  const _ProfileCareTab({required this.pt});
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final todayTasks = ref.watch(
+      careDashboardProvider.select((s) => s.todayTasks),
+    );
+
+    return Builder(builder: (ctx) {
+      return CustomScrollView(
+        key: const PageStorageKey<String>('pet_profile_care'),
+        slivers: [
+          SliverOverlapInjector(
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(ctx),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate(
+                todayTasks.when(
+                  loading: () => List.generate(
+                    3,
+                    (_) => _ProfileRowSkeleton(pt: pt),
+                  ),
+                  error: (e, _) => [
+                    _ProfileTabEmptyMessage(
+                      icon: Icons.cloud_off_rounded,
+                      label: 'Could not load tasks',
+                      pt: pt,
+                      action: TextButton.icon(
+                        onPressed: () =>
+                            ref.read(careDashboardProvider.notifier).refresh(),
+                        icon: const Icon(Icons.refresh_rounded, size: 16),
+                        label: const Text('Retry'),
+                      ),
+                    ),
+                  ],
+                  data: (tasks) => tasks.isEmpty
+                      ? [
+                          _ProfileTabEmptyMessage(
+                            icon: Icons.check_circle_outline_rounded,
+                            label: 'No tasks for today',
+                            pt: pt,
+                          ),
+                        ]
+                      : tasks
+                          .map((t) => _CareTaskRow(task: t, pt: pt))
+                          .toList(),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+}
+
+// ── Profile Health Tab ────────────────────────────────────────────────────────
+
+class _ProfileHealthTab extends ConsumerWidget {
+  const _ProfileHealthTab({required this.pt});
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final recordsAsync = ref.watch(healthVaultControllerProvider);
+
+    return Builder(builder: (ctx) {
+      return CustomScrollView(
+        key: const PageStorageKey<String>('pet_profile_health'),
+        slivers: [
+          SliverOverlapInjector(
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(ctx),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate(
+                recordsAsync.when(
+                  loading: () => List.generate(
+                    3,
+                    (_) => _ProfileRowSkeleton(pt: pt),
+                  ),
+                  error: (e, _) => [
+                    _ProfileTabEmptyMessage(
+                      icon: Icons.cloud_off_rounded,
+                      label: 'Could not load health records',
+                      pt: pt,
+                    ),
+                  ],
+                  data: (records) => records.isEmpty
+                      ? [
+                          _ProfileTabEmptyMessage(
+                            icon: Icons.medical_services_outlined,
+                            label: 'No medical records yet',
+                            pt: pt,
+                          ),
+                        ]
+                      : records
+                          .map((r) => _HealthRecordRow(record: r, pt: pt))
+                          .toList(),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+}
+
+// ── Care task row ─────────────────────────────────────────────────────────────
+
+class _CareTaskRow extends StatelessWidget {
+  const _CareTaskRow({required this.task, required this.pt});
+  final CareTask task;
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final accent = task.isCompleted ? AppColors.meadow500 : cs.primary;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: pt.line200, width: 0.5),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: accent.withAlpha(26),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(task.categoryIconData, color: accent, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    task.title,
+                    style: const TextStyle(
+                      fontFamily: 'Sora',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    task.frequency.name
+                        .replaceAllMapped(
+                          RegExp(r'([A-Z])'),
+                          (m) => ' ${m[0]!.toLowerCase()}',
+                        )
+                        .trim()
+                        .capitalize(),
+                    style: TextStyle(fontSize: 12, color: pt.ink500),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              task.isCompleted
+                  ? Icons.check_circle_rounded
+                  : Icons.radio_button_unchecked_rounded,
+              color: task.isCompleted ? AppColors.meadow500 : pt.ink300,
+              size: 22,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Health record row ─────────────────────────────────────────────────────────
+
+class _HealthRecordRow extends StatelessWidget {
+  const _HealthRecordRow({required this.record, required this.pt});
+  final MedicalRecord record;
+  final PetfolioThemeExtension pt;
+
+  static const typeIcons = {
+    MedicalRecordType.vaccine: Icons.vaccines_rounded,
+    MedicalRecordType.medication: Icons.medication_rounded,
+    MedicalRecordType.allergy: Icons.warning_amber_rounded,
+    MedicalRecordType.surgery: Icons.healing_rounded,
+    MedicalRecordType.parasitePrevention: Icons.pest_control_rounded,
+    MedicalRecordType.other: Icons.folder_open_rounded,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    final (statusLabel, statusColor) = switch (true) {
+      _ when record.isOverdue => ('Overdue', AppColors.coral500),
+      _ when record.isExpiringSoon => ('Due soon', const Color(0xFFF59E0B)),
+      _ => ('Active', AppColors.meadow500),
+    };
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: pt.line200, width: 0.5),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: cs.primary.withAlpha(26),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                typeIcons[record.recordType] ?? Icons.folder_open_rounded,
+                color: cs.primary,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    record.name,
+                    style: const TextStyle(
+                      fontFamily: 'Sora',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    record.recordType.name
+                        .replaceAllMapped(
+                          RegExp(r'([A-Z])'),
+                          (m) => ' ${m[0]!.toLowerCase()}',
+                        )
+                        .trim()
+                        .capitalize(),
+                    style: TextStyle(fontSize: 12, color: pt.ink500),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: statusColor.withAlpha(26),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                statusLabel,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: statusColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Shared tab helpers ────────────────────────────────────────────────────────
+
+class _ProfileRowSkeleton extends StatelessWidget {
+  const _ProfileRowSkeleton({required this.pt});
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          SkeletonLoader(width: 40, height: 40, borderRadius: 10),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SkeletonLoader(width: double.infinity, height: 14),
+                const SizedBox(height: 6),
+                SkeletonLoader(width: 80, height: 11),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          SkeletonLoader(width: 22, height: 22, borderRadius: 999),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileTabEmptyMessage extends StatelessWidget {
+  const _ProfileTabEmptyMessage({
+    required this.icon,
+    required this.label,
+    required this.pt,
+    this.action,
+  });
+
+  final IconData icon;
+  final String label;
+  final PetfolioThemeExtension pt;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 48),
+      child: Column(
+        children: [
+          Icon(icon, size: 40, color: pt.ink300),
+          const SizedBox(height: 12),
+          Text(
+            label,
+            style: TextStyle(fontSize: 14, color: pt.ink500),
+          ),
+          if (action != null) ...[const SizedBox(height: 12), action!],
+        ],
+      ),
+    );
+  }
+}
+
+extension on String {
+  String capitalize() =>
+      isEmpty ? this : '${this[0].toUpperCase()}${substring(1)}';
 }
 
 // ── Empty state ───────────────────────────────────────────────────────────────

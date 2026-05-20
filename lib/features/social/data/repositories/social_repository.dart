@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-import 'package:flutter/foundation.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -226,11 +225,26 @@ class SocialRepository {
 
   // ── Post Creation ─────────────────────────────────────────────────────────
 
-  Future<String> uploadImage(Uint8List bytes, String extension) async {
-    final fileName = '${DateTime.now().millisecondsSinceEpoch}.$extension';
-    final path = 'posts/$fileName';
+  static const _allowedExtensions = {'jpg', 'jpeg', 'png', 'webp', 'gif', 'heic'};
+  static const _maxImageBytes = 10 * 1024 * 1024; // 10 MB
 
-    await _client.storage.from('post-images').uploadBinary(path, bytes);
+  Future<String> uploadPostImage(File file) async {
+    final ext = file.path.split('.').last.toLowerCase();
+    if (!_allowedExtensions.contains(ext)) {
+      throw const ValidationException(message: 'Unsupported image format. Use JPG, PNG, WebP, GIF, or HEIC.');
+    }
+
+    final bytes = await file.readAsBytes();
+    if (bytes.length > _maxImageBytes) {
+      throw const ValidationException(message: 'Image must be under 10 MB.');
+    }
+
+    final path = '$_uid/${DateTime.now().millisecondsSinceEpoch}.$ext';
+    try {
+      await _client.storage.from('post-images').uploadBinary(path, bytes);
+    } on StorageException catch (e) {
+      throw NetworkException(message: 'Image upload failed: ${e.message}');
+    }
     return _client.storage.from('post-images').getPublicUrl(path);
   }
 

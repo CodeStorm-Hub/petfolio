@@ -123,8 +123,59 @@ class Product {
         _       => ProductGlyphType.unknown,
       };
 
+  Map<String, dynamic> toStorageJson() => {
+        'id':              id,
+        'name':            name,
+        'brand':           brand,
+        'variant':         variant,
+        'category':        category.name,
+        'price_cents':     priceCents,
+        'currency':        currency,
+        'subscribable':    subscribable,
+        'glyph':           _glyphToString(glyphType),
+        'gradient_start':  _colorToHex(gradientStart),
+        'gradient_end':    _colorToHex(gradientEnd),
+        'shop_id':         shopId,
+        'shop_name':       shopName,
+        'image_urls':      imageUrls,
+        'inventory_count': inventoryCount,
+      };
+
+  factory Product.fromStorageJson(Map<String, dynamic> json) => Product(
+        id:             json['id'] as String,
+        name:           json['name'] as String,
+        brand:          json['brand'] as String,
+        variant:        (json['variant'] as String?) ?? '',
+        category:       ProductCategory.fromString((json['category'] as String?) ?? 'food'),
+        priceCents:     json['price_cents'] as int,
+        currency:       (json['currency'] as String?) ?? 'usd',
+        subscribable:   (json['subscribable'] as bool?) ?? false,
+        glyphType:      _parseGlyph((json['glyph'] as String?) ?? ''),
+        gradientStart:  _hexColor((json['gradient_start'] as String?) ?? '#F4B57A'),
+        gradientEnd:    _hexColor((json['gradient_end']   as String?) ?? '#C46A4F'),
+        shopId:         (json['shop_id'] as String?) ?? '',
+        shopName:       (json['shop_name'] as String?) ?? '',
+        imageUrls:      (json['image_urls'] as List<dynamic>?)?.cast<String>() ?? [],
+        inventoryCount: (json['inventory_count'] as int?) ?? 0,
+      );
+
   static Color _hexColor(String hex) {
     final h = hex.replaceFirst('#', '');
     return Color(int.parse('FF$h', radix: 16));
   }
+
+  static String _colorToHex(Color c) =>
+      '#${(c.toARGB32() & 0x00FFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
+
+  static String _glyphToString(ProductGlyphType g) => switch (g) {
+        ProductGlyphType.bag     => 'bag',
+        ProductGlyphType.ball    => 'ball',
+        ProductGlyphType.leash   => 'leash',
+        ProductGlyphType.bone    => 'bone',
+        ProductGlyphType.pill    => 'pill',
+        ProductGlyphType.brush   => 'brush',
+        ProductGlyphType.bowl    => 'bowl',
+        ProductGlyphType.rope    => 'rope',
+        ProductGlyphType.unknown => '',
+      };
 }

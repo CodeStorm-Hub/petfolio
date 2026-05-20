@@ -79,47 +79,56 @@ class SocialNotifier extends AsyncNotifier<SocialFeedState> {
   @override
   Future<SocialFeedState> build() async {
     final petId = arg;
+
+    // Register cleanup BEFORE the async gap. If the provider is disposed while
+    // the fetch is in flight, this callback still fires and prevents a zombie
+    // channel from being created below (the mounted guard handles that).
+    ref.onDispose(() {
+      _channel?.unsubscribe();
+      _channel = null;
+    });
+
     final posts = await _repo.fetchFeed(
       activePetId: petId,
       limit: _feedPageSize,
       offset: 0,
     );
 
-    _channel?.unsubscribe();
-    _channel = Supabase.instance.client
-        .channel('public:posts')
-        .onPostgresChanges(
-          event: PostgresChangeEvent.update,
-          schema: 'public',
-          table: 'posts',
-          callback: (payload) {
-            final newRow = payload.newRecord;
-            final postId = newRow['id'] as String?;
-            if (postId == null) return;
+    // Skip channel setup if the provider was disposed during the fetch.
+    if (ref.mounted) {
+      // Use a unique channel name per arg so concurrent instances (different
+      // active pets) don't collide and silently drop each other's callbacks.
+      _channel = Supabase.instance.client
+          .channel('social_feed_$petId')
+          .onPostgresChanges(
+            event: PostgresChangeEvent.update,
+            schema: 'public',
+            table: 'posts',
+            callback: (payload) {
+              final newRow = payload.newRecord;
+              final postId = newRow['id'] as String?;
+              if (postId == null) return;
 
-            final likeCount = newRow['like_count'] as int?;
-            final commentCount = newRow['comment_count'] as int?;
+              final likeCount = newRow['like_count'] as int?;
+              final commentCount = newRow['comment_count'] as int?;
 
-            final current = state.value;
-            if (current == null) return;
+              final current = state.value;
+              if (current == null) return;
 
-            final idx = current.posts.indexWhere((p) => p.id == postId);
-            if (idx == -1) return;
+              final idx = current.posts.indexWhere((p) => p.id == postId);
+              if (idx == -1) return;
 
-            final updated = List<FeedPost>.from(current.posts);
-            updated[idx] = updated[idx].copyWithCounts(
-              likes: likeCount,
-              comments: commentCount,
-            );
+              final updated = List<FeedPost>.from(current.posts)
+                ..[idx] = current.posts[idx].copyWithCounts(
+                  likes: likeCount,
+                  comments: commentCount,
+                );
 
-            state = AsyncData(current.copyWith(posts: updated));
-          },
-        )
-        .subscribe();
-
-    ref.onDispose(() {
-      _channel?.unsubscribe();
-    });
+              state = AsyncData(current.copyWith(posts: updated));
+            },
+          )
+          .subscribe();
+    }
 
     return SocialFeedState(
       posts: posts,

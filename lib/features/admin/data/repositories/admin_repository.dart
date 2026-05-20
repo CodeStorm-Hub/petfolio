@@ -28,12 +28,12 @@ class AdminRepository {
   }
 
   Future<void> approveKyc(String shopId) async {
-    await _client.from('shops').update({
-      'kyc_status': 'approved',
-      'is_verified': true,
-      'rejection_reason': null,
-      'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', shopId);
+    final adminId = _client.auth.currentUser?.id;
+    if (adminId == null) throw NotAdminException();
+    await _client.rpc('approve_vendor_kyc', params: {
+      'p_shop_id': shopId,
+      'p_admin_id': adminId,
+    });
   }
 
   Future<void> rejectKyc(String shopId, String reason) async {
