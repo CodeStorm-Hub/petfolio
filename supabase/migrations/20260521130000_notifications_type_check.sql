@@ -2,7 +2,7 @@
 -- The approve_vendor_kyc RPC inserts 'kyc_approved'; reject will use 'kyc_rejected'.
 
 ALTER TABLE public.notifications
-  DROP CONSTRAINT notifications_type_check;
+  DROP CONSTRAINT IF EXISTS notifications_type_check;
 
 ALTER TABLE public.notifications
   ADD CONSTRAINT notifications_type_check

@@ -1,3 +1,8 @@
+-- sub_price_cents on products (vendor-set subscription price; NULL = compute 12% off) ──
+ALTER TABLE public.products
+  ADD COLUMN IF NOT EXISTS sub_price_cents integer NULL
+    CONSTRAINT products_sub_price_cents_positive CHECK (sub_price_cents IS NULL OR sub_price_cents > 0);
+
 -- inventory_reservations ──────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS public.inventory_reservations (
@@ -73,7 +78,10 @@ BEGIN
     v_quantity      := (v_item->>'quantity')::int;
     v_is_subscribed := COALESCE((v_item->>'is_subscribed')::boolean, false);
 
-    SELECT name, price_cents, sub_price_cents, inventory_count
+    SELECT name,
+           price_cents,
+           COALESCE(sub_price_cents, ROUND(price_cents::numeric * 0.88)::bigint),
+           inventory_count
     INTO   v_product_name, v_price_cents, v_sub_price, v_inv_count
     FROM   public.products
     WHERE  id      = v_product_id
@@ -99,7 +107,7 @@ BEGIN
     END IF;
 
     v_unit_cents := CASE
-      WHEN v_is_subscribed AND v_sub_price IS NOT NULL THEN v_sub_price
+      WHEN v_is_subscribed THEN v_sub_price
       ELSE v_price_cents
     END;
     v_line_total   := v_unit_cents * v_quantity;
@@ -131,7 +139,9 @@ BEGIN
     v_quantity   := (v_item->>'quantity')::int;
 
     INSERT INTO public.inventory_reservations (order_id, product_id, quantity)
-    VALUES (v_order_id, v_product_id, v_quantity);
+    VALUES (v_order_id, v_product_id, v_quantity)
+    ON CONFLICT (order_id, product_id) WHERE status = 'active'
+    DO UPDATE SET quantity = inventory_reservations.quantity + EXCLUDED.quantity;
   END LOOP;
 
   RETURN v_order_id;
@@ -156,7 +166,9 @@ BEGIN
   FOR v_item IN
     SELECT product_id, quantity
     FROM   public.inventory_reservations
-    WHERE  order_id = p_order_id AND status = 'active'
+    WHERE  order_id   = p_order_id
+      AND  status     = 'active'
+      AND  expires_at > now()
   LOOP
     UPDATE public.products
     SET    inventory_count = inventory_count - v_item.quantity
@@ -165,7 +177,9 @@ BEGIN
 
   UPDATE public.inventory_reservations
   SET    status = 'confirmed'
-  WHERE  order_id = p_order_id AND status = 'active';
+  WHERE  order_id   = p_order_id
+    AND  status     = 'active'
+    AND  expires_at > now();
 END;
 $$;
 

@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../data/repositories/social_repository.dart';
 
@@ -13,7 +13,7 @@ class CreatePostState {
     this.error,
   });
 
-  final File? image;
+  final XFile? image;
   final String caption;
   final PostStep step;
   final String? error;
@@ -21,7 +21,7 @@ class CreatePostState {
   bool get isSubmitting => step != PostStep.idle;
 
   CreatePostState copyWith({
-    File? image,
+    XFile? image,
     bool clearImage = false,
     String? caption,
     PostStep? step,
@@ -43,7 +43,7 @@ class CreatePostNotifier extends Notifier<CreatePostState> {
 
   SocialRepository get _repo => ref.read(socialRepositoryProvider);
 
-  void setImage(File image) => state = state.copyWith(image: image, clearError: true);
+  void setImage(XFile image) => state = state.copyWith(image: image, clearError: true);
   void removeImage() => state = state.copyWith(clearImage: true);
   void setCaption(String caption) => state = state.copyWith(caption: caption);
 

@@ -7,7 +7,7 @@ VALUES (
   'post-images',
   'post-images',
   true,
-  5242880,
+  10485760,
   ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic']
 )
 ON CONFLICT (id) DO NOTHING;

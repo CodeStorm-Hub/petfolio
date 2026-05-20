@@ -16,8 +16,9 @@ class OrderRepository {
   // ── Write ──────────────────────────────────────────────────────────────────
 
   /// Atomically validates the shop and inventory, creates the order row, and
-  /// decrements product inventory — all in one Postgres transaction via RPC.
-  /// Returns the new order id.
+  /// reserves stock in `inventory_reservations` — all in one Postgres transaction
+  /// via RPC. Inventory is decremented later by `confirm_order_inventory` when
+  /// the Stripe webhook confirms payment. Returns the new order id.
   Future<String> insertPendingOrder({
     required String buyerId,
     required String shopId,

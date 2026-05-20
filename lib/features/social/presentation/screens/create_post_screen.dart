@@ -49,7 +49,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       imageQuality: 85,
     );
     if (pickedFile != null && mounted) {
-      ref.read(createPostControllerProvider.notifier).setImage(File(pickedFile.path));
+      ref.read(createPostControllerProvider.notifier).setImage(pickedFile);
     }
   }
 
@@ -333,7 +333,7 @@ class _ImageWell extends StatelessWidget {
     required this.onRemove,
   });
 
-  final File? image;
+  final XFile? image;
   final bool isSubmitting;
   final VoidCallback onTap;
   final VoidCallback onRemove;
@@ -362,7 +362,7 @@ class _ImageWell extends StatelessWidget {
                 ),
                 image: image != null
                     ? DecorationImage(
-                        image: FileImage(image!),
+                        image: FileImage(File(image!.path)),
                         fit: BoxFit.cover,
                       )
                     : null,

@@ -84,8 +84,8 @@ linux/
 # ==========================================
 # 5. ASSETS & MEDIA
 # ==========================================
-; assets/
-; google_fonts/
+assets/
+google_fonts/
 *.png
 *.jpg
 *.jpeg
