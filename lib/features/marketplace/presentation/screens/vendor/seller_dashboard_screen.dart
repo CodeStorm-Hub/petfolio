@@ -27,6 +27,11 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(myShopProvider.notifier).refreshAfterOnboarding();
+      }
+    });
   }
 
   @override
@@ -61,7 +66,10 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen>
               );
             }
             if (!shop.isActive) {
-              return const _ShopDeactivatedView();
+              return _ShopDeactivatedView(
+                onRefresh: () =>
+                    ref.read(myShopProvider.notifier).refreshAfterOnboarding(),
+              );
             }
             return _DashboardBody(shop: shop);
           },
@@ -125,8 +133,24 @@ class _NoShopView extends StatelessWidget {
   }
 }
 
-class _ShopDeactivatedView extends StatelessWidget {
-  const _ShopDeactivatedView();
+class _ShopDeactivatedView extends StatefulWidget {
+  const _ShopDeactivatedView({required this.onRefresh});
+
+  final VoidCallback onRefresh;
+
+  @override
+  State<_ShopDeactivatedView> createState() => _ShopDeactivatedViewState();
+}
+
+class _ShopDeactivatedViewState extends State<_ShopDeactivatedView> {
+  bool _checking = false;
+
+  Future<void> _handleRefresh() async {
+    setState(() => _checking = true);
+    widget.onRefresh();
+    await Future<void>.delayed(const Duration(seconds: 2));
+    if (mounted) setState(() => _checking = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -172,15 +196,27 @@ class _ShopDeactivatedView extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
-              onPressed: () => context.pop(),
-              icon: const Icon(Icons.arrow_back_rounded, size: 18),
-              label: const Text('Go back'),
+              onPressed: _checking ? null : _handleRefresh,
+              icon: _checking
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.refresh_rounded, size: 18),
+              label: Text(_checking ? 'Checking…' : 'Check for active shop'),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 48),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
+            ),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: () => context.pop(),
+              icon: const Icon(Icons.arrow_back_rounded, size: 16),
+              label: const Text('Go back'),
             ),
           ],
         ),

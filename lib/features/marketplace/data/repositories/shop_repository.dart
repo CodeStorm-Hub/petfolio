@@ -35,20 +35,27 @@ class ShopRepository {
   }
 
   /// Returns the shop owned by the currently authenticated user, or null.
+  /// Active shops always take priority over inactive ones.
   Future<Shop?> fetchMyShop() async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) return null;
 
-    final rows = await _client
+    final active = await _client
         .from('shops')
         .select()
         .eq('owner_id', userId)
-        .order('is_active', ascending: false)
+        .eq('is_active', true)
+        .limit(1);
+    if (active.isNotEmpty) return Shop.fromJson(active.first);
+
+    final all = await _client
+        .from('shops')
+        .select()
+        .eq('owner_id', userId)
         .order('created_at', ascending: false)
         .limit(1);
-
-    if (rows.isEmpty) return null;
-    return Shop.fromJson(rows.first);
+    if (all.isEmpty) return null;
+    return Shop.fromJson(all.first);
   }
 
   Future<Shop> createShop({

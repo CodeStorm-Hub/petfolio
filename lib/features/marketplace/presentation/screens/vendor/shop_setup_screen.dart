@@ -27,11 +27,11 @@ class _ShopSetupScreenState extends ConsumerState<ShopSetupScreen> {
   void initState() {
     super.initState();
     final shop = ref.read(myShopProvider).value;
-    _isEdit = shop != null;
-    _nameCtrl = TextEditingController(text: shop?.shopName ?? '');
-    _slugCtrl = TextEditingController(text: shop?.slug ?? '');
-    _descCtrl = TextEditingController(text: shop?.description ?? '');
-    if (shop != null) _selectedPayout = shop.payoutMethod;
+    _isEdit = shop != null && shop.isActive;
+    _nameCtrl = TextEditingController(text: _isEdit ? shop!.shopName : '');
+    _slugCtrl = TextEditingController(text: _isEdit ? shop!.slug : '');
+    _descCtrl = TextEditingController(text: _isEdit ? (shop!.description ?? '') : '');
+    if (_isEdit) _selectedPayout = shop!.payoutMethod;
   }
 
   @override
