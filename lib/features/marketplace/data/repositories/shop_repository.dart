@@ -43,6 +43,8 @@ class ShopRepository {
         .from('shops')
         .select()
         .eq('owner_id', userId)
+        .order('is_active', ascending: false)
+        .order('created_at', ascending: false)
         .limit(1);
 
     if (rows.isEmpty) return null;

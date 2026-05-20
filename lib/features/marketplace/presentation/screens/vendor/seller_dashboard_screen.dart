@@ -163,10 +163,24 @@ class _ShopDeactivatedView extends StatelessWidget {
               style: TextStyle(fontSize: 14, color: AppColors.ink500, height: 1.5),
             ),
             const SizedBox(height: 28),
+            PrimaryPillButton(
+              label: 'Set Up New Shop',
+              size: PillButtonSize.lg,
+              isFullWidth: true,
+              onPressed: () => context.push('/seller/setup'),
+              leadingIcon: const Icon(Icons.add_rounded, size: 20),
+            ),
+            const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: () => context.pop(),
               icon: const Icon(Icons.arrow_back_rounded, size: 18),
               label: const Text('Go back'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
             ),
           ],
         ),
