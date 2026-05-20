@@ -135,6 +135,25 @@ class ShopRepository {
     return Shop.fromJson(row);
   }
 
+  Future<void> requestShopDeletion(String shopId, {String? reason}) async {
+    await _client.rpc('request_shop_deletion', params: {
+      'p_shop_id': shopId,
+      if (reason != null && reason.trim().isNotEmpty) 'p_reason': reason.trim(),
+    });
+  }
+
+  Future<Map<String, dynamic>?> fetchMyDeletionRequest(String shopId) async {
+    final rows = await _client
+        .from('shop_deletion_requests')
+        .select()
+        .eq('shop_id', shopId)
+        .inFilter('status', ['pending', 'rejected'])
+        .order('requested_at', ascending: false)
+        .limit(1);
+    if (rows.isEmpty) return null;
+    return rows.first;
+  }
+
   /// Calls the `stripe-onboard-vendor` Edge Function (not a Postgres RPC).
   /// Returns the Stripe account-link URL to open in the user's browser.
   Future<String> startOnboarding(String shopId) async {

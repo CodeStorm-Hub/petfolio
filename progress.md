@@ -22,6 +22,16 @@
 
 ---
 
+## 2026-05-21 — Runtime font fix: Inter-Bold.ttf missing (offline GoogleFonts)
+
+- **Root cause**: `GoogleFonts.config.allowRuntimeFetching = false` (set in `main.dart`) requires every requested font variant to exist as a local asset file. `google_fonts/Inter-Bold.ttf` (FontWeight.w700) was absent; any text inheriting Inter w700 from `AppTheme._textTheme` crashed the app at first render.
+- **Fix**: Downloaded `Inter-Bold.ttf` from `fonts.gstatic.com` using the exact URL embedded in the `google_fonts 8.1.0` package descriptor (`hash = 76121a34...`, size = 326 444 bytes). SHA-256 verified — byte-perfect match. File placed in `google_fonts/Inter-Bold.ttf`.
+- **No config changes**: `pubspec.yaml` already declares `- google_fonts/` as a wildcard asset directory; the new file is picked up automatically on the next build.
+
+**Next step**: `flutter run` to confirm crash is gone.
+
+---
+
 ## 2026-05-20 — Phase 9: Accessibility + header actions (P3-2, P3-3, P3-8)
 
 All changes in `lib/features/pet_profile/presentation/screens/pet_profile_screen.dart`.

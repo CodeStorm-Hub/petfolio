@@ -5,6 +5,7 @@ import '../../../marketplace/data/models/marketplace_order.dart';
 import '../../../marketplace/data/models/shop.dart';
 import '../../../marketplace/data/models/vendor_ledger.dart';
 import '../models/post_report.dart';
+import '../models/shop_deletion_request.dart';
 
 final adminRepositoryProvider = Provider<AdminRepository>(
   (_) => AdminRepository(Supabase.instance.client),
@@ -92,6 +93,33 @@ class AdminRepository {
       'p_report_id': reportId,
       'p_action':    dismiss ? 'dismissed' : 'reviewed',
       'p_hide_post': hidePost,
+    });
+  }
+
+  // ── Shop deletion requests ────────────────────────────────────────────────
+
+  Future<List<ShopDeletionRequest>> fetchPendingDeletionRequests() async {
+    final rows = await _client
+        .from('shop_deletion_requests')
+        .select('*, shop:shop_id(shop_name, owner_id)')
+        .eq('status', 'pending')
+        .order('requested_at', ascending: true);
+    return (rows as List)
+        .map((r) => ShopDeletionRequest.fromJson(r as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> resolveDeletionRequest(
+    String requestId, {
+    required bool approve,
+    String? rejectionNote,
+  }) async {
+    final adminId = _client.auth.currentUser?.id;
+    if (adminId == null) throw NotAdminException();
+    await _client.rpc('resolve_shop_deletion', params: {
+      'p_request_id':     requestId,
+      'p_action':         approve ? 'approved' : 'rejected',
+      if (!approve && rejectionNote != null) 'p_rejection_note': rejectionNote,
     });
   }
 
