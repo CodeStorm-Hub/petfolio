@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/app_snack_bar.dart';
 import '../../data/models/care_task.dart' as dbtask;
 import '../../data/models/care_task_type.dart';
 import '../../data/repositories/checklist_repository.dart';
@@ -114,7 +115,7 @@ class CareNotifier extends Notifier<CareState> {
       },
       fireImmediately: true,
     );
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toLocal());
     final emptyWeek = List.generate(
       7,
       (i) => DayData(
@@ -129,7 +130,7 @@ class CareNotifier extends Notifier<CareState> {
 
   // Maps the loaded care_tasks for today onto today's DayData in the streak week.
   void _onDashboardChange(DailyRoutineState dashboard) {
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toLocal());
     if (DateUtils.dateOnly(dashboard.selectedDate) != today) return;
     final tasks = dashboard.tasks.value;
     if (tasks == null) return;
@@ -179,7 +180,7 @@ class CareNotifier extends Notifier<CareState> {
         )).toList();
 
     // Overlay today from care_tasks (new task system takes precedence over care_logs)
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toLocal());
     final dashboard = ref.read(careDashboardProvider);
     if (DateUtils.dateOnly(dashboard.selectedDate) == today && week.isNotEmpty) {
       final tasks = dashboard.tasks.value;
@@ -220,6 +221,7 @@ class CareNotifier extends Notifier<CareState> {
       debugPrint('[CareNotifier] toggle failed, reverting: $e\n$st');
       state = prevState;
       await _repo.revertLocal(petId: arg, task: task, previousValue: previousDone);
+      AppSnackBar.showError(e);
     }
   }
 }

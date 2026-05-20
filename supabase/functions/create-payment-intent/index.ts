@@ -35,13 +35,6 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-interface LineItem {
-  product_id: string;
-  quantity: number;
-  price_cents: number;
-  name?: string;
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -117,61 +110,42 @@ serve(async (req) => {
       return json({ error: 'This shop is currently inactive', code: 'SHOP_INACTIVE' }, 422);
     }
 
-    // ── Inventory validation (shared by both paths) ───────────────────────────
-    const lineItems: LineItem[] = Array.isArray(order.line_items) ? order.line_items : [];
+    // ── Reservation validity check (shared by both paths) ────────────────────
+    // Inventory was locked at checkout time via inventory_reservations.
+    // Confirm a non-expired active reservation exists before proceeding.
+    const { data: reservations, error: resErr } = await admin
+      .from('inventory_reservations')
+      .select('id')
+      .eq('order_id', orderId)
+      .eq('status', 'active')
+      .gt('expires_at', new Date().toISOString())
+      .limit(1);
 
-    if (lineItems.length === 0) {
-      return json({ error: 'Order has no line items', code: 'EMPTY_ORDER' }, 422);
+    if (resErr) {
+      console.error('reservation check error:', resErr);
+      return json({ error: 'Failed to validate reservation' }, 500);
     }
 
-    const productIds = lineItems.map((i) => i.product_id);
-    const { data: products, error: productsErr } = await admin
-      .from('products')
-      .select('id, inventory_count, name, active')
-      .in('id', productIds);
-
-    if (productsErr || !products) {
-      return json({ error: 'Failed to validate product inventory' }, 500);
-    }
-
-    const productMap = new Map(products.map((p) => [p.id, p]));
-
-    for (const item of lineItems) {
-      const product = productMap.get(item.product_id);
-
-      if (!product) {
-        return json(
-          { error: `Product not found: ${item.product_id}`, code: 'PRODUCT_NOT_FOUND' },
-          422,
-        );
-      }
-
-      if (!product.active) {
-        return json(
-          { error: `"${product.name}" is no longer available`, code: 'PRODUCT_INACTIVE' },
-          422,
-        );
-      }
-
-      if (product.inventory_count < item.quantity) {
-        return json(
-          {
-            error: `Insufficient stock for "${product.name}"`,
-            code: 'INSUFFICIENT_STOCK',
-            available: product.inventory_count,
-            requested: item.quantity,
-          },
-          422,
-        );
-      }
+    if (!reservations?.length) {
+      return json(
+        { error: 'Reservation expired. Please restart checkout.', code: 'RESERVATION_EXPIRED' },
+        422,
+      );
     }
 
     // ════════════════════════════════════════════════════════════════════════
     // CoD path
     // ════════════════════════════════════════════════════════════════════════
     if (payment_method === 'cod') {
-      // Stamp the order with payment method and keep payment_status = 'pending'
-      // (clearance happens when the seller marks it collected).
+      // Confirm the reservation immediately — CoD has no async payment step.
+      const { error: confirmErr } = await admin.rpc('confirm_order_inventory', {
+        p_order_id: orderId,
+      });
+      if (confirmErr) {
+        console.error('cod confirm_order_inventory error:', confirmErr);
+        return json({ error: 'Failed to confirm CoD inventory', code: 'INVENTORY_CONFIRM_FAILED' }, 500);
+      }
+
       const { error: updateErr } = await admin
         .from('marketplace_orders')
         .update({ payment_method: 'cod', payment_status: 'pending' })

@@ -55,7 +55,17 @@
       "Skill(superpowers:receiving-code-review)",
       "Skill(superpowers:receiving-code-review:*)",
       "Bash(gh api *)",
-      "Bash(idx_shops_kyc_status)"
+      "Bash(idx_shops_kyc_status)",
+      "Skill(find-skills)",
+      "Skill(find-skills:*)",
+      "Bash(curl -L --max-time 20 -o \"G:/GitHub/petfolio/google_fonts/Inter-Bold.ttf\" \"https://fonts.gstatic.com/s/a/76121a34a606cc8a0e1ef5a47d2b9ba9678c41f5c852d63eb28f62069373bfad.ttf\")",
+      "Bash(python3 -c ' *)",
+      "Skill(using-superpowers)",
+      "Skill(using-superpowers:*)",
+      "Skill(brainstorming)",
+      "Skill(brainstorming:*)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

@@ -11,9 +11,10 @@ import 'package:petfolio/features/pet_profile/presentation/controllers/active_pe
 import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart';
 import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 
+import 'package:petfolio/core/errors/app_exception.dart';
+
 import '../../data/models/care_task.dart' as dbtask;
 import '../../data/models/care_task_log.dart';
-import '../controllers/care_controller.dart';
 import '../controllers/care_dashboard_controller.dart';
 import '../utils/care_scheduled_time.dart';
 
@@ -65,12 +66,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
   }
 
   Future<void> _init() async {
-    final pet = ref.read(activePetControllerProvider);
-    if (pet == null) return;
-    final ctrl = ref.read(careControllerProvider(pet.id).notifier);
-    await ctrl.loadLocal();
-    ctrl.refresh();
-    // careDashboardProvider auto-loads in its build() — no manual init needed.
+    // careDashboardProvider auto-loads in its build() via Future.microtask.
   }
 
   @override
@@ -113,7 +109,6 @@ class _CareScreenState extends ConsumerState<CareScreen> {
       return Scaffold(backgroundColor: pt.surface1, body: Center(child: body));
     }
 
-    final care = ref.watch(careControllerProvider(activePet.id));
     final dashboard = ref.watch(careDashboardProvider);
     final species = activePet.speciesEnum;
 
@@ -165,7 +160,6 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
                     children: [
                       _StreakBanner(
-                        care: care,
                         species: species,
                         outdoor: _outdoor,
                       ),
@@ -251,12 +245,10 @@ class _CareScreenState extends ConsumerState<CareScreen> {
 
 class _StreakBanner extends ConsumerWidget {
   const _StreakBanner({
-    required this.care,
     required this.species,
     required this.outdoor,
   });
 
-  final CareState care;
   final PetSpecies species;
   final bool outdoor;
 
@@ -295,7 +287,7 @@ class _StreakBanner extends ConsumerWidget {
 
     final streakCount = dashboard.streak.maybeWhen(
       data: (s) => s.currentStreak,
-      orElse: () => care.streak,
+      orElse: () => 0,
     );
     final streakNorm =
         (math.min(math.max(streakCount, 0), 28) / 28.0).clamp(0.0, 1.0);
@@ -772,9 +764,6 @@ class _DailyTasksDashboard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
-
     return state.tasks.when(
       loading: () => const Column(
         children: [
@@ -783,29 +772,9 @@ class _DailyTasksDashboard extends ConsumerWidget {
           _TaskCardSkeleton(),
         ],
       ),
-      error: (err, st) => Container(
-        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
-        decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: pt.line200, width: 0.5),
-        ),
-        child: Column(
-          children: [
-            Icon(Icons.cloud_off_rounded, size: 40, color: pt.ink300),
-            const SizedBox(height: 10),
-            Text(
-              'Could not load tasks',
-              style: TextStyle(fontSize: 15, color: pt.ink500),
-            ),
-            const SizedBox(height: 12),
-            TextButton.icon(
-              onPressed: () => ref.read(careDashboardProvider.notifier).refresh(),
-              icon: const Icon(Icons.refresh_rounded, size: 16),
-              label: const Text('Retry'),
-            ),
-          ],
-        ),
+      error: (err, st) => _CareErrorCard(
+        error: err,
+        onRetry: () => ref.read(careDashboardProvider.notifier).refresh(),
       ),
       data: (tasks) => tasks.isEmpty
           ? _EmptyRoutineState(petName: petName, date: state.selectedDate, onAddTask: onAddTask)
@@ -1173,6 +1142,57 @@ class _TaskCardSkeleton extends StatelessWidget {
             const SkeletonLoader(width: 36, height: 36, borderRadius: 999),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Care Error Card
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CareErrorCard extends StatelessWidget {
+  const _CareErrorCard({required this.error, required this.onRetry});
+
+  final Object error;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
+    final isNetwork = error is NetworkException;
+    final message = error is AppException
+        ? (error as AppException).message
+        : 'Could not load tasks. Check your connection and try again.';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: pt.line200, width: 0.5),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            isNetwork ? Icons.wifi_off_rounded : Icons.cloud_off_rounded,
+            size: 40,
+            color: pt.ink300,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: pt.ink500, height: 1.4),
+          ),
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded, size: 16),
+            label: const Text('Retry'),
+          ),
+        ],
       ),
     );
   }

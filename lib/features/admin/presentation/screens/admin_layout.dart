@@ -7,9 +7,12 @@ import '../../../../core/theme/app_theme.dart';
 import '../widgets/admin_dashboard_tab.dart';
 import '../widgets/financial_ledger_tab.dart';
 import '../widgets/kyc_approvals_tab.dart';
+import '../widgets/moderation_tab.dart';
 import '../widgets/orders_tab.dart';
+import '../widgets/shops_tab.dart';
+import '../controllers/shop_deletion_controller.dart';
 
-enum _AdminTab { dashboard, kyc, ledger, orders }
+enum _AdminTab { dashboard, kyc, ledger, orders, moderation, shops }
 
 class AdminLayout extends ConsumerStatefulWidget {
   const AdminLayout({super.key});
@@ -46,13 +49,27 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
       label: 'Orders',
       tab: _AdminTab.orders,
     ),
+    (
+      icon: Icons.shield_outlined,
+      activeIcon: Icons.shield_rounded,
+      label: 'Moderation',
+      tab: _AdminTab.moderation,
+    ),
+    (
+      icon: Icons.store_outlined,
+      activeIcon: Icons.store_rounded,
+      label: 'Shops',
+      tab: _AdminTab.shops,
+    ),
   ];
 
   Widget get _body => switch (_tab) {
-        _AdminTab.dashboard => const AdminDashboardTab(),
-        _AdminTab.kyc => const KycApprovalsTab(),
-        _AdminTab.ledger => const FinancialLedgerTab(),
-        _AdminTab.orders => const OrdersTab(),
+        _AdminTab.dashboard  => const AdminDashboardTab(),
+        _AdminTab.kyc        => const KycApprovalsTab(),
+        _AdminTab.ledger     => const FinancialLedgerTab(),
+        _AdminTab.orders     => const OrdersTab(),
+        _AdminTab.moderation => const ModerationTab(),
+        _AdminTab.shops      => const ShopsTab(),
       };
 
   int get _selectedIndex =>
@@ -60,6 +77,18 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
 
   void _onDestinationSelected(int i) =>
       setState(() => _tab = _destinations[i].tab);
+
+  Widget _destinationIcon(IconData icon, _AdminTab tab, WidgetRef ref) {
+    if (tab != _AdminTab.shops) return Icon(icon);
+    final hasPending = ref.watch(
+      shopDeletionRequestsProvider.select((v) => (v.value?.isNotEmpty) ?? false),
+    );
+    return Badge(
+      isLabelVisible: hasPending,
+      backgroundColor: AppColors.danger,
+      child: Icon(icon),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,8 +124,8 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
               destinations: [
                 for (final d in _destinations)
                   NavigationRailDestination(
-                    icon: Icon(d.icon),
-                    selectedIcon: Icon(d.activeIcon),
+                    icon: _destinationIcon(d.icon, d.tab, ref),
+                    selectedIcon: _destinationIcon(d.activeIcon, d.tab, ref),
                     label: Text(d.label),
                   ),
               ],

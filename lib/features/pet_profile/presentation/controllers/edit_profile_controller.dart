@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:petfolio/core/errors/app_exception.dart';
 import 'package:petfolio/features/matching/data/repositories/matching_repository.dart';
 
@@ -18,14 +17,14 @@ class EditProfileState {
 
   final bool isSubmitting;
   final String? errorMessage;
-  final File? newImage;
+  final XFile? newImage;
   final bool isSyncingLocation;
 
   EditProfileState copyWith({
     bool? isSubmitting,
     String? errorMessage,
     bool clearError = false,
-    File? newImage,
+    XFile? newImage,
     bool? isSyncingLocation,
   }) {
     return EditProfileState(
@@ -41,7 +40,7 @@ class EditProfileController extends Notifier<EditProfileState> {
   @override
   EditProfileState build() => const EditProfileState();
 
-  void setImage(File file) {
+  void setImage(XFile file) {
     state = state.copyWith(newImage: file, clearError: true);
   }
 

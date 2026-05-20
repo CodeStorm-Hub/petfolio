@@ -37,7 +37,7 @@ class ChecklistRepository {
       '${d.month.toString().padLeft(2, '0')}-'
       '${d.day.toString().padLeft(2, '0')}';
 
-  DateTime _today() => DateUtils.dateOnly(DateTime.now());
+  DateTime _today() => DateUtils.dateOnly(DateTime.now().toLocal());
 
   // ── Read 7-day window from SharedPreferences ────────────────────────────────
 

@@ -35,18 +35,27 @@ class ShopRepository {
   }
 
   /// Returns the shop owned by the currently authenticated user, or null.
+  /// Active shops always take priority over inactive ones.
   Future<Shop?> fetchMyShop() async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) return null;
 
-    final rows = await _client
+    final active = await _client
         .from('shops')
         .select()
         .eq('owner_id', userId)
+        .eq('is_active', true)
         .limit(1);
+    if (active.isNotEmpty) return Shop.fromJson(active.first);
 
-    if (rows.isEmpty) return null;
-    return Shop.fromJson(rows.first);
+    final all = await _client
+        .from('shops')
+        .select()
+        .eq('owner_id', userId)
+        .order('created_at', ascending: false)
+        .limit(1);
+    if (all.isEmpty) return null;
+    return Shop.fromJson(all.first);
   }
 
   Future<Shop> createShop({
@@ -133,6 +142,25 @@ class ShopRepository {
         .select()
         .single();
     return Shop.fromJson(row);
+  }
+
+  Future<void> requestShopDeletion(String shopId, {String? reason}) async {
+    await _client.rpc('request_shop_deletion', params: {
+      'p_shop_id': shopId,
+      if (reason != null && reason.trim().isNotEmpty) 'p_reason': reason.trim(),
+    });
+  }
+
+  Future<Map<String, dynamic>?> fetchMyDeletionRequest(String shopId) async {
+    final rows = await _client
+        .from('shop_deletion_requests')
+        .select()
+        .eq('shop_id', shopId)
+        .inFilter('status', ['pending', 'rejected'])
+        .order('requested_at', ascending: false)
+        .limit(1);
+    if (rows.isEmpty) return null;
+    return rows.first;
   }
 
   /// Calls the `stripe-onboard-vendor` Edge Function (not a Postgres RPC).

@@ -104,49 +104,98 @@ class _GlassBody extends StatelessWidget {
         height: height,
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: fillColor,
-              borderRadius: radius,
-              border: Border(
-                // Top: bright highlight (inner specular)
-                top: BorderSide(color: topBorder),
-                // Other sides: outer rim
-                left: BorderSide(color: rimBorder),
-                right: BorderSide(color: rimBorder),
-                bottom: BorderSide(color: rimBorder),
-              ),
-              boxShadow: pt.shadowGlass,
+          child: CustomPaint(
+            foregroundPainter: _GlassBorderPainter(
+              borderRadius: borderRadius,
+              topColor: topBorder,
+              rimColor: rimBorder,
+              strokeWidth: 1.0,
             ),
-            child: Stack(
-              children: [
-                // Specular highlight — top 30 % linear gradient
-                Positioned.fill(
-                  child: ClipRRect(
-                    borderRadius: radius,
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      heightFactor: 0.30,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [shineColor, Colors.transparent],
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: fillColor,
+                borderRadius: radius,
+                boxShadow: pt.shadowGlass,
+              ),
+              child: Stack(
+                children: [
+                  // Specular highlight — top 30 % linear gradient
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: radius,
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        heightFactor: 0.30,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [shineColor, Colors.transparent],
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                // Content
-                Padding(padding: padding, child: child),
-              ],
+                  // Content
+                  Padding(padding: padding, child: child),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+// ── Glass Border Painter ─────────────────────────────────────────────────────
+
+class _GlassBorderPainter extends CustomPainter {
+  const _GlassBorderPainter({
+    required this.borderRadius,
+    required this.topColor,
+    required this.rimColor,
+    required this.strokeWidth,
+  });
+
+  final double borderRadius;
+  final Color topColor;
+  final Color rimColor;
+  final double strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+
+    final rect = Offset.zero & size;
+    // Deflate by half the stroke width to ensure the border stays completely inside the widget boundary
+    final adjustedRect = rect.deflate(strokeWidth / 2);
+    final rrect = RRect.fromRectAndRadius(
+      adjustedRect,
+      Radius.circular(borderRadius - strokeWidth / 2),
+    );
+
+    // Apply a smooth gradient from top border highlight to outer rim border
+    paint.shader = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [topColor, rimColor, rimColor],
+      stops: const [0.0, 0.15, 1.0],
+    ).createShader(rect);
+
+    canvas.drawRRect(rrect, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _GlassBorderPainter oldDelegate) {
+    return oldDelegate.borderRadius != borderRadius ||
+        oldDelegate.topColor != topColor ||
+        oldDelegate.rimColor != rimColor ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }
 

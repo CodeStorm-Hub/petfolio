@@ -4,6 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../marketplace/data/models/marketplace_order.dart';
 import '../../../marketplace/data/models/shop.dart';
 import '../../../marketplace/data/models/vendor_ledger.dart';
+import '../models/post_report.dart';
+import '../models/shop_deletion_request.dart';
 
 final adminRepositoryProvider = Provider<AdminRepository>(
   (_) => AdminRepository(Supabase.instance.client),
@@ -28,20 +30,22 @@ class AdminRepository {
   }
 
   Future<void> approveKyc(String shopId) async {
-    await _client.from('shops').update({
-      'kyc_status': 'approved',
-      'is_verified': true,
-      'rejection_reason': null,
-      'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', shopId);
+    final adminId = _client.auth.currentUser?.id;
+    if (adminId == null) throw NotAdminException();
+    await _client.rpc('approve_vendor_kyc', params: {
+      'p_shop_id': shopId,
+      'p_admin_id': adminId,
+    });
   }
 
   Future<void> rejectKyc(String shopId, String reason) async {
-    await _client.from('shops').update({
-      'kyc_status': 'rejected',
-      'rejection_reason': reason,
-      'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', shopId);
+    final adminId = _client.auth.currentUser?.id;
+    if (adminId == null) throw NotAdminException();
+    await _client.rpc('reject_vendor_kyc', params: {
+      'p_shop_id':  shopId,
+      'p_admin_id': adminId,
+      'p_reason':   reason,
+    });
   }
 
   // ── KYC document signed URLs ──────────────────────────────────────────────
@@ -63,6 +67,60 @@ class AdminRepository {
       return segments.sublist(bucketIndex + 1).join('/');
     }
     return value;
+  }
+
+  // ── Moderation ────────────────────────────────────────────────────────────
+
+  Future<List<PostReport>> fetchPendingReports() async {
+    final rows = await _client
+        .from('reported_posts')
+        .select('id, post_id, reporter_id, reason, created_at, post:post_id(content)')
+        .eq('status', 'pending')
+        .order('created_at', ascending: false);
+    return (rows as List)
+        .map((r) => PostReport.fromJson(r as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> resolveReport(
+    String reportId, {
+    required bool dismiss,
+    required bool hidePost,
+  }) async {
+    final adminId = _client.auth.currentUser?.id;
+    if (adminId == null) throw NotAdminException();
+    await _client.rpc('resolve_reported_post', params: {
+      'p_report_id': reportId,
+      'p_action':    dismiss ? 'dismissed' : 'reviewed',
+      'p_hide_post': hidePost,
+    });
+  }
+
+  // ── Shop deletion requests ────────────────────────────────────────────────
+
+  Future<List<ShopDeletionRequest>> fetchPendingDeletionRequests() async {
+    final rows = await _client
+        .from('shop_deletion_requests')
+        .select('*, shop:shop_id(shop_name, owner_id)')
+        .eq('status', 'pending')
+        .order('requested_at', ascending: true);
+    return (rows as List)
+        .map((r) => ShopDeletionRequest.fromJson(r as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> resolveDeletionRequest(
+    String requestId, {
+    required bool approve,
+    String? rejectionNote,
+  }) async {
+    final adminId = _client.auth.currentUser?.id;
+    if (adminId == null) throw NotAdminException();
+    await _client.rpc('resolve_shop_deletion', params: {
+      'p_request_id':     requestId,
+      'p_action':         approve ? 'approved' : 'rejected',
+      if (!approve && rejectionNote != null) 'p_rejection_note': rejectionNote,
+    });
   }
 
   // ── COD reconciliation ────────────────────────────────────────────────────

@@ -1,15 +1,20 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_bottom_sheet.dart';
+import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/medical_record.dart';
+import '../../data/repositories/health_repository.dart';
 import '../controllers/health_vault_controller.dart';
 
 extension on MedicalRecord {
@@ -246,6 +251,22 @@ class _MedicalRecordCard extends ConsumerWidget {
 
   final MedicalRecord record;
 
+  Future<void> _openDocument(BuildContext context, WidgetRef ref) async {
+    final path = record.documentUrl;
+    if (path == null) return;
+    try {
+      final url = await ref
+          .read(medicalVaultRepositoryProvider)
+          .createDocumentUrl(path);
+      final uri = Uri.parse(url);
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        if (context.mounted) AppSnackBar.showError('Could not open document.');
+      }
+    } catch (e) {
+      if (context.mounted) AppSnackBar.showError(e);
+    }
+  }
+
   String _dateLine() {
     final parts = <String>[];
     if (record.administeredAt != null) {
@@ -368,6 +389,31 @@ class _MedicalRecordCard extends ConsumerWidget {
                       _dateLine(),
                       style: TextStyle(fontSize: 12, color: pt.ink300),
                     ),
+                    if (record.documentUrl != null) ...[
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: () => _openDocument(context, ref),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.attach_file_rounded,
+                              size: 14,
+                              color: cs.primary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'View document',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: cs.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -399,6 +445,9 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
   DateTime? _nextDueAt;
   DateTime? _expiresAt;
   var _saving = false;
+  XFile? _pickedFile;
+
+  static const int _maxDocBytes = 10 * 1024 * 1024;
 
   @override
   void dispose() {
@@ -407,6 +456,14 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
     _freqCtrl.dispose();
     _notesCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickDocument() async {
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 90,
+    );
+    if (file != null && mounted) setState(() => _pickedFile = file);
   }
 
   Future<void> _pickDate(ValueChanged<DateTime?> onPick) async {
@@ -425,6 +482,41 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
     final name = _nameCtrl.text.trim();
     if (name.isEmpty || _saving) return;
     setState(() => _saving = true);
+
+    String? documentPath;
+    if (_pickedFile != null) {
+      final Uint8List bytes = await _pickedFile!.readAsBytes();
+      if (bytes.length > _maxDocBytes) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('File too large. Maximum size is 10 MB.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        setState(() => _saving = false);
+        return;
+      }
+      try {
+        documentPath = await ref.read(medicalVaultRepositoryProvider).uploadDocument(
+          petId: widget.petId,
+          fileName: _pickedFile!.name,
+          bytes: bytes,
+          mimeType: _pickedFile!.mimeType ?? 'image/jpeg',
+        );
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Document upload failed. Saving record without attachment.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    }
+
     final now = DateTime.now();
     final tempId = 'tmp_${now.microsecondsSinceEpoch}';
     final record = MedicalRecord(
@@ -442,7 +534,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
       frequency: _freqCtrl.text.trim().isEmpty ? null : _freqCtrl.text.trim(),
       isActive: true,
       reminderEnabled: _reminder,
-      documentUrl: null,
+      documentUrl: documentPath,
       notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
       createdAt: now,
       updatedAt: now,
@@ -688,6 +780,53 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: cs.primary, width: 2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'DOCUMENT',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.08 * 12,
+                color: pt.ink500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: _pickedFile == null ? _pickDocument : null,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: pt.surface2,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: pt.line200, width: 0.5),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.attach_file_rounded, size: 18, color: pt.ink500),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _pickedFile == null
+                            ? 'Attach image (optional)'
+                            : _pickedFile!.name,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: _pickedFile != null ? cs.onSurface : pt.ink300,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (_pickedFile != null)
+                      GestureDetector(
+                        onTap: () => setState(() => _pickedFile = null),
+                        child: Icon(Icons.close_rounded, size: 18, color: pt.ink300),
+                      )
+                    else
+                      Icon(Icons.chevron_right_rounded, size: 18, color: pt.ink300),
+                  ],
                 ),
               ),
             ),

@@ -1,31 +1,38 @@
-import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../../../core/errors/app_exception.dart';
 import '../../data/repositories/social_repository.dart';
+
+enum PostStep { idle, uploading, posting }
 
 class CreatePostState {
   CreatePostState({
     this.image,
     this.caption = '',
-    this.isSubmitting = false,
+    this.step = PostStep.idle,
     this.error,
   });
 
-  final File? image;
+  final XFile? image;
   final String caption;
-  final bool isSubmitting;
+  final PostStep step;
   final String? error;
 
+  bool get isSubmitting => step != PostStep.idle;
+
   CreatePostState copyWith({
-    File? image,
+    XFile? image,
+    bool clearImage = false,
     String? caption,
-    bool? isSubmitting,
+    PostStep? step,
     String? error,
+    bool clearError = false,
   }) {
     return CreatePostState(
-      image: image ?? this.image,
+      image: clearImage ? null : (image ?? this.image),
       caption: caption ?? this.caption,
-      isSubmitting: isSubmitting ?? this.isSubmitting,
-      error: error,
+      step: step ?? this.step,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
@@ -36,36 +43,40 @@ class CreatePostNotifier extends Notifier<CreatePostState> {
 
   SocialRepository get _repo => ref.read(socialRepositoryProvider);
 
-  void setImage(File image) => state = state.copyWith(image: image);
+  void setImage(XFile image) => state = state.copyWith(image: image, clearError: true);
+  void removeImage() => state = state.copyWith(clearImage: true);
   void setCaption(String caption) => state = state.copyWith(caption: caption);
 
   Future<bool> submit(String petId) async {
-    if (state.image == null && state.caption.isEmpty) {
-      state = state.copyWith(error: 'Please add an image or caption');
+    if (state.image == null && state.caption.trim().isEmpty) {
+      state = state.copyWith(error: 'Please add an image or caption.');
       return false;
     }
 
-    state = state.copyWith(isSubmitting: true, error: null);
+    state = state.copyWith(step: PostStep.uploading, clearError: true);
 
     try {
       List<String> imageUrls = [];
       if (state.image != null) {
-        final bytes = await state.image!.readAsBytes();
-        final ext = state.image!.path.split('.').last;
-        final imageUrl = await _repo.uploadImage(bytes, ext);
+        final imageUrl = await _repo.uploadPostImage(state.image!);
         imageUrls.add(imageUrl);
       }
 
+      state = state.copyWith(step: PostStep.posting);
+
       await _repo.createPost(
         petId: petId,
-        caption: state.caption,
+        caption: state.caption.trim(),
         imageUrls: imageUrls,
       );
 
-      state = state.copyWith(isSubmitting: false);
+      state = state.copyWith(step: PostStep.idle);
       return true;
+    } on AppException catch (e) {
+      state = state.copyWith(step: PostStep.idle, error: e.message);
+      return false;
     } catch (e) {
-      state = state.copyWith(isSubmitting: false, error: e.toString());
+      state = state.copyWith(step: PostStep.idle, error: e.toString());
       return false;
     }
   }

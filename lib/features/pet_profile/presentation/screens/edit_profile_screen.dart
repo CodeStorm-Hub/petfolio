@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' show File;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -89,7 +89,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Future<void> _pickImage() async {
     final picked = await _picker.pickImage(source: ImageSource.gallery);
     if (picked != null) {
-      ref.read(editProfileControllerProvider.notifier).setImage(File(picked.path));
+      ref.read(editProfileControllerProvider.notifier).setImage(picked);
     }
   }
 
@@ -660,7 +660,7 @@ class _AvatarEditor extends StatelessWidget {
               color: pt.surface2,
               border: Border.all(color: pt.line200, width: 2),
               image: state.newImage != null
-                  ? DecorationImage(image: FileImage(state.newImage!), fit: BoxFit.cover)
+                  ? DecorationImage(image: FileImage(File(state.newImage!.path)), fit: BoxFit.cover)
                   : pet.avatarUrl != null && pet.avatarUrl!.isNotEmpty
                       ? DecorationImage(
                           image: CachedNetworkImageProvider(pet.avatarUrl!),

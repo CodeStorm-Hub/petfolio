@@ -1,7 +1,6 @@
-import 'dart:typed_data';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/errors/app_exception.dart';
@@ -53,7 +52,7 @@ class SocialRepository {
           like_count,
           comment_count,
           pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
-          author:users!posts_author_id_fkey(id, username, display_name, avatar_url),
+          author:users!posts_author_id_fkey(id, username, display_name, avatar_url, location),
           post_likes(pet_id)
         ''')
         .eq('visibility', 'public')
@@ -80,7 +79,7 @@ class SocialRepository {
           like_count,
           comment_count,
           pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
-          author:users!posts_author_id_fkey(id, username, display_name, avatar_url),
+          author:users!posts_author_id_fkey(id, username, display_name, avatar_url, location),
           post_likes(pet_id)
         ''')
         .eq('pet_id', petId);
@@ -113,7 +112,7 @@ class SocialRepository {
           like_count,
           comment_count,
           pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
-          author:users!posts_author_id_fkey(id, username, display_name, avatar_url),
+          author:users!posts_author_id_fkey(id, username, display_name, avatar_url, location),
           post_likes(pet_id)
         ''')
         .eq('id', postId)
@@ -134,6 +133,7 @@ class SocialRepository {
         (author['username'] as String?) ??
         (author['display_name'] as String?) ??
         'petfolio_user';
+    final fuzzyLocation = (author['location'] as String?) ?? '';
 
     final palette = _paletteFor(petSpecies);
     final isLiked = likes.any((l) {
@@ -148,7 +148,7 @@ class SocialRepository {
       petName: petName,
       petSpecies: petSpecies,
       accentColor: palette.accent,
-      fuzzyLocation: '', // not modelled in DB yet
+      fuzzyLocation: fuzzyLocation,
       caption: (r['content'] as String?) ?? '',
       likes: (r['like_count'] as int?) ?? 0,
       comments: (r['comment_count'] as int?) ?? 0,
@@ -226,11 +226,38 @@ class SocialRepository {
 
   // ── Post Creation ─────────────────────────────────────────────────────────
 
-  Future<String> uploadImage(Uint8List bytes, String extension) async {
-    final fileName = '${DateTime.now().millisecondsSinceEpoch}.$extension';
-    final path = 'posts/$fileName';
+  static const _allowedExtensions = {'jpg', 'jpeg', 'png', 'webp', 'gif', 'heic'};
+  static const _maxImageBytes = 10 * 1024 * 1024; // 10 MB
+  static const _mimeTypes = {
+    'jpg':  'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png':  'image/png',
+    'webp': 'image/webp',
+    'gif':  'image/gif',
+    'heic': 'image/heic',
+  };
 
-    await _client.storage.from('post-images').uploadBinary(path, bytes);
+  Future<String> uploadPostImage(XFile file) async {
+    final ext = file.name.split('.').last.toLowerCase();
+    if (!_allowedExtensions.contains(ext)) {
+      throw const ValidationException(message: 'Unsupported image format. Use JPG, PNG, WebP, GIF, or HEIC.');
+    }
+
+    final bytes = await file.readAsBytes();
+    if (bytes.length > _maxImageBytes) {
+      throw const ValidationException(message: 'Image must be under 10 MB.');
+    }
+
+    final path = '$_uid/${DateTime.now().millisecondsSinceEpoch}.$ext';
+    try {
+      await _client.storage.from('post-images').uploadBinary(
+        path,
+        bytes,
+        fileOptions: FileOptions(contentType: _mimeTypes[ext] ?? 'image/$ext'),
+      );
+    } on StorageException catch (e) {
+      throw NetworkException(message: 'Image upload failed: ${e.message}');
+    }
     return _client.storage.from('post-images').getPublicUrl(path);
   }
 

@@ -1,5 +1,10 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:convert';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../data/models/cart_item.dart';
 import '../../data/models/product.dart';
 
@@ -13,11 +18,43 @@ final cartProvider = NotifierProvider<CartNotifier, CartState>(CartNotifier.new)
 // Notifier
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// In-memory cart.  All state is lost on app restart (intentional — the order
-/// row in Supabase is the source of truth once checkout begins).
 class CartNotifier extends Notifier<CartState> {
+  String get _key {
+    final uid = Supabase.instance.client.auth.currentUser?.id;
+    return uid != null ? 'cart_$uid' : 'cart';
+  }
+
   @override
-  CartState build() => CartState.empty;
+  CartState build() {
+    ref.listen<bool>(isLoggedInProvider, (prev, next) {
+      if (prev != next) {
+        state = CartState.empty;
+        _loadFromPrefs();
+      }
+    });
+    _loadFromPrefs();
+    return CartState.empty;
+  }
+
+  Future<void> _loadFromPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_key);
+      if (raw == null) return;
+      state = CartState.fromStorageJson(
+        jsonDecode(raw) as Map<String, dynamic>,
+      );
+    } catch (_) {
+      // Corrupt data — stay with empty cart.
+    }
+  }
+
+  void _persist() {
+    final snapshot = state;
+    SharedPreferences.getInstance().then(
+      (p) => p.setString(_key, jsonEncode(snapshot.toStorageJson())),
+    );
+  }
 
   // ── Public API ─────────────────────────────────────────────────────────────
 
@@ -44,6 +81,7 @@ class CartNotifier extends Notifier<CartState> {
       items[idx] = items[idx].copyWith(quantity: items[idx].quantity + 1);
     }
     state = CartState(items: items);
+    _persist();
   }
 
   /// Remove one unit; remove the line entirely if quantity reaches 0.
@@ -61,6 +99,7 @@ class CartNotifier extends Notifier<CartState> {
       items[idx] = item.copyWith(quantity: item.quantity - 1);
     }
     state = CartState(items: items);
+    _persist();
   }
 
   /// Remove a line entirely.
@@ -71,6 +110,7 @@ class CartNotifier extends Notifier<CartState> {
               !(i.product.id == productId && i.isSubscribed == isSubscribed))
           .toList(),
     );
+    _persist();
   }
 
   /// Toggle subscribe-and-save on an existing cart line.
@@ -84,6 +124,7 @@ class CartNotifier extends Notifier<CartState> {
 
     items[idx] = item.copyWith(isSubscribed: !item.isSubscribed);
     state = CartState(items: items);
+    _persist();
   }
 
   /// Change delivery frequency for a subscribed line.
@@ -94,6 +135,7 @@ class CartNotifier extends Notifier<CartState> {
 
     items[idx] = items[idx].copyWith(frequencyWeeks: weeks);
     state = CartState(items: items);
+    _persist();
   }
 
   /// Remove all items belonging to a specific vendor (called after per-vendor checkout).
@@ -103,8 +145,12 @@ class CartNotifier extends Notifier<CartState> {
           .where((i) => i.product.shopId != shopId)
           .toList(),
     );
+    _persist();
   }
 
-  /// Empty the entire cart.
-  void clear() => state = CartState.empty;
+  /// Empty the entire cart and remove its persisted snapshot.
+  void clear() {
+    state = CartState.empty;
+    SharedPreferences.getInstance().then((p) => p.remove(_key));
+  }
 }

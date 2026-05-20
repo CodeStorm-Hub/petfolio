@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/shop.dart';
 import '../../data/repositories/kyc_repository.dart';
 import '../../data/repositories/shop_repository.dart';
+import 'deletion_request_controller.dart';
 
 final myShopProvider =
     AsyncNotifierProvider<MyShopNotifier, Shop?>(MyShopNotifier.new);
@@ -93,13 +94,14 @@ class MyShopNotifier extends AsyncNotifier<Shop?> {
     return _repo.startOnboarding(shop.id);
   }
 
-  /// Re-fetches the shop row after the user returns from Stripe KYC.
-  /// The webhook may have already set is_verified; this polls for the update.
+  /// Re-fetches the shop row after the user returns from Stripe KYC or when
+  /// the app resumes from background (covers admin-approved deletion case).
   Future<void> refreshAfterOnboarding() async {
     final previous = state;
     try {
       final shop = await _repo.fetchMyShop();
       state = AsyncValue.data(shop);
+      ref.invalidate(deletionRequestProvider);
     } catch (e, st) {
       state = previous.hasValue ? previous : AsyncValue.error(e, st);
     }

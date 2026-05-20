@@ -314,9 +314,10 @@ class _RouterNotifier extends ChangeNotifier {
     // ~55-minute token rotation, making all screens show a loading spinner.
     _ref.listen<bool>(isLoggedInProvider, (previous, next) {
       if (previous != next) {
-        // Auth status truly flipped — invalidate so petListProvider re-runs
-        // with the new (or absent) user ID.
+        // Auth status truly flipped — invalidate so petListProvider and
+        // isAdminProvider re-run with the new (or absent) user.
         _ref.invalidate(petListProvider);
+        _ref.invalidate(isAdminProvider);
       }
       notifyListeners();
     });
