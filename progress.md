@@ -22,6 +22,35 @@
 
 ---
 
+## 2026-05-21 — Shop Deletion Request feature
+
+**DB (migration applied ✅)**
+- New table `shop_deletion_requests` (id, shop_id, owner_id, reason, status, rejection_note, requested_at, resolved_at, resolved_by). RLS: owner SELECT/INSERT own rows; admin SELECT all.
+- `request_shop_deletion(p_shop_id, p_reason)` RPC: ownership guard, active-orders block (raises `ACTIVE_ORDERS:<count>`), duplicate-pending guard; inserts request + audit_log.
+- `resolve_shop_deletion(p_request_id, p_action, p_rejection_note)` RPC: admin-only; on `approved` sets `shops.is_active=false` + bulk-sets `products.active=false`; sends notification; on `rejected` requires rejection note; both write audit_log.
+
+**Dart**
+- `ShopDeletionRequest` model (plain class, nested `shop:shop_id(shop_name)` join)
+- `ShopRepository`: `requestShopDeletion`, `fetchMyDeletionRequest`
+- `AdminRepository`: `fetchPendingDeletionRequests`, `resolveDeletionRequest`
+- `DeletionRequestNotifier` (`AsyncNotifier<Map?>`) — vendor side, reads shopId from `myShopProvider`
+- `ShopDeletionNotifier` (`AsyncNotifier<List<ShopDeletionRequest>>`) — admin side, optimistic removal
+
+**Vendor UI** (`seller_dashboard_screen.dart`)
+- Danger Zone section below Quick Actions: full-width divider + red "DANGER ZONE" label
+- State A: Delete tile → `_DeleteShopRequestSheet` (consequence list, amber info box, optional reason, Submit Request danger button)
+- State B: Amber pending banner with submitted date
+- State C: Red rejected banner with rejection note + "Submit new request →" link
+
+**Admin UI**
+- New `ShopsTab` widget (6th tab in admin panel, `Icons.store_outlined`)
+- Red dot badge on Shops tab icon when pending requests exist
+- `_DeletionRequestCard`: shop name, date, optional reason block, consequence summary, Reject (AlertDialog + required note) + Approve deletion (AlertDialog confirmation)
+
+`flutter analyze` — **No issues found.**
+
+---
+
 ## 2026-05-21 — Runtime font fix: Inter-Bold.ttf missing (offline GoogleFonts)
 
 - **Root cause**: `GoogleFonts.config.allowRuntimeFetching = false` (set in `main.dart`) requires every requested font variant to exist as a local asset file. `google_fonts/Inter-Bold.ttf` (FontWeight.w700) was absent; any text inheriting Inter w700 from `AppTheme._textTheme` crashed the app at first render.
