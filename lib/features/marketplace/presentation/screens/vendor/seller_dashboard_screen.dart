@@ -54,9 +54,17 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen>
           loading: () =>
               const Center(child: CircularProgressIndicator.adaptive()),
           error: (e, _) => Center(child: Text(e.toString())),
-          data: (shop) => shop == null
-              ? _NoShopView(onCreateShop: () => context.push('/seller/setup'))
-              : _DashboardBody(shop: shop),
+          data: (shop) {
+            if (shop == null) {
+              return _NoShopView(
+                onCreateShop: () => context.push('/seller/setup'),
+              );
+            }
+            if (!shop.isActive) {
+              return const _ShopDeactivatedView();
+            }
+            return _DashboardBody(shop: shop);
+          },
         ),
       ),
     );
@@ -109,6 +117,56 @@ class _NoShopView extends StatelessWidget {
               isFullWidth: true,
               onPressed: onCreateShop,
               leadingIcon: const Icon(Icons.add_rounded, size: 20),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ShopDeactivatedView extends StatelessWidget {
+  const _ShopDeactivatedView();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.danger.withAlpha(16),
+              ),
+              child: const Icon(Icons.store_outlined,
+                  size: 36, color: AppColors.danger),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Shop Closed',
+              style: TextStyle(
+                fontFamily: 'Sora',
+                fontWeight: FontWeight.w700,
+                fontSize: 22,
+                color: AppColors.ink950,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Your deletion request was approved.\nThis shop and all its products have been deactivated.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: AppColors.ink500, height: 1.5),
+            ),
+            const SizedBox(height: 28),
+            OutlinedButton.icon(
+              onPressed: () => context.pop(),
+              icon: const Icon(Icons.arrow_back_rounded, size: 18),
+              label: const Text('Go back'),
             ),
           ],
         ),
