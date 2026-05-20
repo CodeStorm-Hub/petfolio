@@ -1,226 +1,493 @@
-# Petfolio — Comprehensive Codebase, Database, and UX Review
+# PetFolio — Comprehensive Platform Review & Analysis
 
-**Review date:** 2026-05-16  
-**Scope:** Application code under `lib/`, Supabase SQL under `supabase/` (migrations + `schema.sql`), Edge Function `create-payment-intent`, and representative UI flows.  
-**Verification run:** `flutter analyze` (no issues); `flutter test` (4 passed, 1 failed — see Testing).
-
-This document supersedes narrative snapshots in older audits where the product has changed (e.g. matching and social feed are now largely DB-backed). It is meant as a single reference for gaps, risks, and improvements alongside `CODEBASE_REVIEW.md` and `REVIEW_FINDINGS.md`.
+**Date:** 2026-05-21  
+**Review Scope:** Full-stack Flutter Codebase + Supabase Database (Tables, RLS Policies, Indexes, Triggers, RPCs) + Edge Functions + Platform User Stories & Navigation Flows
 
 ---
 
-## Executive summary
+## Table of Contents
 
-Petfolio is a feature-first **Flutter + Riverpod + GoRouter** app on **Supabase** (Auth, Postgres, Storage, Realtime) with **Stripe** checkout. Care, social (posts, likes, comments, follows, notifications), marketplace, pet profiles, and matching/discovery are **substantially wired to Postgres**. Remaining problems cluster around: **dead schema surface** (tables unused by the app), **incomplete chat** (threads without a first-class message UI), **client-trusted commerce state**, **configuration defaults in source**, **orphaned UI concepts** (memorial/tributes, header actions), and **thin automated testing** beyond small care utilities.
-
----
-
-## Review method
-
-1. Read `supabase/schema.sql` and all files under `supabase/migrations/` for table and policy intent.  
-2. Grepped `lib/` for `.from('...')`, `.rpc(`, and storage bucket usage to map the app to tables.  
-3. Spot-checked high-risk areas: matching, social, checkout, care repositories, home (`PetProfileScreen`), and `main.dart`.  
-4. Cross-checked claims in `docs/flutter_supabase_full_app_review_2026-05-13.md` against current code (several items are **fixed** or **outdated**).  
-5. Ran `flutter analyze` and `flutter test`.  
-6. Summarized **Flutter + Supabase** guidance from public sources (Supabase docs, community write-ups on RLS and Realtime); see [External references](#external-references-best-practices).
+1. [Executive Summary & Platform Overview](#1-executive-summary--platform-overview)
+2. [Codebase Architecture & Core Design System](#2-codebase-architecture--core-design-system)
+3. [Exhaustive Module Breakdown](#3-exhaustive-module-breakdown)
+4. [Database Schema & ERD Map](#4-database-schema--erd-map)
+5. [User Navigation Flows & Life-cycle States](#5-user-navigation-flows--life-cycle-states)
+6. [Complete User Stories Mapping](#6-complete-user-stories-mapping)
+7. [Security, Performance & Codebase Audit Findings](#7-security-performance--codebase-audit-findings)
 
 ---
 
-## Database inventory (authoritative picture)
+## 1. Executive Summary & Platform Overview
 
-**Base schema (`supabase/schema.sql`)** defines core social/commerce primitives: `users`, `pets`, `care_logs`, `health_vitals`, `posts`, `match_requests`, `chat_threads`, `chat_messages`, `marketplace_orders`, plus RLS patterns and triggers.
+**PetFolio** is a cutting-edge, premium full-stack mobile application that integrates social networking, dating/playdate matching, digital health vault tracking, and a multi-vendor marketplace with automated e-commerce and onboarding flows. 
 
-**Migrations extend / alter** that baseline. Observed additions include (non-exhaustive but representative):
+It is designed for modern pet owners (pets as family members) and small business owners/sellers, built on a robust architecture that leverages **Flutter** for cross-platform visual excellence and **Supabase (PostgreSQL 17)** for performant, secure, real-time backend functionality.
 
-| Area | Objects |
-|------|---------|
-| Marketplace | `products`; `marketplace_orders` stripe + line_items columns |
-| Care | `care_tasks`; `care_logs` append **`logged_date`**, expanded `care_type`, uniqueness on `(pet_id, care_type, logged_date)`; RPC-style daily completion path used from Dart (`check_daily_completion`) |
-| Health | `health_logs`, `medical_vault` |
-| Gamification | `care_streaks`, `pet_badges`, `pet_care_gamification` |
-| Social | `post_likes`, `notifications`, `comments`, `pet_follows` |
-| Cleanup | Drop `post_candles` and memorial column on `posts` (`20260514000001_remove_memorial_feature.sql`) |
-
-**Drift risk:** `schema.sql` in-repo is not automatically the full picture; **migrations are the source of truth** for what production should contain. Keep `schema.sql` regenerated or treat it as documentation-only to avoid false confidence.
+### Core High-Level Goals
+- **Foster Community:** A beautiful social network tailored to sharing pets' lives.
+- **Connect Pets:** Geo-location-based playdate, breeding, and adoption discovery.
+- **Promote Longevity & Care:** Personalised checklists, streaks, and a digital medical document vault.
+- **Power a Pet Economy:** An e-commerce platform where vendors can easily list products, handle Stripe Connect or Cash on Delivery (COD) checkouts, and process automated vendor earnings payouts.
+- **Administrative Moderation:** Robust, secure administration panel for moderating content, reviewing manual vendor KYC, resolving Cash on Delivery payouts, and resolving shop deletion requests.
 
 ---
 
-## Application ↔ database mapping
+## 2. Codebase Architecture & Core Design System
 
-Tables (and buckets/RPC) referenced from `lib/` (from static search):
+### 2.1 Feature-First Architecture
+The codebase strictly adheres to a **Feature-First Architecture** inside the `lib/features/` directory. Each feature folder is modular and separated cleanly into three distinct structural layers:
 
-| Supabase object | Primary features |
-|-----------------|------------------|
-| `users`, `pets` | Auth-adjacent profiles, onboarding, discovery |
-| `care_tasks`, `care_logs`, `care_streaks`, `pet_badges` | Care dashboard, tasks, streaks, badges |
-| `check_daily_completion` (RPC) | Daily completion / streak logic |
-| `health_logs`, `medical_vault` | Health vault / structured logs |
-| `health_vitals` | Target weight write from pet profile flow |
-| `posts`, `post_likes`, `comments`, `pet_follows`, `notifications` | Social feed, profile, notifications |
-| Storage `pets`, `post-images` | Avatars, post media |
-| `match_requests`, `chat_threads` | Discovery swipes → requests; thread list + realtime stream |
-| `products`, `marketplace_orders` | Catalog, orders, Edge Function payment intent |
+```
+lib/features/{feature_name}/
+├── data/
+│   ├── models/             # Freezed immutable data classes with JSON serializers
+│   └── repositories/       # Supabase-specific DB access classes (handling errors & queries)
+└── presentation/
+    ├── controllers/        # Riverpod providers, generated notifier state, and UI binding
+    ├── screens/            # Full-page high-fidelity UI views
+    └── widgets/            # Reusable micro-components specific to the feature
+```
 
-**Not referenced in `lib/` (potential dead or future-only schema):**
+### 2.2 Global State Management
+- Managed exclusively via **Riverpod** (`flutter_riverpod` and `riverpod_annotation`).
+- All state changes, optimistic UI updates (e.g., swiping, care checklist toggles, post liking), and dependency injection are driven by generated Riverpod notifiers.
+- Core providers like `activePetIdProvider` globally synchronize the pet currently in focus, automatically updates care checklists, streaks, and medical record histories.
 
-- `chat_messages` — no app queries found; messaging UX is not implemented end-to-end.  
-- `pet_care_gamification` — table exists in migrations; **no Dart usage** located.  
-- Legacy memorial persistence — `post_candles` removed in SQL; UI may still carry vestigial labels or fields.
-
----
-
-## Mismatches and disconnects
-
-### High impact
-
-1. **Chat threads vs messages**  
-   `MatchingRepository.chatThreadStream()` and `chatThreadsProvider` correctly align with `participant_1_id` / `participant_2_id` and `match_request_id`, filtered by active pet via `match_requests`. There is **no** `chat_messages` layer in the Flutter codebase, so users cannot send/receive messages in-app despite the table and RLS existing in SQL.
-
-2. **Order payment truth**  
-   Checkout promotes orders using **client-side** success from the Stripe Payment Sheet (`checkout_controller.dart` pattern). There is **no** app-side enforcement that server/webhook confirmed payment before treating inventory or fulfillment as final. The Edge Function correctly uses the **service role** for order lookup and stresses JWT ownership checks — good — but **Stripe webhooks** (or a server-confirmed status) remain the production-grade source of truth.
-
-3. **Default environment values in `main.dart`**  
-   `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `STRIPE_PUBLISHABLE_KEY` use `String.fromEnvironment` **with real project defaults**. Anon/publishable keys are not secret, but **shipping one project’s keys as compile-time defaults** invites wrong-environment bugs and accidental coupling. Prefer failing fast in release builds when defines are missing, or flavor-specific config.
-
-4. **Widget test invalid for Riverpod app**  
-   `test/widget_test.dart` pumps `PetfolioApp` **without** `ProviderScope` and still asserts the counter template. **`flutter test` fails** this file (confirmed 2026-05-16).
-
-### Medium impact
-
-5. **Dual “health” models**  
-   `health_vitals` (schema baseline) is used for **target weight** in `pet_repository.dart`. **`health_logs`** and **`medical_vault`** back the care health UX. Product and engineering clarity (one mental model for owners) is split across three surfaces.
-
-6. **Memorial / tributes mismatch**  
-   Migration removed **`post_candles`** and memorial flags. `FeedPost` still exposes **`tributes`** (defaults to 0); `social_screen.dart` still has a “Memorial post” section comment. Social controller comments mention “candle” but only **like** is implemented. Risk: misleading UX or future dead code.
-
-7. **Discovery deck fallback**  
-   `DiscoveryNotifier` seeds a **sample deck** then replaces with Supabase candidates; failures keep the sample deck. Users may **not distinguish** demo cards from real pets without careful UX (demo IDs are skipped in `recordSwipe`, which is good, but the deck can still look “full” when offline).
-
-8. **Swipe / match_requests semantics**  
-   Positive swipes always insert **`pending`** `match_requests`. “Pass” writes nothing (by design — no rejections table). Duplicate pending requests for the same pet pair may depend on **DB constraints**; if missing unique partial indexes, duplicates are possible.
-
-9. **Edge Function CORS**  
-   `create-payment-intent` uses `Access-Control-Allow-Origin: *`. Acceptable for some mobile-origin POST patterns but worth tightening if browser clients ever call it.
-
-### Lower impact / housekeeping
-
-10. **`schema.sql` vs migrations**  
-    Readers of **`schema.sql` alone** may miss `products`, `care_tasks`, `post_likes`, etc. Document or regenerate.
-
-11. **Analyzer strictness**  
-    Current `flutter analyze` is clean with default lints; stricter modes (`strict-casts`, `strict-inference`, `strict-raw-types`) are not enabled — acceptable, but caps long-term safety.
+### 2.3 Premium Aesthetics & Core Design System
+Designed to wow the user immediately, the frontend respects the design tokens in `PetFolio Design System.md`:
+- **Typography:** Features Google Fonts (`Inter` for high-density readable text and `Sora` for brand statements).
+- **Harmony & Dark Mode:** Uses curated color palettes structured in dynamic Light and Dark theme configurations with custom extensions (`PetfolioThemeExtension`) for 50+ HSL tailored styling tokens.
+- **Adaptive Routing:** Employs `GoRouter` mapping adaptive screens. For screens under 600dp (mobiles), the layout draws a bottom `NavigationBar`. For wider displays (tablets/desktops), it automatically renders a side `NavigationRail` without breaking layouts.
+- **Micro-Animations & Visuals:** Packed with dynamic layouts, shimmer skeleton states, custom Glassmorphism components (`GlassCard`), and interactive overlay celebration backdrops.
+- **Offline Font Safety:** Initialized with `GoogleFonts.config.allowRuntimeFetching = false` to guarantee complete crash-free offline rendering, supported by verified local copies of both `Inter-Regular.ttf` and `Inter-Bold.ttf`.
 
 ---
 
-## Feature-area review
+## 3. Exhaustive Module Breakdown
 
-### Auth
+### 3.1 Authentication (Auth)
+- **Files Location:** `lib/features/auth/`
+- **Functional Description:** Multi-step authentication flow with clean client-side input validation. Provisioned with secure email/password register and login states.
+- **Triggers:** A secure trigger on the database level (`private.handle_new_user()`) intercepts new entries in `auth.users` and automatically provisions their corresponding profile row inside the `public.users` table.
+- **State Integration:** The global `isLoggedInProvider` is listened to by GoRouter's `_RouterNotifier` to redirect unauthorized users straight to `/login` or `/register`.
 
-- Supabase email/password flow; session drives GoRouter redirects.  
-- **Recommendation:** Ensure deep links and OAuth (if added later) follow Supabase’s [Flutter guide](https://supabase.com/docs/guides/auth/native-mobile-deep-linking) (PKCE, redirect URLs).
+### 3.2 Onboarding & Pet Profile
+- **Files Location:** `lib/features/pet_profile/`
+- **Functional Description:** 
+  - **Onboarding Wizard:** An 8-step highly interactive questionnaire (Welcome, Species & Breed Selection, Name, DOB Picker with calculated age, Weight Input with kg/lbs dynamic converter, Activity Level Grid, Avatar Photo Upload, and Summary).
+  - **Active Pet Switcher:** Supports owning multiple pets; handles switching the active pet context via a custom bottom sheet switcher.
+  - **Profile Management:** An elegant sectioned form (`EditProfileScreen`) that permits saving custom details, toggling public/discoverable attributes, and updating location markers.
+- **Dynamic Accent Colors:** Accent borders and headers automatically shift shade colors matching the species type (e.g. Dog, Cat, Bird, Reptile).
 
-### Pet profile and home (`PetProfileScreen` at `/home`)
+### 3.3 Care, Streaks, & Badges (Health & Gamification)
+- **Files Location:** `lib/features/care/`
+- **Functional Description:**
+  - **Checklist Engine:** Personalised daily tasks based on the pet's activity level and age. Once-off tasks and recurring task profiles are merged and managed under `careDashboardProvider`.
+  - **Gamification Streaks:** Completing daily tasks awards points and updates daily care streaks. The dashboard listens to the `care_streaks` table via real-time stream subscriptions (`careStreakRealtimeProvider`) to synchronize user milestone accomplishments immediately.
+  - **Milestone Badges:** Unlocking streaks triggers the `check_daily_completion` RPC, which validates task completion states against daily checklist history and automatically adds badges to the pet's reward vault.
 
-- Uses active pet + list providers; integrates care streak realtime elsewhere in app.  
-- **UX gaps:** header **Outdoor mode** and **Notifications** actions use **empty** `onTap` while showing badges/tooltips — visually active, functionally inert.
+### 3.4 Medical Vault & Health Logs
+- **Files Location:** `lib/features/care/`
+- **Functional Description:**
+  - **Medical Tracking:** Logs vaccines, medications, surgeries, and allergies. Sorts records chronologically using cohesive comparisons (`nextDueAt ?? expiresAt ?? administeredAt`), pinning records with no dates to the very end.
+  - **Private Medical Attachments:** Direct integration with a private `medical-documents` storage bucket. Owners pick documents, crop/adjust, upload files safely under their owner-scoped folders, and view attached files through 1-hour signed URLs using `url_launcher`.
+  - **Vitals & Health Logs:** Dynamic weight logs (providing a clean progression chart) and symptom tracking.
 
-### Care
+### 3.5 Pet Discovery & Swipe Matching (Pet Dating)
+- **Files Location:** `lib/features/matching/`
+- **Functional Description:**
+  - **PostGIS Spatial Feeds:** Leverages the Postgres `postgis` spatial extension. The database RPC `matching_discovery_candidates` performs lightning-fast proximity computations based on geographical coordinate points.
+  - **Tinder-Style Swipes:** Users swipe right (LIKE), left (PASS), up (SUPER_PAW), or double tap (GREET). Swipes are recorded immediately using optimistic UI.
+  - **Discovery Preferences:** Bottom sheet filter allowing users to select species, maximum search radius slider, and age ranges. Changes are debounced 450ms to prevent flooding API endpoints.
+  - **Mutual Match Overlay:** When both owners mutually express positive interest, the server inserts a record inside the `matches` table. Supabase Realtime detects the mutual match, automatically triggers a full-screen blurred celebratory backdrop overlay, and provisions a secure `chat_thread`.
+  - **Inbox & Real-time Chat:** An N+1 query-free inbox loads matching threads. Chat threads connect users via a real-time messaging pipeline.
 
-- Rich Supabase integration: tasks, logs with `logged_date`, streaks, badges, RPC completion, optional realtime on streaks.  
-- **Strength:** typed repository errors (`AppException` hierarchy) in `PetCareRepository`.  
-- **Watch:** ensure all devices use consistent **timezone semantics** for `logged_date` (UTC vs local) in edge cases.
+### 3.6 Multi-Vendor Marketplace (E-Commerce)
+- **Files Location:** `lib/features/marketplace/`
+- **Functional Description:**
+  - **Mixed Cart Checkout:** Buyers can add products from multiple separate shops to a single cart. The checkout screen dynamically clusters items by vendor and initiates payment routing per shop.
+  - **Double Payment Paths:** Integration of Stripe Connect (express vendor onboarding with platform fees) and localized Cash on Delivery (COD) checkouts. COD checkouts bypass Stripe entirely, performing active-seller checks and inventory adjustments on the server.
+  - **Secure Inventory Reservations:** To eliminate checkout price manipulation and double-allocation race conditions, all prices are server-calculated. Active orders create a 15-minute row reservation inside the `inventory_reservations` table. Successful payment webhook completes the reservation, decrementing inventory; cancellations release the items instantly.
+  - **Symmetric KYC Onboarding:** Sellers onboard via Stripe Express redirects or through a localized Bangladesh manual portal (uploading NID/Trade Licenses directly to a private `kyc-documents` bucket).
 
-### Social
-
-- Feed loads **`posts`** with joins to `pets` and `users`; **`post_likes`** embedded for `isLiked`; realtime subscription updates **counts** on `posts`.  
-- Comments and notifications repositories exist; create post + storage upload path present.  
-- **Gap:** memorial/candle product surface removed at DB level; UI/model remnants should be removed or re-spec’d.
-
-### Matching
-
-- **Repository** uses real `pets` + `match_requests` (no `swipes`/`matches` tables).  
-- **Chat thread model** matches DB columns.  
-- **Gap:** no message sending; thread list only.
-
-### Marketplace
-
-- `ProductRepository.fetchProducts()` throws on failure — **no silent demo catalog** in current `ProductListNotifier` (improvement vs older reviews).  
-- Stripe Payment Sheet + Edge Function idempotency commentary is sound; **server confirmation** still recommended.
-
----
-
-## UI / UX assessment
-
-**Strengths**
-
-- Cohesive **theme extensions** (`PetfolioThemeExtension`), shared header (`AppHeader`), glass/surface language, adaptive shell (rail vs bottom nav at 600 dp).  
-- Social **optimistic** like with rollback on failure is the right pattern.  
-- `GoogleFonts.config.allowRuntimeFetching = false` in `main.dart` avoids emulator DNS meltdown — pragmatic.
-
-**Issues**
-
-- **False affordances:** home header actions with **no behavior**; any control that looks tappable should navigate, toggle state, or be disabled with explanation.  
-- **Breakpoint strategy:** single 600 dp split; large tablets/desktops may need **max content width** and an intermediate breakpoint (e.g. 840 dp) per common adaptive guidance.  
-- **Accessibility:** audit **icon-only** controls and password fields for labels; ensure dynamic type / text scaling on dense cards (feed, discovery).  
-- **Consistency:** prefer theme tokens over scattered `TextStyle` / raw colors on older widgets.
-
----
-
-## Security and Supabase posture
-
-| Topic | Observation |
-|-------|-------------|
-| RLS | Assumed on all user data tables per migrations; policies should always use `auth.uid()` / `(select auth.uid())`, separate policies per command, and **`WITH CHECK` on `UPDATE`** (see Supabase security guidance). |
-| Keys | Never ship **service_role** to the client (Edge Function pattern here uses env — correct). |
-| Auth hardening | Enable **leaked-password protection** and strong MFA options in Supabase Auth if not already (called out in historical project notes). |
-| Storage | Validate **`post-images`** and **`pets`** bucket policies match app paths; public read buckets need abuse awareness (size limits, content types). |
+### 3.7 Secured Admin Moderation Dashboard
+- **Files Location:** `lib/features/admin/`
+- **Functional Description:** A locked navigation-rail dashboard accessible only if the user's authenticated token carries the `'admin'` metadata claim.
+  - **Report Moderation:** Lists reported posts. Admins resolve reports by either dismissing them or calling `resolve_reported_post` to hide the post globally.
+  - **KYC Approval Queue:** Inspects submitted merchant documents (NID/Trade licenses) using secure storage viewing, approving the seller's storefront or rejecting with a required explanation note.
+  - **COD Earnings Ledger:** Resolves completed COD orders, marking ledger states to "available" to trigger payouts to vendor accounts.
+  - **Shop Deletion Panel:** Resolves danger-zone vendor deletion requests. Approving a deletion deactivates the shop and flags all its products inactive in one secure transaction.
 
 ---
 
-## Testing and quality gates
+## 4. Database Schema & ERD Map
 
-| Check | Result (2026-05-16) |
-|-------|---------------------|
-| `flutter analyze` | Pass — **no issues found** |
-| `flutter test` | **4 passed**, **1 failed** (`test/widget_test.dart` — missing `ProviderScope`, wrong template assertions) |
-| Integration / E2E | Not reviewed as part of this pass |
+The PetFolio platform uses an robust, index-optimized Postgres 17 schema under the `public` schema, with administrative helper operations isolated in a `private` schema.
 
-**Recommendations:** replace default widget test with **scoped** tests (e.g. login shell with mocked `Supabase` / `ProviderScope`), add repository tests with `PostgrestException` paths, and consider `integration_test` for checkout and care toggles.
+```mermaid
+erDiagram
+    users ||--o{ pets : "owns"
+    users ||--o{ posts : "author"
+    users ||--o{ reported_posts : "reported_by"
+    users ||--o{ marketplace_orders : "buys/sells"
+    users ||--o{ shops : "owns"
+    
+    pets ||--o{ care_tasks : "assigned"
+    pets ||--o{ care_logs : "logged_for"
+    pets ||--o{ care_streaks : "has_streak"
+    pets ||--o{ pet_badges : "earns"
+    pets ||--o{ health_logs : "vitals"
+    pets ||--o{ medical_vault : "medical_records"
+    pets ||--o{ post_likes : "likes_with"
+    
+    shops ||--o{ products : "lists"
+    shops ||--o{ shop_deletion_requests : "requests_delete"
+    
+    marketplace_orders ||--o{ inventory_reservations : "reserves"
+    marketplace_orders ||--o{ vendor_ledgers : "accrues"
+    
+    match_requests ||--o| chat_threads : "creates_thread"
+    chat_threads ||--o{ chat_messages : "contains"
+```
+
+### 4.1 Exhaustive Table Specifications
+
+#### 1. `public.users`
+Stores user profile information mirroring `auth.users`.
+- `id` (uuid, PK, References `auth.users(id) ON DELETE CASCADE`)
+- `username` (text, UNIQUE, NOT NULL)
+- `display_name` (text, DEFAULT '')
+- `avatar_url` (text, nullable)
+- `bio` (text, nullable)
+- `location` (text, nullable)
+- `created_at` / `updated_at` (timestamptz)
+
+#### 2. `public.pets`
+Stores core pet attributes.
+- `id` (uuid, PK, DEFAULT `gen_random_uuid()`)
+- `owner_id` (uuid, References `public.users(id) ON DELETE CASCADE`)
+- `name` (text, NOT NULL)
+- `species` (text, NOT NULL)
+- `breed` (text, nullable)
+- `date_of_birth` (date, nullable)
+- `gender` (text, CHECK `gender IN ('male', 'female', 'unknown')`)
+- `weight_kg` (numeric(5,2), nullable)
+- `avatar_url` / `bio` (text, nullable)
+- `is_public` (boolean, DEFAULT true)
+- `is_discoverable` (boolean, DEFAULT false)
+- `location` (geography(Point, 4326), nullable) — Geospatial coordinate
+- `activity_level` (text, CHECK `activity_level IN ('couch_potato', 'low', 'moderate', 'athlete', 'hyperactive')`)
+- `created_at` / `updated_at` (timestamptz)
+
+#### 3. `public.care_tasks`
+Checklist definitions and tracking.
+- `id` (uuid, PK)
+- `pet_id` (uuid, References `public.pets(id) ON DELETE CASCADE`)
+- `task_type` (text, CHECK: feeding, walk, grooming, medication, etc.)
+- `title` (text, NOT NULL)
+- `frequency` (text, CHECK: once, daily, twice_daily, weekly, etc.)
+- `scheduled_time` (time, nullable)
+- `is_completed` (boolean, DEFAULT false)
+- `completed_at` (timestamptz, nullable)
+- `gamification_points` (integer, DEFAULT 10)
+- `notes` (text, nullable)
+
+#### 4. `public.care_logs`
+Historical logs of completed tasks.
+- `id` (uuid, PK)
+- `pet_id` (uuid, References `public.pets(id) ON DELETE CASCADE`)
+- `logged_by` (uuid, References `public.users(id)`)
+- `care_type` (text, NOT NULL)
+- `notes` / `duration_minutes` (nullable)
+- `logged_date` (date, DEFAULT CURRENT_DATE)
+- Unique constraint: `(pet_id, care_type, logged_date)`
+
+#### 5. `public.care_streaks`
+Active gamification streaks per pet.
+- `pet_id` (uuid, PK, References `public.pets(id) ON DELETE CASCADE`)
+- `current_streak` (integer, DEFAULT 0)
+- `last_completion_date` (date)
+- `best_streak` (integer, DEFAULT 0)
+
+#### 6. `public.pet_badges`
+Badges earned by pets.
+- `pet_id` (uuid, References `public.pets(id) ON DELETE CASCADE`)
+- `badge_type` (text, NOT NULL)
+- Composite PK: `(pet_id, badge_type)`
+
+#### 7. `public.health_logs`
+Health vitals logs.
+- `id` (uuid, PK)
+- `pet_id` (uuid, References `public.pets(id) ON DELETE CASCADE`)
+- `recorded_by` (uuid, References `public.users(id)`)
+- `log_type` (text, CHECK: symptom, weight, vet_visit, etc.)
+- `title` (text, NOT NULL)
+- `description` (text, nullable)
+- `weight_kg` (numeric, nullable)
+- `severity` (text, CHECK: mild, moderate, severe, critical)
+- `vet_name` / `vet_clinic` / `diagnosis` / `treatment` (text, nullable)
+- `follow_up_date` (date, nullable)
+
+#### 8. `public.medical_vault`
+Stores clinical medical records and certificates.
+- `id` (uuid, PK)
+- `pet_id` (uuid, References `public.pets(id) ON DELETE CASCADE`)
+- `record_type` (text, CHECK: vaccine, medication, surgery, etc.)
+- `name` (text, NOT NULL)
+- `administered_by` / `batch_number` / `dosage` / `frequency` (text, nullable)
+- `administered_at` / `expires_at` / `next_due_at` (date, nullable)
+- `is_active` (boolean, DEFAULT true)
+- `reminder_enabled` (boolean, DEFAULT true)
+- `document_url` (text, nullable) — Link to files in `medical-documents` bucket.
+
+#### 9. `public.posts`
+Social timeline content.
+- `id` (uuid, PK)
+- `author_id` (uuid, References `public.users(id) ON DELETE CASCADE`)
+- `pet_id` (uuid, References `public.pets(id) ON DELETE SET NULL`)
+- `content` (text, NOT NULL)
+- `image_urls` (text[], DEFAULT '{}')
+- `visibility` (text, CHECK: public, followers, private)
+- `like_count` / `comment_count` (integer, DEFAULT 0)
+- `is_hidden` (boolean, DEFAULT false) — Moderation field.
+
+#### 10. `public.reported_posts`
+Reports submitted for social posts.
+- `id` (uuid, PK)
+- `post_id` (uuid, References `public.posts(id) ON DELETE CASCADE`)
+- `reporter_id` (uuid, References `public.users(id) ON DELETE CASCADE`)
+- `reason` (text, CHECK 1-500 chars)
+- `status` (text, CHECK: pending, reviewed, dismissed)
+- `reviewed_by` / `reviewed_at` (nullable)
+
+#### 11. `public.swipes`
+Matches swipe actions.
+- `id` (uuid, PK)
+- `actor_pet_id` (uuid, References `public.pets(id) ON DELETE CASCADE`)
+- `target_pet_id` (uuid, References `public.pets(id) ON DELETE CASCADE`)
+- `action` (text, CHECK: PASS, LIKE, GREET, SUPER_PAW)
+- `created_at` (timestamptz)
+- Unique constraint: `(actor_pet_id, target_pet_id)`
+
+#### 12. `public.matches`
+Reciprocal matches spawned by swiping.
+- `id` (uuid, PK)
+- `pet_a_id` (uuid, References `public.pets(id) ON DELETE CASCADE`)
+- `pet_b_id` (uuid, References `public.pets(id) ON DELETE CASCADE`)
+- `created_at` (timestamptz)
+
+#### 13. `public.chat_threads`
+Chat channels, auto-provisioned upon match acceptance.
+- `id` (uuid, PK)
+- `mutual_match_id` (uuid, UNIQUE, References `public.matches(id) ON DELETE SET NULL`)
+- `participant_1_id` / `participant_2_id` (uuid, References `public.users(id) ON DELETE CASCADE`)
+- `last_message_at` (timestamptz)
+
+#### 14. `public.chat_messages`
+Realtime conversation messages.
+- `id` (uuid, PK)
+- `thread_id` (uuid, References `public.chat_threads(id) ON DELETE CASCADE`)
+- `sender_id` (uuid, References `public.users(id)`)
+- `content` (text, NOT NULL)
+- `is_read` (boolean, DEFAULT false)
+
+#### 15. `public.shops`
+Vendor profiles for the marketplace.
+- `id` (uuid, PK)
+- `owner_id` (uuid, UNIQUE, References `public.users(id) ON DELETE CASCADE`)
+- `name` (text, NOT NULL)
+- `description` / `logo_url` / `banner_url` (text, nullable)
+- `payout_method` (text, CHECK: stripe, manual)
+- `kyc_status` (text, CHECK: pending, submitted, approved, rejected)
+- `bank_account_details` (jsonb, default '{}')
+- `trade_license_url` / `national_id_url` / `rejection_reason` (text, nullable)
+- `business_email` / `business_phone` / `return_policy` / `shipping_policy` (text, nullable)
+- `address_street` / `address_city` / `address_state` / `address_zip` (text, nullable)
+- `social_links` (jsonb, default '{}')
+- `is_verified` (boolean, DEFAULT false)
+- `is_active` (boolean, DEFAULT true)
+
+#### 16. `public.products`
+Store products for the marketplace.
+- `id` (uuid, PK)
+- `shop_id` (uuid, References `public.shops(id) ON DELETE CASCADE`)
+- `name` / `brand` / `variant` (text, NOT NULL)
+- `category` (text, CHECK: food, gear, toys, treats, health, grooming)
+- `price_cents` (integer, NOT NULL)
+- `subscribable` (boolean, DEFAULT false)
+- `image_urls` (text[], DEFAULT '{}')
+- `inventory_count` (integer, DEFAULT 0, CHECK >= 0)
+- `active` (boolean, DEFAULT true)
+
+#### 17. `public.inventory_reservations`
+Short-term reservation of product inventory.
+- `id` (uuid, PK)
+- `order_id` (uuid, References `public.marketplace_orders(id) ON DELETE CASCADE`)
+- `product_id` (uuid, References `public.products(id) ON DELETE CASCADE`)
+- `quantity` (integer, CHECK > 0)
+- `status` (text, CHECK: active, confirmed, released)
+- `expires_at` (timestamptz, DEFAULT `now() + 15 mins`)
+- Unique partial index: `(order_id, product_id) WHERE status = 'active'`
+
+#### 18. `public.marketplace_orders`
+Orders placed by buyers.
+- `id` (uuid, PK)
+- `buyer_id` (uuid, References `public.users(id) ON DELETE RESTRICT`)
+- `shop_id` (uuid, References `public.shops(id) ON DELETE RESTRICT`)
+- `amount_cents` (bigint, NOT NULL)
+- `payment_method` (text, CHECK: stripe, cod)
+- `payment_status` (text, CHECK: pending, paid, collected)
+- `status` (text, CHECK: pending, confirmed, shipped, delivered, cancelled, refunded)
+- `shipping_address` / `line_items` (jsonb, default '[]')
+- `stripe_payment_intent_id` (text, UNIQUE)
+
+#### 19. `public.vendor_ledgers`
+Financial ledgers for manual seller payouts.
+- `id` (uuid, PK)
+- `shop_id` (uuid, References `public.shops(id) ON DELETE CASCADE`)
+- `order_id` (uuid, References `public.marketplace_orders(id)`)
+- `order_total_cents` / `platform_fee_cents` / `vendor_earnings_cents` (bigint)
+- `status` (text, CHECK: pending_clearance, available, paid)
+
+#### 20. `public.shop_deletion_requests`
+Vendor deactivation/deletion requests.
+- `id` (uuid, PK)
+- `shop_id` (uuid, References `public.shops(id) ON DELETE CASCADE`)
+- `owner_id` (uuid, References `public.users(id)`)
+- `reason` (text, nullable)
+- `status` (text, CHECK: pending, approved, rejected)
+- `rejection_note` (text, nullable)
 
 ---
 
-## External references (best practices)
+## 5. User Navigation Flows & Life-cycle States
 
-- **Supabase + Flutter (official):** [Flutter quickstart / user management](https://supabase.com/docs/guides/getting-started/quickstarts/flutter) — auth persistence, initialization, listening to auth state.  
-- **RLS patterns:** Prefer explicit **`TO authenticated`**, avoid broad `USING (true)` on sensitive data, and never “fix” bugs by disabling RLS. Ali Wajdan’s 2026 write-up on RLS in Flutter ([Medium](https://aliwajdan.medium.com/supabase-row-level-security-in-flutter-the-policy-pattern-i-use-so-users-never-see-each-others-7c72fe87ed89)) aligns with defense-in-depth.for multi-tenant mobile apps.  
-- **Realtime:** Ensure tables have appropriate **`REPLICA IDENTITY`** and publication membership; filter channels to minimize payload and respect RLS ([community overview](https://supabase.com/docs/guides/realtime)).  
-- **Mobile payments:** Stripe’s guidance (via general best practices) — confirm **webhooks** for `payment_intent.succeeded` before irreversible side effects.
+PetFolio's routes are configured with an authentication and pet ownership lifecycle loop to keep user flows intuitive.
+
+```mermaid
+flowchart TD
+    Start([App Launches]) --> InitSession{Is Session Active?}
+    InitSession -- No --> LoginScreen[Login / Register Screen]
+    InitSession -- Yes --> FetchPets{Has Registered Pets?}
+    
+    FetchPets -- None --> OnboardingWizard[8-Step Onboarding Screen]
+    OnboardingWizard --> SavePet[Save Pet in DB] --> CareScreen
+    
+    FetchPets -- Has Pets --> MainShell[Load Bottom AppShell]
+    
+    MainShell --> PetsTab[Pets Tab /home]
+    MainShell --> CareTab[Care Tab /care]
+    MainShell --> SocialTab[Social Tab /social]
+    MainShell --> MatchTab[Matching Tab /matching]
+    MainShell --> MarketTab[Market Tab /marketplace]
+    
+    PetsTab --> EditProfile[Edit Profile Screen]
+    PetsTab --> ManagePets[Manage All Pets]
+    ManagePets --> OnboardingWizard
+    
+    CareTab --> Nutrition[Nutrition & Meals]
+    CareTab --> Medical[Medical Vault & Attachments]
+    
+    SocialTab --> CreatePost[Upload Social Post]
+    SocialTab --> PostDetail[Read Comments / Report Menu]
+    SocialTab --> InboxLink[Top Messages Header] --> MatchesInbox[Matches Inbox]
+    
+    MatchTab --> Preferences[Match Preferences Drawer]
+    MatchTab --> Swiping[Swipe Candidates Stack]
+    Swiping --> MatchSuccess[Mutual Match Overlay] --> MatchChat[Realtime Chat Thread]
+    
+    MarketTab --> Discovery[Discover Shops storefront]
+    MarketTab --> ProductView[View Product Details] --> AddToCart[Add to mixed Cart]
+    AddToCart --> PayGate[Select Payment: Stripe / COD]
+    PayGate --> StripeOn[Process PaymentSheet] --> OrderComplete[Order Success Screen]
+    PayGate --> CODCheck[Create Cash Order] --> OrderComplete
+    
+    PetsTab --> SellerDashboard[Seller Dashboard Card]
+    SellerDashboard -- New --> ShopSetup[Configure Shop Setup]
+    SellerDashboard -- Existing --> ShopEdit[Branding, Contact & Policy Form]
+    ShopSetup --> SellerManual[Upload KYC Docs NID/Trade License] --> VerifyWait[KYC Under Review Banner]
+    ShopSetup --> SellerStripe[Redirect Stripe Express Auth] --> VerifyWait
+    
+    SellerDashboard --> AddProduct[Add / Edit Product Screen]
+    SellerDashboard --> OrderQueue[Merchant Order Processing Queue]
+    SellerDashboard --> DangerZone[Danger Zone: Request Shop Deletion]
+    
+    AdminLock{Is User Admin?} --> AdminHome[Admin panel /admin]
+    AdminHome --> ModerationPanel[Moderator: Hide/Dismiss Posts]
+    AdminHome --> KYCApproval[Merchants KYC review]
+    AdminHome --> CODPayouts[COLLECT Cash & release earnings]
+    AdminHome --> ShopDeletions[Approve / Reject Store Deletion]
+```
 
 ---
 
-## Prioritized recommendations
+## 6. Complete User Stories Mapping
 
-1. **Fix `test/widget_test.dart`** — wrap with `ProviderScope`, drop counter template, or delete in favor of real smoke tests.  
-2. **Remove or complete dead UX** — home header actions, memorial/tributes remnants, or wire them to real routes (`/social/notifications`, etc.).  
-3. **Chat MVP** — read/write `chat_messages` with RLS-safe queries, optimistic send, and thread `last_message_at` updates (trigger or RPC).  
-4. **Commerce hardening** — Stripe webhook → update `marketplace_orders.status` / `stripe_payment_intent_id` server-side; client only reflects confirmed state.  
-5. **Config hygiene** — no production defaults for Supabase/Stripe in source; use flavors + CI-injected defines.  
-6. **Schema documentation** — regenerate `schema.sql` from migrations or add a CI check that migrations apply cleanly.  
-7. **Indexed constraints on `match_requests`** — unique pending pair if product rules require one row per pet pair.  
-8. **Consolidate health modeling** — document when to use `health_vitals` vs `health_logs` vs `medical_vault`, or merge concepts in the UI.  
-9. **Stricter Dart analysis** — enable optional strictness lints incrementally.  
-10. **Operational observability** — `FlutterError.onError` / crash reporting for release builds.
+### 6.1 Pet Parent (Standard User)
+- **Story: The Onboarding Setup**  
+  *As a new user, I want a frictionless onboarding experience where I can set up my dog's profile, including their activity parameters, weight, and breed, so that they have personalized daily task checklist defaults prepared instantly.*
+- **Story: Daily Streak Habit**  
+  *As an active pet parent, I want to record completion of my pet's tasks (grooming, walks, training) and watch our daily streak increase on the dashboard in real-time, motivating me to care for my pet consistently.*
+- **Story: Medical Vault Document Pick**  
+  *As a busy pet parent, I want to take a picture of my pet's vaccine certificate and save it under their medical folder so that I can pull up the file and check expiration dates easily while visiting the veterinarian.*
+
+### 6.2 Social Pet Enthusiast
+- **Story: Share Milestones**  
+  *As a proud pet parent, I want to take a photo of my pet's new trick, add a caption, and post it to the community timeline so that other pet lovers can comment on and like our moments.*
+- **Story: Reporting Bad Behavior**  
+  *As a community member, I want to report harmful or inappropriate social feed posts with a single click, so that moderators can keep the platform safe for all pet parents.*
+
+### 6.3 Pet Daters & Matchers
+- **Story: Playdate Match Proximity**  
+  *As an owner of a highly energetic puppy, I want to discover friendly dogs within a 5-mile radius and swipe right on candidates, so that we can meet up for weekly socialization and playdates.*
+- **Story: Real-time Mutual Match Celebration**  
+  *As a user actively searching for other pet owners, I want to receive an immediate celebratory pop-up showing mutual matches while I am swiping, with a direct option to start chatting instantly.*
+
+### 6.4 The Marketplace Buyer
+- **Story: Cart Grouping & checkout convenience**  
+  *As an e-commerce customer, I want to add a bag of food from one seller and a toy from another, and check out each merchant separately with standard Cash on Delivery or credit card options, so that ordering is seamless.*
+- **Story: Inventory Reservation Guarantee**  
+  *As a buyer purchasing highly limited stock products, I expect the items in my cart to be reserved for me while I enter my payment details, so that I don't lose the stock mid-transaction.*
+
+### 6.5 The Store Owner (Merchant)
+- **Story: Flexible Onboarding Routes**  
+  *As a small business owner in a region where Stripe Connect is unavailable, I want to upload my NID and trade license manually so that I can set up my shop storefront and accept payments locally.*
+- **Story: Storefront Customization**  
+  *As an active seller, I want to upload branding banners, contact information (email, phone, address), policy guidelines, and social links so that my customers feel secure buying from my storefront.*
+
+### 6.6 The System Administrator (Admin)
+- **Story: Moderate reported posts**  
+  *As a platform moderator, I want to review flagged posts and choose to dismiss the report or remove the post globally in one secure action, maintaining trust in the platform.*
+- **Story: Seller Verification**  
+  *As a platform administrator, I want to review manually uploaded seller documents in a secure dashboard, so that I can verify authentic business owners and enable their payment pathways.*
 
 ---
 
-## Changelog vs older reviews
+## 7. Security, Performance & Codebase Audit Findings
 
-| Topic | `docs/flutter_supabase_full_app_review_2026-05-13.md` said | Current state (this review) |
-|-------|----------------------------------|-----------------------------|
-| Social feed | Mock `_demoPosts()` | **`posts` fetched**; Realtime on counts |
-| Matching tables | Writes to nonexistent `swipes`/`matches` | **`match_requests` + real pet query** |
-| Chat mapping | Pet-based columns | **`participant_*` + `match_request_id`** aligned |
-| Marketplace fallback | Silent demo catalog | **Fetch throws**; list driven by `AsyncNotifier` (verify error UI where used) |
+### 7.1 Row Level Security (RLS) Safety
+- **Authentication Wrapper:** Every active RLS policy in the Supabase schema wraps user verification in a statement-level subselect: `(select auth.uid())` instead of raw `auth.uid()`. This caches the resolved ID, avoiding N+1 evaluator queries during Postgres planning cycles.
+- **Owner Checks:** All tables containing pet activities (`care_tasks`, `health_logs`, `medical_vault`, `care_streaks`) verify the owner's profile using the canonical join rule:
+  ```sql
+  (SELECT auth.uid()) IN (
+    SELECT owner_id FROM public.pets WHERE id = care_tasks.pet_id
+  )
+  ```
+- **Administrative Lockout:** Admin RPC operations enforce the security definer block alongside strict validation checks via:
+  ```sql
+  IF NOT public.is_admin() THEN
+    RAISE EXCEPTION 'Access Denied';
+  END IF;
+  ```
+
+### 7.2 PostGIS Spatial Index Optimization
+- The matching candidate discovery query avoids expensive scans by applying spatial geography indices.
+- **Index:** `pets_location_idx` (using `GIST` on `public.pets(location)`) ensures that `ST_DWithin` operations evaluate matches in milliseconds.
+- Candidate discovery requires candidate profiles to have discoverability enabled (`is_discoverable IS TRUE`) and active location points (`pets.location IS NOT NULL`).
+
+### 7.3 Data Consistency & Integrity
+- **Unique Constraints:** The table `care_logs` enforces `(pet_id, care_type, logged_date) UNIQUE` to prevent duplicate daily tracking rows, allowing clean historical tracking.
+- **Automatic Triggers:** Common tables utilize the `public.handle_updated_at()` trigger function, keeping all timestamp records accurate without requiring client-side updates.
+- **Chat Thread Safety:** The `ensure_chat_thread_for_match` RPC employs `ON CONFLICT DO NOTHING` to guarantee chat channel allocation without risk of race conditions.
 
 ---
-
-*End of report.*
