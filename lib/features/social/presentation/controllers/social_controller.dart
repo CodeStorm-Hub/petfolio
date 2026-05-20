@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../../features/pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/feed_post.dart';
 import '../../data/repositories/social_repository.dart';
@@ -208,8 +209,9 @@ class SocialNotifier extends AsyncNotifier<SocialFeedState> {
 
     try {
       await _repo.toggleLike(postId: postId, petId: arg, liked: nowLiked);
-    } catch (_) {
+    } catch (e) {
       state = AsyncData(current);
+      AppSnackBar.showError(e);
     }
   }
 
@@ -228,8 +230,9 @@ class SocialNotifier extends AsyncNotifier<SocialFeedState> {
 
     try {
       await _repo.updatePostCaption(postId: postId, newCaption: newCaption);
-    } catch (_) {
+    } catch (e) {
       state = AsyncData(current);
+      AppSnackBar.showError(e);
     }
   }
 
@@ -245,8 +248,9 @@ class SocialNotifier extends AsyncNotifier<SocialFeedState> {
 
     try {
       await _repo.deletePost(postId);
-    } catch (_) {
+    } catch (e) {
       state = AsyncData(current);
+      AppSnackBar.showError(e);
     }
   }
 

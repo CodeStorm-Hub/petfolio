@@ -55,7 +55,7 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
   final Set<String> _hydratedBadgePets = {};
 
   DailyRoutineState _routine = DailyRoutineState(
-    selectedDate: DateUtils.dateOnly(DateTime.now()),
+    selectedDate: DateUtils.dateOnly(DateTime.now().toLocal()),
     tasks: const AsyncData([]),
     todayTasks: const AsyncData([]),
     streak: const AsyncLoading(),
@@ -78,7 +78,7 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
   @override
   DailyRoutineState build() {
     final petId = ref.watch(activePetIdProvider);
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toLocal());
 
     if (petId == null) {
       _syncedPetId = null;
@@ -147,7 +147,7 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
     state = _routine;
     final dSel = DateUtils.dateOnly(date);
     final weekDates = _weekEndingOn(dSel);
-    final dToday = DateUtils.dateOnly(DateTime.now());
+    final dToday = DateUtils.dateOnly(DateTime.now().toLocal());
     final tasksFuture = _repo.fetchTasksForDate(petId, dSel);
     final todayTasksFuture = dSel == dToday
         ? tasksFuture
@@ -167,6 +167,7 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
       badges = await badgesFuture;
     } catch (e) {
       debugPrint('[CareDashboard] badge fetch failed: $e');
+      AppSnackBar.showError(e);
     }
 
     AsyncValue<List<bool>> weekGoalHit;
@@ -179,6 +180,7 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
     } catch (e, st) {
       debugPrint('[CareDashboard] week goal fetch failed: $e');
       weekGoalHit = AsyncError(e, st);
+      AppSnackBar.showError(e);
     }
 
     _applyBadgeDelta(petId, badges);
@@ -256,7 +258,7 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
               )
             : t)
         .toList();
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toLocal());
     _routine = _routine.copyWith(
       tasks: AsyncData(nextList),
       todayTasks: _routine.selectedDate == today
@@ -298,7 +300,7 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
       if (ref.read(activePetIdProvider) == petId) {
         _routine = _routine.copyWith(
           tasks: AsyncData(prev),
-          todayTasks: _routine.selectedDate == DateUtils.dateOnly(DateTime.now())
+          todayTasks: _routine.selectedDate == DateUtils.dateOnly(DateTime.now().toLocal())
               ? AsyncData(prev)
               : _routine.todayTasks,
         );

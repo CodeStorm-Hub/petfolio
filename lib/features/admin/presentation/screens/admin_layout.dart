@@ -7,9 +7,10 @@ import '../../../../core/theme/app_theme.dart';
 import '../widgets/admin_dashboard_tab.dart';
 import '../widgets/financial_ledger_tab.dart';
 import '../widgets/kyc_approvals_tab.dart';
+import '../widgets/moderation_tab.dart';
 import '../widgets/orders_tab.dart';
 
-enum _AdminTab { dashboard, kyc, ledger, orders }
+enum _AdminTab { dashboard, kyc, ledger, orders, moderation }
 
 class AdminLayout extends ConsumerStatefulWidget {
   const AdminLayout({super.key});
@@ -46,13 +47,20 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
       label: 'Orders',
       tab: _AdminTab.orders,
     ),
+    (
+      icon: Icons.shield_outlined,
+      activeIcon: Icons.shield_rounded,
+      label: 'Moderation',
+      tab: _AdminTab.moderation,
+    ),
   ];
 
   Widget get _body => switch (_tab) {
-        _AdminTab.dashboard => const AdminDashboardTab(),
-        _AdminTab.kyc => const KycApprovalsTab(),
-        _AdminTab.ledger => const FinancialLedgerTab(),
-        _AdminTab.orders => const OrdersTab(),
+        _AdminTab.dashboard  => const AdminDashboardTab(),
+        _AdminTab.kyc        => const KycApprovalsTab(),
+        _AdminTab.ledger     => const FinancialLedgerTab(),
+        _AdminTab.orders     => const OrdersTab(),
+        _AdminTab.moderation => const ModerationTab(),
       };
 
   int get _selectedIndex =>

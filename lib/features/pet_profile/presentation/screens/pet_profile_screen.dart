@@ -11,6 +11,9 @@ import 'package:petfolio/features/care/presentation/controllers/care_dashboard_c
 import 'package:petfolio/features/care/presentation/controllers/care_streak_stream_provider.dart';
 import 'package:petfolio/features/care/presentation/controllers/health_vault_controller.dart';
 
+import 'package:petfolio/features/marketplace/data/models/shop.dart';
+import 'package:petfolio/features/marketplace/presentation/controllers/my_shop_controller.dart';
+
 import '../../data/models/pet.dart';
 import '../../data/models/pet_gender.dart';
 import '../controllers/active_pet_controller.dart';
@@ -47,7 +50,7 @@ class PetProfileScreen extends ConsumerWidget {
                   AppHeaderAction(
                     iconKey: const ValueKey<String>('home_action_outdoor'),
                     icon: Icons.wb_sunny_outlined,
-                    tooltip: 'Outdoor mode',
+                    tooltip: 'Coming soon',
                     onTap: () {},
                   ),
                   AppHeaderAction(
@@ -55,7 +58,7 @@ class PetProfileScreen extends ConsumerWidget {
                     icon: Icons.notifications_outlined,
                     tooltip: 'Notifications',
                     badge: true,
-                    onTap: () {},
+                    onTap: () => context.push('/social/notifications'),
                   ),
                 ],
               ),
@@ -163,16 +166,17 @@ class PetProfileScreen extends ConsumerWidget {
                                 labelColor: cs.primary,
                                 unselectedLabelColor: pt.ink500,
                                 indicatorColor: cs.primary,
-                                labelStyle: const TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                ),
-                                unselectedLabelStyle: const TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 13,
-                                ),
+                                labelStyle: Theme.of(context)
+                                    .textTheme
+                                    .labelMedium!
+                                    .copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                    ),
+                                unselectedLabelStyle: Theme.of(context)
+                                    .textTheme
+                                    .labelMedium!
+                                    .copyWith(fontSize: 13),
                                 tabs: const [
                                   Tab(text: 'Overview'),
                                   Tab(text: 'Health'),
@@ -190,10 +194,7 @@ class PetProfileScreen extends ConsumerWidget {
                         _ProfileOverviewTab(pet: activePet, pt: pt),
                         _ProfileHealthTab(pt: pt),
                         _ProfileCareTab(pt: pt),
-                        _ProfilePlaceholderTab(
-                          title: 'Awards',
-                          pt: pt,
-                        ),
+                        _ProfileAwardsTab(pt: pt),
                       ],
                     ),
                   ),
@@ -206,66 +207,87 @@ class PetProfileScreen extends ConsumerWidget {
   }
 }
 
-class _SellerDashboardCard extends StatelessWidget {
+class _SellerDashboardCard extends ConsumerWidget {
   const _SellerDashboardCard({required this.pt});
 
   final PetfolioThemeExtension pt;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final shopAsync = ref.watch(myShopProvider);
     final cs = Theme.of(context).colorScheme;
 
-    return GestureDetector(
-      onTap: () => context.push('/seller'),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-        decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: pt.line200, width: 0.5),
-          boxShadow: const [
-            BoxShadow(
-              color: AppColors.shadowE1L,
-              blurRadius: 2,
-              offset: Offset(0, 1),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.meadow500.withAlpha(34),
-                borderRadius: BorderRadius.circular(12),
+    final shop = shopAsync.value;
+    final destination = (shop == null) ? '/seller/setup' : '/seller';
+
+    final subtitle = shopAsync.when(
+      loading: () => 'Loading shop…',
+      error: (e, st) => 'Manage your shop, products, and orders',
+      data: (s) {
+        if (s == null) return 'Set up your seller account';
+        return switch (s.kycStatus) {
+          KycStatus.pending   => 'Complete your KYC to start selling',
+          KycStatus.submitted => 'KYC under review',
+          KycStatus.rejected  => 'KYC rejected — resubmit required',
+          KycStatus.approved  => 'Manage your shop, products, and orders',
+        };
+      },
+    );
+
+    return Semantics(
+      button: true,
+      label: 'Seller Dashboard. $subtitle',
+      child: GestureDetector(
+        onTap: () => context.push(destination),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: pt.line200, width: 0.5),
+            boxShadow: const [
+              BoxShadow(
+                color: AppColors.shadowE1L,
+                blurRadius: 2,
+                offset: Offset(0, 1),
               ),
-              child: const Icon(Icons.storefront_rounded,
-                  color: AppColors.meadow500, size: 22),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Seller Dashboard',
-                    style: TextStyle(
-                      fontFamily: 'Sora',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.meadow500.withAlpha(34),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.storefront_rounded,
+                    color: AppColors.meadow500, size: 22),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Seller Dashboard',
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                            fontFamily: 'Sora',
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Manage your shop, products, and orders',
-                    style: TextStyle(fontSize: 13, color: pt.ink500),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(fontSize: 13, color: pt.ink500),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: pt.ink300, size: 22),
-          ],
+              Icon(Icons.chevron_right_rounded, color: pt.ink300, size: 22),
+            ],
+          ),
         ),
       ),
     );
@@ -424,7 +446,7 @@ class _PetProfileTabBarDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-class _ProfileOverviewTab extends StatelessWidget {
+class _ProfileOverviewTab extends ConsumerWidget {
   const _ProfileOverviewTab({
     required this.pet,
     required this.pt,
@@ -433,8 +455,32 @@ class _ProfileOverviewTab extends StatelessWidget {
   final Pet pet;
   final PetfolioThemeExtension pt;
 
+  static IconData _iconForType(MedicalRecordType type) => switch (type) {
+    MedicalRecordType.vaccine           => Icons.vaccines_rounded,
+    MedicalRecordType.medication        => Icons.medication_outlined,
+    MedicalRecordType.allergy           => Icons.warning_amber_outlined,
+    MedicalRecordType.surgery           => Icons.local_hospital_outlined,
+    MedicalRecordType.parasitePrevention => Icons.bug_report_outlined,
+    MedicalRecordType.other             => Icons.medical_services_outlined,
+  };
+
+  static String _dueDateLabel(MedicalRecord r) {
+    final due = r.nextDueAt ?? r.expiresAt;
+    if (due == null) return r.administeredAt != null ? 'Recorded' : 'No date';
+    final today = DateUtils.dateOnly(DateTime.now());
+    final dueDay = DateUtils.dateOnly(due);
+    final diff = dueDay.difference(today).inDays;
+    if (diff < 0) return 'Overdue by ${(-diff)} day${(-diff) == 1 ? '' : 's'}';
+    if (diff == 0) return 'Due today';
+    if (diff == 1) return 'Due tomorrow';
+    return 'Due in $diff days';
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final recordsAsync = ref.watch(healthVaultControllerProvider);
+    final cs = Theme.of(context).colorScheme;
+
     return Builder(
       builder: (context) {
         return CustomScrollView(
@@ -447,62 +493,96 @@ class _ProfileOverviewTab extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _SectionLabel(label: 'Today'),
+                  _SectionLabel(label: 'Upcoming care'),
                   const SizedBox(height: 12),
-                  _ReminderCard(
-                    icon: Icons.medication_outlined,
-                    title: 'Heartworm tablet',
-                    subtitle: '9:00 AM · Daily',
-                    accentColor: pet.speciesEnum.accent,
-                  ),
-                  const SizedBox(height: 10),
-                  _ReminderCard(
-                    icon: Icons.directions_walk_outlined,
-                    title: 'Evening walk with ${pet.name}',
-                    subtitle: '2 / 3 walks today',
-                    accentColor: AppColors.meadow500,
-                    isPrimary: true,
+                  ...recordsAsync.when(
+                    loading: () => [
+                      _ProfileRowSkeleton(pt: pt),
+                      const SizedBox(height: 10),
+                      _ProfileRowSkeleton(pt: pt),
+                    ],
+                    error: (e, st) => [
+                      _ProfileTabEmptyMessage(
+                        icon: Icons.cloud_off_rounded,
+                        label: 'Could not load care records',
+                        pt: pt,
+                      ),
+                    ],
+                    data: (records) {
+                      if (records.isEmpty) {
+                        return [
+                          _ProfileTabEmptyMessage(
+                            icon: Icons.medical_services_outlined,
+                            label: 'No upcoming care records',
+                            pt: pt,
+                          ),
+                        ];
+                      }
+                      final top = records.take(2).toList();
+                      return [
+                        for (var i = 0; i < top.length; i++) ...[
+                          _ReminderCard(
+                            icon: _iconForType(top[i].recordType),
+                            title: top[i].name,
+                            subtitle: _dueDateLabel(top[i]),
+                            accentColor: pet.speciesEnum.accent,
+                          ),
+                          if (i < top.length - 1) const SizedBox(height: 10),
+                        ],
+                      ];
+                    },
                   ),
                   const SizedBox(height: 20),
-                  _SectionLabel(label: 'From the feed'),
+                  _SectionLabel(label: 'Social'),
                   const SizedBox(height: 12),
-                  _FeedPlaceholder(pt: pt),
+                  GestureDetector(
+                    onTap: () => context.push('/social/profile/${pet.id}'),
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+                      decoration: BoxDecoration(
+                        color: cs.surface,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: pt.line200, width: 0.5),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: AppColors.mulberry500.withAlpha(30),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.dynamic_feed_rounded,
+                                color: AppColors.mulberry500, size: 22),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'View Social Profile',
+                                  style: TextStyle(
+                                    fontFamily: 'Sora',
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Posts, likes, and activity for ${pet.name}',
+                                  style: TextStyle(fontSize: 13, color: pt.ink500),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.chevron_right_rounded, color: pt.ink300, size: 22),
+                        ],
+                      ),
+                    ),
+                  ),
                 ]),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _ProfilePlaceholderTab extends StatelessWidget {
-  const _ProfilePlaceholderTab({
-    required this.title,
-    required this.pt,
-  });
-
-  final String title;
-  final PetfolioThemeExtension pt;
-
-  @override
-  Widget build(BuildContext context) {
-    return Builder(
-      builder: (context) {
-        return CustomScrollView(
-          key: PageStorageKey<String>('pet_profile_tab_$title'),
-          slivers: [
-            SliverOverlapInjector(
-              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-            ),
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                child: Text(
-                  '$title — coming soon',
-                  style: TextStyle(fontSize: 15, color: pt.ink500),
-                ),
               ),
             ),
           ],
@@ -527,6 +607,18 @@ class _HeroCard extends ConsumerWidget {
       orElse: () => '0',
     );
 
+    final weekGoalHit = ref.watch(
+      careDashboardProvider.select((s) => s.weekGoalHit),
+    );
+    final goalsData = weekGoalHit.value;
+
+    final todayTasks = ref.watch(
+      careDashboardProvider.select((s) => s.todayTasks),
+    );
+    final walkDue = todayTasks.value
+            ?.any((t) => t.taskType == CareTaskType.walk && !t.isCompleted) ==
+        true;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
       decoration: BoxDecoration(
@@ -546,7 +638,6 @@ class _HeroCard extends ConsumerWidget {
       ),
       child: Stack(
         children: [
-          // Background blob
           Positioned(
             top: -40,
             right: -30,
@@ -576,59 +667,66 @@ class _HeroCard extends ConsumerWidget {
                       color: Colors.white.withAlpha(230),
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(46),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      'on a walk',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.06 * 11,
-                        color: Colors.white.withAlpha(220),
+                  if (walkDue)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(46),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        'Walk due',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.06 * 11,
+                          color: Colors.white.withAlpha(220),
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
               const SizedBox(height: 14),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    streakLabel,
-                    style: const TextStyle(
-                      fontFamily: 'Sora',
-                      fontSize: 56,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -1.5,
-                      color: Colors.white,
-                      height: 1,
+              Semantics(
+                label: '$streakLabel days on track health streak',
+                excludeSemantics: true,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      streakLabel,
+                      style: const TextStyle(
+                        fontFamily: 'Sora',
+                        fontSize: 56,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -1.5,
+                        color: Colors.white,
+                        height: 1,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'days on track',
-                    style: TextStyle(
-                        fontSize: 16, color: Colors.white.withAlpha(230)),
-                  ),
-                ],
+                    const SizedBox(width: 10),
+                    Text(
+                      'days on track',
+                      style: TextStyle(
+                          fontSize: 16, color: Colors.white.withAlpha(230)),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 14),
-              // Weekly bars
               Row(
                 children: List.generate(7, (i) {
+                  final hit = goalsData != null && i < goalsData.length
+                      ? goalsData[i]
+                      : false;
                   return Expanded(
                     child: Container(
                       margin: EdgeInsets.only(right: i < 6 ? 6 : 0),
                       height: 28,
                       decoration: BoxDecoration(
-                        color: i < 6
+                        color: hit
                             ? Colors.white.withAlpha(217)
                             : Colors.white.withAlpha(64),
                         borderRadius: BorderRadius.circular(6),
@@ -638,7 +736,6 @@ class _HeroCard extends ConsumerWidget {
                 }),
               ),
               const SizedBox(height: 8),
-              // Day labels
               Row(
                 children: ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d) {
                   return Expanded(
@@ -691,14 +788,12 @@ class _ReminderCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.accentColor,
-    this.isPrimary = false,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
   final Color accentColor;
-  final bool isPrimary;
 
   @override
   Widget build(BuildContext context) {
@@ -755,117 +850,18 @@ class _ReminderCard extends StatelessWidget {
             height: 36,
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
-              color: isPrimary ? accentColor : pt.surface2,
+              color: pt.surface2,
               borderRadius: BorderRadius.circular(10),
-              boxShadow: isPrimary
-                  ? [
-                      BoxShadow(
-                        color: accentColor.withAlpha(170),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      )
-                    ]
-                  : null,
             ),
             alignment: Alignment.center,
             child: Text(
-              isPrimary ? 'Start walk' : 'Mark done',
+              'Mark done',
               style: TextStyle(
                 fontFamily: 'Inter',
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
-                color: isPrimary ? Colors.white : cs.onSurface,
+                color: cs.onSurface,
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Feed placeholder ──────────────────────────────────────────────────────────
-
-class _FeedPlaceholder extends StatelessWidget {
-  const _FeedPlaceholder({required this.pt});
-  final PetfolioThemeExtension pt;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: pt.line200, width: 0.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
-            child: Row(
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(colors: [
-                      Color.lerp(AppColors.mulberry500, Colors.white, 0.3)!,
-                      AppColors.mulberry500,
-                    ]),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '@parkside_corgi_club',
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                      ),
-                      Text('0.4 km · 2 hr ago',
-                          style:
-                              TextStyle(fontSize: 12, color: pt.ink500)),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.coral500.withAlpha(30),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: const Text(
-                    'Nearby',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.coral500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            height: 160,
-            color: pt.surface2,
-            child: Center(
-              child: Text(
-                '[feed photo]',
-                style: TextStyle(fontSize: 12, color: pt.ink300),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(14),
-            child: Text(
-              'Sunday meetup at Highbury — 6 corgis confirmed.',
-              style: TextStyle(fontSize: 14, color: cs.onSurface, height: 1.45),
             ),
           ),
         ],
@@ -936,6 +932,132 @@ class _ProfileCareTab extends ConsumerWidget {
   }
 }
 
+// ── Profile Awards Tab ────────────────────────────────────────────────────────
+
+class _ProfileAwardsTab extends ConsumerWidget {
+  const _ProfileAwardsTab({required this.pt});
+  final PetfolioThemeExtension pt;
+
+  static String _badgeLabel(String type) => switch (type) {
+    'first_log'      => 'First Care Log 🐾',
+    '3_day_streak'   => '3-Day Streak 🔥',
+    '7_day_hero'     => '7-Day Hero 🏆',
+    'routine_master' => 'Routine Master ⭐',
+    '30_day_legend'  => '30-Day Legend 👑',
+    'care_champion'  => 'Care Champion 💎',
+    _                => 'Badge',
+  };
+
+  static IconData _badgeIcon(String type) => switch (type) {
+    'first_log'      => Icons.favorite_rounded,
+    '3_day_streak'   => Icons.local_fire_department_rounded,
+    '7_day_hero'     => Icons.military_tech_rounded,
+    'routine_master' => Icons.star_rounded,
+    '30_day_legend'  => Icons.emoji_events_rounded,
+    'care_champion'  => Icons.diamond_rounded,
+    _                => Icons.military_tech_rounded,
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dashboard = ref.watch(careDashboardProvider);
+    final isLoading = dashboard.tasks.isLoading;
+    final badgeTypes = dashboard.badgeTypes;
+
+    return Builder(builder: (ctx) {
+      return CustomScrollView(
+        key: const PageStorageKey<String>('pet_profile_awards'),
+        slivers: [
+          SliverOverlapInjector(
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(ctx),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate(
+                isLoading
+                    ? List.generate(3, (_) => _ProfileRowSkeleton(pt: pt))
+                    : badgeTypes.isEmpty
+                        ? [
+                            _ProfileTabEmptyMessage(
+                              icon: Icons.military_tech_outlined,
+                              label: 'No badges yet — keep up the care streak!',
+                              pt: pt,
+                            ),
+                          ]
+                        : badgeTypes
+                            .map((b) => _BadgeRow(
+                                  badgeType: b,
+                                  label: _badgeLabel(b),
+                                  icon: _badgeIcon(b),
+                                  pt: pt,
+                                ))
+                            .toList(),
+              ),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+}
+
+class _BadgeRow extends StatelessWidget {
+  const _BadgeRow({
+    required this.badgeType,
+    required this.label,
+    required this.icon,
+    required this.pt,
+  });
+
+  final String badgeType;
+  final String label;
+  final IconData icon;
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: pt.line200, width: 0.5),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.meadow500.withAlpha(30),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, size: 20, color: AppColors.meadow500),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            Icon(Icons.verified_rounded,
+                size: 18, color: AppColors.meadow500),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ── Profile Health Tab ────────────────────────────────────────────────────────
 
 class _ProfileHealthTab extends ConsumerWidget {
@@ -967,6 +1089,12 @@ class _ProfileHealthTab extends ConsumerWidget {
                       icon: Icons.cloud_off_rounded,
                       label: 'Could not load health records',
                       pt: pt,
+                      action: TextButton.icon(
+                        onPressed: () =>
+                            ref.invalidate(healthVaultControllerProvider),
+                        icon: const Icon(Icons.refresh_rounded, size: 16),
+                        label: const Text('Retry'),
+                      ),
                     ),
                   ],
                   data: (records) => records.isEmpty

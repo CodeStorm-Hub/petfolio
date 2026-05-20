@@ -2,6 +2,170 @@
 
 ---
 
+## 2026-05-20 — Fix Plan: 01-review-implementation → production readiness
+
+> ⚠️ **Marketplace P0 (Phases 1–2) must merge and be verified on staging before any production Stripe keys are configured.**
+
+- [x] Phase 1 — **P0-1 / P0-2 / P1-2 / P1-6** Server-side pricing + inventory reservations ✅
+- [x] Phase 2 — **P0-3** `post-images` storage migration ✅
+- [x] Phase 3 — **P1-1 / P1-3** `reject_vendor_kyc` RPC + safe notifications constraint ✅
+- [x] Phase 4 — **P1-4 / P1-5 / P2-7 / P2-11 / P3-5** Error UX batch ✅
+- [x] Phase 5 — **P2-1 / P2-3 / P2-4 / P2-5** Pet profile UI wiring ✅
+- [ ] Phase 5 — **P1-4 / P1-5** Error UX – health: add Retry button to `_ProfileHealthTab` error state; surface `addRecord` / `updateRecord` / `deactivateRecord` failures via `AppSnackBar.showError`
+- [ ] Phase 6 — **P2-11 / P2-7** Error UX – social & care: add `AppSnackBar.showError` to `toggleLike`, `updateCaption`, delete in `SocialController`; same for `CareNotifier.toggle`
+- [ ] Phase 7 — **P2-1 / P2-3** Awards tab + hero week bars: wire Awards tab to `pet_badges` / badge types; replace hardcoded 7-bar opacity in `_HeroCard` with real `weekGoalHit` data
+- [ ] Phase 8 — **P2-4 / P2-5** Seller card gating + hero chip: gate `_SellerDashboardCard` on `myShopProvider` / KYC status; replace hardcoded `'on a walk'` chip with real activity/care state
+- [ ] Phase 9 — **P1-3** Notifications constraint migration: change `DROP CONSTRAINT notifications_type_check` to `DROP CONSTRAINT IF EXISTS`
+- [ ] Phase 10 — **P2-2 / P2-6 / P2-8–12 / P3-\*** Remaining medium/low issues + pre-release sweep: profile overview reminders, legacy `CareNotifier` task types, null `nextDueAt` sort, document upload in vault, admin moderation UI, accessibility, timezone policy, SharedPreferences schema versioning, placeholder header taps; run `flutter pub run build_runner build --delete-conflicting-outputs` + `npx supabase db reset` / push
+
+`flutter analyze` (2026-05-20): **No issues found.**
+
+---
+
+## 2026-05-20 — Phase 9: Accessibility + header actions (P3-2, P3-3, P3-8)
+
+All changes in `lib/features/pet_profile/presentation/screens/pet_profile_screen.dart`.
+
+- **P3-8 Notifications**: `AppHeaderAction` for notifications: `onTap: () {}` → `onTap: () => context.push('/social/notifications')` (route `/social/notifications` confirmed in router). Outdoor mode `tooltip: 'Outdoor mode'` → `tooltip: 'Coming soon'`; `onTap` remains no-op.
+- **P3-2 Hero card Semantics**: Wrapped streak number + "days on track" `Row` in `Semantics(label: '$streakLabel days on track health streak', excludeSemantics: true)` so screen readers announce the combined value once instead of reading the number and label separately.
+- **P3-2 Seller card Semantics**: Wrapped `GestureDetector` in `Semantics(button: true, label: 'Seller Dashboard. $subtitle')` so TalkBack/VoiceOver announces the full context of the tappable card.
+- **P3-3 TabBar styles**: Replaced `const TextStyle(fontFamily: 'Inter', ...)` for `labelStyle` and `unselectedLabelStyle` with `Theme.of(context).textTheme.labelMedium!.copyWith(fontWeight: ...)` — defers font selection to `AppTheme._textTheme` (Inter via `GoogleFonts.inter`). Font size preserved at 13sp via `.copyWith(fontSize: 13)`.
+- **P3-3 Seller card title**: Replaced raw `TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.w600, fontSize: 15)` with `textTheme.titleSmall!.copyWith(fontFamily: 'Sora', fontWeight: FontWeight.w600)` to defer size/color to theme while keeping brand family.
+
+`flutter analyze` — **No issues found.**
+
+---
+
+## 2026-05-20 — Phase 8: Admin moderation queue (P2-12)
+
+- **`supabase/migrations/20260523140000_reported_posts_moderation.sql`** — Added `status/reviewed_by/reviewed_at` to `reported_posts`; status CHECK `(pending|reviewed|dismissed)`; index on `status`. Added `is_hidden boolean DEFAULT false` to `posts`. Added admin SELECT policies (via `is_admin()`) on both tables. Created `resolve_reported_post(p_report_id, p_action, p_hide_post)` SECURITY DEFINER RPC: is_admin() guard, invalid-action guard, updates report status+reviewer, optionally sets `posts.is_hidden = true`, inserts `audit_logs` row (`post_report_{action}`). Applied ✅
+- **`lib/features/admin/data/models/post_report.dart`** — Simple model: `id, postId, reporterId, reason, createdAt, postContent`. `fromJson` unpacks nested `post:post_id(content)` join.
+- **`admin_repository`** — `fetchPendingReports()` selects `reported_posts` with PostgREST join on `post:post_id(content)`, filtered `status = 'pending'`. `resolveReport(id, {dismiss, hidePost})` calls `resolve_reported_post` RPC.
+- **`moderation_controller.dart`** — `AsyncNotifierProvider<ModerationNotifier, List<PostReport>>`. `resolve()` calls repo + removes item optimistically. `refresh()` reloads.
+- **`moderation_tab.dart`** — `AdminPanelScaffold` + `ListView` of `_ReportCard`. Each card: reporter short-UUID, post snippet (200 chars), reason, loading state, "Dismiss" (OutlinedButton → dismissed, no hide) and "Hide post" (FilledButton danger → reviewed + hidePost=true). Errors via `AppSnackBar.showError`.
+- **`admin_layout.dart`** — Added `_AdminTab.moderation`, destination (`shield` icon, label 'Moderation'), `_body` switch case → `ModerationTab()`.
+
+`flutter analyze` — **No issues found.**
+
+---
+
+## 2026-05-20 — Phase 7: Medical vault attachments (P2-10)
+
+- **`supabase/migrations/20260523130000_medical_documents_bucket.sql`** — Private `medical-documents` bucket (10 MB, jpeg/png/webp/pdf). Owner-scoped RLS on SELECT/INSERT/UPDATE/DELETE via `(select auth.uid())::text = (string_to_array(name, '/'))[1]`. Applied to `jqyjvhwlcqcsuwcqgcwf` ✅
+- **`health_repository.MedicalVaultRepository`** — Added `uploadDocument({petId, fileName, bytes, mimeType})` → uploads to `{uid}/{petId}/{timestamp}.{ext}`, returns storage path. Added `createDocumentUrl(storagePath)` → returns 1-hour signed URL.
+- **`medical_vault_screen._AddMedicalRecordSheetState`** — Added `_pickedFile` (XFile?), `_pickDocument()` via `ImagePicker().pickImage(gallery, quality 90)`. `_save()` uploads document before creating record; validates ≤ 10 MB; failed upload shows snackbar and saves record without attachment. `documentUrl` stores the storage path.
+- **`medical_vault_screen._MedicalRecordCard`** — Added `_openDocument()` helper: resolves signed URL via `createDocumentUrl`, launches via `url_launcher`. Shows "View document" chip (primary colour, attach icon) when `record.documentUrl != null`.
+- **P2-9 skipped** — `fetchActiveRecords` in repo + stream sort in controller already provide per-type grouping client-side without N+1; a DB view adds no meaningful reduction.
+
+`flutter analyze` — **No issues found.**
+
+---
+
+## 2026-05-20 — Phase 6: Overview tab + sort + legacy deprecation + timezone (P2-2, P2-6, P2-8, P3-6)
+
+- **P2-2 Overview tab**: `_ProfileOverviewTab` converted to `ConsumerWidget`. Watches `healthVaultControllerProvider`; shows top-2 records sorted by `nextDueAt ?? expiresAt ?? administeredAt` with `_iconForType` + `_dueDateLabel` helpers. Replaced `_FeedPlaceholder` block with a social-link card (`Icons.photo_library_rounded` → `/social`). Removed unused `_FeedPlaceholder` class.
+- **P2-6 Deprecate legacy `CareNotifier`**: Removed `careControllerProvider` import and watch from `care_screen.dart`. `_StreakBanner` no longer takes a `care` param; streak fallback changed to `0` (careDashboardProvider is the single source of truth). `_init()` simplified to no-op.
+- **P2-8 Health vault sort**: `HealthVaultNotifier._applyAndSort` comparator now uses `nextDueAt ?? expiresAt ?? administeredAt`; null keys sort last.
+- **P3-6 Timezone**: All `DateUtils.dateOnly(DateTime.now())` → `DateUtils.dateOnly(DateTime.now().toLocal())` in `care_controller.dart`, `care_dashboard_controller.dart`, `checklist_repository.dart`.
+- Removed `isPrimary` parameter from `_ReminderCard` (was unused after overview tab rewrite).
+
+`flutter analyze` — **No issues found.**
+
+---
+
+## 2026-05-20 — Phase 5: Pet profile UI wiring (P2-1, P2-3, P2-4, P2-5)
+
+All changes in `lib/features/pet_profile/presentation/screens/pet_profile_screen.dart`.
+
+- **P2-1 Awards tab**: Replaced `_ProfilePlaceholderTab(title:'Awards')` with `_ProfileAwardsTab`. Reads `careDashboardProvider.badgeTypes` (Set<String> populated by `_load`). Loading skeleton while `tasks.isLoading`. Empty state if no badges. Badge rows use inline label/icon mapping matching `AppSnackBar` (private methods can't be reused). Removed unused `_ProfilePlaceholderTab` class.
+- **P2-3 Hero weekly bars**: `_HeroCard` now watches `careDashboardProvider.select((s) => s.weekGoalHit)`. Bars are filled (`withAlpha(217)`) when `weekGoalHit[i] == true`, faded (`withAlpha(64)`) otherwise. While loading or on error, all bars render faded (graceful degradation).
+- **P2-4 Seller card**: `_SellerDashboardCard` converted to `ConsumerWidget` watching `myShopProvider`. `shop == null` → `/seller/setup`; `shop != null` → `/seller`. Subtitle reflects `KycStatus`: pending/submitted/rejected/approved.
+- **P2-5 Activity chip**: `_HeroCard` watches `careDashboardProvider.select((s) => s.todayTasks)`. Chip shows 'Walk due' only when a `CareTaskType.walk` task exists today and `!isCompleted`. Chip hidden when walk is done or tasks not yet loaded.
+
+Imports added to screen: `shop.dart`, `my_shop_controller.dart`.
+
+`flutter analyze` — **No issues found.**
+
+---
+
+## 2026-05-20 — Phase 4: Error UX batch (P1-4, P1-5, P2-7, P2-11, P3-5)
+
+- **P1-4** `pet_profile_screen._ProfileHealthTab` error state: added `action: TextButton.icon(onPressed: () => ref.invalidate(healthVaultControllerProvider), ...)` matching the Care tab pattern.
+- **P1-5** `health_vault_controller`: added `AppSnackBar.showError(e)` after revert in `addRecord`, `updateRecord`, and `deactivateRecord` catch blocks. State reverts first; snackbar fires second. No `AsyncValue.error` set on provider.
+- **P2-7** `care_controller.CareNotifier.toggle`: added `AppSnackBar.showError(e)` after rollback + `revertLocal` in catch block.
+- **P2-11** `social_controller.SocialNotifier`: added `AppSnackBar.showError(e)` in `toggleLike`, `updateCaption`, and `deletePost` catch blocks (all keep optimistic rollback to `current`).
+- **P3-5** `care_dashboard_controller._load`: added `AppSnackBar.showError(e)` in both the badge fetch catch and the week goal fetch catch. `weekGoalHit` still sets `AsyncError` for the UI to respond; snackbar fires additionally.
+
+`flutter analyze` — **No issues found.**
+
+---
+
+## 2026-05-20 — Phase 3: reject_vendor_kyc RPC + safe notifications constraint (P1-1, P1-3)
+
+- **`supabase/migrations/20260523120000_reject_vendor_kyc.sql`** — `reject_vendor_kyc(p_shop_id, p_admin_id, p_reason)` SECURITY DEFINER RPC: is_admin() + admin_id spoofing guard + non-empty reason guard; updates `shops.kyc_status = 'rejected'`, `is_verified = false`, `rejection_reason = trim(reason)`; inserts `audit_logs` row (`kyc_rejected` action + reason in metadata); inserts `notifications` row (`kyc_rejected` type, shop_id + reason in metadata). GRANT to authenticated.
+- **`supabase/migrations/20260523120001_notifications_type_check_safe.sql`** — replaces unsafe `DROP CONSTRAINT` with `DROP CONSTRAINT IF EXISTS` before re-adding the CHECK to prevent failure if constraint was already absent.
+- **`admin_repository.rejectKyc`** — replaced direct `shops` update with `_client.rpc('reject_vendor_kyc', ...)` call; added `NotAdminException` guard on missing `currentUser`.
+- **KYC UI** — already correct: `_reject()` early-returns on `reason.trim().isEmpty` (line 82) and passes `reason.trim()` to controller; no change needed.
+- Both migrations applied to `jqyjvhwlcqcsuwcqgcwf` ✅
+
+`flutter analyze` — **No issues found.**
+
+---
+
+## 2026-05-20 — Phase 2: post-images storage bucket (P0-3)
+
+- **`supabase/migrations/20260523110000_post_images_bucket.sql`** — bucket `post-images`: public, 5 MB, `image/jpeg|png|webp|gif|heic`. Policies: public SELECT (anon + authenticated); authenticated INSERT/UPDATE/DELETE scoped to `(string_to_array(name, '/'))[1] = (select auth.uid())::text`.
+- **Upload path match** — `social_repository.dart` uploads to `'$_uid/${DateTime.now().millisecondsSinceEpoch}.$ext'`; uid is first segment → policy check passes.
+- **HEIC included** — repository `_allowedExtensions` contains `heic`; bucket mime list extended to `image/heic` to match.
+
+`flutter analyze` — **No issues found.**
+
+---
+
+## 2026-05-20 — Phase 1: Server-side pricing + inventory reservations (P0-1, P0-2, P1-2, P1-6)
+
+### New table: `inventory_reservations`
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid PK` | gen_random_uuid() |
+| `order_id` | `uuid FK → marketplace_orders` | ON DELETE CASCADE |
+| `product_id` | `uuid FK → products` | ON DELETE CASCADE |
+| `quantity` | `int` | CHECK > 0 |
+| `status` | `text` | `active \| confirmed \| released` |
+| `expires_at` | `timestamptz` | `now() + 15 min` |
+| `created_at` | `timestamptz` | |
+
+Unique partial index on `(order_id, product_id)` WHERE `status = 'active'`. RLS enabled, no client policies — only SECURITY DEFINER RPCs write this table.
+
+### New RPCs
+| RPC | Caller | Effect |
+|---|---|---|
+| `process_checkout(buyer_id, shop_id, cart_items)` | `authenticated` | Rewrites old RPC: fetches `price_cents`/`sub_price_cents` from DB (ignores client prices), `SELECT ... FOR UPDATE` on products, checks `inventory_count - active_reservations >= quantity`, inserts order with server-computed `amount_cents` and canonical `line_items`, creates `inventory_reservations`. **No decrement.** |
+| `confirm_order_inventory(order_id)` | service role (webhook) | Decrements `products.inventory_count`, marks reservations `confirmed`. |
+| `release_order_inventory(order_id)` | `authenticated` (cancel) + service role (fail) | Marks reservations `released`. Auth check: `auth.uid()` must match `buyer_id` (or `auth.uid() IS NULL` for service role). |
+
+### Edge Function changes
+- **`create-payment-intent`**: Replaced per-product inventory loop with reservation validity check (`inventory_reservations` WHERE `status = active` AND `expires_at > now()`). Returns `RESERVATION_EXPIRED` if none found. CoD path now calls `confirm_order_inventory` before stamping the order.
+- **`stripe-webhook`**: `payment_intent.succeeded` calls `confirm_order_inventory` before ledger insert. `payment_intent.payment_failed` calls `release_order_inventory` after cancelling the order row.
+
+### Flutter changes
+- **`cart_item.dart`**: Added `rpcJson()` (strips price fields). Added `CartState.rpcLineItemsJsonForShop(shopId)`.
+- **`order_repository.dart`**: `insertPendingOrder` uses `rpcLineItemsJsonForShop`. `cancelOrder` calls `release_order_inventory` RPC (swallowed on error) before the status update.
+
+### Migration file
+`supabase/migrations/20260523100000_checkout_pricing_and_reservations.sql`
+
+### Manual test steps
+1. **Happy path** — Add items, checkout, complete Stripe Payment Sheet → `inventory_reservations.status = confirmed`, `products.inventory_count` decremented by webhook.
+2. **Cancel PaymentSheet** — Tap × on Payment Sheet → `cancelOrder` fires, `release_order_inventory` runs → `status = released`, `inventory_count` unchanged.
+3. **Payment failed webhook** — Simulate `payment_intent.payment_failed` → order `status = cancelled`, reservation `status = released`.
+4. **Price tamper** — Send `line_total_cents: 1` in RPC params → `marketplace_orders.amount_cents` must equal server-computed total; Stripe PI amount must match.
+5. **Reservation expiry** — Wait 15 min after checkout without completing → `create-payment-intent` returns `RESERVATION_EXPIRED`.
+
+`flutter analyze` (2026-05-20): **No issues found.**
+
+---
+
 ## 2026-05-20 — Report Post feature (DB → repo → UI)
 
 - **`supabase/migrations/20260520000000_add_reported_posts.sql`** — `reported_posts` table: `id`, `post_id` FK → posts (cascade), `reporter_id` FK → auth.users (cascade), `reason` (1–500 chars check), `created_at`, unique `(post_id, reporter_id)`; RLS: INSERT `reporter_id = auth.uid()`, SELECT own rows. Already applied to `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP.

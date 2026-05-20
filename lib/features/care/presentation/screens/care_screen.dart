@@ -15,7 +15,6 @@ import 'package:petfolio/core/errors/app_exception.dart';
 
 import '../../data/models/care_task.dart' as dbtask;
 import '../../data/models/care_task_log.dart';
-import '../controllers/care_controller.dart';
 import '../controllers/care_dashboard_controller.dart';
 import '../utils/care_scheduled_time.dart';
 
@@ -67,12 +66,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
   }
 
   Future<void> _init() async {
-    final pet = ref.read(activePetControllerProvider);
-    if (pet == null) return;
-    final ctrl = ref.read(careControllerProvider(pet.id).notifier);
-    await ctrl.loadLocal();
-    ctrl.refresh();
-    // careDashboardProvider auto-loads in its build() — no manual init needed.
+    // careDashboardProvider auto-loads in its build() via Future.microtask.
   }
 
   @override
@@ -115,7 +109,6 @@ class _CareScreenState extends ConsumerState<CareScreen> {
       return Scaffold(backgroundColor: pt.surface1, body: Center(child: body));
     }
 
-    final care = ref.watch(careControllerProvider(activePet.id));
     final dashboard = ref.watch(careDashboardProvider);
     final species = activePet.speciesEnum;
 
@@ -167,7 +160,6 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
                     children: [
                       _StreakBanner(
-                        care: care,
                         species: species,
                         outdoor: _outdoor,
                       ),
@@ -253,12 +245,10 @@ class _CareScreenState extends ConsumerState<CareScreen> {
 
 class _StreakBanner extends ConsumerWidget {
   const _StreakBanner({
-    required this.care,
     required this.species,
     required this.outdoor,
   });
 
-  final CareState care;
   final PetSpecies species;
   final bool outdoor;
 
@@ -297,7 +287,7 @@ class _StreakBanner extends ConsumerWidget {
 
     final streakCount = dashboard.streak.maybeWhen(
       data: (s) => s.currentStreak,
-      orElse: () => care.streak,
+      orElse: () => 0,
     );
     final streakNorm =
         (math.min(math.max(streakCount, 0), 28) / 28.0).clamp(0.0, 1.0);

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -300,6 +302,38 @@ class MedicalVaultRepository {
     } catch (e) {
       throw NetworkException(message: e.toString());
     }
+  }
+
+  // ── Upload a document attachment ────────────────────────────────────────────
+  //
+  // Uploads bytes to medical-documents/{uid}/{petId}/{timestamp}.{ext} and
+  // returns the storage path (not a URL). Use createDocumentUrl to resolve.
+
+  Future<String> uploadDocument({
+    required String petId,
+    required String fileName,
+    required Uint8List bytes,
+    required String mimeType,
+  }) async {
+    _requireAuth();
+    final userId = _client.auth.currentUser!.id;
+    final ext = fileName.contains('.') ? fileName.split('.').last : 'jpg';
+    final path = '$userId/$petId/${DateTime.now().millisecondsSinceEpoch}.$ext';
+    await _client.storage.from('medical-documents').uploadBinary(
+      path,
+      bytes,
+      fileOptions: FileOptions(contentType: mimeType, upsert: false),
+    );
+    return path;
+  }
+
+  // ── Create a 1-hour signed URL for a stored document ───────────────────────
+
+  Future<String> createDocumentUrl(String storagePath) async {
+    _requireAuth();
+    return _client.storage
+        .from('medical-documents')
+        .createSignedUrl(storagePath, 3600);
   }
 
   // ── Soft delete (deactivate) ────────────────────────────────────────────────

@@ -211,6 +211,17 @@ serve(async (req) => {
           `payment_intent.succeeded: order ${orderId} → processing, payment_status → paid`,
         );
 
+        // Confirm the inventory reservation → decrement stock atomically.
+        const { error: confirmErr } = await admin.rpc('confirm_order_inventory', {
+          p_order_id: orderId,
+        });
+        if (confirmErr) {
+          console.error(
+            'payment_intent.succeeded: confirm_order_inventory failed (non-fatal)',
+            confirmErr,
+          );
+        }
+
         // Create the vendor ledger entry so the payout flow can proceed.
         // Resolve the shop's platform fee to calculate the split.
         const { data: shop } = await admin
@@ -279,6 +290,16 @@ serve(async (req) => {
         if (error) {
           console.error('payment_intent.payment_failed: DB update failed', error);
           return new Response('DB update failed', { status: 500 });
+        }
+
+        const { error: releaseErr } = await admin.rpc('release_order_inventory', {
+          p_order_id: orderId,
+        });
+        if (releaseErr) {
+          console.error(
+            'payment_intent.payment_failed: release_order_inventory failed (non-fatal)',
+            releaseErr,
+          );
         }
 
         console.log(`payment_intent.payment_failed: order ${orderId} cancelled`);

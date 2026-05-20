@@ -63,6 +63,15 @@ class CartItem {
         'frequency_weeks':  frequencyWeeks,
       };
 
+  /// Minimal payload for the process_checkout RPC.
+  /// Excludes client-computed price fields — the server derives prices from DB.
+  Map<String, dynamic> rpcJson() => {
+        'product_id':      product.id,
+        'quantity':        quantity,
+        'is_subscribed':   isSubscribed,
+        'frequency_weeks': frequencyWeeks,
+      };
+
   // ── JSON (for local SharedPreferences persistence — full round-trip) ───────
 
   Map<String, dynamic> toStorageJson() => {
@@ -127,6 +136,12 @@ class CartState {
   List<Map<String, dynamic>> lineItemsJsonForShop(String shopId) => items
       .where((i) => i.product.shopId == shopId)
       .map((i) => i.toJson())
+      .toList();
+
+  /// Stripped payload for the process_checkout RPC (no client price fields).
+  List<Map<String, dynamic>> rpcLineItemsJsonForShop(String shopId) => items
+      .where((i) => i.product.shopId == shopId)
+      .map((i) => i.rpcJson())
       .toList();
 
   Map<String, dynamic> toStorageJson() => {

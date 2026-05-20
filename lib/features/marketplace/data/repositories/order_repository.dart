@@ -27,7 +27,7 @@ class OrderRepository {
       final result = await _client.rpc('process_checkout', params: {
         'p_buyer_id':   buyerId,
         'p_shop_id':    shopId,
-        'p_cart_items': cart.lineItemsJsonForShop(shopId),
+        'p_cart_items': cart.rpcLineItemsJsonForShop(shopId),
       });
       return result as String;
     } on PostgrestException catch (e) {
@@ -101,7 +101,14 @@ class OrderRepository {
   Future<void> confirmOrder(String orderId) async {}
 
   /// Cancel a pending order (user dismissed Payment Sheet).
+  /// Releases the inventory reservation before cancelling the order row.
   Future<void> cancelOrder(String orderId) async {
+    try {
+      await _client.rpc(
+        'release_order_inventory',
+        params: {'p_order_id': orderId},
+      );
+    } catch (_) {}
     await _client
         .from('marketplace_orders')
         .update({'status': 'cancelled'})

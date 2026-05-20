@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../marketplace/data/models/marketplace_order.dart';
 import '../../../marketplace/data/models/shop.dart';
 import '../../../marketplace/data/models/vendor_ledger.dart';
+import '../models/post_report.dart';
 
 final adminRepositoryProvider = Provider<AdminRepository>(
   (_) => AdminRepository(Supabase.instance.client),
@@ -37,11 +38,13 @@ class AdminRepository {
   }
 
   Future<void> rejectKyc(String shopId, String reason) async {
-    await _client.from('shops').update({
-      'kyc_status': 'rejected',
-      'rejection_reason': reason,
-      'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', shopId);
+    final adminId = _client.auth.currentUser?.id;
+    if (adminId == null) throw NotAdminException();
+    await _client.rpc('reject_vendor_kyc', params: {
+      'p_shop_id':  shopId,
+      'p_admin_id': adminId,
+      'p_reason':   reason,
+    });
   }
 
   // ── KYC document signed URLs ──────────────────────────────────────────────
@@ -63,6 +66,33 @@ class AdminRepository {
       return segments.sublist(bucketIndex + 1).join('/');
     }
     return value;
+  }
+
+  // ── Moderation ────────────────────────────────────────────────────────────
+
+  Future<List<PostReport>> fetchPendingReports() async {
+    final rows = await _client
+        .from('reported_posts')
+        .select('id, post_id, reporter_id, reason, created_at, post:post_id(content)')
+        .eq('status', 'pending')
+        .order('created_at', ascending: false);
+    return (rows as List)
+        .map((r) => PostReport.fromJson(r as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> resolveReport(
+    String reportId, {
+    required bool dismiss,
+    required bool hidePost,
+  }) async {
+    final adminId = _client.auth.currentUser?.id;
+    if (adminId == null) throw NotAdminException();
+    await _client.rpc('resolve_reported_post', params: {
+      'p_report_id': reportId,
+      'p_action':    dismiss ? 'dismissed' : 'reviewed',
+      'p_hide_post': hidePost,
+    });
   }
 
   // ── COD reconciliation ────────────────────────────────────────────────────

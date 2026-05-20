@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/widgets/app_snack_bar.dart';
+
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/medical_record.dart';
 import '../../data/repositories/health_repository.dart';
@@ -28,9 +30,12 @@ class HealthVaultController extends StreamNotifier<List<MedicalRecord>> {
               .map(MedicalRecord.fromJson)
               .toList()
             ..sort((a, b) {
-              if (a.nextDueAt == null) return 1;
-              if (b.nextDueAt == null) return -1;
-              return a.nextDueAt!.compareTo(b.nextDueAt!);
+              final DateTime? keyA = a.nextDueAt ?? a.expiresAt ?? a.administeredAt;
+              final DateTime? keyB = b.nextDueAt ?? b.expiresAt ?? b.administeredAt;
+              if (keyA == null && keyB == null) return 0;
+              if (keyA == null) return 1;
+              if (keyB == null) return -1;
+              return keyA.compareTo(keyB);
             });
           return records;
         });
@@ -54,6 +59,7 @@ class HealthVaultController extends StreamNotifier<List<MedicalRecord>> {
       debugPrint(
           '[HealthVaultController] addRecord failed, reverting: $e\n$st');
       state = prevState;
+      AppSnackBar.showError(e);
       return false;
     }
   }
@@ -76,6 +82,7 @@ class HealthVaultController extends StreamNotifier<List<MedicalRecord>> {
       debugPrint(
           '[HealthVaultController] updateRecord failed, reverting: $e\n$st');
       state = prevState;
+      AppSnackBar.showError(e);
     }
   }
 
@@ -92,6 +99,7 @@ class HealthVaultController extends StreamNotifier<List<MedicalRecord>> {
       debugPrint(
           '[HealthVaultController] deactivateRecord failed, reverting: $e\n$st');
       state = prevState;
+      AppSnackBar.showError(e);
     }
   }
 }
