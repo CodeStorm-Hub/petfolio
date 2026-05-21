@@ -42,7 +42,7 @@ class SocialRepository {
     int limit = 15,
     int offset = 0,
   }) async {
-    final query = _client
+    final rows = await _client
         .from('posts')
         .select('''
           id,
@@ -52,24 +52,34 @@ class SocialRepository {
           like_count,
           comment_count,
           pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
-          author:users!posts_author_id_fkey(id, username, display_name, avatar_url, location),
-          post_likes(pet_id)
+          author:users!posts_author_id_fkey(id, username, display_name, avatar_url, location)
         ''')
         .eq('visibility', 'public')
         .order('created_at', ascending: false)
         .range(offset, offset + limit - 1);
 
-    final rows = await query;
+    final posts = (rows as List).cast<Map<String, dynamic>>();
 
-    return (rows as List)
-        .cast<Map<String, dynamic>>()
-        .map((r) => _rowToFeedPost(r, activePetId))
+    // Fetch only the active pet's likes for this page in a single targeted
+    // query — replaces the nested post_likes(pet_id) that pulled ALL likes
+    // for ALL pets on every post.
+    var likedIds = const <String>{};
+    if (activePetId != null && posts.isNotEmpty) {
+      final postIds = posts.map((r) => r['id'] as String).toList();
+      likedIds = await _fetchLikedPostIds(activePetId, postIds);
+    }
+
+    return posts
+        .map((r) => _rowToFeedPost(
+              r,
+              isLiked: likedIds.contains(r['id'] as String),
+            ))
         .toList(growable: false);
   }
 
   /// Fetches posts authored by a specific pet.
   Future<List<FeedPost>> fetchPostsForPet(String petId, {String? activePetId}) async {
-    var query = _client
+    final rows = await _client
         .from('posts')
         .select('''
           id,
@@ -79,18 +89,25 @@ class SocialRepository {
           like_count,
           comment_count,
           pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
-          author:users!posts_author_id_fkey(id, username, display_name, avatar_url, location),
-          post_likes(pet_id)
+          author:users!posts_author_id_fkey(id, username, display_name, avatar_url, location)
         ''')
-        .eq('pet_id', petId);
-
-    final rows = await query
+        .eq('pet_id', petId)
         .order('created_at', ascending: false)
         .limit(50);
 
-    return (rows as List)
-        .cast<Map<String, dynamic>>()
-        .map((r) => _rowToFeedPost(r, activePetId))
+    final posts = (rows as List).cast<Map<String, dynamic>>();
+
+    var likedIds = const <String>{};
+    if (activePetId != null && posts.isNotEmpty) {
+      final postIds = posts.map((r) => r['id'] as String).toList();
+      likedIds = await _fetchLikedPostIds(activePetId, postIds);
+    }
+
+    return posts
+        .map((r) => _rowToFeedPost(
+              r,
+              isLiked: likedIds.contains(r['id'] as String),
+            ))
         .toList(growable: false);
   }
 
@@ -112,19 +129,36 @@ class SocialRepository {
           like_count,
           comment_count,
           pet:pets!posts_pet_id_fkey(id, name, species, breed, avatar_url),
-          author:users!posts_author_id_fkey(id, username, display_name, avatar_url, location),
-          post_likes(pet_id)
+          author:users!posts_author_id_fkey(id, username, display_name, avatar_url, location)
         ''')
         .eq('id', postId)
         .single();
 
-    return _rowToFeedPost(Map<String, dynamic>.from(row as Map), activePetId);
+    // Single targeted like-status check (one row, no full-table scan).
+    final isLiked = activePetId != null
+        ? await _client
+              .from('post_likes')
+              .select('post_id')
+              .eq('post_id', postId)
+              .eq('pet_id', activePetId)
+              .maybeSingle()
+              .then((r) => r != null)
+        : false;
+
+    return _rowToFeedPost(
+      Map<String, dynamic>.from(row as Map),
+      isLiked: isLiked,
+    );
   }
 
-  FeedPost _rowToFeedPost(Map<String, dynamic> r, String? activePetId) {
+  /// Returns a [FeedPost] from a raw Supabase row.
+  ///
+  /// [isLiked] is computed by the caller via a targeted like-status query
+  /// (either [_fetchLikedPostIds] for list views or a single check for
+  /// [fetchPostById]) — the nested `post_likes` column is no longer fetched.
+  FeedPost _rowToFeedPost(Map<String, dynamic> r, {bool isLiked = false}) {
     final pet = (r['pet'] as Map?)?.cast<String, dynamic>() ?? const {};
     final author = (r['author'] as Map?)?.cast<String, dynamic>() ?? const {};
-    final likes = (r['post_likes'] as List?) ?? const [];
 
     final petName = (pet['name'] as String?) ?? 'Unknown';
     final petSpecies = (pet['species'] as String?) ?? 'dog';
@@ -136,10 +170,6 @@ class SocialRepository {
     final fuzzyLocation = (author['location'] as String?) ?? '';
 
     final palette = _paletteFor(petSpecies);
-    final isLiked = likes.any((l) {
-      final m = (l as Map).cast<String, dynamic>();
-      return m['pet_id'] == activePetId;
-    });
 
     return FeedPost(
       id: r['id'] as String,
@@ -200,6 +230,25 @@ class SocialRepository {
     if (d.inHours < 24) return '${d.inHours}h';
     if (d.inDays < 7) return '${d.inDays}d';
     return '${(d.inDays / 7).floor()}w';
+  }
+
+  // ── Internal helpers ──────────────────────────────────────────────────────
+
+  /// Returns the subset of [postIds] that the given [petId] has liked.
+  ///
+  /// One round-trip regardless of page size — replaces the nested
+  /// `post_likes(pet_id)` select that returned all likes for all pets.
+  Future<Set<String>> _fetchLikedPostIds(
+    String petId,
+    List<String> postIds,
+  ) async {
+    if (postIds.isEmpty) return const {};
+    final rows = await _client
+        .from('post_likes')
+        .select('post_id')
+        .eq('pet_id', petId)
+        .inFilter('post_id', postIds);
+    return {for (final r in (rows as List)) r['post_id'] as String};
   }
 
   // ── Paw likes ─────────────────────────────────────────────────────────────
@@ -275,18 +324,20 @@ class SocialRepository {
     });
   }
 
-  /// Fetches real-time stats for a pet: posts, followers, and following counts.
+  /// Fetches stats for a pet (posts, followers, following) in a single RPC.
+  ///
+  /// Replaces three parallel COUNT queries that each required a separate
+  /// network round-trip.
   Future<PetStats> fetchPetStats(String petId) async {
-    final results = await Future.wait([
-      _client.from('posts').select().eq('pet_id', petId).count(CountOption.exact),
-      _client.from('pet_follows').select().eq('following_pet_id', petId).count(CountOption.exact),
-      _client.from('pet_follows').select().eq('follower_pet_id', petId).count(CountOption.exact),
-    ]);
-
+    final rows = await _client.rpc(
+      'get_pet_stats',
+      params: {'p_pet_id': petId},
+    );
+    final row = (rows as List).cast<Map<String, dynamic>>().first;
     return PetStats(
-      postCount: results[0].count,
-      followerCount: results[1].count,
-      followingCount: results[2].count,
+      postCount: (row['post_count'] as num).toInt(),
+      followerCount: (row['follower_count'] as num).toInt(),
+      followingCount: (row['following_count'] as num).toInt(),
     );
   }
   // ── Follow system ─────────────────────────────────────────────────────────

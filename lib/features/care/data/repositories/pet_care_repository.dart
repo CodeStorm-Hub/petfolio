@@ -8,6 +8,21 @@ import '../models/care_streak.dart';
 import '../models/care_task.dart';
 import '../models/care_task_log.dart';
 
+/// Snapshot of everything the care dashboard needs, fetched in one RPC call.
+class CareDashboardSnapshot {
+  const CareDashboardSnapshot({
+    required this.tasks,
+    required this.todayTasks,
+    required this.badgeTypes,
+    required this.weekGoalHit,
+  });
+
+  final List<CareTask> tasks;
+  final List<CareTask> todayTasks;
+  final Set<String> badgeTypes;
+  final List<bool> weekGoalHit;
+}
+
 class ToggleCompletionResult {
   const ToggleCompletionResult({
     required this.task,
@@ -468,6 +483,161 @@ class PetCareRepository {
     } catch (e) {
       throw NetworkException(message: e.toString());
     }
+  }
+
+  // ── Dashboard snapshot (single-RPC fetch) ────────────────────────────────
+
+  /// Fetches all care dashboard data in one `get_care_dashboard_snapshot` RPC
+  /// call, replacing the previous four parallel round-trips.
+  Future<CareDashboardSnapshot> fetchDashboardSnapshot({
+    required String petId,
+    required DateTime selectedDate,
+    required List<DateTime> weekDates,
+  }) async {
+    try {
+      _requireAuth();
+      final dSel = DateUtils.dateOnly(selectedDate);
+      final dToday = DateUtils.dateOnly(DateTime.now().toLocal());
+      final weekDays = weekDates.map(DateUtils.dateOnly).toList();
+      final minD = weekDays.reduce((a, b) => a.isBefore(b) ? a : b);
+      final maxD = weekDays.reduce((a, b) => a.isAfter(b) ? a : b);
+
+      final raw = await _client.rpc(
+        'get_care_dashboard_snapshot',
+        params: {
+          'p_pet_id': petId,
+          'p_selected_date': _fmtYmd(dSel),
+          'p_week_start': _fmtYmd(minD),
+          'p_week_end': _fmtYmd(maxD),
+        },
+      );
+
+      final data = raw as Map<String, dynamic>;
+
+      final definitions = (data['tasks'] as List)
+          .cast<Map<String, dynamic>>()
+          .map(CareTask.fromJson)
+          .toList();
+
+      final logsSelected =
+          (data['logs_selected'] as List).cast<Map<String, dynamic>>();
+      final tasks =
+          _buildTasksFromSnapshotData(petId, definitions, logsSelected, dSel);
+
+      final logsToday =
+          (data['logs_today'] as List).cast<Map<String, dynamic>>();
+      final todayTasks = dSel == dToday
+          ? tasks
+          : _buildTasksFromSnapshotData(
+              petId, definitions, logsToday, dToday);
+
+      final badgeTypes = (data['badge_types'] as List)
+          .whereType<String>()
+          .toSet();
+
+      final logsWeek =
+          (data['logs_week'] as List).cast<Map<String, dynamic>>();
+      final weekGoalHit = _computeWeekGoalHitFromSnapshotData(
+        definitions,
+        logsWeek,
+        weekDays,
+      );
+
+      return CareDashboardSnapshot(
+        tasks: tasks,
+        todayTasks: todayTasks,
+        badgeTypes: badgeTypes,
+        weekGoalHit: weekGoalHit,
+      );
+    } on AppException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
+    } catch (e) {
+      throw NetworkException(message: e.toString());
+    }
+  }
+
+  /// Replicates `fetchTasksForDate` logic against pre-fetched snapshot data.
+  List<CareTask> _buildTasksFromSnapshotData(
+    String petId,
+    List<CareTask> definitions,
+    List<Map<String, dynamic>> logs,
+    DateTime dayLocal,
+  ) {
+    final doneTypes = logs
+        .map((r) => r['care_type'] as String?)
+        .whereType<String>()
+        .toSet();
+
+    final out = <CareTask>[];
+    for (final task in definitions) {
+      if (!_appliesOnDay(task, dayLocal)) continue;
+      final careType = _taskTypeToLogCareType(task.taskType);
+      final fromLog = doneTypes.contains(careType);
+      final done = _doneForDay(task, dayLocal, fromLog);
+      out.add(task.copyWith(
+        isCompleted: done,
+        completedAt: done ? DateTime.now() : null,
+      ));
+    }
+
+    // Synthesise tasks for care types that appear in logs but have no
+    // matching care_task definition (e.g. ad-hoc log entries).
+    final byCareTypeFirstRow = <String, Map<String, dynamic>>{};
+    for (final row in logs) {
+      final ct = row['care_type'] as String?;
+      if (ct == null) continue;
+      byCareTypeFirstRow.putIfAbsent(ct, () => row);
+    }
+    for (final entry in byCareTypeFirstRow.entries) {
+      final ct = entry.key;
+      if (out.any((t) => _taskTypeToLogCareType(t.taskType) == ct)) continue;
+      out.add(_careTaskFromLogRow(entry.value, petId, dayLocal));
+    }
+
+    out.sort((a, b) {
+      final la = a.isLogDerived;
+      final lb = b.isLogDerived;
+      if (la != lb) return la ? 1 : -1;
+      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+    });
+    return out;
+  }
+
+  /// Replicates `fetchDailyGoalsHitForDates` logic against snapshot data.
+  List<bool> _computeWeekGoalHitFromSnapshotData(
+    List<CareTask> definitions,
+    List<Map<String, dynamic>> logsWeek,
+    List<DateTime> weekDays,
+  ) {
+    final expected = <String>{};
+    for (final task in definitions) {
+      if (task.frequency == CareFrequency.daily ||
+          task.frequency == CareFrequency.twiceDaily) {
+        expected.add(_taskTypeToLogCareType(task.taskType));
+      }
+    }
+    if (expected.isEmpty) {
+      expected.addAll({'feeding', 'walk', 'medication'});
+    }
+
+    final byDay = <String, Set<String>>{};
+    for (final d in weekDays) {
+      byDay[_fmtYmd(d)] = {};
+    }
+    for (final row in logsWeek) {
+      final day = _loggedDayKey(row['logged_date']);
+      final ct = row['care_type'] as String?;
+      if (day.isEmpty || ct == null) continue;
+      byDay.putIfAbsent(day, () => {}).add(ct);
+    }
+
+    return weekDays.map((d) {
+      final key = _fmtYmd(DateUtils.dateOnly(d));
+      final done = byDay[key] ?? const {};
+      return expected.every((e) => done.contains(e));
+    }).toList();
   }
 
   static void _scheduleNotificationIfNeeded(CareTask task) {

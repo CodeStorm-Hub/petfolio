@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -441,12 +442,14 @@ class _ShopDiscoverCard extends StatelessWidget {
                   height: 44,
                   color: AppColors.surface2,
                   child: shop.logoUrl != null
-                      ? Image.network(
-                          shop.logoUrl!,
+                      ? CachedNetworkImage(
+                          imageUrl: shop.logoUrl!,
                           fit: BoxFit.cover,
                           width: 44,
                           height: 44,
-                          errorBuilder: (context, error, stack) => const Icon(
+                          placeholder: (context, url) =>
+                              const SizedBox.shrink(),
+                          errorWidget: (context, url, error) => const Icon(
                             Icons.storefront_rounded,
                             color: AppColors.ink500,
                             size: 22,

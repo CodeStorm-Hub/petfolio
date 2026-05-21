@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
@@ -7,6 +7,8 @@ import '../../data/models/care_streak.dart';
 import '../../data/models/care_task.dart';
 import '../../data/repositories/care_repository.dart';
 import 'care_streak_stream_provider.dart';
+
+part 'care_dashboard_controller.g.dart';
 
 class DailyRoutineState {
   const DailyRoutineState({
@@ -43,12 +45,8 @@ class DailyRoutineState {
       );
 }
 
-final careDashboardProvider =
-    NotifierProvider<CareDashboardNotifier, DailyRoutineState>(
-  CareDashboardNotifier.new,
-);
-
-class CareDashboardNotifier extends Notifier<DailyRoutineState> {
+@Riverpod(keepAlive: true)
+class CareDashboard extends _$CareDashboard {
   String? _syncedPetId;
   DateTime? _lastSelectedDate;
   Set<String> _badgeBaseline = {};
@@ -145,54 +143,39 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
       weekGoalHit: const AsyncLoading(),
     );
     state = _routine;
+
     final dSel = DateUtils.dateOnly(date);
     final weekDates = _weekEndingOn(dSel);
-    final dToday = DateUtils.dateOnly(DateTime.now().toLocal());
-    final tasksFuture = _repo.fetchTasksForDate(petId, dSel);
-    final todayTasksFuture = dSel == dToday
-        ? tasksFuture
-        : _repo.fetchTasksForDate(petId, dToday);
-    final badgesFuture = _repo.fetchPetBadgeTypes(petId);
-    final weekFuture = _repo.fetchDailyGoalsHitForDates(petId, weekDates);
 
-    final tasks = await AsyncValue.guard(() => tasksFuture);
-    if (ref.read(activePetIdProvider) != petId) return;
-
-    final todayTasks = dSel == dToday
-        ? tasks
-        : await AsyncValue.guard(() => todayTasksFuture);
-
-    Set<String> badges = {};
     try {
-      badges = await badgesFuture;
-    } catch (e) {
-      debugPrint('[CareDashboard] badge fetch failed: $e');
-      AppSnackBar.showError(e);
-    }
+      final snapshot = await _repo.fetchDashboardSnapshot(
+        petId: petId,
+        selectedDate: dSel,
+        weekDates: weekDates,
+      );
+      if (ref.read(activePetIdProvider) != petId) return;
 
-    AsyncValue<List<bool>> weekGoalHit;
-    try {
-      final raw = await weekFuture;
-      weekGoalHit = AsyncData(List<bool>.generate(
-        7,
-        (i) => i < raw.length ? raw[i] : false,
-      ));
+      _applyBadgeDelta(petId, snapshot.badgeTypes);
+
+      _routine = _routine.copyWith(
+        tasks: AsyncData(snapshot.tasks),
+        todayTasks: AsyncData(snapshot.todayTasks),
+        weekGoalHit: AsyncData(snapshot.weekGoalHit),
+        badgeTypes: snapshot.badgeTypes,
+      );
+      state = _routine;
+      _lastSelectedDate = _routine.selectedDate;
     } catch (e, st) {
-      debugPrint('[CareDashboard] week goal fetch failed: $e');
-      weekGoalHit = AsyncError(e, st);
+      debugPrint('[CareDashboard] snapshot fetch failed: $e');
+      if (ref.read(activePetIdProvider) != petId) return;
+      _routine = _routine.copyWith(
+        tasks: AsyncError(e, st),
+        todayTasks: AsyncError(e, st),
+        weekGoalHit: AsyncError(e, st),
+      );
+      state = _routine;
       AppSnackBar.showError(e);
     }
-
-    _applyBadgeDelta(petId, badges);
-
-    _routine = _routine.copyWith(
-      tasks: tasks,
-      todayTasks: todayTasks,
-      weekGoalHit: weekGoalHit,
-      badgeTypes: badges,
-    );
-    state = _routine;
-    _lastSelectedDate = _routine.selectedDate;
   }
 
   Future<void> selectDate(DateTime date) async {
@@ -295,7 +278,10 @@ class CareDashboardNotifier extends Notifier<DailyRoutineState> {
         AppSnackBar.showBadgeUnlocked();
         _badgeBaseline = {..._badgeBaseline, '7_day_hero'};
       }
-      await _load(petId, _routine.selectedDate);
+      // State is already correctly synced from outcome.task above.
+      // Streak updates arrive via careStreakRealtimeProvider.
+      // A full _load() reload is intentionally skipped here to avoid
+      // wiping and re-fetching the entire dashboard on every tap.
     } catch (e) {
       if (ref.read(activePetIdProvider) == petId) {
         _routine = _routine.copyWith(

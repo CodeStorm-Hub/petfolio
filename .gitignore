@@ -123,3 +123,4 @@ app.*.symbols
 .cursor/hooks/state/
 tmp_window_dump.xml
 .claude/worktrees/
+/qa_artifacts

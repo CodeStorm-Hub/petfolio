@@ -1,16 +1,17 @@
+import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/models/shop.dart';
 import '../../data/repositories/kyc_repository.dart';
 import '../../data/repositories/shop_repository.dart';
 import 'deletion_request_controller.dart';
 
-final myShopProvider =
-    AsyncNotifierProvider<MyShopNotifier, Shop?>(MyShopNotifier.new);
+part 'my_shop_controller.g.dart';
 
-class MyShopNotifier extends AsyncNotifier<Shop?> {
+@Riverpod(keepAlive: true)
+class MyShop extends _$MyShop {
   ShopRepository get _repo => ref.read(shopRepositoryProvider);
 
   @override
@@ -85,7 +86,6 @@ class MyShopNotifier extends AsyncNotifier<Shop?> {
     return true;
   }
 
-  /// Calls the stripe-onboard-vendor Edge Function and returns the KYC URL.
   Future<String> startOnboarding() async {
     final shop = state.value;
     if (shop == null) {
@@ -94,16 +94,27 @@ class MyShopNotifier extends AsyncNotifier<Shop?> {
     return _repo.startOnboarding(shop.id);
   }
 
-  /// Re-fetches the shop row after the user returns from Stripe KYC or when
-  /// the app resumes from background (covers admin-approved deletion case).
   Future<void> refreshAfterOnboarding() async {
-    final previous = state;
-    try {
-      final shop = await _repo.fetchMyShop();
-      state = AsyncValue.data(shop);
-      ref.invalidate(deletionRequestProvider);
-    } catch (e, st) {
-      state = previous.hasValue ? previous : AsyncValue.error(e, st);
+    final snapshot = state;
+    const maxAttempts = 4;
+    const baseDelayMs = 500;
+
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      if (attempt > 0) {
+        await Future<void>.delayed(
+          Duration(milliseconds: baseDelayMs * (1 << (attempt - 1))),
+        );
+      }
+      try {
+        final shop = await _repo.fetchMyShop();
+        state = AsyncValue.data(shop);
+        ref.invalidate(deletionRequestProvider);
+        return;
+      } catch (e, st) {
+        if (attempt < maxAttempts - 1) continue;
+        state = snapshot.hasValue ? snapshot : AsyncValue.error(e, st);
+        return;
+      }
     }
   }
 }
