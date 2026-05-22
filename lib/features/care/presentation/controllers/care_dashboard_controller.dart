@@ -207,6 +207,14 @@ class CareDashboard extends _$CareDashboard {
     await _load(petId, _routine.selectedDate);
   }
 
+  Future<void> bulkCreateTasks(List<CareTask> tasks) async {
+    final petId = ref.read(activePetIdProvider);
+    if (petId == null || tasks.isEmpty) return;
+    await _repo.bulkCreateTasks(tasks);
+    if (ref.read(activePetIdProvider) != petId) return;
+    await _load(petId, _routine.selectedDate);
+  }
+
   Future<void> updateTask(CareTask task) async {
     final petId = ref.read(activePetIdProvider);
     if (petId == null || task.petId != petId) return;
@@ -267,6 +275,7 @@ class CareDashboard extends _$CareDashboard {
         todayTasks: _routine.selectedDate == today
             ? AsyncData(nextAfter)
             : _routine.todayTasks,
+        badgeTypes: _badgeBaseline,
       );
       state = _routine;
       if (outcome.badgeUnlocked && outcome.unlockedBadges.isNotEmpty) {
@@ -274,9 +283,13 @@ class CareDashboard extends _$CareDashboard {
           AppSnackBar.showBadgeUnlocked(badge);
         }
         _badgeBaseline = {..._badgeBaseline, ...outcome.unlockedBadges};
+        _routine = _routine.copyWith(badgeTypes: _badgeBaseline);
+        state = _routine;
       } else if (outcome.badgeUnlocked) {
         AppSnackBar.showBadgeUnlocked();
         _badgeBaseline = {..._badgeBaseline, '7_day_hero'};
+        _routine = _routine.copyWith(badgeTypes: _badgeBaseline);
+        state = _routine;
       }
       // State is already correctly synced from outcome.task above.
       // Streak updates arrive via careStreakRealtimeProvider.

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
+import 'package:petfolio/features/pet_profile/data/models/activity_level.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 
 import '../../data/models/pet.dart';
@@ -372,11 +373,16 @@ class _WelcomeStep extends StatelessWidget {
               style: tt.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
             ),
             const Spacer(),
-            PrimaryPillButton(
+            Semantics(
               label: 'Add your first pet',
-              onPressed: onStart,
-              isFullWidth: true,
-              size: PillButtonSize.xl,
+              button: true,
+              child: PrimaryPillButton(
+                key: const ValueKey('onboarding_start_cta'),
+                label: 'Add your first pet',
+                onPressed: onStart,
+                isFullWidth: true,
+                size: PillButtonSize.xl,
+              ),
             ),
             const SizedBox(height: 12),
             SizedBox(
@@ -1823,12 +1829,17 @@ class _DoneStep extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-              PrimaryPillButton(
+              Semantics(
                 label: 'Enter PetFolio',
-                onPressed: isLoading ? null : onEnter,
-                isLoading: isLoading,
-                isFullWidth: true,
-                size: PillButtonSize.xl,
+                button: true,
+                child: PrimaryPillButton(
+                  key: const ValueKey('onboarding_finish_cta'),
+                  label: 'Enter PetFolio',
+                  onPressed: isLoading ? null : onEnter,
+                  isLoading: isLoading,
+                  isFullWidth: true,
+                  size: PillButtonSize.xl,
+                ),
               ),
             ],
           ),

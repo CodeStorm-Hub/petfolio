@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/data/models/pet.dart';
+import 'package:petfolio/features/pet_profile/data/models/activity_level.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/health_log.dart';
 import '../controllers/nutrition_controller.dart';
@@ -399,28 +400,12 @@ class _CalorieCard extends StatelessWidget {
     );
   }
 
-  static const _activityFactors = {
-    'sedentary': 1.2,
-    'low': 1.4,
-    'moderate': 1.6,
-    'high': 1.8,
-    'very_high': 2.0,
-  };
-
-  static const _activityLabels = {
-    'sedentary': 'Sedentary',
-    'low': 'Low',
-    'moderate': 'Moderate',
-    'high': 'High',
-    'very_high': 'Very High',
-  };
-
   int? _computeCalories(Pet pet, double? kgForMer) {
     final kg = kgForMer;
     if (kg == null || kg <= 0) return null;
 
-    final factor =
-        _activityFactors[pet.activityLevel?.toLowerCase()] ?? 1.6;
+    final level = ActivityLevel.fromId(pet.activityLevel) ?? ActivityLevel.moderate;
+    final factor = level.factor;
     final speciesModifier =
         pet.species.toLowerCase() == 'cat' ? 0.9 : 1.0;
 
@@ -437,8 +422,8 @@ class _CalorieCard extends StatelessWidget {
     final weightKgForMer =
         _latestLoggedWeightKg(history) ?? pet.weightKg;
     final calories = _computeCalories(pet, weightKgForMer);
-    final activityLabel =
-        _activityLabels[pet.activityLevel?.toLowerCase()] ?? 'Moderate';
+    final level = ActivityLevel.fromId(pet.activityLevel) ?? ActivityLevel.moderate;
+    final activityLabel = level.shortLabel;
     final weightStr = weightKgForMer != null
         ? '${_formatDisplayKg(weightKgForMer)} kg'
         : 'Not set';

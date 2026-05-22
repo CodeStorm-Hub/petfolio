@@ -190,14 +190,27 @@ class _VendorGroupState extends ConsumerState<_VendorGroup> {
                       size: 18, color: AppColors.ink500),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      widget.shopName,
-                      style: const TextStyle(
-                        fontFamily: 'Sora',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        color: AppColors.ink950,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.shopName,
+                          style: const TextStyle(
+                            fontFamily: 'Sora',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: AppColors.ink950,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        const Text(
+                          'Est. delivery: 2-3 business days',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.ink500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Text(

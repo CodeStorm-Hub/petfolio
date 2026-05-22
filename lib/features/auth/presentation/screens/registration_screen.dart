@@ -187,13 +187,17 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                         ],
                         const SizedBox(height: 28),
 
-                        // CTA
-                        PrimaryPillButton(
+                        Semantics(
                           label: 'Create account',
-                          onPressed: _isLoading ? null : _submit,
-                          isLoading: _isLoading,
-                          isFullWidth: true,
-                          size: PillButtonSize.xl,
+                          button: true,
+                          child: PrimaryPillButton(
+                            key: const ValueKey('register_cta'),
+                            label: 'Create account',
+                            onPressed: _isLoading ? null : _submit,
+                            isLoading: _isLoading,
+                            isFullWidth: true,
+                            size: PillButtonSize.xl,
+                          ),
                         ),
                       ],
                     ),

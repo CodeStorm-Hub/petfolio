@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -55,6 +56,7 @@ class ManualKycScreen extends ConsumerWidget {
                     tradeLicenseBytes: kycState.tradeLicenseBytes,
                     onPickNid:         notifier.pickNidImage,
                     onPickTrade:       notifier.pickTradeLicenseImage,
+                    onLoadTestDoc:     notifier.loadTestDocument,
                   ),
                   _Step3(
                     formKey:    notifier.formKey3,
@@ -224,12 +226,14 @@ class _Step2 extends StatelessWidget {
     required this.tradeLicenseBytes,
     required this.onPickNid,
     required this.onPickTrade,
+    required this.onLoadTestDoc,
   });
 
   final Uint8List? nidBytes;
   final Uint8List? tradeLicenseBytes;
   final VoidCallback onPickNid;
   final VoidCallback onPickTrade;
+  final VoidCallback onLoadTestDoc;
 
   @override
   Widget build(BuildContext context) {
@@ -254,6 +258,14 @@ class _Step2 extends StatelessWidget {
           hasFile: tradeLicenseBytes != null,
           onTap: onPickTrade,
         ),
+        if (kDebugMode) ...[
+          const SizedBox(height: 12),
+          TextButton(
+            key: const ValueKey('load_test_document'),
+            onPressed: onLoadTestDoc,
+            child: const Text('Load Test Document (QA)'),
+          ),
+        ],
       ],
     );
   }

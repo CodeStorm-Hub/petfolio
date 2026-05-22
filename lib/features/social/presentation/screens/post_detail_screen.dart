@@ -398,25 +398,11 @@ class _Caption extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
-      child: RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: post.petName,
-              style: tt.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-              ),
-            ),
-            TextSpan(text: '  '),
-            TextSpan(
-              text: post.caption,
-              style: tt.bodySmall?.copyWith(
-                fontSize: 14,
-                height: 1.5,
-              ),
-            ),
-          ],
+      child: Text(
+        post.caption,
+        style: tt.bodySmall?.copyWith(
+          fontSize: 14,
+          height: 1.5,
         ),
       ),
     );

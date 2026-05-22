@@ -177,6 +177,13 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
                             onPressed: () => context.go('/marketplace'),
                           ),
                           const SizedBox(height: 12),
+                          PrimaryPillButton(
+                            label: 'View Order',
+                            size: PillButtonSize.lg,
+                            isFullWidth: true,
+                            onPressed: () => context.go('/marketplace/orders/${widget.orderId}'),
+                          ),
+                          const SizedBox(height: 12),
                           TextButton(
                             onPressed: () => context.go('/home'),
                             child: const Text(

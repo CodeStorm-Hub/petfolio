@@ -114,6 +114,10 @@ class ManualKycNotifier extends Notifier<KycFormState> {
     state = state.copyWith(tradeLicenseBytes: await file.readAsBytes(), clearDocError: true);
   }
 
+  void loadTestDocument() {
+    state = state.copyWith(nidBytes: Uint8List.fromList([137, 80, 78, 71, 13, 10, 26, 10]), clearDocError: true); // dummy PNG header
+  }
+
   Future<bool> submit() async {
     if (!(formKey3.currentState?.validate() ?? false)) return false;
     state = state.copyWith(submitting: true);

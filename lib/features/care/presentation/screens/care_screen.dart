@@ -17,6 +17,8 @@ import '../../data/models/care_task.dart' as dbtask;
 import '../../data/models/care_task_log.dart';
 import '../controllers/care_dashboard_controller.dart';
 import '../utils/care_scheduled_time.dart';
+import '../widgets/routine_recommendation_sheet.dart';
+import '../../domain/services/care_recommendation_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CareScreen
@@ -208,6 +210,63 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                           ],
                         ),
                       ),
+                      if (dashboard.tasks.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: InkWell(
+                            onTap: () {
+                              final service = CareRecommendationService();
+                              final tasks = service.generateRecommendations(activePet);
+                              RoutineRecommendationSheet.show(context, activePet, tasks);
+                            },
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: cs.primaryContainer.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: cs.primary.withOpacity(0.3)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: cs.primary,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(Icons.auto_awesome, color: cs.onPrimary, size: 20),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Generate Routine',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: cs.onPrimaryContainer,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'Get personalized tasks for ${activePet.name}',
+                                          style: TextStyle(
+                                            color: cs.onPrimaryContainer.withOpacity(0.8),
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(Icons.chevron_right, color: cs.primary),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       _DailyTasksDashboard(
                         state: dashboard,
                         petId: activePet.id,
@@ -900,28 +959,37 @@ class _CareTaskCard extends ConsumerWidget {
     final logOnly = task.isLogDerived;
 
     Widget tile() {
-      return AnimatedContainer(
-        duration: PetfolioThemeExtension.durationSm,
-        decoration: BoxDecoration(
-          color: done ? pt.surface2 : cs.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: pt.line200, width: 0.5),
-          boxShadow: done
-              ? null
-              : [
-                  BoxShadow(
-                    color: pt.line200.withAlpha(128),
-                    blurRadius: 0,
-                    spreadRadius: 0.5,
-                  ),
-                  const BoxShadow(
-                    color: AppColors.shadowE1L,
-                    blurRadius: 2,
-                    offset: Offset(0, 1),
-                  ),
-                ],
-        ),
-        child: Padding(
+      return GestureDetector(
+        onTap: () {
+          if (logOnly) {
+            if (!done) return;
+            ref.read(careDashboardProvider.notifier).toggleTaskCompletion(task.id, isCompleted: false);
+            return;
+          }
+          ref.read(careDashboardProvider.notifier).toggleTaskCompletion(task.id, isCompleted: !done);
+        },
+        child: AnimatedContainer(
+          duration: PetfolioThemeExtension.durationSm,
+          decoration: BoxDecoration(
+            color: done ? pt.surface2 : cs.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: pt.line200, width: 0.5),
+            boxShadow: done
+                ? null
+                : [
+                    BoxShadow(
+                      color: pt.line200.withAlpha(128),
+                      blurRadius: 0,
+                      spreadRadius: 0.5,
+                    ),
+                    const BoxShadow(
+                      color: AppColors.shadowE1L,
+                      blurRadius: 2,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+          ),
+          child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
@@ -1026,8 +1094,9 @@ class _CareTaskCard extends ConsumerWidget {
             ],
           ),
         ),
-      );
-    }
+      ),
+    );
+  }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
