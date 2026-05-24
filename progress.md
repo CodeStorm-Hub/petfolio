@@ -2,6 +2,46 @@
 
 ---
 
+## 2026-05-25 — Fresh-Start Android Automation Rerun
+
+- Restarted automation from the beginning with `emulator-5554`: force-stopped PetFolio, cleared logcat, relaunched `com.example.petfolio/.MainActivity`, and captured a new artifact set separate from the earlier run.
+- App storage was intentionally retained because clearing data would remove the authenticated real-data session and no reusable test credentials were available in repo context.
+- New artifacts:
+  - `docs/automation/fresh_2026-05-25_automation/screenshots/` — 63 PNG captures.
+  - `docs/automation/fresh_2026-05-25_automation/ui-dumps/` — 64 XML dumps plus summaries.
+  - `docs/automation/fresh_2026-05-25_automation/logcat_fresh_run.txt`
+  - `docs/automation/fresh_2026-05-25_automation/logcat_findings.txt`
+  - `docs/automation/fresh_2026-05-25_automation/fresh_start_testing_report.md`
+- Validated fresh coverage: Home/Profile, profile tabs, pet switcher, Care, Nutrition, Medical Vault, Social feed, Create Post, Social Messages → Match Inbox, Match Discovery, Match Filters, Match Inbox, Marketplace top/scrolled state, Seller Dashboard, Admin Dashboard.
+- Noted invalid/contaminated captures separately in the fresh report. Main issue was emulator/system instability: `Pixel Launcher isn't responding`, plus Android back-stack focus escaping to Calendar/launcher after some back actions.
+- No PetFolio `FATAL EXCEPTION` was found in filtered logs; Supabase initialized successfully.
+- Remaining clean-pass targets: cart, product detail, shop storefront, notifications, social profile, admin internal tabs, and all destructive workflows against seeded QA data only.
+
+**Next step:** Add a route-aware integration/Marionette harness for deterministic screen-by-screen UI capture, then run a seeded mutating-flow pass.
+
+---
+
+## 2026-05-25 — Android Automation Inventory + Emulator UI Capture
+
+- Used `@test-android-apps` workflow on connected `emulator-5554` and verified Flutter sees `sdk gphone16k x86 64` on Android 17 API 37.
+- Used Supabase MCP against hosted project `jqyjvhwlcqcsuwcqgcwf` to inventory current backend surfaces:
+  - 29 public tables, including care, pet, social, matching, marketplace, seller, admin, and audit tables.
+  - 26 public RPC/functions, including care dashboard/streak, matching inbox/discovery/thread, checkout/inventory, KYC, moderation, shop deletion, and admin helpers.
+  - 6 storage buckets: `pets`, `post-images`, `marketplace-images`, `shops`, `medical-documents`, `kyc-documents`.
+  - 3 Edge Functions: `create-payment-intent`, `stripe-onboard-vendor`, `stripe-webhook`.
+- Inspected `lib/` for feature modules, routes, Supabase calls, stable `ValueKey`/semantics anchors, dialogs, sheets, tabs, and main user workflows.
+- Captured emulator screenshots and UI XML dumps under:
+  - `docs/automation/screenshots/`
+  - `docs/automation/ui-dumps/`
+- Saved durable QA artifact:
+  - `docs/automation/petfolio_android_automation_inventory_2026-05-25.md`
+- Read-only traversal covered authenticated home/profile tabs, pet switcher/manage, social profile, care screen scroll states, add-task sheet, nutrition, medical vault, social feed, create-post screen, match empty state and inbox, marketplace, cart, product detail, shop storefront, seller dashboard, and admin dashboard.
+- Follow-up needed: seeded QA-data pass for destructive flows and exact second pass for admin tab internals.
+
+**Next step:** Run `/remember` to persist this QA inventory before starting destructive seeded automation or redesign review.
+
+---
+
 ## 2026-05-25 — AI Routine v2: Full Pet Context + Weekly/Monthly Support
 
 - **DB migration applied** (`jqyjvhwlcqcsuwcqgcwf`): added `is_ai_suggested boolean NOT NULL DEFAULT false` to `care_tasks` + sparse index on `(pet_id, is_ai_suggested)` where true.

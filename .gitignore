@@ -127,3 +127,7 @@ inserts.sql
 tmp_window_dump.xml
 .claude/worktrees/
 /qa_artifacts
+/docs/automation/fresh_2026-05-25_automation/screenshots
+/docs/automation/fresh_2026-05-25_automation/ui-dumps
+/docs/automation/screenshots
+/docs/automation/ui-dumps
