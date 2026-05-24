@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
-import 'package:petfolio/features/pet_profile/data/models/activity_level.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 
 import '../../data/models/pet.dart';

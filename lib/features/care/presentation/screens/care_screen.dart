@@ -12,6 +12,7 @@ import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_
 import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 
 import 'package:petfolio/core/errors/app_exception.dart';
+import 'package:petfolio/core/models/pet.dart' show Pet;
 
 import '../../data/models/care_task.dart' as dbtask;
 import '../../data/models/care_task_log.dart';
@@ -34,6 +35,7 @@ class CareScreen extends ConsumerStatefulWidget {
 class _CareScreenState extends ConsumerState<CareScreen> {
   bool _outdoor = false;
   bool _onboardingSuccessHandled = false;
+  bool _isGeneratingRoutine = false;
 
   @override
   void initState() {
@@ -69,6 +71,33 @@ class _CareScreenState extends ConsumerState<CareScreen> {
 
   Future<void> _init() async {
     // careDashboardProvider auto-loads in its build() via Future.microtask.
+  }
+
+  Future<void> _generateRoutine(Pet activePet) async {
+    setState(() => _isGeneratingRoutine = true);
+    final hasTasks =
+        ref.read(careDashboardProvider).tasks.value?.isNotEmpty == true;
+    List<dbtask.CareTask>? tasks;
+    Object? caught;
+    try {
+      final service = CareRecommendationService();
+      tasks = await service.generateRecommendations(activePet);
+    } catch (e) {
+      caught = e;
+    } finally {
+      if (mounted) setState(() => _isGeneratingRoutine = false);
+    }
+    if (!mounted) return;
+    if (caught != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to generate routine: $caught')),
+      );
+      return;
+    }
+    if (tasks != null) {
+      RoutineRecommendationSheet.show(context, activePet, tasks,
+          isRefresh: hasTasks);
+    }
   }
 
   @override
@@ -210,63 +239,12 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                           ],
                         ),
                       ),
-                      if (dashboard.tasks.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: InkWell(
-                            onTap: () {
-                              final service = CareRecommendationService();
-                              final tasks = service.generateRecommendations(activePet);
-                              RoutineRecommendationSheet.show(context, activePet, tasks);
-                            },
-                            borderRadius: BorderRadius.circular(16),
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: cs.primaryContainer.withOpacity(0.5),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: cs.primary.withOpacity(0.3)),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: cs.primary,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(Icons.auto_awesome, color: cs.onPrimary, size: 20),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Generate Routine',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: cs.onPrimaryContainer,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          'Get personalized tasks for ${activePet.name}',
-                                          style: TextStyle(
-                                            color: cs.onPrimaryContainer.withOpacity(0.8),
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Icon(Icons.chevron_right, color: cs.primary),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                      _AiRoutineBanner(
+                        activePetId: activePet.id,
+                        hasNoTasks: dashboard.tasks.value?.isEmpty == true,
+                        isGenerating: _isGeneratingRoutine,
+                        onTap: () => _generateRoutine(activePet),
+                      ),
                       _DailyTasksDashboard(
                         state: dashboard,
                         petId: activePet.id,
@@ -292,6 +270,117 @@ class _CareScreenState extends ConsumerState<CareScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI Routine Banner
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _AiRoutineBanner extends StatelessWidget {
+  const _AiRoutineBanner({
+    required this.activePetId,
+    required this.hasNoTasks,
+    required this.isGenerating,
+    required this.onTap,
+  });
+
+  final String activePetId;
+  final bool hasNoTasks;
+  final bool isGenerating;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    if (!hasNoTasks) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: OutlinedButton.icon(
+          onPressed: isGenerating ? null : onTap,
+          icon: isGenerating
+              ? SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: cs.primary,
+                  ),
+                )
+              : const Icon(Icons.auto_awesome, size: 16),
+          label: Text(isGenerating ? 'Generating…' : 'Refresh AI Routine'),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(44),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14)),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: InkWell(
+        onTap: isGenerating ? null : onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: cs.primaryContainer.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: cs.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: isGenerating
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: cs.onPrimary),
+                      )
+                    : Icon(Icons.auto_awesome, color: cs.onPrimary, size: 20),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isGenerating ? 'Generating...' : 'Generate AI Routine',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: cs.onPrimaryContainer,
+                        fontSize: 15,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      isGenerating
+                          ? 'Building personalized care plan...'
+                          : 'Get daily, weekly & monthly tasks tailored for your pet',
+                      style: TextStyle(
+                        color: cs.onPrimaryContainer.withValues(alpha: 0.8),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (!isGenerating)
+                Icon(Icons.chevron_right, color: cs.primary),
+            ],
+          ),
         ),
       ),
     );

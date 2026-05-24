@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/theme/app_theme.dart';
-
 class AdminPanelScaffold extends StatelessWidget {
   const AdminPanelScaffold({
     super.key,
@@ -36,13 +33,13 @@ class AdminPanelScaffold extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
                 onPressed: onRefresh,
-                color: AppColors.ink500,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 tooltip: 'Refresh',
               ),
             ],
           ),
         ),
-        const Divider(height: 1, color: AppColors.line200),
+        Divider(height: 1, color: Theme.of(context).dividerColor),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -65,7 +62,7 @@ class AdminStatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusPill),
+        borderRadius: BorderRadius.circular(100),
         color: color.withAlpha(20),
       ),
       child: Text(
@@ -88,7 +85,7 @@ class AdminEmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 48, color: AppColors.ink300),
+          Icon(icon, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(150)),
           const SizedBox(height: 16),
           Text(
             message,
@@ -111,8 +108,8 @@ class AdminErrorState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.error_outline_rounded,
-              size: 40, color: AppColors.danger),
+          Icon(Icons.error_outline_rounded,
+              size: 40, color: Theme.of(context).colorScheme.error),
           const SizedBox(height: 12),
           Text(
             message,

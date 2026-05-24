@@ -438,6 +438,40 @@ class PetCareRepository {
     }
   }
 
+  Future<List<CareTask>> bulkCreateTasks(
+    List<CareTask> tasks, {
+    bool isAiSuggested = false,
+  }) async {
+    try {
+      if (tasks.isEmpty) return [];
+      _requireAuth();
+      final payloads = tasks.map((task) {
+        final payload = Map<String, dynamic>.from(task.toJson())
+          ..remove('id')
+          ..remove('category_icon');
+        if (isAiSuggested) payload['is_ai_suggested'] = true;
+        return payload;
+      }).toList();
+
+      final rows = await _client
+          .from('care_tasks')
+          .insert(payloads)
+          .select();
+
+      final savedTasks = rows.map((row) => CareTask.fromJson(row)).toList();
+      for (final saved in savedTasks) {
+        _scheduleNotificationIfNeeded(saved);
+      }
+      return savedTasks;
+    } on AppException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
+    } catch (e) {
+      throw NetworkException(message: e.toString());
+    }
+  }
+
   Future<CareTask> updateTask(CareTask task) async {
     try {
       _requireAuth();

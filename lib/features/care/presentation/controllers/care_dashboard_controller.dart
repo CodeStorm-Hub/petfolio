@@ -207,10 +207,13 @@ class CareDashboard extends _$CareDashboard {
     await _load(petId, _routine.selectedDate);
   }
 
-  Future<void> bulkCreateTasks(List<CareTask> tasks) async {
+  Future<void> bulkCreateTasks(
+    List<CareTask> tasks, {
+    bool isAiSuggested = false,
+  }) async {
     final petId = ref.read(activePetIdProvider);
     if (petId == null || tasks.isEmpty) return;
-    await _repo.bulkCreateTasks(tasks);
+    await _repo.bulkCreateTasks(tasks, isAiSuggested: isAiSuggested);
     if (ref.read(activePetIdProvider) != petId) return;
     await _load(petId, _routine.selectedDate);
   }
