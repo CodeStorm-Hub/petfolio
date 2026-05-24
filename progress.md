@@ -10,7 +10,7 @@
   - Builds rich prompt including species, breed, age in months/years (from DOB), gender, weight, activity level, medical records, health log summaries.
   - Restored full frequency support: `weekly`, `biweekly`, `monthly` now correctly parsed (was clamped to `daily` only in v1 fix).
   - Uses `nvext: {guided_json: ...}` with JSON Schema for structured/reliable output (6-8 tasks: 2-3 daily, 2-3 weekly, 1-2 monthly).
-  - API key: `nvapi-_Mz9GJj7...` (second key from provided list).
+  - API key: configured via `--dart-define=NVIDIA_API_KEY` (key removed from source; rotate any previously committed key).
 - **`PetCareRepository.bulkCreateTasks`**: accepts `isAiSuggested` flag, injects `is_ai_suggested: true` into Supabase payload when set.
 - **`CareDashboard.bulkCreateTasks`**: passes `isAiSuggested` through to repository.
 - **`RoutineRecommendationSheet` redesigned**:
@@ -34,7 +34,7 @@
 - **Fix — `care_recommendation_service.dart`**:
   - New `_parseFrequency`: clamps to `daily` / `twiceDaily` / `asNeeded` only; maps snake_case variants (`twice_daily`, `as_needed`); all other values default to `daily` so AI-generated tasks always appear on every future date.
   - New `_parseTaskType`: handles both camelCase (`vetVisit`, `nailTrim`) and snake_case (`vet_visit`, `nail_trim`) to prevent silent fallback to `other`.
-  - API key updated to `nvapi-hCU0OnLkJQihhR-...` (from provided list).
+  - API key: now read from `--dart-define=NVIDIA_API_KEY` (removed from source).
   - Payload updated: `max_tokens: 512`, `top_p: 0.70`, `frequency_penalty: 0.00`, `presence_penalty: 0.00`, `stream: false` per spec.
   - JSON extraction uses regex fallback to handle extra model text wrapping the array.
   - Prompt now requests exactly 4 tasks and includes a complete example JSON to guide the small model.

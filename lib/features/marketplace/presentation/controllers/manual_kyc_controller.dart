@@ -1,10 +1,22 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'my_shop_controller.dart';
+
+// Minimal valid 1×1 white PNG (67 bytes) — used only in debug builds
+const _kOnePxPng = <int>[
+  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+  0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+  0x08, 0x00, 0x00, 0x00, 0x00, 0x3A, 0x7E, 0x9B,
+  0x55, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41,
+  0x54, 0x78, 0x9C, 0x62, 0x60, 0x00, 0x00, 0x00,
+  0x02, 0x00, 0x01, 0xE2, 0x21, 0xBC, 0x33, 0x00,
+  0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
+  0x42, 0x60, 0x82,
+];
 
 final manualKycControllerProvider =
     NotifierProvider<ManualKycNotifier, KycFormState>(
@@ -115,7 +127,12 @@ class ManualKycNotifier extends Notifier<KycFormState> {
   }
 
   void loadTestDocument() {
-    state = state.copyWith(nidBytes: Uint8List.fromList([137, 80, 78, 71, 13, 10, 26, 10]), clearDocError: true); // dummy PNG header
+    assert(kDebugMode, 'loadTestDocument is only available in debug builds');
+    if (!kDebugMode) return;
+    state = state.copyWith(
+      nidBytes: Uint8List.fromList(_kOnePxPng),
+      clearDocError: true,
+    );
   }
 
   Future<bool> submit() async {

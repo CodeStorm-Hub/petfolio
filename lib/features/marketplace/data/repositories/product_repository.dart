@@ -20,11 +20,12 @@ class ProductRepository {
 
   final SupabaseClient _client;
 
-  /// Fetch active products across all shops with cursor-style pagination.
+  /// Fetch active products across all shops with offset-based pagination.
   ///
   /// [page] is zero-based; [pageSize] defaults to 20.
   /// Callers can pass page=0 for the initial load and increment for
-  /// infinite-scroll / load-more without re-fetching previous pages.
+  /// infinite-scroll / load-more. Note: items inserted between pages may cause
+  /// duplicates or skips — prefer a cursor (created_at/id) for live data.
   Future<List<Product>> fetchProducts({
     int page = 0,
     int pageSize = 20,

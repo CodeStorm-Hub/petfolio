@@ -4,7 +4,7 @@ import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-const _apiKey = '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';
+final _apiKey = Platform.environment['NVIDIA_API_KEY'] ?? '';
 const _url = 'https://integrate.api.nvidia.com/v1/chat/completions';
 const _uuid = Uuid();
 
@@ -26,6 +26,7 @@ Each object in the array must have the following keys:
 Return ONLY the JSON array. Do not include markdown formatting like ```json or any other text.
 ''';
 
+  if (_apiKey.isEmpty) throw Exception('NVIDIA_API_KEY environment variable is not set');
   final response = await http.post(
     Uri.parse(_url),
     headers: {

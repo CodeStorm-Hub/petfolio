@@ -333,7 +333,11 @@ class SocialRepository {
       'get_pet_stats',
       params: {'p_pet_id': petId},
     );
-    final row = (rows as List).cast<Map<String, dynamic>>().first;
+    final list = (rows as List).cast<Map<String, dynamic>>();
+    if (list.isEmpty) {
+      return const PetStats(postCount: 0, followerCount: 0, followingCount: 0);
+    }
+    final row = list.first;
     return PetStats(
       postCount: (row['post_count'] as num).toInt(),
       followerCount: (row['follower_count'] as num).toInt(),

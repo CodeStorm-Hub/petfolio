@@ -1,16 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:petfolio/core/models/pet.dart';
 import 'package:petfolio/features/care/data/models/care_task.dart';
 
+final careRecommendationServiceProvider = Provider<CareRecommendationService>(
+  (_) => CareRecommendationService(),
+);
+
 class CareRecommendationService {
   final _uuid = const Uuid();
 
-  static const _apiKey =
-      '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';
+  static const _apiKey = String.fromEnvironment('NVIDIA_API_KEY');
   static const _url = 'https://integrate.api.nvidia.com/v1/chat/completions';
 
   static const _guidedSchema = {
@@ -109,6 +113,12 @@ class CareRecommendationService {
     );
 
     try {
+      if (_apiKey.isEmpty) {
+        throw Exception(
+          'NVIDIA_API_KEY is not configured. '
+          'Pass --dart-define=NVIDIA_API_KEY=<key> when building.',
+        );
+      }
       final response = await http.post(
         Uri.parse(_url),
         headers: {

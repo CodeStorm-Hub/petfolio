@@ -90,14 +90,16 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
   }
 
   Future<void> _autoGenerateRoutines(Pet pet) async {
+    // Capture both providers synchronously before any async gap so this method
+    // remains safe even if the notifier is disposed during the AI call.
+    final service = ref.read(careRecommendationServiceProvider);
+    final repo = ref.read(careTaskRepositoryProvider);
     try {
-      final service = CareRecommendationService();
       final tasks = await service.generateRecommendations(pet);
       if (tasks.isNotEmpty) {
-        await ref.read(careTaskRepositoryProvider).bulkCreateTasks(tasks);
+        await repo.bulkCreateTasks(tasks);
       }
     } catch (e) {
-      // Background failure, silently ignore or log
       debugPrint('Auto-generation of routines failed for pet ${pet.id}: $e');
     }
   }
