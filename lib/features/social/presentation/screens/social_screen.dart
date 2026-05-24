@@ -407,44 +407,51 @@ class _PostHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
       child: Row(
         children: [
-          // Avatar
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: post.accentColor,
-            backgroundImage: post.petAvatarUrl != null
-                ? CachedNetworkImageProvider(post.petAvatarUrl!)
-                : null,
-            child: post.petAvatarUrl == null
-                ? Text(
-                    initial,
-                    style: tt.titleSmall?.copyWith(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  )
-                : null,
+          // Tappable avatar → pet social profile
+          GestureDetector(
+            onTap: () => context.push('/social/profile/${post.petId}'),
+            child: CircleAvatar(
+              radius: 20,
+              backgroundColor: post.accentColor,
+              backgroundImage: post.petAvatarUrl != null
+                  ? CachedNetworkImageProvider(post.petAvatarUrl!)
+                  : null,
+              child: post.petAvatarUrl == null
+                  ? Text(
+                      initial,
+                      style: tt.titleSmall?.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    )
+                  : null,
+            ),
           ),
           const SizedBox(width: 10),
-          // Pet name + handle + timestamp
+          // Tappable pet name + handle + timestamp → pet social profile
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  post.petName,
-                  style: tt.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
+            child: GestureDetector(
+              onTap: () => context.push('/social/profile/${post.petId}'),
+              behavior: HitTestBehavior.opaque,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    post.petName,
+                    style: tt.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 1),
-                Text(
-                  post.fuzzyLocation.isEmpty
-                      ? '@${post.handle} · ${post.timeAgo}'
-                      : '@${post.handle} · ${post.fuzzyLocation} · ${post.timeAgo}',
-                  style: tt.labelSmall?.copyWith(color: pt.ink500),
-                ),
-              ],
+                  const SizedBox(height: 1),
+                  Text(
+                    post.fuzzyLocation.isEmpty
+                        ? '@${post.handle} · ${post.timeAgo}'
+                        : '@${post.handle} · ${post.fuzzyLocation} · ${post.timeAgo}',
+                    style: tt.labelSmall?.copyWith(color: pt.ink500),
+                  ),
+                ],
+              ),
             ),
           ),
           // More menu

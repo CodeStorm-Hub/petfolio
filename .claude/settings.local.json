@@ -66,7 +66,9 @@
       "Skill(brainstorming:*)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "WebFetch(domain:docs.nvidia.com)"
+      "WebFetch(domain:docs.nvidia.com)",
+      "Bash(grep -i \"\\\\.dart$\")",
+      "Bash(xargs grep -l \"class.*Card\\\\|class.*Widget\")"
     ]
   }
 }
