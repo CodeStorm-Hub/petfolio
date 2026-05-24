@@ -355,12 +355,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         const SizedBox(height: 28),
 
                         // CTA
-                        PrimaryPillButton(
+                        Semantics(
                           label: 'Sign in',
-                          onPressed: _isLoading ? null : _submit,
-                          isLoading: _isLoading,
-                          isFullWidth: true,
-                          size: PillButtonSize.xl,
+                          button: true,
+                          child: PrimaryPillButton(
+                            key: const ValueKey('login_cta'),
+                            label: 'Sign in',
+                            onPressed: _isLoading ? null : _submit,
+                            isLoading: _isLoading,
+                            isFullWidth: true,
+                            size: PillButtonSize.xl,
+                          ),
                         ),
                       ],
                     ),

@@ -15,7 +15,7 @@ import 'package:petfolio/features/pet_profile/presentation/controllers/active_pe
 import 'package:petfolio/features/pet_profile/presentation/controllers/discovery_visibility_controller.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/edit_profile_controller.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart';
-import 'package:petfolio/features/pet_profile/presentation/widgets/pet_activity_options.dart';
+import 'package:petfolio/features/pet_profile/data/models/activity_level.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key, required this.pet});
@@ -134,6 +134,26 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       await ref
           .read(discoveryVisibilityControllerProvider.notifier)
           .setDiscoverable(value);
+      if (mounted && value) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+                SizedBox(width: 12),
+                Text(
+                  'Match discovery enabled',
+                  style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) AppSnackBar.showError(e);
     }
@@ -392,7 +412,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       spacing: 8,
                       runSpacing: 8,
                       children: [
-                        for (final opt in kPetActivityOptions)
+                        for (final opt in ActivityLevel.values)
                           _ActivityChip(
                             label: opt.label,
                             icon: opt.icon,
@@ -436,24 +456,27 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         ),
                         if (showDiscovery) ...[
                           const Divider(height: 24),
-                          SwitchListTile(
-                            contentPadding: EdgeInsets.zero,
-                            title: Text(
-                              'Match discovery',
-                              style: TextStyle(
-                                fontFamily: 'Sora',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 15,
-                                color: cs.onSurface,
+                          Semantics(
+                            label: 'Match Discovery On/Off',
+                            child: SwitchListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                'Match discovery',
+                                style: TextStyle(
+                                  fontFamily: 'Sora',
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                  color: cs.onSurface,
+                                ),
                               ),
+                              subtitle: Text(
+                                'Let nearby owners find this pet in Playdates.',
+                                style: TextStyle(fontSize: 13, height: 1.35, color: pt.ink500),
+                              ),
+                              value: pet.isDiscoverable,
+                              onChanged:
+                                  discoverableBusy ? null : _onDiscoverableChanged,
                             ),
-                            subtitle: Text(
-                              'Let nearby owners find this pet in Playdates.',
-                              style: TextStyle(fontSize: 13, height: 1.35, color: pt.ink500),
-                            ),
-                            value: pet.isDiscoverable,
-                            onChanged:
-                                discoverableBusy ? null : _onDiscoverableChanged,
                           ),
                           const SizedBox(height: 12),
                           _LocationRow(

@@ -120,6 +120,10 @@ app.*.symbols
 .env
 .env.local
 
+# Generated seeding output from scripts/generate_inserts.dart — not a versioned migration
+inserts.sql
+
 .cursor/hooks/state/
 tmp_window_dump.xml
 .claude/worktrees/
+/qa_artifacts

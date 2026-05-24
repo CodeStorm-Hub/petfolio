@@ -2,6 +2,52 @@
 
 ---
 
+## 2026-05-25 — AI Routine v2: Full Pet Context + Weekly/Monthly Support
+
+- **DB migration applied** (`jqyjvhwlcqcsuwcqgcwf`): added `is_ai_suggested boolean NOT NULL DEFAULT false` to `care_tasks` + sparse index on `(pet_id, is_ai_suggested)` where true.
+- **`CareRecommendationService` rewritten**:
+  - Fetches ALL pet context in parallel before prompt: `medical_vault` (active records with next_due_at), `health_logs` (recent 5), existing `care_tasks` (to avoid duplicate types).
+  - Builds rich prompt including species, breed, age in months/years (from DOB), gender, weight, activity level, medical records, health log summaries.
+  - Restored full frequency support: `weekly`, `biweekly`, `monthly` now correctly parsed (was clamped to `daily` only in v1 fix).
+  - Uses `nvext: {guided_json: ...}` with JSON Schema for structured/reliable output (6-8 tasks: 2-3 daily, 2-3 weekly, 1-2 monthly).
+  - API key: configured via `--dart-define=NVIDIA_API_KEY` (key removed from source; rotate any previously committed key).
+- **`PetCareRepository.bulkCreateTasks`**: accepts `isAiSuggested` flag, injects `is_ai_suggested: true` into Supabase payload when set.
+- **`CareDashboard.bulkCreateTasks`**: passes `isAiSuggested` through to repository.
+- **`RoutineRecommendationSheet` redesigned**:
+  - Tasks grouped by frequency: Daily / Weekly / Monthly sections with labelled headers.
+  - Summary chips show count breakdown (e.g. "3 daily · 3 weekly · 2 monthly").
+  - Each card shows recurrence label ("Once a week at 09:00"), gamification points, and AI reasoning note.
+  - Select all / Deselect all toggle in header.
+  - Supports `isRefresh` flag for refresh vs. new-setup messaging.
+- **`CareScreen` updated**:
+  - New `_AiRoutineBanner` widget: shows full "Generate AI Routine" promo card when pet has no tasks; shows a compact "Refresh AI Routine" outlined button when tasks already exist.
+  - Context-safe async gap handling (no `BuildContext` across async gaps lint).
+- `flutter analyze` — **No issues found.**
+
+**Next step:** Phase complete. Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-25 — Pet Personalized Recommendation + Task Visibility Bug Fix
+
+- **Root cause identified**: `CareRecommendationService` used `CareFrequency.values.firstWhere(e.name == freqStr)` which correctly parsed AI responses of `"weekly"` / `"monthly"` / `"once"` — valid Dart enum names — to non-recurring frequencies. `_appliesOnDay` then filtered these tasks out on future dates, showing only the 2 tasks that happened to get `daily`.
+- **Fix — `care_recommendation_service.dart`**:
+  - New `_parseFrequency`: clamps to `daily` / `twiceDaily` / `asNeeded` only; maps snake_case variants (`twice_daily`, `as_needed`); all other values default to `daily` so AI-generated tasks always appear on every future date.
+  - New `_parseTaskType`: handles both camelCase (`vetVisit`, `nailTrim`) and snake_case (`vet_visit`, `nail_trim`) to prevent silent fallback to `other`.
+  - API key: now read from `--dart-define=NVIDIA_API_KEY` (removed from source).
+  - Payload updated: `max_tokens: 512`, `top_p: 0.70`, `frequency_penalty: 0.00`, `presence_penalty: 0.00`, `stream: false` per spec.
+  - JSON extraction uses regex fallback to handle extra model text wrapping the array.
+  - Prompt now requests exactly 4 tasks and includes a complete example JSON to guide the small model.
+- **Static analysis fixes**:
+  - Added `uuid: ^4.5.1` to `pubspec.yaml` (was transitive-only, triggering `depend_on_referenced_packages`).
+  - Removed unused import `app_exception.dart` from `matching_screen.dart`.
+  - Added `scripts/**` and `**/*.freezed.dart` to `analysis_options.yaml` excludes.
+- `flutter analyze` — **No issues found.**
+
+**Next step:** Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-05-20 — Fix Plan: 01-review-implementation → production readiness
 
 > ⚠️ **Marketplace P0 (Phases 1–2) must merge and be verified on staging before any production Stripe keys are configured.**

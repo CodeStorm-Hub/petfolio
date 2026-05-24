@@ -1,12 +1,15 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../data/models/pet.dart';
-import '../../data/models/pet_gender.dart';
-import '../../data/repositories/pet_repository.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/pet_profile/data/models/pet.dart';
+import 'package:petfolio/features/pet_profile/data/models/pet_gender.dart';
+import 'package:petfolio/features/pet_profile/data/repositories/pet_repository.dart';
+import 'package:petfolio/features/care/data/repositories/pet_care_repository.dart';
+import 'package:petfolio/features/care/domain/services/care_recommendation_service.dart';
 
 final petRepositoryProvider = Provider<PetRepository>(
   (ref) => PetRepository(Supabase.instance.client),
@@ -79,7 +82,26 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
           activityLevel: activityLevel,
         );
     state = AsyncData([...state.value ?? [], pet]);
+    
+    // Auto-generate care tasks in the background without blocking
+    _autoGenerateRoutines(pet);
+    
     return pet;
+  }
+
+  Future<void> _autoGenerateRoutines(Pet pet) async {
+    // Capture both providers synchronously before any async gap so this method
+    // remains safe even if the notifier is disposed during the AI call.
+    final service = ref.read(careRecommendationServiceProvider);
+    final repo = ref.read(careTaskRepositoryProvider);
+    try {
+      final tasks = await service.generateRecommendations(pet);
+      if (tasks.isNotEmpty) {
+        await repo.bulkCreateTasks(tasks);
+      }
+    } catch (e) {
+      debugPrint('Auto-generation of routines failed for pet ${pet.id}: $e');
+    }
   }
 
   Future<Pet> editPetProfile({

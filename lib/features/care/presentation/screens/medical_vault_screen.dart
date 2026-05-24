@@ -481,6 +481,12 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
   Future<void> _save() async {
     final name = _nameCtrl.text.trim();
     if (name.isEmpty || _saving) return;
+    
+    if (_reminder && _nextDueAt == null) {
+      AppSnackBar.showError('Please set a next due date to enable a reminder.');
+      return;
+    }
+
     setState(() => _saving = true);
 
     String? documentPath;

@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../../../../core/errors/app_exception.dart';
 import '../../../../core/services/lat_lng.dart';
 import '../../../../core/services/location_providers.dart';
 import '../../../../core/services/location_service.dart';
@@ -161,7 +160,7 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
       },
     );
 
-    ref.listen<AppException?>(
+    ref.listen(
       locationSyncErrorProvider,
       (_, error) {
         if (error != null) AppSnackBar.showError(error);
