@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:petfolio/core/theme/theme.dart';
 
-import '../theme/app_colors.dart';
 
 class BoneSliderWidget extends StatelessWidget {
   const BoneSliderWidget({
@@ -48,7 +48,11 @@ class BoneSliderWidget extends StatelessWidget {
             height: _totalH,
             width: w,
             child: CustomPaint(
-              painter: _BoneSliderPainter(pct: _pct, color: color),
+              painter: _BoneSliderPainter(
+                pct: _pct, 
+                color: color,
+                pt: Theme.of(context).extension<PetfolioThemeExtension>()!,
+              ),
             ),
           ),
         );
@@ -58,10 +62,11 @@ class BoneSliderWidget extends StatelessWidget {
 }
 
 class _BoneSliderPainter extends CustomPainter {
-  const _BoneSliderPainter({required this.pct, required this.color});
+  const _BoneSliderPainter({required this.pct, required this.color, required this.pt});
 
   final double pct;
   final Color color;
+  final PetfolioThemeExtension pt;
 
   static const _thumbW = 44.0;
   static const _trackH = 8.0;
@@ -79,7 +84,7 @@ class _BoneSliderPainter extends CustomPainter {
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(tl, cy - _trackH / 2, tw, _trackH),
-        const Radius.circular(999),
+        const Radius.circular(PetfolioThemeExtension.radiusPill),
       ),
       Paint()..color = color.withAlpha(35),
     );
@@ -89,7 +94,7 @@ class _BoneSliderPainter extends CustomPainter {
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTWH(tl, cy - _trackH / 2, tw * pct, _trackH),
-          const Radius.circular(999),
+          const Radius.circular(PetfolioThemeExtension.radiusPill),
         ),
         Paint()
           ..shader = LinearGradient(
@@ -99,13 +104,16 @@ class _BoneSliderPainter extends CustomPainter {
     }
 
     // Thumb shadow
-    canvas.drawCircle(
-      Offset(thumbX, cy),
-      _thumbW / 2,
-      Paint()
-        ..color = color.withAlpha(55)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
-    );
+    if (pt.shadowE2.isNotEmpty) {
+      final shadow = pt.shadowE2.first;
+      canvas.drawCircle(
+        Offset(thumbX + shadow.offset.dx, cy + shadow.offset.dy),
+        _thumbW / 2,
+        Paint()
+          ..color = shadow.color
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, shadow.blurRadius),
+      );
+    }
 
     // Bone thumb
     final bw = _thumbW;

@@ -200,9 +200,26 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 24),
+                            PfSectionTitle(
+                              title: 'Trophy room',
+                              accent: AppColors.lilac,
+                              trailing: GestureDetector(
+                                onTap: () {},
+                                child: const Text(
+                                  'Vault →',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.lilac700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const CareGamifiedTrophyRoom(),
+                            const SizedBox(height: 32),
                             Padding(
-                              padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
+                              padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
                               child: Row(
                                 children: [
                                   Text(
@@ -245,25 +262,8 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                   : 0.0,
                             ),
                             const SizedBox(height: 32),
-                            PfSectionTitle(
-                              title: 'Trophy room',
-                              accent: AppColors.lilac,
-                              trailing: GestureDetector(
-                                onTap: () {},
-                                child: const Text(
-                                  'Vault →',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.lilac700,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const CareGamifiedTrophyRoom(),
-                            const SizedBox(height: 32),
                             _NutritionBanner(pt: pt),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
                             _MedicalVaultBanner(pt: pt),
                           ],
                         ),

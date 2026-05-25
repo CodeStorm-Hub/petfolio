@@ -244,7 +244,7 @@ class ShopStorefrontScreen extends ConsumerWidget {
                         crossAxisCount: 2,
                         crossAxisSpacing: 12,
                         mainAxisSpacing: 20,
-                        childAspectRatio: 0.62,
+                        childAspectRatio: 0.70,
                       ),
                       itemCount: products.length,
                       itemBuilder: (_, i) => ProductCard(

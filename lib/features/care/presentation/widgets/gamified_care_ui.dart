@@ -91,8 +91,8 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
         children: [
           // Streak flame circle with bounce + pulse ring
           SizedBox(
-            width: 118,
-            height: 118,
+            width: 120,
+            height: 120,
             child: Stack(
               alignment: Alignment.center,
               children: [
@@ -107,8 +107,8 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                     ),
                   ),
                   child: Container(
-                    width: 110,
-                    height: 110,
+                    width: 112,
+                    height: 112,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
@@ -126,8 +126,8 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                     child: child,
                   ),
                   child: Container(
-                    width: 102,
-                    height: 102,
+                    width: 104,
+                    height: 104,
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
@@ -177,7 +177,7 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
             ),
           ),
 
-          const SizedBox(width: 18),
+          const SizedBox(width: 16),
 
           // XP & level
           Expanded(
@@ -197,7 +197,7 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                         height: 1.0,
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
                     Text(
                       'Caretaker',
                       style: TextStyle(
@@ -239,7 +239,7 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                     ),
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Text.rich(
                   TextSpan(
                     text: '${600 - (petXp + earned)} XP to ',
@@ -293,12 +293,12 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius2xl),
         border: Border.all(color: pt.line),
       ),
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       child: SizedBox(
-        height: 126,
+        height: 128,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: List.generate(7, (i) {
@@ -358,7 +358,7 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     _dayLetters[i],
                     style: TextStyle(
@@ -385,10 +385,6 @@ class CareGamifiedTrophyRoom extends StatelessWidget {
     ('💯', AppColors.poppy, '100 XP', true),
     ('🦴', AppColors.tangerine, 'Treat Pro', true),
     ('💉', AppColors.mint, 'Vaccinated', true),
-    ('🎓', AppColors.lilac, 'Trained', false),
-    ('🏆', AppColors.sunny, '30-Day', false),
-    ('🌟', AppColors.poppy, 'Lv 10', false),
-    ('👑', AppColors.tangerine, 'Top 1%', false),
   ];
 
   @override
@@ -399,8 +395,8 @@ class CareGamifiedTrophyRoom extends StatelessWidget {
       padding: EdgeInsets.zero,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
         childAspectRatio: 0.75,
       ),
       itemCount: _badges.length,

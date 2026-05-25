@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../data/models/product.dart';
 import '../controllers/cart_controller.dart';
 import 'product_glyph.dart';
@@ -27,17 +26,20 @@ class ProductCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            children: [
-              _ProductTile(product: product),
-              Positioned(
-                bottom: 8,
-                right: 8,
-                child: _QuickAddButton(
-                  onTap: () => ref.read(cartProvider.notifier).add(product),
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                _ProductTile(product: product),
+                Positioned(
+                  bottom: 8,
+                  right: 8,
+                  child: _QuickAddButton(
+                    onTap: () => ref.read(cartProvider.notifier).add(product),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 8),
           _ProductMeta(product: product),
@@ -70,17 +72,20 @@ class ProductCardCompact extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                _ProductTile(product: product),
-                Positioned(
-                  bottom: 8,
-                  right: 8,
-                  child: _QuickAddButton(
-                    onTap: () => ref.read(cartProvider.notifier).add(product),
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _ProductTile(product: product),
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: _QuickAddButton(
+                      onTap: () => ref.read(cartProvider.notifier).add(product),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 8),
             _ProductMeta(product: product, compact: true),
@@ -119,7 +124,7 @@ class _QuickAddButton extends StatelessWidget {
             ),
           ],
         ),
-        child: const Icon(Icons.add_rounded, size: 18, color: AppColors.ink950),
+        child: Icon(Icons.add_rounded, size: 18, color: Theme.of(context).colorScheme.onSurface),
       ),
     );
   }
@@ -136,9 +141,7 @@ class _ProductTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1,
-      child: Container(
+    return Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: LinearGradient(
@@ -147,7 +150,7 @@ class _ProductTile extends StatelessWidget {
             colors: [product.gradientStart, product.gradientEnd],
           ),
           boxShadow: [
-            BoxShadow(color: AppColors.line, blurRadius: 0, spreadRadius: 0.5),
+            BoxShadow(color: Theme.of(context).colorScheme.outlineVariant, blurRadius: 0, spreadRadius: 0.5),
           ],
         ),
         child: Stack(
@@ -190,8 +193,7 @@ class _ProductTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 0.04 * 10,
-                      color: AppColors.mint,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),
@@ -217,18 +219,17 @@ class _ProductTile extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.bookmark_outline_rounded,
                     size: 16,
-                    color: AppColors.ink950,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -249,24 +250,20 @@ class _ProductMeta extends StatelessWidget {
       children: [
         Text(
           product.brand,
-          style: const TextStyle(
-            fontSize: 11,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w500,
-            color: AppColors.ink500,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 1),
         Text(
           product.name,
-          style: TextStyle(
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
-            fontSize: compact ? 13 : 14,
-            height: 1.25,
-            color: AppColors.ink950,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
-          maxLines: 2,
+          maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
@@ -274,20 +271,18 @@ class _ProductMeta extends StatelessWidget {
           children: [
             Text(
               product.priceFormatted,
-              style: const TextStyle(
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w700,
-                fontSize: 14,
-                color: AppColors.ink950,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             if (product.subscribable) ...[
               const SizedBox(width: 6),
               Text(
                 '${product.subPriceFormatted} sub',
-                style: const TextStyle(
-                  fontSize: 11,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppColors.mint,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ],

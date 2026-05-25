@@ -465,7 +465,7 @@ class _ShopBody extends ConsumerWidget {
                   crossAxisCount: 2,
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
-                  childAspectRatio: 0.65,
+                  childAspectRatio: 0.70,
                 ),
                 itemCount: filtered.length,
                 itemBuilder: (_, i) => _NewProductTile(
