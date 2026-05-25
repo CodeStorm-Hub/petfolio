@@ -109,7 +109,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
     if (activePet == null) {
       final body = petsAsync.when(
         skipLoadingOnReload: true,
-        loading: () => const CircularProgressIndicator.adaptive(),
+        loading: () => const TailWagLoader(),
         error: (_, _) => Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -134,7 +134,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                       style: TextStyle(fontSize: 15, color: pt.ink500)),
                 ],
               )
-            : const CircularProgressIndicator.adaptive(),
+            : const TailWagLoader(),
       );
       return Scaffold(backgroundColor: pt.surface1, body: Center(child: body));
     }

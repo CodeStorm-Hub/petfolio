@@ -10,7 +10,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/dashed_circle_painter.dart';
-import '../../../../core/widgets/pf_card.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
@@ -43,7 +42,7 @@ class SocialScreen extends ConsumerWidget {
       body: Center(
         child: petsAsync.when(
           skipLoadingOnReload: true,
-          loading: () => const CircularProgressIndicator.adaptive(),
+          loading: () => const TailWagLoader(),
           error: (_, _) => Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -59,7 +58,7 @@ class SocialScreen extends ConsumerWidget {
               ),
             ],
           ),
-          data: (_) => const CircularProgressIndicator.adaptive(),
+          data: (_) => const TailWagLoader(),
         ),
       ),
     );
@@ -151,7 +150,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
             Expanded(
               child: feedAsync.when(
                 skipLoadingOnReload: true,
-                loading: () => const Center(child: CircularProgressIndicator.adaptive()),
+                loading: () => const Center(child: TailWagLoader(label: 'Loading feed…')),
                 error: (_, _) => Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -294,9 +293,22 @@ class _StoriesRow extends ConsumerWidget {
     final userId = Supabase.instance.client.auth.currentUser?.id;
 
     return storiesAsync.when(
-      loading: () => const SizedBox(
+      loading: () => SizedBox(
         height: 100,
-        child: Center(child: CircularProgressIndicator.adaptive()),
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: 5,
+          separatorBuilder: (_, _) => const SizedBox(width: 12),
+          itemBuilder: (_, _) => const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SkeletonLoader(width: 64, height: 64, borderRadius: 999),
+              SizedBox(height: 6),
+              SkeletonLoader(width: 52, height: 10),
+            ],
+          ),
+        ),
       ),
       error: (err, stack) => const SizedBox.shrink(),
       data: (stories) {

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/petfolio_empty_state.dart';
 import '../../../../core/widgets/primary_pill_button.dart';
 import '../../data/models/cart_item.dart';
 import '../../data/models/marketplace_order.dart';
@@ -82,7 +83,11 @@ class CartScreen extends ConsumerWidget {
             ),
             Expanded(
               child: cart.isEmpty
-                  ? const _EmptyCart()
+                  ? const PetfolioEmptyState(
+                      icon: Icons.shopping_bag_outlined,
+                      title: 'Your cart is empty',
+                      subtitle: 'Browse the shop to find food, gear, treats and more.',
+                    )
                   : ListView(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
                       children: [
@@ -530,45 +535,6 @@ class _CodConfirmSheet extends StatelessWidget {
   }
 }
 
-class _EmptyCart extends StatelessWidget {
-  const _EmptyCart();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.surface2,
-            ),
-            child: const Icon(Icons.shopping_bag_outlined,
-                size: 36, color: AppColors.ink300),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Your cart is empty',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 18,
-              color: AppColors.ink950,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Browse the shop to find food,\ngear, treats and more.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: AppColors.ink500),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _IconBtn extends StatelessWidget {
   const _IconBtn({required this.icon, required this.onTap});

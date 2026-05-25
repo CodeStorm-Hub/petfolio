@@ -12,7 +12,9 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_bottom_sheet.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../../core/widgets/dashed_rect_painter.dart';
+import '../../../../core/widgets/petfolio_empty_state.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
+import '../../../../core/widgets/tail_wag_loader.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/medical_record.dart';
 import '../../data/repositories/health_repository.dart';
@@ -38,7 +40,7 @@ class MedicalVaultScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pet = ref.watch(activePetControllerProvider);
     if (pet == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator.adaptive()));
+      return const Scaffold(body: Center(child: TailWagLoader()));
     }
     return _MedicalVaultBody(petId: pet.id, petName: pet.name);
   }
@@ -377,9 +379,9 @@ class _VaultSection extends StatelessWidget {
             border: Border.all(color: AppColors.line),
           ),
           child: records.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Text(emptyLabel, style: const TextStyle(fontSize: 14, color: AppColors.ink500)),
+              ? PetfolioEmptyState(
+                  icon: icon,
+                  title: emptyLabel,
                 )
               : Column(
                   children: [

@@ -27,7 +27,7 @@ class MatchesInboxScreen extends ConsumerWidget {
       body: Center(
         child: petsAsync.when(
           skipLoadingOnReload: true,
-          loading: () => const CircularProgressIndicator.adaptive(),
+          loading: () => const TailWagLoader(),
           error: (_, _) => Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -43,7 +43,7 @@ class MatchesInboxScreen extends ConsumerWidget {
               ),
             ],
           ),
-          data: (_) => const CircularProgressIndicator.adaptive(),
+          data: (_) => const TailWagLoader(),
         ),
       ),
     );
@@ -81,9 +81,7 @@ class _MatchesInboxView extends ConsumerWidget {
             Expanded(
               child: inboxAsync.when(
                 skipLoadingOnReload: true,
-                loading: () => const Center(
-                  child: CircularProgressIndicator.adaptive(),
-                ),
+                loading: () => const Center(child: TailWagLoader()),
                 error: (error, stackTrace) {
                   debugPrint(
                     '[MatchesInboxScreen] fetchMatchInbox failed: $error\n$stackTrace',

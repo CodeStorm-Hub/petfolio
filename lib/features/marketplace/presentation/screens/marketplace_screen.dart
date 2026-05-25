@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/tail_wag_loader.dart';
 import '../../data/models/cart_item.dart';
 import '../../data/models/product.dart';
 import '../controllers/cart_controller.dart';
@@ -426,7 +427,7 @@ class _ShopBody extends ConsumerWidget {
     final productsAsync = ref.watch(productListProvider);
 
     return productsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator.adaptive()),
+      loading: () => const Center(child: TailWagLoader(label: 'Loading shop…')),
       error: (_, _) => Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

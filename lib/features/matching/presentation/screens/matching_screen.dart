@@ -69,7 +69,7 @@ class MatchingScreen extends ConsumerWidget {
       body: Center(
         child: petsAsync.when(
           skipLoadingOnReload: true,
-          loading: () => const CircularProgressIndicator.adaptive(),
+          loading: () => const TailWagLoader(),
           error: (_, _) => Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -85,7 +85,7 @@ class MatchingScreen extends ConsumerWidget {
               ),
             ],
           ),
-          data: (_) => const CircularProgressIndicator.adaptive(),
+          data: (_) => const TailWagLoader(),
         ),
       ),
     );

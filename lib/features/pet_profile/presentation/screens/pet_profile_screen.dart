@@ -29,7 +29,7 @@ class PetProfileScreen extends ConsumerWidget {
         body: Center(
           child: petsAsync.when(
             skipLoadingOnReload: true,
-            loading: () => const CircularProgressIndicator.adaptive(),
+            loading: () => const TailWagLoader(),
             error: (e, _) => Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -45,8 +45,12 @@ class PetProfileScreen extends ConsumerWidget {
               ],
             ),
             data: (pets) => pets.isEmpty
-                ? const Text('No pets found.')
-                : const CircularProgressIndicator.adaptive(),
+                ? const PetfolioEmptyState(
+                    icon: Icons.pets_outlined,
+                    title: 'No pets found',
+                    subtitle: 'Add a pet to get started.',
+                  )
+                : const TailWagLoader(),
           ),
         ),
       );
