@@ -601,9 +601,9 @@ class _NavTab extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             destination.label,
-            style: GoogleFonts.nunito(
+            style: GoogleFonts.inter(
               fontSize: 11,
-              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               color: iconColor,
               height: 1.0,
             ),
@@ -646,9 +646,9 @@ class _WideNavRail extends StatelessWidget {
             selectedIcon: Icon(destinations[i].activeIcon, color: _tabColors[i]),
             label: Text(
               destinations[i].label,
-              style: GoogleFonts.nunito(
+              style: GoogleFonts.inter(
                 fontSize: 12,
-                fontWeight: selectedIndex == i ? FontWeight.w800 : FontWeight.w600,
+                fontWeight: selectedIndex == i ? FontWeight.w700 : FontWeight.w500,
                 color: selectedIndex == i ? _tabColors[i] : (isDark ? AppColors.ink500D : AppColors.ink500),
               ),
             ),

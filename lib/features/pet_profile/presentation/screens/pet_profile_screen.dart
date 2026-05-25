@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 
@@ -229,14 +227,11 @@ class _HeroGamifiedBanner extends ConsumerWidget {
                             TextSpan(text: 'cuddly today.', style: TextStyle(fontStyle: FontStyle.italic)),
                           ],
                         ),
-                        style: GoogleFonts.fraunces(
-                          fontSize: 34,
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
                           height: 1.05,
                           letterSpacing: -0.2,
-                        ).copyWith(
-                          fontFamilyFallback: const ['Georgia', 'serif'],
                         ),
                       ),
                     ],
@@ -273,7 +268,7 @@ class _HeroGamifiedBanner extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(pet.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: isDark ? AppColors.ink950D : AppColors.ink950)),
+                      Text(pet.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: pt.ink950)),
                       Text('${pet.breed ?? sp.label} · ${pet.ageLabel}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: pt.ink500)),
                     ],
                   ),
@@ -376,7 +371,7 @@ class _StatTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(margin: const EdgeInsets.only(bottom: 2), child: icon),
-          Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: isDark ? AppColors.ink950D : AppColors.ink950, height: 1)),
+          Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950, height: 1)),
           Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: textColor)),
         ],
       ),
@@ -448,10 +443,10 @@ class _DailyQuestRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink950 = isDark ? AppColors.ink950D : AppColors.ink950;
-    final ink500 = isDark ? AppColors.ink500D : AppColors.ink500;
-    
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final ink950 = pt.ink950;
+    final ink500 = pt.ink500;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
       child: Row(
@@ -460,7 +455,7 @@ class _DailyQuestRow extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: done ? AppColors.mint : due ? AppColors.poppySoft : (isDark ? AppColors.cream2D : AppColors.cream2),
+              color: done ? AppColors.mint : due ? AppColors.poppySoft : pt.surface2,
               borderRadius: BorderRadius.circular(14),
             ),
             alignment: Alignment.center,

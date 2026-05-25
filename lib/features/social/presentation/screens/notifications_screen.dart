@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../data/models/app_notification.dart';
@@ -54,9 +52,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         ),
         title: Text(
           'Activity',
-          style: GoogleFonts.sora(
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w700,
-            fontSize: 16,
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
@@ -110,8 +107,7 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No activity yet',
-            style: GoogleFonts.sora(
-              fontSize: 18,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
               color: Theme.of(context).colorScheme.onSurface,
             ),

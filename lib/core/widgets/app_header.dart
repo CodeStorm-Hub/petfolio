@@ -214,8 +214,8 @@ class _PetSwitcherTrigger extends StatelessWidget {
                                 pet!.name,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.nunito(
-                                  fontWeight: FontWeight.w800,
+                                style: GoogleFonts.sora(
+                                  fontWeight: FontWeight.w700,
                                   fontSize: 19,
                                   letterSpacing: -0.2,
                                   color: cs.onSurface,

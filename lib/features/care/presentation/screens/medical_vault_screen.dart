@@ -127,7 +127,6 @@ class _MedicalVaultBody extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.w900,
-                          fontFamily: 'Sora',
                           height: 1.05,
                           color: AppColors.ink950,
                         ),

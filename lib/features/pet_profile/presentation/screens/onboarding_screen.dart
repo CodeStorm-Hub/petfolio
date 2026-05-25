@@ -2,8 +2,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 
@@ -188,9 +186,9 @@ class _OnboardingHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (step == 0 || step >= total) return const SizedBox.shrink();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final activeColor = isDark ? AppColors.ink950D : AppColors.ink950;
-    final inactiveColor = isDark ? Colors.white10 : Colors.black12;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final activeColor = pt.ink950;
+    final inactiveColor = Theme.of(context).brightness == Brightness.dark ? Colors.white10 : Colors.black12;
 
     return SafeArea(
       bottom: false,
@@ -312,8 +310,8 @@ class _StepHello extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 40, 24, 40),
@@ -346,10 +344,9 @@ class _StepHello extends StatelessWidget {
           Text(
             "Hi! I'm PetFolio.",
             textAlign: TextAlign.center,
-            style: GoogleFonts.fraunces(
-              fontSize: 44,
+            style: tt.displaySmall?.copyWith(
               fontWeight: FontWeight.w700,
-              color: isDark ? AppColors.ink950D : AppColors.ink950,
+              color: pt.ink950,
               height: 1.05,
             ),
           ),
@@ -357,7 +354,7 @@ class _StepHello extends StatelessWidget {
           Text(
             "Your pet's whole life — feeds, friends, health, treats — in one cozy place.",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 17, color: (isDark ? AppColors.ink700D : AppColors.ink700), height: 1.45),
+            style: TextStyle(fontSize: 17, color: pt.ink700, height: 1.45),
           ),
           const Spacer(flex: 2),
           PrimaryPillButton(
@@ -372,7 +369,7 @@ class _StepHello extends StatelessWidget {
             onPressed: onSkip,
             child: Text(
               "I already have an account",
-              style: TextStyle(fontWeight: FontWeight.w700, color: (isDark ? AppColors.ink700D : AppColors.ink700), fontSize: 14),
+              style: TextStyle(fontWeight: FontWeight.w700, color: pt.ink700, fontSize: 14),
             ),
           ),
         ],
@@ -390,7 +387,8 @@ class _StepSpecies extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 12, 22, 100),
@@ -399,15 +397,15 @@ class _StepSpecies extends StatelessWidget {
         children: [
           Text(
             "Who are we\nwelcoming home?",
-            style: GoogleFonts.fraunces(
-              fontSize: 32, fontWeight: FontWeight.w700, height: 1.1,
-              color: isDark ? AppColors.ink950D : AppColors.ink950,
+            style: tt.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w700, height: 1.1,
+              color: pt.ink950,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             "Pick your pet — the app will dress up to match.",
-            style: TextStyle(fontSize: 15, color: (isDark ? AppColors.ink700D : AppColors.ink700)),
+            style: TextStyle(fontSize: 15, color: pt.ink700),
           ),
           const SizedBox(height: 22),
           
@@ -456,7 +454,7 @@ class _StepSpecies extends StatelessWidget {
                           s.label,
                           style: TextStyle(
                             fontSize: 13, fontWeight: FontWeight.w800,
-                            color: on ? Colors.white : (isDark ? AppColors.ink950D : AppColors.ink950),
+                            color: on ? Colors.white : pt.ink950,
                           ),
                           maxLines: 1,
                         ),
@@ -493,6 +491,7 @@ class _StepName extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final color = species.resolvedAccent(isDark);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 12, 22, 100),
@@ -501,9 +500,9 @@ class _StepName extends StatelessWidget {
         children: [
           RichText(
             text: TextSpan(
-              style: GoogleFonts.fraunces(
-                fontSize: 32, fontWeight: FontWeight.w700, height: 1.1,
-                color: isDark ? AppColors.ink950D : AppColors.ink950,
+              style: tt.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700, height: 1.1,
+                color: pt.ink950,
               ),
               children: [
                 const TextSpan(text: "What's "),
@@ -515,7 +514,7 @@ class _StepName extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             "The one you whisper when no one's watching.",
-            style: TextStyle(fontSize: 15, color: (isDark ? AppColors.ink700D : AppColors.ink700)),
+            style: TextStyle(fontSize: 15, color: pt.ink700),
           ),
           const SizedBox(height: 24),
           
@@ -525,7 +524,7 @@ class _StepName extends StatelessWidget {
             child: TextField(
               onChanged: onNameChanged,
               controller: TextEditingController(text: name)..selection = TextSelection.collapsed(offset: name.length),
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: isDark ? AppColors.ink950D : AppColors.ink950),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: pt.ink950),
               decoration: InputDecoration(
                 hintText: "e.g. Mochi, Biscuit...",
                 hintStyle: TextStyle(color: pt.ink300),
@@ -548,7 +547,7 @@ class _StepName extends StatelessWidget {
                     borderRadius: BorderRadius.circular(999),
                     border: Border.all(color: pt.line),
                   ),
-                  child: Text(n, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: (isDark ? AppColors.ink700D : AppColors.ink700))),
+                  child: Text(n, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: pt.ink700)),
                 ),
               );
             }).toList(),
@@ -588,6 +587,8 @@ class _StepAge extends StatelessWidget {
         ? (ageMonths == 1 ? 'month' : 'months') 
         : (years.floor() == 1 ? 'year young' : 'years young');
 
+    final tt = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 12, 22, 100),
       child: Column(
@@ -595,9 +596,9 @@ class _StepAge extends StatelessWidget {
         children: [
           RichText(
             text: TextSpan(
-              style: GoogleFonts.fraunces(
-                fontSize: 32, fontWeight: FontWeight.w700, height: 1.1,
-                color: isDark ? AppColors.ink950D : AppColors.ink950,
+              style: tt.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700, height: 1.1,
+                color: pt.ink950,
               ),
               children: [
                 const TextSpan(text: "How old is "),
@@ -609,7 +610,7 @@ class _StepAge extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             "Slide the bone — it's about right, no need to be exact.",
-            style: TextStyle(fontSize: 15, color: (isDark ? AppColors.ink700D : AppColors.ink700)),
+            style: TextStyle(fontSize: 15, color: pt.ink700),
           ),
           const SizedBox(height: 24),
           
@@ -624,7 +625,7 @@ class _StepAge extends StatelessWidget {
                   children: [
                     Text(
                       '$displayNum',
-                      style: GoogleFonts.fraunces(fontSize: 56, color: isDark ? AppColors.ink950D : AppColors.ink950),
+                      style: Theme.of(context).textTheme.displayMedium?.copyWith(color: pt.ink950),
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -694,6 +695,8 @@ class _StepPersonality extends StatelessWidget {
     final color = species.resolvedAccent(isDark);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
+    final tt = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 12, 22, 100),
       child: Column(
@@ -701,9 +704,9 @@ class _StepPersonality extends StatelessWidget {
         children: [
           RichText(
             text: TextSpan(
-              style: GoogleFonts.fraunces(
-                fontSize: 32, fontWeight: FontWeight.w700, height: 1.1,
-                color: isDark ? AppColors.ink950D : AppColors.ink950,
+              style: tt.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700, height: 1.1,
+                color: pt.ink950,
               ),
               children: [
                 const TextSpan(text: "How would you describe their\n"),
@@ -715,7 +718,7 @@ class _StepPersonality extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             "Pick a few. We won't tell anyone.",
-            style: TextStyle(fontSize: 15, color: (isDark ? AppColors.ink700D : AppColors.ink700)),
+            style: TextStyle(fontSize: 15, color: pt.ink700),
           ),
           const SizedBox(height: 22),
           
@@ -743,7 +746,7 @@ class _StepPersonality extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         t['id']!,
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: on ? Colors.white : (isDark ? AppColors.ink950D : AppColors.ink950)),
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: on ? Colors.white : pt.ink950),
                       ),
                     ],
                   ),
@@ -797,10 +800,14 @@ class _StepDone extends StatelessWidget {
           const SizedBox(height: 24),
           Text(
             "Welcome, $name!",
-            style: GoogleFonts.fraunces(fontSize: 38, fontWeight: FontWeight.w700, color: isDark ? AppColors.ink950D : AppColors.ink950, height: 1.05),
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
+              height: 1.05,
+            ),
           ),
           const SizedBox(height: 8),
-          Text("Let's set up their world...", style: TextStyle(fontSize: 16, color: (isDark ? AppColors.ink700D : AppColors.ink700))),
+          Text("Let's set up their world...", style: TextStyle(fontSize: 16, color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink700)),
           const SizedBox(height: 40),
           if (isLoading)
             TailWagLoader(

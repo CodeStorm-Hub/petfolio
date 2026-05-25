@@ -441,7 +441,6 @@ class _ProductInfo extends StatelessWidget {
               product.priceFormatted,
               style: const TextStyle(
                 fontWeight: FontWeight.w900,
-                fontFamily: 'Sora',
                 fontSize: 28,
                 color: AppColors.ink950,
               ),
@@ -808,7 +807,6 @@ class _OrderSummaryCard extends StatelessWidget {
                 '\$${(totalCents / 100).toStringAsFixed(2)}',
                 style: const TextStyle(
                   fontWeight: FontWeight.w900,
-                  fontFamily: 'Sora',
                   fontSize: 24,
                   letterSpacing: -0.22,
                   color: AppColors.ink950,

@@ -169,9 +169,9 @@ class _PrimaryPillButtonState extends State<PrimaryPillButton>
 
     final label = Text(
       widget.label,
-      style: GoogleFonts.nunito(
+      style: GoogleFonts.sora(
         fontSize: s.fontSize,
-        fontWeight: FontWeight.w800,
+        fontWeight: FontWeight.w700,
         color: colors.foreground,
         height: 1.0,
       ),

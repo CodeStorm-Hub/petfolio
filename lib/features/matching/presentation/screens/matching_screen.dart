@@ -3,7 +3,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/services/lat_lng.dart';
@@ -865,8 +864,7 @@ class _CardSurface extends StatelessWidget {
                             '${candidate.name},',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.fraunces(
-                              fontSize: 32,
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
                             ),
@@ -1082,7 +1080,7 @@ class _SwipeLabel extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.fraunces(
+        style: TextStyle(
           fontSize: 17,
           fontWeight: FontWeight.w700,
           color: color,

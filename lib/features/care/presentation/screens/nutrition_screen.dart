@@ -4,8 +4,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/data/models/pet.dart';
@@ -98,7 +96,7 @@ class _NutritionBodyState extends ConsumerState<_NutritionBody> {
         icon: const Icon(Icons.monitor_weight_outlined),
         label: Text(
           'Log Weight',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -132,8 +130,7 @@ class _NutritionAppBar extends StatelessWidget {
         children: [
           Text(
             'NUTRITION',
-            style: GoogleFonts.inter(
-              fontSize: 10,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w700,
               letterSpacing: 1.4,
               color: pt.pillarHealth,
@@ -141,8 +138,7 @@ class _NutritionAppBar extends StatelessWidget {
           ),
           Text(
             pet.name,
-            style: GoogleFonts.sora(
-              fontSize: 17,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: cs.onSurface,
               height: 1.1,
@@ -189,8 +185,7 @@ class _WeightTrendCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'Weight Trend',
-                style: GoogleFonts.sora(
-                  fontSize: 16,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: cs.onSurface,
                 ),
@@ -298,7 +293,7 @@ class _WeightLineChart extends StatelessWidget {
                   reservedSize: 42,
                   getTitlesWidget: (value, meta) => Text(
                     '${value.toStringAsFixed(1)} kg',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 10,
                       color: pt.ink300,
                     ),
@@ -323,7 +318,7 @@ class _WeightLineChart extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
                         '${date.month}/${date.day}',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 10,
                           color: pt.ink300,
                         ),
@@ -356,7 +351,7 @@ class _WeightLineChart extends StatelessWidget {
                     .map(
                       (s) => LineTooltipItem(
                         '${s.y.toStringAsFixed(2)} kg',
-                        GoogleFonts.inter(
+                        const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
@@ -459,8 +454,7 @@ class _CalorieCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'Smart Nutrition',
-                style: GoogleFonts.sora(
-                  fontSize: 16,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
@@ -471,8 +465,7 @@ class _CalorieCard extends StatelessWidget {
           if (calories != null) ...[
             Text(
               '$calories',
-              style: GoogleFonts.sora(
-                fontSize: 48,
+              style: Theme.of(context).textTheme.displaySmall?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
                 height: 1.0,
@@ -480,8 +473,7 @@ class _CalorieCard extends StatelessWidget {
             ),
             Text(
               'kcal / day recommended',
-              style: GoogleFonts.inter(
-                fontSize: 14,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Colors.white.withAlpha(200),
                 fontWeight: FontWeight.w500,
               ),
@@ -517,8 +509,7 @@ class _CalorieCard extends StatelessWidget {
           ] else ...[
             Text(
               'Set your pet\'s weight & activity\nlevel in their profile to see\ncaloric recommendations.',
-              style: GoogleFonts.inter(
-                fontSize: 14,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Colors.white.withAlpha(220),
                 height: 1.6,
               ),
@@ -527,8 +518,7 @@ class _CalorieCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             'Based on NRC metabolic energy requirements (MER = 70 × kg^0.75 × activity factor)',
-            style: GoogleFonts.inter(
-              fontSize: 10,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: Colors.white.withAlpha(160),
               height: 1.4,
             ),
@@ -552,17 +542,17 @@ class _CalorieStat extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              color: Colors.white.withAlpha(180),
+              color: Colors.white,
               letterSpacing: 0.8,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: Colors.white,
@@ -624,8 +614,7 @@ class _HistoryList extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       'Log History',
-                      style: GoogleFonts.sora(
-                        fontSize: 15,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: cs.onSurface,
                       ),
@@ -688,8 +677,7 @@ class _HistoryTile extends StatelessWidget {
                   children: [
                     Text(
                       '${log.weightKg!.toStringAsFixed(2)} kg',
-                      style: GoogleFonts.sora(
-                        fontSize: 15,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: cs.onSurface,
                       ),
@@ -698,7 +686,7 @@ class _HistoryTile extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         log.description!,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 12,
                           color: pt.ink300,
                         ),
@@ -711,7 +699,7 @@ class _HistoryTile extends StatelessWidget {
               ),
               Text(
                 dateStr,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 12,
                   color: pt.ink300,
                 ),
@@ -834,8 +822,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
               const SizedBox(width: 10),
               Text(
                 'Log Weight',
-                style: GoogleFonts.sora(
-                  fontSize: 20,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: cs.onSurface,
                 ),
@@ -898,7 +885,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
                   const SizedBox(width: 10),
                   Text(
                     '${_date.year}/${_date.month.toString().padLeft(2, '0')}/${_date.day.toString().padLeft(2, '0')}',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 16,
                       color: cs.onSurface,
                     ),
@@ -911,7 +898,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
             const SizedBox(height: 8),
             Text(
               _error!,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 13,
                 color: cs.error,
               ),
@@ -995,7 +982,7 @@ class _UnitLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: GoogleFonts.inter(
+      style: TextStyle(
         fontSize: 14,
         fontWeight: active ? FontWeight.w700 : FontWeight.w400,
         color: active ? pt.pillarHealth : pt.ink300,

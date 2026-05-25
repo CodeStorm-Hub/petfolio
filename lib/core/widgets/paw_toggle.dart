@@ -59,64 +59,69 @@ class _PawToggleState extends State<PawToggle> with SingleTickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => widget.onChanged(!widget.value),
-      child: AnimatedBuilder(
-        animation: _ctrl,
-        builder: (context, _) {
-          final slideX = _pad + (_w - _thumbD - _pad * 2) * _slide.value;
-          final trackColor = Color.lerp(
-            Colors.black.withAlpha(30),
-            widget.activeColor,
-            _ctrl.value,
-          )!;
+    return SizedBox(
+      width: _w,
+      height: 48,
+      child: Align(
+        alignment: Alignment.center,
+        child: GestureDetector(
+          onTap: () => widget.onChanged(!widget.value),
+          child: AnimatedBuilder(
+            animation: _ctrl,
+            builder: (context, _) {
+              final slideX = _pad + (_w - _thumbD - _pad * 2) * _slide.value;
+              final trackColor = Color.lerp(
+                Colors.black.withAlpha(30),
+                widget.activeColor,
+                _ctrl.value,
+              )!;
 
-          return SizedBox(
-            width: _w,
-            height: _h,
-            child: Stack(
-              children: [
-                // Track
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: trackColor,
-                      borderRadius: BorderRadius.circular(999),
+              return SizedBox(
+                width: _w,
+                height: _h,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: trackColor,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                // Thumb
-                Positioned(
-                  left: slideX,
-                  top: _pad,
-                  child: ScaleTransition(
-                    scale: _scale,
-                    child: Container(
-                      width: _thumbD,
-                      height: _thumbD,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(50),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
+                    Positioned(
+                      left: slideX,
+                      top: _pad,
+                      child: ScaleTransition(
+                        scale: _scale,
+                        child: Container(
+                          width: _thumbD,
+                          height: _thumbD,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(50),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '🐾',
-                        style: TextStyle(fontSize: _thumbD * 0.52),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '🐾',
+                            style: TextStyle(fontSize: _thumbD * 0.52),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }

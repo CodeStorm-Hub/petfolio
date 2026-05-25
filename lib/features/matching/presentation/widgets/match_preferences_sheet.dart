@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import 'package:petfolio/core/theme/app_colors.dart';
 import 'package:petfolio/core/theme/app_theme.dart';
 import 'package:petfolio/features/pet_profile/data/models/pet_species.dart';
@@ -79,8 +77,7 @@ class MatchPreferencesSheet extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       'Discovery preferences',
-                      style: GoogleFonts.sora(
-                        fontSize: 20,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: cs.onSurface,
                       ),
@@ -95,7 +92,7 @@ class MatchPreferencesSheet extends ConsumerWidget {
               ),
               Text(
                 'Filters apply to your swipe deck. Changes refresh nearby profiles shortly after you adjust them.',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 13,
                   height: 1.45,
                   color: pt.ink500,
@@ -122,7 +119,7 @@ class MatchPreferencesSheet extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text(
                   'All species — tap to narrow',
-                  style: GoogleFonts.inter(fontSize: 12, color: pt.ink300),
+                  style: TextStyle(fontSize: 12, color: pt.ink300),
                 ),
               ],
               const SizedBox(height: 28),
@@ -145,11 +142,11 @@ class MatchPreferencesSheet extends ConsumerWidget {
                 children: [
                   Text(
                     '1 mi',
-                    style: GoogleFonts.inter(fontSize: 12, color: pt.ink300),
+                    style: TextStyle(fontSize: 12, color: pt.ink300),
                   ),
                   Text(
                     '50 mi',
-                    style: GoogleFonts.inter(fontSize: 12, color: pt.ink300),
+                    style: TextStyle(fontSize: 12, color: pt.ink300),
                   ),
                 ],
               ),
@@ -182,11 +179,11 @@ class MatchPreferencesSheet extends ConsumerWidget {
                 children: [
                   Text(
                     '0 yrs',
-                    style: GoogleFonts.inter(fontSize: 12, color: pt.ink300),
+                    style: TextStyle(fontSize: 12, color: pt.ink300),
                   ),
                   Text(
                     '$kMatchMaxAgeYears yrs',
-                    style: GoogleFonts.inter(fontSize: 12, color: pt.ink300),
+                    style: TextStyle(fontSize: 12, color: pt.ink300),
                   ),
                 ],
               ),
@@ -219,8 +216,7 @@ class _SectionLabel extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: GoogleFonts.sora(
-              fontSize: 15,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: Theme.of(context).colorScheme.onSurface,
             ),
@@ -229,7 +225,7 @@ class _SectionLabel extends StatelessWidget {
         if (trailing != null)
           Text(
             trailing!,
-            style: GoogleFonts.inter(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppColors.blue500,
@@ -285,7 +281,7 @@ class _SpeciesPill extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 label,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: fg,

@@ -6,6 +6,8 @@ import 'app_colors.dart';
 @immutable
 class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
   const PetfolioThemeExtension({
+    required this.ink950,
+    required this.ink700,
     required this.ink500,
     required this.ink300,
     required this.line,
@@ -45,6 +47,8 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
     required this.shadowGlass,
   });
 
+  final Color ink950;
+  final Color ink700;
   final Color ink500;
   final Color ink300;
   final Color line;
@@ -108,6 +112,8 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
 
   // ── Pre-built instances ───────────────────────────────────────────────────────
   static const PetfolioThemeExtension light = PetfolioThemeExtension(
+    ink950: AppColors.ink950,
+    ink700: AppColors.ink700,
     ink500: AppColors.ink500,
     ink300: AppColors.ink300,
     line: AppColors.line,
@@ -144,6 +150,8 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
   );
 
   static const PetfolioThemeExtension dark = PetfolioThemeExtension(
+    ink950: AppColors.ink950D,
+    ink700: AppColors.ink700D,
     ink500: AppColors.ink500D,
     ink300: AppColors.ink300D,
     line: AppColors.lineD,
@@ -181,7 +189,7 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
 
   @override
   PetfolioThemeExtension copyWith({
-    Color? ink500, Color? ink300, Color? line, Color? line2,
+    Color? ink950, Color? ink700, Color? ink500, Color? ink300, Color? line, Color? line2,
     Color? surface1, Color? surface2, Color? cream, Color? cream2,
     Color? success, Color? warning, Color? info,
     Color? pillarPets, Color? pillarCare, Color? pillarSocial,
@@ -194,6 +202,8 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
     List<BoxShadow>? shadowE3, List<BoxShadow>? shadowE4,
     List<BoxShadow>? shadowGlass,
   }) => PetfolioThemeExtension(
+    ink950: ink950 ?? this.ink950,
+    ink700: ink700 ?? this.ink700,
     ink500: ink500 ?? this.ink500,
     ink300: ink300 ?? this.ink300,
     line: line ?? this.line,
@@ -233,6 +243,8 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
   PetfolioThemeExtension lerp(PetfolioThemeExtension? other, double t) {
     if (other is! PetfolioThemeExtension) return this;
     return PetfolioThemeExtension(
+      ink950: Color.lerp(ink950, other.ink950, t)!,
+      ink700: Color.lerp(ink700, other.ink700, t)!,
       ink500: Color.lerp(ink500, other.ink500, t)!,
       ink300: Color.lerp(ink300, other.ink300, t)!,
       line: Color.lerp(line, other.line, t)!,
@@ -314,9 +326,9 @@ abstract final class AppTheme {
         scrolledUnderElevation: 1,
         surfaceTintColor: Colors.transparent,
         shadowColor: isDark ? AppColors.shadowE1D : AppColors.shadowE1L,
-        titleTextStyle: GoogleFonts.nunito(
+        titleTextStyle: GoogleFonts.sora(
           fontSize: 20,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           color: isDark ? AppColors.ink950D : AppColors.ink950,
           height: 1.2,
         ),
@@ -333,7 +345,7 @@ abstract final class AppTheme {
         elevation: 0,
         height: 72,
         labelTextStyle: WidgetStateProperty.all(
-          GoogleFonts.nunito(fontSize: 11, fontWeight: FontWeight.w700),
+          GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600),
         ),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -353,12 +365,12 @@ abstract final class AppTheme {
         unselectedIconTheme: IconThemeData(color: isDark ? AppColors.ink500D : AppColors.ink500),
         labelType: NavigationRailLabelType.all,
         elevation: 0,
-        selectedLabelTextStyle: GoogleFonts.nunito(
-          fontSize: 12, fontWeight: FontWeight.w800,
+        selectedLabelTextStyle: GoogleFonts.inter(
+          fontSize: 12, fontWeight: FontWeight.w600,
           color: isDark ? AppColors.tangerineD : AppColors.tangerine,
         ),
-        unselectedLabelTextStyle: GoogleFonts.nunito(
-          fontSize: 12, fontWeight: FontWeight.w600,
+        unselectedLabelTextStyle: GoogleFonts.inter(
+          fontSize: 12, fontWeight: FontWeight.w500,
           color: isDark ? AppColors.ink500D : AppColors.ink500,
         ),
       ),
@@ -394,8 +406,8 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusPill),
           borderSide: BorderSide(color: isDark ? AppColors.tangerineD : AppColors.tangerine, width: 2),
         ),
-        hintStyle: GoogleFonts.nunito(
-          fontSize: 15, fontWeight: FontWeight.w600,
+        hintStyle: GoogleFonts.inter(
+          fontSize: 15, fontWeight: FontWeight.w400,
           color: isDark ? AppColors.ink300D : AppColors.ink300,
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -403,8 +415,8 @@ abstract final class AppTheme {
 
       chipTheme: ChipThemeData(
         backgroundColor: isDark ? AppColors.tangerineSoftD : AppColors.tangerineSoft,
-        labelStyle: GoogleFonts.nunito(
-          fontSize: 13, fontWeight: FontWeight.w700,
+        labelStyle: GoogleFonts.inter(
+          fontSize: 13, fontWeight: FontWeight.w600,
           color: isDark ? AppColors.tangerine700D : AppColors.tangerine700,
         ),
         side: BorderSide.none,
@@ -425,7 +437,7 @@ abstract final class AppTheme {
           padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 24)),
           shape: const WidgetStatePropertyAll(StadiumBorder()),
           textStyle: WidgetStatePropertyAll(
-            GoogleFonts.nunito(fontSize: 17, fontWeight: FontWeight.w800),
+            GoogleFonts.sora(fontSize: 16, fontWeight: FontWeight.w700),
           ),
           elevation: const WidgetStatePropertyAll(0),
         ),
@@ -443,15 +455,15 @@ abstract final class AppTheme {
           padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 20)),
           shape: const WidgetStatePropertyAll(StadiumBorder()),
           textStyle: WidgetStatePropertyAll(
-            GoogleFonts.nunito(fontSize: 16, fontWeight: FontWeight.w700),
+            GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
           ),
         ),
       ),
 
       snackBarTheme: SnackBarThemeData(
         backgroundColor: isDark ? AppColors.surface0D : AppColors.ink950,
-        contentTextStyle: GoogleFonts.nunito(
-          fontSize: 14, fontWeight: FontWeight.w600,
+        contentTextStyle: GoogleFonts.inter(
+          fontSize: 14, fontWeight: FontWeight.w500,
           color: isDark ? AppColors.ink950D : AppColors.surface0,
         ),
         shape: RoundedRectangleBorder(
@@ -505,72 +517,76 @@ abstract final class AppTheme {
   static TextTheme _textTheme(bool isDark) {
     final headColor = isDark ? AppColors.ink950D : AppColors.ink950;
     final bodyColor = isDark ? AppColors.ink700D : AppColors.ink700;
+    final mutedColor = isDark ? AppColors.ink500D : AppColors.ink500;
+
+    // Bundled weights: Sora → w600 (SemiBold), w700 (Bold)
+    //                  Inter → w400 (Regular), w500 (Medium), w600 (SemiBold), w700 (Bold)
 
     return TextTheme(
-      // Display XL — Fraunces serif for hero moments
-      displayLarge: GoogleFonts.fraunces(
+      // ── Display — Sora Bold for hero numbers & screen titles ─────────────────
+      displayLarge: GoogleFonts.sora(
         fontSize: 36, fontWeight: FontWeight.w700,
-        height: 1.05, letterSpacing: -0.54, color: headColor,
+        height: 1.05, letterSpacing: -0.5, color: headColor,
       ),
-      displayMedium: GoogleFonts.fraunces(
+      displayMedium: GoogleFonts.sora(
         fontSize: 30, fontWeight: FontWeight.w700,
-        height: 1.08, letterSpacing: -0.30, color: headColor,
+        height: 1.08, letterSpacing: -0.3, color: headColor,
       ),
-      displaySmall: GoogleFonts.fraunces(
+      displaySmall: GoogleFonts.sora(
+        fontSize: 24, fontWeight: FontWeight.w600,
+        height: 1.15, letterSpacing: -0.1, color: headColor,
+      ),
+      // ── Headline — Sora for section headers & screen headings ────────────────
+      headlineLarge: GoogleFonts.sora(
         fontSize: 24, fontWeight: FontWeight.w700,
-        height: 1.15, letterSpacing: -0.12, color: headColor,
+        height: 1.15, letterSpacing: -0.1, color: headColor,
       ),
-      // Headlines — Nunito heavy
-      headlineLarge: GoogleFonts.nunito(
-        fontSize: 24, fontWeight: FontWeight.w800,
-        height: 1.15, letterSpacing: -0.12, color: headColor,
-      ),
-      headlineMedium: GoogleFonts.nunito(
-        fontSize: 20, fontWeight: FontWeight.w800,
-        height: 1.2, letterSpacing: 0, color: headColor,
-      ),
-      headlineSmall: GoogleFonts.nunito(
-        fontSize: 18, fontWeight: FontWeight.w800,
-        height: 1.2, letterSpacing: 0, color: headColor,
-      ),
-      titleLarge: GoogleFonts.nunito(
+      headlineMedium: GoogleFonts.sora(
         fontSize: 20, fontWeight: FontWeight.w700,
         height: 1.2, letterSpacing: 0, color: headColor,
       ),
-      titleMedium: GoogleFonts.nunito(
-        fontSize: 16, fontWeight: FontWeight.w700,
+      headlineSmall: GoogleFonts.sora(
+        fontSize: 18, fontWeight: FontWeight.w700,
+        height: 1.2, letterSpacing: 0, color: headColor,
+      ),
+      // ── Title — Sora SemiBold for card titles & list headers ─────────────────
+      titleLarge: GoogleFonts.sora(
+        fontSize: 20, fontWeight: FontWeight.w600,
+        height: 1.2, letterSpacing: 0, color: headColor,
+      ),
+      titleMedium: GoogleFonts.sora(
+        fontSize: 16, fontWeight: FontWeight.w600,
         height: 1.45, letterSpacing: 0, color: bodyColor,
       ),
-      titleSmall: GoogleFonts.nunito(
-        fontSize: 15, fontWeight: FontWeight.w700,
+      titleSmall: GoogleFonts.sora(
+        fontSize: 15, fontWeight: FontWeight.w600,
         height: 1.5, letterSpacing: 0, color: bodyColor,
       ),
-      bodyLarge: GoogleFonts.nunito(
+      // ── Body — Inter for paragraph & descriptive text ────────────────────────
+      bodyLarge: GoogleFonts.inter(
         fontSize: 16, fontWeight: FontWeight.w500,
         height: 1.5, letterSpacing: 0, color: bodyColor,
       ),
-      bodyMedium: GoogleFonts.nunito(
-        fontSize: 15, fontWeight: FontWeight.w500,
+      bodyMedium: GoogleFonts.inter(
+        fontSize: 15, fontWeight: FontWeight.w400,
         height: 1.5, letterSpacing: 0, color: bodyColor,
       ),
-      bodySmall: GoogleFonts.nunito(
-        fontSize: 13, fontWeight: FontWeight.w500,
+      bodySmall: GoogleFonts.inter(
+        fontSize: 13, fontWeight: FontWeight.w400,
         height: 1.45, letterSpacing: 0, color: bodyColor,
       ),
-      labelLarge: GoogleFonts.nunito(
-        fontSize: 13, fontWeight: FontWeight.w700,
-        height: 1.35, letterSpacing: 0.1,
-        color: isDark ? AppColors.ink500D : AppColors.ink500,
+      // ── Label — Inter for UI chips, badges, metadata ─────────────────────────
+      labelLarge: GoogleFonts.inter(
+        fontSize: 13, fontWeight: FontWeight.w600,
+        height: 1.35, letterSpacing: 0.1, color: mutedColor,
       ),
-      labelMedium: GoogleFonts.nunito(
-        fontSize: 12, fontWeight: FontWeight.w700,
-        height: 1.35, letterSpacing: 0.1,
-        color: isDark ? AppColors.ink500D : AppColors.ink500,
+      labelMedium: GoogleFonts.inter(
+        fontSize: 12, fontWeight: FontWeight.w600,
+        height: 1.35, letterSpacing: 0.1, color: mutedColor,
       ),
-      labelSmall: GoogleFonts.nunito(
-        fontSize: 11, fontWeight: FontWeight.w800,
-        height: 1.2, letterSpacing: 0.6,
-        color: isDark ? AppColors.ink500D : AppColors.ink500,
+      labelSmall: GoogleFonts.inter(
+        fontSize: 11, fontWeight: FontWeight.w700,
+        height: 1.2, letterSpacing: 0.5, color: mutedColor,
       ),
     );
   }

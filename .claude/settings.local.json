@@ -87,7 +87,8 @@
       "mcp__Windows-MCP__Click",
       "mcp__Windows-MCP__App",
       "mcp__Windows-MCP__Snapshot",
-      "mcp__Claude_in_Chrome__find"
+      "mcp__Claude_in_Chrome__find",
+      "Bash(dir \"G:\\\\GitHub\\\\petfolio\\\\google_fonts\" /b)"
     ]
   }
 }

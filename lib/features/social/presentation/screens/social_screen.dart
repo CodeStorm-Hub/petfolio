@@ -126,12 +126,17 @@ class _SocialViewState extends ConsumerState<_SocialView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Pawsfeed', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Theme.of(context).brightness == Brightness.dark ? AppColors.ink950D : AppColors.ink950)),
-                      Text('Your pack · 124 new posts today', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: pt.ink500)),
-                    ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Pawsfeed',
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: pt.ink950)),
+                        Text('Your pack · 124 new posts today',
+                            style: Theme.of(context).textTheme.labelMedium?.copyWith(color: pt.ink500),
+                            overflow: TextOverflow.ellipsis),
+                      ],
+                    ),
                   ),
                   Row(
                     children: [
@@ -211,11 +216,14 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                             ),
                           ),
                         ),
-                      const SliverToBoxAdapter(
+                      SliverToBoxAdapter(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
                           child: Center(
-                            child: Text("You're all caught up 🐾", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.ink500)),
+                            child: Text(
+                              "You're all caught up 🐾",
+                              style: Theme.of(context).textTheme.labelLarge,
+                            ),
                           ),
                         ),
                       ),
@@ -236,9 +244,9 @@ class _SocialViewState extends ConsumerState<_SocialView> {
         foregroundColor: Colors.white,
         elevation: 4,
         icon: const Icon(Icons.add_photo_alternate_rounded),
-        label: const Text(
+        label: Text(
           'Post',
-          style: TextStyle(fontWeight: FontWeight.w700, fontFamily: 'Sora'),
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white),
         ),
       ),
     );
@@ -254,10 +262,10 @@ class _IconBtn extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final defaultBg = isDark ? AppColors.cream2D : AppColors.cream2;
-    final defaultColor = isDark ? AppColors.ink950D : AppColors.ink950;
-    
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final defaultBg = pt.surface2;
+    final defaultColor = pt.ink950;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -411,7 +419,6 @@ class _OwnStoryOptionsSheet extends ConsumerWidget {
               child: Text(
                 '${pet.name}\'s Story',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontFamily: 'Sora',
                       fontWeight: FontWeight.w700,
                     ),
               ),
@@ -419,13 +426,8 @@ class _OwnStoryOptionsSheet extends ConsumerWidget {
             const Divider(),
             ListTile(
               leading: Icon(Icons.play_circle_outline_rounded, color: cs.primary),
-              title: const Text(
-                'View story',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              title: Text('View story',
+                  style: Theme.of(context).textTheme.titleSmall),
               onTap: () {
                 Navigator.pop(context);
                 context.push('/social/stories?petId=${pet.id}');
@@ -433,13 +435,8 @@ class _OwnStoryOptionsSheet extends ConsumerWidget {
             ),
             ListTile(
               leading: Icon(Icons.add_photo_alternate_outlined, color: cs.primary),
-              title: const Text(
-                'Add to story',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              title: Text('Add to story',
+                  style: Theme.of(context).textTheme.titleSmall),
               onTap: () {
                 Navigator.pop(context);
                 ref.read(createPostControllerProvider.notifier).setIsStory(true);
@@ -475,8 +472,7 @@ class _StoryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final surface = Theme.of(context).colorScheme.surface;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink950 = isDark ? AppColors.ink950D : AppColors.ink950;
+    final ink950 = Theme.of(context).extension<PetfolioThemeExtension>()!.ink950;
 
     if (isAdd) {
       return GestureDetector(
@@ -521,7 +517,7 @@ class _StoryItem extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: ink950)),
+            Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ink950)),
           ],
         ),
       );
@@ -551,7 +547,10 @@ class _StoryItem extends StatelessWidget {
               child: CircleAvatar(
                 backgroundColor: ringColors.first.withAlpha(180),
                 backgroundImage: avatarUrl != null ? CachedNetworkImageProvider(avatarUrl!) : null,
-                child: avatarUrl == null ? Text(initial, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white)) : null,
+                child: avatarUrl == null
+                    ? Text(initial,
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white))
+                    : null,
               ),
             ),
           ),
@@ -560,7 +559,7 @@ class _StoryItem extends StatelessWidget {
             width: 62,
             child: Text(
               label,
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: ink950),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ink950),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
@@ -652,10 +651,10 @@ class _PostCardState extends State<_PostCard> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink950 = isDark ? AppColors.ink950D : AppColors.ink950;
-    final ink500 = isDark ? AppColors.ink500D : AppColors.ink500;
-    
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final ink950 = pt.ink950;
+    final ink500 = pt.ink500;
+
     final totalLikes = widget.post.likes + (_reacted != null && !widget.post.isLiked ? 1 : 0);
 
     return PfCard(
@@ -681,8 +680,15 @@ class _PostCardState extends State<_PostCard> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(widget.post.petName, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: ink950)),
-                          Text(widget.post.fuzzyLocation.isEmpty ? '@${widget.post.handle} · ${widget.post.timeAgo}' : '@${widget.post.handle} · ${widget.post.fuzzyLocation} · ${widget.post.timeAgo}', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: ink500)),
+                          Text(widget.post.petName,
+                              style: Theme.of(context).textTheme.titleSmall?.copyWith(color: ink950)),
+                          Text(
+                            widget.post.fuzzyLocation.isEmpty
+                                ? '@${widget.post.handle} · ${widget.post.timeAgo}'
+                                : '@${widget.post.handle} · ${widget.post.fuzzyLocation} · ${widget.post.timeAgo}',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ink500),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ],
                       ),
                     ),
@@ -732,7 +738,12 @@ class _PostCardState extends State<_PostCard> {
               // Text
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: Text(widget.post.caption, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: ink950, height: 1.45)),
+                child: Text(widget.post.caption,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: ink950,
+                          fontWeight: FontWeight.w500,
+                          height: 1.5,
+                        )),
               ),
               
               // Reaction stack visualizer
@@ -740,15 +751,27 @@ class _PostCardState extends State<_PostCard> {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: Row(
                   children: [
-                    Row(
-                      children: [
-                        _EmojiCircle(emoji: '🐾', color: AppColors.tangerine, index: 0),
-                        _EmojiCircle(emoji: '❤️', color: AppColors.poppy, index: 1),
-                        _EmojiCircle(emoji: '🦴', color: AppColors.sunny, index: 2),
-                      ],
+                    // Overlapping emoji circles — fixed width prevents overflow
+                    SizedBox(
+                      width: 24 + 18 + 18, // 3 circles × 24px, overlapping by 6px each
+                      height: 24,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          const Positioned(left: 0,  child: _EmojiCircle(emoji: '🐾', color: AppColors.tangerine, index: 0)),
+                          const Positioned(left: 18, child: _EmojiCircle(emoji: '❤️', color: AppColors.poppy,     index: 0)),
+                          const Positioned(left: 36, child: _EmojiCircle(emoji: '🦴', color: AppColors.sunny,     index: 0)),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: 6),
-                    Text('$totalLikes reacted · ${widget.post.comments} comments', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: isDark ? AppColors.ink700D : AppColors.ink700)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '$totalLikes reacted · ${widget.post.comments} comments',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: pt.ink700),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -778,9 +801,14 @@ class _PostCardState extends State<_PostCard> {
                             children: [
                               _reacted != null 
                                 ? Text(_emojiForKind(_reacted!), style: const TextStyle(fontSize: 20))
-                                : Icon(Icons.pets, size: 20, color: isDark ? AppColors.ink700D : AppColors.ink700),
+                                : Icon(Icons.pets, size: 20, color: pt.ink700),
                               const SizedBox(width: 6),
-                              Text(_reacted != null ? '${_reacted![0].toUpperCase()}${_reacted!.substring(1)}' : 'React', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: _reacted != null ? _colorForKind(_reacted!) : (isDark ? AppColors.ink700D : AppColors.ink700))),
+                              Text(
+                                _reacted != null ? '${_reacted![0].toUpperCase()}${_reacted!.substring(1)}' : 'React',
+                                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                      color: _reacted != null ? _colorForKind(_reacted!) : pt.ink700,
+                                    ),
+                              ),
                             ],
                           ),
                         ),
@@ -833,20 +861,25 @@ class _EmojiCircle extends StatelessWidget {
   final String emoji;
   final Color color;
   final int index;
-  
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final surface = Theme.of(context).colorScheme.surface;
+    final circle = Container(
       width: 24,
       height: 24,
-      margin: EdgeInsets.only(left: index == 0 ? 0 : -6),
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(color: Theme.of(context).colorScheme.surface, width: 2),
+        border: Border.all(color: surface, width: 2),
       ),
       alignment: Alignment.center,
       child: Text(emoji, style: const TextStyle(fontSize: 12)),
+    );
+    if (index == 0) return circle;
+    return Transform.translate(
+      offset: Offset(-6.0 * index, 0),
+      child: circle,
     );
   }
 }
@@ -858,16 +891,16 @@ class _ActionBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final style = Theme.of(context).textTheme.labelLarge?.copyWith(color: pt.ink700);
+    return SizedBox(
       height: 44,
-      color: Colors.transparent,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 20, color: isDark ? AppColors.ink700D : AppColors.ink700),
-          const SizedBox(width: 6),
-          Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: isDark ? AppColors.ink700D : AppColors.ink700)),
+          Icon(icon, size: 20, color: pt.ink700),
+          const SizedBox(width: 8),
+          Text(label, style: style),
         ],
       ),
     );
@@ -882,7 +915,7 @@ class _ReactPickerBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return GestureDetector(
       onTapDown: (d) => onTap(d.globalPosition.dx, d.globalPosition.dy - 300), // simplified offset
       child: Container(
@@ -890,7 +923,7 @@ class _ReactPickerBtn extends StatelessWidget {
         height: 42,
         margin: const EdgeInsets.symmetric(horizontal: 3),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.cream2D : AppColors.cream2,
+          color: pt.surface2,
           shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
