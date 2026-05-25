@@ -6,24 +6,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../../../../core/services/lat_lng.dart';
-import '../../../../core/services/location_providers.dart';
-import '../../../../core/services/location_service.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/widgets.dart';
-import '../../../pet_profile/data/models/pet.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
-import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
-import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
-import '../../data/models/discovery_candidate.dart';
-import '../../data/models/pet_mutual_match.dart';
-import '../controllers/discovery_candidates_controller.dart';
-import '../controllers/discovery_controller.dart';
-import '../controllers/mutual_match_realtime_provider.dart';
-import '../matching_navigation.dart';
-import '../widgets/match_celebration_overlay.dart';
-import '../widgets/match_preferences_sheet.dart';
+import 'package:petfolio/core/services/lat_lng.dart';
+import 'package:petfolio/core/services/location_providers.dart';
+import 'package:petfolio/core/services/location_service.dart';
+import 'package:petfolio/core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
+import 'package:petfolio/core/widgets/widgets.dart';
+import 'package:petfolio/features/pet_profile/data/models/pet.dart';
+import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart';
+import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
+import 'package:petfolio/features/matching/data/models/discovery_candidate.dart';
+import 'package:petfolio/features/matching/data/models/pet_mutual_match.dart';
+import 'package:petfolio/features/matching/presentation/controllers/discovery_candidates_controller.dart';
+import 'package:petfolio/features/matching/presentation/controllers/discovery_controller.dart';
+import 'package:petfolio/features/matching/presentation/controllers/mutual_match_realtime_provider.dart';
+import 'package:petfolio/features/matching/presentation/matching_navigation.dart';
+import 'package:petfolio/features/matching/presentation/widgets/match_celebration_overlay.dart';
+import 'package:petfolio/features/matching/presentation/widgets/match_preferences_sheet.dart';
 
 String _speciesLabel(String species) {
   return switch (species.toLowerCase()) {
@@ -254,7 +254,8 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
             Column(
               children: [
                 AppHeader(
-                  eyebrow: 'Match · Nearby',
+                  pillar: PfPillar.match,
+                  eyebrow: 'Match',
                   onOpenSwitcher: () => PetSwitcherSheet.show(context),
                   dense: true,
                   actions: [
@@ -475,7 +476,14 @@ class _LocationAccessEmpty extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.location_off_rounded, size: 64, color: pt.ink300),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.location_off_rounded, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
             const SizedBox(height: 16),
             Text(
               title,
@@ -535,7 +543,14 @@ class _EmptyDeck extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.pets_rounded, size: 64, color: pt.ink300),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.pets_rounded, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
             const SizedBox(height: 16),
             Text(
               title,
@@ -777,9 +792,12 @@ class _CardSurface extends StatelessWidget {
           ]
         : gradColors;
 
-    return ClipRRect(
-      borderRadius:
-          BorderRadius.circular(PetfolioThemeExtension.radius2xl),
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: Container(
         width: double.infinity,
         height: double.infinity,
@@ -1318,41 +1336,26 @@ class _DockButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isDisabled = onTap == null;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedOpacity(
-        duration: PetfolioThemeExtension.durationSm,
-        opacity: isDisabled ? 0.38 : 1.0,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: elevated
-                ? color
-                : (isDark ? AppColors.surface0D : AppColors.surface0),
-            border: elevated
-                ? null
-                : Border.all(color: color.withAlpha(90), width: 1.5),
-            boxShadow: elevated
-                ? [
-                    BoxShadow(
-                      color: color.withAlpha(80),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Icon(
-            icon,
-            size: iconSize,
-            color: elevated ? Colors.white : color,
-          ),
+    if (elevated) {
+      return IconButton.filled(
+        onPressed: onTap,
+        icon: Icon(icon, size: iconSize),
+        style: IconButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          minimumSize: Size(size, size),
         ),
+      );
+    }
+    
+    return IconButton.filledTonal(
+      onPressed: onTap,
+      icon: Icon(icon, size: iconSize),
+      style: IconButton.styleFrom(
+        backgroundColor: color.withAlpha(25),
+        foregroundColor: color,
+        minimumSize: Size(size, size),
+        side: BorderSide(color: color.withAlpha(90), width: 1.5),
       ),
     );
   }

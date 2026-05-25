@@ -72,8 +72,19 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         children: [
           CustomScrollView(
             slivers: [
-              SliverToBoxAdapter(
-                child: _ProductHero(product: product),
+              SliverAppBar(
+                expandedHeight: 280,
+                pinned: true,
+                stretch: true,
+                backgroundColor: product.gradientStart,
+                surfaceTintColor: Colors.transparent,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  onPressed: () => context.pop(),
+                ),
+                flexibleSpace: FlexibleSpaceBar(
+                  background: _ProductHeroBackground(product: product),
+                ),
               ),
               SliverToBoxAdapter(
                 child: Padding(
@@ -125,16 +136,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             ],
           ),
 
-          // Close button
-          Positioned(
-            top: MediaQuery.paddingOf(context).top + 12,
-            left: 16,
-            child: _IconBtn(
-              icon: Icons.close_rounded,
-              onTap: () => context.pop(),
-            ),
-          ),
-
           // Sticky Pay bar
           Positioned(
             left: 0,
@@ -172,16 +173,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 // Product hero — gradient tile with glyph
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _ProductHero extends StatelessWidget {
-  const _ProductHero({required this.product});
+class _ProductHeroBackground extends StatelessWidget {
+  const _ProductHeroBackground({required this.product});
 
   final Product product;
 
   @override
   Widget build(BuildContext context) {
-    final topPad = MediaQuery.paddingOf(context).top;
-    return Container(
-      height: 280 + topPad,
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -190,27 +189,22 @@ class _ProductHero extends StatelessWidget {
         ),
       ),
       child: Stack(
+        fit: StackFit.expand,
         children: [
-          // Specular highlight
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: const Alignment(-0.4, -0.5),
-                  radius: 0.8,
-                  colors: [
-                    Colors.white.withAlpha(80),
-                    Colors.transparent,
-                  ],
-                ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: const Alignment(-0.4, -0.5),
+                radius: 0.8,
+                colors: [
+                  Colors.white.withAlpha(80),
+                  Colors.transparent,
+                ],
               ),
             ),
           ),
           Center(
-            child: Padding(
-              padding: EdgeInsets.only(top: topPad),
-              child: ProductGlyph(glyphType: product.glyphType, size: 120),
-            ),
+            child: ProductGlyph(glyphType: product.glyphType, size: 120),
           ),
         ],
       ),
@@ -722,41 +716,6 @@ class _PayBar extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Icon button helper
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _IconBtn extends StatelessWidget {
-  const _IconBtn({required this.icon, required this.onTap});
-
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.surface0,
-          boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
-            BoxShadow(
-              color: Color(0x0A0B1220),
-              offset: Offset(0, 1),
-              blurRadius: 2,
-            ),
-          ],
-        ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
       ),
     );
   }

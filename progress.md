@@ -1164,3 +1164,21 @@ Phase complete and to log to .remember/remember.md, Please run (/remember) to sa
 **Next step:** None.
 
 Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-25 — Material 3 adaptive UI redesign (Phases 1–7)
+
+- **`lib/core/layout/petfolio_breakpoints.dart`** — Width classes, drawer/list-detail/grid helpers, context extensions.
+- **`lib/core/widgets/ds/`** — Pf pillar, buttons, empty state, solid/stat cards, dialogs, content width; exported from `widgets.dart`.
+- **`AppHeader`** — Pillar accent strip; 48dp header actions.
+- **`AppShell`** — Distinct tab icons; `NavigationDrawer` ≥840dp with seller/admin links.
+- **Care** — Compact streak on phones; 56dp date chips.
+- **Social/Match/Market** — Unified eyebrows; inbox split-pane; zero-like copy.
+- **Marketplace** — Responsive grid; PDP `SliverAppBar`; cart empty CTA.
+- **Seller/Admin** — Seller `AppHeader`; admin drawer keys.
+- **`main.dart`** — Text scaler clamp 1.0–1.3.
+
+**Next step:** Marionette pass for auth/checkout/admin tab screenshots.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.

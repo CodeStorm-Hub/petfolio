@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/primary_pill_button.dart';
+import '../../../../core/widgets/widgets.dart';
 import '../../data/models/cart_item.dart';
 import '../../data/models/marketplace_order.dart';
 import '../controllers/cart_controller.dart';
@@ -540,38 +540,12 @@ class _EmptyCart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.surface2,
-            ),
-            child: const Icon(Icons.shopping_bag_outlined,
-                size: 36, color: AppColors.ink300),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Your cart is empty',
-            style: TextStyle(
-              fontFamily: 'Sora',
-              fontWeight: FontWeight.w700,
-              fontSize: 18,
-              color: AppColors.ink950,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Browse the shop to find food,\ngear, treats and more.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: AppColors.ink500),
-          ),
-        ],
-      ),
+    return PfEmptyState(
+      icon: Icons.shopping_bag_outlined,
+      title: 'Your cart is empty',
+      subtitle: 'Browse the shop to find food, gear, treats and more.',
+      actionLabel: 'Browse marketplace',
+      onAction: () => context.go('/marketplace'),
     );
   }
 }

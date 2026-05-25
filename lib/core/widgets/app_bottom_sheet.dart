@@ -21,7 +21,23 @@ abstract final class AppBottomSheet {
               top: Radius.circular(PetfolioThemeExtension.radius2xl),
             ),
           ),
-          child: builder(sheetContext),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 8),
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: pt.line200,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              builder(sheetContext),
+            ],
+          ),
         );
       },
     );

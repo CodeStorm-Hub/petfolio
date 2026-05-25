@@ -585,29 +585,26 @@ class _CommentInputBar extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: pt.surface1,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: pt.line200),
+            child: TextField(
+              controller: controller,
+              autofocus: autofocus,
+              minLines: 1,
+              maxLines: 4,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: TextField(
-                controller: controller,
-                autofocus: autofocus,
-                minLines: 1,
-                maxLines: 4,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurface,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(128),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide.none,
                 ),
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  isDense: true,
-                  hintText: 'Add a comment...',
-                  hintStyle: TextStyle(color: pt.ink300, fontSize: 14),
-                  contentPadding: EdgeInsets.zero,
-                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                hintText: 'Add a comment...',
+                hintStyle: TextStyle(color: pt.ink300, fontSize: 14),
+                isDense: true,
               ),
             ),
           ),

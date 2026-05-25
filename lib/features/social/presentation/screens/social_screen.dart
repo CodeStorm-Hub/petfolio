@@ -4,15 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/widgets.dart';
-import '../../../pet_profile/data/models/pet.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
-import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
-import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
-import '../../data/models/feed_post.dart';
-import '../controllers/social_controller.dart';
+import 'package:petfolio/core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
+import 'package:petfolio/core/widgets/widgets.dart';
+import 'package:petfolio/features/pet_profile/data/models/pet.dart';
+import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart';
+import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
+import 'package:petfolio/features/social/data/models/feed_post.dart';
+import 'package:petfolio/features/social/presentation/controllers/social_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entry point
@@ -108,7 +108,8 @@ class _SocialViewState extends ConsumerState<_SocialView> {
         child: Column(
           children: [
             AppHeader(
-              eyebrow: 'Pack',
+              pillar: PfPillar.social,
+              eyebrow: 'Social',
               onOpenSwitcher: () => PetSwitcherSheet.show(context),
               actions: [
                 AppHeaderAction(
@@ -349,18 +350,17 @@ class _RegularPost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surface0D : AppColors.surface0,
-        borderRadius:
-            BorderRadius.circular(PetfolioThemeExtension.radius2xl),
-        boxShadow: pt.shadowE2,
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16), // Could use zero for edge-to-edge on strictly mobile, but M3 card looks good with margins.
+      elevation: 0,
+      color: isDark ? AppColors.surface0D : AppColors.surface0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant, width: 0.5),
       ),
-      clipBehavior: Clip.hardEdge,
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -668,7 +668,6 @@ class _RegularFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
@@ -688,88 +687,60 @@ class _RegularFooter extends StatelessWidget {
           Row(
             children: [
               // ── Like ─────────────────────────────────────────────────────
-              GestureDetector(
-                onTap: onLike,
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AnimatedSwitcher(
-                        duration: PetfolioThemeExtension.durationSm,
-                        transitionBuilder: (child, animation) => ScaleTransition(
-                          scale: animation,
-                          child: child,
-                        ),
-                        child: Icon(
-                          post.isLiked
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          key: ValueKey(post.isLiked),
-                          color: post.isLiked ? AppColors.coral500 : pt.ink500,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      AnimatedSwitcher(
-                        duration: PetfolioThemeExtension.durationSm,
-                        child: Text(
-                          '${post.likes}',
-                          key: ValueKey(post.likes),
-                          style: tt.labelMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: post.isLiked ? AppColors.coral500 : pt.ink500,
-                          ),
-                        ),
-                      ),
-                    ],
+              FilledButton.tonalIcon(
+                onPressed: onLike,
+                style: FilledButton.styleFrom(
+                  backgroundColor: post.isLiked ? AppColors.coral500.withAlpha(25) : Theme.of(context).colorScheme.surfaceContainerHighest,
+                  foregroundColor: post.isLiked ? AppColors.coral500 : Theme.of(context).colorScheme.onSurfaceVariant,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                  minimumSize: const Size(0, 36),
+                ),
+                icon: AnimatedSwitcher(
+                  duration: PetfolioThemeExtension.durationSm,
+                  transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+                  child: Icon(
+                    post.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                    key: ValueKey(post.isLiked),
+                    size: 20,
+                  ),
+                ),
+                label: AnimatedSwitcher(
+                  duration: PetfolioThemeExtension.durationSm,
+                  child: Text(
+                    post.likes == 0 ? 'Like' : '${post.likes}',
+                    key: ValueKey('${post.likes}_${post.isLiked}'),
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               // ── Comment ──────────────────────────────────────────────────
-              GestureDetector(
-                onTap: onComment,
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.chat_bubble_outline_rounded,
-                        size: 22,
-                        color: pt.ink500,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${post.comments}',
-                        style: tt.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: pt.ink500,
-                        ),
-                      ),
-                    ],
-                  ),
+              FilledButton.tonalIcon(
+                onPressed: onComment,
+                style: FilledButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                  minimumSize: const Size(0, 36),
+                ),
+                icon: const Icon(Icons.chat_bubble_outline_rounded, size: 20),
+                label: Text(
+                  '${post.comments}',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
               const Spacer(),
               // ── Share ─────────────────────────────────────────────────────
-              GestureDetector(
-                onTap: () {
-                  final text =
-                      "Check out ${post.petName}'s post on Petfolio! 🐾\nhttps://petfolio.app/social/post/${post.id}";
+              IconButton.filledTonal(
+                onPressed: () {
+                  final text = "Check out ${post.petName}'s post on Petfolio! 🐾\nhttps://petfolio.app/social/post/${post.id}";
                   SharePlus.instance.share(ShareParams(text: text));
                 },
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                  child: Icon(
-                    Icons.share_outlined,
-                    size: 22,
-                    color: pt.ink500,
-                  ),
+                icon: const Icon(Icons.share_outlined, size: 20),
+                style: IconButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                  minimumSize: const Size(36, 36),
                 ),
               ),
             ],

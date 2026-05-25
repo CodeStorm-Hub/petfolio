@@ -132,7 +132,7 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
       BoxShadow(offset: Offset(0, 20), blurRadius: 40, spreadRadius: -8, color: AppColors.shadowE4L),
     ],
     shadowGlass: [
-      BoxShadow(offset: Offset(0, 16), blurRadius: 40, spreadRadius: -8, color: AppColors.shadowGlassL),
+      BoxShadow(offset: Offset(0, 16), blurRadius: 40, spreadRadius: -12, color: AppColors.shadowE3L),
     ],
   );
 
@@ -165,10 +165,10 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
       BoxShadow(offset: Offset(0, 14), blurRadius: 32, spreadRadius: -6, color: AppColors.shadowE3D),
     ],
     shadowE4: [
-      BoxShadow(offset: Offset(0, 24), blurRadius: 48, spreadRadius: -10, color: AppColors.shadowE4D),
+      BoxShadow(offset: Offset(0, 24), blurRadius: 48, spreadRadius: -8, color: AppColors.shadowE4D),
     ],
     shadowGlass: [
-      BoxShadow(offset: Offset(0, 18), blurRadius: 48, spreadRadius: -10, color: AppColors.shadowGlassD),
+      BoxShadow(offset: Offset(0, 20), blurRadius: 48, spreadRadius: -12, color: AppColors.shadowE4D),
     ],
   );
 
@@ -267,6 +267,8 @@ final class AppThemeSpacing {
   double get sm => 8;
   double get md => 12;
   double get lg => 16;
+  double get xl => 24;
+  double get xxl => 32;
 }
 
 abstract final class AppTheme {
@@ -299,9 +301,9 @@ abstract final class AppTheme {
         scrolledUnderElevation: 1,
         surfaceTintColor: Colors.transparent,
         shadowColor: isDark ? AppColors.shadowE1D : AppColors.shadowE1L,
-        titleTextStyle: GoogleFonts.sora(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
+        titleTextStyle: GoogleFonts.nunito(
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
           color: isDark ? AppColors.ink950D : AppColors.ink950,
           height: 1.2,
         ),
@@ -310,7 +312,6 @@ abstract final class AppTheme {
         ),
       ),
 
-      // ── NavigationBar (mobile bottom nav) ─────────────────
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: isDark ? AppColors.surface0D : AppColors.surface0,
         indicatorColor: isDark ? AppColors.blue100D : AppColors.blue100,
@@ -322,7 +323,7 @@ abstract final class AppTheme {
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return IconThemeData(
-              color: isDark ? AppColors.blue500D : AppColors.blue500,
+              color: isDark ? AppColors.blue500D : AppColors.blue400,
             );
           }
           return IconThemeData(
@@ -336,7 +337,7 @@ abstract final class AppTheme {
         backgroundColor: isDark ? AppColors.surface0D : AppColors.surface0,
         indicatorColor: isDark ? AppColors.blue100D : AppColors.blue100,
         selectedIconTheme: IconThemeData(
-          color: isDark ? AppColors.blue500D : AppColors.blue500,
+          color: isDark ? AppColors.blue500D : AppColors.blue400,
         ),
         unselectedIconTheme: IconThemeData(
           color: isDark ? AppColors.ink500D : AppColors.ink500,
@@ -414,10 +415,10 @@ abstract final class AppTheme {
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.disabled)) {
-              return (isDark ? AppColors.blue500D : AppColors.blue500)
+              return (isDark ? AppColors.blue500D : AppColors.blue400)
                   .withAlpha(102); // 40%
             }
-            return isDark ? AppColors.blue500D : AppColors.blue500;
+            return isDark ? AppColors.blue500D : AppColors.blue400;
           }),
           foregroundColor: WidgetStateProperty.all(Colors.white),
           minimumSize: const WidgetStatePropertyAll(Size(120, PetfolioThemeExtension.btnHeightLg)),
@@ -438,10 +439,10 @@ abstract final class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: ButtonStyle(
           foregroundColor: WidgetStateProperty.all(
-            isDark ? AppColors.blue500D : AppColors.blue500,
+            isDark ? AppColors.blue500D : AppColors.blue400,
           ),
           side: WidgetStateProperty.all(
-            BorderSide(color: isDark ? AppColors.blue500D : AppColors.blue500),
+            BorderSide(color: isDark ? AppColors.blue500D : AppColors.blue400),
           ),
           minimumSize: const WidgetStatePropertyAll(Size(96, PetfolioThemeExtension.btnHeightMd)),
           padding: const WidgetStatePropertyAll(
@@ -473,11 +474,11 @@ abstract final class AppTheme {
   static ColorScheme _colorScheme(bool isDark) {
     // Use fromSeed as a safe base, then precisely override every token
     final base = ColorScheme.fromSeed(
-      seedColor: isDark ? AppColors.blue500D : AppColors.blue500,
+      seedColor: isDark ? AppColors.blue500D : AppColors.blue400,
       brightness: isDark ? Brightness.dark : Brightness.light,
     );
     return base.copyWith(
-      primary: isDark ? AppColors.blue500D : AppColors.blue500,
+      primary: isDark ? AppColors.blue500D : AppColors.blue400,
       onPrimary: Colors.white,
       primaryContainer: isDark ? AppColors.blue100D : AppColors.blue100,
       onPrimaryContainer: isDark ? AppColors.blue200D : AppColors.blue700,
@@ -522,7 +523,7 @@ abstract final class AppTheme {
   }
 
   // ── Text Theme — §3.2 Adaptive Type Scale ─────────────────────────────────
-  // Sora → display, headline, title roles  (Display & UI)
+  // Nunito → display, headline, title roles  (Display & UI)
   // Inter → body, label roles              (Body & Numerics)
   //
   // letterSpacing = tracking% / 100 × fontSize  (converted to logical pixels)
@@ -532,54 +533,54 @@ abstract final class AppTheme {
 
     return TextTheme(
       // Display XL — 36sp / 700 / −1.5 % tracking
-      displayLarge: GoogleFonts.sora(
+      displayLarge: GoogleFonts.nunito(
         fontSize: 36,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w800,
         height: 1.05,
         letterSpacing: -0.54,
         color: headColor,
       ),
       // Display — 30sp / 700 / −1 % tracking
-      displayMedium: GoogleFonts.sora(
+      displayMedium: GoogleFonts.nunito(
         fontSize: 30,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w800,
         height: 1.08,
         letterSpacing: -0.30,
         color: headColor,
       ),
       // Headline — 24sp / 600 / −0.5 % tracking
-      displaySmall: GoogleFonts.sora(
+      displaySmall: GoogleFonts.nunito(
         fontSize: 24,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         height: 1.15,
         letterSpacing: -0.12,
         color: headColor,
       ),
-      headlineLarge: GoogleFonts.sora(
+      headlineLarge: GoogleFonts.nunito(
         fontSize: 24,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         height: 1.15,
         letterSpacing: -0.12,
         color: headColor,
       ),
       // Title — 20sp / 600 / 0 tracking
-      headlineMedium: GoogleFonts.sora(
+      headlineMedium: GoogleFonts.nunito(
         fontSize: 20,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         height: 1.2,
         letterSpacing: 0,
         color: headColor,
       ),
-      headlineSmall: GoogleFonts.sora(
+      headlineSmall: GoogleFonts.nunito(
         fontSize: 18,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         height: 1.2,
         letterSpacing: 0,
         color: headColor,
       ),
-      titleLarge: GoogleFonts.sora(
+      titleLarge: GoogleFonts.nunito(
         fontSize: 20,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         height: 1.2,
         letterSpacing: 0,
         color: headColor,

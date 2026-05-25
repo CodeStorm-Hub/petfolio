@@ -30,6 +30,7 @@ import '../features/marketplace/presentation/screens/vendor/stripe_onboarding_sc
 import '../features/marketplace/presentation/screens/vendor/vendor_order_detail_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/vendor_order_queue_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/vendor_product_list_screen.dart';
+import '../features/marketplace/presentation/controllers/my_shop_controller.dart';
 import '../features/matching/presentation/screens/chat_screen.dart';
 import '../features/matching/presentation/screens/matches_inbox_screen.dart';
 import '../features/matching/presentation/screens/matching_screen.dart';
@@ -375,17 +376,42 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 // AppShell — adaptive nav (bottom bar ≤ 599 dp, rail ≥ 600 dp)
 // ─────────────────────────────────────────────────────────────────────────────
 
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child});
 
   final Widget child;
 
   static const _destinations = [
-    _NavDestination(icon: Icons.pets_outlined, activeIcon: Icons.pets, label: 'Pets', path: '/home'),
-    _NavDestination(icon: Icons.favorite_border, activeIcon: Icons.favorite, label: 'Care', path: '/care'),
-    _NavDestination(icon: Icons.people_outline, activeIcon: Icons.people, label: 'Social', path: '/social'),
-    _NavDestination(icon: Icons.favorite_border_outlined, activeIcon: Icons.favorite, label: 'Match', path: '/matching'),
-    _NavDestination(icon: Icons.store_outlined, activeIcon: Icons.store, label: 'Market', path: '/marketplace'),
+    _NavDestination(
+      icon: Icons.pets_outlined,
+      activeIcon: Icons.pets,
+      label: 'Home',
+      path: '/home',
+    ),
+    _NavDestination(
+      icon: Icons.medical_services_outlined,
+      activeIcon: Icons.medical_services,
+      label: 'Care',
+      path: '/care',
+    ),
+    _NavDestination(
+      icon: Icons.people_outline,
+      activeIcon: Icons.people,
+      label: 'Social',
+      path: '/social',
+    ),
+    _NavDestination(
+      icon: Icons.swipe_rounded,
+      activeIcon: Icons.swipe,
+      label: 'Match',
+      path: '/matching',
+    ),
+    _NavDestination(
+      icon: Icons.storefront_outlined,
+      activeIcon: Icons.storefront,
+      label: 'Shop',
+      path: '/marketplace',
+    ),
   ];
 
   int _selectedIndex(BuildContext context) {
@@ -397,40 +423,35 @@ class AppShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final selectedIndex = _selectedIndex(context);
-    final isWide = MediaQuery.sizeOf(context).width >= 600;
+    final width = MediaQuery.sizeOf(context).width;
+    final useDrawer = width >= 840;
+    final useRail = width >= 600 && width < 840;
+    final isAdmin = ref.watch(isAdminProvider);
+    final hasShop = ref.watch(myShopProvider).value != null;
 
-    if (isWide) {
-      return Scaffold(
-        body: Row(
-          children: [
-            NavigationRail(
-              selectedIndex: selectedIndex,
-              labelType: NavigationRailLabelType.all,
-              onDestinationSelected: (i) =>
-                  context.go(_destinations[i].path),
-              destinations: [
-                for (final d in _destinations)
-                  NavigationRailDestination(
-                    icon: Icon(d.icon),
-                    selectedIcon: Icon(d.activeIcon),
-                    label: Text(d.label),
-                  ),
-              ],
-            ),
-            const VerticalDivider(thickness: 1, width: 1),
-            Expanded(child: child),
+    void goTo(int i) => context.go(_destinations[i].path);
+
+    Widget navDestinations({required bool rail}) {
+      if (rail) {
+        return NavigationRail(
+          selectedIndex: selectedIndex,
+          labelType: NavigationRailLabelType.all,
+          onDestinationSelected: goTo,
+          destinations: [
+            for (final d in _destinations)
+              NavigationRailDestination(
+                icon: Icon(d.icon),
+                selectedIcon: Icon(d.activeIcon),
+                label: Text(d.label),
+              ),
           ],
-        ),
-      );
-    }
-
-    return Scaffold(
-      body: child,
-      bottomNavigationBar: NavigationBar(
+        );
+      }
+      return NavigationBar(
         selectedIndex: selectedIndex,
-        onDestinationSelected: (i) => context.go(_destinations[i].path),
+        onDestinationSelected: goTo,
         destinations: [
           for (final d in _destinations)
             NavigationDestination(
@@ -440,7 +461,73 @@ class AppShell extends StatelessWidget {
               label: d.label,
             ),
         ],
-      ),
+      );
+    }
+
+    if (useDrawer) {
+      return Scaffold(
+        body: Row(
+          children: [
+            SizedBox(
+              width: 280,
+              child: NavigationDrawer(
+                selectedIndex: selectedIndex,
+                onDestinationSelected: goTo,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                    child: Text(
+                      'PetFolio',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                  for (var i = 0; i < _destinations.length; i++)
+                    NavigationDrawerDestination(
+                      icon: Icon(_destinations[i].icon),
+                      selectedIcon: Icon(_destinations[i].activeIcon),
+                      label: Text(_destinations[i].label),
+                    ),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                    child: Divider(),
+                  ),
+                  if (hasShop)
+                    ListTile(
+                      leading: const Icon(Icons.store_mall_directory_outlined),
+                      title: const Text('Seller'),
+                      onTap: () => context.push('/seller'),
+                    ),
+                  if (isAdmin)
+                    ListTile(
+                      leading: const Icon(Icons.admin_panel_settings_outlined),
+                      title: const Text('Admin'),
+                      onTap: () => context.push('/admin'),
+                    ),
+                ],
+              ),
+            ),
+            const VerticalDivider(thickness: 1, width: 1),
+            Expanded(child: child),
+          ],
+        ),
+      );
+    }
+
+    if (useRail) {
+      return Scaffold(
+        body: Row(
+          children: [
+            navDestinations(rail: true),
+            const VerticalDivider(thickness: 1, width: 1),
+            Expanded(child: child),
+          ],
+        ),
+      );
+    }
+
+    return Scaffold(
+      body: child,
+      bottomNavigationBar: navDestinations(rail: false),
     );
   }
 }

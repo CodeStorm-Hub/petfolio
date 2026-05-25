@@ -171,6 +171,7 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
               const SizedBox(height: 8),
               for (final d in _destinations)
                 ListTile(
+                  key: ValueKey<String>('admin_tab_${d.tab.name}'),
                   leading: Icon(
                     _tab == d.tab ? d.activeIcon : d.icon,
                     color: _tab == d.tab

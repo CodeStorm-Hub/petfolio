@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_theme.dart';
-import '../../../../../core/widgets/primary_pill_button.dart';
+
 import '../../controllers/edit_shop_controller.dart';
 import '../../controllers/my_shop_controller.dart';
 import '../../../data/models/shop.dart';
@@ -245,11 +245,11 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen>
           floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
           floatingActionButton: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: PrimaryPillButton(
-              label:      'Save Changes',
-              isLoading:  isSaving,
-              isFullWidth: true,
-              onPressed:  isSaving ? null : () => _save(shop),
+            child: FloatingActionButton.extended(
+              onPressed: isSaving ? null : () => _save(shop),
+              label: isSaving ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator.adaptive(backgroundColor: Colors.white,)) : const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold),),
+              icon: isSaving ? null : const Icon(Icons.save_rounded),
+              elevation: 4,
             ),
           ),
         );

@@ -9,9 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/app_bottom_sheet.dart';
-import '../../../../core/widgets/app_snack_bar.dart';
-import '../../../../core/widgets/skeleton_loader.dart';
+import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/medical_record.dart';
 import '../../data/repositories/health_repository.dart';
@@ -204,7 +202,6 @@ class _VaultSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,15 +223,10 @@ class _VaultSection extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         if (records.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            decoration: BoxDecoration(
-              color: cs.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: pt.line200, width: 0.5),
-            ),
-            child: Text(emptyLabel, style: TextStyle(fontSize: 14, color: pt.ink500)),
+          PfEmptyState(
+            icon: icon,
+            title: emptyLabel.replaceAll('.', ''),
+            subtitle: 'Add a record with the + button below.',
           )
         else
           ...records.map((r) => Padding(

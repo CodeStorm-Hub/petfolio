@@ -22,26 +22,37 @@ class ProductCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              _ProductTile(product: product),
-              Positioned(
-                bottom: 8,
-                right: 8,
-                child: _QuickAddButton(
-                  onTap: () => ref.read(cartProvider.notifier).add(product),
+    return Card(
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant, width: 0.5),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Stack(
+              children: [
+                _ProductTile(product: product),
+                Positioned(
+                  bottom: 8,
+                  right: 8,
+                  child: _QuickAddButton(
+                    onTap: () => ref.read(cartProvider.notifier).add(product),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          _ProductMeta(product: product),
-        ],
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: _ProductMeta(product: product),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -63,28 +74,39 @@ class ProductCardCompact extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        width: 156,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                _ProductTile(product: product),
-                Positioned(
-                  bottom: 8,
-                  right: 8,
-                  child: _QuickAddButton(
-                    onTap: () => ref.read(cartProvider.notifier).add(product),
+    return Card(
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant, width: 0.5),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          width: 156,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Stack(
+                children: [
+                  _ProductTile(product: product),
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: _QuickAddButton(
+                      onTap: () => ref.read(cartProvider.notifier).add(product),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            _ProductMeta(product: product, compact: true),
-          ],
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: _ProductMeta(product: product, compact: true),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -140,15 +162,12 @@ class _ProductTile extends StatelessWidget {
       aspectRatio: 1,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(0), // Handled by Card clipBehavior
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [product.gradientStart, product.gradientEnd],
           ),
-          boxShadow: [
-            BoxShadow(color: AppColors.line200, blurRadius: 0, spreadRadius: 0.5),
-          ],
         ),
         child: Stack(
           children: [

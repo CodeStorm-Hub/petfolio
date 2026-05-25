@@ -4,12 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/widgets.dart';
-import '../../data/models/chat_message.dart';
-import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
-import '../controllers/chat_conversation_controller.dart';
+import 'package:petfolio/core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
+import 'package:petfolio/core/widgets/widgets.dart';
+import 'package:petfolio/features/matching/data/models/chat_message.dart';
+import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
+import 'package:petfolio/features/matching/presentation/controllers/chat_conversation_controller.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({
@@ -79,7 +79,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         child: Column(
           children: [
             AppHeader(
-              eyebrow: 'Match · Chat',
+              pillar: PfPillar.match,
+              eyebrow: 'Chat',
               onOpenSwitcher: () => PetSwitcherSheet.show(context),
               onBack: () => context.pop(),
               dense: true,

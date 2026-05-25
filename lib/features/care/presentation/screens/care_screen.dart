@@ -14,12 +14,12 @@ import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_
 import 'package:petfolio/core/errors/app_exception.dart';
 import 'package:petfolio/core/models/pet.dart' show Pet;
 
-import '../../data/models/care_task.dart' as dbtask;
-import '../../data/models/care_task_log.dart';
-import '../controllers/care_dashboard_controller.dart';
-import '../utils/care_scheduled_time.dart';
-import '../widgets/routine_recommendation_sheet.dart';
-import '../../domain/services/care_recommendation_service.dart';
+import 'package:petfolio/features/care/data/models/care_task.dart' as dbtask;
+import 'package:petfolio/features/care/data/models/care_task_log.dart';
+import 'package:petfolio/features/care/presentation/controllers/care_dashboard_controller.dart';
+import 'package:petfolio/features/care/presentation/utils/care_scheduled_time.dart';
+import 'package:petfolio/features/care/presentation/widgets/routine_recommendation_sheet.dart';
+import 'package:petfolio/features/care/domain/services/care_recommendation_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CareScreen
@@ -166,7 +166,8 @@ class _CareScreenState extends ConsumerState<CareScreen> {
         child: Column(
           children: [
             AppHeader(
-              eyebrow: 'Care · ${activePet.name}',
+              pillar: PfPillar.care,
+              eyebrow: 'Care',
               onOpenSwitcher: () => PetSwitcherSheet.show(context),
               onBack: Navigator.of(context).canPop()
                   ? () => Navigator.of(context).maybePop()
@@ -387,6 +388,152 @@ class _AiRoutineBanner extends StatelessWidget {
   }
 }
 
+Widget _careStreakRing({
+  required double size,
+  required double progress,
+  required double streakNorm,
+  required int done,
+  required int total,
+  required int streakCount,
+}) {
+  return SizedBox(
+    width: size,
+    height: size,
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        SizedBox.expand(
+          child: CircularProgressIndicator(
+            value: streakNorm,
+            strokeWidth: size < 100 ? 5 : 7,
+            backgroundColor: Colors.white.withAlpha(22),
+            color: Colors.white.withAlpha(100),
+            strokeCap: StrokeCap.round,
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.all(size < 100 ? 8 : 13),
+          child: SizedBox.expand(
+            child: CircularProgressIndicator(
+              value: progress,
+              strokeWidth: size < 100 ? 7 : 10,
+              backgroundColor: Colors.white.withAlpha(36),
+              color: Colors.white,
+              strokeCap: StrokeCap.round,
+            ),
+          ),
+        ),
+        if (total > 0)
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '$done',
+                style: TextStyle(
+                  fontFamily: 'Sora',
+                  fontSize: size < 100 ? 22 : 34,
+                  fontWeight: FontWeight.w800,
+                  height: 1,
+                  color: Colors.white,
+                ),
+              ),
+              Text(
+                'of $total',
+                style: TextStyle(
+                  fontSize: size < 100 ? 10 : 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withAlpha(200),
+                ),
+              ),
+            ],
+          )
+        else
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.local_fire_department_rounded,
+                color: Colors.white,
+                size: size < 100 ? 20 : 28,
+              ),
+              Text(
+                '$streakCount',
+                style: TextStyle(
+                  fontFamily: 'Sora',
+                  fontSize: size < 100 ? 20 : 30,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+      ],
+    ),
+  );
+}
+
+Widget _compactStreakRow({
+  required double ringSize,
+  required int done,
+  required int total,
+  required int streakCount,
+  required double progress,
+  required double streakNorm,
+  required bool isViewingToday,
+  required DateTime selectedDay,
+  required List<String> monthShort,
+}) {
+  return Row(
+    children: [
+      _careStreakRing(
+        size: ringSize,
+        progress: progress,
+        streakNorm: streakNorm,
+        done: done,
+        total: total,
+        streakCount: streakCount,
+      ),
+      const SizedBox(width: 16),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'CARE STREAK',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.1,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              total > 0 ? '$done of $total tasks today' : '$streakCount day streak',
+              style: const TextStyle(
+                fontFamily: 'Sora',
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              isViewingToday
+                  ? 'Tap dates below to review other days'
+                  : '${monthShort[selectedDay.month - 1]} ${selectedDay.day}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withAlpha(200),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Streak Banner
 // ─────────────────────────────────────────────────────────────────────────────
@@ -445,6 +592,8 @@ class _StreakBanner extends ConsumerWidget {
 
     final accent = species.accent;
     final darkAccent = Color.lerp(accent, Colors.black, 0.22)!;
+    final compact = MediaQuery.sizeOf(context).width < 600;
+    final ringSize = compact ? 88.0 : 158.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -483,8 +632,20 @@ class _StreakBanner extends ConsumerWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
-            child: Column(
+            padding: EdgeInsets.fromLTRB(18, compact ? 14 : 18, 18, compact ? 14 : 20),
+            child: compact
+                ? _compactStreakRow(
+                    ringSize: ringSize,
+                    done: done,
+                    total: total,
+                    streakCount: streakCount,
+                    progress: progress,
+                    streakNorm: streakNorm,
+                    isViewingToday: isViewingToday,
+                    selectedDay: selectedDay,
+                    monthShort: _monthShort,
+                  )
+                : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
@@ -506,8 +667,8 @@ class _StreakBanner extends ConsumerWidget {
                           const SizedBox(height: 8),
                           Text(
                             isViewingToday
-                                ? 'Inner ring: tasks done today · outer: streak (28d scale)'
-                                : 'Inner ring shows ${_monthShort[selectedDay.month - 1]} ${selectedDay.day}. Tasks below match this day.',
+                                ? 'Tasks today · streak ring (28d)'
+                                : 'Tasks for ${_monthShort[selectedDay.month - 1]} ${selectedDay.day}',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
@@ -555,91 +716,13 @@ class _StreakBanner extends ConsumerWidget {
                 ),
                 const SizedBox(height: 18),
                 Center(
-                  child: SizedBox(
-                    width: 158,
-                    height: 158,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SizedBox.expand(
-                          child: CircularProgressIndicator(
-                            value: streakNorm,
-                            strokeWidth: 7,
-                            backgroundColor: Colors.white.withAlpha(22),
-                            color: Colors.white.withAlpha(100),
-                            strokeCap: StrokeCap.round,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(13),
-                          child: SizedBox.expand(
-                            child: CircularProgressIndicator(
-                              value: progress,
-                              strokeWidth: 10,
-                              backgroundColor: Colors.white.withAlpha(36),
-                              color: Colors.white,
-                              strokeCap: StrokeCap.round,
-                            ),
-                          ),
-                        ),
-                        if (total > 0)
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '$done',
-                                style: const TextStyle(
-                                  fontFamily: 'Sora',
-                                  fontSize: 34,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Text(
-                                'of $total',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white.withAlpha(200),
-                                  letterSpacing: 0.04 * 12,
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.local_fire_department_rounded,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                              Text(
-                                '$streakCount',
-                                style: const TextStyle(
-                                  fontFamily: 'Sora',
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'day streak',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white.withAlpha(200),
-                                  letterSpacing: 0.04 * 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
+                  child: _careStreakRing(
+                    size: ringSize,
+                    progress: progress,
+                    streakNorm: streakNorm,
+                    done: done,
+                    total: total,
+                    streakCount: streakCount,
                   ),
                 ),
                 if (total > 0) ...[
@@ -773,7 +856,7 @@ class _HorizontalDatePicker extends StatefulWidget {
 class _HorizontalDatePickerState extends State<_HorizontalDatePicker> {
   late final ScrollController _scroll;
 
-  static const _chipW = 52.0;
+  static const _chipW = 56.0;
   static const _chipGap = 8.0;
   static const _daysBack = 7;
   static const _daysAhead = 6;
@@ -1057,135 +1140,123 @@ class _CareTaskCard extends ConsumerWidget {
           }
           ref.read(careDashboardProvider.notifier).toggleTaskCompletion(task.id, isCompleted: !done);
         },
-        child: AnimatedContainer(
-          duration: PetfolioThemeExtension.durationSm,
-          decoration: BoxDecoration(
-            color: done ? pt.surface2 : cs.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: pt.line200, width: 0.5),
-            boxShadow: done
-                ? null
-                : [
-                    BoxShadow(
-                      color: pt.line200.withAlpha(128),
-                      blurRadius: 0,
-                      spreadRadius: 0.5,
-                    ),
-                    const BoxShadow(
-                      color: AppColors.shadowE1L,
-                      blurRadius: 2,
-                      offset: Offset(0, 1),
-                    ),
-                  ],
-          ),
-          child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              AnimatedContainer(
-                duration: PetfolioThemeExtension.durationSm,
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: done ? species.accent.withAlpha(25) : pt.surface2,
-                  borderRadius: BorderRadius.circular(12),
+        child: Card(
+          elevation: done ? 0 : 1,
+          color: done ? cs.surfaceContainerHigh : cs.surfaceContainerLow,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          margin: EdgeInsets.zero,
+          clipBehavior: Clip.antiAlias,
+          child: AnimatedContainer(
+            duration: PetfolioThemeExtension.durationSm,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                AnimatedContainer(
+                  duration: PetfolioThemeExtension.durationSm,
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: done ? cs.primaryContainer : cs.secondaryContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    task.categoryIconData,
+                    size: 24,
+                    color: done ? cs.onPrimaryContainer.withAlpha(150) : cs.onSecondaryContainer,
+                  ),
                 ),
-                child: Icon(
-                  task.categoryIconData,
-                  size: 20,
-                  color: done ? species.accent : pt.ink500,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AnimatedDefaultTextStyle(
-                      duration: PetfolioThemeExtension.durationSm,
-                      style: TextStyle(
-                        fontFamily: 'Sora',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                        color: done ? pt.ink300 : cs.onSurface,
-                        decoration: done ? TextDecoration.lineThrough : TextDecoration.none,
-                        decorationColor: pt.ink300,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AnimatedDefaultTextStyle(
+                        duration: PetfolioThemeExtension.durationSm,
+                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: done ? cs.onSurfaceVariant.withAlpha(150) : cs.onSurface,
+                              decoration: done ? TextDecoration.lineThrough : TextDecoration.none,
+                              decorationColor: cs.onSurfaceVariant.withAlpha(150),
+                            ),
+                        child: Text(task.title, overflow: TextOverflow.ellipsis),
                       ),
-                      child: Text(task.title, overflow: TextOverflow.ellipsis),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _sublabel(task),
-                      style: TextStyle(fontSize: 12, color: pt.ink500),
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Text(
+                        _sublabel(task),
+                        style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              PopupMenuButton<String>(
-                key: ValueKey<String>('care_task_menu_${task.id}'),
-                tooltip: 'Task options',
-                padding: EdgeInsets.zero,
-                icon: Icon(Icons.more_vert_rounded, color: pt.ink500, size: 22),
-                onSelected: (value) {
-                  if (logOnly) {
-                    if (value == 'add_plan') {
-                      _openPlanFromLog(context);
-                    } else if (value == 'remove_day') {
-                      _confirmRemoveLog(context, ref);
+                PopupMenuButton<String>(
+                  key: ValueKey<String>('care_task_menu_${task.id}'),
+                  tooltip: 'Task options',
+                  padding: EdgeInsets.zero,
+                  icon: Icon(Icons.more_vert_rounded, color: cs.onSurfaceVariant, size: 24),
+                  onSelected: (value) {
+                    if (logOnly) {
+                      if (value == 'add_plan') {
+                        _openPlanFromLog(context);
+                      } else if (value == 'remove_day') {
+                        _confirmRemoveLog(context, ref);
+                      }
+                    } else {
+                      if (value == 'edit') {
+                        _openEditSheet(context);
+                      } else if (value == 'delete') {
+                        _confirmDelete(context, ref);
+                      }
                     }
-                  } else {
-                    if (value == 'edit') {
-                      _openEditSheet(context);
-                    } else if (value == 'delete') {
-                      _confirmDelete(context, ref);
+                  },
+                  itemBuilder: (ctx) => logOnly
+                      ? const [
+                          PopupMenuItem(value: 'add_plan', child: Text('Add to plan')),
+                          PopupMenuItem(value: 'remove_day', child: Text('Remove from day')),
+                        ]
+                      : const [
+                          PopupMenuItem(value: 'edit', child: Text('Edit')),
+                          PopupMenuItem(value: 'delete', child: Text('Delete')),
+                        ],
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  key: ValueKey<String>('care_task_check_${task.id}'),
+                  onTap: () {
+                    if (logOnly) {
+                      if (!done) return;
+                      ref
+                          .read(careDashboardProvider.notifier)
+                          .toggleTaskCompletion(task.id, isCompleted: false);
+                      return;
                     }
-                  }
-                },
-                itemBuilder: (ctx) => logOnly
-                    ? const [
-                        PopupMenuItem(value: 'add_plan', child: Text('Add to plan')),
-                        PopupMenuItem(value: 'remove_day', child: Text('Remove from day')),
-                      ]
-                    : const [
-                        PopupMenuItem(value: 'edit', child: Text('Edit')),
-                        PopupMenuItem(value: 'delete', child: Text('Delete')),
-                      ],
-              ),
-              const SizedBox(width: 4),
-              GestureDetector(
-                key: ValueKey<String>('care_task_check_${task.id}'),
-                onTap: () {
-                  if (logOnly) {
-                    if (!done) return;
                     ref
                         .read(careDashboardProvider.notifier)
-                        .toggleTaskCompletion(task.id, isCompleted: false);
-                    return;
-                  }
-                  ref
-                      .read(careDashboardProvider.notifier)
-                      .toggleTaskCompletion(task.id, isCompleted: !done);
-                },
-                child: AnimatedContainer(
-                  duration: PetfolioThemeExtension.durationSm,
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: done ? AppColors.success : Colors.transparent,
-                    shape: BoxShape.circle,
-                    border: done ? null : Border.all(color: AppColors.ink300, width: 2),
+                        .toggleTaskCompletion(task.id, isCompleted: !done);
+                  },
+                  child: AnimatedContainer(
+                    duration: PetfolioThemeExtension.durationSm,
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: done ? cs.primary : Colors.transparent,
+                      shape: BoxShape.circle,
+                      border: done ? null : Border.all(color: cs.outline, width: 2),
+                    ),
+                    child: AnimatedSwitcher(
+                      duration: PetfolioThemeExtension.durationSm,
+                      transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+                      child: done
+                          ? Icon(Icons.check, key: const ValueKey('check'), size: 18, color: cs.onPrimary)
+                          : const SizedBox.shrink(key: ValueKey('uncheck')),
+                    ),
                   ),
-                  child: done
-                      ? const Icon(Icons.check, size: 16, color: Colors.white)
-                      : null,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -1473,54 +1544,54 @@ class _MedicalVaultBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      key: const ValueKey<String>('care_medical_vault_banner'),
-      onTap: () => context.push('/care/medical-vault'),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius:
-              BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-          border: Border.all(color: pt.pillarHealth.withAlpha(80)),
-          boxShadow: pt.shadowE1,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: pt.pillarHealth.withAlpha(30),
-                borderRadius: BorderRadius.circular(
-                    PetfolioThemeExtension.radiusMd),
-              ),
-              child: Icon(Icons.folder_special_outlined,
-                  color: pt.pillarHealth, size: 22),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Automated medical vault',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
-                    ),
+    return Semantics(
+      button: true,
+      label: 'Automated medical vault',
+      child: Card(
+        elevation: 0,
+        color: cs.surfaceContainerLow,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          key: const ValueKey<String>('care_medical_vault_banner'),
+          onTap: () => context.push('/care/medical-vault'),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: pt.pillarHealth.withAlpha(30),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Vaccines · Medications · Vet visits',
-                    style: TextStyle(fontSize: 13, color: pt.ink300),
+                  child: Icon(Icons.folder_special_outlined,
+                      color: pt.pillarHealth, size: 24),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Automated medical vault',
+                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Vaccines · Medications · Vet visits',
+                        style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                Icon(Icons.chevron_right_rounded, color: pt.ink300, size: 24),
+              ],
             ),
-            Icon(Icons.chevron_right_rounded, color: pt.ink300),
-          ],
+          ),
         ),
       ),
     );
@@ -1535,54 +1606,54 @@ class _NutritionBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      key: const ValueKey<String>('care_nutrition_banner'),
-      onTap: () => context.push('/care/nutrition'),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius:
-              BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-          border: Border.all(color: pt.pillarHealth.withAlpha(80)),
-          boxShadow: pt.shadowE1,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: pt.pillarHealth.withAlpha(30),
-                borderRadius: BorderRadius.circular(
-                    PetfolioThemeExtension.radiusMd),
-              ),
-              child: Icon(Icons.monitor_weight_outlined,
-                  color: pt.pillarHealth, size: 22),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Smart Nutrition & Weight',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
-                    ),
+    return Semantics(
+      button: true,
+      label: 'Smart Nutrition & Weight',
+      child: Card(
+        elevation: 0,
+        color: cs.surfaceContainerLow,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          key: const ValueKey<String>('care_nutrition_banner'),
+          onTap: () => context.push('/care/nutrition'),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: pt.pillarHealth.withAlpha(30),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Track weight history · View caloric needs',
-                    style: TextStyle(fontSize: 13, color: pt.ink300),
+                  child: Icon(Icons.monitor_weight_outlined,
+                      color: pt.pillarHealth, size: 24),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Smart Nutrition & Weight',
+                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Track weight history · View caloric needs',
+                        style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                Icon(Icons.chevron_right_rounded, color: pt.ink300, size: 24),
+              ],
             ),
-            Icon(Icons.chevron_right_rounded, color: pt.ink300),
-          ],
+          ),
         ),
       ),
     );

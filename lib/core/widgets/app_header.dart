@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
+import 'package:petfolio/core/widgets/ds/pf_pillar.dart';
 import 'package:petfolio/core/widgets/pet_avatar.dart';
 import 'package:petfolio/core/widgets/skeleton_loader.dart';
 import 'package:petfolio/features/pet_profile/data/models/pet.dart';
@@ -40,6 +41,7 @@ class AppHeader extends ConsumerWidget {
     this.actions = const [],
     this.showDivider = true,
     this.dense = false,
+    this.pillar = PfPillar.home,
   });
 
   /// Small uppercase label sitting above the active pet's name (e.g. "CARE",
@@ -67,10 +69,14 @@ class AppHeader extends ConsumerWidget {
   /// (e.g. matching swipe deck).
   final bool dense;
 
+  final PfPillar pillar;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final pet = ref.watch(activePetControllerProvider);
+
+    final pillarColor = pillar.color(context);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -78,7 +84,11 @@ class AppHeader extends ConsumerWidget {
             ? Border(bottom: BorderSide(color: pt.line200, width: 0.5))
             : null,
       ),
-      child: Padding(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(height: 3, color: pillarColor),
+          Padding(
         padding: EdgeInsets.fromLTRB(16, dense ? 8 : 12, 12, dense ? 8 : 12),
         child: Row(
           children: [
@@ -97,8 +107,20 @@ class AppHeader extends ConsumerWidget {
               if (i > 0) const SizedBox(width: 8),
               _ActionButton(action: actions[i]),
             ],
+            if (actions.isNotEmpty) const SizedBox(width: 8),
+            _ActionButton(
+              action: AppHeaderAction(
+                icon: Theme.of(context).brightness == Brightness.dark
+                    ? Icons.light_mode_outlined
+                    : Icons.dark_mode_outlined,
+                tooltip: 'Toggle theme',
+                onTap: () => ref.read(themeModeProvider.notifier).toggle(),
+              ),
+            ),
           ],
         ),
+          ),
+        ],
       ),
     );
   }
@@ -300,8 +322,8 @@ class _CircleChip extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        width: 44,
-        height: 44,
+        width: 48,
+        height: 48,
         decoration: BoxDecoration(
           color: filled ? AppColors.ink950 : cs.surface,
           shape: BoxShape.circle,

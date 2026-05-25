@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/widgets.dart';
-import '../../../pet_profile/data/models/pet.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
-import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
-import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
-import '../../data/models/match_inbox_item.dart';
-import '../controllers/matches_inbox_controller.dart';
-import '../matching_navigation.dart';
+import 'package:petfolio/core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
+import 'package:petfolio/core/widgets/widgets.dart';
+import 'package:petfolio/features/pet_profile/data/models/pet.dart';
+import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart';
+import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
+import 'package:petfolio/features/matching/data/models/match_inbox_item.dart';
+import 'package:petfolio/features/matching/presentation/controllers/matches_inbox_controller.dart';
+import 'package:petfolio/features/matching/presentation/matching_navigation.dart';
 
 class MatchesInboxScreen extends ConsumerWidget {
   const MatchesInboxScreen({super.key});
@@ -67,7 +67,8 @@ class _MatchesInboxView extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AppHeader(
-              eyebrow: 'Match · Inbox',
+              pillar: PfPillar.match,
+              eyebrow: 'Inbox',
               onOpenSwitcher: () => PetSwitcherSheet.show(context),
               onBack: () => context.pop(),
               actions: [
@@ -123,7 +124,7 @@ class _MatchesInboxView extends ConsumerWidget {
                     );
                   }
 
-                  return RefreshIndicator(
+                  final list = RefreshIndicator(
                     onRefresh: () => ref
                         .read(matchesInboxControllerProvider(pet.id).notifier)
                         .refresh(),
@@ -177,6 +178,21 @@ class _MatchesInboxView extends ConsumerWidget {
                         ],
                       ],
                     ),
+                  );
+                  if (!context.pfUseListDetail) return list;
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(width: 360, child: list),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            'Select a match or conversation',
+                            style: TextStyle(fontSize: 15, color: pt.ink500),
+                          ),
+                        ),
+                      ),
+                    ],
                   );
                 },
               ),

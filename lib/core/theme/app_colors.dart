@@ -9,28 +9,28 @@ import 'package:flutter/painting.dart';
 /// Prefer consuming [PetfolioThemeExtension] inside widgets — it
 /// resolves the correct light/dark pair automatically.
 abstract final class AppColors {
-  // ── §2.1  Blue primary ramp ────────────────────────────────────────────────
-  static const blue50   = Color(0xFFEEF4FF);
-  static const blue100  = Color(0xFFD6E4FF);
-  static const blue200  = Color(0xFFAEC6FF);
-  static const blue300  = Color(0xFF7FA3FF);
-  static const blue400  = Color(0xFF4B7DFA);
-  static const blue500  = Color(0xFF2563EB); // ★ Primary brand (light)
-  static const blue600  = Color(0xFF1D4FCC);
-  static const blue700  = Color(0xFF173FA3);
-  static const blue800  = Color(0xFF0F2D75);
-  static const blue900  = Color(0xFF091B47);
+  // ── §2.1  Blue primary ramp (Friendly Pet Vibe) ─────────────────────────
+  static const blue50   = Color(0xFFF0F5FC);
+  static const blue100  = Color(0xFFD6E4F8);
+  static const blue200  = Color(0xFFABC8ED);
+  static const blue300  = Color(0xFF7EACDF);
+  static const blue400  = Color(0xFF4A90E2); // ★ Primary brand (light)
+  static const blue500  = Color(0xFF387AB9); 
+  static const blue600  = Color(0xFF2B5C8C);
+  static const blue700  = Color(0xFF1F4164);
+  static const blue800  = Color(0xFF14293D);
+  static const blue900  = Color(0xFF09121B);
 
-  static const blue50D  = Color(0xFF0F1A2E);
-  static const blue100D = Color(0xFF152340);
-  static const blue200D = Color(0xFF1E325C);
-  static const blue300D = Color(0xFF2C4E91);
-  static const blue400D = Color(0xFF5C8DFF);
-  static const blue500D = Color(0xFF3D7BFF); // ★ Primary brand (dark, lifted for APCA)
-  static const blue600D = Color(0xFF2C66E0);
-  static const blue700D = Color(0xFF1F4FB8);
-  static const blue800D = Color(0xFF16387F);
-  static const blue900D = Color(0xFF0B1F4D);
+  static const blue50D  = Color(0xFF09121B);
+  static const blue100D = Color(0xFF14293D);
+  static const blue200D = Color(0xFF1F4164);
+  static const blue300D = Color(0xFF2B5C8C);
+  static const blue400D = Color(0xFF387AB9);
+  static const blue500D = Color(0xFF4A90E2); // ★ Primary brand (dark)
+  static const blue600D = Color(0xFF7EACDF);
+  static const blue700D = Color(0xFFABC8ED);
+  static const blue800D = Color(0xFFD6E4F8);
+  static const blue900D = Color(0xFFF0F5FC);
 
   // ── §2.2  Secondaries — warm empathetic family ────────────────────────────
   static const sunset500   = Color(0xFFF4A261); // Social pillar

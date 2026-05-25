@@ -142,12 +142,13 @@ class SocialProfileScreen extends ConsumerWidget {
                   }
 
                   return SliverPadding(
-                    padding: const EdgeInsets.only(top: 1),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     sliver: SliverGrid(
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        mainAxisSpacing: 1.5,
-                        crossAxisSpacing: 1.5,
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 0.85,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -170,22 +171,29 @@ class SocialProfileScreen extends ConsumerWidget {
                                 ),
                                 if (post.imageUrls.length > 1)
                                   Positioned(
-                                    top: 6,
-                                    right: 6,
-                                    child: Icon(Icons.collections_rounded, size: 14, color: Colors.white.withAlpha(220)),
+                                    top: 10,
+                                    right: 10,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withAlpha(100),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(Icons.collections_rounded, size: 14, color: Colors.white),
+                                    ),
                                   ),
                               ],
                             );
                           } else {
                             child = Container(
                               color: post.accentColor.withAlpha(40),
-                              padding: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(12),
                               child: Center(
                                 child: Text(
                                   post.caption,
                                   maxLines: 4,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(fontSize: 11, color: post.accentColor),
+                                  style: TextStyle(fontSize: 13, color: post.accentColor),
                                 ),
                               ),
                             );
@@ -193,7 +201,10 @@ class SocialProfileScreen extends ConsumerWidget {
 
                           return GestureDetector(
                             onTap: () => context.push('/social/post/${post.id}', extra: post),
-                            child: child,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: child,
+                            ),
                           );
                         },
                         childCount: posts.length,
@@ -252,41 +263,44 @@ class _ProfileHeader extends StatelessWidget {
       color: cs.surface,
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Avatar + stats row
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _ProfileAvatar(name: petName, avatarUrl: avatarUrl, pt: pt),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _ProfileStatColumn(value: postCount?.toString() ?? '-', label: 'Posts'),
-                    _ProfileStatColumn(value: followerCount?.toString() ?? '-', label: 'Followers'),
-                    _ProfileStatColumn(value: followingCount?.toString() ?? '-', label: 'Following'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 14),
+          // Avatar
+          _ProfileAvatar(name: petName, avatarUrl: avatarUrl, pt: pt),
+          const SizedBox(height: 16),
 
           // Name + breed + bio
-          Text(petName, style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w700, fontSize: 15)),
+          Text(petName, style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
           if (petBreed != null) ...[
-            const SizedBox(height: 2),
-            Text(petBreed!, style: TextStyle(color: pt.ink500, fontSize: 13, fontWeight: FontWeight.w500)),
+            const SizedBox(height: 4),
+            Text(petBreed!, style: TextStyle(color: pt.ink500, fontSize: 14, fontWeight: FontWeight.w500)),
           ],
           if (petBio.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(petBio, style: TextStyle(color: cs.onSurface.withAlpha(200), fontSize: 13.5, height: 1.4)),
+            const SizedBox(height: 12),
+            Text(petBio, textAlign: TextAlign.center, style: TextStyle(color: cs.onSurface.withAlpha(200), fontSize: 14, height: 1.4)),
           ],
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 20),
+
+          // Stats card
+          Card.filled(
+            margin: EdgeInsets.zero,
+            color: cs.surfaceContainerHighest.withAlpha(100),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _ProfileStatColumn(value: postCount?.toString() ?? '-', label: 'Posts'),
+                  _ProfileStatColumn(value: followerCount?.toString() ?? '-', label: 'Followers'),
+                  _ProfileStatColumn(value: followingCount?.toString() ?? '-', label: 'Following'),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 20),
 
           // Action buttons
           if (isOwnProfile && resolvedPet != null)

@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/widgets.dart';
-import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
-import '../../data/models/product.dart';
-import '../../data/models/shop.dart';
-import '../../../admin/presentation/controllers/admin_auth_controller.dart';
-import '../controllers/cart_controller.dart';
-import '../controllers/product_list_controller.dart';
-import '../controllers/shop_list_controller.dart';
-import '../widgets/product_card.dart';
+import 'package:petfolio/core/theme/app_colors.dart';
+import 'package:petfolio/core/widgets/widgets.dart';
+import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
+import 'package:petfolio/features/marketplace/data/models/product.dart';
+import 'package:petfolio/features/marketplace/data/models/shop.dart';
+import 'package:petfolio/features/admin/presentation/controllers/admin_auth_controller.dart';
+import 'package:petfolio/features/marketplace/presentation/controllers/cart_controller.dart';
+import 'package:petfolio/features/marketplace/presentation/controllers/product_list_controller.dart';
+import 'package:petfolio/features/marketplace/presentation/controllers/shop_list_controller.dart';
+import 'package:petfolio/features/marketplace/presentation/widgets/product_card.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MarketplaceScreen — shop landing
@@ -41,7 +41,8 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
         child: Column(
           children: [
             AppHeader(
-              eyebrow: 'Market · Shop',
+              pillar: PfPillar.market,
+              eyebrow: 'Shop',
               onOpenSwitcher: () => PetSwitcherSheet.show(context),
               actions: [
                 if (isAdmin)
@@ -113,57 +114,28 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-      child: Container(
-        height: 44,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          color: AppColors.surface0,
-          boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
-          ],
-        ),
-        child: Row(
-          children: [
-            const SizedBox(width: 14),
-            const Icon(Icons.search_rounded, size: 18, color: AppColors.ink500),
-            const SizedBox(width: 10),
-            Expanded(
-              child: TextField(
-                controller: _controller,
-                onChanged: (v) =>
-                    ref.read(marketplaceSearchQueryProvider.notifier).set(v),
-                style: const TextStyle(fontSize: 14, color: AppColors.ink950),
-                decoration: const InputDecoration(
-                  hintText: 'Search food, gear, treats…',
-                  hintStyle:
-                      TextStyle(fontSize: 14, color: AppColors.ink500),
-                  isDense: true,
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
+      child: SearchBar(
+        controller: _controller,
+        onChanged: (v) => ref.read(marketplaceSearchQueryProvider.notifier).set(v),
+        hintText: 'Search food, gear, treats…',
+        leading: const Icon(Icons.search_rounded),
+        elevation: WidgetStateProperty.all(0),
+        backgroundColor: WidgetStateProperty.all(Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(128)),
+        trailing: [
+          if (hasText)
+            IconButton(
+              icon: const Icon(Icons.close_rounded),
+              onPressed: () {
+                _controller.clear();
+                ref.read(marketplaceSearchQueryProvider.notifier).clear();
+              },
+            )
+          else
+            const IconButton(
+              icon: Icon(Icons.tune_rounded),
+              onPressed: null,
             ),
-            GestureDetector(
-              onTap: hasText
-                  ? () {
-                      _controller.clear();
-                      ref
-                          .read(marketplaceSearchQueryProvider.notifier)
-                          .clear();
-                    }
-                  : null,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Icon(
-                  hasText ? Icons.close_rounded : Icons.tune_rounded,
-                  size: 18,
-                  color: AppColors.ink500,
-                ),
-              ),
-            ),
-            const SizedBox(width: 4),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -201,29 +173,11 @@ class _CategoryChips extends StatelessWidget {
         itemBuilder: (_, i) {
           final cat = _cats[i];
           final active = cat == selected;
-          return GestureDetector(
-            onTap: () => onSelected(cat),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                color: active ? AppColors.ink950 : AppColors.surface0,
-                boxShadow: active
-                    ? null
-                    : const [BoxShadow(color: AppColors.line200, spreadRadius: 0.5)],
-              ),
-              child: Center(
-                child: Text(
-                  cat.label,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                    color: active ? Colors.white : AppColors.ink700,
-                  ),
-                ),
-              ),
-            ),
+          return FilterChip(
+            label: Text(cat.label),
+            selected: active,
+            onSelected: (_) => onSelected(cat),
+            showCheckmark: false,
           );
         },
       ),
@@ -328,8 +282,10 @@ class _ShopBody extends ConsumerWidget {
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 120),
           sliver: SliverGrid.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: PetfolioBreakpoints.marketplaceGridColumns(
+                MediaQuery.sizeOf(context).width,
+              ),
               crossAxisSpacing: 12,
               mainAxisSpacing: 20,
               childAspectRatio: 0.62,
