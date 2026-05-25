@@ -143,15 +143,7 @@ class PetProfileScreen extends ConsumerWidget {
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                            child: PrimaryPillButton(
-                              isFullWidth: true,
-                              leadingIcon:
-                                  const Icon(Icons.dynamic_feed_rounded),
-                              label: 'View Social Profile',
-                              onPressed: () => context.push(
-                                '/social/profile/${activePet.id}',
-                              ),
-                            ),
+                            child: _SocialProfileCard(pet: activePet, pt: pt),
                           ),
                         ),
                         SliverToBoxAdapter(
@@ -287,6 +279,76 @@ class _SellerDashboardCard extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
+                      style: TextStyle(fontSize: 13, color: pt.ink500),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: pt.ink300, size: 22),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SocialProfileCard extends StatelessWidget {
+  const _SocialProfileCard({required this.pet, required this.pt});
+
+  final Pet pet;
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Semantics(
+      button: true,
+      label: 'Social Profile. View posts, likes, and activity for ${pet.name}',
+      child: GestureDetector(
+        onTap: () => context.push('/social/profile/${pet.id}'),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: pt.line200, width: 0.5),
+            boxShadow: const [
+              BoxShadow(
+                color: AppColors.shadowE1L,
+                blurRadius: 2,
+                offset: Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.mulberry500.withAlpha(30),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.dynamic_feed_rounded,
+                    color: AppColors.mulberry500, size: 22),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Social Profile',
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                            fontFamily: 'Sora',
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Posts, likes, and activity for ${pet.name}',
                       style: TextStyle(fontSize: 13, color: pt.ink500),
                     ),
                   ],
@@ -538,56 +600,6 @@ class _ProfileOverviewTab extends ConsumerWidget {
                         ],
                       ];
                     },
-                  ),
-                  const SizedBox(height: 20),
-                  _SectionLabel(label: 'Social'),
-                  const SizedBox(height: 12),
-                  GestureDetector(
-                    onTap: () => context.push('/social/profile/${pet.id}'),
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-                      decoration: BoxDecoration(
-                        color: cs.surface,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: pt.line200, width: 0.5),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: AppColors.mulberry500.withAlpha(30),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(Icons.dynamic_feed_rounded,
-                                color: AppColors.mulberry500, size: 22),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'View Social Profile',
-                                  style: TextStyle(
-                                    fontFamily: 'Sora',
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Posts, likes, and activity for ${pet.name}',
-                                  style: TextStyle(fontSize: 13, color: pt.ink500),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(Icons.chevron_right_rounded, color: pt.ink300, size: 22),
-                        ],
-                      ),
-                    ),
                   ),
                 ]),
               ),
