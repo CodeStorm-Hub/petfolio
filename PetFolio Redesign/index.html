@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PetFolio — Redesign</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* === LIGHT PALETTE — warm pastels + pop accents === */
+    --cream: #FFF4E6;
+    --cream-2: #FFEAD2;
+    --surface: #FFFFFF;
+    --surface-2: #FFFAF3;
+    --ink-950: #261308;
+    --ink-700: #5E3A28;
+    --ink-500: #957762;
+    --ink-300: #D6C2B0;
+    --line: #F4E2CB;
+    --line-2: #EFD8BB;
+
+    --tangerine: #FF8A4C;
+    --tangerine-700: #E0651E;
+    --tangerine-soft: #FFE0CB;
+
+    --poppy: #FF3D3D;
+    --poppy-700: #C41818;
+    --poppy-soft: #FFE0E0;
+
+    --mint: #2FCBA0;
+    --mint-700: #198C6E;
+    --mint-soft: #BFF1E0;
+
+    --sunny: #FFC53D;
+    --sunny-700: #C68B0F;
+    --sunny-soft: #FFEDB3;
+
+    --lilac: #A98BFF;
+    --lilac-700: #6E4DDB;
+    --lilac-soft: #E2D6FF;
+
+    --sky: #6EC8FF;
+    --sky-soft: #CDEAFF;
+
+    --shadow-soft: 0 8px 24px -10px rgba(120, 60, 20, 0.18);
+    --shadow-pop: 0 16px 36px -14px rgba(255, 92, 154, 0.35);
+    --shadow-card: 0 2px 0 0 rgba(120,60,20,0.04), 0 12px 28px -16px rgba(120,60,20,0.18);
+  }
+
+  [data-theme="dark"] {
+    --cream: #1A1014;
+    --cream-2: #221319;
+    --surface: #2A1820;
+    --surface-2: #321C25;
+    --ink-950: #FFF1E1;
+    --ink-700: #E9CFB8;
+    --ink-500: #B89685;
+    --ink-300: #B09080;
+    --line: #47313F;
+    --line-2: #5A404C;
+    --tangerine-700: #FFB886;
+    --mint-700: #62E8BE;
+    --sunny-700: #FFD96E;
+    --lilac-700: #C8AEFF;
+    --sky-soft: #0B2840;
+
+    --tangerine: #FFA374;
+    --tangerine-soft: #4A2516;
+    --poppy: #FF7070;
+    --poppy-700: #FF9898;
+    --poppy-soft: #3D1010;
+    --mint: #59E0BB;
+    --mint-soft: #163A2E;
+    --sunny: #FFD668;
+    --sunny-soft: #3D2B0A;
+    --lilac: #C1A7FF;
+    --lilac-soft: #2E2249;
+
+    --shadow-soft: 0 8px 24px -10px rgba(0,0,0,0.6);
+    --shadow-card: 0 1px 0 0 rgba(0,0,0,0.3), 0 12px 28px -16px rgba(0,0,0,0.6);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Nunito', system-ui, sans-serif;
+    background: var(--cream);
+    color: var(--ink-950);
+    overflow: hidden;
+    transition: background 280ms ease;
+  }
+
+  /* Decorative paw pattern background outside the device */
+  .stage {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background:
+      radial-gradient(circle at 18% 14%, rgba(255,138,76,0.18), transparent 40%),
+      radial-gradient(circle at 82% 84%, rgba(255,61,61,0.16), transparent 42%),
+      radial-gradient(circle at 90% 12%, rgba(255,197,61,0.18), transparent 38%),
+      radial-gradient(circle at 12% 86%, rgba(47,203,160,0.16), transparent 40%),
+      var(--cream);
+  }
+  [data-theme="dark"] .stage {
+    background:
+      radial-gradient(circle at 18% 14%, rgba(255,163,116,0.12), transparent 40%),
+      radial-gradient(circle at 82% 84%, rgba(255,112,112,0.10), transparent 42%),
+      var(--cream);
+  }
+
+  .device-wrap {
+    transform-origin: center;
+    will-change: transform;
+  }
+
+  /* Nunito utility */
+  .app, .app * { font-family: 'Nunito', system-ui, sans-serif; }
+  .display { font-family: 'Fraunces', 'Nunito', serif; font-weight: 700; letter-spacing: -0.02em; }
+
+  /* Bouncy scrollbar hide on inner */
+  .app *::-webkit-scrollbar { width: 0; height: 0; }
+  .app * { scrollbar-width: none; }
+
+  /* Global keyframes used across modules */
+  @keyframes pf-pop-in {
+    0% { transform: scale(0.6); opacity: 0; }
+    60% { transform: scale(1.08); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes pf-float-up {
+    0% { transform: translate(var(--dx, 0), 0) scale(0.6) rotate(var(--rot, 0deg)); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(var(--dx, 0), -180px) scale(1.1) rotate(var(--rot, 0deg)); opacity: 0; }
+  }
+  @keyframes pf-tail-wag {
+    0%, 100% { transform: rotate(-12deg); }
+    50% { transform: rotate(14deg); }
+  }
+  @keyframes pf-wiggle {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
+  @keyframes pf-pulse-ring {
+    0% { transform: scale(0.9); opacity: 0.8; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+  @keyframes pf-fade-up {
+    0% { transform: translateY(12px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes pf-shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: 200px 0; }
+  }
+  @keyframes pf-bounce-soft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  @keyframes pf-confetti-fall {
+    0% { transform: translate(var(--cx,0), -40px) rotate(0); opacity: 0; }
+    10% { opacity: 1; }
+    100% { transform: translate(calc(var(--cx,0) + var(--cdx, 20px)), 900px) rotate(var(--crot, 720deg)); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div id="root" class="device-wrap"></div>
+  </div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="android-frame.jsx"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="components.jsx"></script>
+  <script type="text/babel" src="onboarding.jsx"></script>
+  <script type="text/babel" src="home.jsx"></script>
+  <script type="text/babel" src="social.jsx"></script>
+  <script type="text/babel" src="match.jsx"></script>
+  <script type="text/babel" src="care.jsx"></script>
+  <script type="text/babel" src="health.jsx"></script>
+  <script type="text/babel" src="market.jsx"></script>
+  <script type="text/babel" src="app.jsx"></script>
+
+  <script>
+    // Scale the device to fit the viewport
+    function scaleDevice() {
+      const root = document.getElementById('root');
+      if (!root) return;
+      const child = root.firstElementChild;
+      if (!child) return;
+      const W = window.innerWidth, H = window.innerHeight;
+      const dw = 460, dh = 940; // approx Android frame with margin
+      const s = Math.min(W / dw, H / dh, 1);
+      root.style.transform = `scale(${s})`;
+    }
+    window.addEventListener('resize', scaleDevice);
+    const _scaleObs = new MutationObserver(scaleDevice);
+    document.addEventListener('DOMContentLoaded', () => {
+      _scaleObs.observe(document.getElementById('root'), { childList: true, subtree: true });
+      setTimeout(scaleDevice, 50);
+      setTimeout(scaleDevice, 250);
+      setTimeout(scaleDevice, 600);
+    });
+  </script>
+</body>
+</html>

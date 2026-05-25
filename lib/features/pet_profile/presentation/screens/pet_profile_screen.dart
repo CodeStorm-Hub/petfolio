@@ -548,7 +548,6 @@ class _ProfileOverviewTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final recordsAsync = ref.watch(healthVaultControllerProvider);
-    final cs = Theme.of(context).colorScheme;
 
     return Builder(
       builder: (context) {

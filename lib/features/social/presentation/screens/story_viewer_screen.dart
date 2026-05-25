@@ -51,7 +51,6 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
   void _setupStacks(List<Story> allStories) {
     if (_initialized) return;
 
-    // Group stories by petId
     final grouped = <String, List<Story>>{};
     for (final story in allStories) {
       grouped.putIfAbsent(story.petId, () => []).add(story);
@@ -59,10 +58,8 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
 
     final stacks = grouped.entries.map((e) {
       final first = e.value.first;
-      // Sort stories in stack by oldest first so they play in chronological order
       final sortedStories = List<Story>.from(e.value)
         ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
-
       return PetStoryStack(
         petId: e.key,
         petName: first.petName,
@@ -72,17 +69,17 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
       );
     }).toList();
 
-    // Find the initial pet's index
     int initialIndex = stacks.indexWhere((s) => s.petId == widget.initialPetId);
     if (initialIndex == -1) initialIndex = 0;
 
-    setState(() {
-      _petStacks = stacks;
-      _currentPetIndex = initialIndex;
-      _initialized = true;
-    });
-
+    // Defer setState to avoid calling it during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _petStacks = stacks;
+        _currentPetIndex = initialIndex;
+        _initialized = true;
+      });
       if (_pageController.hasClients) {
         _pageController.jumpToPage(initialIndex);
       }
@@ -90,21 +87,22 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
     });
   }
 
-  void _startStory() {
+  void _startStory({double fromProgress = 0.0}) {
     _timer?.cancel();
     if (_petStacks.isEmpty) return;
 
     setState(() {
-      _progress = 0.0;
+      _progress = fromProgress;
       _isPaused = false;
     });
 
-    // Mark current story as viewed
-    final currentStory = _petStacks[_currentPetIndex].stories[_currentStoryIndex];
-    ref.read(storiesProvider.notifier).markStoryViewed(currentStory.id);
+    if (fromProgress == 0.0) {
+      final currentStory = _petStacks[_currentPetIndex].stories[_currentStoryIndex];
+      ref.read(storiesProvider.notifier).markStoryViewed(currentStory.id);
+    }
 
     final totalTicks = _storyDurationMs / _tickMs;
-    double increment = 1.0 / totalTicks;
+    final increment = 1.0 / totalTicks;
 
     _timer = Timer.periodic(const Duration(milliseconds: _tickMs), (timer) {
       if (_isPaused) return;
@@ -373,9 +371,10 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                               behavior: HitTestBehavior.opaque,
                               onTap: () {
                                 _timer?.cancel();
+                                final savedProgress = _progress;
                                 context.push('/social/profile/${activeStack.petId}').then((_) {
                                   if (mounted) {
-                                    _startStory();
+                                    _startStory(fromProgress: savedProgress);
                                   }
                                 });
                               },

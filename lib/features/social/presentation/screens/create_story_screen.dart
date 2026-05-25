@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +28,7 @@ class CreateStoryScreen extends ConsumerStatefulWidget {
 class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
   final _picker = ImagePicker();
   bool _isDownloadingMock = false;
+  Uint8List? _previewBytes;
 
   static const _mockPetImages = [
     'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&auto=format&fit=crop', // Golden Retriever
@@ -51,6 +52,11 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
 
   // ── Image picking ──────────────────────────────────────────────────────────
 
+  Future<void> _loadPreviewBytes(XFile file) async {
+    final bytes = await file.readAsBytes();
+    if (mounted) setState(() => _previewBytes = bytes);
+  }
+
   Future<void> _pickFromCamera() async {
     final pickedFile = await _picker.pickImage(
       source: ImageSource.camera,
@@ -59,6 +65,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
     );
     if (pickedFile != null && mounted) {
       ref.read(createPostControllerProvider.notifier).setImage(pickedFile);
+      await _loadPreviewBytes(pickedFile);
     }
   }
 
@@ -70,6 +77,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
     );
     if (pickedFile != null && mounted) {
       ref.read(createPostControllerProvider.notifier).setImage(pickedFile);
+      await _loadPreviewBytes(pickedFile);
     }
   }
 
@@ -78,10 +86,13 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
-        final tempDir = Directory.systemTemp;
-        final file = File('${tempDir.path}/mock_pet_${DateTime.now().millisecondsSinceEpoch}.jpg');
-        await file.writeAsBytes(response.bodyBytes);
-        ref.read(createPostControllerProvider.notifier).setImage(XFile(file.path));
+        final xFile = XFile.fromData(
+          response.bodyBytes,
+          mimeType: 'image/jpeg',
+          name: 'mock_pet_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        );
+        ref.read(createPostControllerProvider.notifier).setImage(xFile);
+        if (mounted) setState(() => _previewBytes = response.bodyBytes);
       } else {
         throw Exception('Failed to load image');
       }
@@ -275,10 +286,9 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
         children: [
           // 1. Fullscreen Preview Image
           Positioned.fill(
-            child: Image.file(
-              File(state.image!.path),
-              fit: BoxFit.cover,
-            ),
+            child: _previewBytes != null
+                ? Image.memory(_previewBytes!, fit: BoxFit.cover)
+                : const Center(child: CircularProgressIndicator()),
           ),
 
           // 2. Gradients overlay for visual text readability
@@ -387,7 +397,10 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
               ),
               child: IconButton(
                 icon: const Icon(Icons.close_rounded, color: Colors.white, size: 24),
-                onPressed: () => ref.read(createPostControllerProvider.notifier).removeImage(),
+                onPressed: () {
+                  ref.read(createPostControllerProvider.notifier).removeImage();
+                  setState(() => _previewBytes = null);
+                },
               ),
             ),
           ),

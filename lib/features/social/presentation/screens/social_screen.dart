@@ -153,8 +153,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                     physics: const AlwaysScrollableScrollPhysics(),
                     slivers: [
                       SliverToBoxAdapter(
-                        child: _StoriesRow(
-                            posts: feedState.posts, pet: widget.pet),
+                        child: _StoriesRow(pet: widget.pet),
                       ),
                       if (feedState.posts.isEmpty)
                         SliverFillRemaining(
@@ -235,8 +234,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _StoriesRow extends ConsumerWidget {
-  const _StoriesRow({required this.posts, required this.pet});
-  final List<FeedPost> posts;
+  const _StoriesRow({required this.pet});
   final Pet pet;
 
   @override

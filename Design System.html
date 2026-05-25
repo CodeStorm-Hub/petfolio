@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PetFolio — Design System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500;1,9..144,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* === LIGHT PALETTE — warm pastels + pop accents === */
+    --cream: #FFF4E6;
+    --cream-2: #FFEAD2;
+    --surface: #FFFFFF;
+    --surface-2: #FFFAF3;
+    --ink-950: #261308;
+    --ink-700: #5E3A28;
+    --ink-500: #957762;
+    --ink-300: #D6C2B0;
+    --line: #F4E2CB;
+    --line-2: #EFD8BB;
+
+    --tangerine: #FF8A4C;
+    --tangerine-700: #E0651E;
+    --tangerine-soft: #FFE0CB;
+
+    --poppy: #FF3D3D;
+    --poppy-700: #C41818;
+    --poppy-soft: #FFE0E0;
+
+    --mint: #2FCBA0;
+    --mint-700: #198C6E;
+    --mint-soft: #BFF1E0;
+
+    --sunny: #FFC53D;
+    --sunny-700: #C68B0F;
+    --sunny-soft: #FFEDB3;
+
+    --lilac: #A98BFF;
+    --lilac-700: #6E4DDB;
+    --lilac-soft: #E2D6FF;
+
+    --sky: #6EC8FF;
+    --sky-700: #2895DA;
+    --sky-soft: #CDEAFF;
+
+    --success: #2FB174;
+    --warning: #F0A23A;
+    --danger:  #E5484D;
+    --info:    #6EC8FF;
+
+    --shadow-soft: 0 8px 24px -10px rgba(120, 60, 20, 0.18);
+    --shadow-pop:  0 16px 36px -14px rgba(255, 92, 154, 0.35);
+    --shadow-card: 0 2px 0 0 rgba(120,60,20,0.04), 0 12px 28px -16px rgba(120,60,20,0.18);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: 'Nunito', system-ui, sans-serif;
+    background:
+      radial-gradient(circle at 12% 6%, rgba(255,138,76,0.16), transparent 35%),
+      radial-gradient(circle at 90% 4%, rgba(255,197,61,0.14), transparent 32%),
+      radial-gradient(circle at 88% 88%, rgba(255,61,61,0.10), transparent 38%),
+      radial-gradient(circle at 8% 92%, rgba(47,203,160,0.10), transparent 38%),
+      var(--cream);
+    color: var(--ink-950);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--poppy-soft); color: var(--poppy-700); }
+
+  /* ─── Layout ──────────────────────────── */
+  .page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 56px 40px 120px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 56px;
+    align-items: start;
+  }
+  nav.toc {
+    position: sticky;
+    top: 32px;
+    align-self: start;
+    padding: 22px 20px;
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    box-shadow: var(--shadow-card);
+  }
+  nav.toc .brand {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 18px;
+  }
+  nav.toc .brand .logo {
+    width: 36px; height: 36px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--tangerine), var(--poppy));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    box-shadow: 0 4px 0 0 var(--tangerine-700), 0 10px 20px -8px rgba(255,61,61,0.4);
+  }
+  nav.toc .brand .name { font-weight: 900; font-size: 15px; letter-spacing: -0.01em; }
+  nav.toc .brand .name small { display: block; font-weight: 600; font-size: 11px; color: var(--ink-500); letter-spacing: 0.04em; text-transform: uppercase; }
+  nav.toc ol { list-style: none; counter-reset: nav; }
+  nav.toc li { counter-increment: nav; }
+  nav.toc a {
+    display: flex; align-items: baseline; gap: 8px;
+    padding: 6px 10px; margin: 1px -10px;
+    color: var(--ink-700);
+    text-decoration: none;
+    font-size: 13px; font-weight: 700;
+    border-radius: 10px;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  nav.toc a::before {
+    content: counter(nav, decimal-leading-zero);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-300);
+    font-weight: 500;
+  }
+  nav.toc a:hover { background: var(--tangerine-soft); color: var(--tangerine-700); }
+  nav.toc a:hover::before { color: var(--tangerine-700); }
+
+  main { min-width: 0; }
+
+  /* ─── Hero ───────────────────────────── */
+  .hero {
+    position: relative;
+    background: linear-gradient(135deg, var(--poppy) 0%, #FF5C40 40%, var(--tangerine) 100%);
+    border-radius: 36px;
+    padding: 44px 44px 64px;
+    color: #fff;
+    box-shadow: var(--shadow-pop);
+    overflow: hidden;
+    margin-bottom: 60px;
+  }
+  .hero::after {
+    content: '';
+    position: absolute; left: 0; right: 0; bottom: -1px; height: 38px;
+    background:
+      radial-gradient(circle at 10% 100%, var(--cream) 18px, transparent 19px),
+      radial-gradient(circle at 30% 100%, var(--cream) 22px, transparent 23px),
+      radial-gradient(circle at 50% 100%, var(--cream) 18px, transparent 19px),
+      radial-gradient(circle at 70% 100%, var(--cream) 22px, transparent 23px),
+      radial-gradient(circle at 90% 100%, var(--cream) 18px, transparent 19px);
+  }
+  .hero .eyebrow {
+    font-size: 12px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase;
+    opacity: 0.85; margin-bottom: 18px;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.18); padding: 6px 12px; border-radius: 999px;
+  }
+  .hero h1 {
+    font-family: 'Fraunces', serif; font-weight: 700;
+    font-size: clamp(40px, 5vw, 64px);
+    letter-spacing: -0.025em; line-height: 1.02;
+    max-width: 760px;
+  }
+  .hero h1 em { font-style: italic; font-weight: 500; color: #FFE6F1; }
+  .hero p.lede {
+    margin-top: 18px;
+    font-size: 17px; line-height: 1.55; font-weight: 500;
+    max-width: 620px;
+    color: rgba(255,255,255,0.92);
+  }
+  .hero .meta {
+    margin-top: 28px;
+    display: flex; flex-wrap: wrap; gap: 10px;
+  }
+  .hero .meta .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.18);
+    padding: 8px 14px; border-radius: 999px;
+    font-size: 13px; font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.25);
+  }
+  .hero .meta .chip b { font-family: 'JetBrains Mono', monospace; font-weight: 500; font-size: 12px; opacity: 0.9; }
+
+  /* paw watermarks on hero */
+  .hero svg.paw-wm {
+    position: absolute; opacity: 0.16; color: #fff;
+  }
+  .hero svg.paw-wm.a { top: 30px; right: 60px; transform: rotate(18deg); }
+  .hero svg.paw-wm.b { top: 110px; right: 180px; transform: rotate(-12deg); }
+  .hero svg.paw-wm.c { top: 70px; right: 280px; transform: rotate(34deg); }
+
+  /* ─── Sections ─────────────────────────── */
+  section { margin-bottom: 72px; scroll-margin-top: 24px; }
+  .sec-head {
+    display: flex; align-items: baseline; gap: 14px;
+    margin-bottom: 22px;
+  }
+  .sec-head .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500; font-size: 13px;
+    color: var(--ink-500);
+    background: var(--surface);
+    padding: 4px 10px; border-radius: 8px;
+    border: 1px solid var(--line);
+  }
+  .sec-head h2 {
+    font-family: 'Fraunces', serif; font-weight: 700;
+    font-size: 36px; letter-spacing: -0.022em; line-height: 1.05;
+    color: var(--ink-950);
+  }
+  .sec-head h2 em { font-style: italic; color: var(--poppy-700); font-weight: 500; }
+  .sec-sub {
+    color: var(--ink-700); font-size: 16px; line-height: 1.55;
+    max-width: 720px; margin-bottom: 28px; font-weight: 500;
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    padding: 24px;
+    box-shadow: var(--shadow-card);
+  }
+  .card .h {
+    font-family: 'Fraunces', serif; font-weight: 700;
+    font-size: 22px; letter-spacing: -0.015em;
+    margin-bottom: 6px;
+  }
+  .card .sub {
+    color: var(--ink-500); font-size: 13px; font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  /* Section title (in-app style) */
+  .stitle {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .stitle .bar { width: 6px; height: 22px; border-radius: 4px; background: var(--tangerine); }
+  .stitle h3 { font-size: 17px; font-weight: 800; letter-spacing: -0.005em; }
+
+  .grid { display: grid; gap: 18px; }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .g6 { grid-template-columns: repeat(6, 1fr); }
+  @media (max-width: 880px) {
+    .page { grid-template-columns: 1fr; padding: 32px 22px 80px; }
+    nav.toc { position: static; }
+    .g3, .g4, .g6 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ── Principles ── */
+  .principle {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 22px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+  }
+  .principle .num {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 56px; line-height: 0.9; letter-spacing: -0.03em;
+    color: var(--poppy); opacity: 0.85;
+  }
+  .principle h4 {
+    font-family: 'Fraunces', serif; font-weight: 700; font-size: 22px;
+    letter-spacing: -0.015em; margin: 8px 0 6px;
+  }
+  .principle p { color: var(--ink-700); font-size: 14px; line-height: 1.55; font-weight: 500; }
+  .principle.p1 .num { color: var(--tangerine); }
+  .principle.p2 .num { color: var(--poppy); }
+  .principle.p3 .num { color: var(--mint); }
+  .principle.p4 .num { color: var(--lilac); }
+
+  /* ── Color ── */
+  .swatch {
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-card);
+    background: var(--surface);
+  }
+  .swatch .chip {
+    height: 96px;
+    position: relative;
+    display: flex; align-items: flex-end; justify-content: flex-end;
+    padding: 10px;
+  }
+  .swatch .chip .star {
+    position: absolute; top: 10px; left: 10px;
+    background: rgba(255,255,255,0.85);
+    color: var(--ink-950);
+    width: 22px; height: 22px; border-radius: 6px;
+    font-size: 11px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .swatch .meta { padding: 12px 14px 14px; }
+  .swatch .name {
+    font-size: 14px; font-weight: 800; letter-spacing: -0.005em;
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .swatch .hex {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 500;
+    color: var(--ink-500);
+    margin-top: 2px;
+  }
+  .swatch .role {
+    font-size: 12px; color: var(--ink-500); font-weight: 600;
+    margin-top: 4px;
+  }
+
+  .ramp {
+    display: grid;
+    grid-template-columns: 140px repeat(4, 1fr);
+    border-radius: 22px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-card);
+    background: var(--surface);
+  }
+  .ramp .label {
+    padding: 18px 18px;
+    display: flex; flex-direction: column; justify-content: center; gap: 4px;
+    background: var(--surface-2);
+    border-right: 1px solid var(--line);
+  }
+  .ramp .label .n { font-weight: 800; font-size: 15px; }
+  .ramp .label .d { font-size: 11px; color: var(--ink-500); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  .ramp .stop {
+    padding: 14px 12px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    min-height: 96px;
+    color: #fff;
+  }
+  .ramp .stop.lite { color: var(--ink-950); }
+  .ramp .stop .lvl { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; }
+  .ramp .stop .hex { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; }
+
+  .semantic-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .semantic-row:last-child { border-bottom: none; }
+  .semantic-row .dot { width: 36px; height: 36px; border-radius: 12px; flex-shrink: 0; }
+  .semantic-row .name { font-weight: 800; font-size: 14px; }
+  .semantic-row .desc { font-size: 13px; color: var(--ink-500); font-weight: 600; }
+  .semantic-row .hex { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-700); }
+
+  /* ── Type ── */
+  .type-row {
+    display: grid; grid-template-columns: 180px 1fr 140px;
+    align-items: baseline;
+    padding: 22px 22px;
+    border-bottom: 1px dashed var(--line);
+    gap: 18px;
+  }
+  .type-row:last-child { border-bottom: none; }
+  .type-row .meta-l {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--ink-500); font-weight: 500; line-height: 1.5;
+  }
+  .type-row .meta-l b { color: var(--ink-950); font-family: 'Nunito'; font-weight: 800; font-size: 13px; display: block; margin-bottom: 4px; }
+  .type-row .sample { color: var(--ink-950); }
+  .type-row .meta-r {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--ink-500); text-align: right;
+  }
+
+  .font-card {
+    border-radius: 22px; padding: 24px; background: var(--surface);
+    border: 1px solid var(--line); box-shadow: var(--shadow-card);
+  }
+  .font-card .glyph {
+    font-size: 110px; line-height: 1; letter-spacing: -0.04em;
+    margin-bottom: 8px;
+  }
+  .font-card .fname {
+    font-size: 13px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .font-card .fdesc { font-size: 13px; color: var(--ink-500); font-weight: 600; margin-top: 6px; line-height: 1.5; }
+  .font-card .weights { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .font-card .weights span {
+    font-size: 11px; font-weight: 700;
+    padding: 4px 9px; border-radius: 999px;
+    background: var(--cream-2); color: var(--ink-700);
+  }
+
+  /* ── Radius ── */
+  .rad-tile {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 18px;
+    box-shadow: var(--shadow-card);
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+  .rad-tile .shape {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, var(--tangerine-soft), var(--tangerine));
+    border: 2px solid var(--tangerine-700);
+  }
+  .rad-tile .n { font-weight: 800; font-size: 13px; }
+  .rad-tile .px { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-500); }
+
+  /* ── Shadow / elevation ── */
+  .elev-tile {
+    padding: 22px;
+    background: var(--surface);
+    border-radius: 18px;
+    text-align: center;
+  }
+  .elev-tile .demo {
+    width: 100%; height: 84px;
+    background: var(--surface);
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    margin-bottom: 14px;
+  }
+  .elev-tile .n { font-weight: 800; font-size: 13px; }
+  .elev-tile .d { font-size: 11px; color: var(--ink-500); font-weight: 600; margin-top: 4px; }
+
+  /* ── Spacing ── */
+  .space-row {
+    display: grid; grid-template-columns: 80px 1fr 60px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+  }
+  .space-row:last-child { border: none; }
+  .space-row .tok { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+  .space-row .bar-w { height: 18px; background: var(--tangerine); border-radius: 4px; }
+  .space-row .px { text-align: right; font-family: 'JetBrains Mono', monospace; color: var(--ink-500); }
+
+  /* ── Buttons (in-app pill style) ── */
+  .pill-btn {
+    border-radius: 999px; border: none; cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800; letter-spacing: 0.1px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+  }
+  .pill-btn:active { transform: translateY(2px); }
+  .pill-btn.primary {
+    background: var(--tangerine); color: #fff;
+    box-shadow: 0 6px 0 0 var(--tangerine-700), 0 14px 24px -10px rgba(255,138,76,0.6);
+  }
+  .pill-btn.primary:active { box-shadow: 0 2px 0 0 var(--tangerine-700), 0 8px 16px -8px rgba(255,138,76,0.5); }
+  .pill-btn.primary.poppy {
+    background: var(--poppy);
+    box-shadow: 0 6px 0 0 var(--poppy-700), 0 14px 24px -10px rgba(255,61,61,0.6);
+  }
+  .pill-btn.primary.mint {
+    background: var(--mint);
+    box-shadow: 0 6px 0 0 var(--mint-700), 0 14px 24px -10px rgba(47,203,160,0.6);
+  }
+  .pill-btn.primary.lilac {
+    background: var(--lilac);
+    box-shadow: 0 6px 0 0 var(--lilac-700), 0 14px 24px -10px rgba(169,139,255,0.6);
+  }
+  .pill-btn.soft { background: var(--tangerine-soft); color: var(--tangerine-700); }
+  .pill-btn.outline { background: var(--surface); color: var(--ink-950); box-shadow: inset 0 0 0 2px var(--line-2); }
+  .pill-btn.ghost { background: transparent; color: var(--ink-950); }
+  .pill-btn.dark { background: var(--ink-950); color: var(--cream); box-shadow: 0 6px 0 0 #000, 0 12px 24px -10px rgba(0,0,0,0.4); }
+  .pill-btn.sm { height: 36px; padding: 0 14px; font-size: 14px; }
+  .pill-btn.md { height: 48px; padding: 0 22px; font-size: 16px; }
+  .pill-btn.lg { height: 56px; padding: 0 26px; font-size: 17px; }
+  .pill-btn.xl { height: 64px; padding: 0 30px; font-size: 18px; }
+
+  .icon-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--surface); border: none; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-soft); color: var(--ink-950);
+  }
+
+  /* ── Avatars ── */
+  .avatar {
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .avatar.ring {
+    padding: 3px;
+    background: conic-gradient(from 220deg, var(--tangerine), var(--poppy), var(--sunny), var(--mint), var(--tangerine));
+  }
+  .avatar .inner {
+    width: 100%; height: 100%; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--surface);
+  }
+  .avatar.no-ring .inner { border: none; }
+  .avatar .inner.dog  { background: radial-gradient(circle at 30% 30%, var(--tangerine-soft), var(--tangerine) 90%); }
+  .avatar .inner.cat  { background: radial-gradient(circle at 30% 30%, var(--poppy-soft), var(--poppy) 90%); }
+  .avatar .inner.bird { background: radial-gradient(circle at 30% 30%, var(--sky-soft), var(--sky) 90%); }
+  .avatar .inner.rabbit { background: radial-gradient(circle at 30% 30%, var(--lilac-soft), var(--lilac) 90%); }
+  .avatar .inner.fish { background: radial-gradient(circle at 30% 30%, var(--mint-soft), var(--mint) 90%); }
+  .avatar .inner.reptile { background: radial-gradient(circle at 30% 30%, var(--sunny-soft), var(--sunny) 90%); }
+
+  /* ── Toggle ── */
+  .paw-toggle {
+    width: 54px; height: 30px; border-radius: 999px; border: none; cursor: pointer;
+    position: relative; padding: 3px;
+    transition: background 200ms ease;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .paw-toggle.on { background: var(--tangerine); }
+  .paw-toggle.off { background: var(--line-2); }
+  .paw-toggle .knob {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #fff; position: absolute; top: 3px;
+    transition: left 200ms cubic-bezier(.5,1.7,.5,1);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .paw-toggle.on .knob { left: 27px; }
+  .paw-toggle.off .knob { left: 3px; }
+
+  /* ── Slider ── */
+  .bone-slider { position: relative; height: 28px; padding: 8px 0; }
+  .bone-slider .track {
+    height: 8px; border-radius: 999px; background: var(--line-2); position: relative;
+  }
+  .bone-slider .fill {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 62%;
+    background: linear-gradient(90deg, var(--tangerine), var(--poppy));
+    border-radius: 999px;
+  }
+  .bone-slider .thumb {
+    position: absolute; left: calc(62% - 18px); top: -2px;
+    width: 36px; height: 32px;
+    transform: rotate(-15deg);
+  }
+
+  /* ── Quest row example ── */
+  .quest {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 12px 14px;
+    box-shadow: var(--shadow-card);
+  }
+  .quest .icon {
+    width: 44px; height: 44px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .quest .body { flex: 1; min-width: 0; }
+  .quest .body .t { font-weight: 800; font-size: 15px; }
+  .quest .body .s { font-size: 12px; color: var(--ink-500); font-weight: 700; }
+  .quest .xp {
+    background: var(--sunny-soft); color: var(--sunny-700);
+    font-weight: 800; font-size: 12px; letter-spacing: 0.04em;
+    padding: 4px 10px; border-radius: 999px;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .quest .check {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 2px solid var(--line-2);
+    flex-shrink: 0;
+  }
+  .quest.done {
+    background: var(--mint-soft); border-color: transparent;
+    box-shadow: 0 6px 0 0 rgba(47,203,160,0.18), 0 12px 24px -10px rgba(47,203,160,0.3);
+  }
+  .quest.done .check {
+    background: var(--mint); border-color: var(--mint);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── Bottom nav ── */
+  .bnav {
+    background: var(--surface);
+    border-radius: 32px;
+    border: 1px solid var(--line);
+    box-shadow: 0 -2px 0 0 var(--line), 0 20px 36px -12px rgba(120,60,20,0.18);
+    height: 64px;
+    display: flex; align-items: center; padding: 0 4px;
+  }
+  .bnav .tab {
+    flex: 1; height: 56px; border: none; background: transparent; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; color: var(--ink-500);
+    font-family: inherit; font-weight: 600; font-size: 11px;
+  }
+  .bnav .tab .icw {
+    padding: 4px 14px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .bnav .tab.active { font-weight: 800; }
+  .bnav .tab.active.t1 { color: var(--tangerine); }
+  .bnav .tab.active.t1 .icw { background: color-mix(in oklab, var(--tangerine) 14%, transparent); }
+
+  /* ── Motif demos ── */
+  .wave-demo {
+    border-radius: 22px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-card);
+    background: var(--surface);
+  }
+  .wave-demo .top {
+    background: var(--tangerine);
+    height: 88px;
+    color: #fff;
+    padding: 18px 22px;
+    font-family: 'Fraunces', serif; font-weight: 700; font-size: 22px;
+    letter-spacing: -0.015em;
+  }
+  .wave-demo .top .small { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.85; font-family: 'Nunito'; font-weight: 800; }
+  .wave-demo .bot { padding: 18px 22px; font-size: 13px; color: var(--ink-700); font-weight: 600; }
+
+  .paw-pattern {
+    height: 180px;
+    border-radius: 22px;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    background-color: var(--cream);
+    background-image:
+      radial-gradient(circle at 12% 22%, rgba(255,138,76,0.22) 9px, transparent 10px),
+      radial-gradient(circle at 33% 70%, rgba(255,61,61,0.18) 11px, transparent 12px),
+      radial-gradient(circle at 65% 30%, rgba(255,197,61,0.22) 9px, transparent 10px),
+      radial-gradient(circle at 85% 78%, rgba(47,203,160,0.18) 11px, transparent 12px),
+      radial-gradient(circle at 50% 50%, rgba(169,139,255,0.18) 9px, transparent 10px);
+    position: relative;
+  }
+  .paw-pattern .pw {
+    position: absolute; color: var(--tangerine); opacity: 0.6;
+  }
+
+  /* Loader */
+  @keyframes pf-tail-wag {
+    0%, 100% { transform: rotate(-12deg); }
+    50% { transform: rotate(14deg); }
+  }
+  .loader {
+    position: relative; width: 70px; height: 70px;
+  }
+  .loader .body {
+    position: absolute; left: 20%; top: 30%; width: 60%; height: 55%;
+    border-radius: 50% 60% 55% 50% / 60% 50% 60% 70%;
+    background: var(--tangerine);
+  }
+  .loader .head {
+    position: absolute; left: 10%; top: 15%; width: 38%; height: 42%;
+    border-radius: 50%;
+    background: var(--tangerine);
+  }
+  .loader .ear {
+    position: absolute; left: 8%; top: 5%; width: 18%; height: 24%;
+    border-radius: 60% 40% 50% 50%;
+    background: var(--tangerine-700);
+    transform: rotate(-25deg);
+  }
+  .loader .eye {
+    position: absolute; left: 28%; top: 28%; width: 5px; height: 5px; border-radius: 50%;
+    background: #fff;
+  }
+  .loader .tail {
+    position: absolute; right: 8%; top: 32%; width: 24%; height: 10%;
+    border-radius: 60% 40% 50% 50%;
+    background: var(--tangerine);
+    transform-origin: 0% 50%;
+    animation: pf-tail-wag 350ms ease-in-out infinite;
+  }
+
+  /* Species table */
+  .species-tile {
+    background: var(--surface);
+    border-radius: 22px;
+    border: 1px solid var(--line);
+    padding: 16px;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+  }
+  .species-tile .emoji {
+    width: 64px; height: 64px; border-radius: 50%;
+    margin: 0 auto 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+  }
+  .species-tile .l { font-weight: 800; font-size: 14px; }
+  .species-tile .t { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-500); margin-top: 3px; }
+
+  /* Icon library */
+  .icon-grid {
+    display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px;
+  }
+  .icon-cell {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    padding: 14px 8px 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--ink-700);
+  }
+  .icon-cell .lbl { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-500); }
+  @media (max-width: 880px) { .icon-grid { grid-template-columns: repeat(4, 1fr); } }
+
+  /* Motion */
+  .motion-row {
+    display: grid; grid-template-columns: 90px 100px 1fr;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    gap: 16px;
+  }
+  .motion-row:last-child { border: none; }
+  .motion-row .tk { font-family: 'JetBrains Mono', monospace; font-weight: 500; font-size: 13px; color: var(--ink-950); }
+  .motion-row .dur { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-500); }
+  .motion-row .desc { font-size: 13px; color: var(--ink-700); font-weight: 600; }
+
+  /* Tags / badges */
+  .tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 800;
+  }
+  .tag.streak { background: var(--sunny-soft); color: var(--sunny-700); }
+  .tag.match { background: var(--poppy-soft); color: var(--poppy-700); }
+  .tag.health { background: var(--mint-soft); color: var(--mint-700); }
+  .tag.weekly { background: var(--lilac-soft); color: var(--lilac-700); }
+  .tag.new { background: var(--tangerine-soft); color: var(--tangerine-700); }
+
+  footer {
+    text-align: center; color: var(--ink-500); font-size: 12px; font-weight: 700;
+    padding-top: 40px; border-top: 1px dashed var(--line); margin-top: 40px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.08em;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ──────────────────────── TOC ──────────────────────── -->
+  <nav class="toc">
+    <div class="brand">
+      <div class="logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><ellipse cx="6" cy="9" rx="2.1" ry="2.6"/><ellipse cx="10" cy="5.6" rx="2" ry="2.5"/><ellipse cx="14" cy="5.6" rx="2" ry="2.5"/><ellipse cx="18" cy="9" rx="2.1" ry="2.6"/><path d="M12 10c-3.6 0-6.2 3-6.2 5.7 0 2.1 1.7 3.3 3.5 3.3 1.2 0 1.7-.6 2.7-.6s1.5.6 2.7.6c1.8 0 3.5-1.2 3.5-3.3 0-2.7-2.6-5.7-6.2-5.7z"/></svg>
+      </div>
+      <div class="name">PetFolio<small>Design System</small></div>
+    </div>
+    <ol>
+      <li><a href="#principles">Principles</a></li>
+      <li><a href="#color">Color</a></li>
+      <li><a href="#type">Typography</a></li>
+      <li><a href="#radius">Radius</a></li>
+      <li><a href="#elevation">Elevation</a></li>
+      <li><a href="#spacing">Spacing</a></li>
+      <li><a href="#motion">Motion</a></li>
+      <li><a href="#buttons">Buttons</a></li>
+      <li><a href="#cards">Cards</a></li>
+      <li><a href="#avatars">Avatars &amp; Species</a></li>
+      <li><a href="#controls">Controls</a></li>
+      <li><a href="#nav">Navigation</a></li>
+      <li><a href="#icons">Iconography</a></li>
+      <li><a href="#motifs">Motifs</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ─────── Hero ─────── -->
+    <header class="hero">
+      <svg class="paw-wm a" width="72" height="72" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="6" cy="9" rx="2.1" ry="2.6"/><ellipse cx="10" cy="5.6" rx="2" ry="2.5"/><ellipse cx="14" cy="5.6" rx="2" ry="2.5"/><ellipse cx="18" cy="9" rx="2.1" ry="2.6"/><path d="M12 10c-3.6 0-6.2 3-6.2 5.7 0 2.1 1.7 3.3 3.5 3.3 1.2 0 1.7-.6 2.7-.6s1.5.6 2.7.6c1.8 0 3.5-1.2 3.5-3.3 0-2.7-2.6-5.7-6.2-5.7z"/></svg>
+      <svg class="paw-wm b" width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="6" cy="9" rx="2.1" ry="2.6"/><ellipse cx="10" cy="5.6" rx="2" ry="2.5"/><ellipse cx="14" cy="5.6" rx="2" ry="2.5"/><ellipse cx="18" cy="9" rx="2.1" ry="2.6"/><path d="M12 10c-3.6 0-6.2 3-6.2 5.7 0 2.1 1.7 3.3 3.5 3.3 1.2 0 1.7-.6 2.7-.6s1.5.6 2.7.6c1.8 0 3.5-1.2 3.5-3.3 0-2.7-2.6-5.7-6.2-5.7z"/></svg>
+      <svg class="paw-wm c" width="36" height="36" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="6" cy="9" rx="2.1" ry="2.6"/><ellipse cx="10" cy="5.6" rx="2" ry="2.5"/><ellipse cx="14" cy="5.6" rx="2" ry="2.5"/><ellipse cx="18" cy="9" rx="2.1" ry="2.6"/><path d="M12 10c-3.6 0-6.2 3-6.2 5.7 0 2.1 1.7 3.3 3.5 3.3 1.2 0 1.7-.6 2.7-.6s1.5.6 2.7.6c1.8 0 3.5-1.2 3.5-3.3 0-2.7-2.6-5.7-6.2-5.7z"/></svg>
+
+      <div class="eyebrow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="6" cy="9" rx="2.1" ry="2.6"/><ellipse cx="10" cy="5.6" rx="2" ry="2.5"/><ellipse cx="14" cy="5.6" rx="2" ry="2.5"/><ellipse cx="18" cy="9" rx="2.1" ry="2.6"/><path d="M12 10c-3.6 0-6.2 3-6.2 5.7 0 2.1 1.7 3.3 3.5 3.3 1.2 0 1.7-.6 2.7-.6s1.5.6 2.7.6c1.8 0 3.5-1.2 3.5-3.3 0-2.7-2.6-5.7-6.2-5.7z"/></svg>
+        PetFolio · Redesign · v1
+      </div>
+      <h1>A pet super-app that feels<br><em>cuddly, confident, and quietly serious.</em></h1>
+      <p class="lede">One warm cream surface, six pop accents, and chunky pill buttons that feel toy-like in the hand. This system documents the redesign that ships across Social, Match, Care, Health, and Market.</p>
+      <div class="meta">
+        <span class="chip">Type · <b>Nunito + Fraunces</b></span>
+        <span class="chip">Platform · <b>Android · iOS · Web</b></span>
+        <span class="chip">Pillars · <b>5</b></span>
+        <span class="chip">Pet classes · <b>6</b></span>
+      </div>
+    </header>
+
+    <!-- ─────── 1. Principles ─────── -->
+    <section id="principles">
+      <div class="sec-head">
+        <span class="num">01</span>
+        <h2>Principles &mdash; <em>warm, but grown-up.</em></h2>
+      </div>
+      <p class="sec-sub">Pets are emotional. The redesign embraces that with rounded shapes, warm cream surfaces, and a playful conic-gradient avatar ring &mdash; without ever tipping into cartoon territory. Type stays grounded, hierarchy stays clear, and every primary action is sized for one-handed use on a walk.</p>
+
+      <div class="grid g2">
+        <div class="principle p1">
+          <div class="num">01</div>
+          <h4>Cream is the canvas</h4>
+          <p>Cream (#FFF4E6) is the default background &mdash; never pure white. It signals warmth before any pixel of content loads, and it lets the six pop accents sing without fighting the surface.</p>
+        </div>
+        <div class="principle p2">
+          <div class="num">02</div>
+          <h4>Pillars wear different colors</h4>
+          <p>Tangerine for Pets, Sunny for Care, Poppy for Social, Lilac for Match, Mint for Market. Each pillar's bottom-nav tab and section accents shift accordingly &mdash; the rest of the system stays constant.</p>
+        </div>
+        <div class="principle p3">
+          <div class="num">03</div>
+          <h4>Chunky &gt; sleek</h4>
+          <p>Pill buttons get a 6&nbsp;px hard underline shadow that compresses on press, plus a soft halo. The result feels physical &mdash; closer to a toy than a UI element. Use it for every primary affordance.</p>
+        </div>
+        <div class="principle p4">
+          <div class="num">04</div>
+          <h4>Fraunces for feeling, Nunito for facts</h4>
+          <p>Display headlines lean on Fraunces italic ("Mochi <em>is feeling cuddly today</em>"). Everything else &mdash; metrics, timestamps, captions &mdash; is Nunito. The contrast is the whole personality.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────── 2. Color ─────── -->
+    <section id="color">
+      <div class="sec-head">
+        <span class="num">02</span>
+        <h2>Color &mdash; <em>cream &amp; six pops.</em></h2>
+      </div>
+      <p class="sec-sub">The palette is built around a warm cream surface and six saturated accents. Each accent has a `--soft` tint for chip backgrounds, a base for primary fills, and a `-700` shade for text-on-tint and pressed states.</p>
+
+      <!-- Accent swatch grid -->
+      <div class="stitle"><div class="bar"></div><h3>Accent palette</h3></div>
+      <div class="grid g3" style="margin-bottom: 32px;">
+
+        <div class="swatch">
+          <div class="chip" style="background: var(--tangerine);">
+            <div class="star">★</div>
+          </div>
+          <div class="meta">
+            <div class="name">Tangerine <span class="hex">#FF8A4C</span></div>
+            <div class="role">Pets pillar · primary CTA · streaks</div>
+          </div>
+        </div>
+
+        <div class="swatch">
+          <div class="chip" style="background: var(--poppy);"></div>
+          <div class="meta">
+            <div class="name">Poppy <span class="hex">#FF3D3D</span></div>
+            <div class="role">Social pillar · reactions · passion</div>
+          </div>
+        </div>
+
+        <div class="swatch">
+          <div class="chip" style="background: var(--mint);"></div>
+          <div class="meta">
+            <div class="name">Mint <span class="hex">#2FCBA0</span></div>
+            <div class="role">Market &amp; Health · success · vitals</div>
+          </div>
+        </div>
+
+        <div class="swatch">
+          <div class="chip" style="background: var(--sunny);"></div>
+          <div class="meta">
+            <div class="name">Sunny <span class="hex">#FFC53D</span></div>
+            <div class="role">Care · XP · stars · reminders</div>
+          </div>
+        </div>
+
+        <div class="swatch">
+          <div class="chip" style="background: var(--lilac);"></div>
+          <div class="meta">
+            <div class="name">Lilac <span class="hex">#A98BFF</span></div>
+            <div class="role">Match · premium · weekly tasks</div>
+          </div>
+        </div>
+
+        <div class="swatch">
+          <div class="chip" style="background: var(--sky);"></div>
+          <div class="meta">
+            <div class="name">Sky <span class="hex">#6EC8FF</span></div>
+            <div class="role">Birds · info · gentle highlights</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tangerine ramp (canonical) -->
+      <div class="stitle"><div class="bar" style="background: var(--poppy);"></div><h3>Tangerine ramp <span style="font-weight:600;font-size:12px;color:var(--ink-500);margin-left:6px;">— same pattern for all 6 accents</span></h3></div>
+      <div class="ramp" style="margin-bottom: 22px;">
+        <div class="label"><div class="n">tangerine</div><div class="d">3-stop ramp</div></div>
+        <div class="stop lite" style="background: var(--tangerine-soft);"><div class="lvl">soft</div><div class="hex">#FFE0CB</div></div>
+        <div class="stop" style="background: var(--tangerine);"><div class="lvl">base ★</div><div class="hex">#FF8A4C</div></div>
+        <div class="stop" style="background: var(--tangerine-700);"><div class="lvl">700</div><div class="hex">#E0651E</div></div>
+        <div class="stop" style="background: #8C3A0D;"><div class="lvl">ink</div><div class="hex">#8C3A0D</div></div>
+      </div>
+
+      <!-- Surface/Ink ramp -->
+      <div class="stitle"><div class="bar" style="background: var(--ink-700);"></div><h3>Surface &amp; Ink</h3></div>
+      <div class="grid g4" style="margin-bottom: 22px;">
+        <div class="swatch">
+          <div class="chip" style="background: var(--cream); border-bottom: 1px solid var(--line);"></div>
+          <div class="meta">
+            <div class="name">Cream <span class="hex">#FFF4E6</span></div>
+            <div class="role">App background</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--surface); border-bottom: 1px solid var(--line);"></div>
+          <div class="meta">
+            <div class="name">Surface <span class="hex">#FFFFFF</span></div>
+            <div class="role">Cards &amp; sheets</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--surface-2); border-bottom: 1px solid var(--line);"></div>
+          <div class="meta">
+            <div class="name">Surface-2 <span class="hex">#FFFAF3</span></div>
+            <div class="role">Inset wells</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--ink-950);"></div>
+          <div class="meta">
+            <div class="name">Ink 950 <span class="hex">#261308</span></div>
+            <div class="role">Primary text · dark btn</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--ink-700);"></div>
+          <div class="meta">
+            <div class="name">Ink 700 <span class="hex">#5E3A28</span></div>
+            <div class="role">Body text</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--ink-500);"></div>
+          <div class="meta">
+            <div class="name">Ink 500 <span class="hex">#957762</span></div>
+            <div class="role">Secondary &amp; captions</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--ink-300);"></div>
+          <div class="meta">
+            <div class="name">Ink 300 <span class="hex">#D6C2B0</span></div>
+            <div class="role">Placeholder · disabled</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: var(--line);"></div>
+          <div class="meta">
+            <div class="name">Line <span class="hex">#F4E2CB</span></div>
+            <div class="role">Hairline dividers</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Semantic -->
+      <div class="stitle"><div class="bar" style="background: var(--mint);"></div><h3>Semantic</h3></div>
+      <div class="card" style="padding: 0;">
+        <div class="semantic-row">
+          <div class="dot" style="background: var(--success);"></div>
+          <div>
+            <div class="name">success</div>
+            <div class="desc">Quest done · vaccination up to date · order delivered</div>
+          </div>
+          <div class="hex">#2FB174</div>
+        </div>
+        <div class="semantic-row">
+          <div class="dot" style="background: var(--warning);"></div>
+          <div>
+            <div class="name">warning</div>
+            <div class="desc">Medication due · low stock</div>
+          </div>
+          <div class="hex">#F0A23A</div>
+        </div>
+        <div class="semantic-row">
+          <div class="dot" style="background: var(--danger);"></div>
+          <div>
+            <div class="name">danger</div>
+            <div class="desc">Vet alert · missed dose · listing removed</div>
+          </div>
+          <div class="hex">#E5484D</div>
+        </div>
+        <div class="semantic-row">
+          <div class="dot" style="background: var(--info);"></div>
+          <div>
+            <div class="name">info</div>
+            <div class="desc">Tips · neutral system messages</div>
+          </div>
+          <div class="hex">#6EC8FF</div>
+        </div>
+      </div>
+
+      <!-- Dark mode preview -->
+      <div class="stitle" style="margin-top: 32px;"><div class="bar" style="background: var(--lilac);"></div><h3>Dark mode</h3></div>
+      <div class="grid g4" style="background: #1A1014; border-radius: 22px; padding: 22px; border: 1px solid #321C25;">
+        <div class="swatch" style="background: #2A1820; border-color: #3D2030;">
+          <div class="chip" style="background: #2A1820;"></div>
+          <div class="meta" style="background: #2A1820;">
+            <div class="name" style="color: #FFF1E1;">Surface <span class="hex" style="color: #B89685;">#2A1820</span></div>
+          </div>
+        </div>
+        <div class="swatch" style="background: #2A1820; border-color: #46303B;">
+          <div class="chip" style="background: #FFA374;"></div>
+          <div class="meta" style="background: #2A1820;">
+            <div class="name" style="color: #FFF1E1;">Tangerine <span class="hex" style="color: #B89685;">#FFA374</span></div>
+          </div>
+        </div>
+        <div class="swatch" style="background: #2A1820; border-color: #46303B;">
+          <div class="chip" style="background: #FF7070;"></div>
+          <div class="meta" style="background: #2A1820;">
+            <div class="name" style="color: #FFF1E1;">Poppy <span class="hex" style="color: #B89685;">#FF7070</span></div>
+          </div>
+        </div>
+        <div class="swatch" style="background: #2A1820; border-color: #46303B;">
+          <div class="chip" style="background: #59E0BB;"></div>
+          <div class="meta" style="background: #2A1820;">
+            <div class="name" style="color: #FFF1E1;">Mint <span class="hex" style="color: #B89685;">#59E0BB</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────── 3. Type ─────── -->
+    <section id="type">
+      <div class="sec-head">
+        <span class="num">03</span>
+        <h2>Typography &mdash; <em>two voices.</em></h2>
+      </div>
+      <p class="sec-sub">Fraunces (display, italic-leaning) provides emotional moments &mdash; greetings, hero copy, mood statements. Nunito (UI, 400&ndash;900) carries everything else with a friendly round terminal and excellent legibility at small sizes.</p>
+
+      <div class="grid g2" style="margin-bottom: 28px;">
+        <div class="font-card">
+          <div class="glyph" style="font-family: 'Fraunces', serif; font-weight: 700; font-style: italic; color: var(--poppy-700);">Aa</div>
+          <div class="fname">Fraunces &mdash; display</div>
+          <div class="fdesc">Variable serif with a soft, optically-aware italic. Used at 24&nbsp;px+ for hero copy, section poetry, and quoted moments. Never below 18&nbsp;px.</div>
+          <div class="weights">
+            <span>Medium 500</span><span>Bold 700</span><span>Italic 500</span><span>Italic 700</span>
+          </div>
+        </div>
+        <div class="font-card">
+          <div class="glyph" style="font-family: 'Nunito', sans-serif; font-weight: 900;">Aa</div>
+          <div class="fname">Nunito &mdash; UI &amp; body</div>
+          <div class="fdesc">Rounded sans with a wide x-height. Used for everything &mdash; metrics, captions, button labels, navigation. Goes heavy (800&ndash;900) for emphasis.</div>
+          <div class="weights">
+            <span>Regular 400</span><span>Medium 500</span><span>SemiBold 600</span><span>Bold 700</span><span>ExtraBold 800</span><span>Black 900</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="padding: 0;">
+        <div class="type-row">
+          <div class="meta-l"><b>Display XL</b>Fraunces · 700 · italic mix</div>
+          <div class="sample" style="font-family: 'Fraunces', serif; font-weight: 700; font-size: 44px; line-height: 1.05; letter-spacing: -0.025em;">Mochi <em style="font-style: italic; font-weight: 500;">is feeling cuddly</em></div>
+          <div class="meta-r">44 / 46<br>tracking −2.5%</div>
+        </div>
+        <div class="type-row">
+          <div class="meta-l"><b>Display</b>Fraunces · 700</div>
+          <div class="sample" style="font-family: 'Fraunces', serif; font-weight: 700; font-size: 32px; line-height: 1.08; letter-spacing: -0.02em;">Find your pet's best friend</div>
+          <div class="meta-r">32 / 35<br>tracking −2%</div>
+        </div>
+        <div class="type-row">
+          <div class="meta-l"><b>Headline</b>Nunito · 900</div>
+          <div class="sample" style="font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 24px; line-height: 1.15; letter-spacing: -0.005em;">Today's quests</div>
+          <div class="meta-r">24 / 28<br>tracking −0.5%</div>
+        </div>
+        <div class="type-row">
+          <div class="meta-l"><b>Title</b>Nunito · 800</div>
+          <div class="sample" style="font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 18px; line-height: 1.25;">Heartworm pill · Due 12:00 PM</div>
+          <div class="meta-r">18 / 22<br>tracking 0</div>
+        </div>
+        <div class="type-row">
+          <div class="meta-l"><b>Body L</b>Nunito · 600</div>
+          <div class="sample" style="font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 16px; line-height: 1.45;">Mochi has a 7-day streak — keep it going by logging dinner before 8 PM.</div>
+          <div class="meta-r">16 / 23<br>tracking 0</div>
+        </div>
+        <div class="type-row">
+          <div class="meta-l"><b>Body</b>Nunito · 500</div>
+          <div class="sample" style="font-family: 'Nunito', sans-serif; font-weight: 500; font-size: 15px; line-height: 1.5; color: var(--ink-700);">Add a play date, log a vet visit, or browse treats. PetFolio learns Mochi's routine and suggests gentle nudges &mdash; never alarms.</div>
+          <div class="meta-r">15 / 22<br>tracking 0</div>
+        </div>
+        <div class="type-row">
+          <div class="meta-l"><b>Caption</b>Nunito · 700</div>
+          <div class="sample" style="font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12px; color: var(--ink-500);">Due 12:00 PM · Indoor cat</div>
+          <div class="meta-r">12 / 16<br>tracking +1%</div>
+        </div>
+        <div class="type-row">
+          <div class="meta-l"><b>Overline</b>Nunito · 800</div>
+          <div class="sample" style="font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 11px; color: var(--ink-500); letter-spacing: 0.18em; text-transform: uppercase;">Active pet · Mochi</div>
+          <div class="meta-r">11 / 14<br>tracking +18%</div>
+        </div>
+        <div class="type-row">
+          <div class="meta-l"><b>Numeric</b>JetBrains Mono · 500</div>
+          <div class="sample" style="font-family: 'JetBrains Mono', monospace; font-weight: 500; font-size: 22px;">482 XP &middot; 7-day &middot; $24.50</div>
+          <div class="meta-r">22 / 26<br>tabular</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────── 4. Radius ─────── -->
+    <section id="radius">
+      <div class="sec-head">
+        <span class="num">04</span>
+        <h2>Radius &mdash; <em>everything is squircle.</em></h2>
+      </div>
+      <p class="sec-sub">The system is generous with rounding. Buttons are full pills. Cards are squircles. Avatars are perfect circles. Nothing has a sharp 90° corner that isn't a status bar.</p>
+
+      <div class="grid g6">
+        <div class="rad-tile"><div class="shape" style="border-radius: 6px;"></div><div class="n">xs</div><div class="px">6 px</div></div>
+        <div class="rad-tile"><div class="shape" style="border-radius: 10px;"></div><div class="n">sm</div><div class="px">10 px</div></div>
+        <div class="rad-tile"><div class="shape" style="border-radius: 14px;"></div><div class="n">md</div><div class="px">14 px</div></div>
+        <div class="rad-tile"><div class="shape" style="border-radius: 22px;"></div><div class="n">lg</div><div class="px">22 px</div></div>
+        <div class="rad-tile"><div class="shape" style="border-radius: 28px;"></div><div class="n">xl ★</div><div class="px">28 px</div></div>
+        <div class="rad-tile"><div class="shape" style="border-radius: 999px;"></div><div class="n">pill</div><div class="px">999 px</div></div>
+      </div>
+      <p class="sec-sub" style="margin-top: 18px; font-size: 13px;">★ <b>xl 28&nbsp;px</b> is the default card radius. Pill is used for every button and chip. Avatars use a perfect circle (`50%`).</p>
+    </section>
+
+    <!-- ─────── 5. Elevation ─────── -->
+    <section id="elevation">
+      <div class="sec-head">
+        <span class="num">05</span>
+        <h2>Elevation &mdash; <em>soft, warm shadows.</em></h2>
+      </div>
+      <p class="sec-sub">Shadows are warm-tinted (`rgba(120, 60, 20, ...)`) rather than neutral black, which keeps them rooted in the cream surface. The hero primary button uses a unique stacked shadow &mdash; a hard color bar underneath + a soft halo.</p>
+
+      <div class="grid g4">
+        <div class="elev-tile">
+          <div class="demo" style="box-shadow: none;"></div>
+          <div class="n">e0</div><div class="d">background</div>
+        </div>
+        <div class="elev-tile">
+          <div class="demo" style="box-shadow: 0 2px 0 0 rgba(120,60,20,0.04), 0 12px 28px -16px rgba(120,60,20,0.18);"></div>
+          <div class="n">e1 — shadow-card</div><div class="d">Default card</div>
+        </div>
+        <div class="elev-tile">
+          <div class="demo" style="box-shadow: 0 8px 24px -10px rgba(120, 60, 20, 0.18);"></div>
+          <div class="n">e2 — shadow-soft</div><div class="d">Icon buttons · sheets</div>
+        </div>
+        <div class="elev-tile">
+          <div class="demo" style="box-shadow: 0 16px 36px -14px rgba(255, 92, 154, 0.35);"></div>
+          <div class="n">e3 — shadow-pop</div><div class="d">Hero card · CTAs</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 22px;">
+        <div class="h">Primary button stack</div>
+        <div class="sub">The signature treatment. A 6&nbsp;px solid color bar plus a tinted halo &mdash; compresses to 2&nbsp;px on press.</div>
+        <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
+          <button class="pill-btn primary lg">Get started</button>
+          <button class="pill-btn primary poppy lg">Find a match</button>
+          <button class="pill-btn primary mint lg">Add to cart</button>
+          <button class="pill-btn primary lilac lg">Schedule visit</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────── 6. Spacing ─────── -->
+    <section id="spacing">
+      <div class="sec-head">
+        <span class="num">06</span>
+        <h2>Spacing &mdash; <em>4&nbsp;dp base.</em></h2>
+      </div>
+      <p class="sec-sub">Spacing follows a 4&nbsp;dp base. Card padding is 16&ndash;22&nbsp;dp. Bottom-nav lives 10&nbsp;dp from the bottom safe area. Tap targets are <b>never</b> below 44&nbsp;dp; primary affordances target 52&nbsp;dp.</p>
+
+      <div class="card" style="padding: 22px 28px;">
+        <div class="space-row"><span class="tok">space/1</span><div><div class="bar-w" style="width: 4px;"></div></div><span class="px">4</span></div>
+        <div class="space-row"><span class="tok">space/2</span><div><div class="bar-w" style="width: 8px;"></div></div><span class="px">8</span></div>
+        <div class="space-row"><span class="tok">space/3</span><div><div class="bar-w" style="width: 12px;"></div></div><span class="px">12</span></div>
+        <div class="space-row"><span class="tok">space/4</span><div><div class="bar-w" style="width: 16px;"></div></div><span class="px">16</span></div>
+        <div class="space-row"><span class="tok">space/5</span><div><div class="bar-w" style="width: 20px;"></div></div><span class="px">20</span></div>
+        <div class="space-row"><span class="tok">space/6</span><div><div class="bar-w" style="width: 24px;"></div></div><span class="px">24</span></div>
+        <div class="space-row"><span class="tok">space/8</span><div><div class="bar-w" style="width: 32px;"></div></div><span class="px">32</span></div>
+        <div class="space-row"><span class="tok">space/10</span><div><div class="bar-w" style="width: 40px;"></div></div><span class="px">40</span></div>
+        <div class="space-row"><span class="tok">space/14</span><div><div class="bar-w" style="width: 56px;"></div></div><span class="px">56</span></div>
+      </div>
+    </section>
+
+    <!-- ─────── 7. Motion ─────── -->
+    <section id="motion">
+      <div class="sec-head">
+        <span class="num">07</span>
+        <h2>Motion &mdash; <em>bouncy, not springy.</em></h2>
+      </div>
+      <p class="sec-sub">Motion leans on a single keyframe family &mdash; `pop-in`, `float-up`, `tail-wag`, `wiggle`, `bounce-soft`, `confetti-fall`. Easings prefer overshoot for confirmation moments (toggle knob, milestone), simple ease-out for transitions.</p>
+
+      <div class="card" style="padding: 22px 26px;">
+        <div class="motion-row"><span class="tk">duration/xs</span><span class="dur">80 ms</span><span class="desc">Tap feedback · button compress</span></div>
+        <div class="motion-row"><span class="tk">duration/sm</span><span class="dur">140 ms</span><span class="desc">Hover · color tween</span></div>
+        <div class="motion-row"><span class="tk">duration/md</span><span class="dur">220 ms</span><span class="desc">Page slide · sheet present</span></div>
+        <div class="motion-row"><span class="tk">duration/lg</span><span class="dur">320 ms</span><span class="desc">Pop-in · milestone confirm</span></div>
+        <div class="motion-row"><span class="tk">duration/xl</span><span class="dur">500 ms</span><span class="desc">Loader cycles · reaction burst</span></div>
+        <div class="motion-row"><span class="tk">easing/bounce</span><span class="dur">cubic(.5, 1.7, .5, 1)</span><span class="desc">Toggle knob · paw confirm</span></div>
+        <div class="motion-row"><span class="tk">easing/standard</span><span class="dur">cubic(.2, .8, .2, 1)</span><span class="desc">Default sheet motion</span></div>
+      </div>
+    </section>
+
+    <!-- ─────── 8. Buttons ─────── -->
+    <section id="buttons">
+      <div class="sec-head">
+        <span class="num">08</span>
+        <h2>Buttons &mdash; <em>chunky pills.</em></h2>
+      </div>
+      <p class="sec-sub">Every button is a full pill. Primary carries the 6&nbsp;px hard-shadow stack. Secondary uses the matching `--soft` tint. Ghost is reserved for inline links. Dark is for high-contrast moments (Continue, Save).</p>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="h">Variants</div>
+          <div class="sub">All variants shown at <code>md (48&nbsp;dp)</code>.</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+            <button class="pill-btn primary md">Primary</button>
+            <button class="pill-btn soft md">Soft</button>
+            <button class="pill-btn outline md">Outline</button>
+            <button class="pill-btn ghost md">Ghost</button>
+            <button class="pill-btn dark md">Dark</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="h">Sizes</div>
+          <div class="sub">From inline chip to walk-mode primary.</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+            <button class="pill-btn primary sm">sm 36</button>
+            <button class="pill-btn primary md">md 48</button>
+            <button class="pill-btn primary lg">lg 56</button>
+            <button class="pill-btn primary xl">xl 64</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="h">Accent variations</div>
+          <div class="sub">Primary swaps fill + hard-shadow color per pillar context. Never mix two on one screen.</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+            <button class="pill-btn primary md">Pets</button>
+            <button class="pill-btn primary poppy md">Social</button>
+            <button class="pill-btn primary lilac md">Match</button>
+            <button class="pill-btn primary mint md">Market</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="h">Icon button</div>
+          <div class="sub">Round, 44&nbsp;dp, used in headers and pet-card overlays.</div>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <button class="icon-btn">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+            </button>
+            <button class="icon-btn">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+            </button>
+            <button class="icon-btn" style="background: var(--poppy); color: #fff;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.7-9.5-9.4C1 8 3.2 4 7 4c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.8 0 6 4 4.5 7.6C19.5 16.3 12 21 12 21z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────── 9. Cards ─────── -->
+    <section id="cards">
+      <div class="sec-head">
+        <span class="num">09</span>
+        <h2>Cards &mdash; <em>squircles with breath.</em></h2>
+      </div>
+      <p class="sec-sub">Cards are 28&nbsp;px squircles with a 1&nbsp;px warm hairline and the standard card shadow. Inside, content gets 18&nbsp;dp of breathing room. Quest rows compress to a 22&nbsp;px squircle and `e1`.</p>
+
+      <div class="grid g2">
+        <div>
+          <div class="stitle"><div class="bar"></div><h3>Quest card</h3></div>
+          <div class="quest done" style="margin-bottom: 10px;">
+            <div class="icon" style="background: var(--mint);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-11"/></svg>
+            </div>
+            <div class="body">
+              <div class="t">Morning meal</div>
+              <div class="s">8:00 AM · Done</div>
+            </div>
+            <span class="xp">+10 ★</span>
+            <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-11"/></svg></div>
+          </div>
+          <div class="quest" style="margin-bottom: 10px;">
+            <div class="icon" style="background: var(--poppy-soft);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="6" rx="3" fill="var(--poppy)"/><rect x="3" y="9" width="9" height="6" rx="3" fill="var(--poppy-soft)"/><rect x="3" y="9" width="18" height="6" rx="3" stroke="var(--poppy-700)" stroke-width="1.2" fill="none"/></svg>
+            </div>
+            <div class="body">
+              <div class="t">Heartworm pill</div>
+              <div class="s">Due 12:00 PM</div>
+            </div>
+            <span class="xp">+20 ★</span>
+            <div class="check"></div>
+          </div>
+          <div class="quest">
+            <div class="icon" style="background: var(--lilac-soft);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--lilac-700)"><path d="M5.5 4.5a2.6 2.6 0 0 1 4.7 1.5l3.6 3.6a2.6 2.6 0 1 1 1.7 4.4l-3.6 3.6a2.6 2.6 0 1 1-4.4 1.7 2.6 2.6 0 1 1-1.7-4.4l3.6-3.6A2.6 2.6 0 1 1 5.5 4.5z"/></svg>
+            </div>
+            <div class="body">
+              <div class="t">Tooth brush <span class="tag weekly" style="margin-left: 6px;">Weekly</span></div>
+              <div class="s">Bedtime</div>
+            </div>
+            <span class="xp">+25 ★</span>
+            <div class="check"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="stitle"><div class="bar" style="background: var(--poppy);"></div><h3>Stat tiles</h3></div>
+          <div class="grid g3">
+            <div class="card" style="background: var(--tangerine-soft); border: none; padding: 16px;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="margin-bottom: 8px;"><path d="M12 22c4.4 0 7-3.2 7-7 0-3.4-2.4-5.6-3.5-8.2-.6-1.4-.5-3.3-2-4.8-.6 2.3-1.7 2.6-3.3 4.8C8.6 8.9 5 10.6 5 15c0 3.8 2.6 7 7 7z" fill="#FF6B2C"/><path d="M12 19.6c2.4 0 4.2-1.8 4.2-4.2 0-1.9-1.5-3-2.1-4.5-.4-.9 0-1.9-1-3-.4 1.4-1 1.6-2 3-.8 1.1-3.1 2.1-3.1 4.5 0 2.4 1.7 4.2 4 4.2z" fill="#FFC53D"/></svg>
+              <div style="font-family: 'JetBrains Mono'; font-size: 24px; font-weight: 500;">7</div>
+              <div style="font-size: 11px; color: var(--ink-500); font-weight: 700; margin-top: 2px;">day streak</div>
+            </div>
+            <div class="card" style="background: var(--lilac-soft); border: none; padding: 16px;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--sunny)" style="margin-bottom: 8px;"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg>
+              <div style="font-family: 'JetBrains Mono'; font-size: 24px; font-weight: 500;">482</div>
+              <div style="font-size: 11px; color: var(--ink-500); font-weight: 700; margin-top: 2px;">XP earned</div>
+            </div>
+            <div class="card" style="background: var(--mint-soft); border: none; padding: 16px;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--mint-700)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 8px;"><path d="M5 12l5 5 9-11"/></svg>
+              <div style="font-family: 'JetBrains Mono'; font-size: 24px; font-weight: 500;">34</div>
+              <div style="font-size: 11px; color: var(--ink-500); font-weight: 700; margin-top: 2px;">care logs</div>
+            </div>
+          </div>
+
+          <div class="stitle" style="margin-top: 22px;"><div class="bar" style="background: var(--sunny);"></div><h3>Tags &amp; badges</h3></div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <span class="tag streak">🔥 7-day</span>
+            <span class="tag match">💖 New match</span>
+            <span class="tag health">✓ Up to date</span>
+            <span class="tag weekly">Weekly</span>
+            <span class="tag new">+10 XP</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────── 10. Avatars / Species ─────── -->
+    <section id="avatars">
+      <div class="sec-head">
+        <span class="num">10</span>
+        <h2>Avatars &amp; species &mdash; <em>radial gradients + emoji.</em></h2>
+      </div>
+      <p class="sec-sub">Pet avatars are perfect circles filled with a radial gradient from the species `--soft` tint into the species base color, topped by the species emoji. The active-pet avatar gets a conic-gradient ring made from the four primary accents.</p>
+
+      <div class="stitle"><div class="bar"></div><h3>Sizes &amp; ring states</h3></div>
+      <div class="card" style="margin-bottom: 22px;">
+        <div style="display: flex; gap: 26px; flex-wrap: wrap; align-items: flex-end;">
+          <div style="text-align: center;">
+            <div class="avatar no-ring" style="width: 32px; height: 32px;"><div class="inner cat" style="font-size: 18px;">🐱</div></div>
+            <div style="font-size: 11px; color: var(--ink-500); font-weight: 700; margin-top: 8px;">32 list</div>
+          </div>
+          <div style="text-align: center;">
+            <div class="avatar no-ring" style="width: 44px; height: 44px;"><div class="inner dog" style="font-size: 22px;">🐶</div></div>
+            <div style="font-size: 11px; color: var(--ink-500); font-weight: 700; margin-top: 8px;">44 default</div>
+          </div>
+          <div style="text-align: center;">
+            <div class="avatar ring" style="width: 56px; height: 56px;"><div class="inner cat" style="font-size: 26px;">🐱</div></div>
+            <div style="font-size: 11px; color: var(--ink-500); font-weight: 700; margin-top: 8px;">56 active</div>
+          </div>
+          <div style="text-align: center;">
+            <div class="avatar ring" style="width: 72px; height: 72px;"><div class="inner rabbit" style="font-size: 34px;">🐰</div></div>
+            <div style="font-size: 11px; color: var(--ink-500); font-weight: 700; margin-top: 8px;">72 header</div>
+          </div>
+          <div style="text-align: center;">
+            <div class="avatar ring" style="width: 96px; height: 96px; box-shadow: 0 10px 26px -10px var(--poppy);"><div class="inner cat" style="font-size: 48px;">🐱</div></div>
+            <div style="font-size: 11px; color: var(--ink-500); font-weight: 700; margin-top: 8px;">96 hero · glow</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stitle"><div class="bar" style="background: var(--poppy);"></div><h3>Six pet classes</h3></div>
+      <div class="grid g6">
+        <div class="species-tile">
+          <div class="emoji" style="background: radial-gradient(circle at 30% 30%, var(--tangerine-soft), var(--tangerine) 90%);">🐶</div>
+          <div class="l">Dog</div>
+          <div class="t">tangerine</div>
+        </div>
+        <div class="species-tile">
+          <div class="emoji" style="background: radial-gradient(circle at 30% 30%, var(--poppy-soft), var(--poppy) 90%);">🐱</div>
+          <div class="l">Cat</div>
+          <div class="t">poppy</div>
+        </div>
+        <div class="species-tile">
+          <div class="emoji" style="background: radial-gradient(circle at 30% 30%, var(--lilac-soft), var(--lilac) 90%);">🐰</div>
+          <div class="l">Rabbit</div>
+          <div class="t">lilac</div>
+        </div>
+        <div class="species-tile">
+          <div class="emoji" style="background: radial-gradient(circle at 30% 30%, var(--sky-soft), var(--sky) 90%);">🐦</div>
+          <div class="l">Bird</div>
+          <div class="t">sky</div>
+        </div>
+        <div class="species-tile">
+          <div class="emoji" style="background: radial-gradient(circle at 30% 30%, var(--mint-soft), var(--mint) 90%);">🐠</div>
+          <div class="l">Fish</div>
+          <div class="t">mint</div>
+        </div>
+        <div class="species-tile">
+          <div class="emoji" style="background: radial-gradient(circle at 30% 30%, var(--sunny-soft), var(--sunny) 90%);">🦎</div>
+          <div class="l">Reptile</div>
+          <div class="t">sunny</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────── 11. Controls ─────── -->
+    <section id="controls">
+      <div class="sec-head">
+        <span class="num">11</span>
+        <h2>Controls &mdash; <em>paws and bones.</em></h2>
+      </div>
+      <p class="sec-sub">Two custom controls give the system its toy-like feeling. The Paw toggle &mdash; a switch whose knob carries a paw icon. The Bone slider &mdash; a range whose thumb is a bone shape, tilted 15°.</p>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="h">Paw toggle</div>
+          <div class="sub">54 × 30 with a 24 px round knob. The paw inside flips from gray to accent on activation.</div>
+          <div style="display: flex; align-items: center; gap: 18px;">
+            <button class="paw-toggle on">
+              <span class="knob">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--tangerine)"><ellipse cx="6" cy="9" rx="2.1" ry="2.6"/><ellipse cx="10" cy="5.6" rx="2" ry="2.5"/><ellipse cx="14" cy="5.6" rx="2" ry="2.5"/><ellipse cx="18" cy="9" rx="2.1" ry="2.6"/><path d="M12 10c-3.6 0-6.2 3-6.2 5.7 0 2.1 1.7 3.3 3.5 3.3 1.2 0 1.7-.6 2.7-.6s1.5.6 2.7.6c1.8 0 3.5-1.2 3.5-3.3 0-2.7-2.6-5.7-6.2-5.7z"/></svg>
+              </span>
+            </button>
+            <span style="font-weight: 800; font-size: 14px;">Notifications on</span>
+            <button class="paw-toggle off">
+              <span class="knob">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--ink-300)"><ellipse cx="6" cy="9" rx="2.1" ry="2.6"/><ellipse cx="10" cy="5.6" rx="2" ry="2.5"/><ellipse cx="14" cy="5.6" rx="2" ry="2.5"/><ellipse cx="18" cy="9" rx="2.1" ry="2.6"/><path d="M12 10c-3.6 0-6.2 3-6.2 5.7 0 2.1 1.7 3.3 3.5 3.3 1.2 0 1.7-.6 2.7-.6s1.5.6 2.7.6c1.8 0 3.5-1.2 3.5-3.3 0-2.7-2.6-5.7-6.2-5.7z"/></svg>
+              </span>
+            </button>
+            <span style="font-weight: 800; font-size: 14px; color: var(--ink-500);">Quiet hours off</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="h">Bone slider</div>
+          <div class="sub">Track gradient tangerine&nbsp;→&nbsp;poppy; thumb is a 4-circle + bar bone shape.</div>
+          <div class="bone-slider">
+            <div class="track"><div class="fill"></div></div>
+            <div class="thumb">
+              <svg viewBox="0 0 36 28" width="36" height="28">
+                <g fill="#fff" stroke="var(--tangerine)" stroke-width="2">
+                  <circle cx="6" cy="8" r="5"/>
+                  <circle cx="6" cy="20" r="5"/>
+                  <circle cx="30" cy="8" r="5"/>
+                  <circle cx="30" cy="20" r="5"/>
+                  <rect x="8" y="9" width="20" height="10" rx="3"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+            <span style="font-size: 11px; color: var(--ink-500); font-weight: 700;">Indoor only</span>
+            <span style="font-size: 11px; color: var(--ink-500); font-weight: 700;">10 km</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────── 12. Nav ─────── -->
+    <section id="nav">
+      <div class="sec-head">
+        <span class="num">12</span>
+        <h2>Navigation &mdash; <em>5 tabs, pillar-tinted.</em></h2>
+      </div>
+      <p class="sec-sub">A floating bottom-nav lives 10&nbsp;dp from the home indicator. The active tab's icon gets a translucent pill background in the pillar accent. Inactive tabs are 600-weight, active tabs 800-weight.</p>
+
+      <div class="bnav">
+        <button class="tab active t1">
+          <div class="icw">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--tangerine)"><ellipse cx="6" cy="9" rx="2.1" ry="2.6"/><ellipse cx="10" cy="5.6" rx="2" ry="2.5"/><ellipse cx="14" cy="5.6" rx="2" ry="2.5"/><ellipse cx="18" cy="9" rx="2.1" ry="2.6"/><path d="M12 10c-3.6 0-6.2 3-6.2 5.7 0 2.1 1.7 3.3 3.5 3.3 1.2 0 1.7-.6 2.7-.6s1.5.6 2.7.6c1.8 0 3.5-1.2 3.5-3.3 0-2.7-2.6-5.7-6.2-5.7z"/></svg>
+          </div>
+          Pets
+        </button>
+        <button class="tab">
+          <div class="icw"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 22c4.4 0 7-3.2 7-7 0-3.4-2.4-5.6-3.5-8.2-.6-1.4-.5-3.3-2-4.8-.6 2.3-1.7 2.6-3.3 4.8C8.6 8.9 5 10.6 5 15c0 3.8 2.6 7 7 7z" fill="#FF6B2C"/><path d="M12 19.6c2.4 0 4.2-1.8 4.2-4.2 0-1.9-1.5-3-2.1-4.5-.4-.9 0-1.9-1-3-.4 1.4-1 1.6-2 3-.8 1.1-3.1 2.1-3.1 4.5 0 2.4 1.7 4.2 4 4.2z" fill="#FFC53D"/></svg></div>
+          Care
+        </button>
+        <button class="tab">
+          <div class="icw"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 21s-7.5-4.7-9.5-9.4C1 8 3.2 4 7 4c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.8 0 6 4 4.5 7.6C19.5 16.3 12 21 12 21z"/></svg></div>
+          Social
+        </button>
+        <button class="tab">
+          <div class="icw"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M5.5 4.5a2.6 2.6 0 0 1 4.7 1.5l3.6 3.6a2.6 2.6 0 1 1 1.7 4.4l-3.6 3.6a2.6 2.6 0 1 1-4.4 1.7 2.6 2.6 0 1 1-1.7-4.4l3.6-3.6A2.6 2.6 0 1 1 5.5 4.5z"/></svg></div>
+          Match
+        </button>
+        <button class="tab">
+          <div class="icw"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11.4a2 2 0 0 0 2 1.6h8.7a2 2 0 0 0 2-1.6L21 9H7"/><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/></svg></div>
+          Market
+        </button>
+      </div>
+      <p style="font-size: 12px; color: var(--ink-500); font-weight: 700; margin-top: 14px;">Each tab also carries a 3&nbsp;px pillar-colored underline below the label when active &mdash; a quiet reminder of the current pillar.</p>
+    </section>
+
+    <!-- ─────── 13. Icons ─────── -->
+    <section id="icons">
+      <div class="sec-head">
+        <span class="num">13</span>
+        <h2>Iconography &mdash; <em>stroke + filled.</em></h2>
+      </div>
+      <p class="sec-sub">All icons are drawn on a 24&nbsp;px grid with 1.9&nbsp;px stroke, round caps, round joins. Two weights: stroke for inactive states, filled for active states and selection. Pet-class icons are emoji (intentional &mdash; they carry color and warmth that bespoke vector cannot).</p>
+
+      <div class="icon-grid">
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="6" cy="9" rx="2.1" ry="2.6"/><ellipse cx="10" cy="5.6" rx="2" ry="2.5"/><ellipse cx="14" cy="5.6" rx="2" ry="2.5"/><ellipse cx="18" cy="9" rx="2.1" ry="2.6"/><path d="M12 10c-3.6 0-6.2 3-6.2 5.7 0 2.1 1.7 3.3 3.5 3.3 1.2 0 1.7-.6 2.7-.6s1.5.6 2.7.6c1.8 0 3.5-1.2 3.5-3.3 0-2.7-2.6-5.7-6.2-5.7z"/></svg><span class="lbl">paw</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.7-9.5-9.4C1 8 3.2 4 7 4c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.8 0 6 4 4.5 7.6C19.5 16.3 12 21 12 21z"/></svg><span class="lbl">heart</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M5.5 4.5a2.6 2.6 0 0 1 4.7 1.5l3.6 3.6a2.6 2.6 0 1 1 1.7 4.4l-3.6 3.6a2.6 2.6 0 1 1-4.4 1.7 2.6 2.6 0 1 1-1.7-4.4l3.6-3.6A2.6 2.6 0 1 1 5.5 4.5z"/></svg><span class="lbl">bone</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 22c4.4 0 7-3.2 7-7 0-3.4-2.4-5.6-3.5-8.2-.6-1.4-.5-3.3-2-4.8-.6 2.3-1.7 2.6-3.3 4.8C8.6 8.9 5 10.6 5 15c0 3.8 2.6 7 7 7z" fill="#FF6B2C"/><path d="M12 19.6c2.4 0 4.2-1.8 4.2-4.2 0-1.9-1.5-3-2.1-4.5-.4-.9 0-1.9-1-3-.4 1.4-1 1.6-2 3-.8 1.1-3.1 2.1-3.1 4.5 0 2.4 1.7 4.2 4 4.2z" fill="#FFC53D"/></svg><span class="lbl">flame</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="var(--sunny)"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg><span class="lbl">star</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M6 4h12v3a6 6 0 0 1-12 0V4z" fill="#FFC53D"/><path d="M5 5h-2a2 2 0 0 0 2 4M19 5h2a2 2 0 0 1-2 4" stroke="#FFC53D" stroke-width="1.6" fill="none"/><path d="M9 13h6v3H9z M8 19h8v2H8z" fill="#E0651E"/></svg><span class="lbl">trophy</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="lbl">bell</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><span class="lbl">search</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="7" cy="7" r="2.2"/><circle cx="17" cy="17" r="2.2"/><path d="M9 7h11M4 17h11"/></svg><span class="lbl">filter</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11.4a2 2 0 0 0 2 1.6h8.7a2 2 0 0 0 2-1.6L21 9H7"/><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/></svg><span class="lbl">cart</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12c0 4.4-4 8-9 8-1.4 0-2.8-.3-4-.8L3 21l1.4-4.4C3.5 15.2 3 13.6 3 12c0-4.4 4-8 9-8s9 3.6 9 8z"/></svg><span class="lbl">comment</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="6" r="2.6"/><circle cx="18" cy="18" r="2.6"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/></svg><span class="lbl">share</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v17l-6-4-6 4z"/></svg><span class="lbl">bookmark</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c-4-5-7-8.5-7-12a7 7 0 0 1 14 0c0 3.5-3 7-7 12z"/><circle cx="12" cy="9" r="2.4"/></svg><span class="lbl">location</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--mint-700)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v6a4 4 0 0 0 8 0V3"/><path d="M9 13v2a5 5 0 0 0 10 0v-2"/><circle cx="19" cy="9" r="2"/></svg><span class="lbl">stethoscope</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--mint-700)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3l3 3M14 7l3-3 3 3-3 3-3-3z"/><path d="M14 7l-9 9-1 4 4-1 9-9"/><path d="M8 13l3 3"/></svg><span class="lbl">syringe</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="6" rx="3" fill="var(--poppy)"/><rect x="3" y="9" width="9" height="6" rx="3" fill="var(--poppy-soft)"/><rect x="3" y="9" width="18" height="6" rx="3" stroke="var(--poppy-700)" stroke-width="1.2" fill="none"/></svg><span class="lbl">pill</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg><span class="lbl">send</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 2v6M12 16v6M2 12h6M16 12h6M5 5l4 4M15 15l4 4M5 19l4-4M15 9l4-4" stroke="var(--sunny)" stroke-width="2" stroke-linecap="round"/></svg><span class="lbl">spark</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">plus</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-11"/></svg><span class="lbl">check</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="lbl">close</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg><span class="lbl">chevron</span></div>
+        <div class="icon-cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="lbl">settings</span></div>
+      </div>
+    </section>
+
+    <!-- ─────── 14. Motifs ─────── -->
+    <section id="motifs">
+      <div class="sec-head">
+        <span class="num">14</span>
+        <h2>Motifs &mdash; <em>waves, paws, confetti.</em></h2>
+      </div>
+      <p class="sec-sub">Four recurring decorative elements give the system its personality across screens. None of them are required — they're invited in for moments that earn them.</p>
+
+      <div class="grid g2">
+        <div>
+          <div class="stitle"><div class="bar"></div><h3>Wave header</h3></div>
+          <div class="wave-demo">
+            <div class="top">
+              <div class="small">Active pet</div>
+              Mochi <em style="font-family: 'Fraunces'; font-style: italic; font-weight: 500;">is feeling cuddly</em>
+              <svg viewBox="0 0 412 60" preserveAspectRatio="none" style="position: absolute; left: 0; right: 0; bottom: -1px; width: 100%; height: 28px; display: block;"><path d="M0,40 C90,10 160,70 220,40 C280,15 340,60 412,30 L412,60 L0,60 Z" fill="var(--surface)"/></svg>
+            </div>
+            <div class="bot">Used as the top of every pet-detail and pillar landing screen.</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="stitle"><div class="bar" style="background: var(--poppy);"></div><h3>Paw watermark pattern</h3></div>
+          <div class="paw-pattern">
+            <svg class="pw" style="top: 20%; left: 15%;" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="6" cy="9" rx="2.1" ry="2.6"/><ellipse cx="10" cy="5.6" rx="2" ry="2.5"/><ellipse cx="14" cy="5.6" rx="2" ry="2.5"/><ellipse cx="18" cy="9" rx="2.1" ry="2.6"/><path d="M12 10c-3.6 0-6.2 3-6.2 5.7 0 2.1 1.7 3.3 3.5 3.3 1.2 0 1.7-.6 2.7-.6s1.5.6 2.7.6c1.8 0 3.5-1.2 3.5-3.3 0-2.7-2.6-5.7-6.2-5.7z"/></svg>
+            <svg class="pw" style="top: 55%; left: 60%; color: var(--poppy);" width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="6" cy="9" rx="2.1" ry="2.6"/><ellipse cx="10" cy="5.6" rx="2" ry="2.5"/><ellipse cx="14" cy="5.6" rx="2" ry="2.5"/><ellipse cx="18" cy="9" rx="2.1" ry="2.6"/><path d="M12 10c-3.6 0-6.2 3-6.2 5.7 0 2.1 1.7 3.3 3.5 3.3 1.2 0 1.7-.6 2.7-.6s1.5.6 2.7.6c1.8 0 3.5-1.2 3.5-3.3 0-2.7-2.6-5.7-6.2-5.7z"/></svg>
+            <svg class="pw" style="top: 15%; left: 75%; color: var(--mint);" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="6" cy="9" rx="2.1" ry="2.6"/><ellipse cx="10" cy="5.6" rx="2" ry="2.5"/><ellipse cx="14" cy="5.6" rx="2" ry="2.5"/><ellipse cx="18" cy="9" rx="2.1" ry="2.6"/><path d="M12 10c-3.6 0-6.2 3-6.2 5.7 0 2.1 1.7 3.3 3.5 3.3 1.2 0 1.7-.6 2.7-.6s1.5.6 2.7.6c1.8 0 3.5-1.2 3.5-3.3 0-2.7-2.6-5.7-6.2-5.7z"/></svg>
+            <svg class="pw" style="top: 65%; left: 25%; color: var(--lilac);" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="6" cy="9" rx="2.1" ry="2.6"/><ellipse cx="10" cy="5.6" rx="2" ry="2.5"/><ellipse cx="14" cy="5.6" rx="2" ry="2.5"/><ellipse cx="18" cy="9" rx="2.1" ry="2.6"/><path d="M12 10c-3.6 0-6.2 3-6.2 5.7 0 2.1 1.7 3.3 3.5 3.3 1.2 0 1.7-.6 2.7-.6s1.5.6 2.7.6c1.8 0 3.5-1.2 3.5-3.3 0-2.7-2.6-5.7-6.2-5.7z"/></svg>
+          </div>
+          <p style="font-size: 12px; color: var(--ink-500); font-weight: 700; margin-top: 10px;">Used behind onboarding, empty states, and milestone celebrations. Mixed accent colors at 16&ndash;22% opacity.</p>
+        </div>
+
+        <div>
+          <div class="stitle"><div class="bar" style="background: var(--sunny);"></div><h3>Tail-wag loader</h3></div>
+          <div class="card" style="display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 14px; padding: 36px;">
+            <div class="loader">
+              <div class="body"></div>
+              <div class="head"></div>
+              <div class="ear"></div>
+              <div class="eye"></div>
+              <div class="tail"></div>
+            </div>
+            <div style="font-size: 13px; color: var(--ink-500); font-weight: 700;">Fetching matches…</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="stitle"><div class="bar" style="background: var(--mint);"></div><h3>Reaction burst</h3></div>
+          <div class="card" style="background: linear-gradient(135deg, var(--poppy-soft), var(--lilac-soft)); border: none; padding: 30px; text-align: center; position: relative; overflow: hidden;">
+            <div style="font-size: 40px; letter-spacing: 12px;">🐾💖🦴⭐🐾</div>
+            <div style="margin-top: 8px; font-family: 'Fraunces'; font-style: italic; font-weight: 500; font-size: 18px; color: var(--poppy-700);">Milestone unlocked</div>
+            <div style="font-size: 12px; color: var(--ink-500); font-weight: 700; margin-top: 4px;">Paws, hearts, treats, and stars float up from the tap point in a single 900&nbsp;ms burst.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      PETFOLIO · DESIGN SYSTEM · V1 · CREAM + SIX POPS
+    </footer>
+
+  </main>
+</div>
+
+</body>
+</html>

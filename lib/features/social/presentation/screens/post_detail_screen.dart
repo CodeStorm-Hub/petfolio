@@ -277,13 +277,18 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                       );
                     }
 
-                    // Build threaded comment display list
+                    // Pre-group replies by parentId for O(n) thread building
+                    final repliesByParentId = <String, List<Comment>>{};
+                    for (final c in list) {
+                      if (c.parentId != null) {
+                        repliesByParentId.putIfAbsent(c.parentId!, () => []).add(c);
+                      }
+                    }
                     final rootComments = list.where((c) => c.parentId == null).toList();
                     final displayList = <_CommentDisplayItem>[];
                     for (final root in rootComments) {
                       displayList.add(_CommentDisplayItem(comment: root, isReply: false));
-                      final replies = list.where((c) => c.parentId == root.id).toList();
-                      for (final reply in replies) {
+                      for (final reply in repliesByParentId[root.id] ?? const <Comment>[]) {
                         displayList.add(_CommentDisplayItem(comment: reply, isReply: true));
                       }
                     }
@@ -732,7 +737,6 @@ class _CommentTile extends ConsumerWidget {
                       ref
                           .read(commentListProvider(postId).notifier)
                           .edit(comment.id, newText);
-                      editController.dispose();
                     },
                     child: Text(
                       'Save',
