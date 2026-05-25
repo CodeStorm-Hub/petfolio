@@ -162,32 +162,35 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
               color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              radius: 14,
-              backgroundColor: post.accentColor,
-              backgroundImage: post.petAvatarUrl != null
-                  ? CachedNetworkImageProvider(post.petAvatarUrl!)
-                  : null,
-              child: post.petAvatarUrl == null
-                  ? Text(
-                      post.petName.isNotEmpty ? post.petName[0].toUpperCase() : '?',
-                      style: tt.headlineSmall?.copyWith(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              post.petName,
-              style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-            ),
-          ],
+        title: GestureDetector(
+          onTap: () => context.push('/social/profile/${post.petId}'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: 14,
+                backgroundColor: post.accentColor,
+                backgroundImage: post.petAvatarUrl != null
+                    ? CachedNetworkImageProvider(post.petAvatarUrl!)
+                    : null,
+                child: post.petAvatarUrl == null
+                    ? Text(
+                        post.petName.isNotEmpty ? post.petName[0].toUpperCase() : '?',
+                        style: tt.headlineSmall?.copyWith(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                post.petName,
+                style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
         ),
         centerTitle: true,
         actions: [
@@ -483,25 +486,28 @@ class _CommentTile extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Avatar
-          CircleAvatar(
-            radius: 16,
-            backgroundColor: AppColors.coral500.withAlpha(200),
-            backgroundImage: comment.avatarUrl != null
-                ? CachedNetworkImageProvider(comment.avatarUrl!)
-                : null,
-            child: comment.avatarUrl == null
-                ? Text(
-                    comment.petName.isNotEmpty
-                        ? comment.petName[0].toUpperCase()
-                        : '?',
-                    style: tt.titleSmall?.copyWith(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  )
-                : null,
+          // Tappable avatar → pet social profile
+          GestureDetector(
+            onTap: () => context.push('/social/profile/${comment.petId}'),
+            child: CircleAvatar(
+              radius: 16,
+              backgroundColor: AppColors.coral500.withAlpha(200),
+              backgroundImage: comment.avatarUrl != null
+                  ? CachedNetworkImageProvider(comment.avatarUrl!)
+                  : null,
+              child: comment.avatarUrl == null
+                  ? Text(
+                      comment.petName.isNotEmpty
+                          ? comment.petName[0].toUpperCase()
+                          : '?',
+                      style: tt.titleSmall?.copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    )
+                  : null,
+            ),
           ),
           const SizedBox(width: 10),
           // Content
@@ -511,11 +517,16 @@ class _CommentTile extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Text(
-                      comment.petName,
-                      style: tt.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).colorScheme.onSurface,
+                    // Tappable pet name → pet social profile
+                    GestureDetector(
+                      onTap: () =>
+                          context.push('/social/profile/${comment.petId}'),
+                      child: Text(
+                        comment.petName,
+                        style: tt.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 6),

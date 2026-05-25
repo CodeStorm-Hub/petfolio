@@ -28,6 +28,14 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   static const _maxChars = 500;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(createPostControllerProvider.notifier).setIsStory(false);
+    });
+  }
+
+  @override
   void dispose() {
     _captionController.dispose();
     super.dispose();

@@ -2,6 +2,42 @@
 
 ---
 
+## 2026-05-25 — Premium CreateStoryScreen Redesign
+
+- **Media-First UX Split**: Completely redesigned `CreateStoryScreen` to feature a beautiful camera/selector layout instead of form inputs.
+- **Custom Viewfinder Card**: Added a DSLR-style viewfinder card (`_CameraViewfinderCard`) with corner paint brackets, alignment grids, active REC dot timer, and shutter button linking directly to the system camera.
+- **Interactive Gallery Grid**: Added a 3-column media list. Includes a "Browse" library tile to pick custom photos and a grid of high-quality mock pet photo tiles that download and set immediately.
+- **Fullscreen 9:16 Preview**: Tapping a photo transitions into a fullscreen 9:16 layout featuring the pet's avatar badge, transparent gradient protection layers, and a glowing sunset-gradient "Share to Story" button.
+- `flutter analyze` — **No issues found.**
+
+---
+
+## 2026-05-25 — Dedicated Create Post vs Create Story Pages
+
+- **Split Pages**: Separated the single togglable creation screen into two distinct screens:
+  - `CreatePostScreen` (handles feed posts only, no toggle, requires a caption or photo, title "New Post").
+  - `CreateStoryScreen` (handles stories only, no caption or visibility inputs, requires a photo, title "New Story").
+- **Clean Routes**: Registered separate routes in `router.dart`:
+  - `/social/create-post` -> `CreatePostScreen`.
+  - `/social/create-story` -> `CreateStoryScreen`.
+- **Navigation Update**: Updated the FloatActionButton, story item `+` actions, and long-press bottom sheet actions in `social_screen.dart` to navigate directly to their respective dedicated pages.
+- `flutter analyze` — **No issues found.**
+
+---
+
+## 2026-05-25 — Story Long-Press Popup Menu Options
+
+- **Tab and Hold on Story Avatar**: Added long-press gesture support to the user's own pet story item (`_StoryItem` in `social_screen.dart`).
+- **`_OwnStoryOptionsSheet` Bottom Sheet**: Created a bottom sheet popup that prompts when long-pressing "Your story" with options:
+  - **View story**: Navigates to the active story viewer page (`/social/stories`).
+  - **Add to story**: Configures the post creation controller state to "Story" mode, then pushes the `/social/create` route.
+- **Improved Create Post/Story Entry State**:
+  - Tapping the `+` button on your story avatar or selecting "Add to story" in the long press popup menu automatically forces the selection on `CreatePostScreen` to default to the "Story" tab.
+  - Tapping the bottom navigation FloatActionButton to write a post automatically defaults the selection to the "Feed Post" tab.
+- `flutter analyze` — **No issues found.**
+
+---
+
 ## 2026-05-25 — AI Routine v2: Full Pet Context + Weekly/Monthly Support
 
 - **DB migration applied** (`jqyjvhwlcqcsuwcqgcwf`): added `is_ai_suggested boolean NOT NULL DEFAULT false` to `care_tasks` + sparse index on `(pet_id, is_ai_suggested)` where true.

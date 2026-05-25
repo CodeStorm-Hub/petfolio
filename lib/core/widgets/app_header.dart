@@ -154,7 +154,9 @@ class _PetSwitcherTrigger extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final species = pet?.speciesEnum ?? PetSpecies.dog;
 
-    final avatarTap = pet != null ? () => context.go('/home') : null;
+    final avatarTap = pet != null
+        ? () => context.push('/social/profile/${pet!.id}')
+        : null;
 
     return Row(
       children: [

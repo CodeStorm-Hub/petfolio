@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -12,7 +13,11 @@ import '../../../pet_profile/presentation/controllers/active_pet_controller.dart
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
 import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/feed_post.dart';
+import '../../data/models/story.dart';
 import '../controllers/social_controller.dart';
+import '../controllers/create_post_controller.dart';
+import '../controllers/story_controller.dart';
+import 'story_viewer_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entry point
@@ -208,7 +213,10 @@ class _SocialViewState extends ConsumerState<_SocialView> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/social/create'),
+        onPressed: () {
+          ref.read(createPostControllerProvider.notifier).setIsStory(false);
+          context.push('/social/create-post');
+        },
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         elevation: 4,
@@ -226,27 +234,180 @@ class _SocialViewState extends ConsumerState<_SocialView> {
 // Stories row
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _StoriesRow extends StatelessWidget {
+class _StoriesRow extends ConsumerWidget {
   const _StoriesRow({required this.posts, required this.pet});
   final List<FeedPost> posts;
   final Pet pet;
 
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 96,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        children: [
-          _StoryItem(
-            initial: pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
-            label: 'Your story',
-            ringColors: const [AppColors.sunset500, AppColors.coral500],
-            isAdd: true,
-            onTap: () => context.push('/social/create'),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final storiesAsync = ref.watch(storiesProvider);
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+
+    return storiesAsync.when(
+      loading: () => const SizedBox(
+        height: 96,
+        child: Center(child: CircularProgressIndicator.adaptive()),
+      ),
+      error: (err, stack) => const SizedBox.shrink(),
+      data: (stories) {
+        // Group stories by petId
+        final grouped = <String, List<Story>>{};
+        for (final story in stories) {
+          grouped.putIfAbsent(story.petId, () => []).add(story);
+        }
+
+        final stacks = grouped.entries.map((e) {
+          final first = e.value.first;
+          final sortedStories = List<Story>.from(e.value)
+            ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+          return PetStoryStack(
+            petId: e.key,
+            petName: first.petName,
+            petAvatarUrl: first.petAvatarUrl,
+            petSpecies: first.petSpecies,
+            stories: sortedStories,
+          );
+        }).toList();
+
+        // Check if active pet has stories
+        final activePetStackIdx = stacks.indexWhere((s) => s.petId == pet.id);
+        final activePetStack = activePetStackIdx != -1 ? stacks[activePetStackIdx] : null;
+
+        // Other pets' stacks, sorted with unviewed ones first
+        final otherStacks = stacks.where((s) => s.petId != pet.id).toList()
+          ..sort((a, b) {
+            final aUnviewed = a.hasUnviewed(userId);
+            final bUnviewed = b.hasUnviewed(userId);
+            if (aUnviewed && !bUnviewed) return -1;
+            if (!aUnviewed && bUnviewed) return 1;
+            final aNewest = a.stories.map((s) => s.createdAt).reduce((v, e) => v.isAfter(e) ? v : e);
+            final bNewest = b.stories.map((s) => s.createdAt).reduce((v, e) => v.isAfter(e) ? v : e);
+            return bNewest.compareTo(aNewest);
+          });
+
+        return SizedBox(
+          height: 96,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            children: [
+              // Own Pet Story Item
+              if (activePetStack != null)
+                _StoryItem(
+                  initial: pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
+                  label: 'Your story',
+                  avatarUrl: pet.avatarUrl,
+                  ringColors: activePetStack.hasUnviewed(userId)
+                      ? const [AppColors.sunset500, AppColors.coral500]
+                      : [pt.ink300, pt.ink300],
+                  onTap: () => context.push('/social/stories?petId=${pet.id}'),
+                  onLongPress: () => _showOwnStoryOptions(context, ref, pet),
+                )
+              else
+                _StoryItem(
+                  initial: pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
+                  label: 'Your story',
+                  avatarUrl: pet.avatarUrl,
+                  ringColors: const [AppColors.sunset500, AppColors.coral500],
+                  isAdd: true,
+                  onTap: () {
+                    ref.read(createPostControllerProvider.notifier).setIsStory(true);
+                    context.push('/social/create-story');
+                  },
+                ),
+
+              // Other Pet Story Items
+              ...otherStacks.map((stack) {
+                final initial = stack.petName.isNotEmpty ? stack.petName[0].toUpperCase() : '?';
+                return Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: _StoryItem(
+                    initial: initial,
+                    label: stack.petName,
+                    avatarUrl: stack.petAvatarUrl,
+                    ringColors: stack.hasUnviewed(userId)
+                        ? const [AppColors.sunset500, AppColors.coral500]
+                        : [pt.ink300, pt.ink300],
+                    onTap: () => context.push('/social/stories?petId=${stack.petId}'),
+                  ),
+                );
+              }),
+            ],
           ),
-        ],
+        );
+      },
+    );
+  }
+
+  void _showOwnStoryOptions(BuildContext context, WidgetRef ref, Pet pet) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _OwnStoryOptionsSheet(pet: pet),
+    );
+  }
+}
+
+class _OwnStoryOptionsSheet extends ConsumerWidget {
+  const _OwnStoryOptionsSheet({required this.pet});
+  final Pet pet;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                '${pet.name}\'s Story',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontFamily: 'Sora',
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ),
+            const Divider(),
+            ListTile(
+              leading: Icon(Icons.play_circle_outline_rounded, color: cs.primary),
+              title: const Text(
+                'View story',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                context.push('/social/stories?petId=${pet.id}');
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.add_photo_alternate_outlined, color: cs.primary),
+              title: const Text(
+                'Add to story',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                ref.read(createPostControllerProvider.notifier).setIsStory(true);
+                context.push('/social/create-story');
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -257,61 +418,92 @@ class _StoryItem extends StatelessWidget {
     required this.initial,
     required this.label,
     required this.ringColors,
+    this.avatarUrl,
     this.isAdd = false,
     this.onTap,
+    this.onLongPress,
   });
+
   final String initial;
   final String label;
   final List<Color> ringColors;
+  final String? avatarUrl;
   final bool isAdd;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     final surface = Theme.of(context).colorScheme.surface;
-    final avatarBg = ringColors.isNotEmpty ? ringColors[0].withAlpha(180) : AppColors.blue500;
 
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Ring + avatar
-          Container(
-            width: 58,
-            height: 58,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: ringColors.length >= 2
-                    ? ringColors
-                    : [ringColors.first, ringColors.first],
+          Stack(
+            children: [
+              Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: ringColors.length >= 2
+                        ? ringColors
+                        : [ringColors.first, ringColors.first],
+                  ),
+                ),
+                padding: const EdgeInsets.all(2.5),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: surface,
+                  ),
+                  padding: const EdgeInsets.all(2),
+                  child: CircleAvatar(
+                    backgroundColor: ringColors.first.withAlpha(180),
+                    backgroundImage: avatarUrl != null
+                        ? CachedNetworkImageProvider(avatarUrl!)
+                        : null,
+                    child: avatarUrl == null
+                        ? Text(
+                            initial,
+                            style: tt.titleSmall?.copyWith(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
               ),
-            ),
-            padding: const EdgeInsets.all(2.5),
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: surface,
-              ),
-              padding: const EdgeInsets.all(2),
-              child: CircleAvatar(
-                backgroundColor: avatarBg,
-                child: isAdd
-                    ? const Icon(Icons.add, color: Colors.white, size: 20)
-                    : Text(
-                        initial,
-                        style: tt.titleSmall?.copyWith(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-              ),
-            ),
+              if (isAdd)
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: AppColors.sunset500,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: surface, width: 2),
+                    ),
+                    child: const Icon(
+                      Icons.add,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 4),
           SizedBox(

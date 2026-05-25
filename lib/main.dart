@@ -67,6 +67,7 @@ class PetfolioApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeProvider);
 
     return MaterialApp.router(
       title: 'Petfolio',
@@ -76,7 +77,7 @@ class PetfolioApp extends ConsumerWidget {
       // ── Design system themes ─────────────────────────────────────────────
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
 
       routerConfig: router,
     );

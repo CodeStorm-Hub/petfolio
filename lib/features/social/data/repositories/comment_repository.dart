@@ -40,7 +40,7 @@ class CommentRepository {
   }) async {
     final rows = await _client
         .from('comments')
-        .select('id, post_id, pet_id, content, created_at, pet:pets(name)')
+        .select('id, post_id, pet_id, content, created_at, pet:pets(name, handle, avatar_url)')
         .eq('post_id', postId)
         .order('created_at', ascending: true);
 
@@ -71,7 +71,7 @@ class CommentRepository {
           'pet_id': petId,
           'content': content.trim(),
         })
-        .select('id, post_id, pet_id, content, created_at, pet:pets(name)')
+        .select('id, post_id, pet_id, content, created_at, pet:pets(name, handle, avatar_url)')
         .single();
 
     return Comment.fromJson(row, activePetId: activePetId);
