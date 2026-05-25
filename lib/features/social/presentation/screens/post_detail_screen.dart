@@ -43,12 +43,15 @@ class PostDetailScreen extends ConsumerStatefulWidget {
 class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
   final _commentController = TextEditingController();
   final _scrollController = ScrollController();
+  final _commentFocusNode = FocusNode();
+  Comment? _replyingToComment;
   bool _isSending = false;
 
   @override
   void dispose() {
     _commentController.dispose();
     _scrollController.dispose();
+    _commentFocusNode.dispose();
     super.dispose();
   }
 
@@ -64,11 +67,17 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
     setState(() => _isSending = true);
 
     try {
+      final parentId = _replyingToComment?.parentId ?? _replyingToComment?.id;
       await ref
           .read(commentListProvider(widget.postId).notifier)
-          .add(petId: activePet.id, content: text);
+          .add(
+            petId: activePet.id,
+            content: text,
+            parentId: parentId,
+          );
       
       _commentController.clear();
+      setState(() => _replyingToComment = null);
       
       // Scroll to the bottom after posting.
       await Future.delayed(const Duration(milliseconds: 100));
@@ -253,25 +262,51 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                       ),
                     ),
                   ),
-                  data: (list) => list.isEmpty
-                      ? SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 32, horizontal: 16),
-                            child: Text(
-                              'No comments yet. Be the first!',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: pt.ink500, fontSize: 14),
-                            ),
-                          ),
-                        )
-                      : SliverList.builder(
-                          itemCount: list.length,
-                          itemBuilder: (ctx, i) => _CommentTile(
-                            comment: list[i],
-                            postId: widget.postId,
+                  data: (list) {
+                    if (list.isEmpty) {
+                      return SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 32, horizontal: 16),
+                          child: Text(
+                            'No comments yet. Be the first!',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: pt.ink500, fontSize: 14),
                           ),
                         ),
+                      );
+                    }
+
+                    // Build threaded comment display list
+                    final rootComments = list.where((c) => c.parentId == null).toList();
+                    final displayList = <_CommentDisplayItem>[];
+                    for (final root in rootComments) {
+                      displayList.add(_CommentDisplayItem(comment: root, isReply: false));
+                      final replies = list.where((c) => c.parentId == root.id).toList();
+                      for (final reply in replies) {
+                        displayList.add(_CommentDisplayItem(comment: reply, isReply: true));
+                      }
+                    }
+
+                    return SliverList.builder(
+                      itemCount: displayList.length,
+                      itemBuilder: (ctx, i) {
+                        final item = displayList[i];
+                        return _CommentTile(
+                          key: ValueKey(item.comment.id),
+                          comment: item.comment,
+                          postId: widget.postId,
+                          isReply: item.isReply,
+                          onReplyTap: (c) {
+                            setState(() {
+                              _replyingToComment = c;
+                            });
+                            _commentFocusNode.requestFocus();
+                          },
+                        );
+                      },
+                    );
+                  },
                 ),
 
                 const SliverToBoxAdapter(child: SizedBox(height: 16)),
@@ -279,13 +314,45 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
             ),
           ),
 
-          // ── Fixed comment input bar ─────────────────────────────────────
-          _CommentInputBar(
-            controller: _commentController,
-            isSending: _isSending,
-            onSend: _sendComment,
-            pt: pt,
-            autofocus: widget.autofocusComment,
+          // ── Fixed comment input bar with Replying Banner ──────────────────────────
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_replyingToComment != null)
+                Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    border: Border(top: BorderSide(color: pt.line200)),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Replying to ${_replyingToComment!.handle}',
+                          style: tt.bodySmall?.copyWith(
+                            color: pt.ink500,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => setState(() => _replyingToComment = null),
+                        child: Icon(Icons.close_rounded, size: 16, color: pt.ink300),
+                      ),
+                    ],
+                  ),
+                ),
+              _CommentInputBar(
+                controller: _commentController,
+                focusNode: _commentFocusNode,
+                isSending: _isSending,
+                onSend: _sendComment,
+                pt: pt,
+                autofocus: widget.autofocusComment,
+                replyingToHandle: _replyingToComment?.handle,
+              ),
+            ],
           ),
         ],
       ),
@@ -326,7 +393,7 @@ class _PostImagesState extends State<_PostImages> {
     if (post.imageUrls.isEmpty) {
       // Fallback: gradient blob
       return AspectRatio(
-        aspectRatio: 1,
+        aspectRatio: 4 / 5,
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -342,7 +409,7 @@ class _PostImagesState extends State<_PostImages> {
     return Stack(
       children: [
         AspectRatio(
-          aspectRatio: 1,
+          aspectRatio: 4 / 5,
           child: PageView.builder(
             itemCount: post.imageUrls.length,
             onPageChanged: (i) => setState(() => _currentPage = i),
@@ -433,7 +500,7 @@ class _StatsBar extends ConsumerWidget {
           // Like button
           IconButton(
             icon: Icon(
-              post.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+              post.isLiked ? Icons.pets_rounded : Icons.pets_outlined,
               color: post.isLiked ? AppColors.coral500 : pt.ink500,
             ),
             onPressed: () {
@@ -467,102 +534,367 @@ class _StatsBar extends ConsumerWidget {
   }
 }
 
+class _CommentDisplayItem {
+  const _CommentDisplayItem({required this.comment, required this.isReply});
+  final Comment comment;
+  final bool isReply;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Comment tile
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _CommentTile extends ConsumerWidget {
-  const _CommentTile({required this.comment, required this.postId});
+  const _CommentTile({
+    super.key,
+    required this.comment,
+    required this.postId,
+    this.isReply = false,
+    this.onReplyTap,
+  });
+
   final Comment comment;
   final String postId;
+  final bool isReply;
+  final ValueChanged<Comment>? onReplyTap;
+
+  // ── Context menu ───────────────────────────────────────────────────────────
+
+  /// Shows the owner context menu on long-press.
+  /// Silently returns if the comment belongs to another pet.
+  void _showContextMenu(BuildContext context, WidgetRef ref) {
+    if (!comment.isOwnComment) return;
+
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
+    showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      backgroundColor: cs.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetCtx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag handle
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 8),
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: cs.onSurfaceVariant.withAlpha(60),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              // Preview of the comment text
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                child: Text(
+                  comment.content,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: tt.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              // Edit action
+              ListTile(
+                leading: Icon(Icons.edit_rounded, color: cs.onSurface),
+                title: Text(
+                  'Edit Comment',
+                  style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                onTap: () {
+                  Navigator.of(sheetCtx).pop();
+                  // Small delay so the first sheet is fully dismissed first.
+                  Future.delayed(const Duration(milliseconds: 120), () {
+                    if (context.mounted) _showEditSheet(context, ref);
+                  });
+                },
+              ),
+              // Delete action
+              ListTile(
+                leading: const Icon(Icons.delete_outline_rounded,
+                    color: AppColors.coral500),
+                title: Text(
+                  'Delete Comment',
+                  style: tt.bodyMedium?.copyWith(
+                    color: AppColors.coral500,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.of(sheetCtx).pop();
+                  ref
+                      .read(commentListProvider(postId).notifier)
+                      .delete(comment.id);
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Opens an edit bottom sheet pre-filled with the current comment text.
+  void _showEditSheet(BuildContext context, WidgetRef ref) {
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final editController = TextEditingController(text: comment.content);
+
+    showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true, // allows sheet to grow with keyboard
+      backgroundColor: cs.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetCtx) {
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Drag handle
+                  Center(
+                    child: Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: cs.onSurfaceVariant.withAlpha(60),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Edit Comment',
+                    style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: editController,
+                    autofocus: true,
+                    maxLines: 5,
+                    minLines: 1,
+                    style: tt.bodyMedium,
+                    decoration: InputDecoration(
+                      hintText: 'Update your comment…',
+                      hintStyle: tt.bodyMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                      filled: true,
+                      fillColor: cs.surfaceContainerHighest,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.coral500,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size.fromHeight(48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () {
+                      final newText = editController.text.trim();
+                      if (newText.isEmpty) return;
+                      Navigator.of(sheetCtx).pop();
+                      ref
+                          .read(commentListProvider(postId).notifier)
+                          .edit(comment.id, newText);
+                      editController.dispose();
+                    },
+                    child: Text(
+                      'Save',
+                      style: tt.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    ).whenComplete(() => editController.dispose());
+  }
+
+  // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final tt = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Tappable avatar → pet social profile
-          GestureDetector(
-            onTap: () => context.push('/social/profile/${comment.petId}'),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: AppColors.coral500.withAlpha(200),
-              backgroundImage: comment.avatarUrl != null
-                  ? CachedNetworkImageProvider(comment.avatarUrl!)
-                  : null,
-              child: comment.avatarUrl == null
-                  ? Text(
-                      comment.petName.isNotEmpty
-                          ? comment.petName[0].toUpperCase()
-                          : '?',
-                      style: tt.titleSmall?.copyWith(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    )
-                  : null,
-            ),
-          ),
-          const SizedBox(width: 10),
-          // Content
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    // Tappable pet name → pet social profile
-                    GestureDetector(
-                      onTap: () =>
-                          context.push('/social/profile/${comment.petId}'),
-                      child: Text(
-                        comment.petName,
-                        style: tt.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      comment.timeAgo,
-                      style: tt.labelSmall?.copyWith(color: pt.ink500),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  comment.content,
-                  style: tt.bodySmall?.copyWith(height: 1.4),
-                ),
-              ],
-            ),
-          ),
-          // Delete button (only for own comments)
-          if (comment.isOwnComment)
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: () => _showContextMenu(context, ref),
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: isReply ? 52.0 : 16.0,
+          right: 8.0,
+          top: 8.0,
+          bottom: 8.0,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Tappable avatar → pet social profile
             GestureDetector(
-              onTap: () => ref
-                  .read(commentListProvider(postId).notifier)
-                  .delete(comment.id),
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8, top: 2),
-                child: Icon(Icons.close_rounded, size: 16, color: pt.ink300),
+              onTap: () => context.push('/social/profile/${comment.petId}'),
+              child: CircleAvatar(
+                radius: isReply ? 12 : 16,
+                backgroundColor: AppColors.coral500.withAlpha(200),
+                backgroundImage: comment.avatarUrl != null
+                    ? CachedNetworkImageProvider(comment.avatarUrl!)
+                    : null,
+                child: comment.avatarUrl == null
+                    ? Text(
+                        comment.petName.isNotEmpty
+                            ? comment.petName[0].toUpperCase()
+                            : '?',
+                        style: tt.titleSmall?.copyWith(
+                          fontSize: isReply ? 9 : 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      )
+                    : null,
               ),
             ),
-        ],
+            const SizedBox(width: 10),
+            // Content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      // Tappable pet name → pet social profile
+                      GestureDetector(
+                        onTap: () =>
+                            context.push('/social/profile/${comment.petId}'),
+                        child: Text(
+                          comment.petName,
+                          style: tt.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        comment.timeAgo,
+                        style: tt.labelSmall?.copyWith(color: pt.ink500),
+                      ),
+                      // "• edited" hint for visual feedback after an edit
+                      if (comment.isOwnComment) ...[
+                        const SizedBox(width: 4),
+                        Text(
+                          '· hold to edit',
+                          style: tt.labelSmall?.copyWith(
+                            color: pt.ink500.withAlpha(120),
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    comment.content,
+                    style: tt.bodySmall?.copyWith(height: 1.4),
+                  ),
+                  const SizedBox(height: 4),
+                  // Actions row — like count + Reply link only
+                  Row(
+                    children: [
+                      if (comment.likeCount > 0) ...[
+                        Text(
+                          '${comment.likeCount} ${comment.likeCount == 1 ? 'like' : 'likes'}',
+                          style: tt.labelSmall?.copyWith(
+                            color: pt.ink500,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                      ],
+                      GestureDetector(
+                        onTap: () => onReplyTap?.call(comment),
+                        child: Text(
+                          'Reply',
+                          style: tt.labelSmall?.copyWith(
+                            color: pt.ink500,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // Like button (paw icon) on the right
+            IconButton(
+              icon: Icon(
+                comment.isLiked ? Icons.pets_rounded : Icons.pets_outlined,
+                size: 16,
+                color: comment.isLiked ? AppColors.coral500 : pt.ink300,
+              ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 32,
+                minHeight: 32,
+              ),
+              onPressed: () {
+                ref
+                    .read(commentListProvider(postId).notifier)
+                    .toggleLike(comment.id);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Comment input bar (fixed at bottom)
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _CommentInputBar extends StatelessWidget {
@@ -572,6 +904,8 @@ class _CommentInputBar extends StatelessWidget {
     required this.onSend,
     required this.pt,
     this.autofocus = false,
+    this.focusNode,
+    this.replyingToHandle,
   });
 
   final TextEditingController controller;
@@ -579,6 +913,8 @@ class _CommentInputBar extends StatelessWidget {
   final VoidCallback onSend;
   final PetfolioThemeExtension pt;
   final bool autofocus;
+  final FocusNode? focusNode;
+  final String? replyingToHandle;
 
   @override
   Widget build(BuildContext context) {
@@ -605,6 +941,7 @@ class _CommentInputBar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: TextField(
                 controller: controller,
+                focusNode: focusNode,
                 autofocus: autofocus,
                 minLines: 1,
                 maxLines: 4,
@@ -615,7 +952,9 @@ class _CommentInputBar extends StatelessWidget {
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   isDense: true,
-                  hintText: 'Add a comment...',
+                  hintText: replyingToHandle != null
+                      ? 'Reply to $replyingToHandle...'
+                      : 'Add a comment...',
                   hintStyle: TextStyle(color: pt.ink300, fontSize: 14),
                   contentPadding: EdgeInsets.zero,
                 ),

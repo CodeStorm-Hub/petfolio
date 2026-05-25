@@ -721,7 +721,7 @@ class _PostPhotoState extends State<_PostPhoto>
       onTap: widget.onTap,
       onDoubleTap: _handleDoubleTap,
       child: AspectRatio(
-        aspectRatio: 4 / 3,
+        aspectRatio: 4 / 5,
         child: Container(
           decoration: BoxDecoration(
             gradient: post.imageUrls.isNotEmpty 
@@ -829,7 +829,7 @@ class _PostPhotoState extends State<_PostPhoto>
                       reverseCurve: Curves.easeIn,
                     ),
                     child: Icon(
-                      Icons.favorite_rounded,
+                      Icons.pets_rounded,
                       size: 100,
                       color: Colors.white.withAlpha(220),
                     ),
@@ -896,8 +896,8 @@ class _RegularFooter extends StatelessWidget {
                         ),
                         child: Icon(
                           post.isLiked
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
+                              ? Icons.pets_rounded
+                              : Icons.pets_outlined,
                           key: ValueKey(post.isLiked),
                           color: post.isLiked ? AppColors.coral500 : pt.ink500,
                           size: 24,

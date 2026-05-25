@@ -35,6 +35,7 @@ class PetProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final activePet = ref.watch(activePetControllerProvider);
     final petsAsync = ref.watch(petListProvider);
+    final themeMode = ref.watch(themeProvider);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Scaffold(
@@ -50,10 +51,14 @@ class PetProfileScreen extends ConsumerWidget {
                 onOpenSwitcher: () => PetSwitcherSheet.show(context),
                 actions: [
                   AppHeaderAction(
-                    iconKey: const ValueKey<String>('home_action_outdoor'),
-                    icon: Icons.wb_sunny_outlined,
-                    tooltip: 'Coming soon',
-                    onTap: () {},
+                    iconKey: const ValueKey<String>('home_action_theme'),
+                    icon: themeMode == ThemeMode.dark
+                        ? Icons.light_mode_outlined
+                        : Icons.dark_mode_outlined,
+                    tooltip: themeMode == ThemeMode.dark
+                        ? 'Switch to light theme'
+                        : 'Switch to dark theme',
+                    onTap: () => ref.read(themeProvider.notifier).toggleTheme(),
                   ),
                   AppHeaderAction(
                     iconKey: const ValueKey<String>('home_action_notifications'),

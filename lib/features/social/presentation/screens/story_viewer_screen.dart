@@ -368,63 +368,80 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                       // 2. Pet Info
                       Row(
                         children: [
-                          CircleAvatar(
-                            radius: 18,
-                            backgroundColor: Colors.white.withAlpha(50),
-                            backgroundImage: activeStack.petAvatarUrl != null
-                                ? CachedNetworkImageProvider(activeStack.petAvatarUrl!)
-                                : null,
-                            child: activeStack.petAvatarUrl == null
-                                ? Text(
-                                    activeStack.petName.isNotEmpty
-                                        ? activeStack.petName[0].toUpperCase()
-                                        : '?',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  )
-                                : null,
-                          ),
-                          const SizedBox(width: 10),
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  activeStack.petName,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    fontFamily: 'Sora',
-                                    shadows: [
-                                      Shadow(
-                                        blurRadius: 3.0,
-                                        color: Colors.black45,
-                                        offset: Offset(1.0, 1.0),
-                                      ),
-                                    ],
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {
+                                _timer?.cancel();
+                                context.push('/social/profile/${activeStack.petId}').then((_) {
+                                  if (mounted) {
+                                    _startStory();
+                                  }
+                                });
+                              },
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 18,
+                                    backgroundColor: Colors.white.withAlpha(50),
+                                    backgroundImage: activeStack.petAvatarUrl != null
+                                        ? CachedNetworkImageProvider(activeStack.petAvatarUrl!)
+                                        : null,
+                                    child: activeStack.petAvatarUrl == null
+                                        ? Text(
+                                            activeStack.petName.isNotEmpty
+                                                ? activeStack.petName[0].toUpperCase()
+                                                : '?',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          )
+                                        : null,
                                   ),
-                                ),
-                                const SizedBox(height: 1),
-                                Text(
-                                  _timeAgo(activeStory.createdAt),
-                                  style: TextStyle(
-                                    color: Colors.white.withAlpha(180),
-                                    fontSize: 11,
-                                    fontFamily: 'Inter',
-                                    shadows: const [
-                                      Shadow(
-                                        blurRadius: 2.0,
-                                        color: Colors.black45,
-                                        offset: Offset(1.0, 1.0),
-                                      ),
-                                    ],
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          activeStack.petName,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                            fontFamily: 'Sora',
+                                            shadows: [
+                                              Shadow(
+                                                blurRadius: 3.0,
+                                                color: Colors.black45,
+                                                offset: Offset(1.0, 1.0),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 1),
+                                        Text(
+                                          _timeAgo(activeStory.createdAt),
+                                          style: TextStyle(
+                                            color: Colors.white.withAlpha(180),
+                                            fontSize: 11,
+                                            fontFamily: 'Inter',
+                                            shadows: const [
+                                              Shadow(
+                                                blurRadius: 2.0,
+                                                color: Colors.black45,
+                                                offset: Offset(1.0, 1.0),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                           IconButton(

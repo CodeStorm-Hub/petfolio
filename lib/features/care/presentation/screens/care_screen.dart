@@ -33,7 +33,7 @@ class CareScreen extends ConsumerStatefulWidget {
 }
 
 class _CareScreenState extends ConsumerState<CareScreen> {
-  bool _outdoor = false;
+  final bool _outdoor = false;
   bool _onboardingSuccessHandled = false;
   bool _isGeneratingRoutine = false;
 
@@ -105,6 +105,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
     final activePet = ref.watch(activePetControllerProvider);
+    final themeMode = ref.watch(themeProvider);
 
     final petsAsync = ref.watch(petListProvider);
     if (activePet == null) {
@@ -173,13 +174,15 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                   : null,
               actions: [
                 AppHeaderAction(
-                  iconKey: const ValueKey<String>('care_action_outdoor'),
-                  icon: _outdoor
-                      ? Icons.wb_sunny
-                      : Icons.wb_sunny_outlined,
-                  tooltip: _outdoor ? 'Indoor mode' : 'Outdoor mode',
-                  filled: _outdoor,
-                  onTap: () => setState(() => _outdoor = !_outdoor),
+                  iconKey: const ValueKey<String>('care_action_theme'),
+                  icon: themeMode == ThemeMode.dark
+                      ? Icons.light_mode_outlined
+                      : Icons.dark_mode_outlined,
+                  tooltip: themeMode == ThemeMode.dark
+                      ? 'Switch to light theme'
+                      : 'Switch to dark theme',
+                  onTap: () =>
+                      ref.read(themeProvider.notifier).toggleTheme(),
                 ),
               ],
             ),

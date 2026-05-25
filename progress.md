@@ -1,5 +1,97 @@
 # Petfolio — Progress Log
 
+
+## AI AGENT HANDOVER & ARCHITECTURE GUIDE
+
+> [!IMPORTANT]
+> Incoming developer AI agents must read and adhere to this section. It outlines the codebase design patterns, state management practices, routing constraints, and current feature layouts to prevent regression or architectural drift.
+
+### 1. Technology Stack & Directory Structure
+- **Architecture**: Strict **Feature-First Architecture** inside [lib/features/](file:///home/kratzer/workspace/petfolio/lib/features/). Cleanly split each feature into `presentation` (screens, controllers/notifiers), `domain` (business logic, pure models), and `data` (repositories, data sources, API models) layers.
+- **State Management**: Standardized entirely on **Riverpod** (`flutter_riverpod`, `riverpod_annotation`, with code-generated notifiers).
+  - *Rule*: Do NOT import or introduce the legacy `provider` package.
+  - *Rule*: Riverpod 3 generated notifiers omit type parameters (`extends _$NotifierName`). Use `AsyncValue.value` instead of `.valueOrNull`.
+- **Database (Supabase)**:
+  - *RLS Optimization*: All Row-Level Security policies in Supabase must wrap authentication checks in a subselect: e.g., `(select auth.uid())`. This forces Postgres to cache the query plan and prevents heavy database jank.
+  - *Performance*: Avoid N+1 database queries on client-side joins. Push complex relational operations and aggregations to **Postgres Views** or **RPCs**. Never create queries that result in full table scans; use indexes.
+  - *Applying Schema*: Prefer using Supabase MCP migration commands if available. When using the Supabase CLI, always prefix with `npx` (e.g., `npx supabase db push`).
+
+### 2. Core Feature Areas & Routes
+
+#### A. Social Feed & Stories
+- **Create Post Screen** ([create_post_screen.dart](file:///home/kratzer/workspace/petfolio/lib/features/social/presentation/screens/create_post_screen.dart)):
+  - Route: `/social/create-post`
+  - Aspect Ratio: `4/5` vertical portrait standard.
+- **Create Story Screen** ([create_story_screen.dart](file:///home/kratzer/workspace/petfolio/lib/features/social/presentation/screens/create_story_screen.dart)):
+  - Route: `/social/create-story`
+  - UI Design: Media-first. Top section displays a DSLR-style custom painter camera viewfinder (`_CameraViewfinderCard`, `4/3` ratio) with mock indicators (RAW, HDR, record dot timer, pulsing shutter). Below sits a 3-column scrollable mock photo selector grid loaded with Unsplash pet assets plus a library browse button.
+  - Fullscreen 9:16 story preview overlay on selection with floating pet details and a sunset-gradient submit button.
+- **Story Viewer Screen** ([story_viewer_screen.dart](file:///home/kratzer/workspace/petfolio/lib/features/social/presentation/screens/story_viewer_screen.dart)):
+  - Route: `/social/stories?petId=:petId`
+  - Playback: Features segmented indicators mapping to the story list. Long-pressing the viewport pauses the story progression; releasing resumes it.
+  - Pet Identity Navigation: The top header avatar and pet info are wrapped in an opaque `GestureDetector` that pauses the active timer, pushes the profile route (`/social/profile/:petId`), and resumes the story play timer cleanly upon back navigation.
+- **Aspect Ratio Alignment**:
+  - The feed card ([social_screen.dart](file:///home/kratzer/workspace/petfolio/lib/features/social/presentation/screens/social_screen.dart#L724)), post detail ([post_detail_screen.dart](file:///home/kratzer/workspace/petfolio/lib/features/social/presentation/screens/post_detail_screen.dart#L329)), and creation preview screens are standardized to a vertical `4/5` portrait ratio (`aspectRatio: 4 / 5`) to match Instagram's standard and minimize vertical photo cropping.
+
+#### B. Care & Health
+- **Dashboard**: Accessed at `/care`. Successful onboarding redirects to `/care?onboardingComplete=1` which displays a one-shot success snackbar and normalizes the URL.
+- **Pet Context Dependency**: `careDashboardProvider` and `healthVaultControllerProvider` are non-family providers that watch `activePetIdProvider`. If `activePetId` is null, remote loads are skipped and lists are returned empty.
+- **Completion Streaks & Badges**:
+  - Daily streak completion is driven by the `check_daily_completion` RPC (`target_pet_id`, optional `completion_date` matching `care_logs.logged_date`) checking against `care_tasks` and `care_logs`.
+  - Streak records live in `care_streaks` and badges in `pet_badges`.
+  - The dashboard listens to Supabase realtime on `care_streaks` via `careStreakRealtimeProvider` for instant UI updates.
+
+#### C. Multi-Vendor Marketplace
+- **Discover Shops**: Navigate via `shopListProvider` to `/shop/:id`.
+- **Seller Setup & Onboarding**: Path `/seller/setup` triggers the `stripe-onboard-vendor` Edge Function utilizing `functions.invoke` (not `.rpc()`) with body `{'shopId'}` to return the Stripe Connect setup link.
+- **Checkout Flow**: Handled via cart `itemsByShop` and per-shop `startCheckoutForShop` workflows.
+
+### 3. Critical UI & Navigation Constraints
+- **Circular Imports Avoidance**: Do NOT import [router.dart](file:///home/kratzer/workspace/petfolio/lib/core/router.dart) from screens that the router imports. Instead, navigate using literal path strings or query parameter deep links.
+- **Error UI Handling**: For optimistic UI actions (like toggling care tasks or seller onboarding), show errors using `AppSnackBar.showError` (via `appSnackBarMessengerKey` on `MaterialApp.router`). Do not put long-lived state providers in `AsyncValue.error` states for transient/action-level failures.
+- **Web Safe Target**: Marionette execution runs exclusively in debug builds via conditional compiler imports (`marionette_debug_gate_stub.dart` vs `_io.dart`) to keep `main.dart` from importing `dart:io` on web targets.
+
+## 2026-05-25 — Comment Likes and Threaded Replies
+
+- **Database migration applied** (`jqyjvhwlcqcsuwcqgcwf`): added `parent_id` (foreign key to comments table for threading) and `like_count` to comments table; created `comment_likes` table with triggers to keep counts updated; added RLS security policy wrapping `(select auth.uid())` for plan caching performance.
+- **Comment Likes (Paw Icon & Optimistic UI)**: Added a small paw icon button (`Icons.pets_rounded` / `Icons.pets_outlined`) on each comment tile to toggle liking instantly; handles database failures optimistically by reverting local state and invoking `AppSnackBar.showError(e)`.
+- **Comment Replies (Threaded UI)**: Implemented comments threading in `PostDetailScreen`. Root comments and replies are flattened with replies indented by 52 pixels and styled with smaller avatars (`radius: 12` vs `16`) to build a clear visual hierarchy.
+- **Context-Aware Reply States**: Click "Reply" to activate the replying banner, focus the comment input bar using `FocusNode`, set a custom dynamic placeholder (`Reply to @handle...`), and automatically reset when sent or canceled.
+- `flutter analyze` — **No issues found.**
+
+---
+
+## 2026-05-24 — Paw Icon Likes Alignment
+
+- **Replaced Love with Paw Icons**: Changed post likes from heart icons (`Icons.favorite_rounded`/`Icons.favorite_border_rounded`) to paw icons (`Icons.pets_rounded`/`Icons.pets_outlined`) in both the feed [social_screen.dart](file:///home/kratzer/workspace/petfolio/lib/features/social/presentation/screens/social_screen.dart) and post details [post_detail_screen.dart](file:///home/kratzer/workspace/petfolio/lib/features/social/presentation/screens/post_detail_screen.dart).
+- **Interactive Double-Tap Overlay**: Updated the double-tap gesture like overlay animation on feed posts to render a pulsing big paw icon (`Icons.pets_rounded`) instead of a heart.
+- **Static Analysis**: Verified clean build via `flutter analyze` with **no issues found**.
+
+---
+
+## 2026-05-24 — Persistent Dark Mode Support
+
+- **Theme Mode Notifier**: Created a dynamic generated Riverpod notifier `ThemeNotifier` (generating `themeProvider`) in [theme_notifier.dart](file:///home/kratzer/workspace/petfolio/lib/core/theme/theme_notifier.dart) to replace the old static theme mode provider.
+- **Preferences Persistence**: Automatically saves and loads the user's selected `ThemeMode` from `SharedPreferences` to ensure settings persist across application restarts.
+- **Header Switch Action**: Replaced the placeholder outdoor header icon on [pet_profile_screen.dart](file:///home/kratzer/workspace/petfolio/lib/features/pet_profile/presentation/screens/pet_profile_screen.dart) with a responsive theme toggle action button in the active pet header.
+- **Static Analysis**: Verified clean build via `flutter analyze` with **no issues found**.
+
+---
+
+## 2026-05-24 — Story Viewer Profile Navigation
+
+- **Pet Profile Navigation from Story Viewer**: Wrapped the pet avatar and name/info column in `story_viewer_screen.dart` with a `GestureDetector` that pauses the active story timer and pushes the pet's profile route (`/social/profile/:petId`). The story timer automatically resumes when returning back to the story viewer.
+- **Static Analysis**: Verified clean build via `flutter analyze` with **no issues found**.
+
+---
+
+## 2026-05-24 — Instagram Post Card Aspect Ratio Alignment
+
+- **Feed Image Ratio updated**: Changed the post card photo aspect ratio in `social_screen.dart` from landscape `4/3` to `4/5` (Instagram portrait ratio) to prevent vertical cropping of pet photos.
+- **Creator Screen Preview updated**: Standardized the image preview on `create_post_screen.dart` to `4/5` to maintain UI consistency during creation.
+- **Detail Screen updated**: Updated `post_detail_screen.dart` to `4/5` aspect ratio to keep rendering consistent across the entire post lifecycle.
+- **Static Analysis**: Verified clean build via `flutter analyze` with **no issues found**.
+
 ---
 
 ## 2026-05-25 — Premium CreateStoryScreen Redesign

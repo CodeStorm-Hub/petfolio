@@ -352,7 +352,7 @@ class _ImageWell extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return AspectRatio(
-      aspectRatio: 4 / 3,
+      aspectRatio: 4 / 5,
       child: Stack(
         fit: StackFit.expand,
         children: [
