@@ -327,7 +327,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                 Container(
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
-                    border: Border(top: BorderSide(color: pt.line200)),
+                    border: Border(top: BorderSide(color: pt.line)),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
@@ -925,7 +925,7 @@ class _CommentInputBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        border: Border(top: BorderSide(color: pt.line200)),
+        border: Border(top: BorderSide(color: pt.line)),
       ),
       padding: EdgeInsets.only(
         left: 16,
@@ -940,7 +940,7 @@ class _CommentInputBar extends StatelessWidget {
               decoration: BoxDecoration(
                 color: pt.surface1,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: pt.line200),
+                border: Border.all(color: pt.line),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: TextField(

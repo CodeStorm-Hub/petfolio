@@ -152,7 +152,7 @@ class _DeletionRequestCardState extends ConsumerState<_DeletionRequestCard> {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-        border: Border.all(color: pt.line200, width: 0.5),
+        border: Border.all(color: pt.line, width: 0.5),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -223,7 +223,7 @@ class _DeletionRequestCardState extends ConsumerState<_DeletionRequestCard> {
                   child: OutlinedButton(
                     onPressed: _showRejectDialog,
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: pt.line200),
+                      side: BorderSide(color: pt.line),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                             PetfolioThemeExtension.radiusSm),

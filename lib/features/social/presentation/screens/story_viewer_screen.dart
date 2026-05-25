@@ -410,7 +410,6 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 14,
-                                            fontFamily: 'Sora',
                                             shadows: [
                                               Shadow(
                                                 blurRadius: 3.0,
@@ -426,7 +425,6 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                                           style: TextStyle(
                                             color: Colors.white.withAlpha(180),
                                             fontSize: 11,
-                                            fontFamily: 'Inter',
                                             shadows: const [
                                               Shadow(
                                                 blurRadius: 2.0,

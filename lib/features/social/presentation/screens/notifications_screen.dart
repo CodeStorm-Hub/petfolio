@@ -82,7 +82,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           return ListView.separated(
             itemCount: notifications.length,
             separatorBuilder: (_, _) =>
-                Divider(height: 1, color: pt.line200, indent: 72),
+                Divider(height: 1, color: pt.line, indent: 72),
             itemBuilder: (ctx, i) =>
                 _NotificationTile(notification: notifications[i]),
           );

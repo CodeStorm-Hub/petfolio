@@ -46,7 +46,6 @@ class AppSnackBar {
               child: Text(
                 '$label badge unlocked! 🎉',
                 style: const TextStyle(
-                  fontFamily: 'Inter',
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
                   color: Colors.white,

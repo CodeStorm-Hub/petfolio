@@ -167,7 +167,7 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: _AdminBadge(),
               ),
-              const Divider(height: 1, color: AppColors.line200),
+              const Divider(height: 1, color: AppColors.line),
               const SizedBox(height: 8),
               for (final d in _destinations)
                 ListTile(

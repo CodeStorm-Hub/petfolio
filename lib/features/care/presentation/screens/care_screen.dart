@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
-import 'package:petfolio/features/pet_profile/data/models/pet_species.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart';
 import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
@@ -14,12 +13,13 @@ import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_
 import 'package:petfolio/core/errors/app_exception.dart';
 import 'package:petfolio/core/models/pet.dart' show Pet;
 
-import '../../data/models/care_task.dart' as dbtask;
-import '../../data/models/care_task_log.dart';
-import '../controllers/care_dashboard_controller.dart';
-import '../utils/care_scheduled_time.dart';
-import '../widgets/routine_recommendation_sheet.dart';
-import '../../domain/services/care_recommendation_service.dart';
+import 'package:petfolio/features/care/data/models/care_task.dart' as dbtask;
+import 'package:petfolio/features/care/data/models/care_task_log.dart';
+import 'package:petfolio/features/care/presentation/controllers/care_dashboard_controller.dart';
+import 'package:petfolio/features/care/presentation/utils/care_scheduled_time.dart';
+import 'package:petfolio/features/care/presentation/widgets/routine_recommendation_sheet.dart';
+import 'package:petfolio/features/care/domain/services/care_recommendation_service.dart';
+import 'package:petfolio/features/care/presentation/widgets/gamified_care_ui.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CareScreen
@@ -102,7 +102,6 @@ class _CareScreenState extends ConsumerState<CareScreen> {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
     final activePet = ref.watch(activePetControllerProvider);
     final themeMode = ref.watch(themeProvider);
 
@@ -190,73 +189,85 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                 builder: (context, constraints) {
                   final wide = constraints.maxWidth >= 600;
                   final list = ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 120),
                     children: [
-                      _StreakBanner(
-                        species: species,
+                      CareGamifiedHeader(
+                        activePet: activePet,
+                        dashboard: dashboard,
                       ),
-                      const SizedBox(height: 24),
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: cs.surface,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: pt.line200),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.shadowE1L,
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                          child: _HorizontalDatePicker(
-                            selectedDate: dashboard.selectedDate,
-                            onDateSelected: (d) =>
-                                ref.read(careDashboardProvider.notifier).selectDate(d),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
-                        child: Row(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Text(
-                              'DAILY TASKS',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.08 * 12,
-                                color: pt.ink500,
+                            const SizedBox(height: 20),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "TODAY'S QUESTS",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.08 * 12,
+                                      color: pt.ink500,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  _DoneCounter(tasks: dashboard.tasks.value ?? []),
+                                ],
                               ),
                             ),
-                            const Spacer(),
-                            Text(
-                              'Swipe to complete',
-                              style: TextStyle(fontSize: 12, color: pt.ink300),
+                            _AiRoutineBanner(
+                              activePetId: activePet.id,
+                              hasNoTasks: dashboard.tasks.value?.isEmpty == true,
+                              isGenerating: _isGeneratingRoutine,
+                              onTap: () => _generateRoutine(activePet),
                             ),
+                            _DailyTasksDashboard(
+                              state: dashboard,
+                              petId: activePet.id,
+                              petName: activePet.name,
+                              species: species,
+                              onAddTask: openAddSheet,
+                            ),
+                            const SizedBox(height: 32),
+                            PfSectionTitle(
+                              title: 'This week',
+                              accent: AppColors.mint,
+                            ),
+                            CareGamifiedWeeklyChart(
+                              selectedDay: dashboard.selectedDate,
+                              weekHits: dashboard.weekGoalHit.value ?? List.filled(7, false),
+                              progressPercent: (dashboard.tasks.value != null && dashboard.tasks.value!.isNotEmpty)
+                                  ? (dashboard.tasks.value!.where((t) => t.isCompleted).length / dashboard.tasks.value!.length)
+                                  : 0.0,
+                            ),
+                            const SizedBox(height: 32),
+                            PfSectionTitle(
+                              title: 'Trophy room',
+                              accent: AppColors.lilac,
+                              trailing: GestureDetector(
+                                onTap: () {},
+                                child: const Text(
+                                  'Vault →',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.lilac700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const CareGamifiedTrophyRoom(),
+                            const SizedBox(height: 32),
+                            _NutritionBanner(pt: pt),
+                            const SizedBox(height: 12),
+                            _MedicalVaultBanner(pt: pt),
                           ],
                         ),
                       ),
-                      _AiRoutineBanner(
-                        activePetId: activePet.id,
-                        hasNoTasks: dashboard.tasks.value?.isEmpty == true,
-                        isGenerating: _isGeneratingRoutine,
-                        onTap: () => _generateRoutine(activePet),
-                      ),
-                      _DailyTasksDashboard(
-                        state: dashboard,
-                        petId: activePet.id,
-                        petName: activePet.name,
-                        species: species,
-                        onAddTask: openAddSheet,
-                      ),
-                      const SizedBox(height: 24),
-                      _NutritionBanner(pt: pt),
-                      const SizedBox(height: 12),
-                      _MedicalVaultBanner(pt: pt),
                     ],
                   );
                   if (!wide) return list;
@@ -296,25 +307,25 @@ class _AiRoutineBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     if (!hasNoTasks) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: OutlinedButton.icon(
           onPressed: isGenerating ? null : onTap,
           icon: isGenerating
-              ? SizedBox(
+              ? const SizedBox(
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: cs.primary,
+                    color: AppColors.lilac,
                   ),
                 )
-              : const Icon(Icons.auto_awesome, size: 16),
+              : const Icon(Icons.auto_awesome, size: 16, color: AppColors.lilac),
           label: Text(isGenerating ? 'Generating…' : 'Refresh AI Routine'),
           style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.lilac,
+            side: const BorderSide(color: AppColors.lilac),
             minimumSize: const Size.fromHeight(44),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14)),
@@ -331,26 +342,26 @@ class _AiRoutineBanner extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: cs.primaryContainer.withValues(alpha: 0.5),
+            color: AppColors.lilacSoft,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
+            border: Border.all(color: AppColors.lilac.withAlpha(60)),
           ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: cs.primary,
+                decoration: const BoxDecoration(
+                  color: AppColors.lilac,
                   shape: BoxShape.circle,
                 ),
                 child: isGenerating
-                    ? SizedBox(
+                    ? const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2, color: cs.onPrimary),
+                            strokeWidth: 2, color: Colors.white),
                       )
-                    : Icon(Icons.auto_awesome, color: cs.onPrimary, size: 20),
+                    : const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -359,9 +370,9 @@ class _AiRoutineBanner extends StatelessWidget {
                   children: [
                     Text(
                       isGenerating ? 'Generating...' : 'Generate AI Routine',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: cs.onPrimaryContainer,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.lilac700,
                         fontSize: 15,
                       ),
                     ),
@@ -370,8 +381,8 @@ class _AiRoutineBanner extends StatelessWidget {
                       isGenerating
                           ? 'Building personalized care plan...'
                           : 'Get daily, weekly & monthly tasks tailored for your pet',
-                      style: TextStyle(
-                        color: cs.onPrimaryContainer.withValues(alpha: 0.8),
+                      style: const TextStyle(
+                        color: AppColors.lilac700,
                         fontSize: 13,
                       ),
                     ),
@@ -379,7 +390,7 @@ class _AiRoutineBanner extends StatelessWidget {
                 ),
               ),
               if (!isGenerating)
-                Icon(Icons.chevron_right, color: cs.primary),
+                const Icon(Icons.chevron_right, color: AppColors.lilac),
             ],
           ),
         ),
@@ -390,368 +401,6 @@ class _AiRoutineBanner extends StatelessWidget {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Streak Banner
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _StreakBanner extends ConsumerWidget {
-  const _StreakBanner({
-    required this.species,
-  });
-
-  final PetSpecies species;
-
-  static const _dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-  static const _monthShort = [
-    'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-    'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
-  ];
-
-  static String _letterForDate(DateTime d) => _dayLetters[d.weekday - 1];
-
-  static List<DateTime> _weekEndingOn(DateTime endDay) {
-    final end = DateUtils.dateOnly(endDay);
-    return List.generate(7, (i) => end.subtract(Duration(days: 6 - i)));
-  }
-
-  static List<dbtask.CareTaskType> _distinctTypes(List<dbtask.CareTask> tasks) {
-    final seen = <dbtask.CareTaskType>{};
-    final out = <dbtask.CareTaskType>[];
-    for (final t in tasks) {
-      if (seen.add(t.taskType)) out.add(t.taskType);
-    }
-    return out;
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final dashboard = ref.watch(careDashboardProvider);
-    final calendarToday = DateUtils.dateOnly(DateTime.now());
-    final selectedDay = DateUtils.dateOnly(dashboard.selectedDate);
-    final isViewingToday = selectedDay == calendarToday;
-    final ringTasks = dashboard.tasks.value ?? [];
-    final total = ringTasks.length;
-    final done = ringTasks.where((t) => t.isCompleted).length;
-    final progress = total == 0 ? 0.0 : (done / total).clamp(0.0, 1.0);
-
-    final streakCount = dashboard.streak.maybeWhen(
-      data: (s) => s.currentStreak,
-      orElse: () => 0,
-    );
-    final streakNorm =
-        (math.min(math.max(streakCount, 0), 28) / 28.0).clamp(0.0, 1.0);
-
-    final weekHits = dashboard.weekGoalHit.value ?? List.filled(7, false);
-    final weekDates = _weekEndingOn(selectedDay);
-
-    final accent = species.accent;
-    final darkAccent = Color.lerp(accent, Colors.black, 0.22)!;
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [accent, darkAccent],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: accent.withAlpha(136),
-            blurRadius: 36,
-            offset: const Offset(0, 18),
-            spreadRadius: -16,
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: -50,
-            right: -40,
-            child: Container(
-              width: 220,
-              height: 220,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [Colors.white.withAlpha(46), Colors.transparent],
-                  stops: const [0, 0.65],
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'CARE STREAK',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.1 * 11,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            isViewingToday
-                                ? 'Inner ring: tasks done today · outer: streak (28d scale)'
-                                : 'Inner ring shows ${_monthShort[selectedDay.month - 1]} ${selectedDay.day}. Tasks below match this day.',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white.withAlpha(210),
-                              height: 1.25,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(46),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            isViewingToday
-                                ? 'TODAY'
-                                : '${_monthShort[selectedDay.month - 1]} ${selectedDay.day}',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.08 * 10,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Text(
-                            total > 0 ? '$done / $total' : '—',
-                            style: const TextStyle(
-                              fontFamily: 'Sora',
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              height: 1.1,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                Center(
-                  child: SizedBox(
-                    width: 158,
-                    height: 158,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SizedBox.expand(
-                          child: CircularProgressIndicator(
-                            value: streakNorm,
-                            strokeWidth: 7,
-                            backgroundColor: Colors.white.withAlpha(22),
-                            color: Colors.white.withAlpha(100),
-                            strokeCap: StrokeCap.round,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(13),
-                          child: SizedBox.expand(
-                            child: CircularProgressIndicator(
-                              value: progress,
-                              strokeWidth: 10,
-                              backgroundColor: Colors.white.withAlpha(36),
-                              color: Colors.white,
-                              strokeCap: StrokeCap.round,
-                            ),
-                          ),
-                        ),
-                        if (total > 0)
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '$done',
-                                style: const TextStyle(
-                                  fontFamily: 'Sora',
-                                  fontSize: 34,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Text(
-                                'of $total',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white.withAlpha(200),
-                                  letterSpacing: 0.04 * 12,
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.local_fire_department_rounded,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                              Text(
-                                '$streakCount',
-                                style: const TextStyle(
-                                  fontFamily: 'Sora',
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'day streak',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white.withAlpha(200),
-                                  letterSpacing: 0.04 * 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (total > 0) ...[
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.local_fire_department_rounded,
-                        color: Colors.white.withAlpha(230),
-                        size: 18,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '$streakCount day streak',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white.withAlpha(220),
-                          letterSpacing: 0.04 * 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List.generate(7, (i) {
-                    final hit = i < weekHits.length && weekHits[i];
-                    final d = weekDates[i];
-                    final dOnly = DateUtils.dateOnly(d);
-                    final isSelectedDay = dOnly == selectedDay;
-                    final isCalendarToday = dOnly == calendarToday;
-                    return Column(
-                      children: [
-                        AnimatedContainer(
-                          duration: PetfolioThemeExtension.durationSm,
-                          width: isSelectedDay ? 15 : (isCalendarToday ? 13 : 11),
-                          height: isSelectedDay ? 15 : (isCalendarToday ? 13 : 11),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: hit
-                                ? Colors.white
-                                : Colors.white.withAlpha(28),
-                            border: Border.all(
-                              color: isSelectedDay
-                                  ? Colors.white
-                                  : (isCalendarToday
-                                      ? Colors.white.withAlpha(220)
-                                      : Colors.white.withAlpha(100)),
-                              width: isSelectedDay ? 2.5 : 1,
-                            ),
-                            boxShadow: hit
-                                ? [
-                                    BoxShadow(
-                                      color: Colors.black.withAlpha(50),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ]
-                                : null,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          _letterForDate(d),
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: isSelectedDay
-                                ? Colors.white
-                                : Colors.white.withAlpha(178),
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
-                ),
-                const SizedBox(height: 16),
-                if (_distinctTypes(ringTasks).isNotEmpty)
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: _distinctTypes(ringTasks).map((tp) {
-                      return Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(40),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: Colors.white.withAlpha(90),
-                          ),
-                        ),
-                        child: Icon(
-                          dbtask.careTaskTypeIconData(tp),
-                          size: 22,
-                          color: Colors.white,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Horizontal Date Picker
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _HorizontalDatePicker extends StatefulWidget {
@@ -836,7 +485,7 @@ class _HorizontalDatePickerState extends State<_HorizontalDatePicker> {
                   border: Border.all(
                     color: isSelected
                         ? Colors.transparent
-                        : (isToday ? cs.primary.withAlpha(80) : pt.line200),
+                        : (isToday ? cs.primary.withAlpha(80) : pt.line),
                     width: isToday && !isSelected ? 1.5 : 0.5,
                   ),
                 ),
@@ -858,7 +507,6 @@ class _HorizontalDatePickerState extends State<_HorizontalDatePicker> {
                     Text(
                       '${date.day}',
                       style: TextStyle(
-                        fontFamily: 'Sora',
                         fontWeight: FontWeight.w700,
                         fontSize: 18,
                         height: 1,
@@ -940,10 +588,39 @@ class _DailyTasksDashboard extends ConsumerWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Care Task Card — Dismissible + checkbox
+// Done Counter
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _CareTaskCard extends ConsumerWidget {
+class _DoneCounter extends StatelessWidget {
+  const _DoneCounter({required this.tasks});
+  final List<dbtask.CareTask> tasks;
+
+  @override
+  Widget build(BuildContext context) {
+    if (tasks.isEmpty) return const SizedBox.shrink();
+    final done = tasks.where((t) => t.isCompleted).length;
+    final total = tasks.length;
+    final allDone = done == total;
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: Text(
+        key: ValueKey('$done/$total'),
+        allDone ? 'All done! 🎉' : '$done/$total done',
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          color: allDone ? AppColors.mint700 : AppColors.sunny700,
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Care Task Card — animated card matching JSX TaskRow design
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CareTaskCard extends ConsumerStatefulWidget {
   const _CareTaskCard({
     required this.task,
     required this.petId,
@@ -956,277 +633,91 @@ class _CareTaskCard extends ConsumerWidget {
   final String petName;
   final PetSpecies species;
 
-  void _openPlanFromLog(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _CareTaskFormSheet(
-        petId: petId,
-        petName: petName,
-        createSeed: task,
-      ),
-    );
-  }
+  @override
+  ConsumerState<_CareTaskCard> createState() => _CareTaskCardState();
+}
 
-  Future<void> _confirmRemoveLog(BuildContext context, WidgetRef ref) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Remove from this day'),
-        content: Text(
-          'Clear this completion for "${task.title}"? You can record it again later.',
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
-            child: const Text('Remove'),
-          ),
-        ],
-      ),
-    );
-    if (ok != true || !context.mounted) return;
-    try {
-      await ref.read(careDashboardProvider.notifier).deleteTask(task.id);
-    } catch (e) {
-      AppSnackBar.showError(e);
-    }
-  }
+class _CareTaskCardState extends ConsumerState<_CareTaskCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _xpCtrl;
+  bool _showBurst = false;
 
-  void _openEditSheet(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _CareTaskFormSheet(
-        petId: petId,
-        petName: petName,
-        existing: task,
-      ),
-    );
-  }
-
-  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete task'),
-        content: Text(
-          'Remove "${task.title}" from ${petName.isNotEmpty ? petName : "this pet"}\'s care plan? '
-          'Logs you already saved for this activity stay in history.',
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-    if (ok != true || !context.mounted) return;
-    try {
-      await ref.read(careDashboardProvider.notifier).deleteTask(task.id);
-    } catch (e) {
-      AppSnackBar.showError(e);
-    }
+  @override
+  void initState() {
+    super.initState();
+    _xpCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    )..addStatusListener((s) {
+        if (s == AnimationStatus.completed && mounted) {
+          setState(() => _showBurst = false);
+          _xpCtrl.reset();
+        }
+      });
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
-    final done = task.isCompleted;
-    final logOnly = task.isLogDerived;
-
-    Widget tile() {
-      return GestureDetector(
-        onTap: () {
-          if (logOnly) {
-            if (!done) return;
-            ref.read(careDashboardProvider.notifier).toggleTaskCompletion(task.id, isCompleted: false);
-            return;
-          }
-          ref.read(careDashboardProvider.notifier).toggleTaskCompletion(task.id, isCompleted: !done);
-        },
-        child: AnimatedContainer(
-          duration: PetfolioThemeExtension.durationSm,
-          decoration: BoxDecoration(
-            color: done ? pt.surface2 : cs.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: pt.line200, width: 0.5),
-            boxShadow: done
-                ? null
-                : [
-                    BoxShadow(
-                      color: pt.line200.withAlpha(128),
-                      blurRadius: 0,
-                      spreadRadius: 0.5,
-                    ),
-                    const BoxShadow(
-                      color: AppColors.shadowE1L,
-                      blurRadius: 2,
-                      offset: Offset(0, 1),
-                    ),
-                  ],
-          ),
-          child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              AnimatedContainer(
-                duration: PetfolioThemeExtension.durationSm,
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: done ? species.accent.withAlpha(25) : pt.surface2,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  task.categoryIconData,
-                  size: 20,
-                  color: done ? species.accent : pt.ink500,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AnimatedDefaultTextStyle(
-                      duration: PetfolioThemeExtension.durationSm,
-                      style: TextStyle(
-                        fontFamily: 'Sora',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                        color: done ? pt.ink300 : cs.onSurface,
-                        decoration: done ? TextDecoration.lineThrough : TextDecoration.none,
-                        decorationColor: pt.ink300,
-                      ),
-                      child: Text(task.title, overflow: TextOverflow.ellipsis),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _sublabel(task),
-                      style: TextStyle(fontSize: 12, color: pt.ink500),
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuButton<String>(
-                key: ValueKey<String>('care_task_menu_${task.id}'),
-                tooltip: 'Task options',
-                padding: EdgeInsets.zero,
-                icon: Icon(Icons.more_vert_rounded, color: pt.ink500, size: 22),
-                onSelected: (value) {
-                  if (logOnly) {
-                    if (value == 'add_plan') {
-                      _openPlanFromLog(context);
-                    } else if (value == 'remove_day') {
-                      _confirmRemoveLog(context, ref);
-                    }
-                  } else {
-                    if (value == 'edit') {
-                      _openEditSheet(context);
-                    } else if (value == 'delete') {
-                      _confirmDelete(context, ref);
-                    }
-                  }
-                },
-                itemBuilder: (ctx) => logOnly
-                    ? const [
-                        PopupMenuItem(value: 'add_plan', child: Text('Add to plan')),
-                        PopupMenuItem(value: 'remove_day', child: Text('Remove from day')),
-                      ]
-                    : const [
-                        PopupMenuItem(value: 'edit', child: Text('Edit')),
-                        PopupMenuItem(value: 'delete', child: Text('Delete')),
-                      ],
-              ),
-              const SizedBox(width: 4),
-              GestureDetector(
-                key: ValueKey<String>('care_task_check_${task.id}'),
-                onTap: () {
-                  if (logOnly) {
-                    if (!done) return;
-                    ref
-                        .read(careDashboardProvider.notifier)
-                        .toggleTaskCompletion(task.id, isCompleted: false);
-                    return;
-                  }
-                  ref
-                      .read(careDashboardProvider.notifier)
-                      .toggleTaskCompletion(task.id, isCompleted: !done);
-                },
-                child: AnimatedContainer(
-                  duration: PetfolioThemeExtension.durationSm,
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: done ? AppColors.success : Colors.transparent,
-                    shape: BoxShape.circle,
-                    border: done ? null : Border.all(color: AppColors.ink300, width: 2),
-                  ),
-                  child: done
-                      ? const Icon(Icons.check, size: 16, color: Colors.white)
-                      : null,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  void dispose() {
+    _xpCtrl.dispose();
+    super.dispose();
   }
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: logOnly
-          ? tile()
-          : Dismissible(
-              key: ValueKey(task.id),
-              direction: DismissDirection.startToEnd,
-              background: AnimatedContainer(
-                duration: PetfolioThemeExtension.durationSm,
-                decoration: BoxDecoration(
-                  color: done ? pt.surface2 : AppColors.success,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.only(left: 22),
-                child: Icon(
-                  done ? Icons.replay_rounded : Icons.check_circle_outline_rounded,
-                  color: done ? pt.ink300 : Colors.white,
-                  size: 28,
-                ),
-              ),
-              confirmDismiss: (_) async {
-                ref
-                    .read(careDashboardProvider.notifier)
-                    .toggleTaskCompletion(task.id, isCompleted: !done);
-                return false;
-              },
-              child: tile(),
-            ),
-    );
+  void _toggle() {
+    final nowDone = !widget.task.isCompleted;
+    ref.read(careDashboardProvider.notifier)
+        .toggleTaskCompletion(widget.task.id, isCompleted: nowDone);
+    if (nowDone && widget.task.gamificationPoints > 0) {
+      setState(() => _showBurst = true);
+      _xpCtrl.forward(from: 0);
+    }
   }
 
-  String _sublabel(dbtask.CareTask t) {
-    if (t.isLogDerived) return 'Activity log | This day';
-    final parts = <String>[];
-    if (t.scheduledTime != null) parts.add(t.scheduledTime!);
-    parts.add(_frequencyLabel(t.frequency));
-    if (t.gamificationPoints > 0) parts.add('+${t.gamificationPoints} pts');
-    return parts.join(' | ');
+  Color get _color {
+    switch (widget.task.taskType) {
+      case dbtask.CareTaskType.feeding:    return AppColors.tangerine;
+      case dbtask.CareTaskType.medication: return AppColors.poppy;
+      case dbtask.CareTaskType.walk:       return AppColors.mint;
+      case dbtask.CareTaskType.playtime:   return AppColors.sunny;
+      case dbtask.CareTaskType.dental:     return AppColors.lilac;
+      case dbtask.CareTaskType.grooming:   return AppColors.lilac;
+      case dbtask.CareTaskType.vetVisit:   return AppColors.mint;
+      case dbtask.CareTaskType.training:   return AppColors.tangerine;
+      case dbtask.CareTaskType.nailTrim:   return AppColors.lilac;
+      case dbtask.CareTaskType.bath:       return AppColors.sky;
+      case dbtask.CareTaskType.other:      return AppColors.sunny;
+    }
   }
 
-  String _frequencyLabel(dbtask.CareFrequency f) {
-    switch (f) {
+  String get _emoji {
+    switch (widget.task.taskType) {
+      case dbtask.CareTaskType.feeding:    return '🥩';
+      case dbtask.CareTaskType.walk:       return '🦮';
+      case dbtask.CareTaskType.grooming:   return '✂️';
+      case dbtask.CareTaskType.medication: return '💊';
+      case dbtask.CareTaskType.vetVisit:   return '🏥';
+      case dbtask.CareTaskType.training:   return '🎓';
+      case dbtask.CareTaskType.playtime:   return '🎾';
+      case dbtask.CareTaskType.dental:     return '🦷';
+      case dbtask.CareTaskType.nailTrim:   return '💅';
+      case dbtask.CareTaskType.bath:       return '🛁';
+      case dbtask.CareTaskType.other:      return '⭐';
+    }
+  }
+
+  bool get _isWeeklyish =>
+      widget.task.frequency == dbtask.CareFrequency.weekly ||
+      widget.task.frequency == dbtask.CareFrequency.biweekly ||
+      widget.task.frequency == dbtask.CareFrequency.monthly;
+
+  String get _sublabel {
+    final t = widget.task;
+    if (t.isLogDerived) return 'Activity log · Today';
+    if (t.scheduledTime != null) {
+      return (!t.isCompleted && t.isDueToday)
+          ? 'Due ${t.scheduledTime}'
+          : t.scheduledTime!;
+    }
+    switch (t.frequency) {
       case dbtask.CareFrequency.once:       return 'Once';
       case dbtask.CareFrequency.daily:      return 'Daily';
       case dbtask.CareFrequency.twiceDaily: return 'Twice daily';
@@ -1236,26 +727,469 @@ class _CareTaskCard extends ConsumerWidget {
       case dbtask.CareFrequency.asNeeded:   return 'As needed';
     }
   }
-}
 
-IconData _taskTypeIcon(dbtask.CareTaskType type) {
-  switch (type) {
-    case dbtask.CareTaskType.feeding:    return Icons.restaurant_menu_rounded;
-    case dbtask.CareTaskType.walk:       return Icons.directions_walk_rounded;
-    case dbtask.CareTaskType.grooming:   return Icons.content_cut_rounded;
-    case dbtask.CareTaskType.medication: return Icons.medication_rounded;
-    case dbtask.CareTaskType.vetVisit:   return Icons.local_hospital_rounded;
-    case dbtask.CareTaskType.training:   return Icons.school_rounded;
-    case dbtask.CareTaskType.playtime:   return Icons.sports_tennis_rounded;
-    case dbtask.CareTaskType.dental:     return Icons.medical_services_rounded;
-    case dbtask.CareTaskType.nailTrim:   return Icons.cut_rounded;
-    case dbtask.CareTaskType.bath:       return Icons.water_drop_rounded;
-    case dbtask.CareTaskType.other:      return Icons.star_outline_rounded;
+  void _showContextMenu(BuildContext ctx) {
+    final task = widget.task;
+    final logOnly = task.isLogDerived;
+    showModalBottomSheet<void>(
+      context: ctx,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _TaskContextMenu(
+        taskTitle: task.title,
+        logOnly: logOnly,
+        onAddPlan: logOnly
+            ? () {
+                Navigator.pop(ctx);
+                showModalBottomSheet<void>(
+                  context: ctx,
+                  isScrollControlled: true,
+                  useSafeArea: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (_) => _CareTaskFormSheet(
+                    petId: widget.petId,
+                    petName: widget.petName,
+                    createSeed: task,
+                  ),
+                );
+              }
+            : null,
+        onRemoveDay: logOnly
+            ? () async {
+                Navigator.pop(ctx);
+                await _confirmDialog(
+                  ctx,
+                  title: 'Remove from this day',
+                  body: 'Clear this completion for "${task.title}"?',
+                  confirmLabel: 'Remove',
+                  onConfirmed: () => ref
+                      .read(careDashboardProvider.notifier)
+                      .deleteTask(task.id),
+                );
+              }
+            : null,
+        onEdit: !logOnly
+            ? () {
+                Navigator.pop(ctx);
+                showModalBottomSheet<void>(
+                  context: ctx,
+                  isScrollControlled: true,
+                  useSafeArea: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (_) => _CareTaskFormSheet(
+                    petId: widget.petId,
+                    petName: widget.petName,
+                    existing: task,
+                  ),
+                );
+              }
+            : null,
+        onDelete: !logOnly
+            ? () async {
+                Navigator.pop(ctx);
+                await _confirmDialog(
+                  ctx,
+                  title: 'Delete task',
+                  body: 'Remove "${task.title}" from ${widget.petName}\'s care plan?',
+                  confirmLabel: 'Delete',
+                  onConfirmed: () => ref
+                      .read(careDashboardProvider.notifier)
+                      .deleteTask(task.id),
+                );
+              }
+            : null,
+      ),
+    );
+  }
+
+  Future<void> _confirmDialog(
+    BuildContext ctx, {
+    required String title,
+    required String body,
+    required String confirmLabel,
+    required Future<void> Function() onConfirmed,
+  }) async {
+    final ok = await showDialog<bool>(
+      context: ctx,
+      builder: (d) => AlertDialog(
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(d, false),
+              child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Navigator.pop(d, true),
+            style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(d).colorScheme.error),
+            child: Text(confirmLabel),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !ctx.mounted) return;
+    try {
+      await onConfirmed();
+    } catch (e) {
+      AppSnackBar.showError(e);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
+    final task = widget.task;
+    final done = task.isCompleted;
+    final due = !done && task.isDueToday;
+    final color = _color;
+
+    final yAnim = Tween<double>(begin: 0.0, end: -72.0).animate(
+      CurvedAnimation(parent: _xpCtrl, curve: const Cubic(0.2, 0.8, 0.2, 1.0)),
+    );
+    final opacityAnim = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 15),
+      TweenSequenceItem(tween: ConstantTween(1.0), weight: 55),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 30),
+    ]).animate(_xpCtrl);
+
+    Widget card = GestureDetector(
+      onTap: _toggle,
+      onLongPress: () => _showContextMenu(context),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 240),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: done
+              ? Color.alphaBlend(color.withAlpha(36), cs.surface)
+              : cs.surface,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: done ? color : pt.line,
+            width: 2,
+          ),
+          boxShadow: due
+              ? [BoxShadow(color: AppColors.poppy.withAlpha(64), blurRadius: 0, spreadRadius: 4)]
+              : pt.shadowE1,
+        ),
+        child: Row(
+          children: [
+            // ── Icon box ──────────────────────────────────────────────────
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 240),
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: done ? color : color.withAlpha(48),
+              ),
+              alignment: Alignment.center,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Text(
+                  key: ValueKey(done),
+                  done ? '✅' : _emoji,
+                  style: const TextStyle(fontSize: 26, height: 1.0),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // ── Content ───────────────────────────────────────────────────
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 200),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: done ? pt.ink500 : cs.onSurface,
+                            decoration: done ? TextDecoration.lineThrough : null,
+                            decorationColor: pt.ink300,
+                          ),
+                          child: Text(
+                            task.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                      if (_isWeeklyish) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.lilacSoft,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            task.frequency == dbtask.CareFrequency.monthly
+                                ? 'MONTHLY'
+                                : 'WEEKLY',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.lilac700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    _sublabel,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: due ? AppColors.poppy700 : pt.ink500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            // ── XP chip + check button ────────────────────────────────────
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 9, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: done ? AppColors.mintSoft : AppColors.sunnySoft,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '+${task.gamificationPoints}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          color: done
+                              ? AppColors.mint700
+                              : AppColors.sunny700,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      const Text('⭐',
+                          style: TextStyle(fontSize: 11)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 6),
+                GestureDetector(
+                  onTap: _toggle,
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: done ? color : cs.surface,
+                      border: Border.all(
+                        color: done ? color : pt.line,
+                        width: 2,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: done
+                        ? const Icon(Icons.check_rounded,
+                            color: Colors.white, size: 18)
+                        : null,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // ── XP burst overlay ─────────────────────────────────────────────────
+    card = Stack(
+      clipBehavior: Clip.none,
+      children: [
+        card,
+        if (_showBurst)
+          Positioned(
+            right: 14,
+            bottom: 52,
+            child: AnimatedBuilder(
+              animation: _xpCtrl,
+              builder: (_, child) => Transform.translate(
+                offset: Offset(0, yAnim.value),
+                child: Opacity(
+                  opacity: opacityAnim.value.clamp(0.0, 1.0),
+                  child: Text(
+                    '+${task.gamificationPoints} XP ⭐',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.sunny700,
+                      shadows: [
+                        Shadow(
+                          color: AppColors.sunny,
+                          blurRadius: 12,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+
+    // ── Swipe-to-toggle (Dismissible) for non-log tasks ──────────────────
+    if (!task.isLogDerived) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Dismissible(
+          key: ValueKey('d_${task.id}'),
+          direction: DismissDirection.startToEnd,
+          background: Container(
+            decoration: BoxDecoration(
+              color: done ? pt.surface2 : AppColors.success,
+              borderRadius: BorderRadius.circular(22),
+            ),
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.only(left: 22),
+            child: Icon(
+              done ? Icons.replay_rounded : Icons.check_circle_outline_rounded,
+              color: done ? pt.ink300 : Colors.white,
+              size: 28,
+            ),
+          ),
+          confirmDismiss: (_) async {
+            _toggle();
+            return false;
+          },
+          child: card,
+        ),
+      );
+    }
+
+    return Padding(padding: const EdgeInsets.only(bottom: 10), child: card);
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Task Card Skeleton
+// Task Context Menu (long-press sheet)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _TaskContextMenu extends StatelessWidget {
+  const _TaskContextMenu({
+    required this.taskTitle,
+    required this.logOnly,
+    this.onAddPlan,
+    this.onRemoveDay,
+    this.onEdit,
+    this.onDelete,
+  });
+
+  final String taskTitle;
+  final bool logOnly;
+  final VoidCallback? onAddPlan;
+  final VoidCallback? onRemoveDay;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: pt.surface1,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+          20, 0, 20, MediaQuery.paddingOf(context).bottom + 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                    color: pt.line,
+                    borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+          ),
+          Text(taskTitle,
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: cs.onSurface)),
+          const SizedBox(height: 12),
+          if (onAddPlan != null)
+            _MenuTile(
+                icon: Icons.add_task_rounded,
+                label: 'Add to plan',
+                onTap: onAddPlan!),
+          if (onRemoveDay != null)
+            _MenuTile(
+                icon: Icons.remove_circle_outline_rounded,
+                label: 'Remove from day',
+                onTap: onRemoveDay!),
+          if (onEdit != null)
+            _MenuTile(
+                icon: Icons.edit_outlined,
+                label: 'Edit task',
+                onTap: onEdit!),
+          if (onDelete != null)
+            _MenuTile(
+                icon: Icons.delete_outline_rounded,
+                label: 'Delete task',
+                color: cs.error,
+                onTap: onDelete!),
+        ],
+      ),
+    );
+  }
+}
+
+class _MenuTile extends StatelessWidget {
+  const _MenuTile(
+      {required this.icon, required this.label, required this.onTap, this.color});
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = color ?? Theme.of(context).colorScheme.onSurface;
+    return ListTile(
+      leading: Icon(icon, color: c),
+      title: Text(label, style: TextStyle(color: c, fontWeight: FontWeight.w600)),
+      onTap: onTap,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// XP Progress Bar (shown between streak and date picker)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _TaskCardSkeleton extends StatelessWidget {
@@ -1274,7 +1208,7 @@ class _TaskCardSkeleton extends StatelessWidget {
         decoration: BoxDecoration(
           color: cs.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: pt.line200, width: 0.5),
+          border: Border.all(color: pt.line, width: 0.5),
           boxShadow: [
             const BoxShadow(color: AppColors.shadowE1L, blurRadius: 2, offset: Offset(0, 1)),
           ],
@@ -1326,7 +1260,7 @@ class _CareErrorCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: pt.line200, width: 0.5),
+        border: Border.all(color: pt.line, width: 0.5),
       ),
       child: Column(
         children: [
@@ -1387,7 +1321,6 @@ class _EmptyRoutineState extends StatelessWidget {
           Text(
             isToday ? 'No tasks for today' : 'No tasks for this day',
             style: TextStyle(
-              fontFamily: 'Sora',
               fontWeight: FontWeight.w600,
               fontSize: 16,
               color: cs.onSurface,
@@ -1727,7 +1660,7 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
                 child: Container(
                   width: 36,
                   height: 4,
-                  decoration: BoxDecoration(color: pt.line200, borderRadius: BorderRadius.circular(2)),
+                  decoration: BoxDecoration(color: pt.line, borderRadius: BorderRadius.circular(2)),
                 ),
               ),
             ),
@@ -1738,7 +1671,6 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
                     ? 'Edit care task'
                     : (_isPrefilledCreate ? 'Add to plan' : 'New care task'),
                 style: TextStyle(
-                  fontFamily: 'Sora',
                   fontWeight: FontWeight.w700,
                   fontSize: 18,
                   color: cs.onSurface,
@@ -1770,7 +1702,7 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
                       color: selected ? cs.primary : pt.surface2,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: selected ? Colors.transparent : pt.line200,
+                        color: selected ? Colors.transparent : pt.line,
                         width: 0.5,
                       ),
                     ),
@@ -1823,7 +1755,7 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: pt.line200, width: 0.5),
+                    borderSide: BorderSide(color: pt.line, width: 0.5),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -1853,7 +1785,7 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
                           color: selected ? cs.primary : pt.surface2,
                           borderRadius: BorderRadius.circular(40),
                           border: Border.all(
-                            color: selected ? Colors.transparent : pt.line200,
+                            color: selected ? Colors.transparent : pt.line,
                             width: 0.5,
                           ),
                         ),
@@ -1889,7 +1821,7 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
                 decoration: BoxDecoration(
                   color: pt.surface2,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: pt.line200, width: 0.5),
+                  border: Border.all(color: pt.line, width: 0.5),
                 ),
                 child: Row(
                   children: [
@@ -1975,3 +1907,18 @@ class _SheetLabel extends StatelessWidget {
       );
 }
 
+IconData _taskTypeIcon(dbtask.CareTaskType type) {
+  switch (type) {
+    case dbtask.CareTaskType.feeding:    return Icons.restaurant_menu_rounded;
+    case dbtask.CareTaskType.walk:       return Icons.directions_walk_rounded;
+    case dbtask.CareTaskType.grooming:   return Icons.content_cut_rounded;
+    case dbtask.CareTaskType.medication: return Icons.medication_rounded;
+    case dbtask.CareTaskType.vetVisit:   return Icons.local_hospital_rounded;
+    case dbtask.CareTaskType.training:   return Icons.school_rounded;
+    case dbtask.CareTaskType.playtime:   return Icons.sports_tennis_rounded;
+    case dbtask.CareTaskType.dental:     return Icons.medical_services_rounded;
+    case dbtask.CareTaskType.nailTrim:   return Icons.cut_rounded;
+    case dbtask.CareTaskType.bath:       return Icons.water_drop_rounded;
+    case dbtask.CareTaskType.other:      return Icons.star_outline_rounded;
+  }
+}

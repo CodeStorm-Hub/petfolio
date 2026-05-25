@@ -22,6 +22,7 @@ class FeedPost {
     required this.subjectColor,
     this.tag,
     this.isCarousel = false,
+    this.isMemorial = false,
     this.tributes = 0,
     this.breed,
     this.imageUrls = const [],
@@ -55,6 +56,7 @@ class FeedPost {
 
   final String? tag;
   final bool isCarousel;
+  final bool isMemorial;
   final int tributes;
   final String? breed;
 
@@ -106,6 +108,7 @@ class FeedPost {
     subjectColor: subjectColor,
     tag: tag,
     isCarousel: isCarousel,
+    isMemorial: isMemorial,
     tributes: tributes,
     breed: breed,
     imageUrls: imageUrls,

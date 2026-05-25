@@ -31,7 +31,6 @@ class BuyerOrderListScreen extends ConsumerWidget {
                   const Text(
                     'My Orders',
                     style: TextStyle(
-                      fontFamily: 'Sora',
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
                       color: AppColors.ink950,
@@ -96,7 +95,7 @@ class _OrderTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
         child: Row(
@@ -124,7 +123,6 @@ class _OrderTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontFamily: 'Sora',
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                       color: AppColors.ink950,
@@ -230,7 +228,6 @@ class _EmptyOrders extends StatelessWidget {
             Text(
               'No orders yet',
               style: TextStyle(
-                fontFamily: 'Sora',
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
                 color: AppColors.ink950,
@@ -265,7 +262,7 @@ class _IconBtn extends StatelessWidget {
           shape: BoxShape.circle,
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
         child: Icon(icon, size: 18, color: AppColors.ink700),

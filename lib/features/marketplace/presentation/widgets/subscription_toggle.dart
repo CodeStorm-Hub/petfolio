@@ -27,7 +27,7 @@ class SubscriptionToggle extends StatelessWidget {
         height: 26,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(13),
-          color: value ? AppColors.meadow500 : AppColors.line200,
+          color: value ? AppColors.meadow500 : AppColors.line,
         ),
         child: AnimatedAlign(
           duration: const Duration(milliseconds: 200),
@@ -114,7 +114,7 @@ class _FreqChip extends StatelessWidget {
               ? null
               : [
                   BoxShadow(
-                    color: AppColors.line200,
+                    color: AppColors.line,
                     blurRadius: 0,
                     spreadRadius: 0.5,
                   ),
@@ -127,7 +127,6 @@ class _FreqChip extends StatelessWidget {
                 TextSpan(
                   text: '$weeks',
                   style: TextStyle(
-                    fontFamily: 'Sora',
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                     color: selected ? Colors.white : AppColors.ink700,
@@ -136,7 +135,6 @@ class _FreqChip extends StatelessWidget {
                 TextSpan(
                   text: 'wk',
                   style: TextStyle(
-                    fontFamily: 'Sora',
                     fontWeight: FontWeight.w500,
                     fontSize: 10,
                     color: selected ? Colors.white70 : AppColors.ink500,

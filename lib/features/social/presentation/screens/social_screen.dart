@@ -1,23 +1,28 @@
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:share_plus/share_plus.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/dashed_circle_painter.dart';
+import '../../../../core/widgets/pf_card.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
-import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
+
 import '../../data/models/feed_post.dart';
 import '../../data/models/story.dart';
 import '../controllers/social_controller.dart';
 import '../controllers/create_post_controller.dart';
 import '../controllers/story_controller.dart';
 import 'story_viewer_screen.dart';
+import '../widgets/reaction_burst.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entry point
@@ -102,8 +107,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
   @override
   Widget build(BuildContext context) {
     final feedAsync = ref.watch(socialControllerProvider(widget.pet.id));
-    final notifier =
-        ref.read(socialControllerProvider(widget.pet.id).notifier);
+    final notifier = ref.read(socialControllerProvider(widget.pet.id).notifier);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Scaffold(
@@ -112,31 +116,44 @@ class _SocialViewState extends ConsumerState<_SocialView> {
         bottom: false,
         child: Column(
           children: [
-            AppHeader(
-              eyebrow: 'Pack',
-              onOpenSwitcher: () => PetSwitcherSheet.show(context),
-              actions: [
-                AppHeaderAction(
-                  iconKey: const ValueKey<String>('social_action_messages'),
-                  icon: Icons.mail_outline_rounded,
-                  tooltip: 'Messages',
-                  onTap: () => context.push('/matching/inbox'),
-                ),
-              ],
+            // Sticky Pawsfeed Header
+            Container(
+              padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
+              decoration: BoxDecoration(
+                color: pt.surface1,
+                boxShadow: const [BoxShadow(color: Color(0x19783C14), blurRadius: 8, offset: Offset(0, 8), spreadRadius: -8)],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Pawsfeed', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Theme.of(context).brightness == Brightness.dark ? AppColors.ink950D : AppColors.ink950)),
+                      Text('Your pack · 124 new posts today', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: pt.ink500)),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      _IconBtn(icon: Icons.search, onTap: () {}),
+                      const SizedBox(width: 8),
+                      _IconBtn(icon: Icons.send_rounded, bg: AppColors.tangerine, color: Colors.white, onTap: () => context.push('/matching/inbox')),
+                    ],
+                  ),
+                ],
+              ),
             ),
             Expanded(
               child: feedAsync.when(
                 skipLoadingOnReload: true,
-                loading: () =>
-                    const Center(child: CircularProgressIndicator.adaptive()),
+                loading: () => const Center(child: CircularProgressIndicator.adaptive()),
                 error: (_, _) => Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
                       const SizedBox(height: 12),
-                      Text('Could not load feed',
-                          style: TextStyle(fontSize: 15, color: pt.ink500)),
+                      Text('Could not load feed', style: TextStyle(fontSize: 15, color: pt.ink500)),
                       const SizedBox(height: 16),
                       FilledButton.icon(
                         onPressed: () => notifier.refresh(),
@@ -167,25 +184,18 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                         )
                       else
                         SliverPadding(
-                          padding: const EdgeInsets.only(top: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
                           sliver: SliverList.builder(
                             itemCount: feedState.posts.length,
                             itemBuilder: (ctx, i) {
                               final post = feedState.posts[i];
                               return Padding(
-                                padding: EdgeInsets.only(
-                                  bottom:
-                                      i == feedState.posts.length - 1 ? 0 : 16,
-                                ),
+                                padding: EdgeInsets.only(bottom: i == feedState.posts.length - 1 ? 0 : 18),
                                 child: RepaintBoundary(
-                                  child: _RegularPost(
+                                  child: _PostCard(
                                     post: post,
-                                    onLike: () =>
-                                        notifier.toggleLike(post.id),
-                                    onTapPost: () => context.push(
-                                      '/social/post/${post.id}',
-                                      extra: post,
-                                    ),
+                                    onLike: () => notifier.toggleLike(post.id),
+                                    onTapPost: () => context.push('/social/post/${post.id}', extra: post),
                                   ),
                                 ),
                               );
@@ -197,12 +207,18 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                           child: Padding(
                             padding: EdgeInsets.symmetric(vertical: 16),
                             child: Center(
-                              child: CircularProgressIndicator.adaptive(
-                                  strokeWidth: 2),
+                              child: CircularProgressIndicator.adaptive(strokeWidth: 2),
                             ),
                           ),
                         ),
-                      const SliverToBoxAdapter(child: SizedBox(height: 32)),
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: Text("You're all caught up 🐾", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.ink500)),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -229,6 +245,32 @@ class _SocialViewState extends ConsumerState<_SocialView> {
   }
 }
 
+class _IconBtn extends StatelessWidget {
+  const _IconBtn({required this.icon, this.bg, this.color, required this.onTap});
+  final IconData icon;
+  final Color? bg;
+  final Color? color;
+  final VoidCallback onTap;
+  
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final defaultBg = isDark ? AppColors.cream2D : AppColors.cream2;
+    final defaultColor = isDark ? AppColors.ink950D : AppColors.ink950;
+    
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(color: bg ?? defaultBg, shape: BoxShape.circle),
+        alignment: Alignment.center,
+        child: Icon(icon, size: 20, color: color ?? defaultColor),
+      ),
+    );
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Stories row
 // ─────────────────────────────────────────────────────────────────────────────
@@ -245,7 +287,7 @@ class _StoriesRow extends ConsumerWidget {
 
     return storiesAsync.when(
       loading: () => const SizedBox(
-        height: 96,
+        height: 100,
         child: Center(child: CircularProgressIndicator.adaptive()),
       ),
       error: (err, stack) => const SizedBox.shrink(),
@@ -286,10 +328,10 @@ class _StoriesRow extends ConsumerWidget {
           });
 
         return SizedBox(
-          height: 96,
+          height: 104,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
             children: [
               // Own Pet Story Item
               if (activePetStack != null)
@@ -432,8 +474,58 @@ class _StoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
     final surface = Theme.of(context).colorScheme.surface;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink950 = isDark ? AppColors.ink950D : AppColors.ink950;
+
+    if (isAdd) {
+      return GestureDetector(
+        onTap: onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              children: [
+                CustomPaint(
+                  painter: DashedCirclePainter(
+                    color: AppColors.tangerine,
+                    strokeWidth: 2,
+                    dashLength: 6,
+                    dashSpace: 4,
+                  ),
+                  child: Container(
+                    width: 62,
+                    height: 62,
+                    decoration: BoxDecoration(
+                      color: surface,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text('📸', style: TextStyle(fontSize: 26)),
+                  ),
+                ),
+                Positioned(
+                  right: -2,
+                  bottom: -2,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: AppColors.tangerine,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.cream, width: 2),
+                    ),
+                    child: const Icon(Icons.add, color: Colors.white, size: 14),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: ink950)),
+          ],
+        ),
+      );
+    }
 
     return GestureDetector(
       onTap: onTap,
@@ -441,77 +533,34 @@ class _StoryItem extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Ring + avatar
-          Stack(
-            children: [
-              Container(
-                width: 58,
-                height: 58,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: ringColors.length >= 2
-                        ? ringColors
-                        : [ringColors.first, ringColors.first],
-                  ),
-                ),
-                padding: const EdgeInsets.all(2.5),
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: surface,
-                  ),
-                  padding: const EdgeInsets.all(2),
-                  child: CircleAvatar(
-                    backgroundColor: ringColors.first.withAlpha(180),
-                    backgroundImage: avatarUrl != null
-                        ? CachedNetworkImageProvider(avatarUrl!)
-                        : null,
-                    child: avatarUrl == null
-                        ? Text(
-                            initial,
-                            style: tt.titleSmall?.copyWith(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          )
-                        : null,
-                  ),
-                ),
+          Container(
+            width: 62,
+            height: 62,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: ringColors.length >= 2 ? ringColors : [ringColors.first, ringColors.first],
               ),
-              if (isAdd)
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: AppColors.sunset500,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: surface, width: 2),
-                    ),
-                    child: const Icon(
-                      Icons.add,
-                      color: Colors.white,
-                      size: 14,
-                    ),
-                  ),
-                ),
-            ],
+            ),
+            padding: const EdgeInsets.all(2.5),
+            child: Container(
+              decoration: BoxDecoration(shape: BoxShape.circle, color: surface),
+              padding: const EdgeInsets.all(2),
+              child: CircleAvatar(
+                backgroundColor: ringColors.first.withAlpha(180),
+                backgroundImage: avatarUrl != null ? CachedNetworkImageProvider(avatarUrl!) : null,
+                child: avatarUrl == null ? Text(initial, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white)) : null,
+              ),
+            ),
           ),
           const SizedBox(height: 4),
           SizedBox(
             width: 62,
             child: Text(
               label,
-              style: tt.labelSmall?.copyWith(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: ink950),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
@@ -527,8 +576,8 @@ class _StoryItem extends StatelessWidget {
 // Regular post
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _RegularPost extends StatelessWidget {
-  const _RegularPost({
+class _PostCard extends StatefulWidget {
+  const _PostCard({
     required this.post,
     required this.onLike,
     required this.onTapPost,
@@ -538,436 +587,319 @@ class _RegularPost extends StatelessWidget {
   final VoidCallback onTapPost;
 
   @override
-  Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  State<_PostCard> createState() => _PostCardState();
+}
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surface0D : AppColors.surface0,
-        borderRadius:
-            BorderRadius.circular(PetfolioThemeExtension.radius2xl),
-        boxShadow: pt.shadowE2,
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _PostHeader(post: post),
-          // The PostPhoto handles taps to navigate and double-taps to like.
-          _PostPhoto(
-            post: post,
-            onTap: onTapPost,
-            onDoubleTapLike: () {
-              if (!post.isLiked) onLike();
-            },
-          ),
-          _RegularFooter(
-            post: post,
-            onLike: onLike,
-            onComment: () => context.push(
-              '/social/post/${post.id}?focus=true',
-              extra: post,
-            ),
-          ),
-        ],
-      ),
-    );
+class _PostCardState extends State<_PostCard> {
+  String? _reacted;
+  bool _pickerOpen = false;
+  final List<ReactionBurstItem> _bursts = [];
+
+  void _fireBurst(String kind, double x, double y) {
+    final count = 8 + Random().nextInt(4);
+    final newItems = List.generate(count, (i) {
+      return ReactionBurstItem(
+        id: '${DateTime.now().millisecondsSinceEpoch}_$i',
+        emoji: _emojiForKind(kind),
+        dx: x + (Random().nextDouble() - 0.5) * 40,
+        dy: y,
+      );
+    });
+    
+    setState(() {
+      _bursts.addAll(newItems);
+      _reacted = kind;
+      _pickerOpen = false;
+    });
+
+    Future.delayed(const Duration(milliseconds: 1100), () {
+      if (mounted) {
+        setState(() {
+          final ids = newItems.map((e) => e.id).toSet();
+          _bursts.removeWhere((e) => ids.contains(e.id));
+        });
+      }
+    });
   }
-}
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Memorial post
-// ─────────────────────────────────────────────────────────────────────────────
-
-
-class _PostHeader extends StatelessWidget {
-  const _PostHeader({required this.post});
-  final FeedPost post;
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final initial =
-        post.petName.isNotEmpty ? post.petName[0].toUpperCase() : '?';
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-      child: Row(
-        children: [
-          // Tappable avatar → pet social profile
-          GestureDetector(
-            onTap: () => context.push('/social/profile/${post.petId}'),
-            child: CircleAvatar(
-              radius: 20,
-              backgroundColor: post.accentColor,
-              backgroundImage: post.petAvatarUrl != null
-                  ? CachedNetworkImageProvider(post.petAvatarUrl!)
-                  : null,
-              child: post.petAvatarUrl == null
-                  ? Text(
-                      initial,
-                      style: tt.titleSmall?.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    )
-                  : null,
-            ),
-          ),
-          const SizedBox(width: 10),
-          // Tappable pet name + handle + timestamp → pet social profile
-          Expanded(
-            child: GestureDetector(
-              onTap: () => context.push('/social/profile/${post.petId}'),
-              behavior: HitTestBehavior.opaque,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    post.petName,
-                    style: tt.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 1),
-                  Text(
-                    post.fuzzyLocation.isEmpty
-                        ? '@${post.handle} · ${post.timeAgo}'
-                        : '@${post.handle} · ${post.fuzzyLocation} · ${post.timeAgo}',
-                    style: tt.labelSmall?.copyWith(color: pt.ink500),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // More menu
-          Icon(Icons.more_horiz_rounded, color: pt.ink500, size: 20),
-        ],
-      ),
-    );
+  String _emojiForKind(String kind) {
+    switch(kind) {
+      case 'paw': return '🐾';
+      case 'heart': return '❤️';
+      case 'treat': return '🦴';
+      case 'star': return '⭐';
+      default: return '🐾';
+    }
   }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Regular post photo area
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _PostPhoto extends StatefulWidget {
-  const _PostPhoto({
-    required this.post,
-    required this.onTap,
-    required this.onDoubleTapLike,
-  });
-  final FeedPost post;
-  final VoidCallback onTap;
-  final VoidCallback onDoubleTapLike;
-
-  @override
-  State<_PostPhoto> createState() => _PostPhotoState();
-}
-
-class _PostPhotoState extends State<_PostPhoto>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _heartAnim;
-  bool _showHeart = false;
+  
+  Color _colorForKind(String kind) {
+    switch(kind) {
+      case 'paw': return AppColors.tangerine;
+      case 'heart': return AppColors.poppy;
+      case 'treat': return AppColors.sunny;
+      case 'star': return AppColors.lilac;
+      default: return AppColors.tangerine;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    _heartAnim = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-  }
-
-  @override
-  void dispose() {
-    _heartAnim.dispose();
-    super.dispose();
-  }
-
-  void _handleDoubleTap() {
-    widget.onDoubleTapLike();
-    setState(() => _showHeart = true);
-    _heartAnim.forward(from: 0).then((_) {
-      Future.delayed(const Duration(milliseconds: 400), () {
-        if (mounted) {
-          _heartAnim.reverse().then((_) {
-            if (mounted) setState(() => _showHeart = false);
-          });
-        }
-      });
-    });
+    if (widget.post.isLiked) {
+      _reacted = 'paw';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    final post = widget.post;
-    final colors = post.gradientColors;
-    final emoji = switch (post.petSpecies) {
-      'cat' => '🐱',
-      'rabbit' => '🐰',
-      _ => '🐶',
-    };
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink950 = isDark ? AppColors.ink950D : AppColors.ink950;
+    final ink500 = isDark ? AppColors.ink500D : AppColors.ink500;
+    
+    final totalLikes = widget.post.likes + (_reacted != null && !widget.post.isLiked ? 1 : 0);
 
-    return GestureDetector(
-      onTap: widget.onTap,
-      onDoubleTap: _handleDoubleTap,
-      child: AspectRatio(
-        aspectRatio: 4 / 5,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: post.imageUrls.isNotEmpty 
-                ? null 
-                : LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: colors.length >= 2 ? colors : [colors.first, colors.first],
-                  ),
-          ),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Pet blob illustration or Real Image
-              if (post.imageUrls.isNotEmpty)
-                Positioned.fill(
-                  child: CachedNetworkImage(
-                    imageUrl: post.imageUrls.first,
-                    fit: BoxFit.cover,
-                    // Optimization: Cap decoded image size in memory.
-                    memCacheWidth: 600,
-                    maxWidthDiskCache: 1000,
-                  ),
-                )
-              else
-                Center(
-                  child: Container(
-                    width: 150,
-                    height: 160,
-                    decoration: BoxDecoration(
-                      color: post.subjectColor.withAlpha(160),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(90),
-                        topRight: Radius.circular(75),
-                        bottomLeft: Radius.circular(60),
-                        bottomRight: Radius.circular(100),
-                      ),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(emoji, style: const TextStyle(fontSize: 64)),
-                  ),
-                ),
-              // Carousel indicator
-              if (post.isCarousel)
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withAlpha(100),
-                      borderRadius: BorderRadius.circular(
-                        PetfolioThemeExtension.radiusPill,
-                      ),
-                    ),
-                    child: Text(
-                      '1 / 3',
-                      style: tt.labelSmall?.copyWith(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              // Tag badge
-              if (post.tag != null)
-                Positioned(
-                  bottom: 12,
-                  left: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(30),
-                      borderRadius: BorderRadius.circular(
-                        PetfolioThemeExtension.radiusPill,
-                      ),
-                      border: Border.all(
-                        color: Colors.white.withAlpha(80),
-                      ),
-                    ),
-                    child: Text(
-                      post.tag!,
-                      style: tt.labelMedium?.copyWith(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              // Big Heart animation overlay
-              if (_showHeart)
-                Center(
-                  child: ScaleTransition(
-                    scale: CurvedAnimation(
-                      parent: _heartAnim,
-                      curve: Curves.easeOutBack,
-                      reverseCurve: Curves.easeIn,
-                    ),
-                    child: Icon(
-                      Icons.pets_rounded,
-                      size: 100,
-                      color: Colors.white.withAlpha(220),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Regular post footer — paw like + comments
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _RegularFooter extends StatelessWidget {
-  const _RegularFooter({
-    required this.post,
-    required this.onLike,
-    required this.onComment,
-  });
-  final FeedPost post;
-  final VoidCallback onLike;
-  final VoidCallback onComment;
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return PfCard(
+      padding: EdgeInsets.zero,
+      child: Stack(
         children: [
-          // Caption
-          if (post.caption.isNotEmpty)
-            Text(
-              post.caption,
-              style: tt.bodySmall,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-          if (post.caption.isNotEmpty) const SizedBox(height: 10),
-          // Action row
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ── Like ─────────────────────────────────────────────────────
-              GestureDetector(
-                onTap: onLike,
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AnimatedSwitcher(
-                        duration: PetfolioThemeExtension.durationSm,
-                        transitionBuilder: (child, animation) => ScaleTransition(
-                          scale: animation,
-                          child: child,
-                        ),
-                        child: Icon(
-                          post.isLiked
-                              ? Icons.pets_rounded
-                              : Icons.pets_outlined,
-                          key: ValueKey(post.isLiked),
-                          color: post.isLiked ? AppColors.coral500 : pt.ink500,
-                          size: 24,
-                        ),
+              // Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundColor: widget.post.accentColor,
+                      backgroundImage: widget.post.petAvatarUrl != null ? CachedNetworkImageProvider(widget.post.petAvatarUrl!) : null,
+                      child: widget.post.petAvatarUrl == null ? Text(widget.post.petName.isNotEmpty ? widget.post.petName[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)) : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(widget.post.petName, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: ink950)),
+                          Text(widget.post.fuzzyLocation.isEmpty ? '@${widget.post.handle} · ${widget.post.timeAgo}' : '@${widget.post.handle} · ${widget.post.fuzzyLocation} · ${widget.post.timeAgo}', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: ink500)),
+                        ],
                       ),
-                      const SizedBox(width: 6),
-                      AnimatedSwitcher(
-                        duration: PetfolioThemeExtension.durationSm,
-                        child: Text(
-                          '${post.likes}',
-                          key: ValueKey(post.likes),
-                          style: tt.labelMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: post.isLiked ? AppColors.coral500 : pt.ink500,
+                    ),
+                    _IconBtn(icon: Icons.more_horiz, onTap: () {}),
+                  ],
+                ),
+              ),
+              
+              // Photo
+              GestureDetector(
+                onTap: widget.onTapPost,
+                onDoubleTap: () => _fireBurst('paw', MediaQuery.sizeOf(context).width / 2, 100),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+                  child: AspectRatio(
+                    aspectRatio: 4 / 5,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: widget.post.subjectColor.withAlpha(50),
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      clipBehavior: Clip.hardEdge,
+                      child: widget.post.imageUrls.isNotEmpty 
+                        ? CachedNetworkImage(imageUrl: widget.post.imageUrls.first, fit: BoxFit.cover)
+                        : Center(
+                            child: Container(
+                              width: 150,
+                              height: 160,
+                              decoration: BoxDecoration(
+                                color: widget.post.subjectColor.withAlpha(160),
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(90),
+                                  topRight: Radius.circular(75),
+                                  bottomLeft: Radius.circular(60),
+                                  bottomRight: Radius.circular(100),
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: const Text('🐾', style: TextStyle(fontSize: 64)),
+                            ),
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+              
+              // Text
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Text(widget.post.caption, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: ink950, height: 1.45)),
+              ),
+              
+              // Reaction stack visualizer
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Row(
+                  children: [
+                    Row(
+                      children: [
+                        _EmojiCircle(emoji: '🐾', color: AppColors.tangerine, index: 0),
+                        _EmojiCircle(emoji: '❤️', color: AppColors.poppy, index: 1),
+                        _EmojiCircle(emoji: '🦴', color: AppColors.sunny, index: 2),
+                      ],
+                    ),
+                    const SizedBox(width: 6),
+                    Text('$totalLikes reacted · ${widget.post.comments} comments', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: isDark ? AppColors.ink700D : AppColors.ink700)),
+                  ],
+                ),
+              ),
+              
+              // Actions
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(top: BorderSide(color: Theme.of(context).extension<PetfolioThemeExtension>()!.line)),
+                ),
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          if (_reacted == null) {
+                            _fireBurst('paw', 50, 0); // Simplified position
+                            widget.onLike();
+                          }
+                        },
+                        onLongPress: () => setState(() => _pickerOpen = !_pickerOpen),
+                        child: Container(
+                          height: 44,
+                          color: Colors.transparent,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _reacted != null 
+                                ? Text(_emojiForKind(_reacted!), style: const TextStyle(fontSize: 20))
+                                : Icon(Icons.pets, size: 20, color: isDark ? AppColors.ink700D : AppColors.ink700),
+                              const SizedBox(width: 6),
+                              Text(_reacted != null ? '${_reacted![0].toUpperCase()}${_reacted!.substring(1)}' : 'React', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: _reacted != null ? _colorForKind(_reacted!) : (isDark ? AppColors.ink700D : AppColors.ink700))),
+                            ],
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              // ── Comment ──────────────────────────────────────────────────
-              GestureDetector(
-                onTap: onComment,
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.chat_bubble_outline_rounded,
-                        size: 22,
-                        color: pt.ink500,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${post.comments}',
-                        style: tt.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: pt.ink500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const Spacer(),
-              // ── Share ─────────────────────────────────────────────────────
-              GestureDetector(
-                onTap: () {
-                  final text =
-                      "Check out ${post.petName}'s post on Petfolio! 🐾\nhttps://petfolio.app/social/post/${post.id}";
-                  SharePlus.instance.share(ShareParams(text: text));
-                },
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                  child: Icon(
-                    Icons.share_outlined,
-                    size: 22,
-                    color: pt.ink500,
-                  ),
+                    ),
+                    Expanded(child: _ActionBtn(icon: Icons.chat_bubble_outline_rounded, label: 'Comment')),
+                    Expanded(child: _ActionBtn(icon: Icons.ios_share_rounded, label: 'Share')),
+                    Expanded(child: _ActionBtn(icon: Icons.bookmark_border_rounded, label: 'Save')),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          
+          // Picker
+          if (_pickerOpen)
+            Positioned(
+              bottom: 52,
+              left: 12,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(999),
+                  boxShadow: [BoxShadow(color: Color(0x4D783C14), blurRadius: 32, spreadRadius: -10, offset: const Offset(0, 16)), BorderSide(color: Theme.of(context).extension<PetfolioThemeExtension>()!.line).toBoxShadow()],
+                ),
+                child: Row(
+                  children: [
+                    _ReactPickerBtn(emoji: '🐾', kind: 'paw', onTap: (x,y) => _fireBurst('paw', x, y)),
+                    _ReactPickerBtn(emoji: '❤️', kind: 'heart', onTap: (x,y) => _fireBurst('heart', x, y)),
+                    _ReactPickerBtn(emoji: '🦴', kind: 'treat', onTap: (x,y) => _fireBurst('treat', x, y)),
+                    _ReactPickerBtn(emoji: '⭐', kind: 'star', onTap: (x,y) => _fireBurst('star', x, y)),
+                  ],
+                ),
+              ),
+            ),
+            
+          if (_bursts.isNotEmpty)
+            Positioned.fill(
+              child: ReactionBurst(items: _bursts),
+            ),
         ],
       ),
     );
   }
 }
 
+class _EmojiCircle extends StatelessWidget {
+  const _EmojiCircle({required this.emoji, required this.color, required this.index});
+  final String emoji;
+  final Color color;
+  final int index;
+  
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 24,
+      height: 24,
+      margin: EdgeInsets.only(left: index == 0 ? 0 : -6),
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: Border.all(color: Theme.of(context).colorScheme.surface, width: 2),
+      ),
+      alignment: Alignment.center,
+      child: Text(emoji, style: const TextStyle(fontSize: 12)),
+    );
+  }
+}
+
+class _ActionBtn extends StatelessWidget {
+  const _ActionBtn({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      height: 44,
+      color: Colors.transparent,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 20, color: isDark ? AppColors.ink700D : AppColors.ink700),
+          const SizedBox(width: 6),
+          Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: isDark ? AppColors.ink700D : AppColors.ink700)),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReactPickerBtn extends StatelessWidget {
+  const _ReactPickerBtn({required this.emoji, required this.kind, required this.onTap});
+  final String emoji;
+  final String kind;
+  final Function(double, double) onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return GestureDetector(
+      onTapDown: (d) => onTap(d.globalPosition.dx, d.globalPosition.dy - 300), // simplified offset
+      child: Container(
+        width: 42,
+        height: 42,
+        margin: const EdgeInsets.symmetric(horizontal: 3),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.cream2D : AppColors.cream2,
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: Text(emoji, style: const TextStyle(fontSize: 24)),
+      ),
+    );
+  }
+}
+
+extension on BorderSide {
+  BoxShadow toBoxShadow() => BoxShadow(color: color, blurRadius: 0, spreadRadius: width);
+}

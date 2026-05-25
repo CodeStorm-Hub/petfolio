@@ -64,7 +64,7 @@ class _SecureDocButtonState extends ConsumerState<SecureDocButton> {
       label: Text(widget.label, style: const TextStyle(fontSize: 12)),
       style: OutlinedButton.styleFrom(
         visualDensity: VisualDensity.compact,
-        side: const BorderSide(color: AppColors.line200),
+        side: const BorderSide(color: AppColors.line),
         foregroundColor: AppColors.blue500,
       ),
     );

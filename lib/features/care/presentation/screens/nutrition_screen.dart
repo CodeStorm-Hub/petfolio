@@ -176,7 +176,7 @@ class _WeightTrendCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-        border: Border.all(color: pt.line200),
+        border: Border.all(color: pt.line),
         boxShadow: pt.shadowE1,
       ),
       padding: const EdgeInsets.all(20),
@@ -343,7 +343,7 @@ class _WeightLineChart extends StatelessWidget {
               show: true,
               horizontalInterval: (maxY - minY) < 1 ? 0.5 : null,
               getDrawingHorizontalLine: (value) => FlLine(
-                color: pt.line100,
+                color: pt.line2,
                 strokeWidth: 1,
               ),
               drawVerticalLine: false,
@@ -609,7 +609,7 @@ class _HistoryList extends StatelessWidget {
             color: cs.surface,
             borderRadius:
                 BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-            border: Border.all(color: pt.line200),
+            border: Border.all(color: pt.line),
             boxShadow: pt.shadowE1,
           ),
           child: Column(
@@ -719,7 +719,7 @@ class _HistoryTile extends StatelessWidget {
             ],
           ),
         ),
-        if (!isLast) Divider(height: 1, color: pt.line100),
+        if (!isLast) Divider(height: 1, color: pt.line2),
       ],
     );
   }
@@ -822,7 +822,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: pt.line200,
+                color: pt.line,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -889,7 +889,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
                 color: Theme.of(context).inputDecorationTheme.fillColor,
                 borderRadius:
                     BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-                border: Border.all(color: pt.line200),
+                border: Border.all(color: pt.line),
               ),
               child: Row(
                 children: [
@@ -962,7 +962,7 @@ class _UnitToggle extends StatelessWidget {
           color: cs.surfaceContainerHigh,
           borderRadius:
               BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-          border: Border.all(color: pt.line200),
+          border: Border.all(color: pt.line),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(

@@ -228,7 +228,7 @@ class _SolidFallback extends StatelessWidget {
         color: isDark ? AppColors.surface0D : AppColors.surface0,
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
-          color: isDark ? AppColors.line200D : AppColors.line200,
+          color: isDark ? AppColors.lineD : AppColors.line,
         ),
         // Halved shadow per spec "solid fallback, same shadow halved"
         boxShadow: pt.shadowE1,

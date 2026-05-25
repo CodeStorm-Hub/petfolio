@@ -59,7 +59,6 @@ class CartScreen extends ConsumerWidget {
                   const Text(
                     'Your Cart',
                     style: TextStyle(
-                      fontFamily: 'Sora',
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
                       color: AppColors.ink950,
@@ -171,7 +170,7 @@ class _VendorGroupState extends ConsumerState<_VendorGroup> {
           borderRadius: BorderRadius.circular(18),
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
             BoxShadow(
               color: Color(0x040B1220),
               offset: Offset(0, 1),
@@ -196,7 +195,6 @@ class _VendorGroupState extends ConsumerState<_VendorGroup> {
                         Text(
                           widget.shopName,
                           style: const TextStyle(
-                            fontFamily: 'Sora',
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
                             color: AppColors.ink950,
@@ -263,7 +261,6 @@ class _VendorGroupState extends ConsumerState<_VendorGroup> {
                   Text(
                     subtotal,
                     style: const TextStyle(
-                      fontFamily: 'Sora',
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                       color: AppColors.ink950,
@@ -369,7 +366,7 @@ class _PaymentChip extends StatelessWidget {
               ? AppColors.blue500.withAlpha(15)
               : AppColors.surface1,
           border: Border.all(
-            color: selected ? AppColors.blue500 : AppColors.line200,
+            color: selected ? AppColors.blue500 : AppColors.line,
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -430,7 +427,7 @@ class _CodConfirmSheet extends StatelessWidget {
                 height: 4,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(4),
-                  color: AppColors.line200,
+                  color: AppColors.line,
                 ),
               ),
             ),
@@ -438,7 +435,6 @@ class _CodConfirmSheet extends StatelessWidget {
             const Text(
               'Confirm Order',
               style: TextStyle(
-                fontFamily: 'Sora',
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
                 color: AppColors.ink950,
@@ -475,7 +471,7 @@ class _CodConfirmSheet extends StatelessWidget {
                   ],
                 ),
               ),
-            const Divider(height: 24, color: AppColors.line200),
+            const Divider(height: 24, color: AppColors.line),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -490,7 +486,6 @@ class _CodConfirmSheet extends StatelessWidget {
                 Text(
                   subtotal,
                   style: const TextStyle(
-                    fontFamily: 'Sora',
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                     color: AppColors.ink950,
@@ -558,7 +553,6 @@ class _EmptyCart extends StatelessWidget {
           const Text(
             'Your cart is empty',
             style: TextStyle(
-              fontFamily: 'Sora',
               fontWeight: FontWeight.w700,
               fontSize: 18,
               color: AppColors.ink950,
@@ -593,7 +587,7 @@ class _IconBtn extends StatelessWidget {
           shape: BoxShape.circle,
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
             BoxShadow(
               color: Color(0x0A0B1220),
               offset: Offset(0, 1),

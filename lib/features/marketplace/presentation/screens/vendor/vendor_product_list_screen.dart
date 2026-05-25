@@ -33,7 +33,6 @@ class VendorProductListScreen extends ConsumerWidget {
                   const Text(
                     'My Products',
                     style: TextStyle(
-                      fontFamily: 'Sora',
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
                       color: AppColors.ink950,
@@ -139,7 +138,7 @@ class _ProductTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         color: AppColors.surface0,
         boxShadow: const [
-          BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+          BoxShadow(color: AppColors.line, spreadRadius: 0.5),
         ],
       ),
       child: ListTile(
@@ -163,7 +162,6 @@ class _ProductTile extends StatelessWidget {
         title: Text(
           product.name,
           style: const TextStyle(
-            fontFamily: 'Sora',
             fontWeight: FontWeight.w600,
             fontSize: 14,
             color: AppColors.ink950,
@@ -220,7 +218,6 @@ class _EmptyProducts extends StatelessWidget {
             const Text(
               'No products yet',
               style: TextStyle(
-                fontFamily: 'Sora',
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
                 color: AppColors.ink950,
@@ -263,7 +260,7 @@ class _IconBtn extends StatelessWidget {
           shape: BoxShape.circle,
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
         child: Icon(icon, size: 18, color: AppColors.ink700),

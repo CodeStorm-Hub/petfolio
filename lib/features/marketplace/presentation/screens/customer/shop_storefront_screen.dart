@@ -160,7 +160,7 @@ class ShopStorefrontScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(14),
                       color: AppColors.surface2,
                       border: Border.all(
-                          color: AppColors.line200, width: 1.5),
+                          color: AppColors.line, width: 1.5),
                     ),
                     child: shop.logoUrl != null
                         ? ClipRRect(
@@ -179,7 +179,6 @@ class ShopStorefrontScreen extends ConsumerWidget {
                         Text(
                           shop.shopName,
                           style: const TextStyle(
-                            fontFamily: 'Sora',
                             fontWeight: FontWeight.w700,
                             fontSize: 18,
                             color: AppColors.ink950,
@@ -287,7 +286,7 @@ class _ContactInfoSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Divider(color: AppColors.line100, height: 20),
+          const Divider(color: AppColors.line2, height: 20),
           if (hasEmail)
             _ContactRow(
               icon:  Icons.email_outlined,
@@ -453,7 +452,7 @@ class _CircleBtn extends StatelessWidget {
           shape: BoxShape.circle,
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
         child: Icon(icon, size: 16, color: AppColors.ink700),

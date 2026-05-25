@@ -106,7 +106,6 @@ class _NoShopView extends StatelessWidget {
             const Text(
               'Open your shop',
               style: TextStyle(
-                fontFamily: 'Sora',
                 fontWeight: FontWeight.w700,
                 fontSize: 22,
                 color: AppColors.ink950,
@@ -174,7 +173,6 @@ class _ShopDeactivatedViewState extends State<_ShopDeactivatedView> {
             const Text(
               'Shop Closed',
               style: TextStyle(
-                fontFamily: 'Sora',
                 fontWeight: FontWeight.w700,
                 fontSize: 22,
                 color: AppColors.ink950,
@@ -256,7 +254,6 @@ class _DashboardBody extends ConsumerWidget {
                 const Text(
                   'Seller Dashboard',
                   style: TextStyle(
-                    fontFamily: 'Sora',
                     fontWeight: FontWeight.w700,
                     fontSize: 20,
                     color: AppColors.ink950,
@@ -425,7 +422,7 @@ class _ShopCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
         child: Row(
@@ -453,7 +450,6 @@ class _ShopCard extends StatelessWidget {
                   Text(
                     shop.shopName,
                     style: const TextStyle(
-                      fontFamily: 'Sora',
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                       color: AppColors.ink950,
@@ -578,7 +574,7 @@ class _StatTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
         child: Column(
@@ -597,7 +593,6 @@ class _StatTile extends StatelessWidget {
             Text(
               value,
               style: const TextStyle(
-                fontFamily: 'Sora',
                 fontWeight: FontWeight.w700,
                 fontSize: 24,
                 color: AppColors.ink950,
@@ -675,7 +670,7 @@ class _ActionRow extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
         child: Row(
@@ -808,7 +803,7 @@ class _DangerZone extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Divider(color: AppColors.line200),
+          const Divider(color: AppColors.line),
           const SizedBox(height: 12),
           const Text(
             'DANGER ZONE',
@@ -1067,7 +1062,7 @@ class _DeleteShopRequestSheetState
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: pt.line200,
+                color: pt.line,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1076,7 +1071,6 @@ class _DeleteShopRequestSheetState
           const Text(
             'Request Shop Deletion',
             style: TextStyle(
-              fontFamily: 'Sora',
               fontWeight: FontWeight.w700,
               fontSize: 18,
               color: AppColors.ink950,
@@ -1127,7 +1121,7 @@ class _DeleteShopRequestSheetState
               hintText: 'Why are you closing your shop?',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: pt.line200),
+                borderSide: BorderSide(color: pt.line),
               ),
             ),
           ),
@@ -1212,7 +1206,7 @@ class _IconBtn extends StatelessWidget {
           shape: BoxShape.circle,
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
         child: Icon(icon, size: 18, color: AppColors.ink700),

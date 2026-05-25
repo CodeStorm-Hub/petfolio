@@ -51,6 +51,121 @@
 - **Error UI Handling**: For optimistic UI actions (like toggling care tasks or seller onboarding), show errors using `AppSnackBar.showError` (via `appSnackBarMessengerKey` on `MaterialApp.router`). Do not put long-lived state providers in `AsyncValue.error` states for transient/action-level failures.
 - **Web Safe Target**: Marionette execution runs exclusively in debug builds via conditional compiler imports (`marionette_debug_gate_stub.dart` vs `_io.dart`) to keep `main.dart` from importing `dart:io` on web targets.
 
+## 2026-05-25 — UI Redesign Phase 8: Browser Cross-Validation Fixes
+
+Served `PetFolio Redesign.html` via local HTTP server, navigated all 5 tabs via Chrome MCP JS tool, extracted computed styles and rendered text from each screen. Confirmed gaps vs. previous session's text-only analysis, plus found new ones:
+
+**Match screen fixes:**
+- 5th dock button: ⚡ bolt boost → **↺ `Icons.replay_rounded`** (`AppColors.ink300`, disabled placeholder — undo requires swipe history)
+- Pet name font: 28px → **32px** Fraunces to match design exactly
+
+**Social screen fixes:**
+- Reaction emoji row: 🍖 → **🦴**, removed ⭐ star chip (design shows only 🐾 ❤️ 🦴)
+- Story rings: **`LinearGradient` → `SweepGradient`** (5-stop conic: tangerine→poppy→sunny→mint→tangerine, startAngle 220°) for active stories; inactive stories keep gray linear ring. `_StoryItem` gained `isActive` boolean; `_conicColors` const defined at file scope.
+
+**Market screen fixes:**
+- Added **`_MembersBanner`** widget: poppy→tangerine horizontal gradient, "FOR MEMBERS" overline, "20% off treats this week 🦴" body, white "Claim" pill button. Inserted as first sliver in `_ShopBody` when `selectedCat == all`.
+- Renamed section: "⭐ Top Picks" → **"🦴 Trending in your Pack"** to match design.
+
+**Remaining known gaps (not yet implemented):**
+- Market: "SHIP TO [PET]'S HOUSE / City" delivery address strip (requires active pet + address data)
+- Market: product star ratings on tiles (no `rating` field in `Product` model)
+- Market: category Beds + Apparel (our model has Gear + Health — affects DB data)
+- Social: PostHeader conic-gradient avatar ring
+- Care: next-level name label ("Pet Whisperer")
+- `flutter analyze lib/` — **No issues found.**
+
+**Next step:** Phase complete. Please run (/remember) to save tokens before proceeding.
+
+---
+
+## 2026-05-25 — UI Redesign Phase 7: Cross-Validation Gap Fixes
+
+- **`FeedPost.isMemorial`**: Added boolean field to model (defaults false). Propagated through `_copy()`.
+- **`_MemorialPost` widget** (social_screen.dart): Full memorial post variant — ivory paper bg (`#FAF6EE`), sepia ColorFilter matrix on photo, vignette radial overlay, candle count row, "Light a candle 🕯️" filled button, "Leave a tribute" outlined button, "Sharing & saves disabled out of respect" note with lock icon. Dark mode variants included.
+- **Feed list builder**: Routes to `_MemorialPost` when `post.isMemorial`, otherwise `_RegularPost`.
+- **Save/bookmark icon** added to `_ReactionBar` (social_screen.dart) — `bookmark_outline_rounded` icon as 4th action on the right side.
+- **"You're all caught up"** footer sliver (social_screen.dart): Shows "🐾 You're all caught up / Pull to refresh for new posts" when feed is non-empty and not loading more.
+- **Product tile wishlist button** (product_card.dart): Circular white `bookmark_outline_rounded` button added top-right of `_ProductTile`, matching the design spec's save/wishlist icon.
+- **Match card photo dots bar**: 5 thin horizontal bars at the top of each swipe card. First bar is full-white (active), remaining are 35%-alpha white.
+- **Vet verified badge**: Positioned top-right of the swipe card when `candidate.verified`. Shows mint `verified_rounded` icon + "Vet verified" text on white pill. Replaced inline white icon in `_InfoPanel`.
+- **FuzzyChip** (distance pill): Replaced plain distance Row in `_InfoPanel` with a `_MatchMetaChip` that has `icon: Icons.location_on_rounded`.
+- **SafetyChip** (owner verified): Added `_MatchMetaChip` with `Icons.shield_rounded` in mint color to the meta chips Wrap when `candidate.verified`.
+- **`_MatchMetaChip`**: Added optional `icon` parameter (renders 12px icon + 4px gap before label text).
+- `flutter analyze lib/` — **No issues found.**
+
+**Next step:** Phase complete. Please run (/remember) to save tokens before proceeding to Phase 8 (Health Vitals UI or remaining onboarding gaps).
+
+---
+
+## 2026-05-25 — UI Redesign Phase 6: Marketplace Screen Redesign
+
+- **Dark-mode scaffold**: `backgroundColor: AppColors.surface1` (hardcoded) → `pt.surface1` via `PetfolioThemeExtension`. Added `app_theme.dart` import.
+- **Category chips**: Active pill color changed from `AppColors.ink950` (black) → `AppColors.mint` (marketplace tab brand color). White text on active chip is unchanged.
+- **Section headers**: Removed `_SectionHeader` custom class entirely. All four section headings ("Discover Shops", "Subscribe & Save", "Top Picks", category filter label) now use `PfSectionTitle` with `accent: AppColors.mint` and contextual emoji prefixes (🛍️ 🌿 ⭐). Category filter heading includes item count in `trailing`.
+- **Reorder strip**: Gradient updated from `#8FD0B0→meadow500` to `mintSoft→mint`. Icon and "Manage" button text color updated from `meadow500` → `mint`.
+- **`product_card.dart`**: Subscribe & Save badge text color and sub-price text changed from `AppColors.success` → `AppColors.mint` for palette consistency.
+- `flutter analyze` — **No issues found.**
+
+**Next step:** All 6 redesign phases complete. Please run (/remember) to save tokens and log the full redesign as complete.
+
+---
+
+## 2026-05-25 — UI Redesign Phase 5: Match Screen Swipe Deck Redesign
+
+- **Font migration**: Pet name in `_InfoPanel` switched from `GoogleFonts.sora()` to `GoogleFonts.fraunces()` (28px display weight). Swipe stamp labels (`MATCH`, `PASS`, `WAVE`) also use `GoogleFonts.fraunces()`. All other `GoogleFonts.inter()` calls replaced with plain `TextStyle` so Nunito applies globally.
+- **Color migration** (old aliases → new palette):
+  - `coral500` → `AppColors.poppy` (MATCH stamp, like/paw dock button, card fallback gradient)
+  - `blue500` → `AppColors.lilac` (WAVE stamp, greet dock button, species meta chip bg)
+  - `mulberry500` → `AppColors.lilac` (super paw dock button, breed meta chip bg)
+  - `sunset500` → `AppColors.tangerine` (boost dock button, energy meta chip bg, card fallback gradient)
+- **Action dock**: Pass (ink300, unchanged), Greet (lilac), Like paw center (poppy, elevated glow), Super star (lilac), Boost lightning (tangerine, disabled placeholder)
+- **Meta chips**: Species=lilac tint, Breed=lilac tint, Energy=tangerine tint — all on white text inside the card scrim.
+- `flutter analyze` — **No issues found.**
+
+**Next step:** Phase complete. Please run (/remember) to save tokens before proceeding to Phase 6 (Marketplace screen redesign).
+
+---
+
+## 2026-05-25 — UI Redesign Phase 4: Social Pawsfeed Redesign
+
+- **Pawsfeed section title**: Added `PfSectionTitle` sliver above the stories row with `🐾 Pawsfeed` title, poppy accent bar, and a "Discover" `TextButton` trailing link.
+- **Emoji reaction bar (`_ReactionBar`)**: Replaced the old like/comment/share row in `_RegularFooter` with a new `_ReactionBar` widget. Paw 🐾 (connected to existing `onLike`), Heart ❤️, Treat 🍖, and Star ⭐ are displayed as pill chips using `_ReactionChip`. Active paw chip highlights with poppy color. Comment and share buttons remain on the right.
+- **FAB color**: Changed `FloatingActionButton.extended` `backgroundColor` from `colorScheme.primary` to `AppColors.poppy` to match the social tab accent color.
+- **Story ring gradient**: Updated ring gradient colors from old `sunset500`/`coral500` aliases to `AppColors.tangerine` / `AppColors.poppy`. "Add story" dot also updated to `AppColors.poppy`.
+- `flutter analyze` — **No issues found.**
+
+**Next step:** Phase complete. Please run (/remember) to save tokens before proceeding to Phase 5 (Match screen swipe deck redesign).
+
+---
+
+## 2026-05-25 — UI Redesign Phase 3: Home Wave Banner + Care XP System
+
+- **Home screen — `_PetWaveBanner`**: New widget inserted above `_HeroCard` in `pet_profile_screen.dart`. Uses `WaveHeader` with the active pet's species accent color (e.g. tangerine for dogs, poppy for cats). Displays the pet's avatar (network image with emoji fallback), pet name in Fraunces 26px, and breed/species label. Organic wave clips the bottom and transitions to the cream page background.
+- **Home tab bar**: Tab indicator/label color now uses `activePet.speciesEnum.accent` instead of generic `cs.primary`, so each pet's profile tab feels native to their species color.
+- **Care screen — XP badge pills**: Each task card now shows a `+N XP` pill badge (sunny background, `sunny700` text) when not completed, and a green mint circle checkmark badge when completed. Uses `task.gamificationPoints` from the DB.
+- **Care screen — XP progress bar**: New `_XpProgressBar` widget inserted between the streak banner and the date picker. Shows today's earned XP vs total possible XP for the selected day's tasks, with a sunny gradient `LinearProgressIndicator`.
+- **Care screen — AI Routine banner**: Restyled from generic `cs.primary` to lilac palette (`AppColors.lilac`, `lilacSoft`, `lilac700`). Both the promo card and the "Refresh" outlined button now use lilac to match the Match/AI brand color.
+- `flutter analyze` — **No issues found.**
+
+**Next step:** Phase complete. Please run (/remember) to save tokens before proceeding to Phase 4 (Social Pawsfeed redesign).
+
+---
+
+## 2026-05-25 — UI Redesign Phase 2: Font System Migration (Fraunces + Nunito)
+
+- **Bulk font cleanup**: Removed all 30+ files with hardcoded `fontFamily: 'Sora'` and `fontFamily: 'Inter'` inline `TextStyle` overrides via `sed` bulk delete. The warm-palette theme (Nunito text theme via `GoogleFonts.nunitoTextTheme`) now applies globally as the default.
+- **`app_header.dart`**: Pet name title replaced with `GoogleFonts.nunito(fontWeight: FontWeight.w800)`.
+- **`pet_profile_screen.dart`**: Streak hero number uses `GoogleFonts.fraunces()` (56px display serif); awards stat values use `GoogleFonts.fraunces()` (18px); all other titles/labels use `GoogleFonts.nunito()`.
+- **Parser error fixes**: Two `create_post_screen.dart` and `create_story_screen.dart` files had `Text('...', style: TextStyle(fontFamily: 'Sora'))` on one line — sed deleted the closing paren. Restored as `Text('...')`.
+- **Redundant imports cleaned**: Removed duplicate `pet_species.dart` imports from `app_header.dart`, `care_screen.dart`, `onboarding_screen.dart` (now re-exported via `pet_avatar.dart` / `widgets.dart`).
+- **`wave_header.dart`**: Replaced `if (trailing != null) trailing!` with null-aware `?trailing` element.
+- `flutter analyze` — **No issues found.**
+
+**Next step:** Phase complete. Please run (/remember) to save tokens before proceeding to Phase 3 (Home / Care / Social screen redesigns).
+
+---
+
 ## 2026-05-25 — Comment Likes and Threaded Replies
 
 - **Database migration applied** (`jqyjvhwlcqcsuwcqgcwf`): added `parent_id` (foreign key to comments table for threading) and `like_count` to comments table; created `comment_likes` table with triggers to keep counts updated; added RLS security policy wrapping `(select auth.uid())` for plan caching performance.

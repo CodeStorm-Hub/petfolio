@@ -147,7 +147,7 @@ class _ProductTile extends StatelessWidget {
             colors: [product.gradientStart, product.gradientEnd],
           ),
           boxShadow: [
-            BoxShadow(color: AppColors.line200, blurRadius: 0, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, blurRadius: 0, spreadRadius: 0.5),
           ],
         ),
         child: Stack(
@@ -191,11 +191,40 @@ class _ProductTile extends StatelessWidget {
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.04 * 10,
-                      color: AppColors.success,
+                      color: AppColors.mint,
                     ),
                   ),
                 ),
               ),
+            // Save / wishlist button
+            Positioned(
+              top: 8,
+              right: 8,
+              child: GestureDetector(
+                onTap: () {},
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withAlpha(230),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x1A0B1220),
+                        blurRadius: 6,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.bookmark_outline_rounded,
+                    size: 16,
+                    color: AppColors.ink950,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -232,7 +261,6 @@ class _ProductMeta extends StatelessWidget {
         Text(
           product.name,
           style: TextStyle(
-            fontFamily: 'Sora',
             fontWeight: FontWeight.w600,
             fontSize: compact ? 13 : 14,
             height: 1.25,
@@ -247,7 +275,6 @@ class _ProductMeta extends StatelessWidget {
             Text(
               product.priceFormatted,
               style: const TextStyle(
-                fontFamily: 'Sora',
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
                 color: AppColors.ink950,
@@ -260,7 +287,7 @@ class _ProductMeta extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.success,
+                  color: AppColors.mint,
                 ),
               ),
             ],

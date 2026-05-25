@@ -20,114 +20,110 @@ class CartLineItem extends ConsumerWidget {
     final cart = ref.read(cartProvider.notifier);
     final p = item.product;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: const BoxDecoration(
-        color: AppColors.surface0,
-        border: Border(
-          bottom: BorderSide(color: AppColors.line100, width: 0.5),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(10, 10, 14, 10),
+        decoration: BoxDecoration(
+          color: AppColors.surface0,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.line),
         ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Product thumbnail
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [p.gradientStart, p.gradientEnd],
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Product thumbnail
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color.lerp(p.gradientStart, Colors.white, 0.5)!, 
+                    p.gradientStart
+                  ],
+                ),
+              ),
+              child: Center(
+                child: ProductGlyph(glyphType: p.glyphType, size: 30),
               ),
             ),
-            child: Center(
-              child: ProductGlyph(glyphType: p.glyphType, size: 32),
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // Name + price + subscription label
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  p.brand,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.ink500,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  p.name,
-                  style: const TextStyle(
-                    fontFamily: 'Sora',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                    height: 1.3,
-                    color: AppColors.ink950,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                if (item.isSubscribed)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      color: AppColors.success.withAlpha(26),
+            const SizedBox(width: 12),
+  
+            // Name + sub + line total
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    p.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                      color: AppColors.ink950,
                     ),
-                    child: Text(
-                      'Sub · every ${item.frequencyWeeks}wk · save 12%',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.success,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    p.brand,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.ink500,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '\$${(item.lineTotalCents / 100).toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontFamily: 'Sora',
+                      fontSize: 16,
+                      color: AppColors.ink950,
+                    ),
+                  ),
+                  if (item.isSubscribed) ...[
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: AppColors.success.withAlpha(26),
+                      ),
+                      child: Text(
+                        'Sub · every ${item.frequencyWeeks}wk · save 12%',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.success,
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                  ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-
-          // Quantity stepper + line total
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // Line total
-              Text(
-                '\$${(item.lineTotalCents / 100).toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontFamily: 'Sora',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                  color: AppColors.ink950,
-                ),
+            const SizedBox(width: 12),
+  
+            // Quantity stepper
+            _Stepper(
+              quantity: item.quantity,
+              onDecrement: () => cart.decrement(
+                p.id,
+                isSubscribed: item.isSubscribed,
               ),
-              const SizedBox(height: 8),
-
-              // Stepper
-              _Stepper(
-                quantity: item.quantity,
-                onDecrement: () => cart.decrement(
-                  p.id,
-                  isSubscribed: item.isSubscribed,
-                ),
-                onIncrement: () => cart.add(
-                  p,
-                  subscribe: item.isSubscribed,
-                  frequencyWeeks: item.frequencyWeeks,
-                ),
+              onIncrement: () => cart.add(
+                p,
+                subscribe: item.isSubscribed,
+                frequencyWeeks: item.frequencyWeeks,
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -149,7 +145,7 @@ class _Stepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 32,
+      padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
         color: AppColors.surface2,
@@ -158,14 +154,13 @@ class _Stepper extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _StepBtn(label: '−', onTap: onDecrement),
-          SizedBox(
-            width: 24,
+          Container(
+            constraints: const BoxConstraints(minWidth: 18),
             child: Text(
               '$quantity',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontFamily: 'Sora',
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w900,
                 fontSize: 13,
                 color: AppColors.ink950,
               ),
@@ -189,16 +184,21 @@ class _StepBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 32,
-        height: 32,
+      child: Container(
+        width: 26,
+        height: 26,
+        decoration: const BoxDecoration(
+          color: AppColors.surface0,
+          shape: BoxShape.circle,
+        ),
         child: Center(
           child: Text(
             label,
             style: const TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColors.ink700,
+              fontWeight: FontWeight.w900,
+              color: AppColors.ink950,
+              height: 1.1,
             ),
           ),
         ),
