@@ -29,7 +29,7 @@ class SocialScreen extends ConsumerWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final petsAsync = ref.watch(petListProvider);
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       body: Center(
         child: petsAsync.when(
           skipLoadingOnReload: true,
@@ -102,7 +102,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -210,13 +210,10 @@ class _SocialViewState extends ConsumerState<_SocialView> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/social/create'),
         backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.warmBlack,
         elevation: 4,
         icon: const Icon(Icons.add_photo_alternate_rounded),
-        label: const Text(
-          'Post',
-          style: TextStyle(fontWeight: FontWeight.w700, fontFamily: 'Sora'),
-        ),
+        label: const Text('Post', style: TextStyle(fontWeight: FontWeight.w700)),
       ),
     );
   }
@@ -270,7 +267,7 @@ class _StoryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     final surface = Theme.of(context).colorScheme.surface;
-    final avatarBg = ringColors.isNotEmpty ? ringColors[0].withAlpha(180) : AppColors.blue500;
+    final avatarBg = ringColors.isNotEmpty ? ringColors[0].withAlpha(180) : AppColors.amber500;
 
     return GestureDetector(
       onTap: onTap,
@@ -349,18 +346,9 @@ class _RegularPost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
+    return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surface0D : AppColors.surface0,
-        borderRadius:
-            BorderRadius.circular(PetfolioThemeExtension.radius2xl),
-        boxShadow: pt.shadowE2,
-      ),
-      clipBehavior: Clip.hardEdge,
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -688,89 +676,58 @@ class _RegularFooter extends StatelessWidget {
           Row(
             children: [
               // ── Like ─────────────────────────────────────────────────────
-              GestureDetector(
-                onTap: onLike,
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AnimatedSwitcher(
-                        duration: PetfolioThemeExtension.durationSm,
-                        transitionBuilder: (child, animation) => ScaleTransition(
-                          scale: animation,
-                          child: child,
-                        ),
-                        child: Icon(
-                          post.isLiked
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          key: ValueKey(post.isLiked),
-                          color: post.isLiked ? AppColors.coral500 : pt.ink500,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      AnimatedSwitcher(
-                        duration: PetfolioThemeExtension.durationSm,
-                        child: Text(
-                          '${post.likes}',
-                          key: ValueKey(post.likes),
-                          style: tt.labelMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: post.isLiked ? AppColors.coral500 : pt.ink500,
-                          ),
-                        ),
-                      ),
-                    ],
+              IconButton(
+                onPressed: onLike,
+                visualDensity: VisualDensity.compact,
+                icon: AnimatedSwitcher(
+                  duration: PetfolioThemeExtension.durationSm,
+                  transitionBuilder: (child, anim) =>
+                      ScaleTransition(scale: anim, child: child),
+                  child: Icon(
+                    post.isLiked
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    key: ValueKey(post.isLiked),
+                    color: post.isLiked ? AppColors.coral500 : pt.ink500,
+                    size: 24,
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              // ── Comment ──────────────────────────────────────────────────
-              GestureDetector(
-                onTap: onComment,
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.chat_bubble_outline_rounded,
-                        size: 22,
-                        color: pt.ink500,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${post.comments}',
-                        style: tt.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: pt.ink500,
-                        ),
-                      ),
-                    ],
+              AnimatedSwitcher(
+                duration: PetfolioThemeExtension.durationSm,
+                child: Text(
+                  '${post.likes}',
+                  key: ValueKey(post.likes),
+                  style: tt.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: post.isLiked ? AppColors.coral500 : pt.ink500,
                   ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              // ── Comment ──────────────────────────────────────────────────
+              IconButton(
+                onPressed: onComment,
+                visualDensity: VisualDensity.compact,
+                icon: Icon(Icons.chat_bubble_outline_rounded, size: 22, color: pt.ink500),
+              ),
+              Text(
+                '${post.comments}',
+                style: tt.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: pt.ink500,
                 ),
               ),
               const Spacer(),
               // ── Share ─────────────────────────────────────────────────────
-              GestureDetector(
-                onTap: () {
+              IconButton(
+                onPressed: () {
                   final text =
                       "Check out ${post.petName}'s post on Petfolio! 🐾\nhttps://petfolio.app/social/post/${post.id}";
                   SharePlus.instance.share(ShareParams(text: text));
                 },
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                  child: Icon(
-                    Icons.share_outlined,
-                    size: 22,
-                    color: pt.ink500,
-                  ),
-                ),
+                visualDensity: VisualDensity.compact,
+                icon: Icon(Icons.share_outlined, size: 22, color: pt.ink500),
               ),
             ],
           ),

@@ -122,7 +122,7 @@ class _ManagePetsScreenState extends ConsumerState<ManagePetsScreen> {
     final activePet = ref.watch(activePetControllerProvider);
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -243,7 +243,7 @@ class _ManageHeader extends StatelessWidget {
                   Text(
                     'Your pets',
                     style: TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: 'Fredoka',
                       fontWeight: FontWeight.w700,
                       fontSize: 19,
                       letterSpacing: -0.2,
@@ -429,7 +429,7 @@ class _PetRow extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontFamily: 'Sora',
+                            fontFamily: 'Fredoka',
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
                             letterSpacing: -0.15,
@@ -555,7 +555,7 @@ class _AddPetCallout extends StatelessWidget {
                   const Text(
                     'Add another pet',
                     style: TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: 'Fredoka',
                       fontWeight: FontWeight.w700,
                       fontSize: 15,
                     ),
@@ -632,7 +632,7 @@ class _ShareAccessSheet extends StatelessWidget {
                       Text(
                         'Share ${pet.name}',
                         style: const TextStyle(
-                          fontFamily: 'Sora',
+                          fontFamily: 'Fredoka',
                           fontWeight: FontWeight.w700,
                           fontSize: 18,
                         ),

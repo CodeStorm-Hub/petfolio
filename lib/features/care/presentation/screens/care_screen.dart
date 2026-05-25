@@ -137,7 +137,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
               )
             : const CircularProgressIndicator.adaptive(),
       );
-      return Scaffold(backgroundColor: pt.surface1, body: Center(child: body));
+      return Scaffold(backgroundColor: pt.warmCream, body: Center(child: body));
     }
 
     final dashboard = ref.watch(careDashboardProvider);
@@ -155,7 +155,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
         );
 
     return Scaffold(
-      backgroundColor: _outdoor ? cs.surface : pt.surface1,
+      backgroundColor: _outdoor ? cs.surface : pt.warmCream,
       floatingActionButton: FloatingActionButton(
         key: const ValueKey<String>('care_fab_add_task'),
         onPressed: openAddSheet,
@@ -197,9 +197,9 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                       const SizedBox(height: 24),
                       DecoratedBox(
                         decoration: BoxDecoration(
-                          color: cs.surface,
+                          color: AppColors.surface0,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: pt.line200),
+                          border: Border.all(color: pt.line200, width: 0.5),
                           boxShadow: [
                             BoxShadow(
                               color: AppColors.shadowE1L,
@@ -253,9 +253,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                         onAddTask: openAddSheet,
                       ),
                       const SizedBox(height: 24),
-                      _NutritionBanner(pt: pt),
-                      const SizedBox(height: 12),
-                      _MedicalVaultBanner(pt: pt),
+                      const _CareBentoRow(),
                     ],
                   );
                   if (!wide) return list;
@@ -541,7 +539,7 @@ class _StreakBanner extends ConsumerWidget {
                           Text(
                             total > 0 ? '$done / $total' : '—',
                             style: const TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: 'Fredoka',
                               fontSize: 20,
                               fontWeight: FontWeight.w700,
                               height: 1.1,
@@ -589,7 +587,7 @@ class _StreakBanner extends ConsumerWidget {
                               Text(
                                 '$done',
                                 style: const TextStyle(
-                                  fontFamily: 'Sora',
+                                  fontFamily: 'Fredoka',
                                   fontSize: 34,
                                   fontWeight: FontWeight.w800,
                                   height: 1,
@@ -619,7 +617,7 @@ class _StreakBanner extends ConsumerWidget {
                               Text(
                                 '$streakCount',
                                 style: const TextStyle(
-                                  fontFamily: 'Sora',
+                                  fontFamily: 'Fredoka',
                                   fontSize: 30,
                                   fontWeight: FontWeight.w800,
                                   height: 1,
@@ -708,7 +706,7 @@ class _StreakBanner extends ConsumerWidget {
                         Text(
                           _letterForDate(d),
                           style: TextStyle(
-                            fontFamily: 'Sora',
+                            fontFamily: 'Fredoka',
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             color: isSelectedDay
@@ -861,7 +859,7 @@ class _HorizontalDatePickerState extends State<_HorizontalDatePicker> {
                     Text(
                       '${date.day}',
                       style: TextStyle(
-                        fontFamily: 'Sora',
+                        fontFamily: 'Fredoka',
                         fontWeight: FontWeight.w700,
                         fontSize: 18,
                         height: 1,
@@ -1048,16 +1046,22 @@ class _CareTaskCard extends ConsumerWidget {
     final logOnly = task.isLogDerived;
 
     Widget tile() {
-      return GestureDetector(
-        onTap: () {
-          if (logOnly) {
-            if (!done) return;
-            ref.read(careDashboardProvider.notifier).toggleTaskCompletion(task.id, isCompleted: false);
-            return;
-          }
-          ref.read(careDashboardProvider.notifier).toggleTaskCompletion(task.id, isCompleted: !done);
-        },
-        child: AnimatedContainer(
+      final tt = Theme.of(context).textTheme;
+      return Material(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            if (logOnly) {
+              if (!done) return;
+              ref.read(careDashboardProvider.notifier).toggleTaskCompletion(task.id, isCompleted: false);
+              return;
+            }
+            ref.read(careDashboardProvider.notifier).toggleTaskCompletion(task.id, isCompleted: !done);
+          },
+          child: AnimatedContainer(
           duration: PetfolioThemeExtension.durationSm,
           decoration: BoxDecoration(
             color: done ? pt.surface2 : cs.surface,
@@ -1103,20 +1107,18 @@ class _CareTaskCard extends ConsumerWidget {
                   children: [
                     AnimatedDefaultTextStyle(
                       duration: PetfolioThemeExtension.durationSm,
-                      style: TextStyle(
-                        fontFamily: 'Sora',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
+                      style: tt.titleSmall!.copyWith(
                         color: done ? pt.ink300 : cs.onSurface,
                         decoration: done ? TextDecoration.lineThrough : TextDecoration.none,
                         decorationColor: pt.ink300,
                       ),
                       child: Text(task.title, overflow: TextOverflow.ellipsis),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _sublabel(task),
-                      style: TextStyle(fontSize: 12, color: pt.ink500),
+                    const SizedBox(height: 5),
+                    Wrap(
+                      spacing: 5,
+                      runSpacing: 4,
+                      children: _metaChips(task),
                     ),
                   ],
                 ),
@@ -1183,9 +1185,10 @@ class _CareTaskCard extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
+        ),
+        ),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -1219,13 +1222,17 @@ class _CareTaskCard extends ConsumerWidget {
     );
   }
 
-  String _sublabel(dbtask.CareTask t) {
-    if (t.isLogDerived) return 'Activity log | This day';
-    final parts = <String>[];
-    if (t.scheduledTime != null) parts.add(t.scheduledTime!);
-    parts.add(_frequencyLabel(t.frequency));
-    if (t.gamificationPoints > 0) parts.add('+${t.gamificationPoints} pts');
-    return parts.join(' | ');
+  List<Widget> _metaChips(dbtask.CareTask t) {
+    if (t.isLogDerived) {
+      return [const _MetaChip(icon: Icons.history_rounded, label: 'Activity log')];
+    }
+    return [
+      if (t.scheduledTime != null)
+        _MetaChip(icon: Icons.schedule_rounded, label: t.scheduledTime!),
+      _MetaChip(icon: Icons.repeat_rounded, label: _frequencyLabel(t.frequency)),
+      if (t.gamificationPoints > 0)
+        _MetaChip(icon: Icons.bolt_rounded, label: '+${t.gamificationPoints} pts'),
+    ];
   }
 
   String _frequencyLabel(dbtask.CareFrequency f) {
@@ -1267,38 +1274,33 @@ class _TaskCardSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Container(
-        height: 72,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: cs.surface,
+      child: Card(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: pt.line200, width: 0.5),
-          boxShadow: [
-            const BoxShadow(color: AppColors.shadowE1L, blurRadius: 2, offset: Offset(0, 1)),
-          ],
+          side: BorderSide(color: pt.line200, width: 0.5),
         ),
-        child: Row(
-          children: [
-            const SkeletonLoader(width: 40, height: 40, borderRadius: 12),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  SkeletonLoader(width: 140, height: 14),
-                  SizedBox(height: 6),
-                  SkeletonLoader(width: 100, height: 11),
-                ],
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              SkeletonLoader(width: 40, height: 40, borderRadius: 12),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SkeletonLoader(width: 140, height: 14),
+                    SizedBox(height: 6),
+                    SkeletonLoader(width: 90, height: 10),
+                  ],
+                ),
               ),
-            ),
-            const SkeletonLoader(width: 36, height: 36, borderRadius: 999),
-          ],
+              SkeletonLoader(width: 36, height: 36, borderRadius: 999),
+            ],
+          ),
         ),
       ),
     );
@@ -1317,40 +1319,18 @@ class _CareErrorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
     final isNetwork = error is NetworkException;
     final message = error is AppException
         ? (error as AppException).message
         : 'Could not load tasks. Check your connection and try again.';
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: pt.line200, width: 0.5),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            isNetwork ? Icons.wifi_off_rounded : Icons.cloud_off_rounded,
-            size: 40,
-            color: pt.ink300,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: pt.ink500, height: 1.4),
-          ),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded, size: 16),
-            label: const Text('Retry'),
-          ),
-        ],
+    return PetfolioEmptyState(
+      icon: isNetwork ? Icons.wifi_off_rounded : Icons.cloud_off_rounded,
+      title: message,
+      action: FilledButton.icon(
+        onPressed: onRetry,
+        icon: const Icon(Icons.refresh_rounded, size: 16),
+        label: const Text('Retry'),
       ),
     );
   }
@@ -1369,58 +1349,20 @@ class _EmptyRoutineState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
     final isToday = DateUtils.dateOnly(date) == DateUtils.dateOnly(DateTime.now());
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
-      child: Column(
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: pt.surface2,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(Icons.task_alt_rounded, size: 32, color: pt.ink300),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            isToday ? 'No tasks for today' : 'No tasks for this day',
-            style: TextStyle(
-              fontFamily: 'Sora',
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-              color: cs.onSurface,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: Text(
-              isToday
-                  ? 'Add care tasks for ${petName.isNotEmpty ? petName : 'your pet'} to start tracking daily routines.'
-                  : 'Completed tasks from this day appear here.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: pt.ink500, height: 1.4),
-            ),
-          ),
-          if (isToday && onAddTask != null) ...[
-            const SizedBox(height: 20),
-            OutlinedButton.icon(
+    return PetfolioEmptyState(
+      icon: Icons.task_alt_rounded,
+      title: isToday ? 'No tasks for today' : 'No tasks for this day',
+      subtitle: isToday
+          ? 'Add care tasks for ${petName.isNotEmpty ? petName : 'your pet'} to start tracking.'
+          : 'Completed tasks from this day appear here.',
+      action: (isToday && onAddTask != null)
+          ? FilledButton.icon(
               onPressed: onAddTask,
               icon: const Icon(Icons.add_rounded, size: 16),
               label: const Text('Add first task'),
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
-              ),
-            ),
-          ],
-        ],
-      ),
+            )
+          : null,
     );
   }
 }
@@ -1462,127 +1404,106 @@ String _defaultTitle(dbtask.CareTaskType type) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Medical vault & nutrition entry banners
+// Bento quick-access row (Nutrition + Medical Vault side by side)
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _MedicalVaultBanner extends StatelessWidget {
-  const _MedicalVaultBanner({required this.pt});
-
-  final PetfolioThemeExtension pt;
+class _CareBentoRow extends StatelessWidget {
+  const _CareBentoRow();
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      key: const ValueKey<String>('care_medical_vault_banner'),
-      onTap: () => context.push('/care/medical-vault'),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius:
-              BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-          border: Border.all(color: pt.pillarHealth.withAlpha(80)),
-          boxShadow: pt.shadowE1,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: pt.pillarHealth.withAlpha(30),
-                borderRadius: BorderRadius.circular(
-                    PetfolioThemeExtension.radiusMd),
-              ),
-              child: Icon(Icons.folder_special_outlined,
-                  color: pt.pillarHealth, size: 22),
+    return IntrinsicHeight(
+      child: Row(
+        children: [
+          Expanded(
+            child: _BentoShortcut(
+              key: const ValueKey<String>('care_nutrition_banner'),
+              icon: Icons.monitor_weight_outlined,
+              label: 'Nutrition',
+              subtitle: 'Weight & diet',
+              iconColor: AppColors.teal400,
+              tileColor: AppColors.teal400.withAlpha(22),
+              onTap: () => context.push('/care/nutrition'),
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Automated medical vault',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Vaccines · Medications · Vet visits',
-                    style: TextStyle(fontSize: 13, color: pt.ink300),
-                  ),
-                ],
-              ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _BentoShortcut(
+              key: const ValueKey<String>('care_medical_vault_banner'),
+              icon: Icons.folder_special_outlined,
+              label: 'Medical Vault',
+              subtitle: 'Vaccines & meds',
+              iconColor: AppColors.meadow500,
+              tileColor: AppColors.meadow500.withAlpha(22),
+              onTap: () => context.push('/care/medical-vault'),
             ),
-            Icon(Icons.chevron_right_rounded, color: pt.ink300),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _NutritionBanner extends StatelessWidget {
-  const _NutritionBanner({required this.pt});
+class _BentoShortcut extends StatelessWidget {
+  const _BentoShortcut({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.iconColor,
+    required this.tileColor,
+    required this.onTap,
+  });
 
-  final PetfolioThemeExtension pt;
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final Color iconColor;
+  final Color tileColor;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      key: const ValueKey<String>('care_nutrition_banner'),
-      onTap: () => context.push('/care/nutrition'),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius:
-              BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-          border: Border.all(color: pt.pillarHealth.withAlpha(80)),
-          boxShadow: pt.shadowE1,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: pt.pillarHealth.withAlpha(30),
-                borderRadius: BorderRadius.circular(
-                    PetfolioThemeExtension.radiusMd),
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
+
+    return Material(
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius2xl),
+        side: BorderSide(color: iconColor.withAlpha(60), width: 0.5),
+      ),
+      color: tileColor,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: iconColor.withAlpha(30),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: iconColor, size: 22),
               ),
-              child: Icon(Icons.monitor_weight_outlined,
-                  color: pt.pillarHealth, size: 22),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Smart Nutrition & Weight',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Track weight history · View caloric needs',
-                    style: TextStyle(fontSize: 13, color: pt.ink300),
-                  ),
-                ],
+              const SizedBox(height: 12),
+              Text(
+                label,
+                style: tt.titleSmall!.copyWith(fontWeight: FontWeight.w700),
               ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: pt.ink300),
-          ],
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: tt.bodySmall!.copyWith(color: pt.ink500),
+              ),
+              const SizedBox(height: 8),
+              Icon(Icons.arrow_forward_rounded, size: 16, color: iconColor),
+            ],
+          ),
         ),
       ),
     );
@@ -1590,7 +1511,6 @@ class _NutritionBanner extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-
 // Add / Edit Care Task Sheet
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1715,7 +1635,7 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
 
     return Container(
       decoration: BoxDecoration(
-        color: pt.surface1,
+        color: pt.warmCream,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.fromLTRB(20, 0, 20, math.max(bottom, 24) + 16),
@@ -1741,7 +1661,7 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
                     ? 'Edit care task'
                     : (_isPrefilledCreate ? 'Add to plan' : 'New care task'),
                 style: TextStyle(
-                  fontFamily: 'Sora',
+                  fontFamily: 'Fredoka',
                   fontWeight: FontWeight.w700,
                   fontSize: 18,
                   color: cs.onSurface,
@@ -1844,31 +1764,13 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: dbtask.CareFrequency.values.map((f) {
-                  final selected = f == _frequency;
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
-                    child: GestureDetector(
-                      onTap: () => setState(() => _frequency = f),
-                      child: AnimatedContainer(
-                        duration: PetfolioThemeExtension.durationSm,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-                        decoration: BoxDecoration(
-                          color: selected ? cs.primary : pt.surface2,
-                          borderRadius: BorderRadius.circular(40),
-                          border: Border.all(
-                            color: selected ? Colors.transparent : pt.line200,
-                            width: 0.5,
-                          ),
-                        ),
-                        child: Text(
-                          _freqLabel(f),
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: selected ? Colors.white : pt.ink500,
-                          ),
-                        ),
-                      ),
+                    child: FilterChip(
+                      label: Text(_freqLabel(f)),
+                      selected: f == _frequency,
+                      onSelected: (_) => setState(() => _frequency = f),
+                      showCheckmark: false,
                     ),
                   );
                 }).toList(),
@@ -1967,14 +1869,40 @@ class _SheetLabel extends StatelessWidget {
   final PetfolioThemeExtension pt;
 
   @override
-  Widget build(BuildContext context) => Text(
-        text,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.08 * 12,
-          color: pt.ink500,
-        ),
-      );
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Text(
+      text,
+      style: tt.labelSmall!.copyWith(letterSpacing: 0.96, color: pt.ink500),
+    );
+  }
+}
+
+class _MetaChip extends StatelessWidget {
+  const _MetaChip({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(6, 3, 8, 3),
+      decoration: BoxDecoration(
+        color: pt.surface2,
+        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusPill),
+        border: Border.all(color: pt.line200, width: 0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 11, color: pt.ink500),
+          const SizedBox(width: 3),
+          Text(label, style: tt.labelSmall!.copyWith(color: pt.ink500, fontSize: 11)),
+        ],
+      ),
+    );
+  }
 }
 

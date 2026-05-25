@@ -244,7 +244,7 @@ class _ProductInfo extends StatelessWidget {
         Text(
           product.name,
           style: const TextStyle(
-            fontFamily: 'Sora',
+            fontFamily: 'Fredoka',
             fontWeight: FontWeight.w700,
             fontSize: 22,
             height: 1.2,
@@ -262,7 +262,7 @@ class _ProductInfo extends StatelessWidget {
             Text(
               product.priceFormatted,
               style: const TextStyle(
-                fontFamily: 'Sora',
+                fontFamily: 'Fredoka',
                 fontWeight: FontWeight.w700,
                 fontSize: 22,
                 color: AppColors.ink950,
@@ -360,7 +360,7 @@ class _SubscribeCard extends StatelessWidget {
                         const Text(
                           'Subscribe & Save',
                           style: TextStyle(
-                            fontFamily: 'Sora',
+                            fontFamily: 'Fredoka',
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
                             color: AppColors.ink950,
@@ -497,7 +497,7 @@ class _QuantityStepper extends StatelessWidget {
                     '$quantity',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: 'Fredoka',
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                       color: AppColors.ink950,
@@ -617,7 +617,7 @@ class _OrderSummaryCard extends StatelessWidget {
               const Text(
                 'Total',
                 style: TextStyle(
-                  fontFamily: 'Sora',
+                  fontFamily: 'Fredoka',
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                   color: AppColors.ink950,
@@ -626,7 +626,7 @@ class _OrderSummaryCard extends StatelessWidget {
               Text(
                 '\$${(totalCents / 100).toStringAsFixed(2)}',
                 style: const TextStyle(
-                  fontFamily: 'Sora',
+                  fontFamily: 'Fredoka',
                   fontWeight: FontWeight.w700,
                   fontSize: 22,
                   letterSpacing: -0.22,

@@ -24,19 +24,19 @@ class AuthBrand extends StatelessWidget {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [AppColors.blue400, AppColors.blue600],
+              colors: [AppColors.amber500, AppColors.amber600],
             ),
             borderRadius:
                 BorderRadius.circular(PetfolioThemeExtension.radiusXl),
             boxShadow: [
               BoxShadow(
-                color: AppColors.blue500.withAlpha(80),
+                color: AppColors.amber500.withAlpha(80),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
             ],
           ),
-          child: const Icon(Icons.pets, color: Colors.white, size: 34),
+          child: const Icon(Icons.pets, color: AppColors.warmBlack, size: 34),
         ),
         const SizedBox(height: 16),
         Text(

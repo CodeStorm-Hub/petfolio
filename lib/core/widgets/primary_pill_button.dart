@@ -232,16 +232,16 @@ class _PrimaryPillButtonState extends State<PrimaryPillButton>
   _ButtonColors _resolveColors(bool isDark) {
     return switch (widget.variant) {
       PillButtonVariant.primary => _ButtonColors(
-          background: isDark ? AppColors.blue500D : AppColors.blue500,
-          foreground: Colors.white,
+          background: AppColors.amber500,
+          foreground: AppColors.warmBlack,
         ),
       PillButtonVariant.secondary => _ButtonColors(
-          background: isDark ? AppColors.blue100D : AppColors.blue100,
-          foreground: isDark ? AppColors.blue400D : AppColors.blue700,
+          background: isDark ? AppColors.surface2D : AppColors.cream100,
+          foreground: isDark ? AppColors.amber500 : AppColors.amber700,
         ),
       PillButtonVariant.ghost => _ButtonColors(
           background: Colors.transparent,
-          foreground: isDark ? AppColors.blue500D : AppColors.blue600,
+          foreground: isDark ? AppColors.amber500 : AppColors.amber700,
         ),
       PillButtonVariant.destructive => _ButtonColors(
           background: isDark ? AppColors.dangerD : AppColors.danger,

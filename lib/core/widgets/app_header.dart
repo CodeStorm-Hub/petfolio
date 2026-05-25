@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/pet_avatar.dart';
@@ -221,10 +222,9 @@ class _PetSwitcherTrigger extends StatelessWidget {
                                 pet!.name,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontFamily: 'Sora',
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 19,
+                                style: GoogleFonts.fredoka(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 20,
                                   letterSpacing: -0.2,
                                   color: cs.onSurface,
                                 ),
@@ -304,30 +304,24 @@ class _CircleChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: filled ? AppColors.ink950 : cs.surface,
-          shape: BoxShape.circle,
-          boxShadow: [
-            const BoxShadow(
-              color: AppColors.shadowE1L,
-              blurRadius: 2,
-              offset: Offset(0, 1),
-            ),
-            BoxShadow(
-              color: pt.line200.withAlpha(128),
-              blurRadius: 0,
-              spreadRadius: 0.5,
-            ),
-          ],
+
+    return SizedBox(
+      width: 44,
+      height: 44,
+      child: Material(
+        clipBehavior: Clip.antiAlias,
+        shape: CircleBorder(
+          side: filled
+              ? BorderSide.none
+              : BorderSide(color: pt.line200, width: 0.5),
         ),
-        child: Center(child: child),
+        color: filled ? AppColors.ink950 : AppColors.surface0,
+        elevation: 1,
+        shadowColor: AppColors.shadowE1L,
+        child: InkWell(
+          onTap: onTap,
+          child: Center(child: child),
+        ),
       ),
     );
   }
@@ -349,7 +343,7 @@ class _BadgePill extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.coral500,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: pt.surface1, width: 1.5),
+          border: Border.all(color: pt.warmCream, width: 1.5),
         ),
         alignment: Alignment.center,
         child: Text(
@@ -369,7 +363,7 @@ class _BadgePill extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.coral500,
         shape: BoxShape.circle,
-        border: Border.all(color: pt.surface1, width: 1.5),
+        border: Border.all(color: pt.warmCream, width: 1.5),
       ),
     );
   }

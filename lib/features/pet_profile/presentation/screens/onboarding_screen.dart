@@ -97,7 +97,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       body: AnimatedSwitcher(
         duration: PetfolioThemeExtension.durationMd,
         transitionBuilder: (child, anim) => FadeTransition(
@@ -449,7 +449,7 @@ class _Blob extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            fontFamily: 'Sora',
+            fontFamily: 'Fredoka',
             fontWeight: FontWeight.w700,
             fontSize: size * 0.4,
             color: Colors.white,
@@ -812,7 +812,7 @@ class _CompactSpeciesCard extends StatelessWidget {
               child: Text(
                 species.label,
                 style: TextStyle(
-                  fontFamily: 'Sora',
+                  fontFamily: 'Fredoka',
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                   color: selected ? species.accent : cs.onSurface,
@@ -1367,7 +1367,7 @@ class _ActivityTile extends StatelessWidget {
                   Text(
                     option.label,
                     style: TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: 'Fredoka',
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                       color: selected ? option.accent : cs.onSurface,
@@ -1595,7 +1595,7 @@ class _PhotoStep extends StatelessWidget {
                                       Text(
                                         'Tap to add photo',
                                         style: TextStyle(
-                                          fontFamily: 'Sora',
+                                          fontFamily: 'Fredoka',
                                           fontWeight: FontWeight.w600,
                                           fontSize: 16,
                                           color: species.accent,
@@ -1706,7 +1706,7 @@ class _DoneStep extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           stops: const [0.0, 0.6],
-          colors: [species.tint, pt.surface1],
+          colors: [species.tint, pt.warmCream],
         ),
       ),
       child: SafeArea(
@@ -1749,7 +1749,7 @@ class _DoneStep extends StatelessWidget {
                           style: TextStyle(
                             fontSize: name.isNotEmpty ? 52 : 40,
                             color: Colors.white,
-                            fontFamily: 'Sora',
+                            fontFamily: 'Fredoka',
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -1760,7 +1760,7 @@ class _DoneStep extends StatelessWidget {
               Text(
                 'Hi, ${name.isNotEmpty ? name : 'friend'}.',
                 style: const TextStyle(
-                  fontFamily: 'Sora',
+                  fontFamily: 'Fredoka',
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.64,

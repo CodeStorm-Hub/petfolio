@@ -116,7 +116,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
     // Show a full-screen spinner while the post is loading from the network.
     if (postAsync.isLoading) {
       return Scaffold(
-        backgroundColor: pt.surface1,
+        backgroundColor: pt.warmCream,
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
@@ -136,7 +136,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
 
     if (postAsync.hasError) {
       return Scaffold(
-        backgroundColor: pt.surface1,
+        backgroundColor: pt.warmCream,
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           leading: IconButton(
@@ -152,7 +152,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
     final post = postAsync.value!;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
@@ -587,7 +587,7 @@ class _CommentInputBar extends StatelessWidget {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: pt.surface1,
+                color: pt.warmCream,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: pt.line200),
               ),

@@ -6,13 +6,6 @@ import 'app_colors.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 // PetfolioThemeExtension
 // ─────────────────────────────────────────────────────────────────────────────
-/// Custom ThemeExtension that carries every design-system token not covered
-/// by Material 3's [ColorScheme].
-///
-/// Access inside widgets:
-/// ```dart
-/// final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-/// ```
 @immutable
 class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
   const PetfolioThemeExtension({
@@ -22,6 +15,7 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
     required this.line100,
     required this.surface1,
     required this.surface2,
+    required this.warmCream,
     required this.success,
     required this.warning,
     required this.info,
@@ -41,65 +35,61 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
     required this.shadowGlass,
   });
 
-  // Extended neutral tokens
   final Color ink500;
   final Color ink300;
   final Color line200;
   final Color line100;
 
-  // Surface layers (surface0 lives in ColorScheme.surface)
   final Color surface1;
   final Color surface2;
+  final Color warmCream;
 
-  // Semantic — warning/success/info (danger maps to ColorScheme.error)
   final Color success;
   final Color warning;
   final Color info;
 
-  // §9 Pillar accent colors
-  final Color pillarSocial;   // sunset/500
-  final Color pillarMatch;    // coral/500
-  final Color pillarHealth;   // meadow/500
-  final Color pillarMarket;   // apricot/500
+  final Color pillarSocial;
+  final Color pillarMatch;
+  final Color pillarHealth;
+  final Color pillarMarket;
 
-  // §4.1 Glass tokens
   final Color glassFill;
   final Color glassTopBorder;
   final Color glassRimBorder;
   final Color glassShine;
   final double glassBlurSigma;
 
-  // §4.3 Elevation shadow lists  — consumed directly in BoxDecoration
   final List<BoxShadow> shadowE1;
   final List<BoxShadow> shadowE2;
   final List<BoxShadow> shadowE3;
   final List<BoxShadow> shadowE4;
   final List<BoxShadow> shadowGlass;
 
-  // ── §4.4 Radius scale (static — no theme lerp needed) ────────────────────
+  // ── §4.4 Radius scale ────────────────────────────────────────────────────
   static const double radiusXs   = 6.0;
   static const double radiusSm   = 8.0;
   static const double radiusMd   = 12.0;
   static const double radiusLg   = 16.0;
   static const double radiusXl   = 20.0;
   static const double radius2xl  = 28.0;
+  static const double radius3xl  = 32.0;
   static const double radiusPill = 999.0;
 
-  // ── §8 Motion durations ───────────────────────────────────────────────────
+  // ── §8 Motion durations ──────────────────────────────────────────────────
   static const durationXs = Duration(milliseconds: 80);
   static const durationSm = Duration(milliseconds: 140);
   static const durationMd = Duration(milliseconds: 220);
   static const durationLg = Duration(milliseconds: 320);
   static const durationXl = Duration(milliseconds: 500);
 
-  // ── §5.1 Button heights ───────────────────────────────────────────────────
+  // ── §5.1 Button heights ──────────────────────────────────────────────────
   static const double btnHeightSm   = 36.0;
   static const double btnHeightMd   = 44.0;
-  static const double btnHeightLg   = 52.0; // ★ default primary
+  static const double btnHeightLg   = 52.0;
   static const double btnHeightXl   = 60.0;
   static const double btnHeightWalk = 64.0;
 
-  // ── Pre-built instances ───────────────────────────────────────────────────
+  // ── Pre-built instances ──────────────────────────────────────────────────
   static const PetfolioThemeExtension light = PetfolioThemeExtension(
     ink500: AppColors.ink500,
     ink300: AppColors.ink300,
@@ -107,6 +97,7 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
     line100: AppColors.line100,
     surface1: AppColors.surface1,
     surface2: AppColors.surface2,
+    warmCream: AppColors.cream50,
     success: AppColors.success,
     warning: AppColors.warning,
     info: AppColors.info,
@@ -143,6 +134,7 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
     line100: AppColors.line100D,
     surface1: AppColors.surface1D,
     surface2: AppColors.surface2D,
+    warmCream: AppColors.surface2D,
     success: AppColors.successD,
     warning: AppColors.warningD,
     info: AppColors.infoD,
@@ -181,6 +173,7 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
     Color? line100,
     Color? surface1,
     Color? surface2,
+    Color? warmCream,
     Color? success,
     Color? warning,
     Color? info,
@@ -206,6 +199,7 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
         line100: line100 ?? this.line100,
         surface1: surface1 ?? this.surface1,
         surface2: surface2 ?? this.surface2,
+        warmCream: warmCream ?? this.warmCream,
         success: success ?? this.success,
         warning: warning ?? this.warning,
         info: info ?? this.info,
@@ -235,6 +229,7 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
       line100: Color.lerp(line100, other.line100, t)!,
       surface1: Color.lerp(surface1, other.surface1, t)!,
       surface2: Color.lerp(surface2, other.surface2, t)!,
+      warmCream: Color.lerp(warmCream, other.warmCream, t)!,
       success: Color.lerp(success, other.success, t)!,
       warning: Color.lerp(warning, other.warning, t)!,
       info: Color.lerp(info, other.info, t)!,
@@ -289,18 +284,18 @@ abstract final class AppTheme {
       extensions: [pt],
 
       // ── Scaffold ──────────────────────────────────────────
-      scaffoldBackgroundColor: isDark ? AppColors.surface1D : AppColors.surface1,
+      scaffoldBackgroundColor: isDark ? AppColors.surface1D : AppColors.cream50,
 
       // ── AppBar ────────────────────────────────────────────
       appBarTheme: AppBarTheme(
-        backgroundColor: isDark ? AppColors.surface0D : AppColors.surface0,
+        backgroundColor: isDark ? AppColors.surface0D : AppColors.cream50,
         foregroundColor: isDark ? AppColors.ink950D : AppColors.ink950,
         elevation: 0,
         scrolledUnderElevation: 1,
         surfaceTintColor: Colors.transparent,
         shadowColor: isDark ? AppColors.shadowE1D : AppColors.shadowE1L,
-        titleTextStyle: GoogleFonts.sora(
-          fontSize: 20,
+        titleTextStyle: GoogleFonts.fredoka(
+          fontSize: 22,
           fontWeight: FontWeight.w600,
           color: isDark ? AppColors.ink950D : AppColors.ink950,
           height: 1.2,
@@ -312,8 +307,10 @@ abstract final class AppTheme {
 
       // ── NavigationBar (mobile bottom nav) ─────────────────
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: isDark ? AppColors.surface0D : AppColors.surface0,
-        indicatorColor: isDark ? AppColors.blue100D : AppColors.blue100,
+        backgroundColor: isDark ? AppColors.surface0D : AppColors.cream50,
+        indicatorColor: isDark
+            ? AppColors.amber700.withAlpha(80)
+            : AppColors.cream200,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         labelTextStyle: WidgetStateProperty.all(
@@ -322,7 +319,7 @@ abstract final class AppTheme {
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return IconThemeData(
-              color: isDark ? AppColors.blue500D : AppColors.blue500,
+              color: isDark ? AppColors.amber500 : AppColors.amber700,
             );
           }
           return IconThemeData(
@@ -334,9 +331,11 @@ abstract final class AppTheme {
       // ── NavigationRail (tablet/web) ───────────────────────
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: isDark ? AppColors.surface0D : AppColors.surface0,
-        indicatorColor: isDark ? AppColors.blue100D : AppColors.blue100,
+        indicatorColor: isDark
+            ? AppColors.amber700.withAlpha(80)
+            : AppColors.cream200,
         selectedIconTheme: IconThemeData(
-          color: isDark ? AppColors.blue500D : AppColors.blue500,
+          color: isDark ? AppColors.amber500 : AppColors.amber700,
         ),
         unselectedIconTheme: IconThemeData(
           color: isDark ? AppColors.ink500D : AppColors.ink500,
@@ -346,15 +345,16 @@ abstract final class AppTheme {
       ),
 
       // ── Card ──────────────────────────────────────────────
-      // §4.2 Solid card spec
       cardTheme: CardThemeData(
         color: isDark ? AppColors.surface0D : AppColors.surface0,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius3xl),
           side: BorderSide(
             color: isDark ? AppColors.line200D : AppColors.line200,
+            width: 0.5,
           ),
         ),
       ),
@@ -385,7 +385,7 @@ abstract final class AppTheme {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
           borderSide: BorderSide(
-            color: isDark ? AppColors.blue500D : AppColors.blue500,
+            color: isDark ? AppColors.amber500 : AppColors.amber500,
             width: 2,
           ),
         ),
@@ -398,11 +398,11 @@ abstract final class AppTheme {
 
       // ── Chip ──────────────────────────────────────────────
       chipTheme: ChipThemeData(
-        backgroundColor: isDark ? AppColors.blue100D : AppColors.blue100,
+        backgroundColor: isDark ? AppColors.surface2D : AppColors.cream100,
         labelStyle: GoogleFonts.inter(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: isDark ? AppColors.blue400D : AppColors.blue700,
+          color: isDark ? AppColors.ink950D : AppColors.warmBlack,
         ),
         side: BorderSide.none,
         shape: const StadiumBorder(),
@@ -414,19 +414,18 @@ abstract final class AppTheme {
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.disabled)) {
-              return (isDark ? AppColors.blue500D : AppColors.blue500)
-                  .withAlpha(102); // 40%
+              return AppColors.amber500.withAlpha(102);
             }
-            return isDark ? AppColors.blue500D : AppColors.blue500;
+            return AppColors.amber500;
           }),
-          foregroundColor: WidgetStateProperty.all(Colors.white),
-          minimumSize: const WidgetStatePropertyAll(Size(120, PetfolioThemeExtension.btnHeightLg)),
+          foregroundColor: WidgetStateProperty.all(AppColors.warmBlack),
+          minimumSize: const WidgetStatePropertyAll(
+            Size(120, PetfolioThemeExtension.btnHeightLg),
+          ),
           padding: const WidgetStatePropertyAll(
             EdgeInsets.symmetric(horizontal: 20),
           ),
-          shape: const WidgetStatePropertyAll(
-            StadiumBorder(),
-          ),
+          shape: const WidgetStatePropertyAll(StadiumBorder()),
           textStyle: WidgetStatePropertyAll(
             GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w600),
           ),
@@ -438,12 +437,14 @@ abstract final class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: ButtonStyle(
           foregroundColor: WidgetStateProperty.all(
-            isDark ? AppColors.blue500D : AppColors.blue500,
+            isDark ? AppColors.amber500 : AppColors.amber700,
           ),
           side: WidgetStateProperty.all(
-            BorderSide(color: isDark ? AppColors.blue500D : AppColors.blue500),
+            BorderSide(color: isDark ? AppColors.amber500 : AppColors.amber500),
           ),
-          minimumSize: const WidgetStatePropertyAll(Size(96, PetfolioThemeExtension.btnHeightMd)),
+          minimumSize: const WidgetStatePropertyAll(
+            Size(96, PetfolioThemeExtension.btnHeightMd),
+          ),
           padding: const WidgetStatePropertyAll(
             EdgeInsets.symmetric(horizontal: 16),
           ),
@@ -457,7 +458,7 @@ abstract final class AppTheme {
       // ── NavigationDrawer (expanded/desktop sidebar) ───────
       navigationDrawerTheme: NavigationDrawerThemeData(
         backgroundColor: isDark ? AppColors.surface0D : AppColors.surface0,
-        indicatorColor: isDark ? AppColors.blue100D : AppColors.blue100,
+        indicatorColor: isDark ? AppColors.amber700.withAlpha(80) : AppColors.cream100,
         indicatorShape: const StadiumBorder(),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
@@ -470,14 +471,14 @@ abstract final class AppTheme {
           );
           return base.copyWith(
             color: states.contains(WidgetState.selected)
-                ? (isDark ? AppColors.blue500D : AppColors.blue500)
+                ? (isDark ? AppColors.amber500 : AppColors.amber700)
                 : (isDark ? AppColors.ink700D : AppColors.ink700),
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return IconThemeData(
-              color: isDark ? AppColors.blue500D : AppColors.blue500,
+              color: isDark ? AppColors.amber500 : AppColors.amber700,
             );
           }
           return IconThemeData(
@@ -503,21 +504,20 @@ abstract final class AppTheme {
 
   // ── Color Scheme ───────────────────────────────────────────────────────────
   static ColorScheme _colorScheme(bool isDark) {
-    // Use fromSeed as a safe base, then precisely override every token
     final base = ColorScheme.fromSeed(
-      seedColor: isDark ? AppColors.blue500D : AppColors.blue500,
+      seedColor: AppColors.amber500,
       brightness: isDark ? Brightness.dark : Brightness.light,
     );
     return base.copyWith(
-      primary: isDark ? AppColors.blue500D : AppColors.blue500,
-      onPrimary: Colors.white,
-      primaryContainer: isDark ? AppColors.blue100D : AppColors.blue100,
-      onPrimaryContainer: isDark ? AppColors.blue200D : AppColors.blue700,
+      primary: isDark ? AppColors.amber500 : AppColors.amber500,
+      onPrimary: AppColors.warmBlack,
+      primaryContainer: isDark ? AppColors.amber700.withAlpha(60) : AppColors.cream100,
+      onPrimaryContainer: isDark ? AppColors.amber500 : AppColors.amber700,
       secondary: isDark ? AppColors.sunset500D : AppColors.sunset500,
       onSecondary: Colors.white,
       secondaryContainer: isDark
-          ? const Color(0xFF3D2510) // sunset/100 dark approx
-          : const Color(0xFFFEEBD7), // sunset/100 light approx
+          ? const Color(0xFF3D2510)
+          : const Color(0xFFFEEBD7),
       onSecondaryContainer: isDark
           ? AppColors.sunset500D
           : const Color(0xFF7A4B20),
@@ -538,10 +538,10 @@ abstract final class AppTheme {
       surface: isDark ? AppColors.surface0D : AppColors.surface0,
       onSurface: isDark ? AppColors.ink950D : AppColors.ink950,
       surfaceContainerLowest: isDark ? AppColors.surface0D : AppColors.surface0,
-      surfaceContainerLow: isDark ? AppColors.surface1D : AppColors.surface1,
-      surfaceContainer: isDark ? AppColors.surface1D : AppColors.surface1,
-      surfaceContainerHigh: isDark ? AppColors.surface2D : AppColors.surface2,
-      surfaceContainerHighest: isDark ? AppColors.surface2D : AppColors.surface2,
+      surfaceContainerLow: isDark ? AppColors.surface1D : AppColors.cream50,
+      surfaceContainer: isDark ? AppColors.surface1D : AppColors.cream50,
+      surfaceContainerHigh: isDark ? AppColors.surface2D : AppColors.cream100,
+      surfaceContainerHighest: isDark ? AppColors.surface2D : AppColors.cream200,
       onSurfaceVariant: isDark ? AppColors.ink700D : AppColors.ink700,
       outline: isDark ? AppColors.line200D : AppColors.line200,
       outlineVariant: isDark ? AppColors.line100D : AppColors.line100,
@@ -549,74 +549,71 @@ abstract final class AppTheme {
       scrim: const Color(0x59000000),
       inverseSurface: isDark ? AppColors.surface0 : AppColors.ink950,
       onInverseSurface: isDark ? AppColors.ink950 : AppColors.surface0,
-      inversePrimary: isDark ? AppColors.blue500 : AppColors.blue200,
+      inversePrimary: isDark ? AppColors.amber500 : AppColors.cream200,
     );
   }
 
   // ── Text Theme — §3.2 Adaptive Type Scale ─────────────────────────────────
-  // Sora → display, headline, title roles  (Display & UI)
-  // Inter → body, label roles              (Body & Numerics)
-  //
-  // letterSpacing = tracking% / 100 × fontSize  (converted to logical pixels)
+  // Fredoka → display, headline, titleLarge roles  (warm display & UI)
+  // Inter   → body, label, title roles             (Body & Numerics)
   static TextTheme _textTheme(bool isDark) {
     final headColor = isDark ? AppColors.ink950D : AppColors.ink950;
     final bodyColor = isDark ? AppColors.ink700D : AppColors.ink700;
 
     return TextTheme(
-      // Display XL — 36sp / 700 / −1.5 % tracking
-      displayLarge: GoogleFonts.sora(
+      // Display XL — 36sp / 600
+      displayLarge: GoogleFonts.fredoka(
         fontSize: 36,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         height: 1.05,
         letterSpacing: -0.54,
         color: headColor,
       ),
-      // Display — 30sp / 700 / −1 % tracking
-      displayMedium: GoogleFonts.sora(
+      // Display — 30sp / 600
+      displayMedium: GoogleFonts.fredoka(
         fontSize: 30,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         height: 1.08,
         letterSpacing: -0.30,
         color: headColor,
       ),
-      // Headline — 24sp / 600 / −0.5 % tracking
-      displaySmall: GoogleFonts.sora(
+      // Headline — 24sp / 500
+      displaySmall: GoogleFonts.fredoka(
         fontSize: 24,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w500,
         height: 1.15,
         letterSpacing: -0.12,
         color: headColor,
       ),
-      headlineLarge: GoogleFonts.sora(
+      headlineLarge: GoogleFonts.fredoka(
         fontSize: 24,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w500,
         height: 1.15,
         letterSpacing: -0.12,
         color: headColor,
       ),
-      // Title — 20sp / 600 / 0 tracking
-      headlineMedium: GoogleFonts.sora(
+      headlineMedium: GoogleFonts.fredoka(
         fontSize: 20,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w500,
         height: 1.2,
         letterSpacing: 0,
         color: headColor,
       ),
-      headlineSmall: GoogleFonts.sora(
+      headlineSmall: GoogleFonts.fredoka(
         fontSize: 18,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w500,
         height: 1.2,
         letterSpacing: 0,
         color: headColor,
       ),
-      titleLarge: GoogleFonts.sora(
+      titleLarge: GoogleFonts.fredoka(
         fontSize: 20,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w500,
         height: 1.2,
         letterSpacing: 0,
         color: headColor,
       ),
-      // Body L — 17sp / 400 / 0 (Inter)
+      // Body L — 17sp / 500 (Inter)
       titleMedium: GoogleFonts.inter(
         fontSize: 17,
         fontWeight: FontWeight.w500,
@@ -624,7 +621,7 @@ abstract final class AppTheme {
         letterSpacing: 0,
         color: bodyColor,
       ),
-      // Body — 16sp / 400 / 0 (Inter)
+      // Body — 16sp / 500 (Inter)
       titleSmall: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w500,
@@ -639,7 +636,6 @@ abstract final class AppTheme {
         letterSpacing: 0,
         color: bodyColor,
       ),
-      // Body — 16sp / 400 — floor: 15sp (enforced by OS/dynamic type)
       bodyMedium: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w400,
@@ -647,7 +643,6 @@ abstract final class AppTheme {
         letterSpacing: 0,
         color: bodyColor,
       ),
-      // Body S — 14sp / 400 / +0.5 % tracking
       bodySmall: GoogleFonts.inter(
         fontSize: 14,
         fontWeight: FontWeight.w400,
@@ -655,7 +650,7 @@ abstract final class AppTheme {
         letterSpacing: 0.07,
         color: bodyColor,
       ),
-      // Caption — 12sp / 500 / +1.5 % tracking
+      // Caption — 12sp / 500
       labelLarge: GoogleFonts.inter(
         fontSize: 12,
         fontWeight: FontWeight.w500,
@@ -670,7 +665,7 @@ abstract final class AppTheme {
         letterSpacing: 0.18,
         color: isDark ? AppColors.ink500D : AppColors.ink500,
       ),
-      // Overline — 11sp / 600 / +8 % tracking
+      // Overline — 11sp / 600
       labelSmall: GoogleFonts.inter(
         fontSize: 11,
         fontWeight: FontWeight.w600,

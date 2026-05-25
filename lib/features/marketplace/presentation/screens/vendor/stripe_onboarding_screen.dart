@@ -81,7 +81,7 @@ class _StripeOnboardingScreenState extends ConsumerState<StripeOnboardingScreen>
               const Text(
                 'Stripe setup',
                 style: TextStyle(
-                  fontFamily: 'Sora',
+                  fontFamily: 'Fredoka',
                   fontWeight: FontWeight.w700,
                   fontSize: 22,
                   color: AppColors.ink950,

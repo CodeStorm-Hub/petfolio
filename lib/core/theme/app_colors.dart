@@ -97,6 +97,22 @@ abstract final class AppColors {
   // 0.04 × 255 ≈ 10 = 0x0A
   static const glassShineD  = Color(0x0AFFFFFF);
 
+  // ── §2.5  Warm amber primary ramp ─────────────────────────────────────────
+  static const amber500    = Color(0xFFFEB447); // ★ New primary brand
+  static const amber600    = Color(0xFFF0A030); // Pressed / active state
+  static const amber700    = Color(0xFFD08820); // Dark amber / on-amber text anchor
+
+  // ── §2.6  Warm cream background ramp ──────────────────────────────────────
+  static const cream50     = Color(0xFFFFF2E0); // App background (light)
+  static const cream100    = Color(0xFFFFE8C8); // Inset wells / chips
+  static const cream200    = Color(0xFFFFD8A8); // Hover tint / indicator
+
+  // ── §2.7  Accent pops ─────────────────────────────────────────────────────
+  static const pink300     = Color(0xFFFBBABE); // Baby pink — Pass/discard
+  static const lavender400 = Color(0xFFC8B4E3); // Lavender — Discovery pillar
+  static const teal400     = Color(0xFFA8D8D8); // Sage teal — Health pillar
+  static const warmBlack   = Color(0xFF1F1F1F); // Primary text on amber surfaces
+
   // ── §4.3  Shadow base tints ───────────────────────────────────────────────
   static const shadowInk = Color(0xFF0B1220); // light-mode shadow tint
   // e1 light  rgba(11,18,32,0.04) → α=10=0x0A

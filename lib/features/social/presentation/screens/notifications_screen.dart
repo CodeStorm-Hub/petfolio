@@ -40,7 +40,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final notificationsAsync = ref.watch(notificationsProvider);
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
@@ -54,7 +54,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         ),
         title: Text(
           'Activity',
-          style: GoogleFonts.sora(
+          style: GoogleFonts.fredoka(
             fontWeight: FontWeight.w700,
             fontSize: 16,
             color: Theme.of(context).colorScheme.onSurface,
@@ -110,7 +110,7 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No activity yet',
-            style: GoogleFonts.sora(
+            style: GoogleFonts.fredoka(
               fontSize: 18,
               fontWeight: FontWeight.w700,
               color: Theme.of(context).colorScheme.onSurface,
@@ -186,7 +186,7 @@ class _NotificationTile extends StatelessWidget {
       case 'follow':
         return AppColors.meadow500;
       case 'comment':
-        return AppColors.blue500;
+        return AppColors.teal400;
       default:
         return AppColors.ink500;
     }

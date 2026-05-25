@@ -24,7 +24,7 @@ class MatchesInboxScreen extends ConsumerWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final petsAsync = ref.watch(petListProvider);
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       body: Center(
         child: petsAsync.when(
           skipLoadingOnReload: true,
@@ -61,7 +61,7 @@ class _MatchesInboxView extends ConsumerWidget {
     final inboxAsync = ref.watch(matchesInboxControllerProvider(pet.id));
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -197,7 +197,7 @@ class _SectionTitle extends StatelessWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Text(
       label,
-      style: GoogleFonts.sora(
+      style: GoogleFonts.fredoka(
         fontSize: 18,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.2,
@@ -298,7 +298,7 @@ class _ConversationTile extends StatelessWidget {
                             item.otherPetName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.sora(
+                            style: GoogleFonts.fredoka(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),

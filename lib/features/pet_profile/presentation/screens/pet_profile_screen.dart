@@ -21,13 +21,7 @@ import '../../data/models/pet_gender.dart';
 import '../controllers/active_pet_controller.dart';
 import '../controllers/pet_list_controller.dart';
 import '../widgets/pet_switcher_sheet.dart';
-// AppHeader (shell-wide top bar) is exported from core widgets.
-// Pet switcher sheet is wired locally so the core widget stays feature-free.
 
-/// The main "Home" tab — shows the active pet header and daily summary.
-///
-/// All content is keyed on [activePetControllerProvider] so switching pets
-/// via the switcher sheet instantly re-renders this screen.
 class PetProfileScreen extends ConsumerWidget {
   const PetProfileScreen({super.key});
 
@@ -38,12 +32,11 @@ class PetProfileScreen extends ConsumerWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       body: SafeArea(
-        bottom: false, // Prevents duplicate padding above the navigation bar
+        bottom: false,
         child: CustomScrollView(
           slivers: [
-            // ── Unified shell header ──────────────────────────────────
             SliverToBoxAdapter(
               child: AppHeader(
                 eyebrow: 'Active pet',
@@ -65,53 +58,26 @@ class PetProfileScreen extends ConsumerWidget {
                 ],
               ),
             ),
-
-            // ── Body ───────────────────────────────────────────────────
             if (activePet == null)
-              // Loading / error / no-pets state
               SliverFillRemaining(
                 child: petsAsync.when(
                   skipLoadingOnReload: true,
                   loading: () =>
                       const Center(child: CircularProgressIndicator.adaptive()),
                   error: (e, _) => Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.wifi_off_rounded,
-                              size: 48, color: pt.ink300),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Could not load pets',
-                            style: const TextStyle(
-                              fontFamily: 'Sora',
-                              fontWeight: FontWeight.w600,
-                              fontSize: 17,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Check your connection and try again.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 13, color: pt.ink500),
-                          ),
-                          const SizedBox(height: 24),
-                          FilledButton.icon(
-                            onPressed: () =>
-                                ref.invalidate(petListProvider),
-                            icon: const Icon(Icons.refresh_rounded, size: 16),
-                            label: const Text('Retry'),
-                          ),
-                        ],
+                    child: PetfolioEmptyState(
+                      icon: Icons.wifi_off_rounded,
+                      title: 'Could not load pets',
+                      subtitle: 'Check your connection and try again.',
+                      action: FilledButton.icon(
+                        onPressed: () => ref.invalidate(petListProvider),
+                        icon: const Icon(Icons.refresh_rounded, size: 16),
+                        label: const Text('Retry'),
                       ),
                     ),
                   ),
                   data: (pets) => pets.isEmpty
-                      ? _EmptyPetsState(pt: pt)
-                      // Pets loaded but ActivePetController is still restoring
-                      // the saved selection from SharedPreferences — brief shimmer.
+                      ? const _EmptyPetsState()
                       : const Center(child: CircularProgressIndicator.adaptive()),
                 ),
               )
@@ -152,7 +118,7 @@ class PetProfileScreen extends ConsumerWidget {
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                            child: _SellerDashboardCard(pt: pt),
+                            child: _SellerDashboardCard(),
                           ),
                         ),
                         const SliverToBoxAdapter(child: SizedBox(height: 16)),
@@ -163,7 +129,7 @@ class PetProfileScreen extends ConsumerWidget {
                           sliver: SliverPersistentHeader(
                             pinned: true,
                             delegate: _PetProfileTabBarDelegate(
-                              backgroundColor: pt.surface1,
+                              backgroundColor: pt.warmCream,
                               tabBar: TabBar(
                                 labelColor: cs.primary,
                                 unselectedLabelColor: pt.ink500,
@@ -171,10 +137,7 @@ class PetProfileScreen extends ConsumerWidget {
                                 labelStyle: Theme.of(context)
                                     .textTheme
                                     .labelMedium!
-                                    .copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 13,
-                                    ),
+                                    .copyWith(fontWeight: FontWeight.w600, fontSize: 13),
                                 unselectedLabelStyle: Theme.of(context)
                                     .textTheme
                                     .labelMedium!
@@ -193,10 +156,10 @@ class PetProfileScreen extends ConsumerWidget {
                     },
                     body: TabBarView(
                       children: [
-                        _ProfileOverviewTab(pet: activePet, pt: pt),
-                        _ProfileHealthTab(pt: pt),
-                        _ProfileCareTab(pt: pt),
-                        _ProfileAwardsTab(pt: pt, petId: activePet.id),
+                        _ProfileOverviewTab(pet: activePet),
+                        const _ProfileHealthTab(),
+                        const _ProfileCareTab(),
+                        _ProfileAwardsTab(petId: activePet.id),
                       ],
                     ),
                   ),
@@ -209,15 +172,16 @@ class PetProfileScreen extends ConsumerWidget {
   }
 }
 
-class _SellerDashboardCard extends ConsumerWidget {
-  const _SellerDashboardCard({required this.pt});
+// ── Seller dashboard card ─────────────────────────────────────────────────────
 
-  final PetfolioThemeExtension pt;
+class _SellerDashboardCard extends ConsumerWidget {
+  const _SellerDashboardCard();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final shopAsync = ref.watch(myShopProvider);
-    final cs = Theme.of(context).colorScheme;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
 
     final shop = shopAsync.value;
     final destination = (shop == null) ? '/seller/setup' : '/seller';
@@ -239,56 +203,44 @@ class _SellerDashboardCard extends ConsumerWidget {
     return Semantics(
       button: true,
       label: 'Seller Dashboard. $subtitle',
-      child: GestureDetector(
-        onTap: () => context.push(destination),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-          decoration: BoxDecoration(
-            color: cs.surface,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: pt.line200, width: 0.5),
-            boxShadow: const [
-              BoxShadow(
-                color: AppColors.shadowE1L,
-                blurRadius: 2,
-                offset: Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.meadow500.withAlpha(34),
-                  borderRadius: BorderRadius.circular(12),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => context.push(destination),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.meadow500.withAlpha(34),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.storefront_rounded,
+                      color: AppColors.meadow500, size: 22),
                 ),
-                child: const Icon(Icons.storefront_rounded,
-                    color: AppColors.meadow500, size: 22),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Seller Dashboard',
-                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                            fontFamily: 'Sora',
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: TextStyle(fontSize: 13, color: pt.ink500),
-                    ),
-                  ],
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Seller Dashboard',
+                        style: tt.titleSmall!.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: tt.bodySmall!.copyWith(color: pt.ink500),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: pt.ink300, size: 22),
-            ],
+                Icon(Icons.chevron_right_rounded, color: pt.ink300, size: 22),
+              ],
+            ),
           ),
         ),
       ),
@@ -296,99 +248,126 @@ class _SellerDashboardCard extends ConsumerWidget {
   }
 }
 
+// ── Pet stats row ─────────────────────────────────────────────────────────────
+
 class _PetStatsRow extends StatelessWidget {
   const _PetStatsRow({required this.pet});
 
   final Pet pet;
 
+  static const _tileColors = [
+    Color(0xFFFFF2E0), // cream — Breed
+    Color(0xFFFEB447), // amber — Age
+    AppColors.teal400,  // teal — Weight
+    AppColors.lavender400, // lavender — Sex
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
     final breed =
         (pet.breed != null && pet.breed!.trim().isNotEmpty) ? pet.breed! : '—';
+    final stats = [
+      (label: 'Breed', value: breed, icon: Icons.pets_rounded),
+      (label: 'Age', value: _petAgeLabel(pet), icon: Icons.cake_outlined),
+      (
+        label: 'Weight',
+        value: pet.weightKg != null
+            ? '${pet.weightKg!.toStringAsFixed(pet.weightKg! >= 10 ? 0 : 1)} kg'
+            : '—',
+        icon: Icons.monitor_weight_outlined,
+      ),
+      (
+        label: 'Sex',
+        value: pet.gender == PetGender.unknown ? '—' : pet.gender.label,
+        icon: Icons.transgender_rounded,
+      ),
+    ];
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: pt.line200, width: 0.5),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.shadowE1L,
-            blurRadius: 2,
-            offset: Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
+    return Row(
+      children: [
+        for (var i = 0; i < stats.length; i++) ...[
+          if (i > 0) const SizedBox(width: 8),
           Expanded(
-            child: _StatChip(label: 'Breed', value: breed),
-          ),
-          Expanded(
-            child: _StatChip(label: 'Age', value: _petAgeLabel(pet)),
-          ),
-          Expanded(
-            child: _StatChip(
-              label: 'Weight',
-              value: pet.weightKg != null
-                  ? '${pet.weightKg!.toStringAsFixed(pet.weightKg! >= 10 ? 0 : 1)} kg'
-                  : '—',
-            ),
-          ),
-          Expanded(
-            child: _StatChip(
-              label: 'Sex',
-              value: pet.gender == PetGender.unknown ? '—' : pet.gender.label,
+            child: _BentoStatTile(
+              label: stats[i].label,
+              value: stats[i].value,
+              icon: stats[i].icon,
+              color: _tileColors[i],
             ),
           ),
         ],
-      ),
+      ],
     );
   }
 }
 
-class _StatChip extends StatelessWidget {
-  const _StatChip({required this.label, required this.value});
+class _BentoStatTile extends StatelessWidget {
+  const _BentoStatTile({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
 
   final String label;
   final String value;
+  final IconData icon;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label.toUpperCase(),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.06 * 10,
-              color: pt.ink500,
+    final tt = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark
+        ? AppColors.ink950D
+        : color.computeLuminance() > 0.6
+            ? AppColors.warmBlack
+            : AppColors.surface0;
+
+    return Material(
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius2xl),
+        side: BorderSide(color: pt.line200, width: 0.5),
+      ),
+      color: isDark ? pt.surface2 : color,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isDark ? pt.ink500 : textColor.withAlpha(180),
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontFamily: 'Sora',
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
-              height: 1.15,
+            const SizedBox(height: 6),
+            Text(
+              value,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: tt.titleSmall!.copyWith(
+                fontWeight: FontWeight.w700,
+                height: 1.15,
+                fontSize: 13,
+                color: isDark ? AppColors.ink950D : textColor,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 3),
+            Text(
+              label.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: tt.labelSmall!.copyWith(
+                letterSpacing: 0.5,
+                fontSize: 9,
+                color: isDark ? pt.ink500 : textColor.withAlpha(160),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -448,22 +427,20 @@ class _PetProfileTabBarDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
+// ── Overview tab ──────────────────────────────────────────────────────────────
+
 class _ProfileOverviewTab extends ConsumerWidget {
-  const _ProfileOverviewTab({
-    required this.pet,
-    required this.pt,
-  });
+  const _ProfileOverviewTab({required this.pet});
 
   final Pet pet;
-  final PetfolioThemeExtension pt;
 
   static IconData _iconForType(MedicalRecordType type) => switch (type) {
-    MedicalRecordType.vaccine           => Icons.vaccines_rounded,
-    MedicalRecordType.medication        => Icons.medication_outlined,
-    MedicalRecordType.allergy           => Icons.warning_amber_outlined,
-    MedicalRecordType.surgery           => Icons.local_hospital_outlined,
+    MedicalRecordType.vaccine            => Icons.vaccines_rounded,
+    MedicalRecordType.medication         => Icons.medication_outlined,
+    MedicalRecordType.allergy            => Icons.warning_amber_outlined,
+    MedicalRecordType.surgery            => Icons.local_hospital_outlined,
     MedicalRecordType.parasitePrevention => Icons.bug_report_outlined,
-    MedicalRecordType.other             => Icons.medical_services_outlined,
+    MedicalRecordType.other              => Icons.medical_services_outlined,
   };
 
   static String _dueDateLabel(MedicalRecord r) {
@@ -480,8 +457,9 @@ class _ProfileOverviewTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
     final recordsAsync = ref.watch(healthVaultControllerProvider);
-    final cs = Theme.of(context).colorScheme;
 
     return Builder(
       builder: (context) {
@@ -499,24 +477,22 @@ class _ProfileOverviewTab extends ConsumerWidget {
                   const SizedBox(height: 12),
                   ...recordsAsync.when(
                     loading: () => [
-                      _ProfileRowSkeleton(pt: pt),
+                      const _ProfileRowSkeleton(),
                       const SizedBox(height: 10),
-                      _ProfileRowSkeleton(pt: pt),
+                      const _ProfileRowSkeleton(),
                     ],
                     error: (e, st) => [
-                      _ProfileTabEmptyMessage(
+                      PetfolioEmptyState(
                         icon: Icons.cloud_off_rounded,
-                        label: 'Could not load care records',
-                        pt: pt,
+                        title: 'Could not load care records',
                       ),
                     ],
                     data: (records) {
                       if (records.isEmpty) {
                         return [
-                          _ProfileTabEmptyMessage(
+                          const PetfolioEmptyState(
                             icon: Icons.medical_services_outlined,
-                            label: 'No upcoming care records',
-                            pt: pt,
+                            title: 'No upcoming care records',
                           ),
                         ];
                       }
@@ -537,50 +513,47 @@ class _ProfileOverviewTab extends ConsumerWidget {
                   const SizedBox(height: 20),
                   _SectionLabel(label: 'Social'),
                   const SizedBox(height: 12),
-                  GestureDetector(
-                    onTap: () => context.push('/social/profile/${pet.id}'),
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-                      decoration: BoxDecoration(
-                        color: cs.surface,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: pt.line200, width: 0.5),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: AppColors.mulberry500.withAlpha(30),
-                              borderRadius: BorderRadius.circular(12),
+                  Card(
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () => context.push('/social/profile/${pet.id}'),
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: AppColors.mulberry500.withAlpha(30),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(Icons.dynamic_feed_rounded,
+                                  color: AppColors.mulberry500, size: 22),
                             ),
-                            child: const Icon(Icons.dynamic_feed_rounded,
-                                color: AppColors.mulberry500, size: 22),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'View Social Profile',
-                                  style: TextStyle(
-                                    fontFamily: 'Sora',
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 15,
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'View Social Profile',
+                                    style: tt.titleSmall!.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Posts, likes, and activity for ${pet.name}',
-                                  style: TextStyle(fontSize: 13, color: pt.ink500),
-                                ),
-                              ],
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Posts, likes, and activity for ${pet.name}',
+                                    style: tt.bodySmall!.copyWith(color: pt.ink500),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          Icon(Icons.chevron_right_rounded, color: pt.ink300, size: 22),
-                        ],
+                            Icon(Icons.chevron_right_rounded,
+                                color: pt.ink300, size: 22),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -621,6 +594,9 @@ class _HeroCard extends ConsumerWidget {
             ?.any((t) => t.taskType == CareTaskType.walk && !t.isCompleted) ==
         true;
 
+    final doneTasks = todayTasks.value?.where((t) => t.isCompleted).length ?? 0;
+    final totalTasks = todayTasks.value?.length ?? 0;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
       decoration: BoxDecoration(
@@ -658,35 +634,75 @@ class _HeroCard extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'HEALTH STREAK',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.1 * 12,
-                      color: Colors.white.withAlpha(230),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'HEALTH STREAK',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.1 * 12,
+                            color: Colors.white.withAlpha(230),
+                          ),
+                        ),
+                        if (walkDue) ...[
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withAlpha(46),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              'Walk due',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.06 * 11,
+                                color: Colors.white.withAlpha(220),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
-                  if (walkDue)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(46),
-                        borderRadius: BorderRadius.circular(999),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      PetAvatar(
+                        imageUrl: pet.avatarUrl,
+                        size: PetAvatarSize.xl,
+                        initials: pet.name.isNotEmpty ? pet.name[0] : null,
+                        borderColor: Colors.white.withAlpha(180),
+                        semanticLabel: pet.name,
                       ),
-                      child: Text(
-                        'Walk due',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.06 * 11,
-                          color: Colors.white.withAlpha(220),
+                      if (totalTasks > 0) ...[
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(46),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            '$doneTasks/$totalTasks done',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white.withAlpha(220),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      ],
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 14),
@@ -700,7 +716,7 @@ class _HeroCard extends ConsumerWidget {
                     Text(
                       streakLabel,
                       style: const TextStyle(
-                        fontFamily: 'Sora',
+                        fontFamily: 'Fredoka',
                         fontSize: 56,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -1.5,
@@ -770,12 +786,11 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
     return Text(
       label.toUpperCase(),
-      style: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.08 * 12,
+      style: tt.labelSmall!.copyWith(
+        letterSpacing: 0.96,
         color: pt.ink500,
       ),
     );
@@ -800,73 +815,51 @@ class _ReminderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: pt.line200, width: 0.5),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowE1L,
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: accentColor.withAlpha(34),
-              borderRadius: BorderRadius.circular(12),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: accentColor.withAlpha(34),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: accentColor, size: 22),
             ),
-            child: Icon(icon, color: accentColor, size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontFamily: 'Sora',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: tt.titleSmall!.copyWith(fontWeight: FontWeight.w600),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: TextStyle(fontSize: 13, color: pt.ink500),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            height: 36,
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            decoration: BoxDecoration(
-              color: pt.surface2,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              'Mark done',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-                color: cs.onSurface,
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: tt.bodySmall!.copyWith(color: pt.ink500),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 8),
+            FilledButton.tonal(
+              onPressed: () {},
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                minimumSize: const Size(0, 36),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text('Mark done'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -875,8 +868,7 @@ class _ReminderCard extends StatelessWidget {
 // ── Profile Care Tab ──────────────────────────────────────────────────────────
 
 class _ProfileCareTab extends ConsumerWidget {
-  const _ProfileCareTab({required this.pt});
-  final PetfolioThemeExtension pt;
+  const _ProfileCareTab();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -898,13 +890,12 @@ class _ProfileCareTab extends ConsumerWidget {
                 todayTasks.when(
                   loading: () => List.generate(
                     3,
-                    (_) => _ProfileRowSkeleton(pt: pt),
+                    (_) => const _ProfileRowSkeleton(),
                   ),
                   error: (e, _) => [
-                    _ProfileTabEmptyMessage(
+                    PetfolioEmptyState(
                       icon: Icons.cloud_off_rounded,
-                      label: 'Could not load tasks',
-                      pt: pt,
+                      title: 'Could not load tasks',
                       action: TextButton.icon(
                         onPressed: () =>
                             ref.read(careDashboardProvider.notifier).refresh(),
@@ -915,15 +906,12 @@ class _ProfileCareTab extends ConsumerWidget {
                   ],
                   data: (tasks) => tasks.isEmpty
                       ? [
-                          _ProfileTabEmptyMessage(
+                          const PetfolioEmptyState(
                             icon: Icons.check_circle_outline_rounded,
-                            label: 'No tasks for today',
-                            pt: pt,
+                            title: 'No tasks for today',
                           ),
                         ]
-                      : tasks
-                          .map((t) => _CareTaskRow(task: t, pt: pt))
-                          .toList(),
+                      : tasks.map((t) => _CareTaskRow(task: t)).toList(),
                 ),
               ),
             ),
@@ -1006,9 +994,8 @@ const _badgeCatalog = [
 ];
 
 class _ProfileAwardsTab extends ConsumerWidget {
-  const _ProfileAwardsTab({required this.pt, required this.petId});
+  const _ProfileAwardsTab({required this.petId});
 
-  final PetfolioThemeExtension pt;
   final String petId;
 
   @override
@@ -1023,21 +1010,14 @@ class _ProfileAwardsTab extends ConsumerWidget {
             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(ctx),
           ),
           awardsAsync.when(
-            loading: () => SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  _AwardsStatsSkeleton(pt: pt),
-                  const SizedBox(height: 20),
-                  ...List.generate(2, (_) => _ProfileRowSkeleton(pt: pt)),
-                ]),
-              ),
+            loading: () => const SliverPadding(
+              padding: EdgeInsets.fromLTRB(20, 12, 20, 100),
+              sliver: SliverToBoxAdapter(child: _AwardsStatsSkeleton()),
             ),
             error: (e, _) => SliverFillRemaining(
-              child: _ProfileTabEmptyMessage(
+              child: PetfolioEmptyState(
                 icon: Icons.cloud_off_rounded,
-                label: 'Could not load awards',
-                pt: pt,
+                title: 'Could not load awards',
                 action: TextButton.icon(
                   onPressed: () => ref.invalidate(petAwardsSummaryProvider(petId)),
                   icon: const Icon(Icons.refresh_rounded, size: 16),
@@ -1049,18 +1029,17 @@ class _ProfileAwardsTab extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _AwardsStatsRow(summary: summary, pt: pt),
+                  _AwardsStatsRow(summary: summary),
                   const SizedBox(height: 24),
-                  _SectionLabel(label: 'Badges'),
+                  const _SectionLabel(label: 'Badges'),
                   const SizedBox(height: 12),
                   _BadgeGrid(
                     unlockedTypes: summary.unlockedTypes,
                     unlockedBadges: summary.unlockedBadges,
-                    pt: pt,
                   ),
                   if (summary.logsCount > 0) ...[
                     const SizedBox(height: 20),
-                    _XpProgressCard(summary: summary, pt: pt),
+                    _XpProgressCard(summary: summary),
                   ],
                 ]),
               ),
@@ -1073,10 +1052,9 @@ class _ProfileAwardsTab extends ConsumerWidget {
 }
 
 class _AwardsStatsRow extends StatelessWidget {
-  const _AwardsStatsRow({required this.summary, required this.pt});
+  const _AwardsStatsRow({required this.summary});
 
   final PetAwardsSummary summary;
-  final PetfolioThemeExtension pt;
 
   @override
   Widget build(BuildContext context) {
@@ -1094,7 +1072,6 @@ class _AwardsStatsRow extends StatelessWidget {
           label: 'Current Streak',
           value: '${summary.currentStreak}',
           unit: 'days',
-          pt: pt,
         ),
         _AwardsStatCard(
           icon: Icons.emoji_events_rounded,
@@ -1102,7 +1079,6 @@ class _AwardsStatsRow extends StatelessWidget {
           label: 'Best Streak',
           value: '${summary.bestStreak}',
           unit: 'days',
-          pt: pt,
         ),
         _AwardsStatCard(
           icon: Icons.bolt_rounded,
@@ -1110,7 +1086,6 @@ class _AwardsStatsRow extends StatelessWidget {
           label: 'Total XP',
           value: _formatXp(summary.totalXp),
           unit: 'points',
-          pt: pt,
         ),
         _AwardsStatCard(
           icon: Icons.military_tech_rounded,
@@ -1118,7 +1093,6 @@ class _AwardsStatsRow extends StatelessWidget {
           label: 'Badges',
           value: '${summary.unlockedBadges.length}',
           unit: 'of ${_badgeCatalog.length}',
-          pt: pt,
         ),
       ],
     );
@@ -1137,7 +1111,6 @@ class _AwardsStatCard extends StatelessWidget {
     required this.label,
     required this.value,
     required this.unit,
-    required this.pt,
   });
 
   final IconData icon;
@@ -1145,69 +1118,65 @@ class _AwardsStatCard extends StatelessWidget {
   final String label;
   final String value;
   final String unit;
-  final PetfolioThemeExtension pt;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: cs.surface,
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
+    return Card(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: pt.line200, width: 0.5),
-        boxShadow: const [
-          BoxShadow(color: AppColors.shadowE1L, blurRadius: 2, offset: Offset(0, 1)),
-        ],
+        side: BorderSide(color: pt.line200, width: 0.5),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: iconColor.withAlpha(26),
-              borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: iconColor.withAlpha(26),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: iconColor, size: 18),
             ),
-            child: Icon(icon, color: iconColor, size: 18),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(fontSize: 10, color: pt.ink500, fontWeight: FontWeight.w500),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      value,
-                      style: const TextStyle(
-                        fontFamily: 'Sora',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18,
-                        height: 1,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    label,
+                    style: tt.labelSmall!.copyWith(color: pt.ink500),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        value,
+                        style: tt.titleLarge!.copyWith(
+                          fontWeight: FontWeight.w700,
+                          height: 1,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 3),
-                    Text(
-                      unit,
-                      style: TextStyle(fontSize: 10, color: pt.ink500),
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(width: 3),
+                      Text(
+                        unit,
+                        style: tt.labelSmall!.copyWith(color: pt.ink500),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1217,12 +1186,10 @@ class _BadgeGrid extends StatelessWidget {
   const _BadgeGrid({
     required this.unlockedTypes,
     required this.unlockedBadges,
-    required this.pt,
   });
 
   final Set<String> unlockedTypes;
   final List<UnlockedBadge> unlockedBadges;
-  final PetfolioThemeExtension pt;
 
   @override
   Widget build(BuildContext context) {
@@ -1243,7 +1210,6 @@ class _BadgeGrid extends StatelessWidget {
           def: def,
           unlocked: unlocked,
           unlockedAt: unlockedAt,
-          pt: pt,
         );
       }).toList(),
     );
@@ -1255,13 +1221,11 @@ class _BadgeCard extends StatelessWidget {
     required this.def,
     required this.unlocked,
     this.unlockedAt,
-    required this.pt,
   });
 
   final _BadgeDef def;
   final bool unlocked;
   final DateTime? unlockedAt;
-  final PetfolioThemeExtension pt;
 
   String _formatDate(DateTime dt) {
     const months = [
@@ -1273,20 +1237,21 @@ class _BadgeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
     final iconColor = unlocked ? def.color : pt.ink300;
     final bgColor = unlocked ? def.color.withAlpha(20) : pt.surface2;
     final borderColor = unlocked ? def.color.withAlpha(60) : pt.line200;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surface,
+    return Card(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor, width: unlocked ? 1.5 : 0.5),
-        boxShadow: unlocked
-            ? [BoxShadow(color: def.color.withAlpha(30), blurRadius: 8, offset: const Offset(0, 2))]
-            : null,
+        side: BorderSide(
+            color: borderColor, width: unlocked ? 1.5 : 0.5),
       ),
+      elevation: unlocked ? 0 : 0,
+      shadowColor: unlocked ? def.color.withAlpha(30) : null,
       child: Stack(
         children: [
           Padding(
@@ -1306,8 +1271,7 @@ class _BadgeCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   def.name,
-                  style: TextStyle(
-                    fontFamily: 'Sora',
+                  style: tt.labelSmall!.copyWith(
                     fontWeight: FontWeight.w600,
                     fontSize: 11,
                     color: unlocked ? cs.onSurface : pt.ink300,
@@ -1331,7 +1295,8 @@ class _BadgeCard extends StatelessWidget {
                 else if (!unlocked)
                   Text(
                     def.earnHint,
-                    style: TextStyle(fontSize: 9, color: pt.ink300, height: 1.2),
+                    style: tt.labelSmall!.copyWith(
+                        color: pt.ink300, fontSize: 9, height: 1.2),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -1358,14 +1323,14 @@ class _BadgeCard extends StatelessWidget {
 }
 
 class _XpProgressCard extends StatelessWidget {
-  const _XpProgressCard({required this.summary, required this.pt});
+  const _XpProgressCard({required this.summary});
 
   final PetAwardsSummary summary;
-  final PetfolioThemeExtension pt;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
     const milestones = [100, 250, 500, 1000, 2500, 5000];
     final nextMilestone = milestones.firstWhere(
       (m) => m > summary.totalXp,
@@ -1379,67 +1344,66 @@ class _XpProgressCard extends StatelessWidget {
         : (summary.totalXp - prevMilestone) /
             (nextMilestone - prevMilestone).clamp(1, double.infinity);
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cs.surface,
+    return Card(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: pt.line200, width: 0.5),
+        side: BorderSide(color: pt.line200, width: 0.5),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.bolt_rounded, size: 16, color: const Color(0xFF8B5CF6)),
-              const SizedBox(width: 6),
-              Text(
-                'XP Progress',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
-                  color: pt.ink500,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.bolt_rounded, size: 16, color: Color(0xFF8B5CF6)),
+                const SizedBox(width: 6),
+                Text(
+                  'XP Progress',
+                  style: tt.labelMedium!.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                    color: pt.ink500,
+                  ),
                 ),
-              ),
-              const Spacer(),
-              Text(
-                '${summary.totalXp} / $nextMilestone XP',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF8B5CF6),
+                const Spacer(),
+                Text(
+                  '${summary.totalXp} / $nextMilestone XP',
+                  style: tt.labelMedium!.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF8B5CF6),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: progress.clamp(0.0, 1.0),
-              minHeight: 8,
-              backgroundColor: const Color(0xFF8B5CF6).withAlpha(20),
-              valueColor: const AlwaysStoppedAnimation(Color(0xFF8B5CF6)),
+              ],
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${nextMilestone - summary.totalXp} XP to next milestone',
-            style: TextStyle(fontSize: 11, color: pt.ink300),
-          ),
-        ],
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                value: progress.clamp(0.0, 1.0),
+                minHeight: 8,
+                backgroundColor: const Color(0xFF8B5CF6).withAlpha(20),
+                valueColor: const AlwaysStoppedAnimation(Color(0xFF8B5CF6)),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${nextMilestone - summary.totalXp} XP to next milestone',
+              style: tt.labelSmall!.copyWith(color: pt.ink300),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 class _AwardsStatsSkeleton extends StatelessWidget {
-  const _AwardsStatsSkeleton({required this.pt});
-  final PetfolioThemeExtension pt;
+  const _AwardsStatsSkeleton();
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -1449,29 +1413,30 @@ class _AwardsStatsSkeleton extends StatelessWidget {
       childAspectRatio: 2.1,
       children: List.generate(
         4,
-        (_) => Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+        (_) => Card(
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: pt.line200, width: 0.5),
+            side: BorderSide(color: pt.line200, width: 0.5),
           ),
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              SkeletonLoader(width: 36, height: 36, borderRadius: 10),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    SkeletonLoader(width: 60, height: 10),
-                    SizedBox(height: 6),
-                    SkeletonLoader(width: 40, height: 18),
-                  ],
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                const SkeletonLoader(width: 36, height: 36, borderRadius: 10),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      SkeletonLoader(width: 60, height: 10),
+                      SizedBox(height: 6),
+                      SkeletonLoader(width: 40, height: 18),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -1482,8 +1447,7 @@ class _AwardsStatsSkeleton extends StatelessWidget {
 // ── Profile Health Tab ────────────────────────────────────────────────────────
 
 class _ProfileHealthTab extends ConsumerWidget {
-  const _ProfileHealthTab({required this.pt});
-  final PetfolioThemeExtension pt;
+  const _ProfileHealthTab();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1503,13 +1467,12 @@ class _ProfileHealthTab extends ConsumerWidget {
                 recordsAsync.when(
                   loading: () => List.generate(
                     3,
-                    (_) => _ProfileRowSkeleton(pt: pt),
+                    (_) => const _ProfileRowSkeleton(),
                   ),
                   error: (e, _) => [
-                    _ProfileTabEmptyMessage(
+                    PetfolioEmptyState(
                       icon: Icons.cloud_off_rounded,
-                      label: 'Could not load health records',
-                      pt: pt,
+                      title: 'Could not load health records',
                       action: TextButton.icon(
                         onPressed: () =>
                             ref.invalidate(healthVaultControllerProvider),
@@ -1520,14 +1483,13 @@ class _ProfileHealthTab extends ConsumerWidget {
                   ],
                   data: (records) => records.isEmpty
                       ? [
-                          _ProfileTabEmptyMessage(
+                          const PetfolioEmptyState(
                             icon: Icons.medical_services_outlined,
-                            label: 'No medical records yet',
-                            pt: pt,
+                            title: 'No medical records yet',
                           ),
                         ]
                       : records
-                          .map((r) => _HealthRecordRow(record: r, pt: pt))
+                          .map((r) => _HealthRecordRow(record: r))
                           .toList(),
                 ),
               ),
@@ -1542,70 +1504,68 @@ class _ProfileHealthTab extends ConsumerWidget {
 // ── Care task row ─────────────────────────────────────────────────────────────
 
 class _CareTaskRow extends StatelessWidget {
-  const _CareTaskRow({required this.task, required this.pt});
+  const _CareTaskRow({required this.task});
   final CareTask task;
-  final PetfolioThemeExtension pt;
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
     final accent = task.isCompleted ? AppColors.meadow500 : cs.primary;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: cs.surface,
+      child: Card(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: pt.line200, width: 0.5),
+          side: BorderSide(color: pt.line200, width: 0.5),
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: accent.withAlpha(26),
-                borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: accent.withAlpha(26),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(task.categoryIconData, color: accent, size: 20),
               ),
-              child: Icon(task.categoryIconData, color: accent, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    task.title,
-                    style: const TextStyle(
-                      fontFamily: 'Sora',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      task.title,
+                      style: tt.titleSmall!.copyWith(fontWeight: FontWeight.w600),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    task.frequency.name
-                        .replaceAllMapped(
-                          RegExp(r'([A-Z])'),
-                          (m) => ' ${m[0]!.toLowerCase()}',
-                        )
-                        .trim()
-                        .capitalize(),
-                    style: TextStyle(fontSize: 12, color: pt.ink500),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      task.frequency.name
+                          .replaceAllMapped(
+                            RegExp(r'([A-Z])'),
+                            (m) => ' ${m[0]!.toLowerCase()}',
+                          )
+                          .trim()
+                          .capitalize(),
+                      style: tt.bodySmall!.copyWith(color: pt.ink500),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Icon(
-              task.isCompleted
-                  ? Icons.check_circle_rounded
-                  : Icons.radio_button_unchecked_rounded,
-              color: task.isCompleted ? AppColors.meadow500 : pt.ink300,
-              size: 22,
-            ),
-          ],
+              Icon(
+                task.isCompleted
+                    ? Icons.check_circle_rounded
+                    : Icons.radio_button_unchecked_rounded,
+                color: task.isCompleted ? AppColors.meadow500 : pt.ink300,
+                size: 22,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1615,9 +1575,8 @@ class _CareTaskRow extends StatelessWidget {
 // ── Health record row ─────────────────────────────────────────────────────────
 
 class _HealthRecordRow extends StatelessWidget {
-  const _HealthRecordRow({required this.record, required this.pt});
+  const _HealthRecordRow({required this.record});
   final MedicalRecord record;
-  final PetfolioThemeExtension pt;
 
   static const typeIcons = {
     MedicalRecordType.vaccine: Icons.vaccines_rounded,
@@ -1630,82 +1589,81 @@ class _HealthRecordRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
 
     final (statusLabel, statusColor) = switch (true) {
-      _ when record.isOverdue => ('Overdue', AppColors.coral500),
+      _ when record.isOverdue      => ('Overdue', AppColors.coral500),
       _ when record.isExpiringSoon => ('Due soon', const Color(0xFFF59E0B)),
-      _ => ('Active', AppColors.meadow500),
+      _                            => ('Active', AppColors.meadow500),
     };
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: cs.surface,
+      child: Card(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: pt.line200, width: 0.5),
+          side: BorderSide(color: pt.line200, width: 0.5),
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: cs.primary.withAlpha(26),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                typeIcons[record.recordType] ?? Icons.folder_open_rounded,
-                color: cs.primary,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    record.name,
-                    style: const TextStyle(
-                      fontFamily: 'Sora',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    record.recordType.name
-                        .replaceAllMapped(
-                          RegExp(r'([A-Z])'),
-                          (m) => ' ${m[0]!.toLowerCase()}',
-                        )
-                        .trim()
-                        .capitalize(),
-                    style: TextStyle(fontSize: 12, color: pt.ink500),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: statusColor.withAlpha(26),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                statusLabel,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: statusColor,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: cs.primary.withAlpha(26),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  typeIcons[record.recordType] ?? Icons.folder_open_rounded,
+                  color: cs.primary,
+                  size: 20,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      record.name,
+                      style: tt.titleSmall!.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      record.recordType.name
+                          .replaceAllMapped(
+                            RegExp(r'([A-Z])'),
+                            (m) => ' ${m[0]!.toLowerCase()}',
+                          )
+                          .trim()
+                          .capitalize(),
+                      style: tt.bodySmall!.copyWith(color: pt.ink500),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: statusColor.withAlpha(26),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  statusLabel,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: statusColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1715,61 +1673,28 @@ class _HealthRecordRow extends StatelessWidget {
 // ── Shared tab helpers ────────────────────────────────────────────────────────
 
 class _ProfileRowSkeleton extends StatelessWidget {
-  const _ProfileRowSkeleton({required this.pt});
-  final PetfolioThemeExtension pt;
+  const _ProfileRowSkeleton();
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+    return const Padding(
+      padding: EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
           SkeletonLoader(width: 40, height: 40, borderRadius: 10),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SkeletonLoader(width: double.infinity, height: 14),
-                const SizedBox(height: 6),
+                SizedBox(height: 6),
                 SkeletonLoader(width: 80, height: 11),
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           SkeletonLoader(width: 22, height: 22, borderRadius: 999),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProfileTabEmptyMessage extends StatelessWidget {
-  const _ProfileTabEmptyMessage({
-    required this.icon,
-    required this.label,
-    required this.pt,
-    this.action,
-  });
-
-  final IconData icon;
-  final String label;
-  final PetfolioThemeExtension pt;
-  final Widget? action;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 48),
-      child: Column(
-        children: [
-          Icon(icon, size: 40, color: pt.ink300),
-          const SizedBox(height: 12),
-          Text(
-            label,
-            style: TextStyle(fontSize: 14, color: pt.ink500),
-          ),
-          if (action != null) ...[const SizedBox(height: 12), action!],
         ],
       ),
     );
@@ -1784,30 +1709,19 @@ extension on String {
 // ── Empty state ───────────────────────────────────────────────────────────────
 
 class _EmptyPetsState extends StatelessWidget {
-  const _EmptyPetsState({required this.pt});
-  final PetfolioThemeExtension pt;
+  const _EmptyPetsState();
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('🐾', style: const TextStyle(fontSize: 48)),
-            const SizedBox(height: 16),
-            Text(
-              'No pets yet',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Add your first pet to get started.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: pt.ink500),
-            ),
-          ],
+      child: PetfolioEmptyState(
+        icon: Icons.pets_rounded,
+        title: 'No pets yet',
+        subtitle: 'Add your first pet to get started.',
+        action: FilledButton.icon(
+          onPressed: () => context.go('/onboarding'),
+          icon: const Icon(Icons.add_rounded, size: 18),
+          label: const Text('Add a pet'),
         ),
       ),
     );

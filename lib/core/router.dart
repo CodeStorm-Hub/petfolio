@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'theme/theme_mode_provider.dart';
 
@@ -520,7 +521,6 @@ class AppShell extends ConsumerWidget {
     bool isDark,
   ) {
     final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
     return Scaffold(
       body: Row(
         children: [
@@ -539,9 +539,10 @@ class AppShell extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Text(
                         'Petfolio',
-                        style: tt.titleMedium?.copyWith(
+                        style: GoogleFonts.fredoka(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
                           color: cs.primary,
-                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       const Spacer(),

@@ -106,7 +106,7 @@ class _NoShopView extends StatelessWidget {
             const Text(
               'Open your shop',
               style: TextStyle(
-                fontFamily: 'Sora',
+                fontFamily: 'Fredoka',
                 fontWeight: FontWeight.w700,
                 fontSize: 22,
                 color: AppColors.ink950,
@@ -174,7 +174,7 @@ class _ShopDeactivatedViewState extends State<_ShopDeactivatedView> {
             const Text(
               'Shop Closed',
               style: TextStyle(
-                fontFamily: 'Sora',
+                fontFamily: 'Fredoka',
                 fontWeight: FontWeight.w700,
                 fontSize: 22,
                 color: AppColors.ink950,
@@ -253,14 +253,9 @@ class _DashboardBody extends ConsumerWidget {
                   onTap: () => context.pop(),
                 ),
                 const SizedBox(width: 12),
-                const Text(
+                Text(
                   'Seller Dashboard',
-                  style: TextStyle(
-                    fontFamily: 'Sora',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20,
-                    color: AppColors.ink950,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const Spacer(),
                 IconButton(
@@ -328,13 +323,11 @@ class _DashboardBody extends ConsumerWidget {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-            child: const Text(
+            child: Text(
               'QUICK ACTIONS',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.88,
-                color: AppColors.ink500,
+              style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                letterSpacing: 0.96,
+                color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink500,
               ),
             ),
           ),
@@ -417,62 +410,48 @@ class _ShopCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          color: AppColors.surface0,
-          boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                color: AppColors.surface2,
+                child: Container(
+                  width: 52,
+                  height: 52,
+                  color: cs.surfaceContainerHigh,
+                  child: shop.logoUrl != null
+                      ? Image.network(shop.logoUrl!, fit: BoxFit.cover)
+                      : Icon(Icons.storefront_outlined, color: pt.ink300),
+                ),
               ),
-              child: shop.logoUrl != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(shop.logoUrl!, fit: BoxFit.cover),
-                    )
-                  : const Icon(Icons.storefront_outlined,
-                      color: AppColors.ink300),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    shop.shopName,
-                    style: const TextStyle(
-                      fontFamily: 'Sora',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                      color: AppColors.ink950,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(shop.shopName, style: tt.titleSmall!.copyWith(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 2),
+                    Text(
+                      shop.description ?? 'No description yet',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: tt.bodySmall!.copyWith(color: pt.ink500),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    shop.description ?? 'No description yet',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.ink500),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            _ShopStatusChip(shop: shop),
-          ],
+              const SizedBox(width: 8),
+              _ShopStatusChip(shop: shop),
+            ],
+          ),
         ),
       ),
     );
@@ -531,7 +510,7 @@ class _ShopStatusChip extends StatelessWidget {
       return switch (shop.kycStatus) {
         KycStatus.submitted => (
             'Under Review',
-            AppColors.blue500,
+            AppColors.amber500,
             Icons.hourglass_top_rounded,
             false,
           ),
@@ -570,44 +549,40 @@ class _StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          color: AppColors.surface0,
-          boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: color.withAlpha(26),
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: color.withAlpha(26),
+                ),
+                child: Icon(icon, size: 20, color: color),
               ),
-              child: Icon(icon, size: 20, color: color),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              value,
-              style: const TextStyle(
-                fontFamily: 'Sora',
-                fontWeight: FontWeight.w700,
-                fontSize: 24,
-                color: AppColors.ink950,
+              const SizedBox(height: 12),
+              Text(
+                value,
+                style: tt.headlineMedium!.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurface,
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(label,
-                style:
-                    const TextStyle(fontSize: 12, color: AppColors.ink500)),
-          ],
+              const SizedBox(height: 2),
+              Text(label, style: tt.bodySmall!.copyWith(color: pt.ink500)),
+            ],
+          ),
         ),
       ),
     );
@@ -666,34 +641,28 @@ class _ActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.push(route),
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          color: AppColors.surface0,
-          boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
-          ],
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 20, color: AppColors.ink500),
-            const SizedBox(width: 14),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: AppColors.ink950,
-              ),
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => context.push(route),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Icon(icon, size: 20, color: pt.ink500),
+                const SizedBox(width: 14),
+                Text(label, style: tt.bodyMedium!.copyWith(fontWeight: FontWeight.w500, color: cs.onSurface)),
+                const Spacer(),
+                Icon(Icons.chevron_right_rounded, size: 20, color: pt.ink300),
+              ],
             ),
-            const Spacer(),
-            const Icon(Icons.chevron_right_rounded,
-                size: 20, color: AppColors.ink300),
-          ],
+          ),
         ),
       ),
     );
@@ -808,15 +777,13 @@ class _DangerZone extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Divider(color: AppColors.line200),
+          const Divider(),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'DANGER ZONE',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.88,
-              color: AppColors.danger,
+            style: Theme.of(context).textTheme.labelSmall!.copyWith(
+              letterSpacing: 0.96,
+              color: Theme.of(context).colorScheme.error,
             ),
           ),
           const SizedBox(height: 12),
@@ -842,48 +809,52 @@ class _DeleteTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => _DeleteShopRequestSheet(shop: shop),
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      color: cs.errorContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+        side: BorderSide(color: cs.error.withAlpha(60)),
       ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.surface0,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.danger.withAlpha(60)),
+      elevation: 0,
+      child: InkWell(
+        onTap: () => showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => _DeleteShopRequestSheet(shop: shop),
         ),
-        child: Row(
-          children: [
-            const Icon(Icons.delete_forever_rounded,
-                size: 20, color: AppColors.danger),
-            const SizedBox(width: 14),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Request shop deletion',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.danger,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Icon(Icons.delete_forever_rounded, size: 20, color: cs.onErrorContainer),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Request shop deletion',
+                      style: tt.bodyMedium!.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: cs.onErrorContainer,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 2),
-                  Text(
-                    'Requires admin review',
-                    style: TextStyle(fontSize: 12, color: AppColors.ink500),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      'Requires admin review',
+                      style: tt.bodySmall!.copyWith(color: cs.onErrorContainer.withAlpha(180)),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const Icon(Icons.chevron_right_rounded,
-                size: 18, color: AppColors.ink300),
-          ],
+              Icon(Icons.chevron_right_rounded, size: 18, color: cs.onErrorContainer.withAlpha(160)),
+            ],
+          ),
         ),
       ),
     );
@@ -902,41 +873,44 @@ class _PendingBanner extends StatelessWidget {
     final date =
         '${months[requestedAt.month - 1]} ${requestedAt.day}, ${requestedAt.year}';
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.warning.withAlpha(20),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.warning.withAlpha(60)),
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
+    return Card(
+      color: cs.secondaryContainer,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+        side: BorderSide(color: cs.secondary.withAlpha(60)),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.hourglass_top_rounded,
-              size: 20, color: AppColors.warning),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Deletion request pending',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.warning,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.hourglass_top_rounded, size: 20, color: cs.onSecondaryContainer),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Deletion request pending',
+                    style: tt.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSecondaryContainer,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Admin review in progress · Submitted $date',
-                  style: const TextStyle(
-                      fontSize: 12, color: AppColors.ink500),
-                ),
-              ],
+                  const SizedBox(height: 2),
+                  Text(
+                    'Admin review in progress · Submitted $date',
+                    style: tt.bodySmall!.copyWith(color: cs.onSecondaryContainer.withAlpha(180)),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -950,55 +924,61 @@ class _RejectedBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.danger.withAlpha(12),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.danger.withAlpha(60)),
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
+    return Card(
+      color: cs.errorContainer,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+        side: BorderSide(color: cs.error.withAlpha(60)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.cancel_outlined, size: 20, color: AppColors.danger),
-              SizedBox(width: 10),
-              Text(
-                'Deletion request rejected',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.danger,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.cancel_outlined, size: 20, color: cs.onErrorContainer),
+                const SizedBox(width: 10),
+                Text(
+                  'Deletion request rejected',
+                  style: tt.bodyMedium!.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: cs.onErrorContainer,
+                  ),
                 ),
+              ],
+            ),
+            if (rejectionNote != null && rejectionNote!.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(
+                rejectionNote!,
+                style: tt.bodySmall!.copyWith(color: cs.onErrorContainer.withAlpha(200)),
               ),
             ],
-          ),
-          if (rejectionNote != null && rejectionNote!.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(
-              rejectionNote!,
-              style: const TextStyle(fontSize: 13, color: AppColors.ink700),
-            ),
-          ],
-          const SizedBox(height: 10),
-          GestureDetector(
-            onTap: () => showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (_) => _DeleteShopRequestSheet(shop: shop),
-            ),
-            child: const Text(
-              'Submit new request →',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.danger,
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => _DeleteShopRequestSheet(shop: shop),
+              ),
+              child: Text(
+                'Submit new request →',
+                style: tt.bodySmall!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: cs.onErrorContainer,
+                  decoration: TextDecoration.underline,
+                  decorationColor: cs.onErrorContainer,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1073,13 +1053,10 @@ class _DeleteShopRequestSheetState
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Request Shop Deletion',
-            style: TextStyle(
-              fontFamily: 'Sora',
-              fontWeight: FontWeight.w700,
-              fontSize: 18,
-              color: AppColors.ink950,
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
+              color: Theme.of(context).colorScheme.error,
             ),
           ),
           const SizedBox(height: 16),
@@ -1146,7 +1123,8 @@ class _DeleteShopRequestSheetState
                 child: FilledButton(
                   onPressed: _loading ? null : _submit,
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.danger,
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    foregroundColor: Theme.of(context).colorScheme.onError,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -1203,19 +1181,19 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.surface0,
-          boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
-          ],
+    final cs = Theme.of(context).colorScheme;
+
+    return SizedBox(
+      width: 40,
+      height: 40,
+      child: Material(
+        clipBehavior: Clip.antiAlias,
+        shape: const CircleBorder(),
+        color: cs.surfaceContainerLow,
+        child: InkWell(
+          onTap: onTap,
+          child: Icon(icon, size: 18, color: cs.onSurface),
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
       ),
     );
   }

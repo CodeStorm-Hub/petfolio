@@ -66,7 +66,7 @@ class VendorOrderDetailScreen extends ConsumerWidget {
                     const Text(
                       'Order Detail',
                       style: TextStyle(
-                        fontFamily: 'Sora',
+                        fontFamily: 'Fredoka',
                         fontWeight: FontWeight.w700,
                         fontSize: 20,
                         color: AppColors.ink950,
@@ -125,7 +125,7 @@ class _OrderSummaryCard extends StatelessWidget {
                 Text(
                   'Order #${order.id.substring(0, 8)}',
                   style: const TextStyle(
-                    fontFamily: 'Sora',
+                    fontFamily: 'Fredoka',
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                     color: AppColors.ink950,
@@ -311,7 +311,7 @@ class _ActionButtons extends ConsumerWidget {
             const Text(
               'Add tracking info',
               style: TextStyle(
-                fontFamily: 'Sora',
+                fontFamily: 'Fredoka',
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
                 color: AppColors.ink950,
@@ -413,7 +413,7 @@ class _StatusChip extends StatelessWidget {
   Color get _color => switch (status) {
         OrderStatus.pending    => AppColors.warning,
         OrderStatus.processing => AppColors.info,
-        OrderStatus.shipped    => AppColors.blue500,
+        OrderStatus.shipped    => AppColors.amber500,
         OrderStatus.delivered  => AppColors.success,
         OrderStatus.cancelled  => AppColors.danger,
       };

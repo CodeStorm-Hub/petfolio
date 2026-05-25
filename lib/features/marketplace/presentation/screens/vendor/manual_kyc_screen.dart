@@ -134,7 +134,7 @@ class _Header extends StatelessWidget {
           Text(
             _titles[step],
             style: const TextStyle(
-              fontFamily: 'Sora',
+              fontFamily: 'Fredoka',
               fontWeight: FontWeight.w700,
               fontSize: 20,
               color: AppColors.ink950,
@@ -164,7 +164,7 @@ class _StepIndicator extends StatelessWidget {
               height: 4,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4),
-                color: active ? AppColors.blue500 : AppColors.line200,
+                color: active ? AppColors.amber500 : AppColors.line200,
               ),
             ),
           );
@@ -293,7 +293,7 @@ class _DocPicker extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           color: AppColors.surface0,
           border: Border.all(
-            color: hasFile ? AppColors.blue500 : AppColors.line200,
+            color: hasFile ? AppColors.amber500 : AppColors.line200,
             width: hasFile ? 1.5 : 1,
           ),
         ),
@@ -305,13 +305,13 @@ class _DocPicker extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 color: hasFile
-                    ? AppColors.blue500.withAlpha(20)
+                    ? AppColors.amber500.withAlpha(20)
                     : AppColors.surface2,
               ),
               child: Icon(
                 hasFile ? Icons.check_circle_outline_rounded : icon,
                 size: 20,
-                color: hasFile ? AppColors.blue500 : AppColors.ink300,
+                color: hasFile ? AppColors.amber500 : AppColors.ink300,
               ),
             ),
             const SizedBox(width: 14),
@@ -337,7 +337,7 @@ class _DocPicker extends StatelessWidget {
             Icon(
               Icons.upload_rounded,
               size: 18,
-              color: hasFile ? AppColors.blue500 : AppColors.ink300,
+              color: hasFile ? AppColors.amber500 : AppColors.ink300,
             ),
           ],
         ),
@@ -446,7 +446,7 @@ class _Field extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.blue500, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.amber500, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

@@ -31,7 +31,7 @@ class VendorOrderQueueScreen extends ConsumerWidget {
                   const Text(
                     'Order Queue',
                     style: TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: 'Fredoka',
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
                       color: AppColors.ink950,
@@ -126,7 +126,7 @@ class _OrderTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: 'Fredoka',
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                       color: AppColors.ink950,
@@ -161,7 +161,7 @@ class _OrderTile extends StatelessWidget {
     return switch (s) {
       OrderStatus.pending    => AppColors.warning,
       OrderStatus.processing => AppColors.info,
-      OrderStatus.shipped    => AppColors.blue500,
+      OrderStatus.shipped    => AppColors.amber500,
       OrderStatus.delivered  => AppColors.success,
       OrderStatus.cancelled  => AppColors.danger,
     };
@@ -186,7 +186,7 @@ class _StatusChip extends StatelessWidget {
   Color get _color => switch (status) {
         OrderStatus.pending    => AppColors.warning,
         OrderStatus.processing => AppColors.info,
-        OrderStatus.shipped    => AppColors.blue500,
+        OrderStatus.shipped    => AppColors.amber500,
         OrderStatus.delivered  => AppColors.success,
         OrderStatus.cancelled  => AppColors.danger,
       };
@@ -228,7 +228,7 @@ class _EmptyOrders extends StatelessWidget {
             Text(
               'No active orders',
               style: TextStyle(
-                fontFamily: 'Sora',
+                fontFamily: 'Fredoka',
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
                 color: AppColors.ink950,

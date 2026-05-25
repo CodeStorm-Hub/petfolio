@@ -101,7 +101,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
                           const Text(
                             'Order placed!',
                             style: TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: 'Fredoka',
                               fontWeight: FontWeight.w700,
                               fontSize: 28,
                               letterSpacing: -0.28,
@@ -149,7 +149,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
                                     Text(
                                       widget.orderId.substring(0, 8).toUpperCase(),
                                       style: const TextStyle(
-                                        fontFamily: 'Sora',
+                                        fontFamily: 'Fredoka',
                                         fontWeight: FontWeight.w700,
                                         fontSize: 15,
                                         color: AppColors.ink950,

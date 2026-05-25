@@ -59,7 +59,7 @@ class CartScreen extends ConsumerWidget {
                   const Text(
                     'Your Cart',
                     style: TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: 'Fredoka',
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
                       color: AppColors.ink950,
@@ -196,7 +196,7 @@ class _VendorGroupState extends ConsumerState<_VendorGroup> {
                         Text(
                           widget.shopName,
                           style: const TextStyle(
-                            fontFamily: 'Sora',
+                            fontFamily: 'Fredoka',
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
                             color: AppColors.ink950,
@@ -263,7 +263,7 @@ class _VendorGroupState extends ConsumerState<_VendorGroup> {
                   Text(
                     subtotal,
                     style: const TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: 'Fredoka',
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                       color: AppColors.ink950,
@@ -366,10 +366,10 @@ class _PaymentChip extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: selected
-              ? AppColors.blue500.withAlpha(15)
+              ? AppColors.amber500.withAlpha(15)
               : AppColors.surface1,
           border: Border.all(
-            color: selected ? AppColors.blue500 : AppColors.line200,
+            color: selected ? AppColors.amber500 : AppColors.line200,
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -379,7 +379,7 @@ class _PaymentChip extends StatelessWidget {
             Icon(
               icon,
               size: 16,
-              color: selected ? AppColors.blue500 : AppColors.ink500,
+              color: selected ? AppColors.amber500 : AppColors.ink500,
             ),
             const SizedBox(width: 6),
             Flexible(
@@ -388,7 +388,7 @@ class _PaymentChip extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: selected ? AppColors.blue500 : AppColors.ink700,
+                  color: selected ? AppColors.amber500 : AppColors.ink700,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -438,7 +438,7 @@ class _CodConfirmSheet extends StatelessWidget {
             const Text(
               'Confirm Order',
               style: TextStyle(
-                fontFamily: 'Sora',
+                fontFamily: 'Fredoka',
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
                 color: AppColors.ink950,
@@ -490,7 +490,7 @@ class _CodConfirmSheet extends StatelessWidget {
                 Text(
                   subtotal,
                   style: const TextStyle(
-                    fontFamily: 'Sora',
+                    fontFamily: 'Fredoka',
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                     color: AppColors.ink950,
@@ -558,7 +558,7 @@ class _EmptyCart extends StatelessWidget {
           const Text(
             'Your cart is empty',
             style: TextStyle(
-              fontFamily: 'Sora',
+              fontFamily: 'Fredoka',
               fontWeight: FontWeight.w700,
               fontSize: 18,
               color: AppColors.ink950,

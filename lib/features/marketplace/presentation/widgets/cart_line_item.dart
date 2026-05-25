@@ -65,7 +65,7 @@ class CartLineItem extends ConsumerWidget {
                 Text(
                   p.name,
                   style: const TextStyle(
-                    fontFamily: 'Sora',
+                    fontFamily: 'Fredoka',
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                     height: 1.3,
@@ -104,7 +104,7 @@ class CartLineItem extends ConsumerWidget {
               Text(
                 '\$${(item.lineTotalCents / 100).toStringAsFixed(2)}',
                 style: const TextStyle(
-                  fontFamily: 'Sora',
+                  fontFamily: 'Fredoka',
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
                   color: AppColors.ink950,
@@ -164,7 +164,7 @@ class _Stepper extends StatelessWidget {
               '$quantity',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontFamily: 'Sora',
+                fontFamily: 'Fredoka',
                 fontWeight: FontWeight.w700,
                 fontSize: 13,
                 color: AppColors.ink950,

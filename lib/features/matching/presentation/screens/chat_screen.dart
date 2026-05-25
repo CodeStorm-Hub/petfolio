@@ -74,7 +74,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final myUserId = Supabase.instance.client.auth.currentUser?.id;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       body: SafeArea(
         child: Column(
           children: [
@@ -91,7 +91,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   widget.otherPetName,
-                  style: GoogleFonts.sora(
+                  style: GoogleFonts.fredoka(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.3,
@@ -254,7 +254,7 @@ class _Composer extends StatelessWidget {
     return Material(
       elevation: 8,
       shadowColor: Colors.black.withValues(alpha: 0.06),
-      color: pt.surface1,
+      color: AppColors.surface0,
       child: SafeArea(
         top: false,
         child: Padding(

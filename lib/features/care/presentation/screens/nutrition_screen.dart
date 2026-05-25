@@ -141,7 +141,7 @@ class _NutritionAppBar extends StatelessWidget {
           ),
           Text(
             pet.name,
-            style: GoogleFonts.sora(
+            style: GoogleFonts.fredoka(
               fontSize: 17,
               fontWeight: FontWeight.w600,
               color: cs.onSurface,
@@ -189,7 +189,7 @@ class _WeightTrendCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'Weight Trend',
-                style: GoogleFonts.sora(
+                style: GoogleFonts.fredoka(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: cs.onSurface,
@@ -459,7 +459,7 @@ class _CalorieCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'Smart Nutrition',
-                style: GoogleFonts.sora(
+                style: GoogleFonts.fredoka(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
@@ -471,7 +471,7 @@ class _CalorieCard extends StatelessWidget {
           if (calories != null) ...[
             Text(
               '$calories',
-              style: GoogleFonts.sora(
+              style: GoogleFonts.fredoka(
                 fontSize: 48,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -624,7 +624,7 @@ class _HistoryList extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       'Log History',
-                      style: GoogleFonts.sora(
+                      style: GoogleFonts.fredoka(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: cs.onSurface,
@@ -688,7 +688,7 @@ class _HistoryTile extends StatelessWidget {
                   children: [
                     Text(
                       '${log.weightKg!.toStringAsFixed(2)} kg',
-                      style: GoogleFonts.sora(
+                      style: GoogleFonts.fredoka(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: cs.onSurface,
@@ -834,7 +834,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
               const SizedBox(width: 10),
               Text(
                 'Log Weight',
-                style: GoogleFonts.sora(
+                style: GoogleFonts.fredoka(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                   color: cs.onSurface,

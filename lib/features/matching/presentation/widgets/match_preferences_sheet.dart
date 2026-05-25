@@ -79,7 +79,7 @@ class MatchPreferencesSheet extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       'Discovery preferences',
-                      style: GoogleFonts.sora(
+                      style: GoogleFonts.fredoka(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
                         color: cs.onSurface,
@@ -219,7 +219,7 @@ class _SectionLabel extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: GoogleFonts.sora(
+            style: GoogleFonts.fredoka(
               fontSize: 15,
               fontWeight: FontWeight.w600,
               color: Theme.of(context).colorScheme.onSurface,

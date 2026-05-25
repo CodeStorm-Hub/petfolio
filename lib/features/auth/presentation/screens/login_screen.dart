@@ -253,7 +253,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       body: SafeArea(
         child: FadeTransition(
           opacity: _fadeAnim,

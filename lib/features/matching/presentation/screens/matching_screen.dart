@@ -74,7 +74,7 @@ class MatchingScreen extends ConsumerWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final petsAsync = ref.watch(petListProvider);
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       body: Center(
         child: petsAsync.when(
           skipLoadingOnReload: true,
@@ -246,7 +246,7 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
     }
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       body: SafeArea(
         bottom: false,
         child: Stack(
@@ -521,32 +521,65 @@ class _EmptyDeck extends StatelessWidget {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final tt = Theme.of(context).textTheme;
-    final title = locationReady
-        ? 'No pets nearby yet'
-        : 'No more profiles nearby';
+    final cs = Theme.of(context).colorScheme;
+    final title = locationReady ? 'No pets nearby yet' : 'No more profiles nearby';
     final subtitle = locationReady
         ? 'Turn on Match Discovery for your pet and ask nearby owners to do the same. '
             'Pets also need a saved location—open Match after allowing location access.'
-        : 'Check back soon!';
+        : 'Check back soon — more pets are discovering every day.';
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.pets_rounded, size: 64, color: pt.ink300),
-            const SizedBox(height: 16),
+            SizedBox(
+              height: 160,
+              child: Stack(
+                alignment: Alignment.center,
+                clipBehavior: Clip.none,
+                children: [
+                  Transform.rotate(
+                    angle: -0.22,
+                    child: Card(
+                      color: cs.surfaceContainerHighest.withAlpha(180),
+                      elevation: 0,
+                      child: const SizedBox(width: 88, height: 124),
+                    ),
+                  ),
+                  Transform.rotate(
+                    angle: 0.13,
+                    child: Card(
+                      color: cs.surfaceContainerHigh,
+                      elevation: 2,
+                      child: const SizedBox(width: 88, height: 124),
+                    ),
+                  ),
+                  Card(
+                    elevation: 4,
+                    child: SizedBox(
+                      width: 88,
+                      height: 124,
+                      child: Center(
+                        child: Icon(Icons.pets_rounded, size: 40, color: pt.ink300),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: tt.titleMedium?.copyWith(color: pt.ink500),
+              style: tt.titleMedium?.copyWith(color: cs.onSurface),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: tt.bodySmall?.copyWith(color: pt.ink300, height: 1.45),
+              style: tt.bodySmall?.copyWith(color: pt.ink500, height: 1.5),
             ),
           ],
         ),
@@ -645,7 +678,7 @@ class _SwipeCard extends StatelessWidget {
                     opacity: matchOpacity,
                     child: _SwipeLabel(
                       label: 'MATCH',
-                      color: AppColors.coral500,
+                      color: AppColors.amber500,
                     ),
                   ),
                 ),
@@ -657,7 +690,7 @@ class _SwipeCard extends StatelessWidget {
                     opacity: passOpacity,
                     child: _SwipeLabel(
                       label: 'PASS',
-                      color: AppColors.ink500,
+                      color: AppColors.pink300,
                     ),
                   ),
                 ),
@@ -671,7 +704,7 @@ class _SwipeCard extends StatelessWidget {
                       opacity: greetOpacity,
                       child: _SwipeLabel(
                         label: 'WAVE  👋',
-                        color: AppColors.blue500,
+                        color: AppColors.teal400,
                       ),
                     ),
                   ),
@@ -952,9 +985,9 @@ class _InfoPanel extends StatelessWidget {
                     candidate.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.sora(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
+                    style: GoogleFonts.fredoka(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w600,
                       color: Colors.white,
                       height: 1.1,
                     ),
@@ -1030,7 +1063,7 @@ class _InfoPanel extends StatelessWidget {
                 _MatchMetaChip(
                   label: _speciesLabel(candidate.species),
                   foreground: Colors.white,
-                  background: AppColors.blue500.withValues(alpha: 0.34),
+                  background: AppColors.amber500.withValues(alpha: 0.45),
                   borderColor: Colors.white.withValues(alpha: 0.42),
                 ),
                 _MatchMetaChip(
@@ -1121,7 +1154,7 @@ class _ActionDock extends StatelessWidget {
           _DockButton(
             key: const ValueKey<String>('match_action_pass'),
             size: 56,
-            color: AppColors.ink300,
+            color: AppColors.pink300,
             icon: Icons.close_rounded,
             iconSize: 26,
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.pass),
@@ -1129,7 +1162,7 @@ class _ActionDock extends StatelessWidget {
           _DockButton(
             key: const ValueKey<String>('match_action_greet'),
             size: 48,
-            color: AppColors.blue500,
+            color: AppColors.teal400,
             icon: Icons.waving_hand_rounded,
             iconSize: 22,
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.greet),
@@ -1137,7 +1170,7 @@ class _ActionDock extends StatelessWidget {
           _DockButton(
             key: const ValueKey<String>('match_action_like'),
             size: 64,
-            color: AppColors.coral500,
+            color: AppColors.amber500,
             icon: Icons.pets_rounded,
             iconSize: 30,
             elevated: true,
@@ -1146,7 +1179,7 @@ class _ActionDock extends StatelessWidget {
           _DockButton(
             key: const ValueKey<String>('match_action_super'),
             size: 48,
-            color: AppColors.mulberry500,
+            color: AppColors.lavender400,
             icon: Icons.star_rounded,
             iconSize: 22,
             onTap: disabled
@@ -1158,7 +1191,7 @@ class _ActionDock extends StatelessWidget {
             color: AppColors.sunset500,
             icon: Icons.bolt_rounded,
             iconSize: 26,
-            onTap: null, // Boost — premium feature placeholder
+            onTap: null,
           ),
         ],
       ),
@@ -1223,11 +1256,11 @@ class _SwipeLabel extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.sora(
-          fontSize: 17,
-          fontWeight: FontWeight.w700,
+        style: GoogleFonts.fredoka(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
           color: color,
-          letterSpacing: 1.5,
+          letterSpacing: 1.2,
         ),
       ),
     );
@@ -1321,36 +1354,27 @@ class _DockButton extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isDisabled = onTap == null;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedOpacity(
-        duration: PetfolioThemeExtension.durationSm,
-        opacity: isDisabled ? 0.38 : 1.0,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: elevated
-                ? color
-                : (isDark ? AppColors.surface0D : AppColors.surface0),
-            border: elevated
-                ? null
-                : Border.all(color: color.withAlpha(90), width: 1.5),
-            boxShadow: elevated
-                ? [
-                    BoxShadow(
-                      color: color.withAlpha(80),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
-                : null,
+    return AnimatedOpacity(
+      duration: PetfolioThemeExtension.durationSm,
+      opacity: isDisabled ? 0.38 : 1.0,
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: Material(
+          clipBehavior: Clip.antiAlias,
+          shape: CircleBorder(
+            side: elevated
+                ? BorderSide.none
+                : BorderSide(color: color.withAlpha(90), width: 1.5),
           ),
-          child: Icon(
-            icon,
-            size: iconSize,
-            color: elevated ? Colors.white : color,
+          color: elevated
+              ? color
+              : (isDark ? AppColors.surface0D : AppColors.surface0),
+          elevation: elevated ? 6 : 0,
+          shadowColor: elevated ? color.withAlpha(80) : Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            child: Icon(icon, size: iconSize, color: elevated ? AppColors.warmBlack : color),
           ),
         ),
       ),

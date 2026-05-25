@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../data/models/product.dart';
 import '../controllers/cart_controller.dart';
 import 'product_glyph.dart';
@@ -102,24 +103,19 @@ class _QuickAddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x1A0B1220),
-              blurRadius: 6,
-              offset: Offset(0, 2),
-            ),
-          ],
+    return SizedBox(
+      width: 30,
+      height: 30,
+      child: Material(
+        clipBehavior: Clip.antiAlias,
+        shape: const CircleBorder(),
+        color: Colors.white,
+        elevation: 3,
+        shadowColor: const Color(0x1A0B1220),
+        child: InkWell(
+          onTap: onTap,
+          child: const Icon(Icons.add_rounded, size: 18, color: AppColors.ink950),
         ),
-        child: const Icon(Icons.add_rounded, size: 18, color: AppColors.ink950),
       ),
     );
   }
@@ -215,28 +211,27 @@ class _ProductMeta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           product.brand,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: AppColors.ink500,
-          ),
+          style: tt.labelSmall!.copyWith(color: pt.ink500),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 1),
         Text(
           product.name,
-          style: TextStyle(
-            fontFamily: 'Sora',
+          style: tt.titleSmall!.copyWith(
             fontWeight: FontWeight.w600,
-            fontSize: compact ? 13 : 14,
+            fontSize: compact ? 13 : null,
             height: 1.25,
-            color: AppColors.ink950,
+            color: cs.onSurface,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -246,19 +241,13 @@ class _ProductMeta extends StatelessWidget {
           children: [
             Text(
               product.priceFormatted,
-              style: const TextStyle(
-                fontFamily: 'Sora',
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-                color: AppColors.ink950,
-              ),
+              style: tt.titleSmall!.copyWith(fontWeight: FontWeight.w700, color: cs.onSurface),
             ),
             if (product.subscribable) ...[
               const SizedBox(width: 6),
               Text(
                 '${product.subPriceFormatted} sub',
-                style: const TextStyle(
-                  fontSize: 11,
+                style: tt.labelSmall!.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.success,
                 ),

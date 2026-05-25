@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/theme/theme.dart';
+import '../../../../core/widgets/widgets.dart';
 import '../../../care/data/models/pet_awards_summary.dart';
 import '../../../care/presentation/controllers/pet_awards_provider.dart';
 import '../../../pet_profile/data/models/pet.dart';
@@ -35,12 +36,12 @@ class SocialProfileScreen extends ConsumerWidget {
 
     return petAsync.when(
       loading: () => Scaffold(
-        backgroundColor: pt.surface1,
+        backgroundColor: pt.warmCream,
         appBar: AppBar(backgroundColor: cs.surface, leading: BackButton(color: cs.onSurface)),
         body: const Center(child: CircularProgressIndicator.adaptive()),
       ),
       error: (e, st) => Scaffold(
-        backgroundColor: pt.surface1,
+        backgroundColor: pt.warmCream,
         appBar: AppBar(backgroundColor: cs.surface, leading: BackButton(color: cs.onSurface)),
         body: Center(child: Text('Could not load profile', style: TextStyle(color: pt.ink500))),
       ),
@@ -56,7 +57,7 @@ class SocialProfileScreen extends ConsumerWidget {
         final avatarUrl = resolvedPet?.avatarUrl;
 
         return Scaffold(
-          backgroundColor: pt.surface1,
+          backgroundColor: pt.warmCream,
           appBar: AppBar(
             backgroundColor: cs.surface,
             elevation: 0,
@@ -127,41 +128,37 @@ class SocialProfileScreen extends ConsumerWidget {
                   if (posts.isEmpty) {
                     return SliverFillRemaining(
                       child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.photo_camera_outlined, size: 52, color: pt.ink300),
-                            const SizedBox(height: 12),
-                            Text('No Posts Yet', style: tt.titleSmall?.copyWith(color: pt.ink500)),
-                            const SizedBox(height: 4),
-                            Text('Photos will appear here', style: tt.bodySmall?.copyWith(color: pt.ink300)),
-                          ],
+                        child: PetfolioEmptyState(
+                          icon: Icons.photo_camera_outlined,
+                          title: 'No Posts Yet',
+                          subtitle: 'Photos and updates will appear here.',
                         ),
                       ),
                     );
                   }
 
                   return SliverPadding(
-                    padding: const EdgeInsets.only(top: 1),
+                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
                     sliver: SliverGrid(
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        mainAxisSpacing: 1.5,
-                        crossAxisSpacing: 1.5,
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 10,
+                        childAspectRatio: 1,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
                           final post = posts[index];
-                          Widget child;
+                          Widget content;
                           if (post.imageUrls.isNotEmpty) {
-                            child = Stack(
+                            content = Stack(
                               fit: StackFit.expand,
                               children: [
                                 CachedNetworkImage(
                                   imageUrl: post.imageUrls.first,
                                   fit: BoxFit.cover,
-                                  memCacheWidth: 400,
-                                  maxWidthDiskCache: 800,
+                                  memCacheWidth: 600,
+                                  maxWidthDiskCache: 1000,
                                   placeholder: (ctx, url) => Container(color: pt.surface2),
                                   errorWidget: (ctx, url, err) => Container(
                                     color: pt.surface2,
@@ -170,22 +167,22 @@ class SocialProfileScreen extends ConsumerWidget {
                                 ),
                                 if (post.imageUrls.length > 1)
                                   Positioned(
-                                    top: 6,
-                                    right: 6,
-                                    child: Icon(Icons.collections_rounded, size: 14, color: Colors.white.withAlpha(220)),
+                                    top: 8,
+                                    right: 8,
+                                    child: Icon(Icons.collections_rounded, size: 16, color: Colors.white.withAlpha(220)),
                                   ),
                               ],
                             );
                           } else {
-                            child = Container(
+                            content = Container(
                               color: post.accentColor.withAlpha(40),
-                              padding: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(12),
                               child: Center(
                                 child: Text(
                                   post.caption,
-                                  maxLines: 4,
+                                  maxLines: 5,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(fontSize: 11, color: post.accentColor),
+                                  style: tt.bodySmall?.copyWith(color: post.accentColor),
                                 ),
                               ),
                             );
@@ -193,7 +190,10 @@ class SocialProfileScreen extends ConsumerWidget {
 
                           return GestureDetector(
                             onTap: () => context.push('/social/post/${post.id}', extra: post),
-                            child: child,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+                              child: content,
+                            ),
                           );
                         },
                         childCount: posts.length,
@@ -250,43 +250,49 @@ class _ProfileHeader extends StatelessWidget {
 
     return Container(
       color: cs.surface,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Avatar + stats row
+          // Centered avatar
+          _ProfileAvatar(name: petName, avatarUrl: avatarUrl, pt: pt),
+          const SizedBox(height: 14),
+
+          // Name + breed + bio — centered
+          Text(
+            petName,
+            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            textAlign: TextAlign.center,
+          ),
+          if (petBreed != null) ...[
+            const SizedBox(height: 3),
+            Text(
+              petBreed!,
+              style: tt.bodySmall?.copyWith(color: pt.ink500, fontWeight: FontWeight.w500),
+              textAlign: TextAlign.center,
+            ),
+          ],
+          if (petBio.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              petBio,
+              style: tt.bodySmall?.copyWith(color: cs.onSurface.withAlpha(200), height: 1.5),
+              textAlign: TextAlign.center,
+            ),
+          ],
+
+          const SizedBox(height: 20),
+
+          // Stats row
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _ProfileAvatar(name: petName, avatarUrl: avatarUrl, pt: pt),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _ProfileStatColumn(value: postCount?.toString() ?? '-', label: 'Posts'),
-                    _ProfileStatColumn(value: followerCount?.toString() ?? '-', label: 'Followers'),
-                    _ProfileStatColumn(value: followingCount?.toString() ?? '-', label: 'Following'),
-                  ],
-                ),
-              ),
+              _ProfileStatColumn(value: postCount?.toString() ?? '-', label: 'Posts'),
+              _ProfileStatColumn(value: followerCount?.toString() ?? '-', label: 'Followers'),
+              _ProfileStatColumn(value: followingCount?.toString() ?? '-', label: 'Following'),
             ],
           ),
 
-          const SizedBox(height: 14),
-
-          // Name + breed + bio
-          Text(petName, style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w700, fontSize: 15)),
-          if (petBreed != null) ...[
-            const SizedBox(height: 2),
-            Text(petBreed!, style: TextStyle(color: pt.ink500, fontSize: 13, fontWeight: FontWeight.w500)),
-          ],
-          if (petBio.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(petBio, style: TextStyle(color: cs.onSurface.withAlpha(200), fontSize: 13.5, height: 1.4)),
-          ],
-
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
 
           // Action buttons
           if (isOwnProfile && resolvedPet != null)
@@ -313,8 +319,8 @@ class _ProfileAvatar extends StatelessWidget {
     final hasImage = avatarUrl != null && avatarUrl!.isNotEmpty;
 
     return Container(
-      width: 82,
-      height: 82,
+      width: 96,
+      height: 96,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: hasImage
@@ -500,38 +506,38 @@ class _CareStatCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-      decoration: BoxDecoration(
-        color: bgColor.withAlpha(isDark ? 30 : 18),
+    return Card(
+      color: bgColor.withAlpha(isDark ? 30 : 18),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: bgColor.withAlpha(isDark ? 60 : 40), width: 1),
+        side: BorderSide(color: bgColor.withAlpha(isDark ? 60 : 40), width: 1),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 18, color: iconColor),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: cs.onSurface,
-              height: 1,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 18, color: iconColor),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                fontWeight: FontWeight.w800,
+                color: cs.onSurface,
+                height: 1,
+              ),
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: cs.onSurface.withAlpha(140),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                color: cs.onSurface.withAlpha(140),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

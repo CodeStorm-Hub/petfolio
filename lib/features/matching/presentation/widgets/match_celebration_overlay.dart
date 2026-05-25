@@ -49,7 +49,7 @@ class MatchCelebrationOverlay extends StatelessWidget {
                       Text(
                         "It's a Match!",
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.sora(
+                        style: GoogleFonts.fredoka(
                           fontSize: 34,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,

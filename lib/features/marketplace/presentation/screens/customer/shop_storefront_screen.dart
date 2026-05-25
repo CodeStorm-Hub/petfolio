@@ -179,7 +179,7 @@ class ShopStorefrontScreen extends ConsumerWidget {
                         Text(
                           shop.shopName,
                           style: const TextStyle(
-                            fontFamily: 'Sora',
+                            fontFamily: 'Fredoka',
                             fontWeight: FontWeight.w700,
                             fontSize: 18,
                             color: AppColors.ink950,
@@ -402,9 +402,9 @@ class _SocialBtn extends StatelessWidget {
         margin: const EdgeInsets.only(right: 8),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.blue500.withAlpha(20),
+          color: AppColors.amber500.withAlpha(20),
         ),
-        child: Icon(icon, size: 18, color: AppColors.blue500),
+        child: Icon(icon, size: 18, color: AppColors.amber500),
       ),
     );
   }

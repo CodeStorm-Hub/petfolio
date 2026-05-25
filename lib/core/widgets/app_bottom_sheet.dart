@@ -16,7 +16,7 @@ abstract final class AppBottomSheet {
         final pt = Theme.of(sheetContext).extension<PetfolioThemeExtension>()!;
         return Container(
           decoration: BoxDecoration(
-            color: pt.surface1,
+            color: pt.warmCream,
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(PetfolioThemeExtension.radius2xl),
             ),

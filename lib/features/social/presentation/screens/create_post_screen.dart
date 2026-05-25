@@ -101,7 +101,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     return Stack(
       children: [
         Scaffold(
-          backgroundColor: pt.surface1,
+          backgroundColor: pt.warmCream,
           appBar: _buildAppBar(context, pt, cs, state, canPost),
           body: CustomScrollView(
             slivers: [
@@ -198,7 +198,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       title: Text(
         'New Post',
         style: TextStyle(
-          fontFamily: 'Sora',
+          fontFamily: 'Fredoka',
           fontWeight: FontWeight.w700,
           fontSize: 16,
           color: cs.onSurface,
@@ -211,7 +211,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           child: FilledButton(
             onPressed: canPost ? _submit : null,
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.sunset500,
+              backgroundColor: AppColors.amber500,
               disabledBackgroundColor: pt.line200,
               foregroundColor: Colors.white,
               disabledForegroundColor: pt.ink300,
@@ -274,7 +274,7 @@ class _PetIdentityRow extends StatelessWidget {
                 Text(
                   petName,
                   style: TextStyle(
-                    fontFamily: 'Sora',
+                    fontFamily: 'Fredoka',
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                     color: cs.onSurface,
@@ -484,7 +484,7 @@ class _EmptyImagePlaceholder extends StatelessWidget {
                   Text(
                     'Add a photo',
                     style: TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: 'Fredoka',
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
                       color: pt.ink500,
@@ -515,7 +515,7 @@ class _EmptyImagePlaceholder extends StatelessWidget {
                 _SourceChip(
                   icon: Icons.photo_library_outlined,
                   label: 'Gallery',
-                  color: AppColors.blue500,
+                  color: AppColors.teal400,
                 ),
                 const SizedBox(width: 10),
                 _SourceChip(
@@ -765,7 +765,7 @@ class _ImageSourceSheet extends StatelessWidget {
             Text(
               'Add Photo',
               style: TextStyle(
-                fontFamily: 'Sora',
+                fontFamily: 'Fredoka',
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
                 color: cs.onSurface,
@@ -774,7 +774,7 @@ class _ImageSourceSheet extends StatelessWidget {
             const SizedBox(height: 20),
             _SheetOption(
               icon: Icons.photo_library_rounded,
-              color: AppColors.blue500,
+              color: AppColors.teal400,
               title: 'Photo Library',
               subtitle: 'Choose from your gallery',
               onTap: () => Navigator.of(context).pop(ImageSource.gallery),
@@ -936,7 +936,7 @@ class _UploadOverlay extends StatelessWidget {
               label,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontFamily: 'Sora',
+                fontFamily: 'Fredoka',
                 fontWeight: FontWeight.w700,
                 fontSize: 15,
                 color: cs.onSurface,

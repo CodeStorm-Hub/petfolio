@@ -85,7 +85,7 @@ class PetSwitcherSheet extends ConsumerWidget {
                           const Text(
                             'Your pets',
                             style: TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: 'Fredoka',
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
                               letterSpacing: -0.22,
@@ -272,7 +272,7 @@ class _PetRow extends StatelessWidget {
                         Text(
                           pet.name,
                           style: const TextStyle(
-                            fontFamily: 'Sora',
+                            fontFamily: 'Fredoka',
                             fontWeight: FontWeight.w600,
                             fontSize: 18,
                             letterSpacing: -0.2,
@@ -386,7 +386,7 @@ class _AddPetButton extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontFamily: 'Sora',
+                        fontFamily: 'Fredoka',
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                       ),

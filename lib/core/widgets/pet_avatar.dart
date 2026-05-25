@@ -164,8 +164,8 @@ class _AvatarImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = diameter / 2;
-    final bgColor = isDark ? AppColors.blue100D : AppColors.blue100;
-    final fgColor = isDark ? AppColors.blue500D : AppColors.blue700;
+    final bgColor = isDark ? AppColors.surface2D : AppColors.cream100;
+    final fgColor = isDark ? AppColors.amber500 : AppColors.amber700;
 
     if (imageUrl != null && imageUrl!.isNotEmpty) {
       return ClipOval(

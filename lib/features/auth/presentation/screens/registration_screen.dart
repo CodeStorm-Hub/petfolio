@@ -83,7 +83,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       body: SafeArea(
         child: FadeTransition(
           opacity: _fadeAnim,

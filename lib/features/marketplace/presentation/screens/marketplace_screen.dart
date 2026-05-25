@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/product.dart';
@@ -111,32 +112,32 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
       marketplaceSearchQueryProvider.select((q) => q.isNotEmpty),
     );
 
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
       child: Container(
         height: 44,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          color: AppColors.surface0,
-          boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
-          ],
+          color: cs.surfaceContainerLow,
+          border: Border.all(color: pt.line200, width: 0.5),
         ),
         child: Row(
           children: [
             const SizedBox(width: 14),
-            const Icon(Icons.search_rounded, size: 18, color: AppColors.ink500),
+            Icon(Icons.search_rounded, size: 18, color: pt.ink500),
             const SizedBox(width: 10),
             Expanded(
               child: TextField(
                 controller: _controller,
                 onChanged: (v) =>
                     ref.read(marketplaceSearchQueryProvider.notifier).set(v),
-                style: const TextStyle(fontSize: 14, color: AppColors.ink950),
-                decoration: const InputDecoration(
+                style: TextStyle(fontSize: 14, color: cs.onSurface),
+                decoration: InputDecoration(
                   hintText: 'Search food, gear, treats…',
-                  hintStyle:
-                      TextStyle(fontSize: 14, color: AppColors.ink500),
+                  hintStyle: TextStyle(fontSize: 14, color: pt.ink300),
                   isDense: true,
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.zero,
@@ -157,7 +158,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
                 child: Icon(
                   hasText ? Icons.close_rounded : Icons.tune_rounded,
                   size: 18,
-                  color: AppColors.ink500,
+                  color: pt.ink500,
                 ),
               ),
             ),
@@ -200,30 +201,11 @@ class _CategoryChips extends StatelessWidget {
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
           final cat = _cats[i];
-          final active = cat == selected;
-          return GestureDetector(
-            onTap: () => onSelected(cat),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                color: active ? AppColors.ink950 : AppColors.surface0,
-                boxShadow: active
-                    ? null
-                    : const [BoxShadow(color: AppColors.line200, spreadRadius: 0.5)],
-              ),
-              child: Center(
-                child: Text(
-                  cat.label,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                    color: active ? Colors.white : AppColors.ink700,
-                  ),
-                ),
-              ),
-            ),
+          return FilterChip(
+            label: Text(cat.label),
+            selected: cat == selected,
+            onSelected: (_) => onSelected(cat),
+            showCheckmark: false,
           );
         },
       ),
@@ -300,23 +282,18 @@ class _ShopBody extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
                 children: [
                   Text(
                     selectedCat.label,
-                    style: const TextStyle(
-                      fontFamily: 'Sora',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 18,
-                      color: AppColors.ink950,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '${filtered.length} items',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.ink500,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink500,
                     ),
                   ),
                 ],
@@ -417,66 +394,58 @@ class _ShopDiscoverCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        width: 88,
-        height: _discoverShopsRowHeight,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: AppColors.surface0,
-            boxShadow: const [
-              BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  color: AppColors.surface2,
-                  child: shop.logoUrl != null
-                      ? CachedNetworkImage(
-                          imageUrl: shop.logoUrl!,
-                          fit: BoxFit.cover,
-                          width: 44,
-                          height: 44,
-                          placeholder: (context, url) =>
-                              const SizedBox.shrink(),
-                          errorWidget: (context, url, error) => const Icon(
-                            Icons.storefront_rounded,
-                            color: AppColors.ink500,
-                            size: 22,
-                          ),
-                        )
-                      : const Icon(
-                          Icons.storefront_rounded,
-                          color: AppColors.ink500,
-                          size: 22,
-                        ),
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+
+    return SizedBox(
+      width: 88,
+      height: _discoverShopsRowHeight,
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    color: cs.surfaceContainerHigh,
+                    child: shop.logoUrl != null
+                        ? CachedNetworkImage(
+                            imageUrl: shop.logoUrl!,
+                            fit: BoxFit.cover,
+                            width: 44,
+                            height: 44,
+                            placeholder: (context, url) => const SizedBox.shrink(),
+                            errorWidget: (context, url, error) => Icon(
+                              Icons.storefront_rounded,
+                              color: pt.ink500,
+                              size: 22,
+                            ),
+                          )
+                        : Icon(Icons.storefront_rounded, color: pt.ink500, size: 22),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                shop.shopName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontFamily: 'Sora',
-                  fontWeight: FontWeight.w600,
-                  fontSize: 11,
-                  height: 1.2,
-                  color: AppColors.ink950,
+                const SizedBox(height: 6),
+                Text(
+                  shop.shopName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: tt.labelSmall!.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -540,7 +509,7 @@ class _ReorderStrip extends StatelessWidget {
                     Text(
                       product.name,
                       style: const TextStyle(
-                        fontFamily: 'Sora',
+                        fontFamily: 'Fredoka',
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
@@ -611,22 +580,13 @@ class _SectionHeader extends StatelessWidget {
                 Container(
                   width: 6,
                   height: 6,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: accentColor,
-                  ),
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: accentColor),
                 ),
                 const SizedBox(width: 8),
               ],
               Text(
                 title,
-                style: const TextStyle(
-                  fontFamily: 'Sora',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                  letterSpacing: -0.18,
-                  color: AppColors.ink950,
-                ),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
             ],
           ),
@@ -634,7 +594,9 @@ class _SectionHeader extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               subtitle!,
-              style: const TextStyle(fontSize: 12, color: AppColors.ink500),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink500,
+              ),
             ),
           ],
         ],

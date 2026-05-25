@@ -66,7 +66,7 @@ class BuyerOrderDetailScreen extends ConsumerWidget {
                     const Text(
                       'Order Detail',
                       style: TextStyle(
-                        fontFamily: 'Sora',
+                        fontFamily: 'Fredoka',
                         fontWeight: FontWeight.w700,
                         fontSize: 20,
                         color: AppColors.ink950,
@@ -112,7 +112,7 @@ class _StatusCard extends StatelessWidget {
     final color = switch (order.status) {
       OrderStatus.pending    => AppColors.warning,
       OrderStatus.processing => AppColors.info,
-      OrderStatus.shipped    => AppColors.blue500,
+      OrderStatus.shipped    => AppColors.amber500,
       OrderStatus.delivered  => AppColors.success,
       OrderStatus.cancelled  => AppColors.danger,
     };
@@ -150,7 +150,7 @@ class _StatusCard extends StatelessWidget {
                 Text(
                   order.status.label,
                   style: TextStyle(
-                    fontFamily: 'Sora',
+                    fontFamily: 'Fredoka',
                     fontWeight: FontWeight.w700,
                     fontSize: 18,
                     color: color,

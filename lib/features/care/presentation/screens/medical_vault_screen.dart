@@ -63,7 +63,7 @@ class _MedicalVaultBody extends ConsumerWidget {
     final asyncRecords = ref.watch(healthVaultControllerProvider);
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openAddSheet(context),
         child: const Icon(Icons.add_rounded),
@@ -73,21 +73,13 @@ class _MedicalVaultBody extends ConsumerWidget {
           slivers: [
             SliverAppBar(
               pinned: true,
-              backgroundColor: pt.surface1,
+              backgroundColor: pt.warmCream,
               surfaceTintColor: Colors.transparent,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back_rounded),
                 onPressed: () => context.pop(),
               ),
-              title: Text(
-                'Medical vault',
-                style: TextStyle(
-                  fontFamily: 'Sora',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                  color: cs.onSurface,
-                ),
-              ),
+              title: Text('Medical vault'),
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
@@ -117,7 +109,7 @@ class _MedicalVaultBody extends ConsumerWidget {
                         const SizedBox(height: 12),
                         Text(
                           'Could not load medical records',
-                          style: TextStyle(fontSize: 15, color: pt.ink500),
+                          style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: pt.ink500),
                         ),
                       ],
                     ),
@@ -132,28 +124,25 @@ class _MedicalVaultBody extends ConsumerWidget {
                     delegate: SliverChildListDelegate([
                       Text(
                         petName.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.08 * 11,
+                        style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                          letterSpacing: 0.96,
                           color: pt.ink500,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         'Automated medical vault',
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 22,
-                          letterSpacing: -0.2,
+                        style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                           color: cs.onSurface,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Vaccines, medications, and vet-linked records stay grouped and update live.',
-                        style: TextStyle(fontSize: 14, height: 1.35, color: pt.ink500),
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: pt.ink500,
+                          height: 1.5,
+                        ),
                       ),
                       const SizedBox(height: 24),
                       _VaultSection(
@@ -204,7 +193,6 @@ class _VaultSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,10 +203,8 @@ class _VaultSection extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               title.toUpperCase(),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.08 * 12,
+              style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                letterSpacing: 0.96,
                 color: pt.ink500,
               ),
             ),
@@ -226,15 +212,15 @@ class _VaultSection extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         if (records.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            decoration: BoxDecoration(
-              color: cs.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: pt.line200, width: 0.5),
+          Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              child: Text(
+                emptyLabel,
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: pt.ink500),
+              ),
             ),
-            child: Text(emptyLabel, style: TextStyle(fontSize: 14, color: pt.ink500)),
           )
         else
           ...records.map((r) => Padding(
@@ -349,10 +335,7 @@ class _MedicalRecordCard extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             record.name,
-                            style: TextStyle(
-                              fontFamily: 'Sora',
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15,
+                            style: Theme.of(context).textTheme.titleSmall!.copyWith(
                               color: cs.onSurface,
                             ),
                           ),
@@ -381,13 +364,13 @@ class _MedicalRecordCard extends ConsumerWidget {
                         record.description!,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 13, color: pt.ink500, height: 1.3),
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(color: pt.ink500, height: 1.3),
                       ),
                     ],
                     const SizedBox(height: 6),
                     Text(
                       _dateLine(),
-                      style: TextStyle(fontSize: 12, color: pt.ink300),
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(color: pt.ink300),
                     ),
                     if (record.documentUrl != null) ...[
                       const SizedBox(height: 8),
@@ -404,9 +387,7 @@ class _MedicalRecordCard extends ConsumerWidget {
                             const SizedBox(width: 4),
                             Text(
                               'View document',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                              style: Theme.of(context).textTheme.labelSmall!.copyWith(
                                 color: cs.primary,
                               ),
                             ),
@@ -590,20 +571,13 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
             ),
             Text(
               'Log medical record',
-              style: TextStyle(
-                fontFamily: 'Sora',
-                fontWeight: FontWeight.w700,
-                fontSize: 18,
-                color: cs.onSurface,
-              ),
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(color: cs.onSurface),
             ),
             const SizedBox(height: 18),
             Text(
               'RECORD TYPE',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.08 * 12,
+              style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                letterSpacing: 0.96,
                 color: pt.ink500,
               ),
             ),
@@ -612,39 +586,19 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
               spacing: 8,
               runSpacing: 8,
               children: MedicalRecordType.values.map((t) {
-                final selected = t == _type;
-                return GestureDetector(
-                  onTap: () => setState(() => _type = t),
-                  child: AnimatedContainer(
-                    duration: PetfolioThemeExtension.durationSm,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: selected ? cs.primary : pt.surface2,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: selected ? Colors.transparent : pt.line200,
-                        width: 0.5,
-                      ),
-                    ),
-                    child: Text(
-                      _typeLabel(t),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: selected ? Colors.white : pt.ink500,
-                      ),
-                    ),
-                  ),
+                return FilterChip(
+                  label: Text(_typeLabel(t)),
+                  selected: t == _type,
+                  onSelected: (_) => setState(() => _type = t),
+                  showCheckmark: false,
                 );
               }).toList(),
             ),
             const SizedBox(height: 18),
             Text(
               'NAME',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.08 * 12,
+              style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                letterSpacing: 0.96,
                 color: pt.ink500,
               ),
             ),
@@ -702,10 +656,8 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
             const SizedBox(height: 14),
             Text(
               'DOSAGE & FREQUENCY',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.08 * 12,
+              style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                letterSpacing: 0.96,
                 color: pt.ink500,
               ),
             ),
@@ -758,10 +710,8 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
             const SizedBox(height: 14),
             Text(
               'NOTES',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.08 * 12,
+              style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                letterSpacing: 0.96,
                 color: pt.ink500,
               ),
             ),
@@ -792,10 +742,8 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
             const SizedBox(height: 14),
             Text(
               'DOCUMENT',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.08 * 12,
+              style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                letterSpacing: 0.96,
                 color: pt.ink500,
               ),
             ),
@@ -913,10 +861,8 @@ class _DateRow extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.08 * 11,
+          style: Theme.of(context).textTheme.labelSmall!.copyWith(
+            letterSpacing: 0.96,
             color: pt.ink500,
           ),
         ),

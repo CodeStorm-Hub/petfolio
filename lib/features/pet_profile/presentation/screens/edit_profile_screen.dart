@@ -243,7 +243,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final species = _species;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: pt.warmCream,
       appBar: AppBar(
         backgroundColor: cs.surface,
         elevation: 0,
@@ -255,7 +255,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         title: Text(
           'Edit profile',
           style: TextStyle(
-            fontFamily: 'Sora',
+            fontFamily: 'Fredoka',
             fontWeight: FontWeight.w700,
             fontSize: 16,
             color: cs.onSurface,
@@ -441,7 +441,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           title: Text(
                             'Public profile',
                             style: TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: 'Fredoka',
                               fontWeight: FontWeight.w600,
                               fontSize: 15,
                               color: cs.onSurface,
@@ -463,7 +463,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                               title: Text(
                                 'Match discovery',
                                 style: TextStyle(
-                                  fontFamily: 'Sora',
+                                  fontFamily: 'Fredoka',
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15,
                                   color: cs.onSurface,
@@ -592,7 +592,7 @@ class _SectionCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: TextStyle(
-                    fontFamily: 'Sora',
+                    fontFamily: 'Fredoka',
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                     color: cs.onSurface,
@@ -746,7 +746,7 @@ class _SpeciesChip extends StatelessWidget {
           Text(
             species.label,
             style: TextStyle(
-              fontFamily: 'Sora',
+              fontFamily: 'Fredoka',
               fontWeight: FontWeight.w600,
               color: Theme.of(context).colorScheme.onSurface,
             ),
@@ -885,7 +885,7 @@ class _LocationRow extends StatelessWidget {
         Text(
           'Match location',
           style: TextStyle(
-            fontFamily: 'Sora',
+            fontFamily: 'Fredoka',
             fontWeight: FontWeight.w600,
             fontSize: 15,
             color: cs.onSurface,

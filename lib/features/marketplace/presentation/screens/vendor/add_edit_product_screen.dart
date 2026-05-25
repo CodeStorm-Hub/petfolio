@@ -133,7 +133,7 @@ class _AddEditProductScreenState
                   Text(
                     _isEdit ? 'Edit Product' : 'Add Product',
                     style: const TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: 'Fredoka',
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
                       color: AppColors.ink950,
@@ -261,7 +261,7 @@ class _AddEditProductScreenState
                             value: _subscribable,
                             onChanged: (v) =>
                                 setState(() => _subscribable = v),
-                            activeTrackColor: AppColors.blue500,
+                            activeTrackColor: AppColors.amber500,
                           ),
                           const SizedBox(width: 10),
                           const Column(
@@ -323,7 +323,7 @@ class _AddEditProductScreenState
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.blue500, width: 1.5),
+        borderSide: const BorderSide(color: AppColors.amber500, width: 1.5),
       ),
     );
   }
@@ -386,7 +386,7 @@ class _Field extends StatelessWidget {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide:
-              const BorderSide(color: AppColors.blue500, width: 1.5),
+              const BorderSide(color: AppColors.amber500, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

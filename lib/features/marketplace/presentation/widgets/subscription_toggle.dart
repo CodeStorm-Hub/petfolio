@@ -127,7 +127,7 @@ class _FreqChip extends StatelessWidget {
                 TextSpan(
                   text: '$weeks',
                   style: TextStyle(
-                    fontFamily: 'Sora',
+                    fontFamily: 'Fredoka',
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                     color: selected ? Colors.white : AppColors.ink700,
@@ -136,7 +136,7 @@ class _FreqChip extends StatelessWidget {
                 TextSpan(
                   text: 'wk',
                   style: TextStyle(
-                    fontFamily: 'Sora',
+                    fontFamily: 'Fredoka',
                     fontWeight: FontWeight.w500,
                     fontSize: 10,
                     color: selected ? Colors.white70 : AppColors.ink500,

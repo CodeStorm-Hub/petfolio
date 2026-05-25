@@ -2,6 +2,138 @@
 
 ---
 
+## 2026-05-25 — Warm Bento Redesign Phases B–K (Complete)
+
+**Color system** (`app_colors.dart` — Phase A, prior session): Added `amber500/600/700`, `cream50/100/200`, `pink300`, `lavender400`, `teal400`, `warmBlack`.
+
+**Theme** (`app_theme.dart` — Phase A): `radius3xl=32`, `warmCream` token (cream50 light / surface2D dark), seed → amber500, scaffoldBg → cream50, AppBar → cream50, NavigationBar indicator → cream200, CardTheme → 32dp, ChipTheme → cream100, FilledButton → amber bg / warmBlack fg.
+
+**New widgets** (Phase B): `BentoTile` (Material+InkWell, clip, RoundedRectangleBorder), `CategoryPill` (AnimatedContainer circle + amber ring on select), `WarmSearchBar` (pill Container). Exported from `widgets.dart`.
+
+**Shared widgets** (Phase B–C):
+- `PrimaryPillButton`: primary → amber500/warmBlack; secondary → cream100/amber700; ghost → amber700 fg.
+- `PetAvatar`: initials fallback → cream100 bg / amber700 fg.
+- `AppHeader`: pet name → `GoogleFonts.fredoka(20, w600)`; `_CircleChip` → `Material(CircleBorder, clipBehavior) + InkWell`; badge ring border → `pt.warmCream`.
+- `AppBottomSheet`: container bg → `pt.warmCream`.
+
+**Router** (Phase C): Drawer brand text → `GoogleFonts.fredoka(22, w600, color: cs.primary)`.
+
+**Care screen** (Phase D): All Fredoka font; scaffold → warmCream; date picker → surface0; replaced nutrition/medical banners with `_CareBentoRow` (IntrinsicHeight side-by-side bento shortcut tiles — teal400 + meadow500 colors); task form sheet bg → warmCream.
+
+**Pet profile screen** (Phase E): Fredoka; scaffold → warmCream; `_PetStatsRow` → 4 `_BentoStatTile` with cream50/amber500/teal400/lavender400 colors; `_StatChip` deleted.
+
+**Matching screen** (Phase F): scaffold → warmCream; pet name → fredoka(30); dock buttons → pink300(pass), teal400(greet), amber500(like, warmBlack icon), lavender400(super); swipe labels → fredoka(18); MATCH label → amber500; PASS → pink300; WAVE → teal400; species chip bg → amber500@0.45.
+
+**Auth screens** (Phase G): login + registration scaffold → warmCream; `AuthBrand` logo gradient → amber500→amber600; glow → amber500; logo icon → warmBlack.
+
+**Social screens** (Phase H): scaffold → warmCream for all 5 screens; notifications Sora → Fredoka; comment icon color → teal400; FAB fg → warmBlack; post button → amber500; create_post Sora → Fredoka; gallery color → teal400.
+
+**Marketplace screens** (Phase I): Bulk Sora→Fredoka + blue→amber + surface1→warmCream across all 15 marketplace screens via PowerShell.
+
+**Sweep** (Phase J): All `pt.surface1` instances replaced — onboarding gradient → warmCream; chat input bar → surface0; care task form → warmCream; AppBottomSheet → warmCream; app_header badge rings → warmCream.
+
+**Result** (Phase K): `flutter analyze` → **No issues found.** Zero `Sora` / `surface1` references remain across entire `lib/`.
+
+**Next step:** Phase complete. Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-25 — M3 UI Phase 3: Social + Marketplace M3 Redesign
+
+- **`lib/features/social/presentation/screens/social_profile_screen.dart`**:
+  - `_ProfileHeader`: restructured from left-aligned row (avatar+stats) → centered column (96dp avatar, name/breed/bio centered, stats row below, action buttons full-width)
+  - Posts grid: 3-col tight (1.5px gap) → 2-col with 10px spacing + `ClipRRect(borderRadius: 16)` on each cell for rounded imagery; `childAspectRatio: 1`
+  - Empty posts state: custom Column → `PetfolioEmptyState`
+  - `_CareStatCard`: `Container` → `Card(elevation:0, shape with border)` + `textTheme.headlineSmall` / `textTheme.labelSmall`
+  - Added `widgets.dart` import for `PetfolioEmptyState`
+- **`lib/features/social/presentation/screens/social_screen.dart`**:
+  - `_RegularPost`: `Container(decoration, boxShadow)` → `Card(clipBehavior: antiAlias)`
+  - `_RegularFooter`: Like/Comment/Share `GestureDetector + Padding` → `IconButton(visualDensity: compact)` + adjacent count `Text` widgets
+  - FAB label: `TextStyle(fontFamily: 'Sora')` removed
+- **`lib/features/marketplace/presentation/widgets/product_card.dart`**:
+  - `_ProductMeta`: all `TextStyle(fontFamily:'Sora', color:AppColors.*)` → `textTheme.labelSmall` / `textTheme.titleSmall` with theme-token colors
+  - `_QuickAddButton`: `GestureDetector + Container(circle)` → `Material(CircleBorder, clipBehavior: antiAlias) + InkWell`
+- **`lib/features/marketplace/presentation/screens/marketplace_screen.dart`**:
+  - `_SearchBar`: `AppColors.*` → `cs.surfaceContainerLow` + `pt.line200` border + `pt.ink*` icon/hint colors
+  - `_CategoryChips`: `GestureDetector + AnimatedContainer` → `FilterChip(showCheckmark: false)`
+  - Category filter label (name + count): `TextStyle(fontFamily:'Sora')` → `textTheme.titleLarge` + `textTheme.bodySmall`
+  - `_SectionHeader` title: `TextStyle(fontFamily:'Sora', fontSize:18)` → `textTheme.titleLarge`; subtitle → `textTheme.bodySmall!.copyWith(color: pt.ink500)`
+  - `_ShopDiscoverCard`: `GestureDetector + Container(BoxDecoration)` → `Card(clipBehavior: antiAlias) + InkWell`; shop name → `textTheme.labelSmall`
+  - Added `app_theme.dart` import
+- **`lib/features/marketplace/presentation/screens/vendor/seller_dashboard_screen.dart`**:
+  - Dashboard title → `textTheme.titleLarge`
+  - "QUICK ACTIONS" label → `textTheme.labelSmall!.copyWith(letterSpacing:0.96, color:pt.ink500)`
+  - `_StatTile`: `GestureDetector + Container` → `Card(clipBehavior: antiAlias) + InkWell`; value → `textTheme.headlineMedium`; label → `textTheme.bodySmall`
+  - `_ShopCard`: `Container(BoxDecoration)` → `Card`; shop name → `textTheme.titleSmall!.copyWith(w700)`; description → `textTheme.bodySmall`
+  - `_ActionRow`: `GestureDetector + Container` → `Card(clipBehavior) + InkWell`; label → `textTheme.bodyMedium`
+  - `_IconBtn`: `GestureDetector + Container(circle)` → `Material(CircleBorder, clipBehavior) + InkWell`
+  - **Danger Zone (M3 errorContainer):**
+    - "DANGER ZONE" label → `cs.error` color
+    - `_DeleteTile`: `Container(border)` → `Card(color: cs.errorContainer, side: cs.error)` + `InkWell`; text/icon → `cs.onErrorContainer`
+    - `_PendingBanner`: warning amber → `Card(color: cs.secondaryContainer)`; text/icon → `cs.onSecondaryContainer`
+    - `_RejectedBanner`: danger red → `Card(color: cs.errorContainer)`; text/icon → `cs.onErrorContainer`; "Submit new request" → underlined with `cs.onErrorContainer`
+    - `_DeleteShopRequestSheet` title → `textTheme.titleLarge!.copyWith(color: cs.error)`;  submit `FilledButton` → `backgroundColor: cs.error, foregroundColor: cs.onError`
+- `flutter analyze` — **No issues found.**
+
+**Next step:** Phase 3 complete. Please run (/remember) to save tokens before proceeding.
+
+---
+
+## 2026-05-25 — M3 UI Phase 2: Care + Medical Vault + Matching M3 Redesign
+
+- **`lib/features/care/presentation/screens/care_screen.dart`** — Full M3 pass:
+  - `_MedicalVaultBanner` / `_NutritionBanner`: `GestureDetector+Container` → `Card+InkWell`; removed unused `pt` constructor params.
+  - `_CareTaskCard.tile()`: `GestureDetector+Container` → `Material(clipBehavior: antiAlias, borderRadius:16) + InkWell + AnimatedContainer` (ripple preserved over color animation); title → `tt.titleSmall!.copyWith(...)`.
+  - Sublabel text → `Wrap(_MetaChip widgets)` with icon+label pill chips for scheduled time, frequency, and gamification points.
+  - `_metaChips()` method + `_MetaChip` widget added (pill-shaped, theme-token colors, no hardcoded hex).
+  - `_TaskCardSkeleton`: `Container` → `Card` with 16dp/0.5 shape.
+  - `_CareErrorCard`: custom layout → `PetfolioEmptyState` + `FilledButton` retry.
+  - `_EmptyRoutineState`: custom layout → `PetfolioEmptyState` with optional `FilledButton` action.
+  - `_SheetLabel`: hardcoded `TextStyle` → `tt.labelSmall!.copyWith(letterSpacing: 0.96, color: pt.ink500)`.
+  - Frequency selector in `_CareTaskFormSheet`: `GestureDetector+AnimatedContainer` pill chips → `FilterChip` (M3 native; `showCheckmark: false`).
+- **`lib/features/care/presentation/screens/medical_vault_screen.dart`** — M3 pass:
+  - AppBar title, sheet title → `textTheme.titleLarge` (no hardcoded Sora font).
+  - Header texts (petName label, `'Automated medical vault'`, description) → `textTheme.labelSmall` / `textTheme.headlineSmall` / `textTheme.bodyMedium`.
+  - `_VaultSection` section label → `textTheme.labelSmall!.copyWith(letterSpacing: 0.96)`.
+  - `_VaultSection` empty state: `Container` → `Card`.
+  - `_MedicalRecordCard` name/description/dateLine/view-doc text → `textTheme.*` tokens.
+  - `AddMedicalRecordSheet` record type picker: `GestureDetector+AnimatedContainer` → `FilterChip` (`showCheckmark: false`).
+  - All field labels (NAME, DOSAGE & FREQUENCY, NOTES, DOCUMENT, `_DateRow` labels) → `textTheme.labelSmall!.copyWith(letterSpacing: 0.96)`.
+  - Error state text → `textTheme.bodyMedium`.
+- **`lib/features/matching/presentation/screens/matching_screen.dart`** — M3 pass:
+  - `_EmptyDeck`: plain icon+text → card stack illustration (3 rotated `Card` widgets at varying angles/elevations) + `textTheme.titleMedium`/`textTheme.bodySmall`; subtitle text improved.
+  - `_DockButton`: `GestureDetector+AnimatedOpacity+Container(BoxDecoration circle)` → `AnimatedOpacity + SizedBox(Material(CircleBorder, clipBehavior: antiAlias) + InkWell)` for proper M3 ripple on circular buttons; `elevation` + `shadowColor` preserve the glow on elevated variant; `CircleBorder(side: ...)` preserves border on non-elevated variant.
+- `flutter analyze` — **No issues found.**
+
+**Next step:** Phase 2 complete. Please run (/remember) to save tokens before proceeding.
+
+---
+
+## 2026-05-25 — M3 UI Phase 1: Shared Widgets + Pet Profile/Home Screen
+
+- **`lib/core/widgets/petfolio_empty_state.dart`** — Added optional `action: Widget?` parameter; replaced hardcoded `TextStyle(fontFamily: 'Sora', ...)` with `textTheme.titleMedium` / `textTheme.bodyMedium`; padding increased to 32×24 for better centering.
+- **`lib/core/theme/app_theme.dart`** — Updated `CardTheme`: radius from 16 → 20dp (`radiusXl`), border hairline from 1.0 → 0.5dp; `surfaceTintColor: transparent` to suppress M3 elevation tinting.
+- **`lib/features/pet_profile/presentation/screens/pet_profile_screen.dart`** — Full M3 refactor:
+  - `_HeroCard`: Added `PetAvatar(PetAvatarSize.xl)` in top-right; added tasks-done badge chip (`X/Y done`); walk-due pill moved to left column.
+  - `_PetStatsRow`: `Container` + boxShadow → `Card(margin: zero)`.
+  - `_StatChip`: `TextStyle(fontFamily: Sora, ...)` → `textTheme.labelSmall` / `textTheme.titleSmall`.
+  - `_SellerDashboardCard`: `Container + GestureDetector` → `Card(clipBehavior) + InkWell`. Removed unused `pt` constructor param.
+  - `_ReminderCard`: `Container` → `Card`; custom "Mark done" `Container` → `FilledButton.tonal`.
+  - Social link in Overview tab: `Container + GestureDetector` → `Card + InkWell`.
+  - `_CareTaskRow` / `_HealthRecordRow`: `Container` → `Card` with 14dp shape override.
+  - `_AwardsStatCard` / `_XpProgressCard`: `Container` → `Card` with 16dp shape override; all text → `textTheme.*` tokens.
+  - `_BadgeCard`: `Container` → `Card`; dynamic `BorderSide` preserved for unlocked/locked visual.
+  - `_AwardsStatsSkeleton`: `Container` → `Card` (16dp shape).
+  - `_SectionLabel`: hardcoded style → `textTheme.labelSmall!.copyWith(letterSpacing: 0.96)`.
+  - `_EmptyPetsState`: emoji + raw text → `PetfolioEmptyState` + `FilledButton.icon` → `/onboarding`.
+  - All tab empty/error states → `PetfolioEmptyState` (with `action:` for retry buttons).
+  - Dropped unused `pt` constructor params from `_ProfileCareTab`, `_ProfileHealthTab`, `_ProfileAwardsTab`, `_ProfileRowSkeleton`, `_BadgeGrid`, etc.
+- `flutter analyze` — **No issues found.**
+
+**Next step:** Phase 1 complete. Please run (/remember) to save tokens before proceeding.
+
+---
+
 ## 2026-05-25 — UI/UX Foundation: M3 Theme Toggle + Adaptive Shell (Phase 0)
 
 - **`lib/core/theme/theme_mode_provider.dart`** (NEW) — `ThemeModeNotifier extends Notifier<ThemeMode>` with `toggle()` / `setMode()`; `themeModeProvider` (`NotifierProvider`). Starts on `ThemeMode.system`; toggle cycles between light ↔ dark.
