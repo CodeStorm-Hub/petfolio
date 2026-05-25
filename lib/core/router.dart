@@ -40,10 +40,12 @@ import '../features/pet_profile/presentation/screens/onboarding_screen.dart';
 import '../features/pet_profile/presentation/screens/pet_profile_screen.dart';
 import '../features/social/data/models/feed_post.dart';
 import '../features/social/presentation/screens/create_post_screen.dart';
+import '../features/social/presentation/screens/create_story_screen.dart';
 import '../features/social/presentation/screens/notifications_screen.dart';
 import '../features/social/presentation/screens/post_detail_screen.dart';
 import '../features/social/presentation/screens/social_profile_screen.dart';
 import '../features/social/presentation/screens/social_screen.dart';
+import '../features/social/presentation/screens/story_viewer_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Router provider — must be consumed with ref.watch in the app widget.
@@ -240,8 +242,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
-        path: '/social/create',
+        path: '/social/create-post',
         builder: (context, state) => const CreatePostScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/social/create-story',
+        builder: (context, state) => const CreateStoryScreen(),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
@@ -263,6 +270,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => SocialProfileScreen(
           petId: state.pathParameters['petId']!,
         ),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/social/stories',
+        builder: (context, state) {
+          final petId = state.uri.queryParameters['petId'] ?? '';
+          return StoryViewerScreen(initialPetId: petId);
+        },
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

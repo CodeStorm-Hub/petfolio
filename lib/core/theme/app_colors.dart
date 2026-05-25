@@ -46,25 +46,25 @@ abstract final class AppColors {
 
   // ── §2.3  Neutrals — cool-warm hybrid ─────────────────────────────────────
   static const ink950  = Color(0xFF0B1220); // Primary text (light)
-  static const ink950D = Color(0xFFF4F6FB); // Primary text (dark)
+  static const ink950D = Color(0xFFF8FAFC); // Primary text (dark)
   static const ink700  = Color(0xFF2A3447); // Body text (light)
-  static const ink700D = Color(0xFFC7CEDB); // Body text (dark)
+  static const ink700D = Color(0xFFCBD5E1); // Body text (dark)
   static const ink500  = Color(0xFF5C657A); // Secondary/caption (light)
-  static const ink500D = Color(0xFF8A93A6); // Secondary/caption (dark)
+  static const ink500D = Color(0xFF94A3B8); // Secondary/caption (dark)
   static const ink300  = Color(0xFFA3ABBC); // Placeholder (light)
-  static const ink300D = Color(0xFF5C657A); // Placeholder (dark)
+  static const ink300D = Color(0xFF64748B); // Placeholder (dark)
 
   static const line200  = Color(0xFFE4E7EF); // Hairline dividers (light)
-  static const line200D = Color(0xFF1F2738); // Hairline dividers (dark)
+  static const line200D = Color(0xFF334155); // Hairline dividers (dark)
   static const line100  = Color(0xFFEEF1F7); // Subtle dividers (light)
-  static const line100D = Color(0xFF172033); // Subtle dividers (dark)
+  static const line100D = Color(0xFF1E293B); // Subtle dividers (dark)
 
   static const surface0  = Color(0xFFFFFFFF); // Card / sheet (light)
-  static const surface0D = Color(0xFF0A0F1C); // Card / sheet (dark)
+  static const surface0D = Color(0xFF1E293B); // Card / sheet (dark)
   static const surface1  = Color(0xFFFAFBFD); // App background (light)
-  static const surface1D = Color(0xFF0F1525); // App background (dark)
+  static const surface1D = Color(0xFF0F172A); // App background (dark)
   static const surface2  = Color(0xFFF2F4F9); // Inset wells (light)
-  static const surface2D = Color(0xFF141B2D); // Inset wells (dark)
+  static const surface2D = Color(0xFF020617); // Inset wells (dark)
 
   // ── §2.4  Semantic ────────────────────────────────────────────────────────
   static const success  = Color(0xFF1F8A5B);

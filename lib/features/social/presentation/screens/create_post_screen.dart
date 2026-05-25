@@ -28,6 +28,14 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   static const _maxChars = 500;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(createPostControllerProvider.notifier).setIsStory(false);
+    });
+  }
+
+  @override
   void dispose() {
     _captionController.dispose();
     super.dispose();
@@ -344,7 +352,7 @@ class _ImageWell extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return AspectRatio(
-      aspectRatio: 4 / 3,
+      aspectRatio: 4 / 5,
       child: Stack(
         fit: StackFit.expand,
         children: [

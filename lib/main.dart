@@ -6,7 +6,8 @@ import 'package:marionette_flutter/marionette_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'marionette_debug_gate_stub.dart'
-    if (dart.library.io) 'marionette_debug_gate_io.dart' as marionette_gate;
+    if (dart.library.io) 'marionette_debug_gate_io.dart'
+    as marionette_gate;
 import 'core/router.dart';
 import 'core/services/notification_service.dart';
 import 'core/theme/theme.dart';
@@ -51,10 +52,7 @@ Future<void> main() async {
   Stripe.merchantIdentifier = 'merchant.com.petfolio';
   await Stripe.instance.applySettings();
 
-  await Supabase.initialize(
-    url: _supabaseUrl,
-    anonKey: _supabaseAnonKey,
-  );
+  await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
 
   await NotificationService.instance.initialize();
 
@@ -67,16 +65,17 @@ class PetfolioApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeProvider);
 
     return MaterialApp.router(
-      title: 'Petfolio',
+      title: 'PetFolio',
       debugShowCheckedModeBanner: false,
       scaffoldMessengerKey: appSnackBarMessengerKey,
 
       // ── Design system themes ─────────────────────────────────────────────
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
 
       routerConfig: router,
     );

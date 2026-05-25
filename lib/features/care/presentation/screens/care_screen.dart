@@ -33,7 +33,6 @@ class CareScreen extends ConsumerStatefulWidget {
 }
 
 class _CareScreenState extends ConsumerState<CareScreen> {
-  bool _outdoor = false;
   bool _onboardingSuccessHandled = false;
   bool _isGeneratingRoutine = false;
 
@@ -105,6 +104,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
     final activePet = ref.watch(activePetControllerProvider);
+    final themeMode = ref.watch(themeProvider);
 
     final petsAsync = ref.watch(petListProvider);
     if (activePet == null) {
@@ -155,7 +155,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
         );
 
     return Scaffold(
-      backgroundColor: _outdoor ? cs.surface : pt.surface1,
+      backgroundColor: pt.surface1,
       floatingActionButton: FloatingActionButton(
         key: const ValueKey<String>('care_fab_add_task'),
         onPressed: openAddSheet,
@@ -173,13 +173,15 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                   : null,
               actions: [
                 AppHeaderAction(
-                  iconKey: const ValueKey<String>('care_action_outdoor'),
-                  icon: _outdoor
-                      ? Icons.wb_sunny
-                      : Icons.wb_sunny_outlined,
-                  tooltip: _outdoor ? 'Indoor mode' : 'Outdoor mode',
-                  filled: _outdoor,
-                  onTap: () => setState(() => _outdoor = !_outdoor),
+                  iconKey: const ValueKey<String>('care_action_theme'),
+                  icon: themeMode == ThemeMode.dark
+                      ? Icons.light_mode_outlined
+                      : Icons.dark_mode_outlined,
+                  tooltip: themeMode == ThemeMode.dark
+                      ? 'Switch to light theme'
+                      : 'Switch to dark theme',
+                  onTap: () =>
+                      ref.read(themeProvider.notifier).toggleTheme(),
                 ),
               ],
             ),
@@ -192,7 +194,6 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                     children: [
                       _StreakBanner(
                         species: species,
-                        outdoor: _outdoor,
                       ),
                       const SizedBox(height: 24),
                       DecoratedBox(
@@ -228,7 +229,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.08 * 12,
-                                color: _outdoor ? AppColors.ink700 : pt.ink500,
+                                color: pt.ink500,
                               ),
                             ),
                             const Spacer(),
@@ -394,11 +395,9 @@ class _AiRoutineBanner extends StatelessWidget {
 class _StreakBanner extends ConsumerWidget {
   const _StreakBanner({
     required this.species,
-    required this.outdoor,
   });
 
   final PetSpecies species;
-  final bool outdoor;
 
   static const _dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   static const _monthShort = [
@@ -454,16 +453,14 @@ class _StreakBanner extends ConsumerWidget {
           colors: [accent, darkAccent],
         ),
         borderRadius: BorderRadius.circular(24),
-        boxShadow: outdoor
-            ? null
-            : [
-                BoxShadow(
-                  color: accent.withAlpha(136),
-                  blurRadius: 36,
-                  offset: const Offset(0, 18),
-                  spreadRadius: -16,
-                ),
-              ],
+        boxShadow: [
+          BoxShadow(
+            color: accent.withAlpha(136),
+            blurRadius: 36,
+            offset: const Offset(0, 18),
+            spreadRadius: -16,
+          ),
+        ],
       ),
       child: Stack(
         children: [
