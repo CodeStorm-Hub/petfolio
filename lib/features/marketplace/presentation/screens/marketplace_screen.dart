@@ -369,7 +369,7 @@ class _CategoryChips extends StatelessWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Container(
-      height: 104,
+      height: 112,
       padding: const EdgeInsets.only(top: 14, bottom: 6),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
