@@ -68,7 +68,8 @@
       "Bash(git commit -m ' *)",
       "WebFetch(domain:docs.nvidia.com)",
       "Bash(grep -i \"\\\\.dart$\")",
-      "Bash(xargs grep -l \"class.*Card\\\\|class.*Widget\")"
+      "Bash(xargs grep -l \"class.*Card\\\\|class.*Widget\")",
+      "Bash(not exist *)"
     ]
   }
 }

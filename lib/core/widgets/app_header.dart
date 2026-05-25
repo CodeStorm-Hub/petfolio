@@ -69,8 +69,17 @@ class AppHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final pet = ref.watch(activePetControllerProvider);
+    final pt    = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final pet   = ref.watch(activePetControllerProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final themeToggle = AppHeaderAction(
+      icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+      onTap: () => ref.read(themeModeProvider.notifier).toggle(),
+      tooltip: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+    );
+
+    final allActions = [...actions, themeToggle];
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -93,9 +102,9 @@ class AppHeader extends ConsumerWidget {
                 onTap: onOpenSwitcher,
               ),
             ),
-            for (var i = 0; i < actions.length; i++) ...[
+            for (var i = 0; i < allActions.length; i++) ...[
               if (i > 0) const SizedBox(width: 8),
-              _ActionButton(action: actions[i]),
+              _ActionButton(action: allActions[i]),
             ],
           ],
         ),

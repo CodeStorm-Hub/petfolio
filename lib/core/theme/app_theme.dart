@@ -454,6 +454,38 @@ abstract final class AppTheme {
         ),
       ),
 
+      // ── NavigationDrawer (expanded/desktop sidebar) ───────
+      navigationDrawerTheme: NavigationDrawerThemeData(
+        backgroundColor: isDark ? AppColors.surface0D : AppColors.surface0,
+        indicatorColor: isDark ? AppColors.blue100D : AppColors.blue100,
+        indicatorShape: const StadiumBorder(),
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final base = GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w600
+                : FontWeight.w500,
+          );
+          return base.copyWith(
+            color: states.contains(WidgetState.selected)
+                ? (isDark ? AppColors.blue500D : AppColors.blue500)
+                : (isDark ? AppColors.ink700D : AppColors.ink700),
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return IconThemeData(
+              color: isDark ? AppColors.blue500D : AppColors.blue500,
+            );
+          }
+          return IconThemeData(
+            color: isDark ? AppColors.ink500D : AppColors.ink500,
+          );
+        }),
+      ),
+
       // ── SnackBar ──────────────────────────────────────────
       snackBarTheme: SnackBarThemeData(
         backgroundColor: isDark ? AppColors.surface2D : AppColors.ink950,

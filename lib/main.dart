@@ -76,7 +76,7 @@ class PetfolioApp extends ConsumerWidget {
       // ── Design system themes ─────────────────────────────────────────────
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: ref.watch(themeModeProvider),
 
       routerConfig: router,
     );

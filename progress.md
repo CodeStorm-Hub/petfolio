@@ -2,6 +2,23 @@
 
 ---
 
+## 2026-05-25 — UI/UX Foundation: M3 Theme Toggle + Adaptive Shell (Phase 0)
+
+- **`lib/core/theme/theme_mode_provider.dart`** (NEW) — `ThemeModeNotifier extends Notifier<ThemeMode>` with `toggle()` / `setMode()`; `themeModeProvider` (`NotifierProvider`). Starts on `ThemeMode.system`; toggle cycles between light ↔ dark.
+- **`lib/core/theme/theme.dart`** — Exports `theme_mode_provider.dart`.
+- **`lib/main.dart`** — `themeMode:` now watches `themeModeProvider` instead of the hardcoded `ThemeMode.system`.
+- **`lib/core/theme/app_theme.dart`** — Added `NavigationDrawerThemeData` to `_build()`: surface/indicator colors aligned with existing blue-primary tokens; `WidgetStateProperty` icon/label colors match the NavigationBar/Rail pattern.
+- **`lib/core/router.dart`** — `AppShell` promoted to `ConsumerWidget`; split into three layout builders keyed on screen width:
+  - **Compact** (`< 600 dp`): `NavigationBar` (bottom) + `FloatingActionButton.small` (theme toggle, `miniEndFloat`, `heroTag: 'shell_theme_toggle'`).
+  - **Medium** (`600–1199 dp`): `NavigationRail` + `IconButton.filledTonal` in `trailing` (theme toggle).
+  - **Expanded** (`≥ 1200 dp`): Persistent `NavigationDrawer` in a `Row`, header row carries app icon + name + `IconButton.filledTonal` theme toggle; divider separates sidebar from content.
+- **Nav icons fixed**: Care now uses `health_and_safety_outlined` / `health_and_safety`; duplicate heart icon between Care and Match resolved.
+- `flutter analyze` — **No issues found.**
+
+**Next step:** Phase complete. Please run (/remember) to save tokens before proceeding to the next phase (individual feature screen redesigns).
+
+---
+
 ## 2026-05-25 — AI Routine v2: Full Pet Context + Weekly/Monthly Support
 
 - **DB migration applied** (`jqyjvhwlcqcsuwcqgcwf`): added `is_ai_suggested boolean NOT NULL DEFAULT false` to `care_tasks` + sparse index on `(pet_id, is_ai_suggested)` where true.

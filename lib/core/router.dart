@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'theme/theme_mode_provider.dart';
+
 import '../features/auth/presentation/controllers/auth_controller.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/registration_screen.dart';
@@ -372,20 +374,51 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 // ─────────────────────────────────────────────────────────────────────────────
-// AppShell — adaptive nav (bottom bar ≤ 599 dp, rail ≥ 600 dp)
+// AppShell — adaptive nav
+//   compact  : width < 600 dp  → NavigationBar + mini FAB theme toggle
+//   medium   : 600–1199 dp     → NavigationRail  + trailing theme toggle
+//   expanded : ≥ 1200 dp       → NavigationDrawer (persistent) + header toggle
 // ─────────────────────────────────────────────────────────────────────────────
 
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child});
 
   final Widget child;
 
+  static const double _mediumBreakpoint   = 600;
+  static const double _expandedBreakpoint = 1200;
+
   static const _destinations = [
-    _NavDestination(icon: Icons.pets_outlined, activeIcon: Icons.pets, label: 'Pets', path: '/home'),
-    _NavDestination(icon: Icons.favorite_border, activeIcon: Icons.favorite, label: 'Care', path: '/care'),
-    _NavDestination(icon: Icons.people_outline, activeIcon: Icons.people, label: 'Social', path: '/social'),
-    _NavDestination(icon: Icons.favorite_border_outlined, activeIcon: Icons.favorite, label: 'Match', path: '/matching'),
-    _NavDestination(icon: Icons.store_outlined, activeIcon: Icons.store, label: 'Market', path: '/marketplace'),
+    _NavDestination(
+      icon: Icons.pets_outlined,
+      activeIcon: Icons.pets,
+      label: 'Pets',
+      path: '/home',
+    ),
+    _NavDestination(
+      icon: Icons.health_and_safety_outlined,
+      activeIcon: Icons.health_and_safety,
+      label: 'Care',
+      path: '/care',
+    ),
+    _NavDestination(
+      icon: Icons.people_outline,
+      activeIcon: Icons.people,
+      label: 'Social',
+      path: '/social',
+    ),
+    _NavDestination(
+      icon: Icons.favorite_border,
+      activeIcon: Icons.favorite,
+      label: 'Match',
+      path: '/matching',
+    ),
+    _NavDestination(
+      icon: Icons.store_outlined,
+      activeIcon: Icons.store,
+      label: 'Market',
+      path: '/marketplace',
+    ),
   ];
 
   int _selectedIndex(BuildContext context) {
@@ -397,35 +430,26 @@ class AppShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final selectedIndex = _selectedIndex(context);
-    final isWide = MediaQuery.sizeOf(context).width >= 600;
+    final width         = MediaQuery.sizeOf(context).width;
+    final isDark        = Theme.of(context).brightness == Brightness.dark;
 
-    if (isWide) {
-      return Scaffold(
-        body: Row(
-          children: [
-            NavigationRail(
-              selectedIndex: selectedIndex,
-              labelType: NavigationRailLabelType.all,
-              onDestinationSelected: (i) =>
-                  context.go(_destinations[i].path),
-              destinations: [
-                for (final d in _destinations)
-                  NavigationRailDestination(
-                    icon: Icon(d.icon),
-                    selectedIcon: Icon(d.activeIcon),
-                    label: Text(d.label),
-                  ),
-              ],
-            ),
-            const VerticalDivider(thickness: 1, width: 1),
-            Expanded(child: child),
-          ],
-        ),
-      );
+    if (width >= _expandedBreakpoint) {
+      return _buildExpanded(context, ref, selectedIndex, isDark);
     }
+    if (width >= _mediumBreakpoint) {
+      return _buildMedium(context, ref, selectedIndex, isDark);
+    }
+    return _buildCompact(context, ref, selectedIndex);
+  }
 
+  // ── Compact: NavigationBar + mini FAB ──────────────────────────────────────
+  Widget _buildCompact(
+    BuildContext context,
+    WidgetRef ref,
+    int selectedIndex,
+  ) {
     return Scaffold(
       body: child,
       bottomNavigationBar: NavigationBar(
@@ -439,6 +463,116 @@ class AppShell extends StatelessWidget {
               selectedIcon: Icon(d.activeIcon),
               label: d.label,
             ),
+        ],
+      ),
+    );
+  }
+
+  // ── Medium: NavigationRail + trailing toggle ────────────────────────────────
+  Widget _buildMedium(
+    BuildContext context,
+    WidgetRef ref,
+    int selectedIndex,
+    bool isDark,
+  ) {
+    return Scaffold(
+      body: Row(
+        children: [
+          NavigationRail(
+            selectedIndex: selectedIndex,
+            labelType: NavigationRailLabelType.all,
+            onDestinationSelected: (i) => context.go(_destinations[i].path),
+            trailing: Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: IconButton.filledTonal(
+                onPressed: () =>
+                    ref.read(themeModeProvider.notifier).toggle(),
+                tooltip:
+                    isDark ? 'Switch to light mode' : 'Switch to dark mode',
+                icon: Icon(
+                  isDark
+                      ? Icons.light_mode_rounded
+                      : Icons.dark_mode_rounded,
+                ),
+              ),
+            ),
+            destinations: [
+              for (final d in _destinations)
+                NavigationRailDestination(
+                  icon: Icon(d.icon),
+                  selectedIcon: Icon(d.activeIcon),
+                  label: Text(d.label),
+                ),
+            ],
+          ),
+          const VerticalDivider(thickness: 1, width: 1),
+          Expanded(child: child),
+        ],
+      ),
+    );
+  }
+
+  // ── Expanded: persistent NavigationDrawer with header toggle ───────────────
+  Widget _buildExpanded(
+    BuildContext context,
+    WidgetRef ref,
+    int selectedIndex,
+    bool isDark,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    return Scaffold(
+      body: Row(
+        children: [
+          SizedBox(
+            width: 280,
+            child: NavigationDrawer(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (i) =>
+                  context.go(_destinations[i].path),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 12, 12),
+                  child: Row(
+                    children: [
+                      Icon(Icons.pets_rounded, color: cs.primary, size: 22),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Petfolio',
+                        style: tt.titleMedium?.copyWith(
+                          color: cs.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton.filledTonal(
+                        onPressed: () =>
+                            ref.read(themeModeProvider.notifier).toggle(),
+                        tooltip: isDark
+                            ? 'Switch to light mode'
+                            : 'Switch to dark mode',
+                        icon: Icon(
+                          isDark
+                              ? Icons.light_mode_rounded
+                              : Icons.dark_mode_rounded,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(indent: 24, endIndent: 24),
+                const SizedBox(height: 4),
+                for (final d in _destinations)
+                  NavigationDrawerDestination(
+                    icon: Icon(d.icon),
+                    selectedIcon: Icon(d.activeIcon),
+                    label: Text(d.label),
+                  ),
+              ],
+            ),
+          ),
+          const VerticalDivider(thickness: 1, width: 1),
+          Expanded(child: child),
         ],
       ),
     );
