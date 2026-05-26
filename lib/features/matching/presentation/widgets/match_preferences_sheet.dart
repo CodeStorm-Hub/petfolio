@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petfolio/core/theme/app_colors.dart';
 import 'package:petfolio/core/theme/app_theme.dart';
 import 'package:petfolio/features/pet_profile/data/models/pet_species.dart';
 
@@ -13,7 +12,7 @@ class MatchPreferencesSheet extends ConsumerWidget {
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        barrierColor: const Color(0x6B0B1220),
+        barrierColor: Theme.of(context).colorScheme.scrim,
         useSafeArea: true,
         builder: (_) => const MatchPreferencesSheet(),
       );
@@ -47,13 +46,7 @@ class MatchPreferencesSheet extends ConsumerWidget {
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(PetfolioThemeExtension.radius2xl),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.shadowE4L,
-                blurRadius: 60,
-                offset: const Offset(0, -20),
-              ),
-            ],
+            boxShadow: pt.shadowE4,
           ),
           child: ListView(
             controller: scrollController,
@@ -92,9 +85,7 @@ class MatchPreferencesSheet extends ConsumerWidget {
               ),
               Text(
                 'Filters apply to your swipe deck. Changes refresh nearby profiles shortly after you adjust them.',
-                style: TextStyle(
-                  fontSize: 13,
-                  height: 1.45,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: pt.ink500,
                 ),
               ),
@@ -119,7 +110,9 @@ class MatchPreferencesSheet extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text(
                   'All species — tap to narrow',
-                  style: TextStyle(fontSize: 12, color: pt.ink300),
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: pt.ink300,
+                  ),
                 ),
               ],
               const SizedBox(height: 28),
@@ -142,11 +135,11 @@ class MatchPreferencesSheet extends ConsumerWidget {
                 children: [
                   Text(
                     '1 mi',
-                    style: TextStyle(fontSize: 12, color: pt.ink300),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(color: pt.ink300),
                   ),
                   Text(
                     '50 mi',
-                    style: TextStyle(fontSize: 12, color: pt.ink300),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(color: pt.ink300),
                   ),
                 ],
               ),
@@ -179,11 +172,11 @@ class MatchPreferencesSheet extends ConsumerWidget {
                 children: [
                   Text(
                     '0 yrs',
-                    style: TextStyle(fontSize: 12, color: pt.ink300),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(color: pt.ink300),
                   ),
                   Text(
                     '$kMatchMaxAgeYears yrs',
-                    style: TextStyle(fontSize: 12, color: pt.ink300),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(color: pt.ink300),
                   ),
                 ],
               ),
@@ -225,10 +218,8 @@ class _SectionLabel extends StatelessWidget {
         if (trailing != null)
           Text(
             trailing!,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppColors.blue500,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
       ],
@@ -274,23 +265,25 @@ class _SpeciesPill extends StatelessWidget {
                 BorderRadius.circular(PetfolioThemeExtension.radiusPill),
             border: Border.all(color: border, width: selected ? 1.5 : 1),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(emoji, style: const TextStyle(fontSize: 15)),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: fg,
-                ),
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(emoji, style: const TextStyle(fontSize: 15)),
+                  const SizedBox(width: 6),
+                  Text(
+                    label,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: fg,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
     );
   }
 }

@@ -269,7 +269,7 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
                 ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
                     child: IgnorePointer(
                       ignoring: overlayActive,
                       child: locationAccessAsync.when(
@@ -286,13 +286,17 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
                 if (!locationBlocked)
                   IgnorePointer(
                     ignoring: overlayActive,
-                    child: _ActionDock(
-                      state: state,
-                      notifier: notifier,
-                      bufferAsync: bufferAsync,
+                    child: Container(
+                      padding: EdgeInsets.only(
+                        bottom: 90.0 + MediaQuery.paddingOf(context).bottom,
+                      ),
+                      child: _ActionDock(
+                        state: state,
+                        notifier: notifier,
+                        bufferAsync: bufferAsync,
+                      ),
                     ),
                   ),
-                const SizedBox(height: 16),
               ],
             ),
             if (overlayActive)
@@ -767,67 +771,68 @@ class _CardSurface extends StatelessWidget {
     };
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(32),
+      borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius3xl),
       child: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            center: const Alignment(-0.4, -0.4),
-            radius: 1.2,
-            colors: [softColor, mainColor],
-          ),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 50,
-              offset: Offset(0, 24),
-              spreadRadius: -20,
+        color: Theme.of(context).colorScheme.surface,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: const Alignment(-0.4, -0.4),
+              radius: 1.2,
+              colors: [softColor, mainColor],
             ),
-          ],
-        ),
+          ),
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Emoji blob
-            Center(
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 60),
-                child: Text(
-                  emoji,
-                  style: const TextStyle(
-                    fontSize: 160,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black26,
-                        blurRadius: 28,
-                        offset: Offset(0, 12),
-                      ),
-                    ],
+            if (candidate.avatarUrl != null && candidate.avatarUrl!.isNotEmpty)
+              Image.network(
+                candidate.avatarUrl!,
+                fit: BoxFit.cover,
+                width: double.infinity,
+              )
+            else
+              // Emoji blob fallback
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 60),
+                  child: Text(
+                    emoji,
+                    style: TextStyle(
+                      fontSize: 160,
+                      shadows: [
+                        Shadow(
+                          color: Theme.of(context).colorScheme.shadow.withAlpha(66),
+                          blurRadius: 28,
+                          offset: const Offset(0, 12),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
+
 
             // Distance Pill
             Positioned(
               top: 14,
               right: 14,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusPill),
                 child: Container(
-                  color: Colors.black.withAlpha(100),
+                  color: Theme.of(context).colorScheme.shadow.withAlpha(100),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.location_on, size: 12, color: Colors.white),
+                      Icon(Icons.location_on, size: 12, color: Theme.of(context).colorScheme.surface),
                       const SizedBox(width: 4),
                       Text(
                         candidate.distance,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.surface,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -843,12 +848,17 @@ class _CardSurface extends StatelessWidget {
               right: 0,
               bottom: 0,
               child: Container(
-                padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
-                decoration: const BoxDecoration(
+                padding: const EdgeInsets.fromLTRB(20, 60, 20, 24),
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black87],
+                    colors: [
+                      Colors.transparent,
+                      Theme.of(context).colorScheme.shadow.withAlpha(80),
+                      Theme.of(context).colorScheme.shadow.withAlpha(220),
+                      Theme.of(context).colorScheme.shadow,
+                    ],
                   ),
                 ),
                 child: Column(
@@ -864,58 +874,54 @@ class _CardSurface extends StatelessWidget {
                             '${candidate.name},',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              color: Theme.of(context).colorScheme.surface,
                             ),
                           ),
                         ),
                         const SizedBox(width: 10),
                         Text(
                           candidate.age,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white70,
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w400,
+                            color: Theme.of(context).colorScheme.surface.withAlpha(220),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      candidate.breed,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white70,
-                      ),
-                    ),
                     const SizedBox(height: 8),
                     Text(
-                      candidate.bio,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        height: 1.4,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                      candidate.breed,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.surface.withAlpha(220),
                       ),
                     ),
                     const SizedBox(height: 12),
+                    Text(
+                      candidate.bio,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        height: 1.5,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.surface,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
+                      spacing: 8,
+                      runSpacing: 8,
                       children: candidate.traits.take(3).map((t) {
                         return ClipRRect(
-                          borderRadius: BorderRadius.circular(999),
+                          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusPill),
                           child: Container(
-                            color: Colors.white.withAlpha(56),
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            color: Theme.of(context).colorScheme.surface.withAlpha(70),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             child: Text(
                               t,
-                              style: const TextStyle(
-                                fontSize: 11,
+                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.surface,
                               ),
                             ),
                           ),
@@ -928,6 +934,7 @@ class _CardSurface extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -948,6 +955,8 @@ class _ActionDock extends StatelessWidget {
     final deck = bufferAsync.asData?.value.candidates ?? const <DiscoveryCandidate>[];
     final disabled = state.isExiting || deck.isEmpty;
 
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
       child: Row(
@@ -956,7 +965,7 @@ class _ActionDock extends StatelessWidget {
         children: [
           _DockButton(
             size: 56,
-            color: AppColors.ink500,
+            color: pt.ink500,
             bgColor: Theme.of(context).colorScheme.surface,
             label: '✕',
             fontSize: 22,
@@ -965,8 +974,8 @@ class _ActionDock extends StatelessWidget {
           const SizedBox(width: 16),
           _DockButton(
             size: 48,
-            color: Colors.white,
-            bgColor: AppColors.lilac,
+            color: Theme.of(context).colorScheme.onPrimary,
+            bgColor: pt.pillarMatch,
             label: '⭐',
             fontSize: 19,
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.superPaw),
@@ -974,26 +983,26 @@ class _ActionDock extends StatelessWidget {
           const SizedBox(width: 16),
           _DockButton(
             size: 72,
-            color: Colors.white,
-            bgColor: AppColors.poppy,
+            color: Theme.of(context).colorScheme.onPrimary,
+            bgColor: pt.pillarSocial,
             label: '🐾',
             fontSize: 32,
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.match),
           ),
           const SizedBox(width: 16),
-          const _DockButton(
+          _DockButton(
             size: 48,
-            color: Colors.white,
-            bgColor: AppColors.sunny,
+            color: Theme.of(context).colorScheme.onPrimary,
+            bgColor: pt.pillarCare,
             label: '🦴',
             fontSize: 19,
             onTap: null,
           ),
           const SizedBox(width: 16),
-          const _DockButton(
+          _DockButton(
             size: 56,
-            color: Colors.white,
-            bgColor: AppColors.mint,
+            color: Theme.of(context).colorScheme.onPrimary,
+            bgColor: pt.pillarHealth,
             label: '↺',
             fontSize: 22,
             onTap: null,
@@ -1051,7 +1060,7 @@ class _DockButton extends StatelessWidget {
           ),
           child: Text(
             label,
-            style: TextStyle(
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               fontSize: fontSize,
               fontWeight: FontWeight.w900,
               color: color,
@@ -1080,7 +1089,7 @@ class _SwipeLabel extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
           fontSize: 17,
           fontWeight: FontWeight.w700,
           color: color,
