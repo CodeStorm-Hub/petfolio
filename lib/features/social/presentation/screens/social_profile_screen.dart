@@ -111,7 +111,7 @@ class SocialProfileScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: Container(
                   color: cs.surface,
-                  child: Divider(height: 1, thickness: 0.5, color: pt.line200),
+                  child: Divider(height: 1, thickness: 0.5, color: pt.line),
                 ),
               ),
 
@@ -410,7 +410,7 @@ class _AwardsSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Expanded(child: Divider(height: 1, color: pt.line100)),
+                Expanded(child: Divider(height: 1, color: pt.line2)),
               ],
             ),
           ),
@@ -722,7 +722,7 @@ class _OtherProfileButtons extends ConsumerWidget {
           child: OutlinedButton(
             style: OutlinedButton.styleFrom(
               foregroundColor: cs.onSurface,
-              side: BorderSide(color: pt.line200),
+              side: BorderSide(color: pt.line),
               padding: EdgeInsets.zero,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -768,7 +768,7 @@ class _ActionButton extends StatelessWidget {
           )
         : OutlinedButton.styleFrom(
             foregroundColor: cs.onSurface,
-            side: BorderSide(color: pt.line200),
+            side: BorderSide(color: pt.line),
             padding: EdgeInsets.zero,
             minimumSize: const Size.fromHeight(36),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

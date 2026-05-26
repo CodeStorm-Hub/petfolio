@@ -1,30 +1,24 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:petfolio/features/pet_profile/data/models/pet_species.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import 'skeleton_loader.dart';
 
+export 'package:petfolio/features/pet_profile/data/models/pet_species.dart'
+    show PetSpecies;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Size token
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// §4.4: avatars always use `pill` radius (fully circular).
 enum PetAvatarSize {
-  sm(32),
-  md(40),
-  lg(48),
-  xl(56);
+  sm(32), md(40), lg(48), xl(56), xxl(72);
 
   const PetAvatarSize(this.dp);
-
-  /// Logical-pixel diameter of the avatar circle.
   final double dp;
-
-  /// Status indicator dot diameter (~25 % of avatar, min 8 dp).
   double get dotSize => (dp * 0.25).clamp(8.0, 16.0);
-
-  /// White ring around the dot keeps it legible on any background.
   double get ringWidth => dp < 48 ? 1.5 : 2.0;
 }
 
@@ -32,55 +26,28 @@ enum PetAvatarSize {
 // PetAvatar
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Circular avatar for pets or users, with an optional online/offline indicator.
-///
-/// Follows PetFolio §4.4: avatars always use `pill` (fully circular) radius.
-/// The online dot uses `meadow/500` (Health pillar green) as its color per
-/// the design system's semantic color usage.
-///
-/// ```dart
-/// // Pet with online indicator
-/// PetAvatar(
-///   imageUrl: pet.avatarUrl,
-///   isOnline: true,
-///   semanticLabel: pet.name,
-/// )
-///
-/// // Placeholder / no image
-/// PetAvatar(size: PetAvatarSize.lg)
-///
-/// // Custom initials fallback
-/// PetAvatar(initials: 'MX', size: PetAvatarSize.md)
-/// ```
 class PetAvatar extends StatelessWidget {
   const PetAvatar({
     super.key,
     this.imageUrl,
+    this.species,
     this.size = PetAvatarSize.md,
     this.isOnline,
     this.semanticLabel = '',
     this.initials,
+    this.showRing = false,
     this.onTap,
     this.borderColor,
   });
 
-  /// Remote image URL. Uses [CachedNetworkImage] with a shimmer placeholder.
   final String? imageUrl;
-
+  final PetSpecies? species;
   final PetAvatarSize size;
-
-  /// `true` → green dot, `false` → gray dot, `null` → no indicator.
   final bool? isOnline;
-
-  /// Accessibility label passed to [Semantics].
   final String semanticLabel;
-
-  /// Shown when [imageUrl] is null or fails to load. Max 2 characters.
   final String? initials;
-
+  final bool showRing;
   final VoidCallback? onTap;
-
-  /// Optional colored ring around the avatar (e.g. pillar accent for active match).
   final Color? borderColor;
 
   @override
@@ -88,46 +55,60 @@ class PetAvatar extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final d = size.dp;
 
-    Widget avatar = _AvatarImage(
-      imageUrl: imageUrl,
-      initials: initials,
-      diameter: d,
-      isDark: isDark,
-    );
+    Widget avatar;
 
-    // Optional colored ring
-    if (borderColor != null) {
-      avatar = Container(
-        width: d + 4,
-        height: d + 4,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: borderColor!, width: 2),
-        ),
-        child: avatar,
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
+      avatar = _NetworkAvatar(
+        imageUrl: imageUrl!,
+        diameter: d,
+        isDark: isDark,
+        species: species,
+        initials: initials,
+      );
+    } else {
+      avatar = _SpeciesDisc(
+        species: species,
+        diameter: d,
+        isDark: isDark,
+        initials: initials,
       );
     }
 
-    // Stack with status indicator
+    if (showRing || borderColor != null) {
+      if (borderColor != null) {
+        avatar = Container(
+          width: d + 4,
+          height: d + 4,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: borderColor!, width: 2),
+          ),
+          child: avatar,
+        );
+      } else {
+        avatar = _RainbowRing(diameter: d, child: avatar);
+      }
+    }
+
     if (isOnline != null) {
       avatar = Stack(
         clipBehavior: Clip.none,
         children: [
           avatar,
           Positioned(
-            right: borderColor != null ? 2 : 0,
-            bottom: borderColor != null ? 2 : 0,
+            right: 0,
+            bottom: 0,
             child: _StatusDot(
               isOnline: isOnline!,
-              size: size,
               isDark: isDark,
+              dotSize: size.dotSize,
+              ringWidth: size.ringWidth,
             ),
           ),
         ],
       );
     }
 
-    // Tap affordance (§5.1: touch targets ≥ 48 dp)
     if (onTap != null) {
       final hitArea = d < 48 ? 48.0 : d;
       avatar = GestureDetector(
@@ -137,142 +118,173 @@ class PetAvatar extends StatelessWidget {
     }
 
     return Semantics(
-      label: semanticLabel.isNotEmpty
-          ? '$semanticLabel, ${isOnline == true ? 'online' : isOnline == false ? 'offline' : ''}'
-          : null,
+      label: semanticLabel.isNotEmpty ? semanticLabel : null,
       image: imageUrl != null,
       child: avatar,
     );
   }
 }
 
-// ── Avatar image ─────────────────────────────────────────────────────────────
+// ─── Species emoji disc ───────────────────────────────────────────────────────
 
-class _AvatarImage extends StatelessWidget {
-  const _AvatarImage({
-    required this.imageUrl,
-    required this.initials,
+class _SpeciesDisc extends StatelessWidget {
+  const _SpeciesDisc({
+    required this.species,
     required this.diameter,
     required this.isDark,
+    this.initials,
   });
 
-  final String? imageUrl;
-  final String? initials;
+  final PetSpecies? species;
   final double diameter;
   final bool isDark;
+  final String? initials;
 
   @override
   Widget build(BuildContext context) {
-    final radius = diameter / 2;
-    final bgColor = isDark ? AppColors.blue100D : AppColors.blue100;
-    final fgColor = isDark ? AppColors.blue500D : AppColors.blue700;
+    final sp = species ?? PetSpecies.dog;
+    final base = sp.resolvedAccent(isDark);
+    final soft = sp.resolvedTint(isDark);
 
-    if (imageUrl != null && imageUrl!.isNotEmpty) {
-      return ClipOval(
-        child: CachedNetworkImage(
-          imageUrl: imageUrl!,
-          width: diameter,
-          height: diameter,
-          fit: BoxFit.cover,
-          placeholder: (_, _) => SkeletonLoader(
-            width: diameter,
-            height: diameter,
-            borderRadius: radius,
-          ),
-          errorWidget: (_, _, _) => _InitialsCircle(
-            initials: initials,
-            diameter: diameter,
-            bgColor: bgColor,
-            fgColor: fgColor,
-          ),
+    return Container(
+      width: diameter,
+      height: diameter,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          center: const Alignment(-0.3, -0.3),
+          radius: 0.9,
+          colors: [soft, base],
         ),
-      );
-    }
-
-    return _InitialsCircle(
-      initials: initials,
-      diameter: diameter,
-      bgColor: bgColor,
-      fgColor: fgColor,
+      ),
+      alignment: Alignment.center,
+      child: initials != null
+          ? Text(
+              initials!.substring(0, initials!.length.clamp(0, 2)).toUpperCase(),
+              style: TextStyle(
+                fontSize: (diameter * 0.35).clamp(10.0, 24.0),
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                height: 1.0,
+              ),
+            )
+          : Text(
+              sp.emoji,
+              style: TextStyle(fontSize: diameter * 0.55, height: 1.0),
+            ),
     );
   }
 }
 
-class _InitialsCircle extends StatelessWidget {
-  const _InitialsCircle({
-    required this.initials,
+// ─── Network avatar ───────────────────────────────────────────────────────────
+
+class _NetworkAvatar extends StatelessWidget {
+  const _NetworkAvatar({
+    required this.imageUrl,
     required this.diameter,
-    required this.bgColor,
-    required this.fgColor,
+    required this.isDark,
+    this.species,
+    this.initials,
   });
 
-  final String? initials;
+  final String imageUrl;
   final double diameter;
-  final Color bgColor;
-  final Color fgColor;
+  final bool isDark;
+  final PetSpecies? species;
+  final String? initials;
 
   @override
   Widget build(BuildContext context) {
-    final label = initials?.substring(0, initials!.length.clamp(0, 2)).toUpperCase() ?? '?';
-    return Container(
-      width: diameter,
-      height: diameter,
-      decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-      alignment: Alignment.center,
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: (diameter * 0.35).clamp(10.0, 24.0),
-          fontWeight: FontWeight.w600,
-          color: fgColor,
-          height: 1.0,
+    return ClipOval(
+      child: CachedNetworkImage(
+        imageUrl: imageUrl,
+        width: diameter,
+        height: diameter,
+        fit: BoxFit.cover,
+        placeholder: (_, _) => SkeletonLoader(
+          width: diameter,
+          height: diameter,
+          borderRadius: diameter / 2,
+        ),
+        errorWidget: (_, _, _) => _SpeciesDisc(
+          species: species,
+          diameter: diameter,
+          isDark: isDark,
+          initials: initials,
         ),
       ),
     );
   }
 }
 
-// ── Status indicator dot ─────────────────────────────────────────────────────
+// ─── Rainbow ring ─────────────────────────────────────────────────────────────
+
+class _RainbowRing extends StatelessWidget {
+  const _RainbowRing({required this.diameter, required this.child});
+
+  final double diameter;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: diameter + 10,
+      height: diameter + 10,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: SweepGradient(
+          startAngle: 3.8,
+          colors: [
+            AppColors.tangerine,
+            AppColors.poppy,
+            AppColors.sunny,
+            AppColors.mint,
+            AppColors.tangerine,
+          ],
+        ),
+      ),
+      padding: const EdgeInsets.all(2), // 2px gradient border
+      child: Container(
+        decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+        padding: const EdgeInsets.all(3), // 3px white gap
+        child: child,
+      ),
+    );
+  }
+}
+
+// ─── Status dot ───────────────────────────────────────────────────────────────
 
 class _StatusDot extends StatelessWidget {
   const _StatusDot({
     required this.isOnline,
-    required this.size,
     required this.isDark,
+    required this.dotSize,
+    required this.ringWidth,
   });
 
   final bool isOnline;
-  final PetAvatarSize size;
   final bool isDark;
+  final double dotSize;
+  final double ringWidth;
 
   @override
   Widget build(BuildContext context) {
-    final dotDiameter = size.dotSize;
-    final ringWidth = size.ringWidth;
-
-    // Online: meadow/500 (Health green — vitality / wellness streak color).
-    // Offline: ink/300 (tertiary / placeholder neutral).
     final dotColor = isOnline
-        ? (isDark ? AppColors.meadow500D : AppColors.meadow500)
+        ? (isDark ? AppColors.mintD : AppColors.mint)
         : (isDark ? AppColors.ink300D : AppColors.ink300);
-
     final ringColor = isDark ? AppColors.surface0D : AppColors.surface0;
 
     return AnimatedContainer(
       duration: PetfolioThemeExtension.durationSm,
-      width: dotDiameter,
-      height: dotDiameter,
+      width: dotSize,
+      height: dotSize,
       decoration: BoxDecoration(
         color: dotColor,
         shape: BoxShape.circle,
         border: Border.all(color: ringColor, width: ringWidth),
-        // Subtle shadow so dot reads over both light and dark images
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(40),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
+          BoxShadow(color: Colors.black.withAlpha(40), blurRadius: 2, offset: const Offset(0, 1)),
         ],
       ),
     );

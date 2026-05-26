@@ -1,122 +1,148 @@
 import 'package:flutter/painting.dart';
 
-/// Raw design-token color constants for the PetFolio design system.
-/// Every value maps 1-to-1 to §2 of the PetFolio Design System spec.
-///
-/// Suffix-less names are **light-mode** values.
-/// Names ending in `D` are the **dark-mode** counterpart.
-///
-/// Prefer consuming [PetfolioThemeExtension] inside widgets — it
-/// resolves the correct light/dark pair automatically.
 abstract final class AppColors {
-  // ── §2.1  Blue primary ramp ────────────────────────────────────────────────
-  static const blue50   = Color(0xFFEEF4FF);
-  static const blue100  = Color(0xFFD6E4FF);
-  static const blue200  = Color(0xFFAEC6FF);
-  static const blue300  = Color(0xFF7FA3FF);
-  static const blue400  = Color(0xFF4B7DFA);
-  static const blue500  = Color(0xFF2563EB); // ★ Primary brand (light)
-  static const blue600  = Color(0xFF1D4FCC);
-  static const blue700  = Color(0xFF173FA3);
-  static const blue800  = Color(0xFF0F2D75);
-  static const blue900  = Color(0xFF091B47);
+  // ── Warm primary palette ─────────────────────────────────────────────────────
+  static const cream        = Color(0xFFFFF4E6);
+  static const cream2       = Color(0xFFFFEAD2);
+  static const creamD       = Color(0xFF1A1014);
+  static const cream2D      = Color(0xFF221319);
 
-  static const blue50D  = Color(0xFF0F1A2E);
-  static const blue100D = Color(0xFF152340);
-  static const blue200D = Color(0xFF1E325C);
-  static const blue300D = Color(0xFF2C4E91);
-  static const blue400D = Color(0xFF5C8DFF);
-  static const blue500D = Color(0xFF3D7BFF); // ★ Primary brand (dark, lifted for APCA)
-  static const blue600D = Color(0xFF2C66E0);
-  static const blue700D = Color(0xFF1F4FB8);
-  static const blue800D = Color(0xFF16387F);
-  static const blue900D = Color(0xFF0B1F4D);
+  // ── Tangerine — Pets / primary action ───────────────────────────────────────
+  static const tangerine     = Color(0xFFFF8A4C);
+  static const tangerine700  = Color(0xFFE0651E);
+  static const tangerineSoft = Color(0xFFFFE0CB);
+  static const tangerineD    = Color(0xFFFFA374);
+  static const tangerine700D = Color(0xFFFFB886);
+  static const tangerineSoftD= Color(0xFF4A2516);
 
-  // ── §2.2  Secondaries — warm empathetic family ────────────────────────────
-  static const sunset500   = Color(0xFFF4A261); // Social pillar
-  static const sunset500D  = Color(0xFFF6B27A);
-  static const coral500    = Color(0xFFE76F51); // Match pillar
-  static const coral500D   = Color(0xFFF08770);
-  static const meadow500   = Color(0xFF6BAF92); // Health pillar
-  static const meadow500D  = Color(0xFF7BC4A4);
-  static const apricot500  = Color(0xFFF5C49B); // Marketplace pillar
-  static const apricot500D = Color(0xFFE8B58A);
-  static const mulberry500  = Color(0xFF9B5C8A); // Premium/breed-match
-  static const mulberry500D = Color(0xFFB274A0);
+  // ── Poppy — Social / danger ─────────────────────────────────────────────────
+  static const poppy     = Color(0xFFFF3D3D);
+  static const poppy700  = Color(0xFFC41818);
+  static const poppySoft = Color(0xFFFFE0E0);
+  static const poppyD    = Color(0xFFFF7070);
+  static const poppy700D = Color(0xFFFF9898);
+  static const poppySoftD= Color(0xFF3D1010);
 
-  // ── §2.3  Neutrals — cool-warm hybrid ─────────────────────────────────────
-  static const ink950  = Color(0xFF0B1220); // Primary text (light)
-  static const ink950D = Color(0xFFF8FAFC); // Primary text (dark)
-  static const ink700  = Color(0xFF2A3447); // Body text (light)
-  static const ink700D = Color(0xFFCBD5E1); // Body text (dark)
-  static const ink500  = Color(0xFF5C657A); // Secondary/caption (light)
-  static const ink500D = Color(0xFF94A3B8); // Secondary/caption (dark)
-  static const ink300  = Color(0xFFA3ABBC); // Placeholder (light)
-  static const ink300D = Color(0xFF64748B); // Placeholder (dark)
+  // ── Mint — Health / marketplace ─────────────────────────────────────────────
+  static const mint     = Color(0xFF2FCBA0);
+  static const mint700  = Color(0xFF198C6E);
+  static const mintSoft = Color(0xFFBFF1E0);
+  static const mintD    = Color(0xFF59E0BB);
+  static const mint700D = Color(0xFF62E8BE);
+  static const mintSoftD= Color(0xFF163A2E);
 
-  static const line200  = Color(0xFFE4E7EF); // Hairline dividers (light)
-  static const line200D = Color(0xFF334155); // Hairline dividers (dark)
-  static const line100  = Color(0xFFEEF1F7); // Subtle dividers (light)
-  static const line100D = Color(0xFF1E293B); // Subtle dividers (dark)
+  // ── Sunny — Care / streak ───────────────────────────────────────────────────
+  static const sunny     = Color(0xFFFFC53D);
+  static const sunny700  = Color(0xFFC68B0F);
+  static const sunnySoft = Color(0xFFFFEDB3);
+  static const sunnyD    = Color(0xFFFFD668);
+  static const sunny700D = Color(0xFFFFD96E);
+  static const sunnySoftD= Color(0xFF3D2B0A);
 
-  static const surface0  = Color(0xFFFFFFFF); // Card / sheet (light)
-  static const surface0D = Color(0xFF1E293B); // Card / sheet (dark)
-  static const surface1  = Color(0xFFFAFBFD); // App background (light)
-  static const surface1D = Color(0xFF0F172A); // App background (dark)
-  static const surface2  = Color(0xFFF2F4F9); // Inset wells (light)
-  static const surface2D = Color(0xFF020617); // Inset wells (dark)
+  // ── Lilac — Match ──────────────────────────────────────────────────────────
+  static const lilac     = Color(0xFFA98BFF);
+  static const lilac700  = Color(0xFF6E4DDB);
+  static const lilacSoft = Color(0xFFE2D6FF);
+  static const lilacD    = Color(0xFFC1A7FF);
+  static const lilac700D = Color(0xFFC8AEFF);
+  static const lilacSoftD= Color(0xFF2E2249);
 
-  // ── §2.4  Semantic ────────────────────────────────────────────────────────
-  static const success  = Color(0xFF1F8A5B);
-  static const successD = Color(0xFF3FB57F);
-  static const warning  = Color(0xFFC97A1A);
-  static const warningD = Color(0xFFF0A23A);
-  static const danger   = Color(0xFFD14343);
-  static const dangerD  = Color(0xFFF26A6A);
-  static const info     = Color(0xFF2A6FDB);
-  static const infoD    = Color(0xFF5C95F2);
+  // ── Sky — Bird species accent ───────────────────────────────────────────────
+  static const sky     = Color(0xFF6EC8FF);
+  static const sky700  = Color(0xFF2895DA);
+  static const skySoft = Color(0xFFCDEAFF);
+  static const skyD    = Color(0xFF6EC8FF);
+  static const skySoftD= Color(0xFF0B2840);
 
-  // ── §4.1  Glass fills — ARGB; alpha = round(opacity × 255) ───────────────
-  // rgba(255,255,255,0.62) → α = 158 = 0x9E
+  // ── Ink — Text & icons ──────────────────────────────────────────────────────
+  static const ink950  = Color(0xFF261308);
+  static const ink700  = Color(0xFF5E3A28);
+  static const ink500  = Color(0xFF957762);
+  static const ink300  = Color(0xFFD6C2B0);
+  static const ink950D = Color(0xFFFFF1E1);
+  static const ink700D = Color(0xFFE9CFB8);
+  static const ink500D = Color(0xFFB89685);
+  static const ink300D = Color(0xFFB09080);
+
+  // ── Dividers / lines ────────────────────────────────────────────────────────
+  static const line    = Color(0xFFF4E2CB);
+  static const line2   = Color(0xFFEFD8BB);
+  static const lineD   = Color(0xFF47313F);
+  static const line2D  = Color(0xFF5A404C);
+
+  // ── Surfaces ────────────────────────────────────────────────────────────────
+  static const surface0  = Color(0xFFFFFFFF);
+  static const surface1  = Color(0xFFFFF4E6); // cream
+  static const surface2  = Color(0xFFFFFAF3);
+  static const surface0D = Color(0xFF2A1820);
+  static const surface1D = Color(0xFF1A1014);
+  static const surface2D = Color(0xFF321C25);
+
+  // ── Semantic ────────────────────────────────────────────────────────────────
+  static const success  = Color(0xFF2FCBA0); // mint
+  static const successD = Color(0xFF59E0BB);
+  static const warning  = Color(0xFFFFC53D); // sunny
+  static const warningD = Color(0xFFFFD668);
+  static const danger   = Color(0xFFFF3D3D); // poppy
+  static const dangerD  = Color(0xFFFF7070);
+  static const info     = Color(0xFF6EC8FF); // sky
+  static const infoD    = Color(0xFF6EC8FF);
+
+  // ── Glass fills ──────────────────────────────────────────────────────────────
   static const glassFillL   = Color(0x9EFFFFFF);
-  // rgba(20,27,45,0.55)    → α = 140 = 0x8C
-  static const glassFillD   = Color(0x8C141B2D);
-  // Inner/top border highlight
-  // rgba(255,255,255,0.55) → α = 140 = 0x8C
+  static const glassFillD   = Color(0x8C2A1820);
   static const glassTopL    = Color(0x8CFFFFFF);
-  // rgba(255,255,255,0.10) → α = 26  = 0x1A
   static const glassTopD    = Color(0x1AFFFFFF);
-  // Outer rim border
-  // rgba(11,18,32,0.06)    → α = 15  = 0x0F
-  static const glassRimL    = Color(0x0F0B1220);
-  // rgba(0,0,0,0.40)       → α = 102 = 0x66
+  static const glassRimL    = Color(0x0F261308);
   static const glassRimD    = Color(0x66000000);
-  // Specular highlight: 8 % (light) / 4 % (dark) white
-  // 0.08 × 255 ≈ 20 = 0x14
   static const glassShineL  = Color(0x14FFFFFF);
-  // 0.04 × 255 ≈ 10 = 0x0A
   static const glassShineD  = Color(0x0AFFFFFF);
 
-  // ── §4.3  Shadow base tints ───────────────────────────────────────────────
-  static const shadowInk = Color(0xFF0B1220); // light-mode shadow tint
-  // e1 light  rgba(11,18,32,0.04) → α=10=0x0A
-  static const shadowE1L = Color(0x0A0B1220);
-  // e2 light  rgba(11,18,32,0.10) → α=26=0x1A
-  static const shadowE2L = Color(0x1A0B1220);
-  // e3 light  rgba(11,18,32,0.14) → α=36=0x24
-  static const shadowE3L = Color(0x240B1220);
-  // e4 light  rgba(11,18,32,0.20) → α=51=0x33
-  static const shadowE4L = Color(0x330B1220);
-  // Glass shadow light  rgba(11,18,32,0.18) → α=46=0x2E
-  static const shadowGlassL = Color(0x2E0B1220);
-  // e1 dark  rgba(0,0,0,0.35) → α=89=0x59
+  // ── Shadow tints ─────────────────────────────────────────────────────────────
+  static const shadowInk = Color(0xFF261308);
+  static const shadowE1L = Color(0x0A261308);
+  static const shadowE2L = Color(0x1A261308);
+  static const shadowE3L = Color(0x24261308);
+  static const shadowE4L = Color(0x33261308);
+  static const shadowGlassL = Color(0x2E261308);
   static const shadowE1D = Color(0x59000000);
-  // e2 dark  rgba(0,0,0,0.45) → α=115=0x73
   static const shadowE2D = Color(0x73000000);
-  // e3 dark  rgba(0,0,0,0.55) → α=140=0x8C
   static const shadowE3D = Color(0x8C000000);
-  // e4 dark  rgba(0,0,0,0.65) → α=166=0xA6
   static const shadowE4D = Color(0xA6000000);
-  // Glass shadow dark  rgba(0,0,0,0.55)
   static const shadowGlassD = Color(0x8C000000);
+
+  // ── Backward-compat aliases (used by existing screens) ──────────────────────
+  static const blue50   = Color(0xFFFFE0CB); // → tangerineSoft
+  static const blue100  = tangerineSoft;
+  static const blue200  = tangerineSoft;
+  static const blue300  = tangerine;
+  static const blue400  = tangerine;
+  static const blue500  = tangerine;
+  static const blue600  = tangerine700;
+  static const blue700  = tangerine700;
+  static const blue100D = tangerineSoftD;
+  static const blue200D = tangerineSoftD;
+  static const blue300D = tangerineD;
+  static const blue400D = tangerineD;
+  static const blue500D = tangerineD;
+  static const blue600D = tangerine700D;
+  static const blue700D = tangerine700D;
+  static const blue800D = tangerine700D;
+  static const blue900D = tangerine700D;
+
+  static const sunset500  = tangerine;
+  static const sunset500D = tangerineD;
+  static const coral500   = poppy;
+  static const coral500D  = poppyD;
+  static const meadow500  = mint;
+  static const meadow500D = mintD;
+  static const apricot500  = sunny;
+  static const apricot500D = sunnyD;
+  static const mulberry500  = lilac;
+  static const mulberry500D = lilacD;
+
+  static const line200  = line;
+  static const line200D = lineD;
+  static const line100  = line2;
+  static const line100D = line2D;
 }

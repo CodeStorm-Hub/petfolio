@@ -356,7 +356,7 @@ class _BannerPicker extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-          color: AppColors.line200,
+          color: AppColors.line,
           boxShadow: pt.shadowE1,
         ),
         child: Stack(
@@ -436,7 +436,7 @@ class _LogoPicker extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
           color: AppColors.blue500.withAlpha(15),
-          border: Border.all(color: AppColors.line200),
+          border: Border.all(color: AppColors.line),
           boxShadow: pt.shadowE1,
         ),
         child: Stack(
@@ -692,11 +692,11 @@ class _FormField extends StatelessWidget {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-              borderSide: const BorderSide(color: AppColors.line200),
+              borderSide: const BorderSide(color: AppColors.line),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-              borderSide: const BorderSide(color: AppColors.line200),
+              borderSide: const BorderSide(color: AppColors.line),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),

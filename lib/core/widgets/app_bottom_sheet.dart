@@ -6,11 +6,13 @@ abstract final class AppBottomSheet {
   static Future<T?> show<T>(
     BuildContext context, {
     required WidgetBuilder builder,
+    bool useRootNavigator = true,
   }) {
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      useRootNavigator: useRootNavigator,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
         final pt = Theme.of(sheetContext).extension<PetfolioThemeExtension>()!;

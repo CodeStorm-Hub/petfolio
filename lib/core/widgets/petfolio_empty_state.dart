@@ -29,7 +29,6 @@ class PetfolioEmptyState extends StatelessWidget {
             title,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontFamily: 'Sora',
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: cs.onSurface,

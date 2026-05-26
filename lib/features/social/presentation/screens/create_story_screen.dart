@@ -122,8 +122,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
             children: [
               Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
               SizedBox(width: 10),
-              Text('Story shared!',
-                  style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600)),
+              Text('Story shared!'),
             ],
           ),
           backgroundColor: AppColors.success,
@@ -172,7 +171,6 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
             title: const Text(
               'Add to Story',
               style: TextStyle(
-                fontFamily: 'Sora',
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
                 color: Colors.black,
@@ -200,7 +198,6 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                   child: Text(
                     'Recent Photos',
                     style: TextStyle(
-                      fontFamily: 'Sora',
                       fontWeight: FontWeight.w700,
                       fontSize: 15,
                       color: pt.ink500,
@@ -263,7 +260,6 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                   Text(
                     'Loading photo…',
                     style: TextStyle(
-                      fontFamily: 'Sora',
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
                     ),
@@ -363,7 +359,6 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
-                          fontFamily: 'Sora',
                           shadows: [
                             Shadow(blurRadius: 3.0, color: Colors.black45, offset: Offset(1.0, 1.0)),
                           ],
@@ -374,7 +369,6 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                         style: TextStyle(
                           color: Colors.white70,
                           fontSize: 11,
-                          fontFamily: 'Inter',
                           shadows: [
                             Shadow(blurRadius: 2.0, color: Colors.black45, offset: Offset(1.0, 1.0)),
                           ],
@@ -444,7 +438,6 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                           'Share to Story',
                           style: TextStyle(
                             color: Colors.white,
-                            fontFamily: 'Sora',
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
@@ -458,7 +451,6 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                   'Stories expire automatically after 24 hours',
                   style: TextStyle(
                     color: Colors.white60,
-                    fontFamily: 'Inter',
                     fontSize: 11,
                   ),
                 ),
@@ -495,7 +487,7 @@ class _BrowseLibraryTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: cs.surfaceContainerHighest.withAlpha(80),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: pt.line200, width: 1.5),
+          border: Border.all(color: pt.line, width: 1.5),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -520,7 +512,6 @@ class _BrowseLibraryTile extends StatelessWidget {
             Text(
               'Browse',
               style: TextStyle(
-                fontFamily: 'Inter',
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
                 color: pt.ink500,
@@ -662,7 +653,6 @@ class _CameraViewfinderCardState extends State<_CameraViewfinderCard>
                         'REC',
                         style: TextStyle(
                           color: Colors.white.withAlpha(200),
-                          fontFamily: 'Inter',
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1.0,
@@ -680,7 +670,6 @@ class _CameraViewfinderCardState extends State<_CameraViewfinderCard>
                     'RAW · 4:3 · HDR',
                     style: TextStyle(
                       color: Colors.white.withAlpha(140),
-                      fontFamily: 'Inter',
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                     ),
@@ -739,7 +728,6 @@ class _CameraViewfinderCardState extends State<_CameraViewfinderCard>
                           style: TextStyle(
                             color: Colors.white.withAlpha(200),
                             fontSize: 10,
-                            fontFamily: 'Inter',
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -888,7 +876,6 @@ class _UploadOverlay extends StatelessWidget {
               label,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontFamily: 'Sora',
                 fontWeight: FontWeight.w700,
                 fontSize: 15,
                 color: cs.onSurface,
@@ -899,7 +886,6 @@ class _UploadOverlay extends StatelessWidget {
               sub,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontFamily: 'Inter',
                 fontSize: 13,
                 color: cs.onSurface.withAlpha(140),
               ),

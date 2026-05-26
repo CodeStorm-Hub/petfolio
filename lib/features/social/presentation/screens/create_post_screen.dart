@@ -79,8 +79,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             children: [
               Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
               SizedBox(width: 10),
-              Text('Post shared!',
-                  style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600)),
+              Text('Post shared!'),
             ],
           ),
           backgroundColor: AppColors.success,
@@ -197,7 +196,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       backgroundColor: cs.surface,
       elevation: 0,
       scrolledUnderElevation: 1,
-      shadowColor: pt.line200,
+      shadowColor: pt.line,
       leading: IconButton(
         icon: Icon(Icons.close_rounded, color: cs.onSurface, size: 22),
         onPressed: state.isSubmitting ? null : () => context.pop(),
@@ -206,7 +205,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       title: Text(
         'New Post',
         style: TextStyle(
-          fontFamily: 'Sora',
           fontWeight: FontWeight.w700,
           fontSize: 16,
           color: cs.onSurface,
@@ -220,14 +218,13 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             onPressed: canPost ? _submit : null,
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.sunset500,
-              disabledBackgroundColor: pt.line200,
+              disabledBackgroundColor: pt.line,
               foregroundColor: Colors.white,
               disabledForegroundColor: pt.ink300,
               minimumSize: const Size(72, 36),
               padding: const EdgeInsets.symmetric(horizontal: 18),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
               textStyle: const TextStyle(
-                fontFamily: 'Inter',
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),
@@ -264,7 +261,7 @@ class _PetIdentityRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: pt.line200),
+        border: Border.all(color: pt.line),
       ),
       child: Row(
         children: [
@@ -282,7 +279,6 @@ class _PetIdentityRow extends StatelessWidget {
                 Text(
                   petName,
                   style: TextStyle(
-                    fontFamily: 'Sora',
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                     color: cs.onSurface,
@@ -292,7 +288,6 @@ class _PetIdentityRow extends StatelessWidget {
                 Text(
                   'Posting as this pet',
                   style: TextStyle(
-                    fontFamily: 'Inter',
                     fontSize: 12,
                     color: pt.ink300,
                   ),
@@ -314,7 +309,6 @@ class _PetIdentityRow extends StatelessWidget {
                 Text(
                   'Public',
                   style: const TextStyle(
-                    fontFamily: 'Inter',
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: AppColors.sunset500,
@@ -365,7 +359,7 @@ class _ImageWell extends StatelessWidget {
                 color: cs.surface,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: image != null ? Colors.transparent : pt.line200,
+                  color: image != null ? Colors.transparent : pt.line,
                   width: 1.5,
                 ),
                 image: image != null
@@ -439,7 +433,6 @@ class _ImageWell extends StatelessWidget {
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 12,
-                            fontFamily: 'Inter',
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -492,7 +485,6 @@ class _EmptyImagePlaceholder extends StatelessWidget {
                   Text(
                     'Add a photo',
                     style: TextStyle(
-                      fontFamily: 'Sora',
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
                       color: pt.ink500,
@@ -502,7 +494,6 @@ class _EmptyImagePlaceholder extends StatelessWidget {
                   Text(
                     'JPG, PNG, WebP or GIF · Max 10 MB',
                     style: TextStyle(
-                      fontFamily: 'Inter',
                       fontSize: 12,
                       color: pt.ink300,
                     ),
@@ -515,7 +506,7 @@ class _EmptyImagePlaceholder extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               color: pt.surface2,
-              border: Border(top: BorderSide(color: pt.line200)),
+              border: Border(top: BorderSide(color: pt.line)),
             ),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             child: Row(
@@ -563,7 +554,6 @@ class _SourceChip extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontFamily: 'Inter',
                 fontWeight: FontWeight.w500,
                 fontSize: 13,
                 color: color,
@@ -613,7 +603,7 @@ class _CaptionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: pt.line200),
+        border: Border.all(color: pt.line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -634,14 +624,12 @@ class _CaptionCard extends StatelessWidget {
                 hintText: "What's your pet up to? 🐾",
                 hintStyle: TextStyle(
                   color: pt.ink300,
-                  fontFamily: 'Inter',
                   fontSize: 15,
                 ),
                 contentPadding: EdgeInsets.zero,
               ),
               style: TextStyle(
                 color: cs.onSurface,
-                fontFamily: 'Inter',
                 fontSize: 15,
                 height: 1.5,
               ),
@@ -656,7 +644,6 @@ class _CaptionCard extends StatelessWidget {
                 Text(
                   'Add hashtags to reach more pet lovers',
                   style: TextStyle(
-                    fontFamily: 'Inter',
                     fontSize: 12,
                     color: pt.ink300,
                   ),
@@ -665,7 +652,6 @@ class _CaptionCard extends StatelessWidget {
                 Text(
                   '$charCount/$maxChars',
                   style: TextStyle(
-                    fontFamily: 'Inter',
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: counterColor,
@@ -696,7 +682,7 @@ class _VisibilityInfo extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: pt.line200),
+        border: Border.all(color: pt.line),
       ),
       child: Row(
         children: [
@@ -717,7 +703,6 @@ class _VisibilityInfo extends StatelessWidget {
                 Text(
                   'Public post',
                   style: TextStyle(
-                    fontFamily: 'Inter',
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                     color: cs.onSurface,
@@ -726,7 +711,6 @@ class _VisibilityInfo extends StatelessWidget {
                 Text(
                   'Visible to all PetFolio members',
                   style: TextStyle(
-                    fontFamily: 'Inter',
                     fontSize: 12,
                     color: pt.ink300,
                   ),
@@ -766,14 +750,13 @@ class _ImageSourceSheet extends StatelessWidget {
               height: 4,
               margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
-                color: pt.line200,
+                color: pt.line,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             Text(
               'Add Photo',
               style: TextStyle(
-                fontFamily: 'Sora',
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
                 color: cs.onSurface,
@@ -801,14 +784,13 @@ class _ImageSourceSheet extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: () => Navigator.of(context).pop(),
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: pt.line200),
+                  side: BorderSide(color: pt.line),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: Text(
                   'Cancel',
                   style: TextStyle(
-                    fontFamily: 'Inter',
                     fontWeight: FontWeight.w600,
                     color: pt.ink500,
                   ),
@@ -870,7 +852,6 @@ class _SheetOption extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontFamily: 'Inter',
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                       color: cs.onSurface,
@@ -879,7 +860,6 @@ class _SheetOption extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontFamily: 'Inter',
                       fontSize: 12,
                       color: pt.ink300,
                     ),
@@ -944,7 +924,6 @@ class _UploadOverlay extends StatelessWidget {
               label,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontFamily: 'Sora',
                 fontWeight: FontWeight.w700,
                 fontSize: 15,
                 color: cs.onSurface,
@@ -955,7 +934,6 @@ class _UploadOverlay extends StatelessWidget {
               sub,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontFamily: 'Inter',
                 fontSize: 13,
                 color: cs.onSurface.withAlpha(140),
               ),
@@ -988,7 +966,6 @@ class _ErrorBanner extends StatelessWidget {
             child: Text(
               message,
               style: const TextStyle(
-                fontFamily: 'Inter',
                 fontSize: 13,
                 color: AppColors.coral500,
                 fontWeight: FontWeight.w500,

@@ -90,7 +90,7 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
     // Base color: surface/2 — the spec's inset-well surface
     final baseColor = isDark ? AppColors.surface2D : AppColors.surface2;
     // Highlight: line/200 — a subtle brighter step
-    final highlightColor = isDark ? AppColors.line200D : AppColors.line200;
+    final highlightColor = isDark ? AppColors.lineD : AppColors.line;
 
     final radius = BorderRadius.circular(widget.borderRadius);
 

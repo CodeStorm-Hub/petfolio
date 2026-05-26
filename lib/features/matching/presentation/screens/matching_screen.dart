@@ -1,9 +1,8 @@
 import 'dart:math' as math;
 
-import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/services/lat_lng.dart';
@@ -25,15 +24,7 @@ import '../matching_navigation.dart';
 import '../widgets/match_celebration_overlay.dart';
 import '../widgets/match_preferences_sheet.dart';
 
-String _speciesLabel(String species) {
-  return switch (species.toLowerCase()) {
-    'cat' => 'Cat',
-    'rabbit' => 'Rabbit',
-    'bird' => 'Bird',
-    'reptile' => 'Reptile',
-    _ => 'Dog',
-  };
-}
+
 
 bool _isLocationBlocked(LocationAccessState? access) {
   return switch (access) {
@@ -78,7 +69,7 @@ class MatchingScreen extends ConsumerWidget {
       body: Center(
         child: petsAsync.when(
           skipLoadingOnReload: true,
-          loading: () => const CircularProgressIndicator.adaptive(),
+          loading: () => const TailWagLoader(),
           error: (_, _) => Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -94,7 +85,7 @@ class MatchingScreen extends ConsumerWidget {
               ),
             ],
           ),
-          data: (_) => const CircularProgressIndicator.adaptive(),
+          data: (_) => const TailWagLoader(),
         ),
       ),
     );
@@ -245,65 +236,80 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
       );
     }
 
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isWide = screenWidth >= ResponsiveLayout.mobileMax;
+
+    Widget mainContent = Column(
+      children: [
+        AppHeader(
+          eyebrow: 'Match · Nearby',
+          onOpenSwitcher: () => PetSwitcherSheet.show(context),
+          dense: true,
+          actions: [
+            AppHeaderAction(
+              iconKey: const ValueKey<String>('match_action_inbox'),
+              icon: Icons.chat_bubble_outline_rounded,
+              tooltip: 'Matches & messages',
+              onTap: overlayActive
+                  ? () {}
+                  : () => openMatchesInbox(context),
+            ),
+            AppHeaderAction(
+              iconKey: const ValueKey<String>('match_action_filter'),
+              icon: Icons.tune_rounded,
+              tooltip: 'Filters',
+              onTap: overlayActive
+                  ? () {}
+                  : () => MatchPreferencesSheet.show(context),
+            ),
+          ],
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            child: IgnorePointer(
+              ignoring: overlayActive,
+              child: locationAccessAsync.when(
+                skipLoadingOnReload: true,
+                loading: () => const Center(
+                  child: CircularProgressIndicator.adaptive(),
+                ),
+                error: (_, _) => buildDiscoveryContent(),
+                data: (_) => buildDiscoveryContent(),
+              ),
+            ),
+          ),
+        ),
+        if (!locationBlocked)
+          IgnorePointer(
+            ignoring: overlayActive,
+            child: _ActionDock(
+              state: state,
+              notifier: notifier,
+              bufferAsync: bufferAsync,
+            ),
+          ),
+        SizedBox(height: isWide ? 16 : (92 + MediaQuery.paddingOf(context).bottom)),
+      ],
+    );
+
+    if (isWide) {
+      mainContent = Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: mainContent,
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: pt.surface1,
       body: SafeArea(
         bottom: false,
         child: Stack(
           children: [
-            Column(
-              children: [
-                AppHeader(
-                  eyebrow: 'Match · Nearby',
-                  onOpenSwitcher: () => PetSwitcherSheet.show(context),
-                  dense: true,
-                  actions: [
-                    AppHeaderAction(
-                      iconKey: const ValueKey<String>('match_action_inbox'),
-                      icon: Icons.chat_bubble_outline_rounded,
-                      tooltip: 'Matches & messages',
-                      onTap: overlayActive
-                          ? () {}
-                          : () => openMatchesInbox(context),
-                    ),
-                    AppHeaderAction(
-                      iconKey: const ValueKey<String>('match_action_filter'),
-                      icon: Icons.tune_rounded,
-                      tooltip: 'Filters',
-                      onTap: overlayActive
-                          ? () {}
-                          : () => MatchPreferencesSheet.show(context),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                    child: IgnorePointer(
-                      ignoring: overlayActive,
-                      child: locationAccessAsync.when(
-                        skipLoadingOnReload: true,
-                        loading: () => const Center(
-                          child: CircularProgressIndicator.adaptive(),
-                        ),
-                        error: (_, _) => buildDiscoveryContent(),
-                        data: (_) => buildDiscoveryContent(),
-                      ),
-                    ),
-                  ),
-                ),
-                if (!locationBlocked)
-                  IgnorePointer(
-                    ignoring: overlayActive,
-                    child: _ActionDock(
-                      state: state,
-                      notifier: notifier,
-                      bufferAsync: bufferAsync,
-                    ),
-                  ),
-                const SizedBox(height: 16),
-              ],
-            ),
+            mainContent,
             if (overlayActive)
               MatchCelebrationOverlay(
                 activePet: activePet,
@@ -595,25 +601,28 @@ class _SwipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
+    final layoutWidth = math.min(size.width, 480.0);
     if (state.isExiting && state.exitingCard != null) {
       return _buildExitAnimation(
         context,
         state.exitingCard!,
         size,
+        layoutWidth,
         state.exitAction!,
         state.exitDurationMs,
       );
     }
     final top = interactiveTop!;
-    return _buildDraggable(context, top, size);
+    return _buildDraggable(context, top, size, layoutWidth);
   }
 
   Widget _buildDraggable(
     BuildContext context,
     DiscoveryCandidate top,
     Size size,
+    double layoutWidth,
   ) {
-    final dxNorm = state.dragOffset.dx / (size.width * 0.75);
+    final dxNorm = state.dragOffset.dx / (layoutWidth * 0.75);
     final dyTilt = state.dragOffset.dy / (size.height * 1.2);
     final angle = (dxNorm + dyTilt * 0.12).clamp(-0.44, 0.44);
 
@@ -645,7 +654,7 @@ class _SwipeCard extends StatelessWidget {
                     opacity: matchOpacity,
                     child: _SwipeLabel(
                       label: 'MATCH',
-                      color: AppColors.coral500,
+                      color: AppColors.poppy,
                     ),
                   ),
                 ),
@@ -671,7 +680,7 @@ class _SwipeCard extends StatelessWidget {
                       opacity: greetOpacity,
                       child: _SwipeLabel(
                         label: 'WAVE  👋',
-                        color: AppColors.blue500,
+                        color: AppColors.lilac,
                       ),
                     ),
                   ),
@@ -687,10 +696,11 @@ class _SwipeCard extends StatelessWidget {
     BuildContext context,
     DiscoveryCandidate top,
     Size size,
+    double layoutWidth,
     SwipeAction action,
     int durationMs,
   ) {
-    final (exitOffset, exitAngle) = _exitParams(action, size);
+    final (exitOffset, exitAngle) = _exitParams(action, size, layoutWidth);
     final curve = const Cubic(0.4, 0, 1, 1);
     final fast = MediaQuery.disableAnimationsOf(context);
 
@@ -725,14 +735,14 @@ class _SwipeCard extends StatelessWidget {
     );
   }
 
-  static (Offset, double) _exitParams(SwipeAction action, Size size) {
+  static (Offset, double) _exitParams(SwipeAction action, Size size, double layoutWidth) {
     return switch (action) {
       SwipeAction.pass => (
-          Offset(-size.width * 1.45, size.height * 0.06),
+          Offset(-layoutWidth * 1.45, size.height * 0.06),
           -math.pi / 10,
         ),
       SwipeAction.match => (
-          Offset(size.width * 1.45, size.height * 0.06),
+          Offset(layoutWidth * 1.45, size.height * 0.06),
           math.pi / 10,
         ),
       SwipeAction.greet => (
@@ -740,7 +750,7 @@ class _SwipeCard extends StatelessWidget {
           0.0,
         ),
       SwipeAction.superPaw => (
-          Offset(size.width * 0.4, -size.height * 1.2),
+          Offset(layoutWidth * 0.4, -size.height * 1.2),
           math.pi / 20,
         ),
     };
@@ -764,338 +774,183 @@ class _CardSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = candidate.gradientColors;
-    final gradColors = [
-      if (colors.isNotEmpty) colors[0],
-      if (colors.length > 1) colors[1],
-      if (colors.length > 2) colors[2] else if (colors.isNotEmpty) colors.last,
-    ];
-    final resolvedGradColors = gradColors.isEmpty
-        ? [
-            AppColors.sunset500.withValues(alpha: 0.45),
-            AppColors.coral500.withValues(alpha: 0.72),
-            AppColors.coral500,
-          ]
-        : gradColors;
+    final softColor = colors.isNotEmpty ? colors.first.withAlpha(120) : AppColors.tangerine.withAlpha(120);
+    final mainColor = colors.isNotEmpty ? colors.last : AppColors.tangerine;
+
+    final emoji = switch (candidate.species) {
+      'cat' => '🐱',
+      'rabbit' => '🐰',
+      'bird' => '🦜',
+      'reptile' => '🦎',
+      _ => '🐶',
+    };
 
     return ClipRRect(
-      borderRadius:
-          BorderRadius.circular(PetfolioThemeExtension.radius2xl),
+      borderRadius: BorderRadius.circular(32),
       child: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: resolvedGradColors,
+          gradient: RadialGradient(
+            center: const Alignment(-0.4, -0.4),
+            radius: 1.2,
+            colors: [softColor, mainColor],
           ),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 50,
+              offset: Offset(0, 24),
+              spreadRadius: -20,
+            ),
+          ],
         ),
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Pet blob (centred in the upper portion)
-            Positioned(
-              top: 40,
-              left: 0,
-              right: 0,
-              bottom: 160,
-              child: Center(child: _PetBlob(candidate: candidate)),
-            ),
-            // Scrim — fade to black for info readability
-            const Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: [0.45, 1.0],
-                    colors: [Colors.transparent, Color(0xCC000000)],
+            // Emoji blob
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 60),
+                child: Text(
+                  emoji,
+                  style: const TextStyle(
+                    fontSize: 160,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black26,
+                        blurRadius: 28,
+                        offset: Offset(0, 12),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-            // Info panel pinned to the bottom
+
+            // Distance Pill
+            Positioned(
+              top: 14,
+              right: 14,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: Container(
+                  color: Colors.black.withAlpha(100),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.location_on, size: 12, color: Colors.white),
+                      const SizedBox(width: 4),
+                      Text(
+                        candidate.distance,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Info Gradient
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
-              child: _InfoPanel(
-                candidate: candidate,
-                isExpanded: isExpanded,
-                onToggle: onToggleExpand,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Pet blob illustration
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _PetBlob extends StatelessWidget {
-  const _PetBlob({required this.candidate});
-  final DiscoveryCandidate candidate;
-
-  static const _blobRadius = BorderRadius.only(
-    topLeft: Radius.circular(120),
-    topRight: Radius.circular(100),
-    bottomLeft: Radius.circular(80),
-    bottomRight: Radius.circular(140),
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    final emoji = switch (candidate.species) {
-      'cat' => '🐱',
-      'rabbit' => '🐰',
-      _ => '🐶',
-    };
-
-    return Semantics(
-      label: '${candidate.name}, ${_speciesLabel(candidate.species)}',
-      child: LayoutBuilder(
-        builder: (_, constraints) {
-        // Scale the blob with the available area, clamped for small/large screens.
-        final w = (constraints.maxWidth * 0.52).clamp(120.0, 220.0);
-        final h = w * 1.1;
-        final emojiSize = w * 0.44;
-
-        final blobDecoration = BoxDecoration(
-          color: candidate.subjectColor.withAlpha(180),
-          borderRadius: _blobRadius,
-        );
-
-        // When a real pet photo is available, show it inside the blob shape.
-        // Fall back to the emoji illustration on network error or absence.
-        final hasPhoto = candidate.avatarUrl != null &&
-            candidate.avatarUrl!.isNotEmpty;
-
-        if (hasPhoto) {
-          return ClipRRect(
-            borderRadius: _blobRadius,
-            child: CachedNetworkImage(
-              imageUrl: candidate.avatarUrl!,
-              width: w,
-              height: h,
-              fit: BoxFit.cover,
-              // Placeholder: show the coloured blob while the image loads.
-              placeholder: (_, _) => Container(
-                width: w,
-                height: h,
-                decoration: blobDecoration,
-                alignment: Alignment.center,
-                child: Text(emoji,
-                    style: TextStyle(fontSize: emojiSize)),
-              ),
-              // Error: fall back to emoji blob — never a broken-image icon.
-              errorWidget: (_, _, _) => Container(
-                width: w,
-                height: h,
-                decoration: blobDecoration,
-                alignment: Alignment.center,
-                child: Text(emoji,
-                    style: TextStyle(fontSize: emojiSize)),
-              ),
-            ),
-          );
-        }
-
-        return Container(
-          width: w,
-          height: h,
-          decoration: blobDecoration,
-          alignment: Alignment.center,
-          child: Text(emoji, style: TextStyle(fontSize: emojiSize)),
-        );
-        },
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Info panel
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _InfoPanel extends StatelessWidget {
-  const _InfoPanel({
-    required this.candidate,
-    required this.isExpanded,
-    this.onToggle,
-  });
-  final DiscoveryCandidate candidate;
-  final bool isExpanded;
-  final VoidCallback? onToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSize(
-      duration: PetfolioThemeExtension.durationMd,
-      curve: Curves.easeInOut,
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // ── Name + age + expand toggle ──────────────────────────────
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Text(
-                    candidate.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.sora(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      height: 1.1,
-                    ),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Colors.black87],
                   ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  candidate.age,
-                  style: GoogleFonts.inter(
-                    fontSize: 18,
-                    color: Colors.white.withAlpha(190),
-                  ),
-                ),
-                if (candidate.verified) ...[
-                  const SizedBox(width: 8),
-                  const Icon(
-                    Icons.verified_rounded,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                ],
-                const Spacer(),
-                if (onToggle != null)
-                  GestureDetector(
-                    onTap: onToggle,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(30),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withAlpha(60),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            '${candidate.name},',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
+                        const SizedBox(width: 10),
+                        Text(
+                          candidate.age,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      candidate.breed,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white70,
                       ),
-                      child: Icon(
-                        isExpanded
-                            ? Icons.keyboard_arrow_down_rounded
-                            : Icons.keyboard_arrow_up_rounded,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      candidate.bio,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        height: 1.4,
+                        fontWeight: FontWeight.w600,
                         color: Colors.white,
-                        size: 20,
                       ),
                     ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(
-                  Icons.location_on_rounded,
-                  size: 13,
-                  color: Colors.white.withAlpha(180),
-                ),
-                const SizedBox(width: 2),
-                Expanded(
-                  child: Text(
-                    candidate.distance,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: Colors.white.withAlpha(180),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: candidate.traits.take(3).map((t) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(999),
+                          child: Container(
+                            color: Colors.white.withAlpha(56),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            child: Text(
+                              t,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                _MatchMetaChip(
-                  label: _speciesLabel(candidate.species),
-                  foreground: Colors.white,
-                  background: AppColors.blue500.withValues(alpha: 0.34),
-                  borderColor: Colors.white.withValues(alpha: 0.42),
-                ),
-                _MatchMetaChip(
-                  label: candidate.breed,
-                  foreground: Colors.white,
-                  background: AppColors.mulberry500.withValues(alpha: 0.42),
-                  borderColor: Colors.white.withValues(alpha: 0.45),
-                ),
-                _MatchMetaChip(
-                  label: candidate.energy,
-                  foreground: Colors.white,
-                  background: AppColors.sunset500.withValues(alpha: 0.88),
-                  borderColor: Colors.white.withValues(alpha: 0.48),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            // ── Traits ──────────────────────────────────────────────────
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                for (final trait in candidate.traits) _TraitChip(label: trait),
-              ],
-            ),
-            // ── Expanded bio ─────────────────────────────────────────────
-            if (isExpanded) ...[
-              const SizedBox(height: 14),
-              Text(
-                candidate.bio,
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: Colors.white.withAlpha(215),
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 12),
-              _DetailRow(
-                icon: Icons.directions_walk_rounded,
-                label: 'Play style',
-                value: candidate.playStyle,
-              ),
-              const SizedBox(height: 6),
-              _DetailRow(
-                icon: Icons.bolt_rounded,
-                label: 'Energy',
-                value: candidate.energy,
-              ),
-              const SizedBox(height: 6),
-              _DetailRow(
-                icon: Icons.people_outline_rounded,
-                label: 'Best with',
-                value: candidate.bestWith,
-              ),
-            ],
           ],
         ),
       ),
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Action dock — 5 buttons from the design spec
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _ActionDock extends StatelessWidget {
   const _ActionDock({
@@ -1113,52 +968,54 @@ class _ActionDock extends StatelessWidget {
     final disabled = state.isExiting || deck.isEmpty;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _DockButton(
-            key: const ValueKey<String>('match_action_pass'),
             size: 56,
-            color: AppColors.ink300,
-            icon: Icons.close_rounded,
-            iconSize: 26,
+            color: AppColors.ink500,
+            bgColor: Theme.of(context).colorScheme.surface,
+            label: '✕',
+            fontSize: 22,
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.pass),
           ),
+          const SizedBox(width: 16),
           _DockButton(
-            key: const ValueKey<String>('match_action_greet'),
             size: 48,
-            color: AppColors.blue500,
-            icon: Icons.waving_hand_rounded,
-            iconSize: 22,
-            onTap: disabled ? null : () => notifier.swipe(SwipeAction.greet),
+            color: Colors.white,
+            bgColor: AppColors.lilac,
+            label: '⭐',
+            fontSize: 19,
+            onTap: disabled ? null : () => notifier.swipe(SwipeAction.superPaw),
           ),
+          const SizedBox(width: 16),
           _DockButton(
-            key: const ValueKey<String>('match_action_like'),
-            size: 64,
-            color: AppColors.coral500,
-            icon: Icons.pets_rounded,
-            iconSize: 30,
-            elevated: true,
+            size: 72,
+            color: Colors.white,
+            bgColor: AppColors.poppy,
+            label: '🐾',
+            fontSize: 32,
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.match),
           ),
-          _DockButton(
-            key: const ValueKey<String>('match_action_super'),
+          const SizedBox(width: 16),
+          const _DockButton(
             size: 48,
-            color: AppColors.mulberry500,
-            icon: Icons.star_rounded,
-            iconSize: 22,
-            onTap: disabled
-                ? null
-                : () => notifier.swipe(SwipeAction.superPaw),
+            color: Colors.white,
+            bgColor: AppColors.sunny,
+            label: '🦴',
+            fontSize: 19,
+            onTap: null,
           ),
-          _DockButton(
+          const SizedBox(width: 16),
+          const _DockButton(
             size: 56,
-            color: AppColors.sunset500,
-            icon: Icons.bolt_rounded,
-            iconSize: 26,
-            onTap: null, // Boost — premium feature placeholder
+            color: Colors.white,
+            bgColor: AppColors.mint,
+            label: '↺',
+            fontSize: 22,
+            onTap: null,
           ),
         ],
       ),
@@ -1166,45 +1023,64 @@ class _ActionDock extends StatelessWidget {
   }
 }
 
-class _MatchMetaChip extends StatelessWidget {
-  const _MatchMetaChip({
+class _DockButton extends StatelessWidget {
+  const _DockButton({
+    required this.size,
+    required this.color,
+    required this.bgColor,
     required this.label,
-    required this.foreground,
-    required this.background,
-    required this.borderColor,
+    required this.fontSize,
+    required this.onTap,
   });
+  final double size;
+  final Color color;
+  final Color bgColor;
   final String label;
-  final Color foreground;
-  final Color background;
-  final Color borderColor;
+  final double fontSize;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusSm),
-        border: Border.all(color: borderColor, width: 1),
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: GoogleFonts.inter(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.2,
-          color: foreground,
+    final isDisabled = onTap == null;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedOpacity(
+        duration: PetfolioThemeExtension.durationSm,
+        opacity: isDisabled ? 0.38 : 1.0,
+        child: Container(
+          width: size,
+          height: size,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: bgColor,
+            boxShadow: [
+              BoxShadow(
+                color: bgColor.withAlpha(153), // ~60%
+                offset: const Offset(0, 6),
+              ),
+              BoxShadow(
+                color: bgColor.withAlpha(255),
+                blurRadius: 24,
+                spreadRadius: -10,
+                offset: const Offset(0, 14),
+              ),
+            ],
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.w900,
+              color: color,
+            ),
+          ),
         ),
       ),
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Reusable small widgets
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _SwipeLabel extends StatelessWidget {
   const _SwipeLabel({required this.label, required this.color});
@@ -1223,7 +1099,7 @@ class _SwipeLabel extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.sora(
+        style: TextStyle(
           fontSize: 17,
           fontWeight: FontWeight.w700,
           color: color,
@@ -1234,126 +1110,3 @@ class _SwipeLabel extends StatelessWidget {
   }
 }
 
-class _TraitChip extends StatelessWidget {
-  const _TraitChip({required this.label});
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white.withAlpha(35),
-        borderRadius:
-            BorderRadius.circular(PetfolioThemeExtension.radiusPill),
-        border: Border.all(color: Colors.white.withAlpha(70)),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 14, color: Colors.white.withAlpha(150)),
-        const SizedBox(width: 6),
-        Text(
-          '$label  ',
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Colors.white.withAlpha(180),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              color: Colors.white.withAlpha(215),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DockButton extends StatelessWidget {
-  const _DockButton({
-    super.key,
-    required this.size,
-    required this.color,
-    required this.icon,
-    required this.iconSize,
-    required this.onTap,
-    this.elevated = false,
-  });
-  final double size;
-  final Color color;
-  final IconData icon;
-  final double iconSize;
-  final VoidCallback? onTap;
-  final bool elevated;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isDisabled = onTap == null;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedOpacity(
-        duration: PetfolioThemeExtension.durationSm,
-        opacity: isDisabled ? 0.38 : 1.0,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: elevated
-                ? color
-                : (isDark ? AppColors.surface0D : AppColors.surface0),
-            border: elevated
-                ? null
-                : Border.all(color: color.withAlpha(90), width: 1.5),
-            boxShadow: elevated
-                ? [
-                    BoxShadow(
-                      color: color.withAlpha(80),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Icon(
-            icon,
-            size: iconSize,
-            color: elevated ? Colors.white : color,
-          ),
-        ),
-      ),
-    );
-  }
-}

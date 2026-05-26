@@ -68,7 +68,27 @@
       "Bash(git commit -m ' *)",
       "WebFetch(domain:docs.nvidia.com)",
       "Bash(grep -i \"\\\\.dart$\")",
-      "Bash(xargs grep -l \"class.*Card\\\\|class.*Widget\")"
+      "Bash(xargs grep -l \"class.*Card\\\\|class.*Widget\")",
+      "Bash(dir \"G:\\\\GitHub\\\\petfolio\\\\PetFolio Redesign\")",
+      "Bash(xargs sed -i 's/\\\\.line200/.line/g; s/\\\\.line100/.line2/g')",
+      "Bash(sed -i \"/import 'package:petfolio\\\\/features\\\\/pet_profile\\\\/data\\\\/models\\\\/pet_species.dart'/d\" lib/core/widgets/app_header.dart)",
+      "Bash(sed -i \"/import 'package:petfolio\\\\/features\\\\/pet_profile\\\\/data\\\\/models\\\\/pet_species.dart'/d\" lib/features/care/presentation/screens/care_screen.dart)",
+      "Bash(sed -i \"/import '..\\\\/..\\\\/data\\\\/models\\\\/pet_species.dart'/d\" lib/features/pet_profile/presentation/screens/onboarding_screen.dart)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_in_Chrome__select_browser",
+      "mcp__Claude_in_Chrome__navigate",
+      "mcp__Claude_in_Chrome__browser_batch",
+      "mcp__Windows-MCP__Screenshot",
+      "mcp__Claude_in_Chrome__get_page_text",
+      "Bash(python -m http.server 8765)",
+      "Bash(Start-Sleep -Seconds 2)",
+      "Bash(curl -s http://localhost:8765/ -o NUL)",
+      "mcp__Claude_in_Chrome__javascript_tool",
+      "mcp__Windows-MCP__Click",
+      "mcp__Windows-MCP__App",
+      "mcp__Windows-MCP__Snapshot",
+      "mcp__Claude_in_Chrome__find",
+      "Bash(dir \"G:\\\\GitHub\\\\petfolio\\\\google_fonts\" /b)"
     ]
   }
 }

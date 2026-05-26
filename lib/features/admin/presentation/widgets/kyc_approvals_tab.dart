@@ -141,13 +141,13 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
                   borderRadius:
                       BorderRadius.circular(PetfolioThemeExtension.radiusMd),
                   borderSide:
-                      const BorderSide(color: AppColors.line200),
+                      const BorderSide(color: AppColors.line),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius:
                       BorderRadius.circular(PetfolioThemeExtension.radiusMd),
                   borderSide:
-                      const BorderSide(color: AppColors.line200),
+                      const BorderSide(color: AppColors.line),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius:
@@ -169,7 +169,7 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(ctx),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.line200),
+                      side: const BorderSide(color: AppColors.line),
                       foregroundColor: AppColors.ink700,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
@@ -255,7 +255,7 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
             ),
           ),
 
-          const Divider(height: 1, color: AppColors.line200),
+          const Divider(height: 1, color: AppColors.line),
 
           // ── Bank details ─────────────────────────────────────────────────
           if (bank != null)
@@ -320,7 +320,7 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
             ),
 
           const SizedBox(height: 12),
-          const Divider(height: 1, color: AppColors.line200),
+          const Divider(height: 1, color: AppColors.line),
 
           // ── Action buttons ────────────────────────────────────────────────
           Padding(
@@ -335,7 +335,7 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: cs.error,
                       side: BorderSide(
-                        color: _busy ? AppColors.line200 : cs.error,
+                        color: _busy ? AppColors.line : cs.error,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
@@ -399,7 +399,7 @@ class _ShopAvatar extends StatelessWidget {
         borderRadius:
             BorderRadius.circular(PetfolioThemeExtension.radiusMd),
         color: AppColors.blue500.withAlpha(15),
-        border: Border.all(color: AppColors.line200),
+        border: Border.all(color: AppColors.line),
       ),
       clipBehavior: Clip.antiAlias,
       child: logoUrl != null

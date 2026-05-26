@@ -188,7 +188,7 @@ class _ManageHeader extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: pt.line200, width: 0.5)),
+        border: Border(bottom: BorderSide(color: pt.line, width: 0.5)),
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 10, 16, 10),
@@ -211,7 +211,7 @@ class _ManageHeader extends StatelessWidget {
                       offset: Offset(0, 1),
                     ),
                     BoxShadow(
-                      color: pt.line200.withAlpha(128),
+                      color: pt.line.withAlpha(128),
                       blurRadius: 0,
                       spreadRadius: 0.5,
                     ),
@@ -243,7 +243,6 @@ class _ManageHeader extends StatelessWidget {
                   Text(
                     'Your pets',
                     style: TextStyle(
-                      fontFamily: 'Sora',
                       fontWeight: FontWeight.w700,
                       fontSize: 19,
                       letterSpacing: -0.2,
@@ -383,7 +382,7 @@ class _PetRow extends StatelessWidget {
           color: cs.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isActive ? species.accent : pt.line200,
+            color: isActive ? species.accent : pt.line,
             width: isActive ? 1.5 : 0.5,
           ),
           boxShadow: [
@@ -429,7 +428,6 @@ class _PetRow extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontFamily: 'Sora',
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
                             letterSpacing: -0.15,
@@ -555,7 +553,6 @@ class _AddPetCallout extends StatelessWidget {
                   const Text(
                     'Add another pet',
                     style: TextStyle(
-                      fontFamily: 'Sora',
                       fontWeight: FontWeight.w700,
                       fontSize: 15,
                     ),
@@ -632,7 +629,6 @@ class _ShareAccessSheet extends StatelessWidget {
                       Text(
                         'Share ${pet.name}',
                         style: const TextStyle(
-                          fontFamily: 'Sora',
                           fontWeight: FontWeight.w700,
                           fontSize: 18,
                         ),

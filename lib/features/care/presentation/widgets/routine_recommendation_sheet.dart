@@ -5,6 +5,7 @@ import 'package:petfolio/core/models/pet.dart';
 import 'package:petfolio/features/care/data/models/care_task.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_dashboard_controller.dart';
 import 'package:petfolio/core/widgets/app_snack_bar.dart';
+import 'package:petfolio/core/theme/theme.dart';
 
 class RoutineRecommendationSheet extends ConsumerStatefulWidget {
   const RoutineRecommendationSheet({
@@ -27,6 +28,7 @@ class RoutineRecommendationSheet extends ConsumerStatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (_) => RoutineRecommendationSheet(
         pet: pet,
@@ -136,7 +138,8 @@ class _RoutineRecommendationSheetState
       height: size.height * 0.9,
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(PetfolioThemeExtension.radius2xl)),
+        boxShadow: theme.extension<PetfolioThemeExtension>()!.shadowE4,
       ),
       child: Column(
         children: [
@@ -245,7 +248,7 @@ class _RoutineRecommendationSheetState
             onPressed: (_isSaving || _selectedIds.isEmpty) ? null : _save,
             style: FilledButton.styleFrom(
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
+                  borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg)),
             ),
             child: _isSaving
                 ? const SizedBox(
@@ -328,7 +331,7 @@ class _SummaryChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusXl),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
@@ -442,7 +445,8 @@ class _TaskRecommendationCard extends StatelessWidget {
               : theme.cardColor,
           border:
               Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+          boxShadow: isSelected ? theme.extension<PetfolioThemeExtension>()!.shadowE1 : null,
         ),
         child: CheckboxListTile(
           value: isSelected,
@@ -507,7 +511,7 @@ class _TaskRecommendationCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: theme.colorScheme.secondaryContainer
                         .withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusSm),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,

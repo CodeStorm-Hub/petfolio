@@ -125,7 +125,7 @@ class _Header extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.surface0,
-                boxShadow: const [BoxShadow(color: AppColors.line200, spreadRadius: 0.5)],
+                boxShadow: const [BoxShadow(color: AppColors.line, spreadRadius: 0.5)],
               ),
               child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.ink700),
             ),
@@ -134,7 +134,6 @@ class _Header extends StatelessWidget {
           Text(
             _titles[step],
             style: const TextStyle(
-              fontFamily: 'Sora',
               fontWeight: FontWeight.w700,
               fontSize: 20,
               color: AppColors.ink950,
@@ -164,7 +163,7 @@ class _StepIndicator extends StatelessWidget {
               height: 4,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4),
-                color: active ? AppColors.blue500 : AppColors.line200,
+                color: active ? AppColors.blue500 : AppColors.line,
               ),
             ),
           );
@@ -293,7 +292,7 @@ class _DocPicker extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           color: AppColors.surface0,
           border: Border.all(
-            color: hasFile ? AppColors.blue500 : AppColors.line200,
+            color: hasFile ? AppColors.blue500 : AppColors.line,
             width: hasFile ? 1.5 : 1,
           ),
         ),
@@ -438,11 +437,11 @@ class _Field extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.line200),
+          borderSide: const BorderSide(color: AppColors.line),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.line200),
+          borderSide: const BorderSide(color: AppColors.line),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

@@ -74,7 +74,7 @@ class AuthCard extends StatelessWidget {
         color: cs.surface,
         borderRadius:
             BorderRadius.circular(PetfolioThemeExtension.radius2xl),
-        border: Border.all(color: pt.line200),
+        border: Border.all(color: pt.line),
         boxShadow: pt.shadowE2,
       ),
       padding: const EdgeInsets.all(24),
@@ -187,11 +187,11 @@ class _AuthFieldState extends State<AuthField> {
           // ── Borders — OutlineInputBorder correctly notches the floating label
           border: OutlineInputBorder(
             borderRadius: radius,
-            borderSide: BorderSide(color: pt.line200),
+            borderSide: BorderSide(color: pt.line),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: radius,
-            borderSide: BorderSide(color: pt.line200),
+            borderSide: BorderSide(color: pt.line),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: radius,

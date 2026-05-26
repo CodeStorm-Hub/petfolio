@@ -66,7 +66,6 @@ class VendorOrderDetailScreen extends ConsumerWidget {
                     const Text(
                       'Order Detail',
                       style: TextStyle(
-                        fontFamily: 'Sora',
                         fontWeight: FontWeight.w700,
                         fontSize: 20,
                         color: AppColors.ink950,
@@ -113,7 +112,7 @@ class _OrderSummaryCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
         child: Column(
@@ -125,7 +124,6 @@ class _OrderSummaryCard extends StatelessWidget {
                 Text(
                   'Order #${order.id.substring(0, 8)}',
                   style: const TextStyle(
-                    fontFamily: 'Sora',
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                     color: AppColors.ink950,
@@ -135,7 +133,7 @@ class _OrderSummaryCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            const Divider(color: AppColors.line200, height: 1),
+            const Divider(color: AppColors.line, height: 1),
             const SizedBox(height: 12),
             _InfoRow(label: 'Total', value: order.amountFormatted),
             const SizedBox(height: 6),
@@ -184,7 +182,7 @@ class _LineItemsCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
         child: Column(
@@ -311,7 +309,6 @@ class _ActionButtons extends ConsumerWidget {
             const Text(
               'Add tracking info',
               style: TextStyle(
-                fontFamily: 'Sora',
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
                 color: AppColors.ink950,
@@ -455,7 +452,7 @@ class _IconBtn extends StatelessWidget {
           shape: BoxShape.circle,
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
         child: Icon(icon, size: 18, color: AppColors.ink700),

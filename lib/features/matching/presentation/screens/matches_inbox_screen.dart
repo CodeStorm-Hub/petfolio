@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -28,14 +27,14 @@ class MatchesInboxScreen extends ConsumerWidget {
       body: Center(
         child: petsAsync.when(
           skipLoadingOnReload: true,
-          loading: () => const CircularProgressIndicator.adaptive(),
+          loading: () => const TailWagLoader(),
           error: (_, _) => Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
               const SizedBox(height: 12),
               Text('Connection error',
-                  style: TextStyle(fontSize: 15, color: pt.ink500)),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: pt.ink500)),
               const SizedBox(height: 16),
               FilledButton.icon(
                 onPressed: () => ref.invalidate(petListProvider),
@@ -44,7 +43,7 @@ class MatchesInboxScreen extends ConsumerWidget {
               ),
             ],
           ),
-          data: (_) => const CircularProgressIndicator.adaptive(),
+          data: (_) => const TailWagLoader(),
         ),
       ),
     );
@@ -82,9 +81,7 @@ class _MatchesInboxView extends ConsumerWidget {
             Expanded(
               child: inboxAsync.when(
                 skipLoadingOnReload: true,
-                loading: () => const Center(
-                  child: CircularProgressIndicator.adaptive(),
-                ),
+                loading: () => const Center(child: TailWagLoader()),
                 error: (error, stackTrace) {
                   debugPrint(
                     '[MatchesInboxScreen] fetchMatchInbox failed: $error\n$stackTrace',
@@ -97,7 +94,7 @@ class _MatchesInboxView extends ConsumerWidget {
                       const SizedBox(height: 12),
                       Text(
                         'Could not load matches',
-                        style: TextStyle(fontSize: 15, color: pt.ink500),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: pt.ink500),
                       ),
                       const SizedBox(height: 16),
                       FilledButton.icon(
@@ -197,8 +194,7 @@ class _SectionTitle extends StatelessWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Text(
       label,
-      style: GoogleFonts.sora(
-        fontSize: 18,
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
         fontWeight: FontWeight.w700,
         letterSpacing: -0.2,
         color: pt.ink500,
@@ -245,8 +241,7 @@ class _NewMatchAvatar extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 12,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -298,16 +293,14 @@ class _ConversationTile extends StatelessWidget {
                             item.otherPetName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.sora(
-                              fontSize: 16,
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                         Text(
                           timeLabel,
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: pt.ink300,
                           ),
                         ),
@@ -318,8 +311,7 @@ class _ConversationTile extends StatelessWidget {
                       preview,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: pt.ink500,
                       ),
                     ),

@@ -22,6 +22,7 @@ class PetSwitcherSheet extends ConsumerWidget {
   static Future<void> show(BuildContext context) => showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
+        useRootNavigator: true,
         backgroundColor: Colors.transparent,
         barrierColor: const Color(0x6B0B1220),
         useSafeArea: true,
@@ -85,7 +86,6 @@ class PetSwitcherSheet extends ConsumerWidget {
                           const Text(
                             'Your pets',
                             style: TextStyle(
-                              fontFamily: 'Sora',
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
                               letterSpacing: -0.22,
@@ -237,7 +237,7 @@ class _PetRow extends StatelessWidget {
             color: isActive ? species.tint : cs.surface,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: isActive ? species.accent : pt.line200,
+              color: isActive ? species.accent : pt.line,
               width: isActive ? 2 : 0.5,
             ),
             boxShadow: isActive
@@ -272,7 +272,6 @@ class _PetRow extends StatelessWidget {
                         Text(
                           pet.name,
                           style: const TextStyle(
-                            fontFamily: 'Sora',
                             fontWeight: FontWeight.w600,
                             fontSize: 18,
                             letterSpacing: -0.2,
@@ -386,7 +385,6 @@ class _AddPetButton extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontFamily: 'Sora',
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                       ),
@@ -442,7 +440,6 @@ class _ManageRow extends StatelessWidget {
             Text(
               'Manage',
               style: TextStyle(
-                fontFamily: 'Inter',
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
                 color: Theme.of(context).colorScheme.primary,
@@ -483,7 +480,6 @@ class _SignOutRow extends ConsumerWidget {
               child: Text(
                 'Sign out',
                 style: TextStyle(
-                  fontFamily: 'Inter',
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                   color: AppColors.coral500,

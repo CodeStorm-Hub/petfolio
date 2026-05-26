@@ -11,7 +11,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_bottom_sheet.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
+import '../../../../core/widgets/dashed_rect_painter.dart';
+import '../../../../core/widgets/petfolio_empty_state.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
+import '../../../../core/widgets/tail_wag_loader.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/medical_record.dart';
 import '../../data/repositories/health_repository.dart';
@@ -37,7 +40,7 @@ class MedicalVaultScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pet = ref.watch(activePetControllerProvider);
     if (pet == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator.adaptive()));
+      return const Scaffold(body: Center(child: TailWagLoader()));
     }
     return _MedicalVaultBody(petId: pet.id, petName: pet.name);
   }
@@ -58,34 +61,104 @@ class _MedicalVaultBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
     final asyncRecords = ref.watch(healthVaultControllerProvider);
 
     return Scaffold(
-      backgroundColor: pt.surface1,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _openAddSheet(context),
-        child: const Icon(Icons.add_rounded),
-      ),
+      backgroundColor: AppColors.cream,
       body: SafeArea(
+        bottom: false,
         child: CustomScrollView(
           slivers: [
-            SliverAppBar(
-              pinned: true,
-              backgroundColor: pt.surface1,
-              surfaceTintColor: Colors.transparent,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back_rounded),
-                onPressed: () => context.pop(),
-              ),
-              title: Text(
-                'Medical vault',
-                style: TextStyle(
-                  fontFamily: 'Sora',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                  color: cs.onSurface,
+            SliverToBoxAdapter(
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [AppColors.mintSoft, AppColors.cream],
+                  ),
+                ),
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => context.pop(),
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: const BoxDecoration(
+                              color: AppColors.surface0,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.arrow_back_ios_new_rounded, size: 22, color: AppColors.ink700),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            '${petName.toUpperCase()} · MEDICAL VAULT',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.8,
+                              color: AppColors.mint700,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => _openAddSheet(context),
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: const BoxDecoration(
+                              color: AppColors.mint,
+                              shape: BoxShape.circle,
+                              boxShadow: [BoxShadow(color: AppColors.shadowE1L, blurRadius: 4, offset: Offset(0, 2))],
+                            ),
+                            child: const Icon(Icons.add_rounded, size: 22, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    RichText(
+                      text: const TextSpan(
+                        style: TextStyle(
+                          fontSize: 36,
+                          fontWeight: FontWeight.w900,
+                          height: 1.05,
+                          color: AppColors.ink950,
+                        ),
+                        children: [
+                          TextSpan(text: 'Everything '),
+                          TextSpan(text: 'healthy', style: TextStyle(color: AppColors.mint700)),
+                          TextSpan(text: ',\nin one cozy spot.'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Vaccines, meds, and vet visits — synced live from $petName\'s clinic.',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.ink700,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    const Row(
+                      children: [
+                        Expanded(child: _HealthPill(icon: '💚', label: 'Vitals', value: 'Strong')),
+                        SizedBox(width: 8),
+                        Expanded(child: _HealthPill(icon: '💉', label: 'Vaccines', value: 'Up to date')),
+                        SizedBox(width: 8),
+                        Expanded(child: _HealthPill(icon: '📅', label: 'Next visit', value: '14 Jun')),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -94,7 +167,6 @@ class _MedicalVaultBody extends ConsumerWidget {
               sliver: asyncRecords.when(
                 loading: () => SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: 8),
                     ...List.generate(
                       4,
                       (_) => Padding(
@@ -113,11 +185,11 @@ class _MedicalVaultBody extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(vertical: 48),
                     child: Column(
                       children: [
-                        Icon(Icons.cloud_off_rounded, size: 44, color: pt.ink300),
+                        const Icon(Icons.cloud_off_rounded, size: 44, color: AppColors.ink300),
                         const SizedBox(height: 12),
-                        Text(
+                        const Text(
                           'Could not load medical records',
-                          style: TextStyle(fontSize: 15, color: pt.ink500),
+                          style: TextStyle(fontSize: 15, color: AppColors.ink500),
                         ),
                       ],
                     ),
@@ -130,51 +202,73 @@ class _MedicalVaultBody extends ConsumerWidget {
 
                   return SliverList(
                     delegate: SliverChildListDelegate([
-                      Text(
-                        petName.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.08 * 11,
-                          color: pt.ink500,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Automated medical vault',
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 22,
-                          letterSpacing: -0.2,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Vaccines, medications, and vet-linked records stay grouped and update live.',
-                        style: TextStyle(fontSize: 14, height: 1.35, color: pt.ink500),
-                      ),
-                      const SizedBox(height: 24),
                       _VaultSection(
                         title: 'Vaccines',
                         icon: Icons.vaccines_rounded,
+                        accent: AppColors.mint,
                         records: vaccines,
                         emptyLabel: 'No vaccine records yet.',
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
                       _VaultSection(
                         title: 'Medications',
                         icon: Icons.medication_rounded,
+                        accent: AppColors.poppy,
                         records: meds,
                         emptyLabel: 'No medication records yet.',
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
                       _VaultSection(
                         title: 'Vet visits',
                         icon: Icons.local_hospital_rounded,
+                        accent: AppColors.tangerine,
                         records: vet,
                         emptyLabel: 'No vet visit or clinical notes yet.',
+                      ),
+                      // Share with vet card
+                      CustomPaint(
+                        painter: DashedRectPainter(
+                          color: AppColors.mint,
+                          strokeWidth: 2,
+                          dashLength: 8,
+                          dashSpace: 6,
+                          borderRadius: 24,
+                        ),
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24),
+                            gradient: const LinearGradient(
+                              colors: [AppColors.mintSoft, AppColors.surface0],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Text('🩺', style: TextStyle(fontSize: 36)),
+                              const SizedBox(width: 14),
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Share with your vet', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.ink950)),
+                                    Text('Generate a temporary QR — expires in 24h', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.ink500)),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.mint,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: const Text('Share', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ]),
                   );
@@ -188,68 +282,128 @@ class _MedicalVaultBody extends ConsumerWidget {
   }
 }
 
+class _HealthPill extends StatelessWidget {
+  const _HealthPill({required this.icon, required this.label, required this.value});
+  final String icon;
+  final String label;
+  final String value;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface0,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.line, width: 1.5),
+        boxShadow: const [BoxShadow(color: AppColors.shadowE1L, blurRadius: 4, offset: Offset(0, 2))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(icon, style: const TextStyle(fontSize: 18, height: 1)),
+          const SizedBox(height: 2),
+          Text(label.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.4, color: AppColors.ink500)),
+          Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.ink950)),
+        ],
+      ),
+    );
+  }
+}
+
 class _VaultSection extends StatelessWidget {
   const _VaultSection({
     required this.title,
     required this.icon,
+    required this.accent,
     required this.records,
     required this.emptyLabel,
   });
 
   final String title;
   final IconData icon;
+  final Color accent;
   final List<MedicalRecord> records;
   final String emptyLabel;
 
   @override
   Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(icon, size: 18, color: pt.pillarHealth),
-            const SizedBox(width: 8),
-            Text(
-              title.toUpperCase(),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.08 * 12,
-                color: pt.ink500,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Color.lerp(accent, AppColors.surface0, 0.78),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(child: Icon(icon, size: 18, color: accent)),
               ),
-            ),
-          ],
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.ink950,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Color.lerp(accent, AppColors.surface0, 0.82),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '${records.length}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.ink700,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 10),
-        if (records.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            decoration: BoxDecoration(
-              color: cs.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: pt.line200, width: 0.5),
-            ),
-            child: Text(emptyLabel, style: TextStyle(fontSize: 14, color: pt.ink500)),
-          )
-        else
-          ...records.map((r) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: _MedicalRecordCard(record: r),
-              )),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: AppColors.surface0,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.line),
+          ),
+          child: records.isEmpty
+              ? PetfolioEmptyState(
+                  icon: icon,
+                  title: emptyLabel,
+                )
+              : Column(
+                  children: [
+                    for (int i = 0; i < records.length; i++) ...[
+                      _MedicalRecordCard(record: records[i], accent: accent, icon: icon),
+                      if (i < records.length - 1)
+                        const Divider(height: 1, thickness: 1, color: AppColors.line),
+                    ]
+                  ],
+                ),
+        ),
       ],
     );
   }
 }
 
 class _MedicalRecordCard extends ConsumerWidget {
-  const _MedicalRecordCard({required this.record});
+  const _MedicalRecordCard({required this.record, required this.accent, required this.icon});
 
   final MedicalRecord record;
+  final Color accent;
+  final IconData icon;
 
   Future<void> _openDocument(BuildContext context, WidgetRef ref) async {
     final path = record.documentUrl;
@@ -289,12 +443,11 @@ class _MedicalRecordCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
     final warn = record.isExpiringSoon;
-    final borderColor = warn ? pt.warning : pt.line200;
-    final fill = warn ? pt.warning.withAlpha(22) : cs.surface;
-
+    final statusBg = warn ? AppColors.sunnySoft : Color.lerp(accent, AppColors.surface0, 0.85)!;
+    final statusColor = warn ? AppColors.sunny700 : Color.lerp(accent, AppColors.ink950, 0.5)!;
+    final statusLabel = warn ? 'Due soon' : (record.isActive ? 'Active' : 'Archived');
+    
     return Dismissible(
       key: ValueKey(record.id),
       direction: DismissDirection.endToStart,
@@ -303,7 +456,6 @@ class _MedicalRecordCard extends ConsumerWidget {
         padding: const EdgeInsets.only(right: 20),
         decoration: BoxDecoration(
           color: AppColors.danger.withAlpha(230),
-          borderRadius: BorderRadius.circular(16),
         ),
         child: const Icon(Icons.archive_outlined, color: Colors.white),
       ),
@@ -311,114 +463,103 @@ class _MedicalRecordCard extends ConsumerWidget {
         await ref.read(healthVaultControllerProvider.notifier).deactivateRecord(record.id);
         return false;
       },
-      child: AnimatedContainer(
-        duration: PetfolioThemeExtension.durationSm,
-        decoration: BoxDecoration(
-          color: fill,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: borderColor, width: warn ? 1.5 : 0.5),
-          boxShadow: [
-            if (warn)
-              BoxShadow(
-                color: pt.warning.withAlpha(60),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              )
-            else ...[
-              BoxShadow(color: pt.line200.withAlpha(128), blurRadius: 0, spreadRadius: 0.5),
-              const BoxShadow(color: AppColors.shadowE1L, blurRadius: 2, offset: Offset(0, 1)),
-            ],
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (warn)
-                Padding(
-                  padding: const EdgeInsets.only(right: 10, top: 2),
-                  child: Icon(Icons.schedule_rounded, size: 22, color: pt.warning),
-                ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            record.name,
-                            style: TextStyle(
-                              fontFamily: 'Sora',
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15,
-                              color: cs.onSurface,
-                            ),
-                          ),
-                        ),
-                        if (warn)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: pt.warning.withAlpha(36),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              'Due soon',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: pt.warning,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    if (record.description != null && record.description!.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        record.description!,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 13, color: pt.ink500, height: 1.3),
-                      ),
-                    ],
-                    const SizedBox(height: 6),
-                    Text(
-                      _dateLine(),
-                      style: TextStyle(fontSize: 12, color: pt.ink300),
-                    ),
-                    if (record.documentUrl != null) ...[
-                      const SizedBox(height: 8),
-                      GestureDetector(
-                        onTap: () => _openDocument(context, ref),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.attach_file_rounded,
-                              size: 14,
-                              color: cs.primary,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'View document',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: cs.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: Color.lerp(accent, AppColors.surface0, 0.82),
+                borderRadius: BorderRadius.circular(14),
               ),
-            ],
-          ),
+              child: Center(child: Icon(icon, size: 20, color: accent)),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          record.name,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.ink950,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: statusBg,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          statusLabel,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                            color: statusColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _dateLine(),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.ink500,
+                    ),
+                  ),
+                  if (record.notes != null && record.notes!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      record.notes!,
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        color: AppColors.ink700,
+                      ),
+                    ),
+                  ],
+                  if (record.documentUrl != null) ...[
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: () => _openDocument(context, ref),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.attach_file_rounded,
+                            size: 14,
+                            color: AppColors.blue500,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'View document',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.blue500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -582,7 +723,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: pt.line200,
+                    color: pt.line,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -591,7 +732,6 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
             Text(
               'Log medical record',
               style: TextStyle(
-                fontFamily: 'Sora',
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
                 color: cs.onSurface,
@@ -622,7 +762,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                       color: selected ? cs.primary : pt.surface2,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: selected ? Colors.transparent : pt.line200,
+                        color: selected ? Colors.transparent : pt.line,
                         width: 0.5,
                       ),
                     ),
@@ -660,11 +800,11 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line200, width: 0.5),
+                  borderSide: BorderSide(color: pt.line, width: 0.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line200, width: 0.5),
+                  borderSide: BorderSide(color: pt.line, width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -720,11 +860,11 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line200, width: 0.5),
+                  borderSide: BorderSide(color: pt.line, width: 0.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line200, width: 0.5),
+                  borderSide: BorderSide(color: pt.line, width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -743,11 +883,11 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line200, width: 0.5),
+                  borderSide: BorderSide(color: pt.line, width: 0.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line200, width: 0.5),
+                  borderSide: BorderSide(color: pt.line, width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -777,11 +917,11 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line200, width: 0.5),
+                  borderSide: BorderSide(color: pt.line, width: 0.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line200, width: 0.5),
+                  borderSide: BorderSide(color: pt.line, width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -807,7 +947,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 decoration: BoxDecoration(
                   color: pt.surface2,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: pt.line200, width: 0.5),
+                  border: Border.all(color: pt.line, width: 0.5),
                 ),
                 child: Row(
                   children: [
@@ -928,7 +1068,7 @@ class _DateRow extends StatelessWidget {
             decoration: BoxDecoration(
               color: pt.surface2,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: pt.line200, width: 0.5),
+              border: Border.all(color: pt.line, width: 0.5),
             ),
             child: Row(
               children: [

@@ -66,7 +66,6 @@ class BuyerOrderDetailScreen extends ConsumerWidget {
                     const Text(
                       'Order Detail',
                       style: TextStyle(
-                        fontFamily: 'Sora',
                         fontWeight: FontWeight.w700,
                         fontSize: 20,
                         color: AppColors.ink950,
@@ -150,7 +149,6 @@ class _StatusCard extends StatelessWidget {
                 Text(
                   order.status.label,
                   style: TextStyle(
-                    fontFamily: 'Sora',
                     fontWeight: FontWeight.w700,
                     fontSize: 18,
                     color: color,
@@ -194,7 +192,7 @@ class _SummaryCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
         child: Column(
@@ -251,7 +249,7 @@ class _LineItemsCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
         child: Column(
@@ -347,7 +345,7 @@ class _TrackingCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
         child: Column(
@@ -436,7 +434,7 @@ class _IconBtn extends StatelessWidget {
           shape: BoxShape.circle,
           color: AppColors.surface0,
           boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
+            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
         child: Icon(icon, size: 18, color: AppColors.ink700),

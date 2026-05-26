@@ -80,7 +80,7 @@ class _ReportCardState extends ConsumerState<_ReportCard> {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-        border: Border.all(color: pt.line200, width: 0.5),
+        border: Border.all(color: pt.line, width: 0.5),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -150,7 +150,7 @@ class _ReportCardState extends ConsumerState<_ReportCard> {
                   child: OutlinedButton(
                     onPressed: () => _resolve(dismiss: true, hidePost: false),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: pt.line200),
+                      side: BorderSide(color: pt.line),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                           PetfolioThemeExtension.radiusSm,

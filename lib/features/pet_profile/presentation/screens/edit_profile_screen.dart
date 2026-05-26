@@ -143,7 +143,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 SizedBox(width: 12),
                 Text(
                   'Match discovery enabled',
-                  style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -214,7 +213,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               SizedBox(width: 12),
               Text(
                 'Profile saved',
-                style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w500),
               ),
             ],
           ),
@@ -255,7 +253,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         title: Text(
           'Edit profile',
           style: TextStyle(
-            fontFamily: 'Sora',
             fontWeight: FontWeight.w700,
             fontSize: 16,
             color: cs.onSurface,
@@ -441,7 +438,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           title: Text(
                             'Public profile',
                             style: TextStyle(
-                              fontFamily: 'Sora',
                               fontWeight: FontWeight.w600,
                               fontSize: 15,
                               color: cs.onSurface,
@@ -463,7 +459,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                               title: Text(
                                 'Match discovery',
                                 style: TextStyle(
-                                  fontFamily: 'Sora',
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15,
                                   color: cs.onSurface,
@@ -501,7 +496,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
               decoration: BoxDecoration(
                 color: cs.surface,
-                border: Border(top: BorderSide(color: pt.line200, width: 0.5)),
+                border: Border(top: BorderSide(color: pt.line, width: 0.5)),
                 boxShadow: const [
                   BoxShadow(
                     color: AppColors.shadowE1L,
@@ -574,7 +569,7 @@ class _SectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: pt.line200, width: 0.5),
+        border: Border.all(color: pt.line, width: 0.5),
         boxShadow: const [
           BoxShadow(
             color: AppColors.shadowE1L,
@@ -592,7 +587,6 @@ class _SectionCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: TextStyle(
-                    fontFamily: 'Sora',
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                     color: cs.onSurface,
@@ -681,7 +675,7 @@ class _AvatarEditor extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: pt.surface2,
-              border: Border.all(color: pt.line200, width: 2),
+              border: Border.all(color: pt.line, width: 2),
               image: state.newImage != null
                   ? DecorationImage(image: FileImage(File(state.newImage!.path)), fit: BoxFit.cover)
                   : pet.avatarUrl != null && pet.avatarUrl!.isNotEmpty
@@ -746,7 +740,6 @@ class _SpeciesChip extends StatelessWidget {
           Text(
             species.label,
             style: TextStyle(
-              fontFamily: 'Sora',
               fontWeight: FontWeight.w600,
               color: Theme.of(context).colorScheme.onSurface,
             ),
@@ -826,7 +819,7 @@ class _ActivityChip extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: selected ? accent : pt.line200,
+              color: selected ? accent : pt.line,
               width: selected ? 1.5 : 0.5,
             ),
           ),
@@ -885,7 +878,6 @@ class _LocationRow extends StatelessWidget {
         Text(
           'Match location',
           style: TextStyle(
-            fontFamily: 'Sora',
             fontWeight: FontWeight.w600,
             fontSize: 15,
             color: cs.onSurface,

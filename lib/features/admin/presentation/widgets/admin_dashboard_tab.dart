@@ -261,7 +261,7 @@ class _RecentActivitySection extends StatelessWidget {
               separatorBuilder: (context, index) => const Divider(
                 height: 1,
                 indent: 64,
-                color: AppColors.line200,
+                color: AppColors.line,
               ),
               itemBuilder: (context, i) => _ActivityTile(item: items[i]),
             ),

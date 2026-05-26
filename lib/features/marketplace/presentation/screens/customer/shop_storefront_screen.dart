@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/theme.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/cart_controller.dart';
 import '../../controllers/shop_list_controller.dart';
@@ -22,8 +22,7 @@ class ShopStorefrontRoute extends ConsumerWidget {
     final shopAsync = ref.watch(shopByIdProvider(shopId));
 
     return shopAsync.when(
-      loading: () => const Scaffold(
-        backgroundColor: AppColors.surface1,
+      loading: () => Scaffold(
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.all(16),
@@ -41,14 +40,13 @@ class ShopStorefrontRoute extends ConsumerWidget {
         ),
       ),
       error: (_, _) => Scaffold(
-        backgroundColor: AppColors.surface1,
         body: SafeArea(
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Shop not found',
-                    style: TextStyle(color: AppColors.ink500)),
+                Text('Shop not found',
+                    style: Theme.of(context).textTheme.bodyMedium),
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: () => context.pop(),
@@ -77,13 +75,16 @@ class ShopStorefrontScreen extends ConsumerWidget {
           0, (s, i) => s + i.quantity) ??
         0;
 
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final tt = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: AppColors.surface1,
+      backgroundColor: pt.surface1,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: shop.bannerUrl != null ? 160 : 80,
-            backgroundColor: AppColors.surface0,
+            backgroundColor: pt.surface1,
             elevation: 0,
             pinned: true,
             leading: Padding(
@@ -158,9 +159,8 @@ class ShopStorefrontScreen extends ConsumerWidget {
                     height: 60,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
-                      color: AppColors.surface2,
-                      border: Border.all(
-                          color: AppColors.line200, width: 1.5),
+                      color: pt.surface2,
+                      border: Border.all(color: pt.line, width: 1.5),
                     ),
                     child: shop.logoUrl != null
                         ? ClipRRect(
@@ -168,8 +168,8 @@ class ShopStorefrontScreen extends ConsumerWidget {
                             child: Image.network(shop.logoUrl!,
                                 fit: BoxFit.cover),
                           )
-                        : const Icon(Icons.storefront_outlined,
-                            color: AppColors.ink300, size: 28),
+                        : Icon(Icons.storefront_outlined,
+                            color: pt.ink300, size: 28),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -178,21 +178,18 @@ class ShopStorefrontScreen extends ConsumerWidget {
                       children: [
                         Text(
                           shop.shopName,
-                          style: const TextStyle(
-                            fontFamily: 'Sora',
+                          style: tt.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
-                            fontSize: 18,
-                            color: AppColors.ink950,
+                            color: pt.ink950,
                           ),
                         ),
                         if (shop.description != null) ...[
-                          const SizedBox(height: 3),
+                          const SizedBox(height: 4),
                           Text(
                             shop.description!,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontSize: 12, color: AppColors.ink500),
+                            style: tt.bodySmall?.copyWith(color: pt.ink500),
                           ),
                         ],
                       ],
@@ -207,16 +204,15 @@ class ShopStorefrontScreen extends ConsumerWidget {
 
           SliverToBoxAdapter(child: _ContactInfoSection(shop: shop)),
 
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(16, 6, 16, 6),
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
               child: Text(
                 'PRODUCTS',
-                style: TextStyle(
-                  fontSize: 11,
+                style: tt.labelSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.88,
-                  color: AppColors.ink500,
+                  color: pt.ink500,
                 ),
               ),
             ),
@@ -233,10 +229,10 @@ class ShopStorefrontScreen extends ConsumerWidget {
               ),
             ),
             data: (products) => products.isEmpty
-                ? const SliverFillRemaining(
+                ? SliverFillRemaining(
                     child: Center(
                       child: Text('No products available',
-                          style: TextStyle(color: AppColors.ink500)),
+                          style: tt.bodyMedium?.copyWith(color: pt.ink500)),
                     ),
                   )
                 : SliverPadding(
@@ -248,7 +244,7 @@ class ShopStorefrontScreen extends ConsumerWidget {
                         crossAxisCount: 2,
                         crossAxisSpacing: 12,
                         mainAxisSpacing: 20,
-                        childAspectRatio: 0.62,
+                        childAspectRatio: 0.70,
                       ),
                       itemCount: products.length,
                       itemBuilder: (_, i) => ProductCard(
@@ -282,12 +278,14 @@ class _ContactInfoSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Divider(color: AppColors.line100, height: 20),
+          Divider(color: pt.line2, height: 20),
           if (hasEmail)
             _ContactRow(
               icon:  Icons.email_outlined,
@@ -337,18 +335,19 @@ class _ContactRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final tt = Theme.of(context).textTheme;
     final row = Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 15, color: AppColors.ink500),
+          Icon(icon, size: 15, color: pt.ink500),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               label,
-              style: tt.bodySmall!.copyWith(color: AppColors.ink700),
+              style: tt.bodySmall!.copyWith(color: pt.ink700),
             ),
           ),
         ],
@@ -391,20 +390,27 @@ class _SocialBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => launchUrl(
-        Uri.parse(url),
-        mode: LaunchMode.externalApplication,
-      ),
-      child: Container(
-        width: 36,
-        height: 36,
-        margin: const EdgeInsets.only(right: 8),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.blue500.withAlpha(20),
+    return SizedBox(
+      width: 48,
+      height: 48,
+      child: Align(
+        alignment: Alignment.center,
+        child: GestureDetector(
+          onTap: () => launchUrl(
+            Uri.parse(url),
+            mode: LaunchMode.externalApplication,
+          ),
+          child: Container(
+            width: 36,
+            height: 36,
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.blue500.withAlpha(20),
+            ),
+            child: Icon(icon, size: 18, color: AppColors.blue500),
+          ),
         ),
-        child: Icon(icon, size: 18, color: AppColors.blue500),
       ),
     );
   }
@@ -417,12 +423,13 @@ class _ErrorRetry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Could not load products',
-              style: TextStyle(color: AppColors.ink500)),
+          Text('Could not load products',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: pt.ink500)),
           const SizedBox(height: 12),
           PrimaryPillButton(
             label: 'Retry',
@@ -444,19 +451,27 @@ class _CircleBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.surface0,
-          boxShadow: const [
-            BoxShadow(color: AppColors.line200, spreadRadius: 0.5),
-          ],
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    return SizedBox(
+      width: 48,
+      height: 48,
+      child: Align(
+        alignment: Alignment.center,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: pt.surface1,
+              boxShadow: [
+                BoxShadow(color: pt.line, spreadRadius: 0.5),
+              ],
+            ),
+            child: Icon(icon, size: 16, color: pt.ink700),
+          ),
         ),
-        child: Icon(icon, size: 16, color: AppColors.ink700),
       ),
     );
   }

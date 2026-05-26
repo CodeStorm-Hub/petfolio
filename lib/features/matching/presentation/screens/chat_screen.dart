@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -91,8 +90,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   widget.otherPetName,
-                  style: GoogleFonts.sora(
-                    fontSize: 22,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.3,
                   ),
@@ -134,7 +132,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         child: Text(
                           'You matched with ${widget.otherPetName}. Break the ice with a friendly hello.',
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 15,
                             height: 1.45,
                             color: pt.ink500,
@@ -219,7 +217,7 @@ class _MessageBubble extends StatelessWidget {
             ),
             child: Text(
               message.content,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 15,
                 height: 1.4,
                 color: fg,
@@ -229,7 +227,7 @@ class _MessageBubble extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             _formatTime(message.createdAt),
-            style: GoogleFonts.inter(fontSize: 11, color: pt.ink300),
+            style: TextStyle(fontSize: 11, color: pt.ink300),
           ),
         ],
       ),

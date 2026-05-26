@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import 'theme/app_colors.dart';
 
 import '../features/auth/presentation/controllers/auth_controller.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
@@ -397,10 +400,10 @@ class AppShell extends StatelessWidget {
 
   static const _destinations = [
     _NavDestination(icon: Icons.pets_outlined, activeIcon: Icons.pets, label: 'Pets', path: '/home'),
-    _NavDestination(icon: Icons.favorite_border, activeIcon: Icons.favorite, label: 'Care', path: '/care'),
-    _NavDestination(icon: Icons.people_outline, activeIcon: Icons.people, label: 'Social', path: '/social'),
-    _NavDestination(icon: Icons.favorite_border_outlined, activeIcon: Icons.favorite, label: 'Match', path: '/matching'),
-    _NavDestination(icon: Icons.store_outlined, activeIcon: Icons.store, label: 'Market', path: '/marketplace'),
+    _NavDestination(icon: Icons.local_fire_department_outlined, activeIcon: Icons.local_fire_department, label: 'Care', path: '/care'),
+    _NavDestination(icon: Icons.favorite_border, activeIcon: Icons.favorite, label: 'Social', path: '/social'),
+    _NavDestination(icon: Icons.auto_awesome_outlined, activeIcon: Icons.auto_awesome, label: 'Match', path: '/matching'),
+    _NavDestination(icon: Icons.storefront_outlined, activeIcon: Icons.storefront, label: 'Market', path: '/marketplace'),
   ];
 
   int _selectedIndex(BuildContext context) {
@@ -420,19 +423,10 @@ class AppShell extends StatelessWidget {
       return Scaffold(
         body: Row(
           children: [
-            NavigationRail(
+            _WideNavRail(
               selectedIndex: selectedIndex,
-              labelType: NavigationRailLabelType.all,
-              onDestinationSelected: (i) =>
-                  context.go(_destinations[i].path),
-              destinations: [
-                for (final d in _destinations)
-                  NavigationRailDestination(
-                    icon: Icon(d.icon),
-                    selectedIcon: Icon(d.activeIcon),
-                    label: Text(d.label),
-                  ),
-              ],
+              destinations: _destinations,
+              onSelect: (i) => context.go(_destinations[i].path),
             ),
             const VerticalDivider(thickness: 1, width: 1),
             Expanded(child: child),
@@ -442,18 +436,25 @@ class AppShell extends StatelessWidget {
     }
 
     return Scaffold(
-      body: child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex,
-        onDestinationSelected: (i) => context.go(_destinations[i].path),
-        destinations: [
-          for (final d in _destinations)
-            NavigationDestination(
-              key: ValueKey<String>('shell_nav_${d.path.replaceAll('/', '_')}'),
-              icon: Icon(d.icon),
-              selectedIcon: Icon(d.activeIcon),
-              label: d.label,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Stack(
+        children: [
+          // Main content with padding for floating nav
+          Positioned.fill(
+            bottom: 0,
+            child: child,
+          ),
+          // Floating pill bottom nav, raised above system home indicator
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 12 + MediaQuery.paddingOf(context).bottom,
+            child: _FloatingNav(
+              selectedIndex: selectedIndex,
+              destinations: _destinations,
+              onSelect: (i) => context.go(_destinations[i].path),
             ),
+          ),
         ],
       ),
     );
@@ -498,4 +499,161 @@ class _NavDestination {
   final IconData activeIcon;
   final String label;
   final String path;
+}
+
+// ─── Tab accent colors (matches design system pillar colors) ─────────────────
+const _tabColors = [
+  AppColors.tangerine,  // Pets
+  AppColors.sunny,      // Care
+  AppColors.poppy,      // Social
+  AppColors.lilac,      // Match
+  AppColors.mint,       // Market
+];
+
+// ─── Floating pill bottom nav ─────────────────────────────────────────────────
+
+class _FloatingNav extends StatelessWidget {
+  const _FloatingNav({
+    required this.selectedIndex,
+    required this.destinations,
+    required this.onSelect,
+  });
+
+  final int selectedIndex;
+  final List<_NavDestination> destinations;
+  final ValueChanged<int> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? AppColors.surface0D : AppColors.surface0;
+    final border = isDark ? AppColors.lineD : AppColors.line;
+    final shadowColor = isDark ? AppColors.shadowE3D : AppColors.shadowE3L;
+
+    return Container(
+      height: 68,
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(34),
+        border: Border.all(color: border),
+        boxShadow: [
+          BoxShadow(color: shadowColor, blurRadius: 24, spreadRadius: -4, offset: const Offset(0, 8)),
+        ],
+      ),
+      child: Row(
+        children: [
+          for (var i = 0; i < destinations.length; i++)
+            Expanded(
+              child: _NavTab(
+                destination: destinations[i],
+                isSelected: i == selectedIndex,
+                accentColor: _tabColors[i],
+                isDark: isDark,
+                onTap: () => onSelect(i),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NavTab extends StatelessWidget {
+  const _NavTab({
+    required this.destination,
+    required this.isSelected,
+    required this.accentColor,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  final _NavDestination destination;
+  final bool isSelected;
+  final Color accentColor;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final unselectedColor = isDark ? AppColors.ink500D : AppColors.ink500;
+    final iconColor = isSelected ? accentColor : unselectedColor;
+    final softColor = Color.alphaBlend(accentColor.withAlpha(36), Colors.transparent);
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            decoration: BoxDecoration(
+              color: isSelected ? softColor : Colors.transparent,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Icon(
+              isSelected ? destination.activeIcon : destination.icon,
+              color: iconColor,
+              size: 22,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            destination.label,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              color: iconColor,
+              height: 1.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Wide nav rail ───────────────────────────────────────────────────────────
+
+class _WideNavRail extends StatelessWidget {
+  const _WideNavRail({
+    required this.selectedIndex,
+    required this.destinations,
+    required this.onSelect,
+  });
+
+  final int selectedIndex;
+  final List<_NavDestination> destinations;
+  final ValueChanged<int> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return NavigationRail(
+      selectedIndex: selectedIndex,
+      labelType: NavigationRailLabelType.all,
+      backgroundColor: isDark ? AppColors.surface0D : AppColors.surface0,
+      indicatorColor: Colors.transparent,
+      onDestinationSelected: onSelect,
+      destinations: [
+        for (var i = 0; i < destinations.length; i++)
+          NavigationRailDestination(
+            padding: EdgeInsets.zero,
+            icon: Icon(destinations[i].icon,
+                color: selectedIndex == i ? _tabColors[i] : (isDark ? AppColors.ink500D : AppColors.ink500)),
+            selectedIcon: Icon(destinations[i].activeIcon, color: _tabColors[i]),
+            label: Text(
+              destinations[i].label,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: selectedIndex == i ? FontWeight.w700 : FontWeight.w500,
+                color: selectedIndex == i ? _tabColors[i] : (isDark ? AppColors.ink500D : AppColors.ink500),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
 }
