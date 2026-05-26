@@ -62,9 +62,6 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
   }
 
   void _openCart() {
-    context.push('/marketplace/cart'); // Fallback or we can implement the drawer
-    // We can also implement a BottomSheet here instead of pushing route,
-    // but PetFolio already has a cart route. The instructions say "CartDrawer modal bottom sheet".
     _showCartDrawer();
   }
   
