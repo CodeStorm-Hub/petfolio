@@ -109,130 +109,145 @@ class _SocialViewState extends ConsumerState<_SocialView> {
     final notifier = ref.read(socialControllerProvider(widget.pet.id).notifier);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
-    return Scaffold(
-      backgroundColor: pt.surface1,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            // Sticky Pawsfeed Header
-            Container(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
-              decoration: BoxDecoration(
-                color: pt.surface1,
-                boxShadow: const [BoxShadow(color: Color(0x19783C14), blurRadius: 8, offset: Offset(0, 8), spreadRadius: -8)],
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isWide = screenWidth >= ResponsiveLayout.mobileMax;
+
+    Widget content = Column(
+      children: [
+        // Sticky Pawsfeed Header
+        Container(
+          padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
+          decoration: BoxDecoration(
+            color: pt.surface1,
+            boxShadow: const [BoxShadow(color: Color(0x19783C14), blurRadius: 8, offset: Offset(0, 8), spreadRadius: -8)],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Pawsfeed',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: pt.ink950)),
+                    Text('Your pack · 124 new posts today',
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(color: pt.ink500),
+                        overflow: TextOverflow.ellipsis),
+                  ],
+                ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Row(
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Pawsfeed',
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: pt.ink950)),
-                        Text('Your pack · 124 new posts today',
-                            style: Theme.of(context).textTheme.labelMedium?.copyWith(color: pt.ink500),
-                            overflow: TextOverflow.ellipsis),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      _IconBtn(icon: Icons.search, onTap: () {}),
-                      const SizedBox(width: 8),
-                      _IconBtn(icon: Icons.send_rounded, bg: AppColors.tangerine, color: Colors.white, onTap: () => context.push('/matching/inbox')),
-                    ],
+                  _IconBtn(icon: Icons.search, onTap: () {}),
+                  const SizedBox(width: 8),
+                  _IconBtn(icon: Icons.send_rounded, bg: AppColors.tangerine, color: Colors.white, onTap: () => context.push('/matching/inbox')),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: feedAsync.when(
+            skipLoadingOnReload: true,
+            loading: () => const Center(child: TailWagLoader(label: 'Loading feed…')),
+            error: (_, _) => Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
+                  const SizedBox(height: 12),
+                  Text('Could not load feed', style: TextStyle(fontSize: 15, color: pt.ink500)),
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: () => notifier.refresh(),
+                    icon: const Icon(Icons.refresh_rounded, size: 16),
+                    label: const Text('Retry'),
                   ),
                 ],
               ),
             ),
-            Expanded(
-              child: feedAsync.when(
-                skipLoadingOnReload: true,
-                loading: () => const Center(child: TailWagLoader(label: 'Loading feed…')),
-                error: (_, _) => Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
-                      const SizedBox(height: 12),
-                      Text('Could not load feed', style: TextStyle(fontSize: 15, color: pt.ink500)),
-                      const SizedBox(height: 16),
-                      FilledButton.icon(
-                        onPressed: () => notifier.refresh(),
-                        icon: const Icon(Icons.refresh_rounded, size: 16),
-                        label: const Text('Retry'),
-                      ),
-                    ],
+            data: (feedState) => RefreshIndicator.adaptive(
+              onRefresh: notifier.refresh,
+              child: CustomScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: _StoriesRow(pet: widget.pet),
                   ),
-                ),
-                data: (feedState) => RefreshIndicator.adaptive(
-                  onRefresh: notifier.refresh,
-                  child: CustomScrollView(
-                    controller: _scrollController,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: _StoriesRow(pet: widget.pet),
-                      ),
-                      if (feedState.posts.isEmpty)
-                        SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: Center(
-                            child: Text(
-                              'No posts yet — be the first to share!',
-                              style: TextStyle(color: pt.ink500),
-                            ),
-                          ),
-                        )
-                      else
-                        SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
-                          sliver: SliverList.builder(
-                            itemCount: feedState.posts.length,
-                            itemBuilder: (ctx, i) {
-                              final post = feedState.posts[i];
-                              return Padding(
-                                padding: EdgeInsets.only(bottom: i == feedState.posts.length - 1 ? 0 : 18),
-                                child: RepaintBoundary(
-                                  child: _PostCard(
-                                    post: post,
-                                    onLike: () => notifier.toggleLike(post.id),
-                                    onTapPost: () => context.push('/social/post/${post.id}', extra: post),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      if (feedState.isLoadingMore)
-                        const SliverToBoxAdapter(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Center(
-                              child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                            ),
-                          ),
-                        ),
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
-                          child: Center(
-                            child: Text(
-                              "You're all caught up 🐾",
-                              style: Theme.of(context).textTheme.labelLarge,
-                            ),
-                          ),
+                  if (feedState.posts.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Text(
+                          'No posts yet — be the first to share!',
+                          style: TextStyle(color: pt.ink500),
                         ),
                       ),
-                    ],
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      sliver: SliverList.builder(
+                        itemCount: feedState.posts.length,
+                        itemBuilder: (ctx, i) {
+                          final post = feedState.posts[i];
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: i == feedState.posts.length - 1 ? 0 : 18),
+                            child: RepaintBoundary(
+                              child: _PostCard(
+                                post: post,
+                                onLike: () => notifier.toggleLike(post.id),
+                                onTapPost: () => context.push('/social/post/${post.id}', extra: post),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  if (feedState.isLoadingMore)
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+                        ),
+                      ),
+                    ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+                      child: Center(
+                        child: Text(
+                          "You're all caught up 🐾",
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
+      ],
+    );
+
+    if (isWide) {
+      content = Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: content,
+        ),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: pt.surface1,
+      body: SafeArea(
+        bottom: false,
+        child: content,
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -712,7 +727,7 @@ class _PostCardState extends State<_PostCard> {
               // Photo
               GestureDetector(
                 onTap: widget.onTapPost,
-                onDoubleTap: () => _fireBurst('paw', MediaQuery.sizeOf(context).width / 2, 100),
+                onDoubleTap: () => _fireBurst('paw', (context.size?.width ?? 320) / 2, 100),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
                   child: AspectRatio(

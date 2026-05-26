@@ -66,6 +66,42 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final bgColor = isDark ? AppColors.surface1D : AppColors.surface1;
     final softColor = _species.resolvedTint(isDark);
 
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isWide = screenWidth >= ResponsiveLayout.mobileMax;
+
+    Widget onboardingContent = Column(
+      children: [
+        _OnboardingHeader(step: _step, total: _totalSteps, onBack: _back),
+        Expanded(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            transitionBuilder: (child, anim) => FadeTransition(
+              opacity: anim,
+              child: SlideTransition(
+                position: Tween(begin: const Offset(0.04, 0), end: Offset.zero)
+                    .animate(CurvedAnimation(parent: anim, curve: Curves.easeOut)),
+                child: child,
+              ),
+            ),
+            child: KeyedSubtree(
+              key: ValueKey(_step),
+              child: _buildStep(context),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    if (isWide) {
+      onboardingContent = Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: onboardingContent,
+        ),
+      );
+    }
+
     return Scaffold(
       body: AnimatedContainer(
         duration: const Duration(milliseconds: 600),
@@ -89,27 +125,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             
             // Content
-            Column(
-              children: [
-                _OnboardingHeader(step: _step, total: _totalSteps, onBack: _back),
-                Expanded(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 400),
-                    transitionBuilder: (child, anim) => FadeTransition(
-                      opacity: anim,
-                      child: SlideTransition(
-                        position: Tween(begin: const Offset(0.04, 0), end: Offset.zero)
-                            .animate(CurvedAnimation(parent: anim, curve: Curves.easeOut)),
-                        child: child,
-                      ),
-                    ),
-                    child: KeyedSubtree(
-                      key: ValueKey(_step),
-                      child: _buildStep(context),
-                    ),
-                  ),
-                ),
-              ],
+            Positioned.fill(
+              child: onboardingContent,
             ),
           ],
         ),

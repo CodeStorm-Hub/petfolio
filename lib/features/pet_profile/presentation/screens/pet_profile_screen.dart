@@ -56,84 +56,97 @@ class PetProfileScreen extends ConsumerWidget {
       );
     }
 
-    return Scaffold(
-      backgroundColor: pt.surface1,
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: _HeroGamifiedBanner(pet: activePet),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 48, 16, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _QuickStatsTrio(pet: activePet),
-                  const SizedBox(height: 18),
-                  
-                  // Today's care preview
-                  PfSectionTitle(
-                    title: "Today's quests",
-                    accent: AppColors.sunny,
-                    trailing: TextButton(
-                      onPressed: () => context.push('/care'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.tangerine700,
-                        textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text('See all →'),
-                    ),
-                  ),
-                  _DailyQuestsCard(petId: activePet.id),
-                  
-                  const SizedBox(height: 18),
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isWide = screenWidth >= ResponsiveLayout.mobileMax;
 
-                  // Recent moments
-                  PfSectionTitle(
-                    title: "Recent moments",
-                    accent: AppColors.poppy,
-                    trailing: TextButton(
-                      onPressed: () {},
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.poppy700,
-                        textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text('Gallery →'),
+    final view = CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: _HeroGamifiedBanner(pet: activePet),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 48, 16, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _QuickStatsTrio(pet: activePet),
+                const SizedBox(height: 18),
+                
+                // Today's care preview
+                PfSectionTitle(
+                  title: "Today's quests",
+                  accent: AppColors.sunny,
+                  trailing: TextButton(
+                    onPressed: () => context.push('/care'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.tangerine700,
+                      textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
+                    child: const Text('See all →'),
                   ),
-                  Row(
-                    children: [
-                      Expanded(child: _MomentPlaceholder(label: 'bath day', color: AppColors.poppy, soft: AppColors.poppySoft, emoji: '🛁')),
-                      const SizedBox(width: 8),
-                      Expanded(child: _MomentPlaceholder(label: 'napping', color: AppColors.lilac, soft: AppColors.lilacSoft, emoji: '💤')),
-                      const SizedBox(width: 8),
-                      Expanded(child: _MomentPlaceholder(label: 'park run', color: AppColors.mint, soft: AppColors.mintSoft, emoji: '🌳')),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 18),
+                ),
+                _DailyQuestsCard(petId: activePet.id),
+                
+                const SizedBox(height: 18),
 
-                  // Recent achievements
-                  const PfSectionTitle(
-                    title: "Recent achievements",
-                    accent: AppColors.lilac,
+                // Recent moments
+                PfSectionTitle(
+                  title: "Recent moments",
+                  accent: AppColors.poppy,
+                  trailing: TextButton(
+                    onPressed: () {},
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.poppy700,
+                      textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text('Gallery →'),
                   ),
-                  _RecentAchievementsRow(),
-                  
-                  const SizedBox(height: 100),
-                ],
-              ),
+                ),
+                Row(
+                  children: [
+                    Expanded(child: _MomentPlaceholder(label: 'bath day', color: AppColors.poppy, soft: AppColors.poppySoft, emoji: '🛁')),
+                    const SizedBox(width: 8),
+                    Expanded(child: _MomentPlaceholder(label: 'napping', color: AppColors.lilac, soft: AppColors.lilacSoft, emoji: '💤')),
+                    const SizedBox(width: 8),
+                    Expanded(child: _MomentPlaceholder(label: 'park run', color: AppColors.mint, soft: AppColors.mintSoft, emoji: '🌳')),
+                  ],
+                ),
+                
+                const SizedBox(height: 18),
+
+                // Recent achievements
+                const PfSectionTitle(
+                  title: "Recent achievements",
+                  accent: AppColors.lilac,
+                ),
+                _RecentAchievementsRow(),
+                
+                const SizedBox(height: 100),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
+    );
+
+    return Scaffold(
+      backgroundColor: pt.surface1,
+      body: isWide
+          ? Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 560),
+                child: view,
+              ),
+            )
+          : view,
     );
   }
 }

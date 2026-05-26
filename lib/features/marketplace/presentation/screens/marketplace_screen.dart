@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/tail_wag_loader.dart';
+import '../../../../core/widgets/widgets.dart';
 import '../../data/models/cart_item.dart';
 import '../../data/models/product.dart';
 import '../controllers/cart_controller.dart';
@@ -73,6 +73,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      constraints: const BoxConstraints(maxWidth: 560),
       builder: (ctx) => _CartDrawer(),
     );
   }
@@ -80,6 +81,35 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isWide = screenWidth >= ResponsiveLayout.mobileMax;
+
+    Widget bodyContent = Column(
+      children: [
+        _MarketHeader(onCart: _openCart),
+        _CategoryChips(
+          selected: _selectedCat,
+          onSelected: (cat) => setState(() => _selectedCat = cat),
+        ),
+        Expanded(
+          child: _ShopBody(
+            selectedCat: _selectedCat,
+            onProductTap: (p) => context.push('/marketplace/product/${p.id}', extra: p),
+            onAdd: _addToCart,
+          ),
+        ),
+      ],
+    );
+
+    if (isWide) {
+      bodyContent = Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: bodyContent,
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: pt.surface1,
@@ -87,22 +117,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
         children: [
           SafeArea(
             bottom: false,
-            child: Column(
-              children: [
-                _MarketHeader(onCart: _openCart),
-                _CategoryChips(
-                  selected: _selectedCat,
-                  onSelected: (cat) => setState(() => _selectedCat = cat),
-                ),
-                Expanded(
-                  child: _ShopBody(
-                    selectedCat: _selectedCat,
-                    onProductTap: (p) => context.push('/marketplace/product/${p.id}', extra: p),
-                    onAdd: _addToCart,
-                  ),
-                ),
-              ],
-            ),
+            child: bodyContent,
           ),
           
           // Fly to cart overlay
@@ -128,19 +143,16 @@ class _FlyToCartAnim extends StatefulWidget {
 
 class _FlyToCartAnimState extends State<_FlyToCartAnim> with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
-  late final Animation<double> _xAnim;
-  late final Animation<double> _yAnim;
+  Animation<double>? _xAnim;
+  Animation<double>? _yAnim;
   late final Animation<double> _scaleAnim;
   late final Animation<double> _opacityAnim;
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
     _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
-    
-    // Animate from item rect to top right (approx x: 340, y: 50)
-    _xAnim = Tween<double>(begin: widget.item.rect.center.dx - 24, end: 340).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeIn));
-    _yAnim = Tween<double>(begin: widget.item.rect.center.dy - 24, end: 50).animate(CurvedAnimation(parent: _ctrl, curve: const Cubic(0.5, -0.2, 0.8, 0.3)));
     
     _scaleAnim = TweenSequence<double>([
       TweenSequenceItem(tween: ConstantTween(1.0), weight: 70),
@@ -151,8 +163,28 @@ class _FlyToCartAnimState extends State<_FlyToCartAnim> with SingleTickerProvide
       TweenSequenceItem(tween: ConstantTween(1.0), weight: 70),
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 30),
     ]).animate(_ctrl);
+  }
 
-    _ctrl.forward();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final screenWidth = MediaQuery.sizeOf(context).width;
+      // If layout is centered/constrained to 800px, cart icon is on the right edge of that 800px column
+      final endX = screenWidth >= 800 
+          ? (screenWidth + 800) / 2 - 40
+          : screenWidth - 40;
+
+      _xAnim = Tween<double>(begin: widget.item.rect.center.dx - 24, end: endX).animate(
+        CurvedAnimation(parent: _ctrl, curve: Curves.easeIn),
+      );
+      _yAnim = Tween<double>(begin: widget.item.rect.center.dy - 24, end: 50).animate(
+        CurvedAnimation(parent: _ctrl, curve: const Cubic(0.5, -0.2, 0.8, 0.3)),
+      );
+
+      _initialized = true;
+      _ctrl.forward();
+    }
   }
   
   @override
@@ -163,12 +195,13 @@ class _FlyToCartAnimState extends State<_FlyToCartAnim> with SingleTickerProvide
 
   @override
   Widget build(BuildContext context) {
+    if (!_initialized) return const SizedBox.shrink();
     return AnimatedBuilder(
       animation: _ctrl,
       builder: (context, child) {
         return Positioned(
-          left: _xAnim.value,
-          top: _yAnim.value,
+          left: _xAnim!.value,
+          top: _yAnim!.value,
           child: Opacity(
             opacity: _opacityAnim.value,
             child: Transform.scale(
@@ -461,8 +494,12 @@ class _ShopBody extends ConsumerWidget {
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
               sliver: SliverGrid.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: MediaQuery.sizeOf(context).width >= ResponsiveLayout.tabletMax
+                      ? 4
+                      : MediaQuery.sizeOf(context).width >= ResponsiveLayout.mobileMax
+                          ? 3
+                          : 2,
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                   childAspectRatio: 0.70,

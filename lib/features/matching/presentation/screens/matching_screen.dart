@@ -236,65 +236,80 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
       );
     }
 
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isWide = screenWidth >= ResponsiveLayout.mobileMax;
+
+    Widget mainContent = Column(
+      children: [
+        AppHeader(
+          eyebrow: 'Match · Nearby',
+          onOpenSwitcher: () => PetSwitcherSheet.show(context),
+          dense: true,
+          actions: [
+            AppHeaderAction(
+              iconKey: const ValueKey<String>('match_action_inbox'),
+              icon: Icons.chat_bubble_outline_rounded,
+              tooltip: 'Matches & messages',
+              onTap: overlayActive
+                  ? () {}
+                  : () => openMatchesInbox(context),
+            ),
+            AppHeaderAction(
+              iconKey: const ValueKey<String>('match_action_filter'),
+              icon: Icons.tune_rounded,
+              tooltip: 'Filters',
+              onTap: overlayActive
+                  ? () {}
+                  : () => MatchPreferencesSheet.show(context),
+            ),
+          ],
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            child: IgnorePointer(
+              ignoring: overlayActive,
+              child: locationAccessAsync.when(
+                skipLoadingOnReload: true,
+                loading: () => const Center(
+                  child: CircularProgressIndicator.adaptive(),
+                ),
+                error: (_, _) => buildDiscoveryContent(),
+                data: (_) => buildDiscoveryContent(),
+              ),
+            ),
+          ),
+        ),
+        if (!locationBlocked)
+          IgnorePointer(
+            ignoring: overlayActive,
+            child: _ActionDock(
+              state: state,
+              notifier: notifier,
+              bufferAsync: bufferAsync,
+            ),
+          ),
+        const SizedBox(height: 16),
+      ],
+    );
+
+    if (isWide) {
+      mainContent = Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: mainContent,
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: pt.surface1,
       body: SafeArea(
         bottom: false,
         child: Stack(
           children: [
-            Column(
-              children: [
-                AppHeader(
-                  eyebrow: 'Match · Nearby',
-                  onOpenSwitcher: () => PetSwitcherSheet.show(context),
-                  dense: true,
-                  actions: [
-                    AppHeaderAction(
-                      iconKey: const ValueKey<String>('match_action_inbox'),
-                      icon: Icons.chat_bubble_outline_rounded,
-                      tooltip: 'Matches & messages',
-                      onTap: overlayActive
-                          ? () {}
-                          : () => openMatchesInbox(context),
-                    ),
-                    AppHeaderAction(
-                      iconKey: const ValueKey<String>('match_action_filter'),
-                      icon: Icons.tune_rounded,
-                      tooltip: 'Filters',
-                      onTap: overlayActive
-                          ? () {}
-                          : () => MatchPreferencesSheet.show(context),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                    child: IgnorePointer(
-                      ignoring: overlayActive,
-                      child: locationAccessAsync.when(
-                        skipLoadingOnReload: true,
-                        loading: () => const Center(
-                          child: CircularProgressIndicator.adaptive(),
-                        ),
-                        error: (_, _) => buildDiscoveryContent(),
-                        data: (_) => buildDiscoveryContent(),
-                      ),
-                    ),
-                  ),
-                ),
-                if (!locationBlocked)
-                  IgnorePointer(
-                    ignoring: overlayActive,
-                    child: _ActionDock(
-                      state: state,
-                      notifier: notifier,
-                      bufferAsync: bufferAsync,
-                    ),
-                  ),
-                const SizedBox(height: 16),
-              ],
-            ),
+            mainContent,
             if (overlayActive)
               MatchCelebrationOverlay(
                 activePet: activePet,
@@ -586,25 +601,28 @@ class _SwipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
+    final layoutWidth = math.min(size.width, 480.0);
     if (state.isExiting && state.exitingCard != null) {
       return _buildExitAnimation(
         context,
         state.exitingCard!,
         size,
+        layoutWidth,
         state.exitAction!,
         state.exitDurationMs,
       );
     }
     final top = interactiveTop!;
-    return _buildDraggable(context, top, size);
+    return _buildDraggable(context, top, size, layoutWidth);
   }
 
   Widget _buildDraggable(
     BuildContext context,
     DiscoveryCandidate top,
     Size size,
+    double layoutWidth,
   ) {
-    final dxNorm = state.dragOffset.dx / (size.width * 0.75);
+    final dxNorm = state.dragOffset.dx / (layoutWidth * 0.75);
     final dyTilt = state.dragOffset.dy / (size.height * 1.2);
     final angle = (dxNorm + dyTilt * 0.12).clamp(-0.44, 0.44);
 
@@ -678,10 +696,11 @@ class _SwipeCard extends StatelessWidget {
     BuildContext context,
     DiscoveryCandidate top,
     Size size,
+    double layoutWidth,
     SwipeAction action,
     int durationMs,
   ) {
-    final (exitOffset, exitAngle) = _exitParams(action, size);
+    final (exitOffset, exitAngle) = _exitParams(action, size, layoutWidth);
     final curve = const Cubic(0.4, 0, 1, 1);
     final fast = MediaQuery.disableAnimationsOf(context);
 
@@ -716,14 +735,14 @@ class _SwipeCard extends StatelessWidget {
     );
   }
 
-  static (Offset, double) _exitParams(SwipeAction action, Size size) {
+  static (Offset, double) _exitParams(SwipeAction action, Size size, double layoutWidth) {
     return switch (action) {
       SwipeAction.pass => (
-          Offset(-size.width * 1.45, size.height * 0.06),
+          Offset(-layoutWidth * 1.45, size.height * 0.06),
           -math.pi / 10,
         ),
       SwipeAction.match => (
-          Offset(size.width * 1.45, size.height * 0.06),
+          Offset(layoutWidth * 1.45, size.height * 0.06),
           math.pi / 10,
         ),
       SwipeAction.greet => (
@@ -731,7 +750,7 @@ class _SwipeCard extends StatelessWidget {
           0.0,
         ),
       SwipeAction.superPaw => (
-          Offset(size.width * 0.4, -size.height * 1.2),
+          Offset(layoutWidth * 0.4, -size.height * 1.2),
           math.pi / 20,
         ),
     };
