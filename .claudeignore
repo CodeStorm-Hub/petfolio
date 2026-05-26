@@ -4,7 +4,7 @@
 # These folders contain hundreds of HTML, JSX, XML, and PNG 
 # files from UI audits and design stitches. They will flood 
 # the context window and cause severe token bloat.
-docs/resolved-deprecated/claude_design/
+docs/resolved-deprecated
 docs/logs/
 qa-screens/
 redesign_stitch/

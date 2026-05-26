@@ -11,7 +11,7 @@ supabase/.temp/
 # 2. PETFOLIO SPECIFIC NOISE
 # ==========================================
 # Prevents AI from reading massive UI mockups & QA logs
-claude_design/
+docs/resolved-deprecated
 docs/logs/
 qa-screens/
 redesign_stitch/
