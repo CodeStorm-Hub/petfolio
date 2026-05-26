@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+// import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../controllers/ledger_controller.dart';
 import 'admin_shared_widgets.dart';
@@ -106,7 +106,7 @@ class _PayoutCardState extends ConsumerState<_PayoutCard> {
                 children: [
                   Text(
                     'Bank details',
-                    style: tt.labelMedium!.copyWith(color: AppColors.blue500),
+                    style: tt.labelMedium!.copyWith(color: pt.info),
                   ),
                   const SizedBox(width: 4),
                   Icon(
@@ -114,7 +114,7 @@ class _PayoutCardState extends ConsumerState<_PayoutCard> {
                         ? Icons.keyboard_arrow_up_rounded
                         : Icons.keyboard_arrow_down_rounded,
                     size: 16,
-                    color: AppColors.blue500,
+                    color: pt.info,
                   ),
                 ],
               ),

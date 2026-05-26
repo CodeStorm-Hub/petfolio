@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,8 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/pet_avatar.dart';
 import 'package:petfolio/core/widgets/skeleton_loader.dart';
-import 'package:petfolio/features/pet_profile/data/models/pet.dart';
-import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AppHeader — the single, shell-wide top bar.

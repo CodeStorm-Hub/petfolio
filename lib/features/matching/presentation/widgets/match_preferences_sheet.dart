@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:petfolio/core/theme/app_theme.dart';
-import 'package:petfolio/features/pet_profile/data/models/pet_species.dart';
+import 'package:petfolio/core/domain/models/pet_species.dart';
 
 import '../controllers/match_preference_controller.dart';
 
@@ -79,14 +79,14 @@ class MatchPreferencesSheet extends ConsumerWidget {
                   IconButton(
                     key: const ValueKey<String>('match_prefs_close'),
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: Icon(Icons.close_rounded, color: pt.ink500),
+                    icon: Icon(Icons.close_rounded, color: const Color(0xFF64748B)),
                   ),
                 ],
               ),
               Text(
                 'Filters apply to your swipe deck. Changes refresh nearby profiles shortly after you adjust them.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: pt.ink500,
+                  color: const Color(0xFF64748B),
                 ),
               ),
               const SizedBox(height: 24),

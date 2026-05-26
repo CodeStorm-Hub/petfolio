@@ -7,7 +7,7 @@ import 'package:petfolio/core/errors/app_exception.dart';
 import 'package:petfolio/core/services/location_providers.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
 import '../../data/models/discovery_candidate.dart';
 import '../../data/models/matching_discovery_row.dart';
 import '../../data/repositories/matching_repository.dart';

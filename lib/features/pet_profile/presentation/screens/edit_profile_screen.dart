@@ -8,14 +8,15 @@ import 'package:image_picker/image_picker.dart';
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/app_snack_bar.dart';
 import 'package:petfolio/core/widgets/primary_pill_button.dart';
-import 'package:petfolio/features/pet_profile/data/models/pet.dart';
-import 'package:petfolio/features/pet_profile/data/models/pet_gender.dart';
-import 'package:petfolio/features/pet_profile/data/models/pet_species.dart';
-import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
+import 'package:petfolio/core/domain/models/pet_gender.dart';
+import 'package:petfolio/core/domain/models/pet_species.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/discovery_visibility_controller.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/edit_profile_controller.dart';
-import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart';
-import 'package:petfolio/features/pet_profile/data/models/activity_level.dart';
+import 'package:petfolio/core/domain/controllers/pet_list_controller.dart';
+import 'package:petfolio/core/domain/models/activity_level.dart';
+
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key, required this.pet});
@@ -104,7 +105,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
           colorScheme: Theme.of(context).colorScheme.copyWith(
-                primary: AppColors.blue500,
+                primary: Theme.of(context).extension<PetfolioThemeExtension>()!.info,
               ),
         ),
         child: child!,
@@ -241,7 +242,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final species = _species;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       appBar: AppBar(
         backgroundColor: cs.surface,
         elevation: 0,
@@ -362,7 +363,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                               IconButton(
                                 tooltip: 'Clear birthday',
                                 onPressed: _clearDateOfBirth,
-                                icon: Icon(Icons.close_rounded, color: pt.ink500),
+                                icon: Icon(Icons.close_rounded, color: const Color(0xFF64748B)),
                               ),
                             ],
                           ],
@@ -371,7 +372,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           const SizedBox(height: 6),
                           Text(
                             _ageLabel(_dateOfBirth!),
-                            style: TextStyle(fontSize: 13, color: pt.ink500),
+                            style: TextStyle(fontSize: 13, color: const Color(0xFF64748B)),
                           ),
                         ],
                         const SizedBox(height: 20),
@@ -445,7 +446,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           ),
                           subtitle: Text(
                             'Show this pet on social posts and public views.',
-                            style: TextStyle(fontSize: 13, height: 1.35, color: pt.ink500),
+                            style: TextStyle(fontSize: 13, height: 1.35, color: const Color(0xFF64748B)),
                           ),
                           value: _isPublic,
                           onChanged: (v) => setState(() => _isPublic = v),
@@ -466,7 +467,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                               ),
                               subtitle: Text(
                                 'Let nearby owners find this pet in Playdates.',
-                                style: TextStyle(fontSize: 13, height: 1.35, color: pt.ink500),
+                                style: TextStyle(fontSize: 13, height: 1.35, color: const Color(0xFF64748B)),
                               ),
                               value: pet.isDiscoverable,
                               onChanged:
@@ -496,7 +497,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
               decoration: BoxDecoration(
                 color: cs.surface,
-                border: Border(top: BorderSide(color: pt.line, width: 0.5)),
+                border: Border(top: BorderSide(color: const Color(0xFFE2E8F0), width: 0.5)),
                 boxShadow: const [
                   BoxShadow(
                     color: AppColors.shadowE1L,
@@ -521,7 +522,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   static TextStyle _fieldLabelStyle(PetfolioThemeExtension pt) => TextStyle(
         fontWeight: FontWeight.w600,
         fontSize: 14,
-        color: pt.ink500,
+        color: const Color(0xFF64748B),
       );
 
   static String _formatDate(DateTime d) {
@@ -561,6 +562,7 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
@@ -569,7 +571,7 @@ class _SectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: pt.line, width: 0.5),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 0.5),
         boxShadow: const [
           BoxShadow(
             color: AppColors.shadowE1L,
@@ -596,7 +598,7 @@ class _SectionCard extends StatelessWidget {
               if (subtitle != null)
                 Text(
                   subtitle!,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: pt.ink500),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF64748B)),
                 ),
             ],
           ),
@@ -638,7 +640,7 @@ class _LabeledField extends StatelessWidget {
               Text(' (optional)', style: TextStyle(fontSize: 12, color: pt.ink300)),
             if (suffix != null) ...[
               const Spacer(),
-              Text(suffix!, style: TextStyle(fontSize: 13, color: pt.ink500)),
+              Text(suffix!, style: TextStyle(fontSize: 13, color: const Color(0xFF64748B))),
             ],
           ],
         ),
@@ -675,7 +677,7 @@ class _AvatarEditor extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: pt.surface2,
-              border: Border.all(color: pt.line, width: 2),
+              border: Border.all(color: const Color(0xFFE2E8F0), width: 2),
               image: state.newImage != null
                   ? DecorationImage(image: FileImage(File(state.newImage!.path)), fit: BoxFit.cover)
                   : pet.avatarUrl != null && pet.avatarUrl!.isNotEmpty
@@ -693,7 +695,7 @@ class _AvatarEditor extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.w600,
-                        color: pt.ink500,
+                        color: const Color(0xFF64748B),
                       ),
                     ),
                   )
@@ -724,6 +726,7 @@ class _SpeciesChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -745,7 +748,7 @@ class _SpeciesChip extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Icon(Icons.lock_outline_rounded, size: 16, color: pt.ink500),
+          Icon(Icons.lock_outline_rounded, size: 16, color: const Color(0xFF64748B)),
         ],
       ),
     );
@@ -805,6 +808,7 @@ class _ActivityChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
@@ -819,14 +823,14 @@ class _ActivityChip extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: selected ? accent : pt.line,
+              color: selected ? accent : const Color(0xFFE2E8F0),
               width: selected ? 1.5 : 0.5,
             ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 18, color: selected ? accent : pt.ink500),
+              Icon(icon, size: 18, color: selected ? accent : const Color(0xFF64748B)),
               const SizedBox(width: 6),
               Text(
                 label,
@@ -861,6 +865,7 @@ class _LocationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
@@ -886,7 +891,7 @@ class _LocationRow extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           'Uses your device GPS for nearby discovery. Update after you move.',
-          style: TextStyle(fontSize: 13, height: 1.35, color: pt.ink500),
+          style: TextStyle(fontSize: 13, height: 1.35, color: const Color(0xFF64748B)),
         ),
         if (statusText.isNotEmpty) ...[
           const SizedBox(height: 8),
@@ -895,11 +900,11 @@ class _LocationRow extends StatelessWidget {
               Icon(
                 statusText.contains('saved') ? Icons.place_rounded : Icons.place_outlined,
                 size: 18,
-                color: pt.ink500,
+                color: const Color(0xFF64748B),
               ),
               const SizedBox(width: 6),
               Expanded(
-                child: Text(statusText, style: TextStyle(fontSize: 13, color: pt.ink500)),
+                child: Text(statusText, style: TextStyle(fontSize: 13, color: const Color(0xFF64748B))),
               ),
             ],
           ),

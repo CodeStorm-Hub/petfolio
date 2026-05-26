@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/app_snack_bar.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
 import '../../data/models/comment.dart';
 import '../../data/repositories/comment_repository.dart';
 import 'social_controller.dart';

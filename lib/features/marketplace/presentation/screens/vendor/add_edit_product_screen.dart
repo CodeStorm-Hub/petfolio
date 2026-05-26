@@ -3,10 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/vendor_products_controller.dart';
 import '../../../data/models/product.dart';
+import '../../../../../core/theme/app_theme.dart';
+
 
 class AddEditProductScreen extends ConsumerStatefulWidget {
   const AddEditProductScreen({super.key, this.product});
@@ -96,9 +97,9 @@ class _AddEditProductScreenState
       context.pop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Failed to save product. Please try again.'),
-          backgroundColor: AppColors.danger,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -106,6 +107,9 @@ class _AddEditProductScreenState
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     const categories = [
       'food',
       'gear',
@@ -116,26 +120,26 @@ class _AddEditProductScreenState
     ];
 
     return Scaffold(
-      backgroundColor: AppColors.surface1,
+      backgroundColor: Color(0xFFFFFFFF),
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 12),
               child: Row(
                 children: [
                   _IconBtn(
                     icon: Icons.arrow_back_ios_new_rounded,
                     onTap: () => context.pop(),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Text(
                     _isEdit ? 'Edit Product' : 'Add Product',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                 ],
@@ -143,41 +147,41 @@ class _AddEditProductScreenState
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+                padding: EdgeInsets.fromLTRB(16, 8, 16, 120),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _Label('Product name'),
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6),
                       _Field(
                         controller: _nameCtrl,
                         hint: 'e.g. Premium Salmon Kibble',
                         validator: (v) =>
                             v == null || v.trim().isEmpty ? 'Required' : null,
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       _Label('Brand'),
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6),
                       _Field(
                         controller: _brandCtrl,
                         hint: 'e.g. Pawsome',
                         validator: (v) =>
                             v == null || v.trim().isEmpty ? 'Required' : null,
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       _Label('Variant'),
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6),
                       _Field(
                         controller: _variantCtrl,
                         hint: 'e.g. 2 kg bag',
                         validator: (v) =>
                             v == null || v.trim().isEmpty ? 'Required' : null,
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       _Label('Category'),
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6),
                       DropdownButtonFormField<String>(
                         key: ValueKey(_category),
                         initialValue: _category,
@@ -194,7 +198,7 @@ class _AddEditProductScreenState
                             ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       Row(
                         children: [
                           Expanded(
@@ -202,12 +206,12 @@ class _AddEditProductScreenState
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 _Label('Price (USD)'),
-                                const SizedBox(height: 6),
+                                SizedBox(height: 6),
                                 _Field(
                                   controller: _priceCtrl,
                                   hint: '0.00',
                                   keyboardType:
-                                      const TextInputType.numberWithOptions(
+                                      TextInputType.numberWithOptions(
                                           decimal: true),
                                   inputFormatters: [
                                     FilteringTextInputFormatter.allow(
@@ -227,13 +231,13 @@ class _AddEditProductScreenState
                               ],
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 _Label('Stock qty'),
-                                const SizedBox(height: 6),
+                                SizedBox(height: 6),
                                 _Field(
                                   controller: _inventoryCtrl,
                                   hint: '0',
@@ -253,17 +257,17 @@ class _AddEditProductScreenState
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       Row(
                         children: [
                           Switch.adaptive(
                             value: _subscribable,
                             onChanged: (v) =>
                                 setState(() => _subscribable = v),
-                            activeTrackColor: AppColors.blue500,
+                            activeTrackColor: pt.info,
                           ),
-                          const SizedBox(width: 10),
-                          const Column(
+                          SizedBox(width: 10),
+                          Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
@@ -271,13 +275,13 @@ class _AddEditProductScreenState
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 14,
-                                  color: AppColors.ink950,
+                                  color: pt.ink950,
                                 ),
                               ),
                               Text(
                                 'Allow recurring subscription orders',
                                 style: TextStyle(
-                                    fontSize: 12, color: AppColors.ink500),
+                                    fontSize: 12, color: Color(0xFF64748B)),
                               ),
                             ],
                           ),
@@ -293,7 +297,7 @@ class _AddEditProductScreenState
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: PrimaryPillButton(
             label: _isEdit ? 'Save changes' : 'Add product',
             size: PillButtonSize.xl,
@@ -309,20 +313,20 @@ class _AddEditProductScreenState
   InputDecoration _fieldDecoration() {
     return InputDecoration(
       filled: true,
-      fillColor: AppColors.surface0,
+      fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,
       contentPadding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.line),
+        borderSide: BorderSide(color: Color(0xFFE2E8F0)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.line),
+        borderSide: BorderSide(color: Color(0xFFE2E8F0)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.blue500, width: 1.5),
+        borderSide: BorderSide(color: Theme.of(context).extension<PetfolioThemeExtension>()!.info, width: 1.5),
       ),
     );
   }
@@ -334,12 +338,16 @@ class _Label extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: AppColors.ink700,
+        color: Color(0xFF334155),
       ),
     );
   }
@@ -362,6 +370,8 @@ class _Field extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return TextFormField(
       controller: controller,
       maxLines: 1,
@@ -371,25 +381,25 @@ class _Field extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hint,
         filled: true,
-        fillColor: AppColors.surface0,
+        fillColor: cs.surfaceContainerLowest,
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.line),
+          borderSide: BorderSide(color: Color(0xFFE2E8F0)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.line),
+          borderSide: BorderSide(color: Color(0xFFE2E8F0)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide:
-              const BorderSide(color: AppColors.blue500, width: 1.5),
+              BorderSide(color: pt.info, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.danger),
+          borderSide: BorderSide(color: cs.error),
         ),
       ),
     );
@@ -404,6 +414,9 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -411,12 +424,12 @@ class _IconBtn extends StatelessWidget {
         height: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.surface0,
+          color: cs.surfaceContainerLowest,
           boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+            BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: Color(0xFF334155)),
       ),
     );
   }

@@ -215,9 +215,9 @@ class SocialRepository {
       case 'dog':
       default:
         return const _SpeciesPalette(
-          accent: AppColors.blue500,
+          accent: Color(0xFF6EA8FE),
           subject: Color(0xFF1D4ED8),
-          gradient: [Color(0xFFBFD7FF), Color(0xFF6EA8FE), AppColors.blue500],
+          gradient: [Color(0xFFBFD7FF), Color(0xFF6EA8FE), Color(0xFF6EA8FE)],
         );
     }
   }

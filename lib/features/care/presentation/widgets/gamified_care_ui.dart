@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/theme.dart';
-import '../../../../core/models/pet.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
 import '../../../../core/widgets/pf_achievement_tile.dart';
 import '../controllers/care_dashboard_controller.dart';
+import '../../../../core/theme/app_theme.dart';
+
 
 class CareGamifiedHeader extends ConsumerStatefulWidget {
   const CareGamifiedHeader({
@@ -63,6 +65,8 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
 
   @override
   Widget build(BuildContext context) {
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
@@ -82,7 +86,7 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [AppColors.sunnySoft, cs.surface],
+          colors: [pc.sunnySoft, cs.surface],
         ),
       ),
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
@@ -112,7 +116,7 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: AppColors.tangerine,
+                        color: pc.tangerine,
                         width: 3,
                       ),
                     ),
@@ -128,17 +132,17 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                   child: Container(
                     width: 104,
                     height: 104,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         center: Alignment(0, 0.2),
                         radius: 0.7,
-                        colors: [AppColors.sunny, AppColors.tangerine],
+                        colors: [pc.sunny, pc.tangerine],
                         stops: [0.0, 0.7],
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.tangerine,
+                          color: pc.tangerine,
                           blurRadius: 28,
                           offset: Offset(0, 14),
                           spreadRadius: -8,
@@ -203,7 +207,7 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
-                        color: pt.ink500,
+                        color: const Color(0xFF64748B),
                       ),
                     ),
                   ],
@@ -214,7 +218,7 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: pt.ink500,
+                    color: const Color(0xFF64748B),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -224,7 +228,7 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(999),
                     color: cs.surface,
-                    border: Border.all(color: pt.line),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
                   ),
                   child: FractionallySizedBox(
                     alignment: Alignment.centerLeft,
@@ -232,8 +236,8 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(999),
-                        gradient: const LinearGradient(
-                          colors: [AppColors.sunny, AppColors.tangerine, AppColors.poppy],
+                        gradient: LinearGradient(
+                          colors: [pc.sunny, pc.tangerine, pc.poppy],
                         ),
                       ),
                     ),
@@ -245,7 +249,7 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                     text: '${600 - (petXp + earned)} XP to ',
                     style: TextStyle(
                       fontSize: 11,
-                      color: pt.ink500,
+                      color: const Color(0xFF64748B),
                       fontWeight: FontWeight.w700,
                     ),
                     children: const [
@@ -280,13 +284,15 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
   static const _dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   // Demo heights matching the JSX design (indices 0-5 = Mon-Sat, index 6 = today/dynamic)
   static const _demoHeights = [0.86, 0.94, 0.70, 1.0, 0.88, 0.60];
-  static const _colors = [
-    AppColors.tangerine, AppColors.poppy, AppColors.mint,
-    AppColors.sunny, AppColors.lilac, AppColors.tangerine, AppColors.poppy,
+  List<Color> _colors(BuildContext context) => [
+    Theme.of(context).extension<PetFolioColors>()!.tangerine, Theme.of(context).extension<PetFolioColors>()!.poppy, Theme.of(context).extension<PetFolioColors>()!.mint,
+    Theme.of(context).extension<PetFolioColors>()!.sunny, Theme.of(context).extension<PetFolioColors>()!.lilac, Theme.of(context).extension<PetFolioColors>()!.tangerine, Theme.of(context).extension<PetFolioColors>()!.poppy,
   ];
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
@@ -294,7 +300,7 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius2xl),
-        border: Border.all(color: pt.line),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       child: SizedBox(
@@ -306,7 +312,7 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
             final h = isToday
                 ? progressPercent.clamp(0.15, 1.0)
                 : _demoHeights[i];
-            final color = _colors[i];
+            final color = _colors(context)[i];
 
             return Expanded(
               child: Column(
@@ -333,7 +339,7 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
                             border: isToday
-                                ? Border.all(color: AppColors.ink950, width: 2)
+                                ? Border.all(color: pt.ink950, width: 2)
                                 : null,
                             boxShadow: isToday
                                 ? [
@@ -364,7 +370,7 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
-                      color: isToday ? AppColors.ink950 : pt.ink500,
+                      color: isToday ? pt.ink950 : const Color(0xFF64748B),
                     ),
                   ),
                 ],
@@ -380,15 +386,17 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
 class CareGamifiedTrophyRoom extends StatelessWidget {
   const CareGamifiedTrophyRoom({super.key});
 
-  static const _badges = [
-    ('🔥', AppColors.sunny, '7-Day', true),
-    ('💯', AppColors.poppy, '100 XP', true),
-    ('🦴', AppColors.tangerine, 'Treat Pro', true),
-    ('💉', AppColors.mint, 'Vaccinated', true),
+  List<(String, Color, String, bool)> _badges(BuildContext context) => [
+    ('🔥', Theme.of(context).extension<PetFolioColors>()!.sunny, '7-Day', true),
+    ('💯', Theme.of(context).extension<PetFolioColors>()!.poppy, '100 XP', true),
+    ('🦴', Theme.of(context).extension<PetFolioColors>()!.tangerine, 'Treat Pro', true),
+    ('💉', Theme.of(context).extension<PetFolioColors>()!.mint, 'Vaccinated', true),
   ];
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -399,12 +407,12 @@ class CareGamifiedTrophyRoom extends StatelessWidget {
         crossAxisSpacing: 16,
         childAspectRatio: 0.75,
       ),
-      itemCount: _badges.length,
+      itemCount: _badges(context).length,
       itemBuilder: (context, i) => PfAchievementTile(
-        emoji: _badges[i].$1,
-        color: _badges[i].$2,
-        label: _badges[i].$3,
-        owned: _badges[i].$4,
+        emoji: _badges(context)[i].$1,
+        color: _badges(context)[i].$2,
+        label: _badges(context)[i].$3,
+        owned: _badges(context)[i].$4,
         index: i,
       ),
     );

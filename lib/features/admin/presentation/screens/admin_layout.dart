@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../widgets/admin_dashboard_tab.dart';
 import '../widgets/financial_ledger_tab.dart';
@@ -85,24 +84,26 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
     );
     return Badge(
       isLabelVisible: hasPending,
-      backgroundColor: AppColors.danger,
+      backgroundColor: Theme.of(context).colorScheme.error,
       child: Icon(icon),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     final isWide = MediaQuery.sizeOf(context).width > 800;
 
     if (isWide) {
       return Scaffold(
-        backgroundColor: AppColors.surface1,
+        backgroundColor: const Color(0xFFFFFFFF),
         body: Row(
           children: [
             NavigationRail(
               selectedIndex: _selectedIndex,
               labelType: NavigationRailLabelType.all,
-              backgroundColor: AppColors.surface0,
+              backgroundColor: cs.surfaceContainerLowest,
               leading: const Padding(
                 padding: EdgeInsets.only(bottom: 8),
                 child: _AdminBadge(),
@@ -138,9 +139,9 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       appBar: AppBar(
-        backgroundColor: AppColors.surface0,
+        backgroundColor: cs.surfaceContainerLowest,
         // Title inherits appBarTheme.titleTextStyle (Sora 20sp w600) from AppTheme
         title: Text(_destinations[_selectedIndex].label),
         leading: Builder(
@@ -158,7 +159,7 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
         ],
       ),
       drawer: Drawer(
-        backgroundColor: AppColors.surface0,
+        backgroundColor: cs.surfaceContainerLowest,
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,15 +168,15 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: _AdminBadge(),
               ),
-              const Divider(height: 1, color: AppColors.line),
+              Divider(height: 1, color: const Color(0xFFE2E8F0)),
               const SizedBox(height: 8),
               for (final d in _destinations)
                 ListTile(
                   leading: Icon(
                     _tab == d.tab ? d.activeIcon : d.icon,
                     color: _tab == d.tab
-                        ? AppColors.blue500
-                        : AppColors.ink500,
+                        ? pt.info
+                        : const Color(0xFF64748B),
                   ),
                   title: Text(
                     d.label,
@@ -184,12 +185,12 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
                               ? FontWeight.w600
                               : FontWeight.w400,
                           color: _tab == d.tab
-                              ? AppColors.blue500
-                              : AppColors.ink700,
+                              ? pt.info
+                              : const Color(0xFF334155),
                         ),
                   ),
                   selected: _tab == d.tab,
-                  selectedTileColor: AppColors.blue500.withAlpha(12),
+                  selectedTileColor: pt.info.withAlpha(12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(
                       PetfolioThemeExtension.radiusMd,
@@ -214,6 +215,9 @@ class _AdminBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Column(
@@ -223,16 +227,16 @@ class _AdminBadge extends StatelessWidget {
             height: 36,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.blue500.withAlpha(20),
+              color: pt.info.withAlpha(20),
             ),
-            child: const Icon(Icons.admin_panel_settings_rounded,
-                size: 20, color: AppColors.blue500),
+            child: Icon(Icons.admin_panel_settings_rounded,
+                size: 20, color: pt.info),
           ),
           const SizedBox(height: 4),
           Text(
             'Admin',
             style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                  color: AppColors.blue500,
+                  color: pt.info,
                 ),
           ),
         ],

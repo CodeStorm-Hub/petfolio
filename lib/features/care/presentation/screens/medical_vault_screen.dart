@@ -15,7 +15,7 @@ import '../../../../core/widgets/dashed_rect_painter.dart';
 import '../../../../core/widgets/petfolio_empty_state.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
 import '../../../../core/widgets/tail_wag_loader.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
 import '../../data/models/medical_record.dart';
 import '../../data/repositories/health_repository.dart';
 import '../controllers/health_vault_controller.dart';
@@ -40,7 +40,7 @@ class MedicalVaultScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pet = ref.watch(activePetControllerProvider);
     if (pet == null) {
-      return const Scaffold(body: Center(child: TailWagLoader()));
+      return Scaffold(body: Center(child: TailWagLoader()));
     }
     return _MedicalVaultBody(petId: pet.id, petName: pet.name);
   }
@@ -64,21 +64,21 @@ class _MedicalVaultBody extends ConsumerWidget {
     final asyncRecords = ref.watch(healthVaultControllerProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.cream,
+      backgroundColor: Theme.of(context).extension<PetfolioThemeExtension>()!.cream,
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [AppColors.mintSoft, AppColors.cream],
+                    colors: [Theme.of(context).extension<PetFolioColors>()!.mintSoft, Theme.of(context).extension<PetfolioThemeExtension>()!.cream],
                   ),
                 ),
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
+                padding: EdgeInsets.fromLTRB(16, 14, 16, 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -89,22 +89,22 @@ class _MedicalVaultBody extends ConsumerWidget {
                           child: Container(
                             width: 40,
                             height: 40,
-                            decoration: const BoxDecoration(
-                              color: AppColors.surface0,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surfaceContainerLowest,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.arrow_back_ios_new_rounded, size: 22, color: AppColors.ink700),
+                            child: Icon(Icons.arrow_back_ios_new_rounded, size: 22, color: Color(0xFF334155)),
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             '${petName.toUpperCase()} · MEDICAL VAULT',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.8,
-                              color: AppColors.mint700,
+                              color: Theme.of(context).extension<PetFolioColors>()!.mint700,
                             ),
                           ),
                         ),
@@ -113,43 +113,43 @@ class _MedicalVaultBody extends ConsumerWidget {
                           child: Container(
                             width: 40,
                             height: 40,
-                            decoration: const BoxDecoration(
-                              color: AppColors.mint,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).extension<PetFolioColors>()!.mint,
                               shape: BoxShape.circle,
                               boxShadow: [BoxShadow(color: AppColors.shadowE1L, blurRadius: 4, offset: Offset(0, 2))],
                             ),
-                            child: const Icon(Icons.add_rounded, size: 22, color: Colors.white),
+                            child: Icon(Icons.add_rounded, size: 22, color: Colors.white),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     RichText(
-                      text: const TextSpan(
+                      text: TextSpan(
                         style: TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.w900,
                           height: 1.05,
-                          color: AppColors.ink950,
+                          color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
                         ),
                         children: [
                           TextSpan(text: 'Everything '),
-                          TextSpan(text: 'healthy', style: TextStyle(color: AppColors.mint700)),
+                          TextSpan(text: 'healthy', style: TextStyle(color: Theme.of(context).extension<PetFolioColors>()!.mint700)),
                           TextSpan(text: ',\nin one cozy spot.'),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text(
                       'Vaccines, meds, and vet visits — synced live from $petName\'s clinic.',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.ink700,
+                        color: Color(0xFF334155),
                       ),
                     ),
-                    const SizedBox(height: 18),
-                    const Row(
+                    SizedBox(height: 18),
+                    Row(
                       children: [
                         Expanded(child: _HealthPill(icon: '💚', label: 'Vitals', value: 'Strong')),
                         SizedBox(width: 8),
@@ -163,14 +163,14 @@ class _MedicalVaultBody extends ConsumerWidget {
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 120),
               sliver: asyncRecords.when(
                 loading: () => SliverList(
                   delegate: SliverChildListDelegate([
                     ...List.generate(
                       4,
                       (_) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
+                        padding: EdgeInsets.only(bottom: 10),
                         child: SkeletonLoader(
                           width: double.infinity,
                           height: 88,
@@ -182,14 +182,14 @@ class _MedicalVaultBody extends ConsumerWidget {
                 ),
                 error: (err, st) => SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 48),
+                    padding: EdgeInsets.symmetric(vertical: 48),
                     child: Column(
                       children: [
-                        const Icon(Icons.cloud_off_rounded, size: 44, color: AppColors.ink300),
-                        const SizedBox(height: 12),
-                        const Text(
+                        Icon(Icons.cloud_off_rounded, size: 44, color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink300),
+                        SizedBox(height: 12),
+                        Text(
                           'Could not load medical records',
-                          style: TextStyle(fontSize: 15, color: AppColors.ink500),
+                          style: TextStyle(fontSize: 15, color: Color(0xFF64748B)),
                         ),
                       ],
                     ),
@@ -205,66 +205,66 @@ class _MedicalVaultBody extends ConsumerWidget {
                       _VaultSection(
                         title: 'Vaccines',
                         icon: Icons.vaccines_rounded,
-                        accent: AppColors.mint,
+                        accent: Theme.of(context).extension<PetFolioColors>()!.mint,
                         records: vaccines,
                         emptyLabel: 'No vaccine records yet.',
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
                       _VaultSection(
                         title: 'Medications',
                         icon: Icons.medication_rounded,
-                        accent: AppColors.poppy,
+                        accent: Theme.of(context).extension<PetFolioColors>()!.poppy,
                         records: meds,
                         emptyLabel: 'No medication records yet.',
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
                       _VaultSection(
                         title: 'Vet visits',
                         icon: Icons.local_hospital_rounded,
-                        accent: AppColors.tangerine,
+                        accent: Theme.of(context).extension<PetFolioColors>()!.tangerine,
                         records: vet,
                         emptyLabel: 'No vet visit or clinical notes yet.',
                       ),
                       // Share with vet card
                       CustomPaint(
                         painter: DashedRectPainter(
-                          color: AppColors.mint,
+                          color: Theme.of(context).extension<PetFolioColors>()!.mint,
                           strokeWidth: 2,
                           dashLength: 8,
                           dashSpace: 6,
                           borderRadius: 24,
                         ),
                         child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 16),
-                          padding: const EdgeInsets.all(18),
+                          margin: EdgeInsets.symmetric(vertical: 16),
+                          padding: EdgeInsets.all(18),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(24),
-                            gradient: const LinearGradient(
-                              colors: [AppColors.mintSoft, AppColors.surface0],
+                            gradient: LinearGradient(
+                              colors: [Theme.of(context).extension<PetFolioColors>()!.mintSoft, Theme.of(context).colorScheme.surfaceContainerLowest],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                           ),
                           child: Row(
                             children: [
-                              const Text('🩺', style: TextStyle(fontSize: 36)),
-                              const SizedBox(width: 14),
-                              const Expanded(
+                              Text('🩺', style: TextStyle(fontSize: 36)),
+                              SizedBox(width: 14),
+                              Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Share with your vet', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.ink950)),
-                                    Text('Generate a temporary QR — expires in 24h', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.ink500)),
+                                    Text('Share with your vet', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950)),
+                                    Text('Generate a temporary QR — expires in 24h', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF64748B))),
                                   ],
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: AppColors.mint,
+                                  color: Theme.of(context).extension<PetFolioColors>()!.mint,
                                   borderRadius: BorderRadius.circular(999),
                                 ),
-                                child: const Text('Share', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
+                                child: Text('Share', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
                               ),
                             ],
                           ),
@@ -289,21 +289,23 @@ class _HealthPill extends StatelessWidget {
   final String value;
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.surface0,
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.line, width: 1.5),
+        border: Border.all(color: Color(0xFFE2E8F0), width: 1.5),
         boxShadow: const [BoxShadow(color: AppColors.shadowE1L, blurRadius: 4, offset: Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(icon, style: const TextStyle(fontSize: 18, height: 1)),
-          const SizedBox(height: 2),
-          Text(label.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.4, color: AppColors.ink500)),
-          Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.ink950)),
+          Text(icon, style: TextStyle(fontSize: 18, height: 1)),
+          SizedBox(height: 2),
+          Text(label.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.4, color: Color(0xFF64748B))),
+          Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950)),
         ],
       ),
     );
@@ -327,44 +329,46 @@ class _VaultSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
+          padding: EdgeInsets.fromLTRB(4, 0, 4, 10),
           child: Row(
             children: [
               Container(
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: Color.lerp(accent, AppColors.surface0, 0.78),
+                  color: Color.lerp(accent, Theme.of(context).colorScheme.surfaceContainerLowest, 0.78),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(child: Icon(icon, size: 18, color: accent)),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.ink950,
+                  color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Color.lerp(accent, AppColors.surface0, 0.82),
+                  color: Color.lerp(accent, Theme.of(context).colorScheme.surfaceContainerLowest, 0.82),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   '${records.length}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.ink700,
+                    color: Color(0xFF334155),
                   ),
                 ),
               ),
@@ -374,9 +378,9 @@ class _VaultSection extends StatelessWidget {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: AppColors.surface0,
+            color: Theme.of(context).colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.line),
+            border: Border.all(color: Color(0xFFE2E8F0)),
           ),
           child: records.isEmpty
               ? PetfolioEmptyState(
@@ -388,7 +392,7 @@ class _VaultSection extends StatelessWidget {
                     for (int i = 0; i < records.length; i++) ...[
                       _MedicalRecordCard(record: records[i], accent: accent, icon: icon),
                       if (i < records.length - 1)
-                        const Divider(height: 1, thickness: 1, color: AppColors.line),
+                        Divider(height: 1, thickness: 1, color: Color(0xFFE2E8F0)),
                     ]
                   ],
                 ),
@@ -444,8 +448,8 @@ class _MedicalRecordCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final warn = record.isExpiringSoon;
-    final statusBg = warn ? AppColors.sunnySoft : Color.lerp(accent, AppColors.surface0, 0.85)!;
-    final statusColor = warn ? AppColors.sunny700 : Color.lerp(accent, AppColors.ink950, 0.5)!;
+    final statusBg = warn ? Theme.of(context).extension<PetFolioColors>()!.sunnySoft : Color.lerp(accent, Theme.of(context).colorScheme.surfaceContainerLowest, 0.85)!;
+    final statusColor = warn ? Theme.of(context).extension<PetFolioColors>()!.sunny700 : Color.lerp(accent, Theme.of(context).extension<PetfolioThemeExtension>()!.ink950, 0.5)!;
     final statusLabel = warn ? 'Due soon' : (record.isActive ? 'Active' : 'Archived');
     
     return Dismissible(
@@ -453,18 +457,18 @@ class _MedicalRecordCard extends ConsumerWidget {
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
+        padding: EdgeInsets.only(right: 20),
         decoration: BoxDecoration(
-          color: AppColors.danger.withAlpha(230),
+          color: Theme.of(context).colorScheme.error.withAlpha(230),
         ),
-        child: const Icon(Icons.archive_outlined, color: Colors.white),
+        child: Icon(Icons.archive_outlined, color: Colors.white),
       ),
       confirmDismiss: (_) async {
         await ref.read(healthVaultControllerProvider.notifier).deactivateRecord(record.id);
         return false;
       },
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(14),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -472,12 +476,12 @@ class _MedicalRecordCard extends ConsumerWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: Color.lerp(accent, AppColors.surface0, 0.82),
+                color: Color.lerp(accent, Theme.of(context).colorScheme.surfaceContainerLowest, 0.82),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Center(child: Icon(icon, size: 20, color: accent)),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -487,15 +491,15 @@ class _MedicalRecordCard extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           record.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.ink950,
+                            color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
                           ),
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: statusBg,
                           borderRadius: BorderRadius.circular(999),
@@ -511,37 +515,37 @@ class _MedicalRecordCard extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   Text(
                     _dateLine(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.ink500,
+                      color: Color(0xFF64748B),
                     ),
                   ),
                   if (record.notes != null && record.notes!.isNotEmpty) ...[
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Text(
                       record.notes!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'monospace',
                         fontSize: 12,
-                        color: AppColors.ink700,
+                        color: Color(0xFF334155),
                       ),
                     ),
                   ],
                   if (record.documentUrl != null) ...[
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     GestureDetector(
                       onTap: () => _openDocument(context, ref),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             Icons.attach_file_rounded,
                             size: 14,
-                            color: AppColors.blue500,
+                            color: Theme.of(context).extension<PetfolioThemeExtension>()!.info,
                           ),
                           SizedBox(width: 4),
                           Text(
@@ -549,7 +553,7 @@ class _MedicalRecordCard extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.blue500,
+                              color: Theme.of(context).extension<PetfolioThemeExtension>()!.info,
                             ),
                           ),
                         ],
@@ -636,7 +640,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
       if (bytes.length > _maxDocBytes) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('File too large. Maximum size is 10 MB.'),
               behavior: SnackBarBehavior.floating,
             ),
@@ -655,7 +659,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('Document upload failed. Saving record without attachment.'),
               behavior: SnackBarBehavior.floating,
             ),
@@ -695,7 +699,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
       Navigator.of(context).pop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Could not save record. Please try again.'),
           behavior: SnackBarBehavior.floating,
         ),
@@ -705,6 +709,8 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
@@ -718,12 +724,12 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
           children: [
             Center(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: EdgeInsets.symmetric(vertical: 12),
                 child: Container(
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: pt.line,
+                    color: Color(0xFFE2E8F0),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -737,17 +743,17 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 color: cs.onSurface,
               ),
             ),
-            const SizedBox(height: 18),
+            SizedBox(height: 18),
             Text(
               'RECORD TYPE',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.08 * 12,
-                color: pt.ink500,
+                color: Color(0xFF64748B),
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -757,12 +763,12 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                   onTap: () => setState(() => _type = t),
                   child: AnimatedContainer(
                     duration: PetfolioThemeExtension.durationSm,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: selected ? cs.primary : pt.surface2,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: selected ? Colors.transparent : pt.line,
+                        color: selected ? Colors.transparent : Color(0xFFE2E8F0),
                         width: 0.5,
                       ),
                     ),
@@ -771,24 +777,24 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: selected ? Colors.white : pt.ink500,
+                        color: selected ? Colors.white : Color(0xFF64748B),
                       ),
                     ),
                   ),
                 );
               }).toList(),
             ),
-            const SizedBox(height: 18),
+            SizedBox(height: 18),
             Text(
               'NAME',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.08 * 12,
-                color: pt.ink500,
+                color: Color(0xFF64748B),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             TextField(
               controller: _nameCtrl,
               textCapitalization: TextCapitalization.words,
@@ -797,14 +803,14 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 hintText: 'e.g. Rabies booster',
                 filled: true,
                 fillColor: pt.surface2,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line, width: 0.5),
+                  borderSide: BorderSide(color: Color(0xFFE2E8F0), width: 0.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line, width: 0.5),
+                  borderSide: BorderSide(color: Color(0xFFE2E8F0), width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -812,7 +818,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 ),
               ),
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
             _DateRow(
               label: 'Administered',
               value: _administeredAt,
@@ -821,7 +827,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
               pt: pt,
               cs: cs,
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             _DateRow(
               label: 'Next due (renewal)',
               value: _nextDueAt,
@@ -830,7 +836,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
               pt: pt,
               cs: cs,
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             _DateRow(
               label: 'Expires',
               value: _expiresAt,
@@ -839,17 +845,17 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
               pt: pt,
               cs: cs,
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
             Text(
               'DOSAGE & FREQUENCY',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.08 * 12,
-                color: pt.ink500,
+                color: Color(0xFF64748B),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             TextField(
               controller: _dosageCtrl,
               style: TextStyle(fontSize: 15, color: cs.onSurface),
@@ -857,14 +863,14 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 hintText: 'Dosage (optional)',
                 filled: true,
                 fillColor: pt.surface2,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line, width: 0.5),
+                  borderSide: BorderSide(color: Color(0xFFE2E8F0), width: 0.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line, width: 0.5),
+                  borderSide: BorderSide(color: Color(0xFFE2E8F0), width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -872,7 +878,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             TextField(
               controller: _freqCtrl,
               style: TextStyle(fontSize: 15, color: cs.onSurface),
@@ -880,14 +886,14 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 hintText: 'Frequency (optional)',
                 filled: true,
                 fillColor: pt.surface2,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line, width: 0.5),
+                  borderSide: BorderSide(color: Color(0xFFE2E8F0), width: 0.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line, width: 0.5),
+                  borderSide: BorderSide(color: Color(0xFFE2E8F0), width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -895,17 +901,17 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 ),
               ),
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
             Text(
               'NOTES',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.08 * 12,
-                color: pt.ink500,
+                color: Color(0xFF64748B),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             TextField(
               controller: _notesCtrl,
               maxLines: 3,
@@ -914,14 +920,14 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 hintText: 'Optional notes',
                 filled: true,
                 fillColor: pt.surface2,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line, width: 0.5),
+                  borderSide: BorderSide(color: Color(0xFFE2E8F0), width: 0.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: pt.line, width: 0.5),
+                  borderSide: BorderSide(color: Color(0xFFE2E8F0), width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -929,30 +935,30 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 ),
               ),
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
             Text(
               'DOCUMENT',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.08 * 12,
-                color: pt.ink500,
+                color: Color(0xFF64748B),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             GestureDetector(
               onTap: _pickedFile == null ? _pickDocument : null,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
                   color: pt.surface2,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: pt.line, width: 0.5),
+                  border: Border.all(color: Color(0xFFE2E8F0), width: 0.5),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.attach_file_rounded, size: 18, color: pt.ink500),
-                    const SizedBox(width: 10),
+                    Icon(Icons.attach_file_rounded, size: 18, color: Color(0xFF64748B)),
+                    SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         _pickedFile == null
@@ -976,14 +982,14 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: Text('Reminders enabled', style: TextStyle(fontSize: 14, color: cs.onSurface)),
               value: _reminder,
               onChanged: (v) => setState(() => _reminder = v),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -993,12 +999,12 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 child: _saving
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
-                    : const Text('Save record', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                    : Text('Save record', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
               ),
             ),
           ],
@@ -1044,6 +1050,8 @@ class _DateRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final text = value == null
         ? 'Tap to set'
         : '${value!.year}-${value!.month.toString().padLeft(2, '0')}-${value!.day.toString().padLeft(2, '0')}';
@@ -1057,23 +1065,23 @@ class _DateRow extends StatelessWidget {
             fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.08 * 11,
-            color: pt.ink500,
+            color: Color(0xFF64748B),
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         GestureDetector(
           onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
               color: pt.surface2,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: pt.line, width: 0.5),
+              border: Border.all(color: Color(0xFFE2E8F0), width: 0.5),
             ),
             child: Row(
               children: [
-                Icon(Icons.calendar_today_outlined, size: 18, color: pt.ink500),
-                const SizedBox(width: 10),
+                Icon(Icons.calendar_today_outlined, size: 18, color: Color(0xFF64748B)),
+                SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     text,

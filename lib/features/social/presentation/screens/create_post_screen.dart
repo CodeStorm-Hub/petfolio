@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/pet_avatar.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
 import '../controllers/create_post_controller.dart';
 import '../controllers/social_controller.dart';
 
@@ -82,7 +82,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               Text('Post shared!'),
             ],
           ),
-          backgroundColor: AppColors.success,
+          backgroundColor: Theme.of(context).extension<PetfolioThemeExtension>()!.success,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -108,7 +108,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     return Stack(
       children: [
         Scaffold(
-          backgroundColor: pt.surface1,
+          backgroundColor: const Color(0xFFFFFFFF),
           appBar: _buildAppBar(context, pt, cs, state, canPost),
           body: CustomScrollView(
             slivers: [
@@ -196,7 +196,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       backgroundColor: cs.surface,
       elevation: 0,
       scrolledUnderElevation: 1,
-      shadowColor: pt.line,
+      shadowColor: const Color(0xFFE2E8F0),
       leading: IconButton(
         icon: Icon(Icons.close_rounded, color: cs.onSurface, size: 22),
         onPressed: state.isSubmitting ? null : () => context.pop(),
@@ -218,7 +218,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             onPressed: canPost ? _submit : null,
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.sunset500,
-              disabledBackgroundColor: pt.line,
+              disabledBackgroundColor: const Color(0xFFE2E8F0),
               foregroundColor: Colors.white,
               disabledForegroundColor: pt.ink300,
               minimumSize: const Size(72, 36),
@@ -261,7 +261,7 @@ class _PetIdentityRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: pt.line),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Row(
         children: [
@@ -359,7 +359,7 @@ class _ImageWell extends StatelessWidget {
                 color: cs.surface,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: image != null ? Colors.transparent : pt.line,
+                  color: image != null ? Colors.transparent : const Color(0xFFE2E8F0),
                   width: 1.5,
                 ),
                 image: image != null
@@ -487,7 +487,7 @@ class _EmptyImagePlaceholder extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
-                      color: pt.ink500,
+                      color: const Color(0xFF64748B),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -506,7 +506,7 @@ class _EmptyImagePlaceholder extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               color: pt.surface2,
-              border: Border(top: BorderSide(color: pt.line)),
+              border: Border(top: BorderSide(color: const Color(0xFFE2E8F0))),
             ),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             child: Row(
@@ -514,7 +514,7 @@ class _EmptyImagePlaceholder extends StatelessWidget {
                 _SourceChip(
                   icon: Icons.photo_library_outlined,
                   label: 'Gallery',
-                  color: AppColors.blue500,
+                  color: pt.info,
                 ),
                 const SizedBox(width: 10),
                 _SourceChip(
@@ -596,14 +596,14 @@ class _CaptionCard extends StatelessWidget {
     final counterColor = atLimit
         ? cs.error
         : nearLimit
-            ? AppColors.warning
+            ? pt.warning
             : pt.ink300;
 
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: pt.line),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -682,7 +682,7 @@ class _VisibilityInfo extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: pt.line),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Row(
         children: [
@@ -750,7 +750,7 @@ class _ImageSourceSheet extends StatelessWidget {
               height: 4,
               margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
-                color: pt.line,
+                color: const Color(0xFFE2E8F0),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -765,7 +765,7 @@ class _ImageSourceSheet extends StatelessWidget {
             const SizedBox(height: 20),
             _SheetOption(
               icon: Icons.photo_library_rounded,
-              color: AppColors.blue500,
+              color: pt.info,
               title: 'Photo Library',
               subtitle: 'Choose from your gallery',
               onTap: () => Navigator.of(context).pop(ImageSource.gallery),
@@ -784,7 +784,7 @@ class _ImageSourceSheet extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: () => Navigator.of(context).pop(),
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: pt.line),
+                  side: BorderSide(color: const Color(0xFFE2E8F0)),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
@@ -792,7 +792,7 @@ class _ImageSourceSheet extends StatelessWidget {
                   'Cancel',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: pt.ink500,
+                    color: const Color(0xFF64748B),
                   ),
                 ),
               ),

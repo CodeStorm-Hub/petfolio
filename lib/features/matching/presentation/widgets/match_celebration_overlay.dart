@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../pet_profile/data/models/pet.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
 
 class MatchCelebrationOverlay extends StatelessWidget {
   const MatchCelebrationOverlay({
@@ -75,7 +75,7 @@ class MatchCelebrationOverlay extends StatelessWidget {
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
                               height: 1.05,
-                              shadows: const [
+                              shadows: [
                                 Shadow(
                                   color: Colors.black45,
                                   blurRadius: 22,
@@ -116,7 +116,7 @@ class MatchCelebrationOverlay extends StatelessWidget {
                               shape: BoxShape.circle,
                               color: AppColors.sunny,
                               border: Border.all(color: Colors.white, width: 6),
-                              boxShadow: const [
+                              boxShadow: [
                                 BoxShadow(
                                   color: Colors.black26,
                                   blurRadius: 28,
@@ -203,6 +203,8 @@ class _AvatarCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<AppColors>()!;
     return Container(
       width: 134,
       height: 134,
@@ -239,6 +241,8 @@ class _FloatingPawsBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<AppColors>()!;
     return Opacity(
       opacity: 0.2,
       child: Stack(

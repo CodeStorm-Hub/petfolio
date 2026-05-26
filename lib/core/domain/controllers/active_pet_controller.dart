@@ -2,8 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../data/models/pet.dart';
-import 'pet_list_controller.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
+import 'package:petfolio/core/domain/controllers/pet_list_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ActivePetController

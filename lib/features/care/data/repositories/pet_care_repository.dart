@@ -5,8 +5,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/services/notification_service.dart';
 import '../models/care_streak.dart';
-import '../models/care_task.dart';
-import '../models/care_task_log.dart';
+import 'package:petfolio/core/domain/models/care_task.dart';
+
 
 /// Snapshot of everything the care dashboard needs, fetched in one RPC call.
 class CareDashboardSnapshot {

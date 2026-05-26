@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:petfolio/core/models/pet.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart';
+import 'package:petfolio/core/domain/controllers/pet_list_controller.dart';
 import 'package:petfolio/main.dart';
 
 class _StubPetListNotifier extends PetListNotifier {

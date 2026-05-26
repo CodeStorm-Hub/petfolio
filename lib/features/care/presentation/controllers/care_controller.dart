@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/app_snack_bar.dart';
-import '../../data/models/care_task.dart' as dbtask;
+import 'package:petfolio/core/domain/models/care_task.dart' as dbtask;
 import '../../data/models/care_task_type.dart';
 import '../../data/repositories/checklist_repository.dart';
 import 'care_dashboard_controller.dart';

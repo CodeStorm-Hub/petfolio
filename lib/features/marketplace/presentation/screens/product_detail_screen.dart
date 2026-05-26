@@ -10,6 +10,8 @@ import '../controllers/cart_controller.dart';
 import '../controllers/product_list_controller.dart';
 import '../widgets/product_glyph.dart';
 import '../widgets/subscription_toggle.dart';
+import '../../../../core/theme/app_theme.dart';
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ProductDetailScreen
@@ -68,6 +70,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> with 
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     final product = _product;
     if (product == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -82,7 +90,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> with 
     final cartItemCount = ref.watch(cartProvider.select((c) => c.itemCount));
 
     return Scaffold(
-      backgroundColor: AppColors.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: Stack(
         children: [
           CustomScrollView(
@@ -175,6 +183,11 @@ class _ProductHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     final topPad = MediaQuery.paddingOf(context).top;
     return SizedBox(
       height: 320 + topPad,
@@ -229,9 +242,9 @@ class _ProductHero extends StatelessWidget {
                             top: -2,
                             right: -2,
                             child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                color: AppColors.poppy,
+                              padding: EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: pc.poppy,
                                 shape: BoxShape.circle,
                               ),
                               child: Text(
@@ -289,7 +302,7 @@ class _ProductHero extends StatelessWidget {
             child: SizedBox(
               height: 40,
               child: CustomPaint(
-                painter: _WavePainter(color: AppColors.surface1),
+                painter: _WavePainter(color: const Color(0xFFFFFFFF)),
               ),
             ),
           ),
@@ -357,6 +370,10 @@ class _ProductInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -365,25 +382,25 @@ class _ProductInfo extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.sunny.withAlpha(26),
+                color: pc.sunny.withAlpha(26),
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.star_rounded, color: AppColors.sunny700, size: 12),
+                  Icon(Icons.star_rounded, color: pc.sunny700, size: 12),
                   const SizedBox(width: 4),
-                  const Text(
+                  Text(
                     '4.8',
                     style: TextStyle(
-                      color: AppColors.sunny700,
+                      color: pc.sunny700,
                       fontWeight: FontWeight.w800,
                       fontSize: 11,
                     ),
                   ),
-                  const Text(
+                  Text(
                     ' · 421 reviews',
                     style: TextStyle(
-                      color: AppColors.sunny700,
+                      color: pc.sunny700,
                       fontWeight: FontWeight.w800,
                       fontSize: 11,
                     ),
@@ -395,13 +412,13 @@ class _ProductInfo extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.mint.withAlpha(26),
+                color: pc.mint.withAlpha(26),
                 borderRadius: BorderRadius.circular(999),
               ),
-              child: const Text(
+              child: Text(
                 'Free delivery',
                 style: TextStyle(
-                  color: AppColors.mint700,
+                  color: pc.mint700,
                   fontWeight: FontWeight.w800,
                   fontSize: 11,
                 ),
@@ -416,33 +433,33 @@ class _ProductInfo extends StatelessWidget {
             fontSize: 12,
             fontWeight: FontWeight.w800,
             letterSpacing: 0.8,
-            color: AppColors.ink500,
+            color: Color(0xFF64748B),
           ),
         ),
         const SizedBox(height: 4),
         Text(
           product.name,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: 26,
             height: 1.1,
-            color: AppColors.ink950,
+            color: pt.ink950,
           ),
         ),
         const SizedBox(height: 6),
         Text(
           product.variant,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.ink500),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF64748B)),
         ),
         const SizedBox(height: 16),
         Row(
           children: [
             Text(
               product.priceFormatted,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w900,
                 fontSize: 28,
-                color: AppColors.ink950,
+                color: pt.ink950,
               ),
             ),
             if (product.subscribable) ...[
@@ -451,14 +468,14 @@ class _ProductInfo extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: AppColors.success.withAlpha(26),
+                  color: pt.success.withAlpha(26),
                 ),
                 child: Text(
                   '${product.subPriceFormatted} subscribed',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.success,
+                    color: pt.success,
                   ),
                 ),
               ),
@@ -491,6 +508,10 @@ class _SubscribeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
+    final cs = Theme.of(context).colorScheme;
     final savingsCents = product.priceCents - product.subPriceCents;
 
     return AnimatedContainer(
@@ -498,8 +519,8 @@ class _SubscribeCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        color: subscribe ? const Color(0xFFEDF7F2) : AppColors.surface0,
-        border: Border.all(color: subscribe ? const Color(0xFFC3E8D6) : AppColors.line),
+        color: subscribe ? const Color(0xFFEDF7F2) : cs.surfaceContainerLowest,
+        border: Border.all(color: subscribe ? const Color(0xFFC3E8D6) : const Color(0xFFE2E8F0)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x060B1220),
@@ -519,12 +540,12 @@ class _SubscribeCard extends StatelessWidget {
                 height: 44,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  color: subscribe ? AppColors.meadow500 : AppColors.surface2,
+                  color: subscribe ? AppColors.meadow500 : pt.surface2,
                 ),
                 child: Icon(
                   Icons.autorenew_rounded,
                   size: 24,
-                  color: subscribe ? Colors.white : AppColors.ink500,
+                  color: subscribe ? Colors.white : const Color(0xFF64748B),
                 ),
               ),
               const SizedBox(width: 14),
@@ -534,12 +555,12 @@ class _SubscribeCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Text(
+                        Text(
                           'Subscribe & Save',
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 16,
-                            color: AppColors.ink950,
+                            color: pt.ink950,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -547,14 +568,14 @@ class _SubscribeCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(6),
-                            color: AppColors.success.withAlpha(26),
+                            color: pt.success.withAlpha(26),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Save 12%',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.success,
+                              color: pt.success,
                             ),
                           ),
                         ),
@@ -565,7 +586,7 @@ class _SubscribeCard extends StatelessWidget {
                       subscribe
                           ? 'Auto-delivers every $frequencyWeeks weeks · save \$${(savingsCents / 100).toStringAsFixed(2)}'
                           : 'Save 12% on every refill · cancel anytime',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.ink500),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF64748B)),
                     ),
                   ],
                 ),
@@ -596,7 +617,7 @@ class _SubscribeCard extends StatelessWidget {
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.88,
-                      color: AppColors.ink500,
+                      color: Color(0xFF64748B),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -632,12 +653,16 @@ class _QuantityStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        color: AppColors.surface0,
-        border: Border.all(color: AppColors.line),
+        color: cs.surfaceContainerLowest,
+        border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x040B1220),
@@ -648,12 +673,12 @@ class _QuantityStepper extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Text(
+          Text(
             'Quantity',
             style: TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 16,
-              color: AppColors.ink950,
+              color: pt.ink950,
             ),
           ),
           const Spacer(),
@@ -662,7 +687,7 @@ class _QuantityStepper extends StatelessWidget {
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(999),
-              color: AppColors.surface2,
+              color: pt.surface2,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -673,10 +698,10 @@ class _QuantityStepper extends StatelessWidget {
                   child: Text(
                     '$quantity',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: 16,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                 ),
@@ -698,23 +723,27 @@ class _StepperBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
         width: 36,
         height: 36,
-        decoration: const BoxDecoration(
-          color: AppColors.surface0,
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerLowest,
           shape: BoxShape.circle,
         ),
         child: Center(
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              color: AppColors.ink950,
+              color: pt.ink950,
               height: 1.1,
             ),
           ),
@@ -747,12 +776,16 @@ class _OrderSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        color: AppColors.surface0,
-        border: Border.all(color: AppColors.line),
+        color: cs.surfaceContainerLowest,
+        border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x040B1220),
@@ -770,7 +803,7 @@ class _OrderSummaryCard extends StatelessWidget {
               fontSize: 11,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.88,
-              color: AppColors.ink500,
+              color: Color(0xFF64748B),
             ),
           ),
           const SizedBox(height: 12),
@@ -783,33 +816,33 @@ class _OrderSummaryCard extends StatelessWidget {
             _SumRow(
               label: 'Subscribe & Save (12%)',
               value: '− \$${(savingsCents * quantity / 100).toStringAsFixed(2)}',
-              accent: AppColors.success,
+              accent: pt.success,
             ),
           ],
           const SizedBox(height: 10),
           const _SumRow(label: 'Delivery', value: 'Calculated at checkout'),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(color: AppColors.line, height: 1),
+            child: Divider(color: Color(0xFFE2E8F0), height: 1),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Total',
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
-                  color: AppColors.ink950,
+                  color: pt.ink950,
                 ),
               ),
               Text(
                 '\$${(totalCents / 100).toStringAsFixed(2)}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 24,
                   letterSpacing: -0.22,
-                  color: AppColors.ink950,
+                  color: pt.ink950,
                 ),
               ),
             ],
@@ -829,17 +862,22 @@ class _SumRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.ink500)),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: const Color(0xFF64748B))),
         Text(
           value,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w800,
-            color: accent ?? AppColors.ink950,
+            color: accent ?? pt.ink950,
           ),
         ),
       ],
@@ -866,15 +904,21 @@ class _PayBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     final bottomPad = MediaQuery.paddingOf(context).bottom;
 
     return Container(
       padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPad),
       decoration: BoxDecoration(
-        color: AppColors.surface1.withAlpha(235),
+        color: const Color(0xFFFFFFFF).withAlpha(235),
         boxShadow: const [
           BoxShadow(
-            color: AppColors.line,
+            color: Color(0xFFE2E8F0),
             offset: Offset(0, -1),
             blurRadius: 0,
           ),
@@ -897,7 +941,7 @@ class _PayBar extends StatelessWidget {
             Text(
               'Then \$${(totalCents / 100).toStringAsFixed(2)} every $frequencyWeeks weeks · pause anytime',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.ink500),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF64748B)),
             ),
           ],
         ],
@@ -919,6 +963,11 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -926,7 +975,7 @@ class _IconBtn extends StatelessWidget {
         height: 44,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: bg ?? AppColors.surface0,
+          color: bg ?? cs.surfaceContainerLowest,
           boxShadow: const [
             BoxShadow(
               color: Color(0x0F0B1220),
@@ -935,7 +984,7 @@ class _IconBtn extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(icon, size: 22, color: AppColors.ink700),
+        child: Icon(icon, size: 22, color: const Color(0xFF334155)),
       ),
     );
   }

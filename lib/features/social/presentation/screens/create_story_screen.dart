@@ -10,8 +10,8 @@ import 'package:http/http.dart' as http;
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
-import '../../../pet_profile/data/models/pet.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
 import '../controllers/create_post_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -125,7 +125,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
               Text('Story shared!'),
             ],
           ),
-          backgroundColor: AppColors.success,
+          backgroundColor: Theme.of(context).extension<PetfolioThemeExtension>()!.success,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -153,13 +153,14 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
   // ── State 1: Media Selector View ───────────────────────────────────────────
 
   Widget _buildMediaSelector() {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
     return Stack(
       children: [
         Scaffold(
-          backgroundColor: pt.surface1,
+          backgroundColor: const Color(0xFFFFFFFF),
           appBar: AppBar(
             backgroundColor: cs.surface,
             elevation: 0,
@@ -200,7 +201,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 15,
-                      color: pt.ink500,
+                      color: const Color(0xFF64748B),
                     ),
                   ),
                 ),
@@ -477,6 +478,7 @@ class _BrowseLibraryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
@@ -487,7 +489,7 @@ class _BrowseLibraryTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: cs.surfaceContainerHighest.withAlpha(80),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: pt.line, width: 1.5),
+          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -514,7 +516,7 @@ class _BrowseLibraryTile extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
-                color: pt.ink500,
+                color: const Color(0xFF64748B),
               ),
             ),
           ],

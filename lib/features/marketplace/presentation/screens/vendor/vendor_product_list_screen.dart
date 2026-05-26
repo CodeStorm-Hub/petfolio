@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/vendor_products_controller.dart';
 import '../../../data/models/product.dart';
 import '../../widgets/product_glyph.dart';
+import '../../../../../core/theme/app_theme.dart';
+
 
 class VendorProductListScreen extends ConsumerWidget {
   const VendorProductListScreen({super.key});
@@ -16,7 +17,7 @@ class VendorProductListScreen extends ConsumerWidget {
     final productsAsync = ref.watch(vendorProductsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -30,12 +31,12 @@ class VendorProductListScreen extends ConsumerWidget {
                     onTap: () => context.pop(),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
+                  Text(
                     'My Products',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
-                      color: AppColors.ink950,
+                      color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
                     ),
                   ),
                   const Spacer(),
@@ -46,7 +47,7 @@ class VendorProductListScreen extends ConsumerWidget {
                       height: 40,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.ink950,
+                        color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
                       ),
                       child: const Icon(Icons.add_rounded,
                           size: 20, color: Colors.white),
@@ -103,12 +104,12 @@ class VendorProductListScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete',
-                style: TextStyle(color: AppColors.danger)),
+            child: Text('Delete',
+                style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
@@ -133,12 +134,14 @@ class _ProductTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: AppColors.surface0,
+        color: cs.surfaceContainerLowest,
         boxShadow: const [
-          BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+          BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
         ],
       ),
       child: ListTile(
@@ -161,27 +164,27 @@ class _ProductTile extends StatelessWidget {
         ),
         title: Text(
           product.name,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 14,
-            color: AppColors.ink950,
+            color: pt.ink950,
           ),
         ),
         subtitle: Text(
           '${product.priceFormatted}  ·  ${product.inventoryCount} in stock',
-          style: const TextStyle(fontSize: 12, color: AppColors.ink500),
+          style: TextStyle(fontSize: 12, color: const Color(0xFF64748B)),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: const Icon(Icons.edit_outlined,
-                  size: 18, color: AppColors.ink500),
+              icon: Icon(Icons.edit_outlined,
+                  size: 18, color: const Color(0xFF64748B)),
               onPressed: onEdit,
             ),
             IconButton(
-              icon: const Icon(Icons.delete_outline_rounded,
-                  size: 18, color: AppColors.danger),
+              icon: Icon(Icons.delete_outline_rounded,
+                  size: 18, color: cs.error),
               onPressed: onDelete,
             ),
           ],
@@ -198,6 +201,9 @@ class _EmptyProducts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -207,26 +213,26 @@ class _EmptyProducts extends StatelessWidget {
             Container(
               width: 80,
               height: 80,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.surface2,
+                color: pt.surface2,
               ),
-              child: const Icon(Icons.inventory_2_outlined,
-                  size: 36, color: AppColors.ink300),
+              child: Icon(Icons.inventory_2_outlined,
+                  size: 36, color: pt.ink300),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'No products yet',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
-                color: AppColors.ink950,
+                color: pt.ink950,
               ),
             ),
             const SizedBox(height: 8),
             const Text(
               'Add your first product to start selling.',
-              style: TextStyle(fontSize: 14, color: AppColors.ink500),
+              style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
             ),
             const SizedBox(height: 24),
             PrimaryPillButton(
@@ -251,6 +257,9 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -258,12 +267,12 @@ class _IconBtn extends StatelessWidget {
         height: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.surface0,
+          color: cs.surfaceContainerLowest,
           boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+            BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: const Color(0xFF334155)),
       ),
     );
   }

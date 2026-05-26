@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/petfolio_empty_state.dart';
 import '../../../../core/widgets/primary_pill_button.dart';
 import '../../data/models/cart_item.dart';
@@ -11,6 +10,8 @@ import '../controllers/cart_controller.dart';
 import '../controllers/checkout_controller.dart';
 import '../controllers/shop_list_controller.dart';
 import '../widgets/cart_line_item.dart';
+import '../../../../core/theme/app_theme.dart';
+
 
 const _petfolioOfficialShopId = 'cccccccc-0000-0000-0000-cccccccccccc';
 
@@ -33,7 +34,7 @@ class CartScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.errorMessage!),
-            backgroundColor: AppColors.danger,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
         ref.read(checkoutProvider.notifier).reset();
@@ -43,7 +44,7 @@ class CartScreen extends ConsumerWidget {
     final groups = cart.itemsByShop.entries.toList();
 
     return Scaffold(
-      backgroundColor: AppColors.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -57,12 +58,12 @@ class CartScreen extends ConsumerWidget {
                     onTap: () => context.pop(),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
+                  Text(
                     'Your Cart',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
-                      color: AppColors.ink950,
+                      color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
                     ),
                   ),
                   const Spacer(),
@@ -70,11 +71,11 @@ class CartScreen extends ConsumerWidget {
                     TextButton(
                       onPressed: () =>
                           ref.read(cartProvider.notifier).clear(),
-                      child: const Text(
+                      child: Text(
                         'Clear',
                         style: TextStyle(
                           fontSize: 13,
-                          color: AppColors.danger,
+                          color: Theme.of(context).colorScheme.error,
                         ),
                       ),
                     ),
@@ -162,6 +163,8 @@ class _VendorGroupState extends ConsumerState<_VendorGroup> {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     final cart = ref.watch(cartProvider);
     final checkout = ref.watch(checkoutProvider);
     final subtotalCents = cart.totalCentsForShop(widget.shopId);
@@ -173,9 +176,9 @@ class _VendorGroupState extends ConsumerState<_VendorGroup> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-          color: AppColors.surface0,
+          color: cs.surfaceContainerLowest,
           boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+            BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
             BoxShadow(
               color: Color(0x040B1220),
               offset: Offset(0, 1),
@@ -190,8 +193,8 @@ class _VendorGroupState extends ConsumerState<_VendorGroup> {
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
               child: Row(
                 children: [
-                  const Icon(Icons.storefront_outlined,
-                      size: 18, color: AppColors.ink500),
+                  Icon(Icons.storefront_outlined,
+                      size: 18, color: const Color(0xFF64748B)),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
@@ -199,10 +202,10 @@ class _VendorGroupState extends ConsumerState<_VendorGroup> {
                       children: [
                         Text(
                           widget.shopName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
-                            color: AppColors.ink950,
+                            color: pt.ink950,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -210,7 +213,7 @@ class _VendorGroupState extends ConsumerState<_VendorGroup> {
                           'Est. delivery: 2-3 business days',
                           style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.ink500,
+                            color: Color(0xFF64748B),
                           ),
                         ),
                       ],
@@ -220,7 +223,7 @@ class _VendorGroupState extends ConsumerState<_VendorGroup> {
                     '${widget.items.fold<int>(0, (s, i) => s + i.quantity)} items',
                     style: const TextStyle(
                       fontSize: 12,
-                      color: AppColors.ink500,
+                      color: Color(0xFF64748B),
                     ),
                   ),
                 ],
@@ -235,17 +238,17 @@ class _VendorGroupState extends ConsumerState<_VendorGroup> {
                     borderRadius: BorderRadius.circular(12),
                     color: const Color(0xFFFFF3CD),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
                       Icon(Icons.info_outline_rounded,
-                          size: 18, color: AppColors.warning),
+                          size: 18, color: pt.warning),
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           'This shop is not ready to accept payments yet.',
                           style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.ink700,
+                            color: Color(0xFF334155),
                           ),
                         ),
                       ),
@@ -261,14 +264,14 @@ class _VendorGroupState extends ConsumerState<_VendorGroup> {
                 children: [
                   const Text(
                     'Subtotal',
-                    style: TextStyle(fontSize: 13, color: AppColors.ink500),
+                    style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
                   ),
                   Text(
                     subtotal,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                 ],
@@ -318,6 +321,10 @@ class _PaymentSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
       child: Row(
@@ -360,6 +367,9 @@ class _PaymentChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -368,10 +378,10 @@ class _PaymentChip extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: selected
-              ? AppColors.blue500.withAlpha(15)
-              : AppColors.surface1,
+              ? pt.info.withAlpha(15)
+              : const Color(0xFFFFFFFF),
           border: Border.all(
-            color: selected ? AppColors.blue500 : AppColors.line,
+            color: selected ? pt.info : const Color(0xFFE2E8F0),
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -381,7 +391,7 @@ class _PaymentChip extends StatelessWidget {
             Icon(
               icon,
               size: 16,
-              color: selected ? AppColors.blue500 : AppColors.ink500,
+              color: selected ? pt.info : const Color(0xFF64748B),
             ),
             const SizedBox(width: 6),
             Flexible(
@@ -390,7 +400,7 @@ class _PaymentChip extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: selected ? AppColors.blue500 : AppColors.ink700,
+                  color: selected ? pt.info : const Color(0xFF334155),
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -417,6 +427,9 @@ class _CodConfirmSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     final subtotal = '\$${(subtotalCents / 100).toStringAsFixed(2)}';
 
     return SafeArea(
@@ -432,23 +445,23 @@ class _CodConfirmSheet extends StatelessWidget {
                 height: 4,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(4),
-                  color: AppColors.line,
+                  color: const Color(0xFFE2E8F0),
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Confirm Order',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
-                color: AppColors.ink950,
+                color: pt.ink950,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               shopName,
-              style: const TextStyle(fontSize: 13, color: AppColors.ink500),
+              style: TextStyle(fontSize: 13, color: const Color(0xFF64748B)),
             ),
             const SizedBox(height: 16),
             for (final item in items)
@@ -461,39 +474,39 @@ class _CodConfirmSheet extends StatelessWidget {
                         '${item.product.name} × ${item.quantity}',
                         style: const TextStyle(
                           fontSize: 13,
-                          color: AppColors.ink700,
+                          color: Color(0xFF334155),
                         ),
                       ),
                     ),
                     Text(
                       '\$${((item.product.priceCents * item.quantity) / 100).toStringAsFixed(2)}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.ink950,
+                        color: pt.ink950,
                       ),
                     ),
                   ],
                 ),
               ),
-            const Divider(height: 24, color: AppColors.line),
+            Divider(height: 24, color: const Color(0xFFE2E8F0)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Total',
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
-                    color: AppColors.ink950,
+                    color: pt.ink950,
                   ),
                 ),
                 Text(
                   subtotal,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
-                    color: AppColors.ink950,
+                    color: pt.ink950,
                   ),
                 ),
               ],
@@ -505,15 +518,15 @@ class _CodConfirmSheet extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
                 color: const Color(0xFFFFF3CD),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(Icons.payments_outlined,
-                      size: 16, color: AppColors.warning),
+                      size: 16, color: pt.warning),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Pay when you receive your order.',
-                      style: TextStyle(fontSize: 12, color: AppColors.ink700),
+                      style: TextStyle(fontSize: 12, color: Color(0xFF334155)),
                     ),
                   ),
                 ],
@@ -544,6 +557,9 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -551,9 +567,9 @@ class _IconBtn extends StatelessWidget {
         height: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.surface0,
+          color: cs.surfaceContainerLowest,
           boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+            BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
             BoxShadow(
               color: Color(0x0A0B1220),
               offset: Offset(0, 1),
@@ -561,7 +577,7 @@ class _IconBtn extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: const Color(0xFF334155)),
       ),
     );
   }

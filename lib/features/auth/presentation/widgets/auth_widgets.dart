@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
+// import '../../../../core/theme/app_theme.dart';
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared auth-screen widgets
@@ -21,16 +23,16 @@ class AuthBrand extends StatelessWidget {
           width: 72,
           height: 72,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [AppColors.blue400, AppColors.blue600],
+              colors: [AppColors.blue400, pt.info],
             ),
             borderRadius:
                 BorderRadius.circular(PetfolioThemeExtension.radiusXl),
             boxShadow: [
               BoxShadow(
-                color: AppColors.blue500.withAlpha(80),
+                color: pt.info.withAlpha(80),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
@@ -50,7 +52,7 @@ class AuthBrand extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           'Your pet\'s world, beautifully organized.',
-          style: tt.bodyMedium?.copyWith(color: pt.ink500),
+          style: tt.bodyMedium?.copyWith(color: const Color(0xFF64748B)),
           textAlign: TextAlign.center,
         ),
       ],
@@ -74,7 +76,7 @@ class AuthCard extends StatelessWidget {
         color: cs.surface,
         borderRadius:
             BorderRadius.circular(PetfolioThemeExtension.radius2xl),
-        border: Border.all(color: pt.line),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: pt.shadowE2,
       ),
       padding: const EdgeInsets.all(24),
@@ -173,11 +175,11 @@ class _AuthFieldState extends State<AuthField> {
         decoration: InputDecoration(
           labelText: widget.label,
           labelStyle: TextStyle(
-            color: pt.ink500,
+            color: const Color(0xFF64748B),
             fontSize: 16,
           ),
           floatingLabelStyle: TextStyle(
-            color: focused ? cs.primary : pt.ink500,
+            color: focused ? cs.primary : const Color(0xFF64748B),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -187,11 +189,11 @@ class _AuthFieldState extends State<AuthField> {
           // ── Borders — OutlineInputBorder correctly notches the floating label
           border: OutlineInputBorder(
             borderRadius: radius,
-            borderSide: BorderSide(color: pt.line),
+            borderSide: BorderSide(color: const Color(0xFFE2E8F0)),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: radius,
-            borderSide: BorderSide(color: pt.line),
+            borderSide: BorderSide(color: const Color(0xFFE2E8F0)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: radius,
@@ -313,6 +315,7 @@ class AuthToggleLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
@@ -325,7 +328,7 @@ class AuthToggleLink extends StatelessWidget {
           child: Text.rich(
             TextSpan(
               text: '$question  ',
-              style: TextStyle(color: pt.ink500, fontSize: 15),
+              style: TextStyle(color: const Color(0xFF64748B), fontSize: 15),
               children: [
                 TextSpan(
                   text: actionLabel,

@@ -8,6 +8,8 @@ import 'package:petfolio/core/widgets/widgets.dart';
 
 import '../controllers/auth_controller.dart';
 import '../widgets/auth_widgets.dart';
+import '../../../../core/theme/app_theme.dart';
+
 
 class RegistrationScreen extends ConsumerStatefulWidget {
   const RegistrationScreen({super.key});
@@ -83,7 +85,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         child: FadeTransition(
           opacity: _fadeAnim,
@@ -109,7 +111,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                         const SizedBox(height: 4),
                         Text(
                           'One home for every pet in your life.',
-                          style: tt.bodyMedium?.copyWith(color: pt.ink500),
+                          style: tt.bodyMedium?.copyWith(color: const Color(0xFF64748B)),
                         ),
                         const SizedBox(height: 28),
 

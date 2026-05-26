@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../data/models/app_notification.dart';
+import 'package:petfolio/core/domain/models/app_notification.dart';
 import '../controllers/notification_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -38,7 +38,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final notificationsAsync = ref.watch(notificationsProvider);
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
@@ -67,7 +67,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             padding: const EdgeInsets.all(32),
             child: Text(
               'Failed to load activity',
-              style: TextStyle(color: pt.ink500),
+              style: TextStyle(color: const Color(0xFF64748B)),
             ),
           ),
         ),
@@ -79,7 +79,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           return ListView.separated(
             itemCount: notifications.length,
             separatorBuilder: (_, _) =>
-                Divider(height: 1, color: pt.line, indent: 72),
+                Divider(height: 1, color: const Color(0xFFE2E8F0), indent: 72),
             itemBuilder: (ctx, i) =>
                 _NotificationTile(notification: notifications[i]),
           );
@@ -116,7 +116,7 @@ class _EmptyState extends StatelessWidget {
           Text(
             "When someone likes your post,\nfollows you, or leaves a comment,\nyou'll see it here.",
             textAlign: TextAlign.center,
-            style: TextStyle(color: pt.ink500, height: 1.5),
+            style: TextStyle(color: const Color(0xFF64748B), height: 1.5),
           ),
         ],
       ),
@@ -159,7 +159,7 @@ class _NotificationTile extends StatelessWidget {
         ),
         subtitle: Text(
           notification.timeAgo,
-          style: tt.labelSmall?.copyWith(color: pt.ink500),
+          style: tt.labelSmall?.copyWith(color: const Color(0xFF64748B)),
         ),
         trailing: !notification.isRead
             ? Container(
@@ -182,9 +182,9 @@ class _NotificationTile extends StatelessWidget {
       case 'follow':
         return AppColors.meadow500;
       case 'comment':
-        return AppColors.blue500;
+        return const Color(0xFF3B82F6);
       default:
-        return AppColors.ink500;
+        return const Color(0xFF64748B);
     }
   }
 

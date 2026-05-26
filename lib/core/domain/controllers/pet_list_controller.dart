@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petfolio/features/pet_profile/data/models/pet.dart';
-import 'package:petfolio/features/pet_profile/data/models/pet_gender.dart';
-import 'package:petfolio/features/pet_profile/data/repositories/pet_repository.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
+import 'package:petfolio/core/domain/models/pet_gender.dart';
+import 'package:petfolio/core/domain/repositories/pet_repository.dart';
 import 'package:petfolio/features/care/data/repositories/pet_care_repository.dart';
 import 'package:petfolio/features/care/domain/services/care_recommendation_service.dart';
 

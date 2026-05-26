@@ -1,8 +1,8 @@
+import 'package:petfolio/core/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../controllers/admin_auth_controller.dart';
 import 'admin_layout.dart';
 
@@ -18,8 +18,8 @@ class AdminScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.lock_outline_rounded,
-                  size: 48, color: AppColors.ink300),
+              Icon(Icons.lock_outline_rounded,
+                  size: 48, color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink300),
               const SizedBox(height: 16),
               Text(
                 'Admin access required',

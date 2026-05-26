@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 
-import '../../data/models/pet.dart';
-import '../controllers/active_pet_controller.dart';
-import '../controllers/pet_list_controller.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/controllers/pet_list_controller.dart';
+// import '../../../../core/theme/app_theme.dart';
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ManagePetsScreen — opened from the pet-switcher "Manage" link.
@@ -117,12 +119,13 @@ class _ManagePetsScreenState extends ConsumerState<ManagePetsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final petsAsync = ref.watch(petListProvider);
     final activePet = ref.watch(activePetControllerProvider);
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -183,12 +186,13 @@ class _ManageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: pt.line, width: 0.5)),
+        border: Border(bottom: BorderSide(color: const Color(0xFFE2E8F0), width: 0.5)),
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 10, 16, 10),
@@ -211,7 +215,7 @@ class _ManageHeader extends StatelessWidget {
                       offset: Offset(0, 1),
                     ),
                     BoxShadow(
-                      color: pt.line.withAlpha(128),
+                      color: const Color(0xFFE2E8F0).withAlpha(128),
                       blurRadius: 0,
                       spreadRadius: 0.5,
                     ),
@@ -236,7 +240,7 @@ class _ManageHeader extends StatelessWidget {
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.08 * 11,
-                      color: pt.ink500,
+                      color: const Color(0xFF64748B),
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -298,7 +302,7 @@ class _PetList extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Long-press the handle to reorder · tap ⋯ to share or archive',
-                    style: TextStyle(fontSize: 12, color: pt.ink500, height: 1.4),
+                    style: TextStyle(fontSize: 12, color: const Color(0xFF64748B), height: 1.4),
                   ),
                 ),
               ],
@@ -382,7 +386,7 @@ class _PetRow extends StatelessWidget {
           color: cs.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isActive ? species.accent : pt.line,
+            color: isActive ? species.accent : const Color(0xFFE2E8F0),
             width: isActive ? 1.5 : 0.5,
           ),
           boxShadow: [
@@ -464,7 +468,7 @@ class _PetRow extends StatelessWidget {
                     subtitleParts.join(' · '),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12, color: pt.ink500),
+                    style: TextStyle(fontSize: 12, color: const Color(0xFF64748B)),
                   ),
                 ],
               ),
@@ -472,7 +476,7 @@ class _PetRow extends StatelessWidget {
             PopupMenuButton<String>(
               key: ValueKey<String>('manage_pet_menu_${pet.id}'),
               tooltip: '${pet.name} options',
-              icon: Icon(Icons.more_vert_rounded, color: pt.ink500),
+              icon: Icon(Icons.more_vert_rounded, color: const Color(0xFF64748B)),
               onSelected: (value) {
                 switch (value) {
                   case 'share':
@@ -560,7 +564,7 @@ class _AddPetCallout extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     'Name, breed, photo — 30 seconds',
-                    style: TextStyle(fontSize: 12, color: pt.ink500),
+                    style: TextStyle(fontSize: 12, color: const Color(0xFF64748B)),
                   ),
                 ],
               ),
@@ -635,7 +639,7 @@ class _ShareAccessSheet extends StatelessWidget {
                       ),
                       Text(
                         'Invite a partner or sitter as a co-carer',
-                        style: TextStyle(fontSize: 13, color: pt.ink500),
+                        style: TextStyle(fontSize: 13, color: const Color(0xFF64748B)),
                       ),
                     ],
                   ),
@@ -663,7 +667,7 @@ class _ShareAccessSheet extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(Icons.schedule_rounded,
-                      size: 18, color: AppColors.blue600),
+                      size: 18, color: pt.info),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -711,6 +715,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Center(
       child: Padding(
@@ -728,7 +733,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               'Add your first pet to get started.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: pt.ink500),
+              style: TextStyle(color: const Color(0xFF64748B)),
             ),
             const SizedBox(height: 18),
             FilledButton.icon(
@@ -760,7 +765,7 @@ class _ErrorState extends StatelessWidget {
           children: [
             Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
             const SizedBox(height: 12),
-            Text(message, style: TextStyle(fontSize: 15, color: pt.ink500)),
+            Text(message, style: TextStyle(fontSize: 15, color: const Color(0xFF64748B))),
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: onRetry,

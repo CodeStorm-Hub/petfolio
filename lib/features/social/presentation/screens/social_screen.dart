@@ -11,9 +11,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/dashed_circle_painter.dart';
 import '../../../../core/widgets/widgets.dart';
-import '../../../pet_profile/data/models/pet.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
-import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/controllers/pet_list_controller.dart';
 
 import '../../data/models/feed_post.dart';
 import '../../data/models/story.dart';
@@ -38,7 +38,7 @@ class SocialScreen extends ConsumerWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final petsAsync = ref.watch(petListProvider);
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: Center(
         child: petsAsync.when(
           skipLoadingOnReload: true,
@@ -49,7 +49,7 @@ class SocialScreen extends ConsumerWidget {
               Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
               const SizedBox(height: 12),
               Text('Connection error',
-                  style: TextStyle(fontSize: 15, color: pt.ink500)),
+                  style: TextStyle(fontSize: 15, color: const Color(0xFF64748B))),
               const SizedBox(height: 16),
               FilledButton.icon(
                 onPressed: () => ref.invalidate(petListProvider),
@@ -105,12 +105,14 @@ class _SocialViewState extends ConsumerState<_SocialView> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final feedAsync = ref.watch(socialControllerProvider(widget.pet.id));
     final notifier = ref.read(socialControllerProvider(widget.pet.id).notifier);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -119,7 +121,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
             Container(
               padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
               decoration: BoxDecoration(
-                color: pt.surface1,
+                color: const Color(0xFFFFFFFF),
                 boxShadow: const [BoxShadow(color: Color(0x19783C14), blurRadius: 8, offset: Offset(0, 8), spreadRadius: -8)],
               ),
               child: Row(
@@ -132,7 +134,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                         Text('Pawsfeed',
                             style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: pt.ink950)),
                         Text('Your pack · 124 new posts today',
-                            style: Theme.of(context).textTheme.labelMedium?.copyWith(color: pt.ink500),
+                            style: Theme.of(context).textTheme.labelMedium?.copyWith(color: const Color(0xFF64748B)),
                             overflow: TextOverflow.ellipsis),
                       ],
                     ),
@@ -157,7 +159,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                     children: [
                       Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
                       const SizedBox(height: 12),
-                      Text('Could not load feed', style: TextStyle(fontSize: 15, color: pt.ink500)),
+                      Text('Could not load feed', style: TextStyle(fontSize: 15, color: const Color(0xFF64748B))),
                       const SizedBox(height: 16),
                       FilledButton.icon(
                         onPressed: () => notifier.refresh(),
@@ -182,7 +184,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                           child: Center(
                             child: Text(
                               'No posts yet — be the first to share!',
-                              style: TextStyle(color: pt.ink500),
+                              style: TextStyle(color: const Color(0xFF64748B)),
                             ),
                           ),
                         )
@@ -261,6 +263,8 @@ class _IconBtn extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final defaultBg = pt.surface2;
     final defaultColor = pt.ink950;
@@ -483,6 +487,8 @@ class _StoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final surface = Theme.of(context).colorScheme.surface;
     final ink950 = Theme.of(context).extension<PetfolioThemeExtension>()!.ink950;
 
@@ -521,7 +527,7 @@ class _StoryItem extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: AppColors.tangerine,
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.cream, width: 2),
+                      border: Border.all(color: Theme.of(context).extension<PetfolioThemeExtension>()!.cream, width: 2),
                     ),
                     child: const Icon(Icons.add, color: Colors.white, size: 14),
                   ),
@@ -663,9 +669,11 @@ class _PostCardState extends State<_PostCard> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final ink950 = pt.ink950;
-    final ink500 = pt.ink500;
+    final ink500 = const Color(0xFF64748B);
 
     final totalLikes = widget.post.likes + (_reacted != null && !widget.post.isLiked ? 1 : 0);
 
@@ -770,9 +778,9 @@ class _PostCardState extends State<_PostCard> {
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          const Positioned(left: 0,  child: _EmojiCircle(emoji: '🐾', color: AppColors.tangerine, index: 0)),
-                          const Positioned(left: 18, child: _EmojiCircle(emoji: '❤️', color: AppColors.poppy,     index: 0)),
-                          const Positioned(left: 36, child: _EmojiCircle(emoji: '🦴', color: AppColors.sunny,     index: 0)),
+                          Positioned(left: 0,  child: _EmojiCircle(emoji: '🐾', color: AppColors.tangerine, index: 0)),
+                          Positioned(left: 18, child: _EmojiCircle(emoji: '❤️', color: AppColors.poppy,     index: 0)),
+                          Positioned(left: 36, child: _EmojiCircle(emoji: '🦴', color: AppColors.sunny,     index: 0)),
                         ],
                       ),
                     ),
@@ -780,7 +788,7 @@ class _PostCardState extends State<_PostCard> {
                     Expanded(
                       child: Text(
                         '$totalLikes reacted · ${widget.post.comments} comments',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: pt.ink700),
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF334155)),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -813,12 +821,12 @@ class _PostCardState extends State<_PostCard> {
                             children: [
                               _reacted != null 
                                 ? Text(_emojiForKind(_reacted!), style: const TextStyle(fontSize: 20))
-                                : Icon(Icons.pets, size: 20, color: pt.ink700),
+                                : Icon(Icons.pets, size: 20, color: const Color(0xFF334155)),
                               const SizedBox(width: 6),
                               Text(
                                 _reacted != null ? '${_reacted![0].toUpperCase()}${_reacted!.substring(1)}' : 'React',
                                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                      color: _reacted != null ? _colorForKind(_reacted!) : pt.ink700,
+                                      color: _reacted != null ? _colorForKind(_reacted!) : const Color(0xFF334155),
                                     ),
                               ),
                             ],
@@ -876,6 +884,8 @@ class _EmojiCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final surface = Theme.of(context).colorScheme.surface;
     final circle = Container(
       width: 24,
@@ -903,14 +913,17 @@ class _ActionBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final style = Theme.of(context).textTheme.labelLarge?.copyWith(color: pt.ink700);
+    final style = Theme.of(context).textTheme.labelLarge?.copyWith(color: const Color(0xFF334155));
     return SizedBox(
       height: 44,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 20, color: pt.ink700),
+          Icon(icon, size: 20, color: const Color(0xFF334155)),
           const SizedBox(width: 8),
           Text(label, style: style),
         ],
@@ -927,6 +940,8 @@ class _ReactPickerBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return GestureDetector(
       onTapDown: (d) => onTap(d.globalPosition.dx, d.globalPosition.dy - 300), // simplified offset

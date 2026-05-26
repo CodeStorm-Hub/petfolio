@@ -11,10 +11,10 @@ import '../../../../core/services/location_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
-import '../../../pet_profile/data/models/pet.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
-import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
-import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/controllers/pet_list_controller.dart';
+import 'package:petfolio/core/widgets/pet_switcher_sheet.dart';
 import '../../data/models/discovery_candidate.dart';
 import '../../data/models/pet_mutual_match.dart';
 import '../controllers/discovery_candidates_controller.dart';
@@ -62,10 +62,11 @@ class MatchingScreen extends ConsumerWidget {
     final pet = ref.watch(activePetControllerProvider);
     if (pet != null) return _DiscoveryView(petId: pet.id);
 
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final petsAsync = ref.watch(petListProvider);
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: Center(
         child: petsAsync.when(
           skipLoadingOnReload: true,
@@ -73,10 +74,10 @@ class MatchingScreen extends ConsumerWidget {
           error: (_, _) => Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
+              Icon(Icons.wifi_off_rounded, size: 48, color: const Color(0xFFCBD5E1)),
               const SizedBox(height: 12),
               Text('Connection error',
-                  style: TextStyle(fontSize: 15, color: pt.ink500)),
+                  style: TextStyle(fontSize: 15, color: const Color(0xFF64748B))),
               const SizedBox(height: 16),
               FilledButton.icon(
                 onPressed: () => ref.invalidate(petListProvider),
@@ -139,6 +140,8 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     ref.listen<AsyncValue<PetMutualMatch>>(
       mutualMatchInsertStreamProvider(petId),
       (previous, next) {
@@ -163,6 +166,7 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
     final deviceLocationAsync = ref.watch(deviceLatLngProvider);
     final state = ref.watch(discoveryControllerProvider(petId));
     final notifier = ref.read(discoveryControllerProvider(petId).notifier);
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final activePet = ref.watch(activePetControllerProvider);
     final overlayActive = _celebrationMatch != null && activePet != null;
@@ -200,11 +204,11 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
+              Icon(Icons.wifi_off_rounded, size: 48, color: const Color(0xFFCBD5E1)),
               const SizedBox(height: 12),
               Text(
                 'Could not load profiles',
-                style: TextStyle(fontSize: 15, color: pt.ink500),
+                style: TextStyle(fontSize: 15, color: const Color(0xFF64748B)),
               ),
               const SizedBox(height: 16),
               FilledButton.icon(
@@ -237,7 +241,7 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
     }
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         bottom: false,
         child: Stack(
@@ -382,6 +386,8 @@ class _DiscoveryStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final hasFlying = state.isExiting && state.exitingCard != null;
     if (!hasFlying && buffer.isEmpty) return const _EmptyDeck();
 
@@ -447,6 +453,9 @@ class _LocationAccessEmpty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final tt = Theme.of(context).textTheme;
     final permanentlyDenied =
@@ -470,14 +479,14 @@ class _LocationAccessEmpty extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.location_off_rounded, size: 64, color: pt.ink300),
+            Icon(Icons.location_off_rounded, size: 64, color: const Color(0xFFCBD5E1)),
             const SizedBox(height: 16),
             Text(
               title,
               textAlign: TextAlign.center,
               style: tt.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: pt.ink500,
+                color: const Color(0xFF64748B),
               ),
             ),
             const SizedBox(height: 8),
@@ -485,7 +494,7 @@ class _LocationAccessEmpty extends StatelessWidget {
               subtitle,
               textAlign: TextAlign.center,
               style: tt.bodySmall?.copyWith(
-                color: pt.ink300,
+                color: const Color(0xFFCBD5E1),
                 height: 1.45,
               ),
             ),
@@ -514,6 +523,9 @@ class _EmptyDeck extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final tt = Theme.of(context).textTheme;
     final title = locationReady
@@ -530,18 +542,18 @@ class _EmptyDeck extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.pets_rounded, size: 64, color: pt.ink300),
+            Icon(Icons.pets_rounded, size: 64, color: const Color(0xFFCBD5E1)),
             const SizedBox(height: 16),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: tt.titleMedium?.copyWith(color: pt.ink500),
+              style: tt.titleMedium?.copyWith(color: const Color(0xFF64748B)),
             ),
             const SizedBox(height: 6),
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: tt.bodySmall?.copyWith(color: pt.ink300, height: 1.45),
+              style: tt.bodySmall?.copyWith(color: const Color(0xFFCBD5E1), height: 1.45),
             ),
           ],
         ),
@@ -562,6 +574,8 @@ class _StackCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     return Transform.translate(
       offset: Offset(0, offsetY),
       child: Transform.scale(
@@ -589,6 +603,8 @@ class _SwipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final size = MediaQuery.sizeOf(context);
     if (state.isExiting && state.exitingCard != null) {
       return _buildExitAnimation(
@@ -652,7 +668,7 @@ class _SwipeCard extends StatelessWidget {
                     opacity: passOpacity,
                     child: _SwipeLabel(
                       label: 'PASS',
-                      color: AppColors.ink500,
+                      color: const Color(0xFF64748B),
                     ),
                   ),
                 ),
@@ -758,6 +774,8 @@ class _CardSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final colors = candidate.gradientColors;
     final softColor = colors.isNotEmpty ? colors.first.withAlpha(120) : AppColors.tangerine.withAlpha(120);
     final mainColor = colors.isNotEmpty ? colors.last : AppColors.tangerine;
@@ -952,6 +970,8 @@ class _ActionDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final deck = bufferAsync.asData?.value.candidates ?? const <DiscoveryCandidate>[];
     final disabled = state.isExiting || deck.isEmpty;
 
@@ -965,7 +985,7 @@ class _ActionDock extends StatelessWidget {
         children: [
           _DockButton(
             size: 56,
-            color: pt.ink500,
+            color: const Color(0xFF64748B),
             bgColor: Theme.of(context).colorScheme.surface,
             label: '✕',
             fontSize: 22,
@@ -1031,6 +1051,8 @@ class _DockButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final isDisabled = onTap == null;
 
     return GestureDetector(
@@ -1079,6 +1101,8 @@ class _SwipeLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
       decoration: BoxDecoration(

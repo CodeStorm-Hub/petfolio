@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../models/app_notification.dart';
+import 'package:petfolio/core/domain/models/app_notification.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Provider

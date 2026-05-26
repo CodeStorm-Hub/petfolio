@@ -1,8 +1,8 @@
+import '../../../../core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../controllers/kyc_review_controller.dart';
 
 class SecureDocButton extends ConsumerStatefulWidget {
@@ -44,7 +44,7 @@ class _SecureDocButtonState extends ConsumerState<SecureDocButton> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: AppColors.danger,
+        backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -52,6 +52,13 @@ class _SecureDocButtonState extends ConsumerState<SecureDocButton> {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
+    // ignore: unused_local_variable
+//     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+//     final cs = Theme.of(context).colorScheme;
     return OutlinedButton.icon(
       onPressed: _loading ? null : _open,
       icon: _loading
@@ -64,8 +71,8 @@ class _SecureDocButtonState extends ConsumerState<SecureDocButton> {
       label: Text(widget.label, style: const TextStyle(fontSize: 12)),
       style: OutlinedButton.styleFrom(
         visualDensity: VisualDensity.compact,
-        side: const BorderSide(color: AppColors.line),
-        foregroundColor: AppColors.blue500,
+        side: BorderSide(color: const Color(0xFFE2E8F0)),
+        foregroundColor: pt.info,
       ),
     );
   }

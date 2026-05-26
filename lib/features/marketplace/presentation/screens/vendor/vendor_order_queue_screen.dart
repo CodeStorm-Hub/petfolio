@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../core/theme/app_colors.dart';
 import '../../controllers/vendor_orders_controller.dart';
 import '../../../data/models/marketplace_order.dart';
+import '../../../../../core/theme/app_theme.dart';
+
 
 class VendorOrderQueueScreen extends ConsumerWidget {
   const VendorOrderQueueScreen({super.key});
@@ -14,32 +15,32 @@ class VendorOrderQueueScreen extends ConsumerWidget {
     final ordersAsync = ref.watch(vendorOrdersProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.surface1,
+      backgroundColor: Color(0xFFFFFFFF),
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 12),
               child: Row(
                 children: [
                   _IconBtn(
                     icon: Icons.arrow_back_ios_new_rounded,
                     onTap: () => context.pop(),
                   ),
-                  const SizedBox(width: 12),
-                  const Text(
+                  SizedBox(width: 12),
+                  Text(
                     'Order Queue',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
-                      color: AppColors.ink950,
+                      color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
                     ),
                   ),
-                  const Spacer(),
+                  Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.refresh_rounded,
-                        size: 22, color: AppColors.ink500),
+                    icon: Icon(Icons.refresh_rounded,
+                        size: 22, color: Color(0xFF64748B)),
                     onPressed: () =>
                         ref.read(vendorOrdersProvider.notifier).refresh(),
                   ),
@@ -49,7 +50,7 @@ class VendorOrderQueueScreen extends ConsumerWidget {
             Expanded(
               child: ordersAsync.when(
                 loading: () =>
-                    const Center(child: CircularProgressIndicator.adaptive()),
+                    Center(child: CircularProgressIndicator.adaptive()),
                 error: (e, _) => Center(child: Text(e.toString())),
                 data: (orders) {
                   final active = orders
@@ -60,9 +61,9 @@ class VendorOrderQueueScreen extends ConsumerWidget {
                     return const _EmptyOrders();
                   }
                   return ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
+                    padding: EdgeInsets.fromLTRB(16, 4, 16, 120),
                     itemCount: active.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 10),
+                    separatorBuilder: (_, _) => SizedBox(height: 10),
                     itemBuilder: (_, i) => _OrderTile(
                       order: active[i],
                       onTap: () => context.push(
@@ -89,15 +90,17 @@ class _OrderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: AppColors.surface0,
+          color: cs.surfaceContainerLowest,
           boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+            BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
           ],
         ),
         child: Row(
@@ -107,15 +110,15 @@ class _OrderTile extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: _statusColor(order.status).withAlpha(26),
+                color: _statusColor(context, order.status).withAlpha(26),
               ),
               child: Icon(
                 _statusIcon(order.status),
                 size: 22,
-                color: _statusColor(order.status),
+                color: _statusColor(context, order.status),
               ),
             ),
-            const SizedBox(width: 14),
+            SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,29 +127,29 @@ class _OrderTile extends StatelessWidget {
                     order.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
-                  const SizedBox(height: 3),
+                  SizedBox(height: 3),
                   Text(
                     '${order.lineItems.length} item${order.lineItems.length == 1 ? '' : 's'}  ·  ${order.amountFormatted}',
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.ink500),
+                    style: TextStyle(
+                        fontSize: 12, color: Color(0xFF64748B)),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 _StatusChip(status: order.status),
-                const SizedBox(height: 4),
-                const Icon(Icons.chevron_right_rounded,
-                    size: 18, color: AppColors.ink300),
+                SizedBox(height: 4),
+                Icon(Icons.chevron_right_rounded,
+                    size: 18, color: pt.ink300),
               ],
             ),
           ],
@@ -155,13 +158,13 @@ class _OrderTile extends StatelessWidget {
     );
   }
 
-  Color _statusColor(OrderStatus s) {
+  Color _statusColor(BuildContext context, OrderStatus s) {
     return switch (s) {
-      OrderStatus.pending    => AppColors.warning,
-      OrderStatus.processing => AppColors.info,
-      OrderStatus.shipped    => AppColors.blue500,
-      OrderStatus.delivered  => AppColors.success,
-      OrderStatus.cancelled  => AppColors.danger,
+      OrderStatus.pending    => Theme.of(context).extension<PetfolioThemeExtension>()!.warning,
+      OrderStatus.processing => Theme.of(context).extension<PetfolioThemeExtension>()!.info,
+      OrderStatus.shipped    => Theme.of(context).extension<PetfolioThemeExtension>()!.info,
+      OrderStatus.delivered  => Theme.of(context).extension<PetfolioThemeExtension>()!.success,
+      OrderStatus.cancelled  => Theme.of(context).colorScheme.error,
     };
   }
 
@@ -181,28 +184,32 @@ class _StatusChip extends StatelessWidget {
 
   final OrderStatus status;
 
-  Color get _color => switch (status) {
-        OrderStatus.pending    => AppColors.warning,
-        OrderStatus.processing => AppColors.info,
-        OrderStatus.shipped    => AppColors.blue500,
-        OrderStatus.delivered  => AppColors.success,
-        OrderStatus.cancelled  => AppColors.danger,
+  Color _color(BuildContext context) => switch (status) {
+        OrderStatus.pending    => Theme.of(context).extension<PetfolioThemeExtension>()!.warning,
+        OrderStatus.processing => Theme.of(context).extension<PetfolioThemeExtension>()!.info,
+        OrderStatus.shipped    => Theme.of(context).extension<PetfolioThemeExtension>()!.info,
+        OrderStatus.delivered  => Theme.of(context).extension<PetfolioThemeExtension>()!.success,
+        OrderStatus.cancelled  => Theme.of(context).colorScheme.error,
       };
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
-        color: _color.withAlpha(26),
+        color: _color(context).withAlpha(26),
       ),
       child: Text(
         status.label,
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: _color,
+          color: _color(context),
         ),
       ),
     );
@@ -214,27 +221,30 @@ class _EmptyOrders extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
+    return Center(
       child: Padding(
         padding: EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.receipt_long_outlined,
-                size: 48, color: AppColors.ink300),
+                size: 48, color: pt.ink300),
             SizedBox(height: 16),
             Text(
               'No active orders',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
-                color: AppColors.ink950,
+                color: pt.ink950,
               ),
             ),
             SizedBox(height: 8),
             Text(
               'New orders from buyers will appear here.',
-              style: TextStyle(fontSize: 14, color: AppColors.ink500),
+              style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
             ),
           ],
         ),
@@ -251,6 +261,9 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -258,12 +271,12 @@ class _IconBtn extends StatelessWidget {
         height: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.surface0,
+          color: cs.surfaceContainerLowest,
           boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+            BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: Color(0xFF334155)),
       ),
     );
   }

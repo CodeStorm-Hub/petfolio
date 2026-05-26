@@ -4,6 +4,147 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 @immutable
+class PetFolioColors extends ThemeExtension<PetFolioColors> {
+  const PetFolioColors({
+    required this.tangerine,
+    required this.tangerine700,
+    required this.tangerineSoft,
+    required this.poppy,
+    required this.poppy700,
+    required this.poppySoft,
+    required this.mint,
+    required this.mint700,
+    required this.mintSoft,
+    required this.sunny,
+    required this.sunny700,
+    required this.sunnySoft,
+    required this.lilac,
+    required this.lilac700,
+    required this.lilacSoft,
+    required this.sky,
+    required this.sky700,
+    required this.skySoft,
+  });
+
+  final Color tangerine;
+  final Color tangerine700;
+  final Color tangerineSoft;
+  final Color poppy;
+  final Color poppy700;
+  final Color poppySoft;
+  final Color mint;
+  final Color mint700;
+  final Color mintSoft;
+  final Color sunny;
+  final Color sunny700;
+  final Color sunnySoft;
+  final Color lilac;
+  final Color lilac700;
+  final Color lilacSoft;
+  final Color sky;
+  final Color sky700;
+  final Color skySoft;
+
+  static const PetFolioColors light = PetFolioColors(
+    tangerine: AppColors.tangerine,
+    tangerine700: AppColors.tangerine700,
+    tangerineSoft: AppColors.tangerineSoft,
+    poppy: AppColors.poppy,
+    poppy700: AppColors.poppy700,
+    poppySoft: AppColors.poppySoft,
+    mint: AppColors.mint,
+    mint700: AppColors.mint700,
+    mintSoft: AppColors.mintSoft,
+    sunny: AppColors.sunny,
+    sunny700: AppColors.sunny700,
+    sunnySoft: AppColors.sunnySoft,
+    lilac: AppColors.lilac,
+    lilac700: AppColors.lilac700,
+    lilacSoft: AppColors.lilacSoft,
+    sky: AppColors.sky,
+    sky700: AppColors.sky700,
+    skySoft: AppColors.skySoft,
+  );
+
+  static const PetFolioColors dark = PetFolioColors(
+    tangerine: AppColors.tangerineD,
+    tangerine700: AppColors.tangerine700D,
+    tangerineSoft: AppColors.tangerineSoftD,
+    poppy: AppColors.poppyD,
+    poppy700: AppColors.poppy700D,
+    poppySoft: AppColors.poppySoftD,
+    mint: AppColors.mintD,
+    mint700: AppColors.mint700D,
+    mintSoft: AppColors.mintSoftD,
+    sunny: AppColors.sunnyD,
+    sunny700: AppColors.sunny700D,
+    sunnySoft: AppColors.sunnySoftD,
+    lilac: AppColors.lilacD,
+    lilac700: AppColors.lilac700D,
+    lilacSoft: AppColors.lilacSoftD,
+    sky: AppColors.skyD,
+    sky700: AppColors.sky700,
+    skySoft: AppColors.skySoftD,
+  );
+
+  @override
+  PetFolioColors copyWith({
+    Color? tangerine, Color? tangerine700, Color? tangerineSoft,
+    Color? poppy, Color? poppy700, Color? poppySoft,
+    Color? mint, Color? mint700, Color? mintSoft,
+    Color? sunny, Color? sunny700, Color? sunnySoft,
+    Color? lilac, Color? lilac700, Color? lilacSoft,
+    Color? sky, Color? sky700, Color? skySoft,
+  }) {
+    return PetFolioColors(
+      tangerine: tangerine ?? this.tangerine,
+      tangerine700: tangerine700 ?? this.tangerine700,
+      tangerineSoft: tangerineSoft ?? this.tangerineSoft,
+      poppy: poppy ?? this.poppy,
+      poppy700: poppy700 ?? this.poppy700,
+      poppySoft: poppySoft ?? this.poppySoft,
+      mint: mint ?? this.mint,
+      mint700: mint700 ?? this.mint700,
+      mintSoft: mintSoft ?? this.mintSoft,
+      sunny: sunny ?? this.sunny,
+      sunny700: sunny700 ?? this.sunny700,
+      sunnySoft: sunnySoft ?? this.sunnySoft,
+      lilac: lilac ?? this.lilac,
+      lilac700: lilac700 ?? this.lilac700,
+      lilacSoft: lilacSoft ?? this.lilacSoft,
+      sky: sky ?? this.sky,
+      sky700: sky700 ?? this.sky700,
+      skySoft: skySoft ?? this.skySoft,
+    );
+  }
+
+  @override
+  PetFolioColors lerp(ThemeExtension<PetFolioColors>? other, double t) {
+    if (other is! PetFolioColors) return this;
+    return PetFolioColors(
+      tangerine: Color.lerp(tangerine, other.tangerine, t)!,
+      tangerine700: Color.lerp(tangerine700, other.tangerine700, t)!,
+      tangerineSoft: Color.lerp(tangerineSoft, other.tangerineSoft, t)!,
+      poppy: Color.lerp(poppy, other.poppy, t)!,
+      poppy700: Color.lerp(poppy700, other.poppy700, t)!,
+      poppySoft: Color.lerp(poppySoft, other.poppySoft, t)!,
+      mint: Color.lerp(mint, other.mint, t)!,
+      mint700: Color.lerp(mint700, other.mint700, t)!,
+      mintSoft: Color.lerp(mintSoft, other.mintSoft, t)!,
+      sunny: Color.lerp(sunny, other.sunny, t)!,
+      sunny700: Color.lerp(sunny700, other.sunny700, t)!,
+      sunnySoft: Color.lerp(sunnySoft, other.sunnySoft, t)!,
+      lilac: Color.lerp(lilac, other.lilac, t)!,
+      lilac700: Color.lerp(lilac700, other.lilac700, t)!,
+      lilacSoft: Color.lerp(lilacSoft, other.lilacSoft, t)!,
+      sky: Color.lerp(sky, other.sky, t)!,
+      sky700: Color.lerp(sky700, other.sky700, t)!,
+      skySoft: Color.lerp(skySoft, other.skySoft, t)!,
+    );
+  }
+}
+
+@immutable
 class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
   const PetfolioThemeExtension({
     required this.ink950,
@@ -315,7 +456,7 @@ abstract final class AppTheme {
       brightness: brightness,
       colorScheme: cs,
       textTheme: tt,
-      extensions: [ext],
+      extensions: [ext, isDark ? PetFolioColors.dark : PetFolioColors.light],
 
       scaffoldBackgroundColor: isDark ? AppColors.creamD : AppColors.cream,
 
@@ -326,7 +467,7 @@ abstract final class AppTheme {
         scrolledUnderElevation: 1,
         surfaceTintColor: Colors.transparent,
         shadowColor: isDark ? AppColors.shadowE1D : AppColors.shadowE1L,
-        titleTextStyle: GoogleFonts.sora(
+        titleTextStyle: GoogleFonts.fraunces(
           fontSize: 20,
           fontWeight: FontWeight.w700,
           color: isDark ? AppColors.ink950D : AppColors.ink950,
@@ -345,7 +486,7 @@ abstract final class AppTheme {
         elevation: 0,
         height: 72,
         labelTextStyle: WidgetStateProperty.all(
-          GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600),
+          GoogleFonts.nunito(fontSize: 11, fontWeight: FontWeight.w600),
         ),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -365,11 +506,11 @@ abstract final class AppTheme {
         unselectedIconTheme: IconThemeData(color: isDark ? AppColors.ink500D : AppColors.ink500),
         labelType: NavigationRailLabelType.all,
         elevation: 0,
-        selectedLabelTextStyle: GoogleFonts.inter(
+        selectedLabelTextStyle: GoogleFonts.nunito(
           fontSize: 12, fontWeight: FontWeight.w600,
           color: isDark ? AppColors.tangerineD : AppColors.tangerine,
         ),
-        unselectedLabelTextStyle: GoogleFonts.inter(
+        unselectedLabelTextStyle: GoogleFonts.nunito(
           fontSize: 12, fontWeight: FontWeight.w500,
           color: isDark ? AppColors.ink500D : AppColors.ink500,
         ),
@@ -406,7 +547,7 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusPill),
           borderSide: BorderSide(color: isDark ? AppColors.tangerineD : AppColors.tangerine, width: 2),
         ),
-        hintStyle: GoogleFonts.inter(
+        hintStyle: GoogleFonts.nunito(
           fontSize: 15, fontWeight: FontWeight.w400,
           color: isDark ? AppColors.ink300D : AppColors.ink300,
         ),
@@ -415,7 +556,7 @@ abstract final class AppTheme {
 
       chipTheme: ChipThemeData(
         backgroundColor: isDark ? AppColors.tangerineSoftD : AppColors.tangerineSoft,
-        labelStyle: GoogleFonts.inter(
+        labelStyle: GoogleFonts.nunito(
           fontSize: 13, fontWeight: FontWeight.w600,
           color: isDark ? AppColors.tangerine700D : AppColors.tangerine700,
         ),
@@ -437,7 +578,7 @@ abstract final class AppTheme {
           padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 24)),
           shape: const WidgetStatePropertyAll(StadiumBorder()),
           textStyle: WidgetStatePropertyAll(
-            GoogleFonts.sora(fontSize: 16, fontWeight: FontWeight.w700),
+            GoogleFonts.fraunces(fontSize: 16, fontWeight: FontWeight.w700),
           ),
           elevation: const WidgetStatePropertyAll(0),
         ),
@@ -455,14 +596,14 @@ abstract final class AppTheme {
           padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 20)),
           shape: const WidgetStatePropertyAll(StadiumBorder()),
           textStyle: WidgetStatePropertyAll(
-            GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
+            GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600),
           ),
         ),
       ),
 
       snackBarTheme: SnackBarThemeData(
         backgroundColor: isDark ? AppColors.surface0D : AppColors.ink950,
-        contentTextStyle: GoogleFonts.inter(
+        contentTextStyle: GoogleFonts.nunito(
           fontSize: 14, fontWeight: FontWeight.w500,
           color: isDark ? AppColors.ink950D : AppColors.surface0,
         ),
@@ -496,7 +637,7 @@ abstract final class AppTheme {
       onError: Colors.white,
       errorContainer: isDark ? AppColors.poppySoftD : AppColors.poppySoft,
       onErrorContainer: isDark ? AppColors.poppyD : AppColors.poppy700,
-      surface: isDark ? AppColors.surface0D : AppColors.surface0,
+      surface: isDark ? AppColors.creamD : AppColors.cream,
       onSurface: isDark ? AppColors.ink950D : AppColors.ink950,
       surfaceContainerLowest: isDark ? AppColors.surface0D : AppColors.surface0,
       surfaceContainerLow: isDark ? AppColors.surface1D : AppColors.surface1,
@@ -519,72 +660,72 @@ abstract final class AppTheme {
     final bodyColor = isDark ? AppColors.ink700D : AppColors.ink700;
     final mutedColor = isDark ? AppColors.ink500D : AppColors.ink500;
 
-    // Bundled weights: Sora → w600 (SemiBold), w700 (Bold)
-    //                  Inter → w400 (Regular), w500 (Medium), w600 (SemiBold), w700 (Bold)
+    // Bundled weights: Fraunces → w500 (Medium), w700 (Bold)
+    //                  Nunito → w400 (Regular), w500 (Medium), w600 (SemiBold), w700 (Bold), w800, w900
 
     return TextTheme(
-      // ── Display — Sora Bold for hero numbers & screen titles ─────────────────
-      displayLarge: GoogleFonts.sora(
+      // ── Display — Fraunces Bold for hero numbers & screen titles ─────────────────
+      displayLarge: GoogleFonts.fraunces(
         fontSize: 36, fontWeight: FontWeight.w700,
         height: 1.05, letterSpacing: -0.5, color: headColor,
       ),
-      displayMedium: GoogleFonts.sora(
+      displayMedium: GoogleFonts.fraunces(
         fontSize: 30, fontWeight: FontWeight.w700,
         height: 1.08, letterSpacing: -0.3, color: headColor,
       ),
-      displaySmall: GoogleFonts.sora(
+      displaySmall: GoogleFonts.fraunces(
         fontSize: 24, fontWeight: FontWeight.w600,
         height: 1.15, letterSpacing: -0.1, color: headColor,
       ),
-      // ── Headline — Sora for section headers & screen headings ────────────────
-      headlineLarge: GoogleFonts.sora(
+      // ── Headline — Fraunces for section headers & screen headings ────────────────
+      headlineLarge: GoogleFonts.fraunces(
         fontSize: 24, fontWeight: FontWeight.w700,
         height: 1.15, letterSpacing: -0.1, color: headColor,
       ),
-      headlineMedium: GoogleFonts.sora(
+      headlineMedium: GoogleFonts.fraunces(
         fontSize: 20, fontWeight: FontWeight.w700,
         height: 1.2, letterSpacing: 0, color: headColor,
       ),
-      headlineSmall: GoogleFonts.sora(
+      headlineSmall: GoogleFonts.fraunces(
         fontSize: 18, fontWeight: FontWeight.w700,
         height: 1.2, letterSpacing: 0, color: headColor,
       ),
-      // ── Title — Sora SemiBold for card titles & list headers ─────────────────
-      titleLarge: GoogleFonts.sora(
+      // ── Title — Fraunces SemiBold for card titles & list headers ─────────────────
+      titleLarge: GoogleFonts.fraunces(
         fontSize: 20, fontWeight: FontWeight.w600,
         height: 1.2, letterSpacing: 0, color: headColor,
       ),
-      titleMedium: GoogleFonts.sora(
+      titleMedium: GoogleFonts.fraunces(
         fontSize: 16, fontWeight: FontWeight.w600,
         height: 1.45, letterSpacing: 0, color: bodyColor,
       ),
-      titleSmall: GoogleFonts.sora(
+      titleSmall: GoogleFonts.fraunces(
         fontSize: 15, fontWeight: FontWeight.w600,
         height: 1.5, letterSpacing: 0, color: bodyColor,
       ),
-      // ── Body — Inter for paragraph & descriptive text ────────────────────────
-      bodyLarge: GoogleFonts.inter(
+      // ── Body — Nunito for paragraph & descriptive text ────────────────────────
+      bodyLarge: GoogleFonts.nunito(
         fontSize: 16, fontWeight: FontWeight.w500,
         height: 1.5, letterSpacing: 0, color: bodyColor,
       ),
-      bodyMedium: GoogleFonts.inter(
+      bodyMedium: GoogleFonts.nunito(
         fontSize: 15, fontWeight: FontWeight.w400,
         height: 1.5, letterSpacing: 0, color: bodyColor,
       ),
-      bodySmall: GoogleFonts.inter(
+      bodySmall: GoogleFonts.nunito(
         fontSize: 13, fontWeight: FontWeight.w400,
         height: 1.45, letterSpacing: 0, color: bodyColor,
       ),
-      // ── Label — Inter for UI chips, badges, metadata ─────────────────────────
-      labelLarge: GoogleFonts.inter(
+      // ── Label — Nunito for UI chips, badges, metadata ─────────────────────────
+      labelLarge: GoogleFonts.nunito(
         fontSize: 13, fontWeight: FontWeight.w600,
         height: 1.35, letterSpacing: 0.1, color: mutedColor,
       ),
-      labelMedium: GoogleFonts.inter(
+      labelMedium: GoogleFonts.nunito(
         fontSize: 12, fontWeight: FontWeight.w600,
         height: 1.35, letterSpacing: 0.1, color: mutedColor,
       ),
-      labelSmall: GoogleFonts.inter(
+      labelSmall: GoogleFonts.nunito(
         fontSize: 11, fontWeight: FontWeight.w700,
         height: 1.2, letterSpacing: 0.5, color: mutedColor,
       ),

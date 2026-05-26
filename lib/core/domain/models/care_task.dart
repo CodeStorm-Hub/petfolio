@@ -75,6 +75,8 @@ abstract class CareTask with _$CareTask {
     return updatedAt.isBefore(DateTime(today.year, today.month, today.day));
   }
 
+  bool get isLogDerived => false;
+
   CareTask markCompleted() => copyWith(
         isCompleted: true,
         completedAt: DateTime.now(),

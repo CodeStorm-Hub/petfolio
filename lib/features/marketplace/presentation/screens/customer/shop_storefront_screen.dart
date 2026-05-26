@@ -12,6 +12,7 @@ import '../../../data/models/shop.dart';
 import '../../widgets/product_card.dart';
 import '../../../../../core/widgets/skeleton_loader.dart';
 
+
 class ShopStorefrontRoute extends ConsumerWidget {
   const ShopStorefrontRoute({super.key, required this.shopId});
 
@@ -79,12 +80,12 @@ class ShopStorefrontScreen extends ConsumerWidget {
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: shop.bannerUrl != null ? 160 : 80,
-            backgroundColor: pt.surface1,
+            backgroundColor: const Color(0xFFFFFFFF),
             elevation: 0,
             pinned: true,
             leading: Padding(
@@ -160,7 +161,7 @@ class ShopStorefrontScreen extends ConsumerWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
                       color: pt.surface2,
-                      border: Border.all(color: pt.line, width: 1.5),
+                      border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
                     ),
                     child: shop.logoUrl != null
                         ? ClipRRect(
@@ -189,7 +190,7 @@ class ShopStorefrontScreen extends ConsumerWidget {
                             shop.description!,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: tt.bodySmall?.copyWith(color: pt.ink500),
+                            style: tt.bodySmall?.copyWith(color: const Color(0xFF64748B)),
                           ),
                         ],
                       ],
@@ -212,7 +213,7 @@ class ShopStorefrontScreen extends ConsumerWidget {
                 style: tt.labelSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.88,
-                  color: pt.ink500,
+                  color: const Color(0xFF64748B),
                 ),
               ),
             ),
@@ -232,7 +233,7 @@ class ShopStorefrontScreen extends ConsumerWidget {
                 ? SliverFillRemaining(
                     child: Center(
                       child: Text('No products available',
-                          style: tt.bodyMedium?.copyWith(color: pt.ink500)),
+                          style: tt.bodyMedium?.copyWith(color: const Color(0xFF64748B))),
                     ),
                   )
                 : SliverPadding(
@@ -278,6 +279,7 @@ class _ContactInfoSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Padding(
@@ -285,7 +287,7 @@ class _ContactInfoSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Divider(color: pt.line2, height: 20),
+          Divider(color: const Color(0xFFE2E8F0), height: 20),
           if (hasEmail)
             _ContactRow(
               icon:  Icons.email_outlined,
@@ -335,6 +337,7 @@ class _ContactRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final tt = Theme.of(context).textTheme;
     final row = Padding(
@@ -342,12 +345,12 @@ class _ContactRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 15, color: pt.ink500),
+          Icon(icon, size: 15, color: const Color(0xFF64748B)),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               label,
-              style: tt.bodySmall!.copyWith(color: pt.ink700),
+              style: tt.bodySmall!.copyWith(color: const Color(0xFF334155)),
             ),
           ),
         ],
@@ -406,9 +409,9 @@ class _SocialBtn extends StatelessWidget {
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.blue500.withAlpha(20),
+              color: Theme.of(context).extension<PetfolioThemeExtension>()!.info.withAlpha(20),
             ),
-            child: Icon(icon, size: 18, color: AppColors.blue500),
+            child: Icon(icon, size: 18, color: Theme.of(context).extension<PetfolioThemeExtension>()!.info),
           ),
         ),
       ),
@@ -423,13 +426,14 @@ class _ErrorRetry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text('Could not load products',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: pt.ink500)),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: const Color(0xFF64748B))),
           const SizedBox(height: 12),
           PrimaryPillButton(
             label: 'Retry',
@@ -451,6 +455,7 @@ class _CircleBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return SizedBox(
       width: 48,
@@ -464,12 +469,12 @@ class _CircleBtn extends StatelessWidget {
             height: 36,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: pt.surface1,
+              color: const Color(0xFFFFFFFF),
               boxShadow: [
-                BoxShadow(color: pt.line, spreadRadius: 0.5),
+                BoxShadow(color: const Color(0xFFE2E8F0), spreadRadius: 0.5),
               ],
             ),
-            child: Icon(icon, size: 16, color: pt.ink700),
+            child: Icon(icon, size: 16, color: const Color(0xFF334155)),
           ),
         ),
       ),

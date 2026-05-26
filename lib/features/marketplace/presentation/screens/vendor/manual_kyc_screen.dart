@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/manual_kyc_controller.dart';
+import '../../../../../core/theme/app_theme.dart';
+
 
 class ManualKycScreen extends ConsumerWidget {
   const ManualKycScreen({super.key});
@@ -21,14 +22,14 @@ class ManualKycScreen extends ConsumerWidget {
       (_, error) {
         if (error != null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(error), backgroundColor: AppColors.danger),
+            SnackBar(content: Text(error), backgroundColor: Theme.of(context).colorScheme.error),
           );
         }
       },
     );
 
     return Scaffold(
-      backgroundColor: AppColors.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -88,9 +89,9 @@ class ManualKycScreen extends ConsumerWidget {
                       if (ok && context.mounted) context.go('/seller');
                       if (!ok && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text('Submission failed. Please try again.'),
-                            backgroundColor: AppColors.danger,
+                            backgroundColor: Theme.of(context).colorScheme.error,
                           ),
                         );
                       }
@@ -113,6 +114,8 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Row(
@@ -124,19 +127,19 @@ class _Header extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.surface0,
-                boxShadow: const [BoxShadow(color: AppColors.line, spreadRadius: 0.5)],
+                color: cs.surfaceContainerLowest,
+                boxShadow: [BoxShadow(color: const Color(0xFFE2E8F0), spreadRadius: 0.5)],
               ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.ink700),
+              child: Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: const Color(0xFF334155)),
             ),
           ),
           const SizedBox(width: 12),
           Text(
             _titles[step],
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 20,
-              color: AppColors.ink950,
+              color: pt.ink950,
             ),
           ),
         ],
@@ -152,6 +155,9 @@ class _StepIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
       child: Row(
@@ -163,7 +169,7 @@ class _StepIndicator extends StatelessWidget {
               height: 4,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4),
-                color: active ? AppColors.blue500 : AppColors.line,
+                color: active ? pt.info : const Color(0xFFE2E8F0),
               ),
             ),
           );
@@ -188,6 +194,10 @@ class _Step1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Form(
       key: formKey,
       child: Column(
@@ -235,12 +245,16 @@ class _Step2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
           'Upload at least one of the following documents. Both are accepted.',
-          style: TextStyle(fontSize: 13, color: AppColors.ink500),
+          style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
         ),
         const SizedBox(height: 20),
         _DocPicker(
@@ -284,15 +298,17 @@ class _DocPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: AppColors.surface0,
+          color: cs.surfaceContainerLowest,
           border: Border.all(
-            color: hasFile ? AppColors.blue500 : AppColors.line,
+            color: hasFile ? pt.info : const Color(0xFFE2E8F0),
             width: hasFile ? 1.5 : 1,
           ),
         ),
@@ -304,13 +320,13 @@ class _DocPicker extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 color: hasFile
-                    ? AppColors.blue500.withAlpha(20)
-                    : AppColors.surface2,
+                    ? pt.info.withAlpha(20)
+                    : pt.surface2,
               ),
               child: Icon(
                 hasFile ? Icons.check_circle_outline_rounded : icon,
                 size: 20,
-                color: hasFile ? AppColors.blue500 : AppColors.ink300,
+                color: hasFile ? pt.info : pt.ink300,
               ),
             ),
             const SizedBox(width: 14),
@@ -320,15 +336,15 @@ class _DocPicker extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                   Text(
                     hasFile ? 'Image selected — tap to replace' : 'Tap to pick from gallery',
-                    style: const TextStyle(fontSize: 12, color: AppColors.ink500),
+                    style: TextStyle(fontSize: 12, color: const Color(0xFF64748B)),
                   ),
                 ],
               ),
@@ -336,7 +352,7 @@ class _DocPicker extends StatelessWidget {
             Icon(
               Icons.upload_rounded,
               size: 18,
-              color: hasFile ? AppColors.blue500 : AppColors.ink300,
+              color: hasFile ? pt.info : pt.ink300,
             ),
           ],
         ),
@@ -362,6 +378,10 @@ class _Step3 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Form(
       key: formKey,
       child: Column(
@@ -397,12 +417,16 @@ class _Label extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Text(
       text,
       style: const TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: AppColors.ink700,
+        color: Color(0xFF334155),
       ),
     );
   }
@@ -425,6 +449,8 @@ class _Field extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
@@ -433,23 +459,23 @@ class _Field extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hint,
         filled: true,
-        fillColor: AppColors.surface0,
+        fillColor: cs.surfaceContainerLowest,
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.line),
+          borderSide: BorderSide(color: const Color(0xFFE2E8F0)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.line),
+          borderSide: BorderSide(color: const Color(0xFFE2E8F0)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.blue500, width: 1.5),
+          borderSide: BorderSide(color: pt.info, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.danger),
+          borderSide: BorderSide(color: cs.error),
         ),
       ),
     );

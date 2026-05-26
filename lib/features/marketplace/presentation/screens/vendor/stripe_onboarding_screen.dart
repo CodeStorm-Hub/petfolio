@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../../core/theme/app_colors.dart';
+// import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/my_shop_controller.dart';
+import '../../../../../core/theme/app_theme.dart';
+
 
 class StripeOnboardingScreen extends ConsumerStatefulWidget {
   const StripeOnboardingScreen({super.key, required this.accountLinkUrl});
@@ -51,8 +53,9 @@ class _StripeOnboardingScreenState extends ConsumerState<StripeOnboardingScreen>
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Scaffold(
-      backgroundColor: AppColors.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -61,8 +64,8 @@ class _StripeOnboardingScreenState extends ConsumerState<StripeOnboardingScreen>
               Align(
                 alignment: Alignment.centerLeft,
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                      size: 20, color: AppColors.ink700),
+                  icon: Icon(Icons.arrow_back_ios_new_rounded,
+                      size: 20, color: const Color(0xFF334155)),
                   onPressed: () => context.pop(),
                 ),
               ),
@@ -70,20 +73,20 @@ class _StripeOnboardingScreenState extends ConsumerState<StripeOnboardingScreen>
               Container(
                 width: 72,
                 height: 72,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.surface2,
+                  color: pt.surface2,
                 ),
-                child: const Icon(Icons.account_balance_outlined,
-                    size: 36, color: AppColors.ink500),
+                child: Icon(Icons.account_balance_outlined,
+                    size: 36, color: const Color(0xFF64748B)),
               ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'Stripe setup',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 22,
-                  color: AppColors.ink950,
+                  color: pt.ink950,
                 ),
               ),
               const SizedBox(height: 10),
@@ -91,7 +94,7 @@ class _StripeOnboardingScreenState extends ConsumerState<StripeOnboardingScreen>
                 'Complete identity verification in your browser to start receiving payouts. '
                 'Return here once done — we will automatically update your shop status.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: AppColors.ink500),
+                style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
               ),
               const Spacer(),
               PrimaryPillButton(

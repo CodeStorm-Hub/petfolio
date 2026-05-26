@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../marketplace/data/models/shop.dart';
 import '../controllers/kyc_review_controller.dart';
@@ -136,18 +135,18 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
               decoration: InputDecoration(
                 hintText: 'e.g. NID image is blurry or expired…',
                 filled: true,
-                fillColor: AppColors.surface1,
+                fillColor: const Color(0xFFFFFFFF),
                 border: OutlineInputBorder(
                   borderRadius:
                       BorderRadius.circular(PetfolioThemeExtension.radiusMd),
                   borderSide:
-                      const BorderSide(color: AppColors.line),
+                      BorderSide(color: const Color(0xFFE2E8F0)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius:
                       BorderRadius.circular(PetfolioThemeExtension.radiusMd),
                   borderSide:
-                      const BorderSide(color: AppColors.line),
+                      BorderSide(color: const Color(0xFFE2E8F0)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius:
@@ -169,8 +168,8 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(ctx),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.line),
-                      foregroundColor: AppColors.ink700,
+                      side: BorderSide(color: const Color(0xFFE2E8F0)),
+                      foregroundColor: const Color(0xFF334155),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                           PetfolioThemeExtension.radiusMd,
@@ -205,13 +204,17 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     final shop = widget.shop;
     final bank = shop.bankAccountDetails;
     final hasNid = shop.nationalIdUrl != null;
     final hasLicense = shop.tradeLicenseUrl != null;
     final tt = Theme.of(context).textTheme;
-    final cs = Theme.of(context).colorScheme;
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+//     final cs = Theme.of(context).colorScheme;
+    // ignore: unused_local_variable
+//     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Container(
       decoration: BoxDecoration(
@@ -243,10 +246,10 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      const AdminStatusChip(
+                      SizedBox(height: 4),
+                      AdminStatusChip(
                         label: 'Submitted',
-                        color: AppColors.warning,
+                        color: pt.warning,
                       ),
                     ],
                   ),
@@ -255,7 +258,7 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
             ),
           ),
 
-          const Divider(height: 1, color: AppColors.line),
+          Divider(height: 1, color: const Color(0xFFE2E8F0)),
 
           // ── Bank details ─────────────────────────────────────────────────
           if (bank != null)
@@ -320,7 +323,7 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
             ),
 
           const SizedBox(height: 12),
-          const Divider(height: 1, color: AppColors.line),
+          Divider(height: 1, color: const Color(0xFFE2E8F0)),
 
           // ── Action buttons ────────────────────────────────────────────────
           Padding(
@@ -335,7 +338,7 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: cs.error,
                       side: BorderSide(
-                        color: _busy ? AppColors.line : cs.error,
+                        color: _busy ? const Color(0xFFE2E8F0) : cs.error,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
@@ -362,8 +365,8 @@ class _KycRequestCardState extends ConsumerState<KycRequestCard> {
                         : const Icon(Icons.check_rounded, size: 15),
                     label: const Text('Approve'),
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.success,
-                      disabledBackgroundColor: AppColors.success.withAlpha(80),
+                      backgroundColor: pt.success,
+                      disabledBackgroundColor: pt.success.withAlpha(80),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                           PetfolioThemeExtension.radiusMd,
@@ -392,14 +395,15 @@ class _ShopAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Container(
       width: 48,
       height: 48,
       decoration: BoxDecoration(
         borderRadius:
             BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-        color: AppColors.blue500.withAlpha(15),
-        border: Border.all(color: AppColors.line),
+        color: pt.info.withAlpha(15),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       clipBehavior: Clip.antiAlias,
       child: logoUrl != null
@@ -412,9 +416,9 @@ class _ShopAvatar extends StatelessWidget {
     );
   }
 
-  Widget get _fallback => const Center(
+  Widget get _fallback => Center(
         child: Icon(Icons.storefront_outlined,
-            size: 22, color: AppColors.blue500),
+            size: 22, color: Color(0xFF3B82F6)),
       );
 }
 
@@ -433,13 +437,15 @@ class _BankDetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     if (value == null || value!.isEmpty) return const SizedBox.shrink();
     final tt = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(icon, size: 14, color: AppColors.ink500),
+          Icon(icon, size: 14, color: const Color(0xFF64748B)),
           const SizedBox(width: 8),
           SizedBox(
             width: 88,

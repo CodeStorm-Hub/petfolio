@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/widgets/app_snack_bar.dart';
 
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
 import '../../data/models/medical_record.dart';
 import '../../data/repositories/health_repository.dart';
 

@@ -6,15 +6,13 @@ import 'package:go_router/go_router.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
-import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
-import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart';
-import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/controllers/pet_list_controller.dart';
+import 'package:petfolio/core/widgets/pet_switcher_sheet.dart';
 
 import 'package:petfolio/core/errors/app_exception.dart';
-import 'package:petfolio/core/models/pet.dart' show Pet;
-
-import 'package:petfolio/features/care/data/models/care_task.dart' as dbtask;
-import 'package:petfolio/features/care/data/models/care_task_log.dart';
+import 'package:petfolio/core/domain/models/pet.dart' show Pet;
+import 'package:petfolio/core/domain/models/care_task.dart' as dbtask;
 import 'package:petfolio/features/care/presentation/controllers/care_dashboard_controller.dart';
 import 'package:petfolio/features/care/presentation/utils/care_scheduled_time.dart';
 import 'package:petfolio/features/care/presentation/widgets/routine_recommendation_sheet.dart';

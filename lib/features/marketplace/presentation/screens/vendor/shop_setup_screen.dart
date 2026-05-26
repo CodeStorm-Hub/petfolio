@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../../data/models/shop.dart';
 import '../../controllers/my_shop_controller.dart';
+import '../../../../../core/theme/app_theme.dart';
+
 
 class ShopSetupScreen extends ConsumerStatefulWidget {
   const ShopSetupScreen({super.key});
@@ -67,9 +68,9 @@ class _ShopSetupScreenState extends ConsumerState<ShopSetupScreen> {
 
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Failed to save shop. Please try again.'),
-          backgroundColor: AppColors.danger,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
       return;
@@ -84,8 +85,11 @@ class _ShopSetupScreenState extends ConsumerState<ShopSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: AppColors.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -101,10 +105,10 @@ class _ShopSetupScreenState extends ConsumerState<ShopSetupScreen> {
                   const SizedBox(width: 12),
                   Text(
                     _isEdit ? 'Edit Shop' : 'Create Shop',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                 ],
@@ -213,6 +217,8 @@ class _LocationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -220,9 +226,9 @@ class _LocationTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: AppColors.surface0,
+          color: cs.surfaceContainerLowest,
           border: Border.all(
-            color: selected ? AppColors.blue500 : AppColors.line,
+            color: selected ? pt.info : const Color(0xFFE2E8F0),
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -234,13 +240,13 @@ class _LocationTile extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: selected
-                    ? AppColors.blue500.withAlpha(20)
-                    : AppColors.surface2,
+                    ? pt.info.withAlpha(20)
+                    : pt.surface2,
               ),
               child: Icon(
                 icon,
                 size: 18,
-                color: selected ? AppColors.blue500 : AppColors.ink300,
+                color: selected ? pt.info : pt.ink300,
               ),
             ),
             const SizedBox(width: 12),
@@ -253,14 +259,14 @@ class _LocationTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: selected ? AppColors.blue500 : AppColors.ink950,
+                      color: selected ? pt.info : pt.ink950,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
                     style: const TextStyle(
-                        fontSize: 12, color: AppColors.ink500),
+                        fontSize: 12, color: Color(0xFF64748B)),
                   ),
                 ],
               ),
@@ -270,7 +276,7 @@ class _LocationTile extends StatelessWidget {
                   ? Icons.radio_button_checked_rounded
                   : Icons.radio_button_unchecked_rounded,
               size: 20,
-              color: selected ? AppColors.blue500 : AppColors.ink300,
+              color: selected ? pt.info : pt.ink300,
             ),
           ],
         ),
@@ -285,12 +291,16 @@ class _Label extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Text(
       text,
       style: const TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: AppColors.ink700,
+        color: Color(0xFF334155),
       ),
     );
   }
@@ -311,6 +321,8 @@ class _Field extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
@@ -318,25 +330,25 @@ class _Field extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hint,
         filled: true,
-        fillColor: AppColors.surface0,
+        fillColor: cs.surfaceContainerLowest,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.line),
+          borderSide: BorderSide(color: const Color(0xFFE2E8F0)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.line),
+          borderSide: BorderSide(color: const Color(0xFFE2E8F0)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide:
-              const BorderSide(color: AppColors.blue500, width: 1.5),
+              BorderSide(color: pt.info, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.danger),
+          borderSide: BorderSide(color: cs.error),
         ),
       ),
     );
@@ -351,6 +363,9 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -358,12 +373,12 @@ class _IconBtn extends StatelessWidget {
         height: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.surface0,
+          color: cs.surfaceContainerLowest,
           boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+            BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: const Color(0xFF334155)),
       ),
     );
   }

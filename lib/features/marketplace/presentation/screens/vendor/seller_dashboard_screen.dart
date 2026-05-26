@@ -52,12 +52,12 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen>
     final shopAsync = ref.watch(myShopProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.surface1,
+      backgroundColor: Color(0xFFFFFFFF),
       body: SafeArea(
         bottom: false,
         child: shopAsync.when(
           loading: () =>
-              const Center(child: CircularProgressIndicator.adaptive()),
+              Center(child: CircularProgressIndicator.adaptive()),
           error: (e, _) => Center(child: Text(e.toString())),
           data: (shop) {
             if (shop == null) {
@@ -88,42 +88,42 @@ class _NoShopView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               width: 80,
               height: 80,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.surface2,
+                color: Theme.of(context).extension<PetfolioThemeExtension>()!.surface2,
               ),
-              child: const Icon(Icons.storefront_outlined,
-                  size: 36, color: AppColors.ink300),
+              child: Icon(Icons.storefront_outlined,
+                  size: 36, color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink300),
             ),
-            const SizedBox(height: 20),
-            const Text(
+            SizedBox(height: 20),
+            Text(
               'Open your shop',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 22,
-                color: AppColors.ink950,
+                color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
               ),
             ),
-            const SizedBox(height: 10),
-            const Text(
+            SizedBox(height: 10),
+            Text(
               'Create a storefront to sell pet products\nto the PetFolio community.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: AppColors.ink500),
+              style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
             ),
-            const SizedBox(height: 28),
+            SizedBox(height: 28),
             PrimaryPillButton(
               label: 'Create My Shop',
               size: PillButtonSize.lg,
               isFullWidth: true,
               onPressed: onCreateShop,
-              leadingIcon: const Icon(Icons.add_rounded, size: 20),
+              leadingIcon: Icon(Icons.add_rounded, size: 20),
             ),
           ],
         ),
@@ -147,7 +147,7 @@ class _ShopDeactivatedViewState extends State<_ShopDeactivatedView> {
   Future<void> _handleRefresh() async {
     setState(() => _checking = true);
     widget.onRefresh();
-    await Future<void>.delayed(const Duration(seconds: 2));
+    await Future<void>.delayed(Duration(seconds: 2));
     if (mounted) setState(() => _checking = false);
   }
 
@@ -155,7 +155,7 @@ class _ShopDeactivatedViewState extends State<_ShopDeactivatedView> {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -164,57 +164,57 @@ class _ShopDeactivatedViewState extends State<_ShopDeactivatedView> {
               height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.danger.withAlpha(16),
+                color: Theme.of(context).colorScheme.error.withAlpha(16),
               ),
-              child: const Icon(Icons.store_outlined,
-                  size: 36, color: AppColors.danger),
+              child: Icon(Icons.store_outlined,
+                  size: 36, color: Theme.of(context).colorScheme.error),
             ),
-            const SizedBox(height: 20),
-            const Text(
+            SizedBox(height: 20),
+            Text(
               'Shop Closed',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 22,
-                color: AppColors.ink950,
+                color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
               ),
             ),
-            const SizedBox(height: 10),
-            const Text(
+            SizedBox(height: 10),
+            Text(
               'Your deletion request was approved.\nThis shop and all its products have been deactivated.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: AppColors.ink500, height: 1.5),
+              style: TextStyle(fontSize: 14, color: Color(0xFF64748B), height: 1.5),
             ),
-            const SizedBox(height: 28),
+            SizedBox(height: 28),
             PrimaryPillButton(
               label: 'Set Up New Shop',
               size: PillButtonSize.lg,
               isFullWidth: true,
               onPressed: () => context.push('/seller/setup'),
-              leadingIcon: const Icon(Icons.add_rounded, size: 20),
+              leadingIcon: Icon(Icons.add_rounded, size: 20),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: _checking ? null : _handleRefresh,
               icon: _checking
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator.adaptive(strokeWidth: 2),
                     )
-                  : const Icon(Icons.refresh_rounded, size: 18),
+                  : Icon(Icons.refresh_rounded, size: 18),
               label: Text(_checking ? 'Checking…' : 'Check for active shop'),
               style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 48),
+                minimumSize: Size(double.infinity, 48),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             TextButton.icon(
               onPressed: () => context.pop(),
-              icon: const Icon(Icons.arrow_back_rounded, size: 16),
-              label: const Text('Go back'),
+              icon: Icon(Icons.arrow_back_rounded, size: 16),
+              label: Text('Go back'),
             ),
           ],
         ),
@@ -243,26 +243,26 @@ class _DashboardBody extends ConsumerWidget {
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Row(
               children: [
                 _IconBtn(
                   icon: Icons.arrow_back_ios_new_rounded,
                   onTap: () => context.pop(),
                 ),
-                const SizedBox(width: 12),
-                const Text(
+                SizedBox(width: 12),
+                Text(
                   'Seller Dashboard',
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 20,
-                    color: AppColors.ink950,
+                    color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
                   ),
                 ),
-                const Spacer(),
+                Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.edit_outlined,
-                      size: 20, color: AppColors.ink500),
+                  icon: Icon(Icons.edit_outlined,
+                      size: 20, color: Color(0xFF64748B)),
                   onPressed: () => context.push('/seller/edit-shop'),
                 ),
               ],
@@ -279,7 +279,7 @@ class _DashboardBody extends ConsumerWidget {
         // KYC status banners (Bangladesh / manual payout vendors)
         if (shop.payoutMethod == PayoutMethod.manual &&
             shop.kycStatus == KycStatus.submitted)
-          const SliverToBoxAdapter(child: _KycPendingBanner()),
+          SliverToBoxAdapter(child: _KycPendingBanner()),
         if (shop.payoutMethod == PayoutMethod.manual &&
             shop.kycStatus == KycStatus.rejected)
           SliverToBoxAdapter(
@@ -294,7 +294,7 @@ class _DashboardBody extends ConsumerWidget {
         // Stats row
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: Row(
               children: [
                 Expanded(
@@ -306,7 +306,7 @@ class _DashboardBody extends ConsumerWidget {
                     onTap: () => context.push('/seller/products'),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: _StatTile(
                     icon: Icons.receipt_long_outlined,
@@ -324,14 +324,14 @@ class _DashboardBody extends ConsumerWidget {
         // Quick actions
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-            child: const Text(
+            padding: EdgeInsets.fromLTRB(16, 20, 16, 8),
+            child: Text(
               'QUICK ACTIONS',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.88,
-                color: AppColors.ink500,
+                color: Color(0xFF64748B),
               ),
             ),
           ),
@@ -345,7 +345,7 @@ class _DashboardBody extends ConsumerWidget {
           child: _DangerZone(shop: shop),
         ),
 
-        const SliverToBoxAdapter(child: SizedBox(height: 120)),
+        SliverToBoxAdapter(child: SizedBox(height: 120)),
       ],
     );
   }
@@ -359,25 +359,25 @@ class _OnboardingBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: const Color(0xFFFFF3CD),
+          color: Color(0xFFFFF3CD),
         ),
         child: Row(
           children: [
-            const Icon(Icons.warning_amber_rounded,
-                color: AppColors.warning, size: 22),
-            const SizedBox(width: 12),
-            const Expanded(
+            Icon(Icons.warning_amber_rounded,
+                color: Theme.of(context).extension<PetfolioThemeExtension>()!.warning, size: 22),
+            SizedBox(width: 12),
+            Expanded(
               child: Text(
                 'Complete your Stripe setup to start receiving payments.',
-                style: TextStyle(fontSize: 13, color: AppColors.ink700),
+                style: TextStyle(fontSize: 13, color: Color(0xFF334155)),
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             GestureDetector(
               onTap: () async {
                 try {
@@ -391,12 +391,12 @@ class _OnboardingBanner extends ConsumerWidget {
                   if (context.mounted) AppSnackBar.showError(e);
                 }
               },
-              child: const Text(
+              child: Text(
                 'Setup',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
-                  color: AppColors.warning,
+                  color: Theme.of(context).extension<PetfolioThemeExtension>()!.warning,
                 ),
               ),
             ),
@@ -415,14 +415,14 @@ class _ShopCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-          color: AppColors.surface0,
+          color: Theme.of(context).colorScheme.surfaceContainerLowest,
           boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+            BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
           ],
         ),
         child: Row(
@@ -432,41 +432,41 @@ class _ShopCard extends StatelessWidget {
               height: 52,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: AppColors.surface2,
+                color: Theme.of(context).extension<PetfolioThemeExtension>()!.surface2,
               ),
               child: shop.logoUrl != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.network(shop.logoUrl!, fit: BoxFit.cover),
                     )
-                  : const Icon(Icons.storefront_outlined,
-                      color: AppColors.ink300),
+                  : Icon(Icons.storefront_outlined,
+                      color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink300),
             ),
-            const SizedBox(width: 14),
+            SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     shop.shopName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
-                      color: AppColors.ink950,
+                      color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   Text(
                     shop.description ?? 'No description yet',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.ink500),
+                    style: TextStyle(
+                        fontSize: 12, color: Color(0xFF64748B)),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             _ShopStatusChip(shop: shop),
           ],
         ),
@@ -482,10 +482,10 @@ class _ShopStatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (label, color, icon, tappable) = _resolve();
+    final (label, color, icon, tappable) = _resolve(context);
 
     final chip = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
         color: color.withAlpha(20),
@@ -494,7 +494,7 @@ class _ShopStatusChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 11, color: color),
-          const SizedBox(width: 4),
+          SizedBox(width: 4),
           Text(
             label,
             style: TextStyle(
@@ -504,7 +504,7 @@ class _ShopStatusChip extends StatelessWidget {
             ),
           ),
           if (tappable) ...[
-            const SizedBox(width: 2),
+            SizedBox(width: 2),
             Icon(Icons.chevron_right_rounded, size: 13, color: color),
           ],
         ],
@@ -519,33 +519,33 @@ class _ShopStatusChip extends StatelessWidget {
     );
   }
 
-  (String, Color, IconData, bool) _resolve() {
+  (String, Color, IconData, bool) _resolve(BuildContext context) {
     if (shop.isVerified) {
-      return ('Verified', AppColors.success, Icons.check_circle_outline_rounded, false);
+      return ('Verified', Color(0xFF10B981), Icons.check_circle_outline_rounded, false);
     }
     if (shop.payoutMethod == PayoutMethod.manual) {
       return switch (shop.kycStatus) {
         KycStatus.submitted => (
             'Under Review',
-            AppColors.blue500,
+            Color(0xFF3B82F6),
             Icons.hourglass_top_rounded,
             false,
           ),
         KycStatus.rejected => (
             'Rejected',
-            AppColors.danger,
+            Theme.of(context).colorScheme.error,
             Icons.cancel_outlined,
             true,
           ),
         _ => (
             'Complete KYC',
-            AppColors.warning,
+            Theme.of(context).extension<PetfolioThemeExtension>()!.warning,
             Icons.upload_file_outlined,
             true,
           ),
       };
     }
-    return ('Pending', AppColors.warning, Icons.schedule_rounded, false);
+    return ('Pending', Theme.of(context).extension<PetfolioThemeExtension>()!.warning, Icons.schedule_rounded, false);
   }
 }
 
@@ -569,12 +569,12 @@ class _StatTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-          color: AppColors.surface0,
+          color: Theme.of(context).colorScheme.surfaceContainerLowest,
           boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+            BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
           ],
         ),
         child: Column(
@@ -589,19 +589,19 @@ class _StatTile extends StatelessWidget {
               ),
               child: Icon(icon, size: 20, color: color),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 24,
-                color: AppColors.ink950,
+                color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: 2),
             Text(label,
                 style:
-                    const TextStyle(fontSize: 12, color: AppColors.ink500)),
+                    TextStyle(fontSize: 12, color: Color(0xFF64748B))),
           ],
         ),
       ),
@@ -664,30 +664,30 @@ class _ActionRow extends StatelessWidget {
     return GestureDetector(
       onTap: () => context.push(route),
       child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        margin: EdgeInsets.fromLTRB(16, 0, 16, 10),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          color: AppColors.surface0,
+          color: Theme.of(context).colorScheme.surfaceContainerLowest,
           boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+            BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
           ],
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: AppColors.ink500),
-            const SizedBox(width: 14),
+            Icon(icon, size: 20, color: Color(0xFF64748B)),
+            SizedBox(width: 14),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: AppColors.ink950,
+                color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
               ),
             ),
-            const Spacer(),
-            const Icon(Icons.chevron_right_rounded,
-                size: 20, color: AppColors.ink300),
+            Spacer(),
+            Icon(Icons.chevron_right_rounded,
+                size: 20, color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink300),
           ],
         ),
       ),
@@ -701,21 +701,21 @@ class _KycPendingBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: const Color(0xFFFFF3CD),
+          color: Color(0xFFFFF3CD),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.hourglass_top_rounded, color: AppColors.warning, size: 22),
+            Icon(Icons.hourglass_top_rounded, color: Theme.of(context).extension<PetfolioThemeExtension>()!.warning, size: 22),
             SizedBox(width: 12),
             Expanded(
               child: Text(
                 'Documents under review. We\'ll notify you once verified.',
-                style: TextStyle(fontSize: 13, color: AppColors.ink700),
+                style: TextStyle(fontSize: 13, color: Color(0xFF334155)),
               ),
             ),
           ],
@@ -733,46 +733,46 @@ class _KycRejectedBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: AppColors.danger.withAlpha(20),
+          color: Theme.of(context).colorScheme.error.withAlpha(20),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.cancel_outlined, color: AppColors.danger, size: 22),
-            const SizedBox(width: 12),
+            Icon(Icons.cancel_outlined, color: Theme.of(context).colorScheme.error, size: 22),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Documents rejected.',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.danger,
+                      color: Theme.of(context).colorScheme.error,
                     ),
                   ),
                   if (reason != null && reason!.isNotEmpty) ...[
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Text(
                       reason!,
-                      style: const TextStyle(fontSize: 13, color: AppColors.ink700),
+                      style: TextStyle(fontSize: 13, color: Color(0xFF334155)),
                     ),
                   ],
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   GestureDetector(
                     onTap: () => context.push('/seller/kyc'),
-                    child: const Text(
+                    child: Text(
                       'Resubmit documents',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.danger,
+                        color: Theme.of(context).colorScheme.error,
                       ),
                     ),
                   ),
@@ -799,22 +799,22 @@ class _DangerZone extends ConsumerWidget {
     final request = requestAsync.value;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+      padding: EdgeInsets.fromLTRB(16, 20, 16, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Divider(color: AppColors.line),
-          const SizedBox(height: 12),
-          const Text(
+          Divider(color: Color(0xFFE2E8F0)),
+          SizedBox(height: 12),
+          Text(
             'DANGER ZONE',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.88,
-              color: AppColors.danger,
+              color: Theme.of(context).colorScheme.error,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           if (request == null)
             _DeleteTile(shop: shop)
           else if (request['status'] == 'pending')
@@ -845,18 +845,18 @@ class _DeleteTile extends StatelessWidget {
         builder: (_) => _DeleteShopRequestSheet(shop: shop),
       ),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.surface0,
+          color: Theme.of(context).colorScheme.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.danger.withAlpha(60)),
+          border: Border.all(color: Theme.of(context).colorScheme.error.withAlpha(60)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.delete_forever_rounded,
-                size: 20, color: AppColors.danger),
-            const SizedBox(width: 14),
-            const Expanded(
+            Icon(Icons.delete_forever_rounded,
+                size: 20, color: Theme.of(context).colorScheme.error),
+            SizedBox(width: 14),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -865,19 +865,19 @@ class _DeleteTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.danger,
+                      color: Theme.of(context).colorScheme.error,
                     ),
                   ),
                   SizedBox(height: 2),
                   Text(
                     'Requires admin review',
-                    style: TextStyle(fontSize: 12, color: AppColors.ink500),
+                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
-                size: 18, color: AppColors.ink300),
+            Icon(Icons.chevron_right_rounded,
+                size: 18, color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink300),
           ],
         ),
       ),
@@ -898,35 +898,35 @@ class _PendingBanner extends StatelessWidget {
         '${months[requestedAt.month - 1]} ${requestedAt.day}, ${requestedAt.year}';
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.warning.withAlpha(20),
+        color: Theme.of(context).extension<PetfolioThemeExtension>()!.warning.withAlpha(20),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.warning.withAlpha(60)),
+        border: Border.all(color: Theme.of(context).extension<PetfolioThemeExtension>()!.warning.withAlpha(60)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.hourglass_top_rounded,
-              size: 20, color: AppColors.warning),
-          const SizedBox(width: 12),
+          Icon(Icons.hourglass_top_rounded,
+              size: 20, color: Theme.of(context).extension<PetfolioThemeExtension>()!.warning),
+          SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Deletion request pending',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.warning,
+                    color: Theme.of(context).extension<PetfolioThemeExtension>()!.warning,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(
                   'Admin review in progress · Submitted $date',
-                  style: const TextStyle(
-                      fontSize: 12, color: AppColors.ink500),
+                  style: TextStyle(
+                      fontSize: 12, color: Color(0xFF64748B)),
                 ),
               ],
             ),
@@ -946,37 +946,37 @@ class _RejectedBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.danger.withAlpha(12),
+        color: Theme.of(context).colorScheme.error.withAlpha(12),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.danger.withAlpha(60)),
+        border: Border.all(color: Theme.of(context).colorScheme.error.withAlpha(60)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.cancel_outlined, size: 20, color: AppColors.danger),
+              Icon(Icons.cancel_outlined, size: 20, color: Theme.of(context).colorScheme.error),
               SizedBox(width: 10),
               Text(
                 'Deletion request rejected',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.danger,
+                  color: Theme.of(context).colorScheme.error,
                 ),
               ),
             ],
           ),
           if (rejectionNote != null && rejectionNote!.isNotEmpty) ...[
-            const SizedBox(height: 6),
+            SizedBox(height: 6),
             Text(
               rejectionNote!,
-              style: const TextStyle(fontSize: 13, color: AppColors.ink700),
+              style: TextStyle(fontSize: 13, color: Color(0xFF334155)),
             ),
           ],
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           GestureDetector(
             onTap: () => showModalBottomSheet(
               context: context,
@@ -984,12 +984,12 @@ class _RejectedBanner extends StatelessWidget {
               backgroundColor: Colors.transparent,
               builder: (_) => _DeleteShopRequestSheet(shop: shop),
             ),
-            child: const Text(
+            child: Text(
               'Submit new request →',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: AppColors.danger,
+                color: Theme.of(context).colorScheme.error,
               ),
             ),
           ),
@@ -1051,7 +1051,7 @@ class _DeleteShopRequestSheetState
       padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottom),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1062,56 +1062,56 @@ class _DeleteShopRequestSheetState
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: pt.line,
+                color: Color(0xFFE2E8F0),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
-          const SizedBox(height: 20),
-          const Text(
+          SizedBox(height: 20),
+          Text(
             'Request Shop Deletion',
             style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 18,
-              color: AppColors.ink950,
+              color: pt.ink950,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _ConsequenceItem(
               icon: Icons.visibility_off_outlined,
               text: 'Shop hidden from all buyers immediately on approval'),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _ConsequenceItem(
               icon: Icons.inventory_2_outlined,
               text: 'All products will be unlisted'),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _ConsequenceItem(
               icon: Icons.warning_amber_rounded,
               text: 'Cannot be undone without contacting support'),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.warning.withAlpha(20),
+              color: pt.warning.withAlpha(20),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Row(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(Icons.info_outline_rounded,
-                    size: 16, color: AppColors.warning),
+                    size: 16, color: pt.warning),
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'PetFolio reviews requests within 2–3 business days. You\'ll be notified of the outcome.',
                     style:
-                        TextStyle(fontSize: 12, color: AppColors.ink700),
+                        TextStyle(fontSize: 12, color: Color(0xFF334155)),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           TextField(
             controller: _reasonController,
             maxLines: 3,
@@ -1121,32 +1121,32 @@ class _DeleteShopRequestSheetState
               hintText: 'Why are you closing your shop?',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: pt.line),
+                borderSide: BorderSide(color: Color(0xFFE2E8F0)),
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           Row(
             children: [
               Expanded(
                 child: TextButton(
                   onPressed:
                       _loading ? null : () => Navigator.pop(context),
-                  child: const Text('Cancel'),
+                  child: Text('Cancel'),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: FilledButton(
                   onPressed: _loading ? null : _submit,
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.danger,
+                    backgroundColor: cs.error,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: _loading
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
@@ -1154,7 +1154,7 @@ class _DeleteShopRequestSheetState
                             color: Colors.white,
                           ),
                         )
-                      : const Text('Submit Request'),
+                      : Text('Submit Request'),
                 ),
               ),
             ],
@@ -1176,12 +1176,12 @@ class _ConsequenceItem extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: AppColors.ink500),
-        const SizedBox(width: 10),
+        Icon(icon, size: 16, color: Color(0xFF64748B)),
+        SizedBox(width: 10),
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(fontSize: 13, color: AppColors.ink700),
+            style: TextStyle(fontSize: 13, color: Color(0xFF334155)),
           ),
         ),
       ],
@@ -1204,12 +1204,12 @@ class _IconBtn extends StatelessWidget {
         height: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.surface0,
+          color: Theme.of(context).colorScheme.surfaceContainerLowest,
           boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+            BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: Color(0xFF334155)),
       ),
     );
   }

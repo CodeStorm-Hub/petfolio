@@ -6,9 +6,11 @@ import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 
-import '../../data/models/pet.dart';
-import '../controllers/active_pet_controller.dart';
-import '../controllers/pet_list_controller.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/controllers/pet_list_controller.dart';
+// import '../../../../core/theme/app_theme.dart';
+
 
 /// Shows the pet switcher as a drag-to-dismiss modal bottom sheet.
 ///
@@ -94,7 +96,7 @@ class PetSwitcherSheet extends ConsumerWidget {
                             data: (pets) => Text(
                               '${pets.length} pet${pets.length == 1 ? '' : 's'} · tap to switch',
                               style: TextStyle(
-                                  fontSize: 13, color: pt.ink500),
+                                  fontSize: 13, color: const Color(0xFF64748B)),
                             ),
                             loading: () => const SizedBox.shrink(),
                             error: (_, _) => const SizedBox.shrink(),
@@ -127,7 +129,7 @@ class PetSwitcherSheet extends ConsumerWidget {
                   ),
                   error: (e, _) => Center(
                     child: Text('Could not load pets',
-                        style: TextStyle(color: pt.ink500)),
+                        style: TextStyle(color: const Color(0xFF64748B))),
                   ),
                   data: (pets) => ListView(
                     controller: scrollController,
@@ -152,7 +154,7 @@ class PetSwitcherSheet extends ConsumerWidget {
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.08 * 11,
-                              color: pt.ink500,
+                              color: const Color(0xFF64748B),
                             ),
                           ),
                         ),
@@ -236,7 +238,7 @@ class _PetRow extends StatelessWidget {
             color: isActive ? species.tint : cs.surface,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: isActive ? species.accent : pt.line,
+              color: isActive ? species.accent : const Color(0xFFE2E8F0),
               width: isActive ? 2 : 0.5,
             ),
             boxShadow: isActive
@@ -306,7 +308,7 @@ class _PetRow extends StatelessWidget {
                     if (pet.breed != null)
                       Text(
                         pet.breed!,
-                        style: TextStyle(fontSize: 13, color: pt.ink500),
+                        style: TextStyle(fontSize: 13, color: const Color(0xFF64748B)),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -343,6 +345,7 @@ class _AddPetButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
@@ -393,7 +396,7 @@ class _AddPetButton extends StatelessWidget {
                       'Name, breed, photo — 30 seconds',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 13, color: pt.ink500),
+                      style: TextStyle(fontSize: 13, color: const Color(0xFF64748B)),
                     ),
                   ],
                 ),
@@ -428,7 +431,7 @@ class _ManageRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.settings_outlined, size: 18, color: pt.ink500),
+            Icon(Icons.settings_outlined, size: 18, color: const Color(0xFF64748B)),
             const SizedBox(width: 12),
             Expanded(
               child: Text(

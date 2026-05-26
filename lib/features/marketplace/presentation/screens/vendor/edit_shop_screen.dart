@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_theme.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/edit_shop_controller.dart';
@@ -147,7 +146,7 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(saved.error.toString()),
-          backgroundColor: AppColors.danger,
+          backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -190,7 +189,7 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen>
         _populate(shop);
 
         return Scaffold(
-          backgroundColor: pt.surface1,
+          backgroundColor: const Color(0xFFFFFFFF),
           appBar: AppBar(
             backgroundColor: cs.surface,
             surfaceTintColor: Colors.transparent,
@@ -200,9 +199,9 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen>
               controller: _tabController,
               labelStyle: tt.labelMedium!.copyWith(fontWeight: FontWeight.w600),
               unselectedLabelStyle: tt.labelMedium,
-              indicatorColor: AppColors.blue500,
-              labelColor: AppColors.blue500,
-              unselectedLabelColor: AppColors.ink500,
+              indicatorColor: pt.info,
+              labelColor: pt.info,
+              unselectedLabelColor: const Color(0xFF64748B),
               tabs: const [
                 Tab(text: 'Branding'),
                 Tab(text: 'Contact Info'),
@@ -356,7 +355,7 @@ class _BannerPicker extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-          color: AppColors.line,
+          color: const Color(0xFFE2E8F0),
           boxShadow: pt.shadowE1,
         ),
         child: Stack(
@@ -365,7 +364,7 @@ class _BannerPicker extends StatelessWidget {
             child,
             Container(
               decoration: BoxDecoration(
-                color: AppColors.ink950.withAlpha(60),
+                color: pt.ink950.withAlpha(60),
               ),
             ),
             Center(
@@ -378,12 +377,12 @@ class _BannerPicker extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.photo_camera_outlined, size: 16, color: AppColors.blue500),
+                    Icon(Icons.photo_camera_outlined, size: 16, color: pt.info),
                     const SizedBox(width: 6),
                     Text(
                       'Change Banner',
                       style: Theme.of(context).textTheme.labelMedium!
-                          .copyWith(color: AppColors.blue500, fontWeight: FontWeight.w600),
+                          .copyWith(color: pt.info, fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
@@ -396,8 +395,8 @@ class _BannerPicker extends StatelessWidget {
   }
 
   Widget _bannerPlaceholder(BuildContext context) => Container(
-    color: AppColors.blue500.withAlpha(15),
-    child: const Icon(Icons.storefront_outlined, size: 40, color: AppColors.blue500),
+    color: Theme.of(context).extension<PetfolioThemeExtension>()!.info.withAlpha(15),
+    child: Icon(Icons.storefront_outlined, size: 40, color: Theme.of(context).extension<PetfolioThemeExtension>()!.info),
   );
 }
 
@@ -421,10 +420,10 @@ class _LogoPicker extends StatelessWidget {
       image = Image.memory(bytes!, fit: BoxFit.cover);
     } else if (existingUrl != null) {
       image = Image.network(existingUrl!, fit: BoxFit.cover,
-        errorBuilder: (context2, error, stack) => const Icon(
-          Icons.storefront_outlined, size: 28, color: AppColors.blue500));
+        errorBuilder: (context2, error, stack) => Icon(
+          Icons.storefront_outlined, size: 28, color: pt.info));
     } else {
-      image = const Icon(Icons.storefront_outlined, size: 28, color: AppColors.blue500);
+      image = Icon(Icons.storefront_outlined, size: 28, color: pt.info);
     }
 
     return GestureDetector(
@@ -435,8 +434,8 @@ class _LogoPicker extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-          color: AppColors.blue500.withAlpha(15),
-          border: Border.all(color: AppColors.line),
+          color: pt.info.withAlpha(15),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
           boxShadow: pt.shadowE1,
         ),
         child: Stack(
@@ -449,8 +448,8 @@ class _LogoPicker extends StatelessWidget {
               child: Container(
                 width: 22,
                 height: 22,
-                decoration: const BoxDecoration(
-                  color: AppColors.blue500,
+                decoration: BoxDecoration(
+                  color: pt.info,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.edit, size: 12, color: Colors.white),
@@ -644,7 +643,7 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       text.toUpperCase(),
       style: Theme.of(context).textTheme.labelSmall!.copyWith(
-        color: AppColors.ink500,
+        color: const Color(0xFF64748B),
         letterSpacing: 0.8,
       ),
     );
@@ -683,7 +682,7 @@ class _FormField extends StatelessWidget {
           style:        tt.bodyMedium,
           decoration: InputDecoration(
             hintText:  hint,
-            hintStyle: tt.bodyMedium!.copyWith(color: AppColors.ink300),
+            hintStyle: tt.bodyMedium!.copyWith(color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink300),
             filled:     true,
             fillColor:  cs.surface,
             contentPadding: EdgeInsets.symmetric(
@@ -692,15 +691,15 @@ class _FormField extends StatelessWidget {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-              borderSide: const BorderSide(color: AppColors.line),
+              borderSide: BorderSide(color: const Color(0xFFE2E8F0)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-              borderSide: const BorderSide(color: AppColors.line),
+              borderSide: BorderSide(color: const Color(0xFFE2E8F0)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-              borderSide: BorderSide(color: AppColors.blue500, width: 1.5),
+              borderSide: BorderSide(color: Theme.of(context).extension<PetfolioThemeExtension>()!.info, width: 1.5),
             ),
           ),
         ),

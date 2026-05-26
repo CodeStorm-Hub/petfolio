@@ -8,6 +8,8 @@ import 'package:petfolio/core/widgets/widgets.dart';
 
 import '../controllers/auth_controller.dart';
 import '../widgets/auth_widgets.dart';
+import '../../../../core/theme/app_theme.dart';
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Forgot-password bottom sheet
@@ -41,6 +43,7 @@ class _ForgotPasswordSheetState extends ConsumerState<_ForgotPasswordSheet> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
@@ -67,7 +70,7 @@ class _ForgotPasswordSheetState extends ConsumerState<_ForgotPasswordSheet> {
                     const SizedBox(height: 4),
                     Text(
                       "We'll send a reset link to your email.",
-                      style: tt.bodyMedium?.copyWith(color: pt.ink500),
+                      style: tt.bodyMedium?.copyWith(color: const Color(0xFF64748B)),
                     ),
                   ],
                 ),
@@ -253,7 +256,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         child: FadeTransition(
           opacity: _fadeAnim,
@@ -279,7 +282,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         const SizedBox(height: 4),
                         Text(
                           'Sign in to continue.',
-                          style: tt.bodyMedium?.copyWith(color: pt.ink500),
+                          style: tt.bodyMedium?.copyWith(color: const Color(0xFF64748B)),
                         ),
                         const SizedBox(height: 28),
 
@@ -341,7 +344,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: pt.ink500,
+                                color: const Color(0xFF64748B),
                               ),
                             ),
                           ),

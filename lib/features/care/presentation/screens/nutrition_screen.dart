@@ -6,9 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
-import '../../../pet_profile/data/models/pet.dart';
-import 'package:petfolio/features/pet_profile/data/models/activity_level.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
+import 'package:petfolio/core/domain/models/activity_level.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
 import '../../data/models/health_log.dart';
 import '../controllers/nutrition_controller.dart';
 
@@ -172,7 +172,7 @@ class _WeightTrendCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-        border: Border.all(color: pt.line),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: pt.shadowE1,
       ),
       padding: const EdgeInsets.all(20),
@@ -338,7 +338,7 @@ class _WeightLineChart extends StatelessWidget {
               show: true,
               horizontalInterval: (maxY - minY) < 1 ? 0.5 : null,
               getDrawingHorizontalLine: (value) => FlLine(
-                color: pt.line2,
+                color: const Color(0xFFE2E8F0),
                 strokeWidth: 1,
               ),
               drawVerticalLine: false,
@@ -346,7 +346,7 @@ class _WeightLineChart extends StatelessWidget {
             borderData: FlBorderData(show: false),
             lineTouchData: LineTouchData(
               touchTooltipData: LineTouchTooltipData(
-                getTooltipColor: (_) => pt.ink500.withAlpha(220),
+                getTooltipColor: (_) => const Color(0xFF64748B).withAlpha(220),
                 getTooltipItems: (spots) => spots
                     .map(
                       (s) => LineTooltipItem(
@@ -599,7 +599,7 @@ class _HistoryList extends StatelessWidget {
             color: cs.surface,
             borderRadius:
                 BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-            border: Border.all(color: pt.line),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
             boxShadow: pt.shadowE1,
           ),
           child: Column(
@@ -707,7 +707,7 @@ class _HistoryTile extends StatelessWidget {
             ],
           ),
         ),
-        if (!isLast) Divider(height: 1, color: pt.line2),
+        if (!isLast) Divider(height: 1, color: const Color(0xFFE2E8F0)),
       ],
     );
   }
@@ -810,7 +810,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: pt.line,
+                color: const Color(0xFFE2E8F0),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -876,7 +876,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
                 color: Theme.of(context).inputDecorationTheme.fillColor,
                 borderRadius:
                     BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-                border: Border.all(color: pt.line),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               child: Row(
                 children: [
@@ -949,7 +949,7 @@ class _UnitToggle extends StatelessWidget {
           color: cs.surfaceContainerHigh,
           borderRadius:
               BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-          border: Border.all(color: pt.line),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(

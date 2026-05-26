@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../data/models/cart_item.dart';
 import '../controllers/cart_controller.dart';
 import 'product_glyph.dart';
+import '../../../../core/theme/app_theme.dart';
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CartLineItem — one row in the CartScreen list
@@ -25,9 +26,9 @@ class CartLineItem extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(10, 10, 14, 10),
         decoration: BoxDecoration(
-          color: AppColors.surface0,
+          color: Theme.of(context).colorScheme.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: AppColors.line),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -60,10 +61,10 @@ class CartLineItem extends ConsumerWidget {
                 children: [
                   Text(
                     p.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 14,
-                      color: AppColors.ink950,
+                      color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -72,17 +73,17 @@ class CartLineItem extends ConsumerWidget {
                     p.brand,
                     style: const TextStyle(
                       fontSize: 11,
-                      color: AppColors.ink500,
+                      color: Color(0xFF64748B),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     '\$${(item.lineTotalCents / 100).toStringAsFixed(2)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: 16,
-                      color: AppColors.ink950,
+                      color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
                     ),
                   ),
                   if (item.isSubscribed) ...[
@@ -91,14 +92,14 @@ class CartLineItem extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(4),
-                        color: AppColors.success.withAlpha(26),
+                        color: Theme.of(context).extension<PetfolioThemeExtension>()!.success.withAlpha(26),
                       ),
                       child: Text(
                         'Sub · every ${item.frequencyWeeks}wk · save 12%',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.success,
+                          color: Theme.of(context).extension<PetfolioThemeExtension>()!.success,
                         ),
                       ),
                     ),
@@ -143,11 +144,14 @@ class _Stepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
-        color: AppColors.surface2,
+        color: pt.surface2,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -158,10 +162,10 @@ class _Stepper extends StatelessWidget {
             child: Text(
               '$quantity',
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w900,
                 fontSize: 13,
-                color: AppColors.ink950,
+                color: pt.ink950,
               ),
             ),
           ),
@@ -180,23 +184,25 @@ class _StepBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
         width: 26,
         height: 26,
-        decoration: const BoxDecoration(
-          color: AppColors.surface0,
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerLowest,
           shape: BoxShape.circle,
         ),
         child: Center(
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w900,
-              color: AppColors.ink950,
+              color: pt.ink950,
               height: 1.1,
             ),
           ),

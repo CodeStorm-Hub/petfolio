@@ -1,3 +1,4 @@
+import '../../../../core/theme/app_colors.dart';
 
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -5,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/tail_wag_loader.dart';
 import '../../data/models/cart_item.dart';
@@ -79,10 +79,13 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: Stack(
         children: [
           SafeArea(
@@ -163,6 +166,8 @@ class _FlyToCartAnimState extends State<_FlyToCartAnim> with SingleTickerProvide
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     return AnimatedBuilder(
       animation: _ctrl,
       builder: (context, child) {
@@ -215,7 +220,7 @@ class _MarketHeader extends ConsumerWidget {
           end: Alignment.bottomCenter,
           colors: isDark
             ? [AppColors.sunnySoft.withAlpha(40), AppColors.surface1D]
-            : [AppColors.sunnySoft, AppColors.surface1],
+            : [AppColors.sunnySoft, const Color(0xFFFFFFFF)],
         ),
       ),
       padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
@@ -227,10 +232,10 @@ class _MarketHeader extends ConsumerWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('SHIP TO MOCHI\'S HOUSE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: pt.ink500, letterSpacing: 0.6)),
+                  Text('SHIP TO MOCHI\'S HOUSE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: const Color(0xFF64748B), letterSpacing: 0.6)),
                   Row(
                     children: [
-                      const Icon(Icons.location_on, size: 16, color: AppColors.tangerine),
+                      Icon(Icons.location_on, size: 16, color: AppColors.tangerine),
                       const SizedBox(width: 4),
                       Text('Brooklyn, NY', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: pt.ink950)),
                       const SizedBox(width: 4),
@@ -244,7 +249,7 @@ class _MarketHeader extends ConsumerWidget {
                 child: Container(
                   width: 44,
                   height: 44,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppColors.tangerine,
                     shape: BoxShape.circle,
                     boxShadow: [BoxShadow(color: AppColors.tangerine700, offset: Offset(0, 6))],
@@ -264,7 +269,7 @@ class _MarketHeader extends ConsumerWidget {
                             decoration: BoxDecoration(
                               color: AppColors.poppy,
                               shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.cream, width: 2),
+                              border: Border.all(color: pt.cream, width: 2),
                             ),
                             alignment: Alignment.center,
                             child: Text(cart.itemCount.toString(), style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900)),
@@ -294,21 +299,23 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final hasText = ref.watch(marketplaceSearchQueryProvider.select((q) => q.isNotEmpty));
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        color: pt.surface1,
+        color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: pt.line, width: 1.5),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
         boxShadow: const [BoxShadow(color: Color(0x0C000000), blurRadius: 8, offset: Offset(0, 2))],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          Icon(Icons.search_rounded, size: 20, color: pt.ink500),
+          Icon(Icons.search_rounded, size: 20, color: const Color(0xFF64748B)),
           const SizedBox(width: 10),
           Expanded(
             child: TextField(
@@ -317,7 +324,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: pt.ink950),
               decoration: InputDecoration(
                 hintText: 'Search treats, beds, toys…',
-                hintStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: pt.ink500),
+                hintStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF64748B)),
                 isDense: true,
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
@@ -330,7 +337,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
                 _controller.clear();
                 ref.read(marketplaceSearchQueryProvider.notifier).clear();
               },
-              child: Icon(Icons.close_rounded, size: 18, color: pt.ink500),
+              child: Icon(Icons.close_rounded, size: 18, color: const Color(0xFF64748B)),
             ),
         ],
       ),
@@ -350,7 +357,7 @@ class _CategoryModel {
   final Color color;
 }
 
-const _cats = [
+final _cats = [
   _CategoryModel(ProductCategory.food, 'Food', '🍖', AppColors.tangerine),
   _CategoryModel(ProductCategory.treats, 'Treats', '🦴', AppColors.sunny),
   _CategoryModel(ProductCategory.toys, 'Toys', '🎾', AppColors.mint),
@@ -366,6 +373,8 @@ class _CategoryChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Container(
@@ -390,7 +399,7 @@ class _CategoryChips extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(22),
                     color: Color.lerp(cat.color, Theme.of(context).colorScheme.surface, 0.82),
-                    border: Border.all(color: isActive ? cat.color : pt.line, width: 1.5),
+                    border: Border.all(color: isActive ? cat.color : const Color(0xFFE2E8F0), width: 1.5),
                     boxShadow: const [BoxShadow(color: Color(0x0C000000), blurRadius: 8, offset: Offset(0, 2))],
                   ),
                   alignment: Alignment.center,
@@ -432,7 +441,7 @@ class _ShopBody extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Could not load products', style: TextStyle(color: AppColors.ink500)),
+            Text('Could not load products', style: TextStyle(color: const Color(0xFF64748B))),
             TextButton(onPressed: () => ref.invalidate(productListProvider), child: const Text('Retry')),
           ],
         ),
@@ -487,17 +496,18 @@ class _HeroBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28),
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [AppColors.poppy, AppColors.tangerine],
+            colors: [pc.poppy, pc.tangerine],
           ),
-          boxShadow: [BoxShadow(color: AppColors.poppy.withAlpha(128), blurRadius: 30, spreadRadius: -12, offset: const Offset(0, 14))],
+          boxShadow: [BoxShadow(color: pc.poppy.withAlpha(128), blurRadius: 30, spreadRadius: -12, offset: const Offset(0, 14))],
         ),
         padding: const EdgeInsets.all(18),
         clipBehavior: Clip.hardEdge,
@@ -520,11 +530,11 @@ class _HeroBanner extends StatelessWidget {
                       const Text('FOR MEMBERS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white70, letterSpacing: 0.5)),
                       const SizedBox(height: 4),
                       const Text('20% off treats\nthis week 🦴', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Colors.white, height: 1.1)),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                         decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface, borderRadius: BorderRadius.circular(999)),
-                        child: const Text('Claim', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.poppy700)),
+                        child: Text('Claim', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: pc.poppy700)),
                       ),
                     ],
                   ),
@@ -577,15 +587,16 @@ class _NewProductTileState extends State<_NewProductTile> {
 
   @override
   Widget build(BuildContext context) {
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: pt.surface1,
+          color: const Color(0xFFFFFFFF),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: pt.line),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
           boxShadow: const [BoxShadow(color: Color(0x0C000000), blurRadius: 8, offset: Offset(0, 2))],
         ),
         clipBehavior: Clip.hardEdge,
@@ -622,12 +633,12 @@ class _NewProductTileState extends State<_NewProductTile> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: pt.surface1,
+                        color: const Color(0xFFFFFFFF),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.star_rounded, size: 12, color: AppColors.sunny),
+                          Icon(Icons.star_rounded, size: 12, color: pc.sunny),
                           const SizedBox(width: 3),
                           Text('4.9', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: pt.ink950)),
                         ],
@@ -645,7 +656,7 @@ class _NewProductTileState extends State<_NewProductTile> {
                   children: [
                     Text(widget.product.name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: pt.ink950, height: 1.2), maxLines: 2, overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 4),
-                    Text(widget.product.brand, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: pt.ink500)),
+                    Text(widget.product.brand, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFF64748B))),
                     const Spacer(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -694,9 +705,9 @@ class _CartDrawer extends ConsumerWidget {
     final cart = ref.watch(cartProvider);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final ink950 = pt.ink950;
-    final ink500 = pt.ink500;
-    final surface = pt.surface1;
-    final bg = pt.surface1;
+    final ink500 = const Color(0xFF64748B);
+    final surface = const Color(0xFFFFFFFF);
+    final bg = const Color(0xFFFFFFFF);
     
     final items = cart.items.toList();
     final subtotal = cart.totalCents / 100;
@@ -712,7 +723,7 @@ class _CartDrawer extends ConsumerWidget {
       constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.88),
       child: Column(
         children: [
-          Container(width: 48, height: 5, margin: const EdgeInsets.only(top: 12), decoration: BoxDecoration(color: pt.line, borderRadius: BorderRadius.circular(3))),
+          Container(width: 48, height: 5, margin: const EdgeInsets.only(top: 12), decoration: BoxDecoration(color: const Color(0xFFE2E8F0), borderRadius: BorderRadius.circular(3))),
           Padding(
             padding: const EdgeInsets.fromLTRB(22, 12, 22, 14),
             child: Row(
@@ -789,7 +800,7 @@ class _CartDrawer extends ConsumerWidget {
           if (items.isNotEmpty)
             Container(
               padding: const EdgeInsets.fromLTRB(22, 14, 22, 22),
-              decoration: BoxDecoration(border: Border(top: BorderSide(color: pt.line))),
+              decoration: BoxDecoration(border: Border(top: BorderSide(color: const Color(0xFFE2E8F0)))),
               child: Column(
                 children: [
                   _SummaryRow(label: 'Subtotal', value: '\$${subtotal.toStringAsFixed(2)}'),
@@ -815,12 +826,12 @@ class _CartDrawer extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
                   Text.rich(
                     TextSpan(
                       children: [
-                        const TextSpan(text: '🐾 Earn '),
-                        TextSpan(text: '+${(total * 4).floor()} XP', style: const TextStyle(color: AppColors.tangerine700)),
+                        TextSpan(text: '🐾 Earn '),
+                        TextSpan(text: '+${(total * 4).floor()} XP', style: TextStyle(color: AppColors.tangerine700)),
                         const TextSpan(text: ' when you check out'),
                       ],
                     ),
@@ -843,12 +854,14 @@ class _SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = Theme.of(context).extension<PetFolioColors>()!;
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: TextStyle(fontSize: big ? 16 : 13, fontWeight: big ? FontWeight.w800 : FontWeight.w700, color: big ? pt.ink950 : pt.ink700)),
-        Text(value, style: TextStyle(fontSize: big ? 18 : 13, fontWeight: big ? FontWeight.w900 : FontWeight.w700, color: big ? pt.ink950 : pt.ink700)),
+        Text(label, style: TextStyle(fontSize: big ? 16 : 13, fontWeight: big ? FontWeight.w800 : FontWeight.w700, color: big ? pt.ink950 : const Color(0xFF334155))),
+        Text(value, style: TextStyle(fontSize: big ? 18 : 13, fontWeight: big ? FontWeight.w900 : FontWeight.w700, color: big ? pt.ink950 : const Color(0xFF334155))),
       ],
     );
   }
@@ -866,9 +879,9 @@ class _CartItemRow extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.fromLTRB(10, 10, 14, 10),
       decoration: BoxDecoration(
-        color: pt.surface1,
+        color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: pt.line),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Row(
         children: [
@@ -894,7 +907,7 @@ class _CartItemRow extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(item.product.name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: pt.ink950)),
-                Text(item.product.brand, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: pt.ink500)),
+                Text(item.product.brand, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFF64748B))),
                 const SizedBox(height: 2),
                 Text('\$${((item.product.priceCents * item.quantity) / 100).toStringAsFixed(2)}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: pt.ink950)),
               ],
@@ -907,7 +920,7 @@ class _CartItemRow extends ConsumerWidget {
               children: [
                 GestureDetector(
                   onTap: () => ref.read(cartProvider.notifier).decrement(item.product.id),
-                  child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: const Text('−', style: TextStyle(fontWeight: FontWeight.w900))),
+                  child: Container(width: 26, height: 26, decoration: BoxDecoration(color: const Color(0xFFFFFFFF), shape: BoxShape.circle), alignment: Alignment.center, child: const Text('−', style: TextStyle(fontWeight: FontWeight.w900))),
                 ),
                 Container(
                   constraints: const BoxConstraints(minWidth: 18),
@@ -916,7 +929,7 @@ class _CartItemRow extends ConsumerWidget {
                 ),
                 GestureDetector(
                   onTap: () => ref.read(cartProvider.notifier).add(item.product),
-                  child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: const Text('+', style: TextStyle(fontWeight: FontWeight.w900))),
+                  child: Container(width: 26, height: 26, decoration: BoxDecoration(color: const Color(0xFFFFFFFF), shape: BoxShape.circle), alignment: Alignment.center, child: const Text('+', style: TextStyle(fontWeight: FontWeight.w900))),
                 ),
               ],
             ),

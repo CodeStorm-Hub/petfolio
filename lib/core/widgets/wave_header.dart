@@ -4,28 +4,21 @@ import '../theme/app_colors.dart';
 
 // ─── Wave clipper ─────────────────────────────────────────────────────────────
 
-// Exact SVG path from home.jsx:
-// M0,40 C90,10 160,70 220,40 C280,15 340,60 412,30 L412,60 L0,60 Z
-// viewBox 412×60, rendered at height 56px.
-// _WaveClipper mirrors this path in full-height coords so the clipped
-// background matches exactly what WavePainter overlays.
 class _WaveClipper extends CustomClipper<Path> {
-  static const _svgW = 412.0;
-  static const _svgH = 60.0; // painter height
+  const _WaveClipper();
 
   @override
   Path getClip(Size size) {
-    final W = size.width;
-    final H = size.height;
-    // Convert SVG y → stack y: stackY = H - _svgH + svgY
-    double sy(double svgY) => H - _svgH + svgY;
-    double sx(double svgX) => W * (svgX / _svgW);
-
     final path = Path();
-    path.lineTo(0, sy(40));
-    path.cubicTo(sx(90), sy(10), sx(160), sy(70), sx(220), sy(40));
-    path.cubicTo(sx(280), sy(15), sx(340), sy(60), W, sy(30));
+    final W = size.width;
+    double sx(double svgX) => W * (svgX / 412.0);
+
+    path.lineTo(0, size.height - 60);
+    path.moveTo(0, size.height - 20);
+    path.cubicTo(sx(90), size.height - 50, sx(160), size.height + 10, sx(220), size.height - 20);
+    path.cubicTo(sx(280), size.height - 45, sx(340), size.height, W, size.height - 30);
     path.lineTo(W, 0);
+    path.lineTo(0, 0);
     path.close();
     return path;
   }
@@ -89,38 +82,40 @@ class WaveHeader extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final pageColor = waveColor ?? (isDark ? AppColors.creamD : AppColors.cream);
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        // Colored header background clipped to wave shape (optional)
-        if (clipWave)
-          ClipPath(
-            clipper: _WaveClipper(),
-            child: Container(
+    return RepaintBoundary(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Colored header background clipped to wave shape (optional)
+          if (clipWave)
+            ClipPath(
+              clipper: const _WaveClipper(),
+              child: Container(
+                color: color,
+                height: height,
+                child: child,
+              ),
+            )
+          else
+            Container(
               color: color,
               height: height,
               child: child,
             ),
-          )
-        else
-          Container(
-            color: color,
-            height: height,
-            child: child,
-          ),
-        // Wave transition at the bottom
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: SizedBox(
-            height: 60,
-            child: CustomPaint(
-              painter: WavePainter(color: pageColor),
+          // Wave transition at the bottom
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SizedBox(
+              height: 60,
+              child: CustomPaint(
+                painter: WavePainter(color: pageColor),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -177,7 +172,6 @@ class PfSectionTitle extends StatelessWidget {
     );
   }
 }
-
 
 // ─── PfGreetingWaveHeader ─────────────────────────────────────────────────────
 

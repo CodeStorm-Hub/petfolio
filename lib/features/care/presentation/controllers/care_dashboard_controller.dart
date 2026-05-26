@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/widgets/app_snack_bar.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
 import '../../data/models/care_streak.dart';
-import '../../data/models/care_task.dart';
+import 'package:petfolio/core/domain/models/care_task.dart';
 import '../../data/repositories/care_repository.dart';
 import 'care_streak_stream_provider.dart';
 

@@ -1,6 +1,7 @@
+
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:petfolio/features/care/data/models/care_task.dart';
+import 'package:petfolio/core/domain/models/care_task.dart';
 
 void main() {
   test('CareTask copyWith used for edit keeps stable keys', () {

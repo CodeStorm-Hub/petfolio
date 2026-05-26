@@ -4,10 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
-import '../../../pet_profile/data/models/pet.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
-import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
-import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/controllers/pet_list_controller.dart';
+import 'package:petfolio/core/widgets/pet_switcher_sheet.dart';
 import '../../data/models/match_inbox_item.dart';
 import '../controllers/matches_inbox_controller.dart';
 import '../matching_navigation.dart';
@@ -23,7 +23,7 @@ class MatchesInboxScreen extends ConsumerWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final petsAsync = ref.watch(petListProvider);
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: Center(
         child: petsAsync.when(
           skipLoadingOnReload: true,
@@ -34,7 +34,7 @@ class MatchesInboxScreen extends ConsumerWidget {
               Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
               const SizedBox(height: 12),
               Text('Connection error',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: pt.ink500)),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: const Color(0xFF64748B))),
               const SizedBox(height: 16),
               FilledButton.icon(
                 onPressed: () => ref.invalidate(petListProvider),
@@ -60,7 +60,7 @@ class _MatchesInboxView extends ConsumerWidget {
     final inboxAsync = ref.watch(matchesInboxControllerProvider(pet.id));
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -94,7 +94,7 @@ class _MatchesInboxView extends ConsumerWidget {
                       const SizedBox(height: 12),
                       Text(
                         'Could not load matches',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: pt.ink500),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: const Color(0xFF64748B)),
                       ),
                       const SizedBox(height: 16),
                       FilledButton.icon(
@@ -191,13 +191,14 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Text(
       label,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
         fontWeight: FontWeight.w700,
         letterSpacing: -0.2,
-        color: pt.ink500,
+        color: const Color(0xFF64748B),
       ),
     );
   }
@@ -312,7 +313,7 @@ class _ConversationTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: pt.ink500,
+                        color: const Color(0xFF64748B),
                       ),
                     ),
                   ],

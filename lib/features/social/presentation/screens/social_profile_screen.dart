@@ -7,10 +7,12 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../care/data/models/pet_awards_summary.dart';
 import '../../../care/presentation/controllers/pet_awards_provider.dart';
-import '../../../pet_profile/data/models/pet.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
 import '../controllers/follow_controller.dart';
 import '../controllers/social_profile_controller.dart';
+import '../../../../core/theme/app_theme.dart';
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Screen
@@ -35,14 +37,14 @@ class SocialProfileScreen extends ConsumerWidget {
 
     return petAsync.when(
       loading: () => Scaffold(
-        backgroundColor: pt.surface1,
+        backgroundColor: const Color(0xFFFFFFFF),
         appBar: AppBar(backgroundColor: cs.surface, leading: BackButton(color: cs.onSurface)),
         body: const Center(child: CircularProgressIndicator.adaptive()),
       ),
       error: (e, st) => Scaffold(
-        backgroundColor: pt.surface1,
+        backgroundColor: const Color(0xFFFFFFFF),
         appBar: AppBar(backgroundColor: cs.surface, leading: BackButton(color: cs.onSurface)),
-        body: Center(child: Text('Could not load profile', style: TextStyle(color: pt.ink500))),
+        body: Center(child: Text('Could not load profile', style: TextStyle(color: const Color(0xFF64748B)))),
       ),
       data: (pet) {
         final resolvedPet = pet ?? (isOwnProfile ? activePet : null);
@@ -56,7 +58,7 @@ class SocialProfileScreen extends ConsumerWidget {
         final avatarUrl = resolvedPet?.avatarUrl;
 
         return Scaffold(
-          backgroundColor: pt.surface1,
+          backgroundColor: const Color(0xFFFFFFFF),
           appBar: AppBar(
             backgroundColor: cs.surface,
             elevation: 0,
@@ -111,7 +113,7 @@ class SocialProfileScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: Container(
                   color: cs.surface,
-                  child: Divider(height: 1, thickness: 0.5, color: pt.line),
+                  child: Divider(height: 1, thickness: 0.5, color: const Color(0xFFE2E8F0)),
                 ),
               ),
 
@@ -121,7 +123,7 @@ class SocialProfileScreen extends ConsumerWidget {
                   child: Center(child: CircularProgressIndicator.adaptive()),
                 ),
                 error: (e, st) => SliverFillRemaining(
-                  child: Center(child: Text('Failed to load posts', style: TextStyle(color: pt.ink500))),
+                  child: Center(child: Text('Failed to load posts', style: TextStyle(color: const Color(0xFF64748B)))),
                 ),
                 data: (posts) {
                   if (posts.isEmpty) {
@@ -132,7 +134,7 @@ class SocialProfileScreen extends ConsumerWidget {
                           children: [
                             Icon(Icons.photo_camera_outlined, size: 52, color: pt.ink300),
                             const SizedBox(height: 12),
-                            Text('No Posts Yet', style: tt.titleSmall?.copyWith(color: pt.ink500)),
+                            Text('No Posts Yet', style: tt.titleSmall?.copyWith(color: const Color(0xFF64748B))),
                             const SizedBox(height: 4),
                             Text('Photos will appear here', style: tt.bodySmall?.copyWith(color: pt.ink300)),
                           ],
@@ -279,7 +281,7 @@ class _ProfileHeader extends StatelessWidget {
           Text(petName, style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w700, fontSize: 15)),
           if (petBreed != null) ...[
             const SizedBox(height: 2),
-            Text(petBreed!, style: TextStyle(color: pt.ink500, fontSize: 13, fontWeight: FontWeight.w500)),
+            Text(petBreed!, style: TextStyle(color: const Color(0xFF64748B), fontSize: 13, fontWeight: FontWeight.w500)),
           ],
           if (petBio.isNotEmpty) ...[
             const SizedBox(height: 6),
@@ -340,7 +342,7 @@ class _ProfileAvatar extends StatelessWidget {
             ? Center(
                 child: Text(
                   name.isNotEmpty ? name[0].toUpperCase() : '?',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: pt.ink500),
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: const Color(0xFF64748B)),
                 ),
               )
             : null,
@@ -405,12 +407,12 @@ class _AwardsSection extends StatelessWidget {
                   style: tt.labelSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.6,
-                    color: pt.ink500,
+                    color: const Color(0xFF64748B),
                     fontSize: 11,
                   ),
                 ),
                 const SizedBox(width: 8),
-                Expanded(child: Divider(height: 1, color: pt.line2)),
+                Expanded(child: Divider(height: 1, color: const Color(0xFFE2E8F0))),
               ],
             ),
           ),
@@ -722,7 +724,7 @@ class _OtherProfileButtons extends ConsumerWidget {
           child: OutlinedButton(
             style: OutlinedButton.styleFrom(
               foregroundColor: cs.onSurface,
-              side: BorderSide(color: pt.line),
+              side: BorderSide(color: const Color(0xFFE2E8F0)),
               padding: EdgeInsets.zero,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -768,7 +770,7 @@ class _ActionButton extends StatelessWidget {
           )
         : OutlinedButton.styleFrom(
             foregroundColor: cs.onSurface,
-            side: BorderSide(color: pt.line),
+            side: BorderSide(color: const Color(0xFFE2E8F0)),
             padding: EdgeInsets.zero,
             minimumSize: const Size.fromHeight(36),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

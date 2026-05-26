@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+// import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../controllers/cod_orders_controller.dart';
 import 'admin_shared_widgets.dart';
@@ -92,10 +92,10 @@ class _CodOrderCardState extends State<_CodOrderCard> {
             decoration: BoxDecoration(
               borderRadius:
                   BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-              color: AppColors.blue500.withAlpha(15),
+              color: pt.info.withAlpha(15),
             ),
-            child: const Icon(Icons.payments_outlined,
-                size: 22, color: AppColors.blue500),
+            child: Icon(Icons.payments_outlined,
+                size: 22, color: pt.info),
           ),
           const SizedBox(width: 14),
           Expanded(

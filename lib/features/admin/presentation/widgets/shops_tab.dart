@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../data/models/shop_deletion_request.dart';
@@ -82,7 +81,7 @@ class _DeletionRequestCardState extends ConsumerState<_DeletionRequestCard> {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.danger),
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Approve deletion'),
           ),
@@ -122,7 +121,7 @@ class _DeletionRequestCardState extends ConsumerState<_DeletionRequestCard> {
               child: const Text('Cancel'),
             ),
             FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: AppColors.danger),
+              style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
               onPressed: () {
                 if (formKey.currentState!.validate()) {
                   Navigator.pop(ctx, controller.text.trim());
@@ -141,8 +140,10 @@ class _DeletionRequestCardState extends ConsumerState<_DeletionRequestCard> {
 
   @override
   Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+//     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final r = widget.request;
 
@@ -152,7 +153,7 @@ class _DeletionRequestCardState extends ConsumerState<_DeletionRequestCard> {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-        border: Border.all(color: pt.line, width: 0.5),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 0.5),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -160,8 +161,8 @@ class _DeletionRequestCardState extends ConsumerState<_DeletionRequestCard> {
         children: [
           Row(
             children: [
-              const Icon(Icons.delete_forever_rounded,
-                  size: 16, color: AppColors.danger),
+              Icon(Icons.delete_forever_rounded,
+                  size: 16, color: cs.error),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -172,13 +173,13 @@ class _DeletionRequestCardState extends ConsumerState<_DeletionRequestCard> {
                   ),
                 ),
               ),
-              AdminStatusChip(label: 'Pending', color: AppColors.warning),
+              AdminStatusChip(label: 'Pending', color: pt.warning),
             ],
           ),
           const SizedBox(height: 4),
           Text(
             'Requested $requestedDate',
-            style: tt.labelSmall!.copyWith(color: pt.ink500),
+            style: tt.labelSmall!.copyWith(color: const Color(0xFF64748B)),
           ),
           if (r.reason != null && r.reason!.isNotEmpty) ...[
             const SizedBox(height: 10),
@@ -205,7 +206,7 @@ class _DeletionRequestCardState extends ConsumerState<_DeletionRequestCard> {
           const SizedBox(height: 10),
           Text(
             'Approving deactivates this shop and unlists all its products.',
-            style: TextStyle(fontSize: 12, color: pt.ink500),
+            style: TextStyle(fontSize: 12, color: const Color(0xFF64748B)),
           ),
           const SizedBox(height: 14),
           if (_loading)
@@ -223,7 +224,7 @@ class _DeletionRequestCardState extends ConsumerState<_DeletionRequestCard> {
                   child: OutlinedButton(
                     onPressed: _showRejectDialog,
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: pt.line),
+                      side: BorderSide(color: const Color(0xFFE2E8F0)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                             PetfolioThemeExtension.radiusSm),
@@ -237,7 +238,7 @@ class _DeletionRequestCardState extends ConsumerState<_DeletionRequestCard> {
                   child: FilledButton(
                     onPressed: _showApproveDialog,
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.danger,
+                      backgroundColor: cs.error,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                             PetfolioThemeExtension.radiusSm),

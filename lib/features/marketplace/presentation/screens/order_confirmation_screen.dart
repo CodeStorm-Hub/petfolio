@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_colors.dart';
+// import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/primary_pill_button.dart';
+import '../../../../core/theme/app_theme.dart';
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // OrderConfirmationScreen — shown after successful payment
@@ -29,15 +31,15 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: Duration(milliseconds: 600),
     );
     _scaleAnim = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0.0, 0.7, curve: Curves.elasticOut),
+      curve: Interval(0.0, 0.7, curve: Curves.elasticOut),
     );
     _fadeAnim = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
+      curve: Interval(0.4, 1.0, curve: Curves.easeOut),
     );
     _controller.forward();
   }
@@ -50,16 +52,18 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     // bottom: false — we add bottomPad manually so SafeArea doesn't
     // double-count the home-indicator inset.
     final bottomPad = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: AppColors.surface0,
+      backgroundColor: cs.surfaceContainerLowest,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
+          physics: ClampingScrollPhysics(),
           child: ConstrainedBox(
             // On tall devices the Column fills the screen (Spacers absorb space).
             // On very short devices (≤ 568 dp) the content scrolls instead of
@@ -73,7 +77,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
                 padding: EdgeInsets.fromLTRB(32, 0, 32, bottomPad + 24),
                 child: Column(
                   children: [
-                    const Spacer(),
+                    Spacer(),
 
                     // Success badge
                     ScaleTransition(
@@ -83,74 +87,74 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
                         height: 96,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppColors.success.withAlpha(26),
+                          color: pt.success.withAlpha(26),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.check_circle_rounded,
                           size: 56,
-                          color: AppColors.success,
+                          color: pt.success,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32),
 
                     FadeTransition(
                       opacity: _fadeAnim,
                       child: Column(
                         children: [
-                          const Text(
+                          Text(
                             'Order placed!',
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 28,
                               letterSpacing: -0.28,
-                              color: AppColors.ink950,
+                              color: pt.ink950,
                             ),
                           ),
-                          const SizedBox(height: 12),
-                          const Text(
+                          SizedBox(height: 12),
+                          Text(
                             'Your order is confirmed and will\narrive within 3–5 business days.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 15,
                               height: 1.5,
-                              color: AppColors.ink500,
+                              color: Color(0xFF64748B),
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24),
 
                           // Order reference chip
                           Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding: EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 10),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
-                              color: AppColors.surface2,
+                              color: pt.surface2,
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.receipt_long_outlined,
-                                    size: 16, color: AppColors.ink500),
-                                const SizedBox(width: 8),
+                                Icon(Icons.receipt_long_outlined,
+                                    size: 16, color: Color(0xFF64748B)),
+                                SizedBox(width: 8),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'ORDER REFERENCE',
                                       style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: 0.8,
-                                        color: AppColors.ink500,
+                                        color: Color(0xFF64748B),
                                       ),
                                     ),
                                     Text(
                                       widget.orderId.substring(0, 8).toUpperCase(),
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.w700,
                                         fontSize: 15,
-                                        color: AppColors.ink950,
+                                        color: pt.ink950,
                                       ),
                                     ),
                                   ],
@@ -162,7 +166,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
                       ),
                     ),
 
-                    const Spacer(),
+                    Spacer(),
 
                     FadeTransition(
                       opacity: _fadeAnim,
@@ -174,21 +178,21 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
                             isFullWidth: true,
                             onPressed: () => context.go('/marketplace'),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           PrimaryPillButton(
                             label: 'View Order',
                             size: PillButtonSize.lg,
                             isFullWidth: true,
                             onPressed: () => context.go('/marketplace/orders/${widget.orderId}'),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           TextButton(
                             onPressed: () => context.go('/home'),
-                            child: const Text(
+                            child: Text(
                               'Back to home',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: AppColors.ink500,
+                                color: Color(0xFF64748B),
                               ),
                             ),
                           ),

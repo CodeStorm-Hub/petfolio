@@ -2,8 +2,8 @@ import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../models/pet.dart';
-import '../models/pet_gender.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
+import 'package:petfolio/core/domain/models/pet_gender.dart';
 
 class PetRepository {
   const PetRepository(this._client);

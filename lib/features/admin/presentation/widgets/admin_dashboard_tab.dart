@@ -69,7 +69,7 @@ class _MetricsBanner extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           // ink950 → blue600 — both from AppColors
-          colors: [AppColors.ink950, AppColors.blue600],
+          colors: [pt.ink950, pt.info],
         ),
         boxShadow: pt.shadowE2,
       ),
@@ -100,7 +100,7 @@ class _MetricsBanner extends StatelessWidget {
                   icon: Icons.storefront_rounded,
                   label: 'Active Shops',
                   value: data.activeShopCount.toString(),
-                  iconColor: AppColors.blue300,
+                  iconColor: pt.info,
                 ),
                 _MetricGlassCard(
                   icon: Icons.assignment_outlined,
@@ -231,16 +231,16 @@ class _RecentActivitySection extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius:
                       BorderRadius.circular(PetfolioThemeExtension.radiusPill),
-                  color: AppColors.blue500.withAlpha(15),
+                  color: pt.info.withAlpha(15),
                 ),
                 child: Text(
                   '${items.length}',
-                  style: tt.labelSmall!.copyWith(color: AppColors.blue500),
+                  style: tt.labelSmall!.copyWith(color: pt.info),
                 ),
               ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         if (items.isEmpty)
           const AdminEmptyState(
             icon: Icons.history_rounded,
@@ -258,10 +258,10 @@ class _RecentActivitySection extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: items.length,
-              separatorBuilder: (context, index) => const Divider(
+              separatorBuilder: (context, index) => Divider(
                 height: 1,
                 indent: 64,
-                color: AppColors.line,
+                color: const Color(0xFFE2E8F0),
               ),
               itemBuilder: (context, i) => _ActivityTile(item: items[i]),
             ),
@@ -285,7 +285,7 @@ class _ActivityTile extends StatelessWidget {
     final (icon, color) = switch (item.type) {
       ActivityType.shopJoined => (
           Icons.storefront_outlined,
-          AppColors.blue500,
+          pt.info,
         ),
       ActivityType.orderDelivered => (
           Icons.check_circle_outline_rounded,

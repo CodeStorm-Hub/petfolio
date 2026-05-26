@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+// import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../data/models/post_report.dart';
@@ -80,7 +80,7 @@ class _ReportCardState extends ConsumerState<_ReportCard> {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-        border: Border.all(color: pt.line, width: 0.5),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 0.5),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -88,18 +88,18 @@ class _ReportCardState extends ConsumerState<_ReportCard> {
         children: [
           Row(
             children: [
-              const Icon(Icons.flag_rounded, size: 16, color: AppColors.danger),
+              Icon(Icons.flag_rounded, size: 16, color: cs.error),
               const SizedBox(width: 6),
               Text(
                 'Reporter #$reporterShort',
                 style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                      color: pt.ink500,
+                      color: const Color(0xFF64748B),
                     ),
               ),
               const Spacer(),
               AdminStatusChip(
                 label: 'Pending',
-                color: AppColors.warning,
+                color: pt.warning,
               ),
             ],
           ),
@@ -125,7 +125,7 @@ class _ReportCardState extends ConsumerState<_ReportCard> {
           Text(
             'Reason',
             style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                  color: pt.ink500,
+                  color: const Color(0xFF64748B),
                   letterSpacing: 0.08 * 11,
                 ),
           ),
@@ -150,7 +150,7 @@ class _ReportCardState extends ConsumerState<_ReportCard> {
                   child: OutlinedButton(
                     onPressed: () => _resolve(dismiss: true, hidePost: false),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: pt.line),
+                      side: BorderSide(color: const Color(0xFFE2E8F0)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                           PetfolioThemeExtension.radiusSm,
@@ -165,7 +165,7 @@ class _ReportCardState extends ConsumerState<_ReportCard> {
                   child: FilledButton(
                     onPressed: () => _resolve(dismiss: false, hidePost: true),
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.danger,
+                      backgroundColor: cs.error,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                           PetfolioThemeExtension.radiusSm,

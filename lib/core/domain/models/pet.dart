@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:petfolio/features/pet_profile/data/models/pet_gender.dart';
-import 'package:petfolio/features/pet_profile/data/models/pet_species.dart';
+import 'package:petfolio/core/domain/models/pet_gender.dart';
+import 'package:petfolio/core/domain/models/pet_species.dart';
 
 part 'pet.freezed.dart';
 part 'pet.g.dart';

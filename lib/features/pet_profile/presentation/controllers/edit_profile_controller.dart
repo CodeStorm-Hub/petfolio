@@ -3,9 +3,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:petfolio/core/errors/app_exception.dart';
 import 'package:petfolio/features/matching/data/repositories/matching_repository.dart';
 
-import '../../data/models/pet.dart';
-import '../../data/models/pet_gender.dart';
-import 'pet_list_controller.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
+import 'package:petfolio/core/domain/models/pet_gender.dart';
+import 'package:petfolio/core/domain/controllers/pet_list_controller.dart';
 
 class EditProfileState {
   const EditProfileState({

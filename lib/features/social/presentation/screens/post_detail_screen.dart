@@ -7,7 +7,7 @@ import '../../../../core/errors/app_exception.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
 import '../../data/models/comment.dart';
 import '../../data/models/feed_post.dart';
 import '../../data/repositories/social_repository.dart';
@@ -125,7 +125,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
     // Show a full-screen spinner while the post is loading from the network.
     if (postAsync.isLoading) {
       return Scaffold(
-        backgroundColor: pt.surface1,
+        backgroundColor: const Color(0xFFFFFFFF),
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
@@ -145,7 +145,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
 
     if (postAsync.hasError) {
       return Scaffold(
-        backgroundColor: pt.surface1,
+        backgroundColor: const Color(0xFFFFFFFF),
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           leading: IconButton(
@@ -161,7 +161,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
     final post = postAsync.value!;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
@@ -204,7 +204,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.more_horiz_rounded, color: pt.ink500),
+            icon: Icon(Icons.more_horiz_rounded, color: const Color(0xFF64748B)),
             onPressed: () => _showPostOptions(context, post),
           ),
         ],
@@ -257,7 +257,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                         padding: const EdgeInsets.all(32),
                         child: Text(
                           'Failed to load comments',
-                          style: TextStyle(color: pt.ink500),
+                          style: TextStyle(color: const Color(0xFF64748B)),
                         ),
                       ),
                     ),
@@ -271,7 +271,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                           child: Text(
                             'No comments yet. Be the first!',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: pt.ink500, fontSize: 14),
+                            style: TextStyle(color: const Color(0xFF64748B), fontSize: 14),
                           ),
                         ),
                       );
@@ -327,7 +327,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                 Container(
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
-                    border: Border(top: BorderSide(color: pt.line)),
+                    border: Border(top: BorderSide(color: const Color(0xFFE2E8F0))),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
@@ -336,7 +336,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                         child: Text(
                           'Replying to ${_replyingToComment!.handle}',
                           style: tt.bodySmall?.copyWith(
-                            color: pt.ink500,
+                            color: const Color(0xFF64748B),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -506,7 +506,7 @@ class _StatsBar extends ConsumerWidget {
           IconButton(
             icon: Icon(
               post.isLiked ? Icons.pets_rounded : Icons.pets_outlined,
-              color: post.isLiked ? AppColors.coral500 : pt.ink500,
+              color: post.isLiked ? AppColors.coral500 : const Color(0xFF64748B),
             ),
             onPressed: () {
               final activePet = ref.read(activePetControllerProvider);
@@ -521,7 +521,7 @@ class _StatsBar extends ConsumerWidget {
             style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(width: 16),
-          Icon(Icons.chat_bubble_outline_rounded, size: 22, color: pt.ink500),
+          Icon(Icons.chat_bubble_outline_rounded, size: 22, color: const Color(0xFF64748B)),
           const SizedBox(width: 6),
           Text(
             '${post.comments}',
@@ -530,7 +530,7 @@ class _StatsBar extends ConsumerWidget {
           const Spacer(),
           Text(
             post.timeAgo,
-            style: tt.labelSmall?.copyWith(color: pt.ink500),
+            style: tt.labelSmall?.copyWith(color: const Color(0xFF64748B)),
           ),
           const SizedBox(width: 8),
         ],
@@ -821,7 +821,7 @@ class _CommentTile extends ConsumerWidget {
                       const SizedBox(width: 6),
                       Text(
                         comment.timeAgo,
-                        style: tt.labelSmall?.copyWith(color: pt.ink500),
+                        style: tt.labelSmall?.copyWith(color: const Color(0xFF64748B)),
                       ),
                       // "• edited" hint for visual feedback after an edit
                       if (comment.isOwnComment) ...[
@@ -829,7 +829,7 @@ class _CommentTile extends ConsumerWidget {
                         Text(
                           '· hold to edit',
                           style: tt.labelSmall?.copyWith(
-                            color: pt.ink500.withAlpha(120),
+                            color: const Color(0xFF64748B).withAlpha(120),
                             fontSize: 10,
                           ),
                         ),
@@ -849,7 +849,7 @@ class _CommentTile extends ConsumerWidget {
                         Text(
                           '${comment.likeCount} ${comment.likeCount == 1 ? 'like' : 'likes'}',
                           style: tt.labelSmall?.copyWith(
-                            color: pt.ink500,
+                            color: const Color(0xFF64748B),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -860,7 +860,7 @@ class _CommentTile extends ConsumerWidget {
                         child: Text(
                           'Reply',
                           style: tt.labelSmall?.copyWith(
-                            color: pt.ink500,
+                            color: const Color(0xFF64748B),
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -925,7 +925,7 @@ class _CommentInputBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        border: Border(top: BorderSide(color: pt.line)),
+        border: Border(top: BorderSide(color: const Color(0xFFE2E8F0))),
       ),
       padding: EdgeInsets.only(
         left: 16,
@@ -938,9 +938,9 @@ class _CommentInputBar extends StatelessWidget {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: pt.surface1,
+                color: const Color(0xFFFFFFFF),
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: pt.line),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: TextField(

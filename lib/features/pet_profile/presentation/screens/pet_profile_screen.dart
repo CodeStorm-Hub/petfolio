@@ -4,15 +4,17 @@ import 'package:go_router/go_router.dart';
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 
-import 'package:petfolio/features/care/data/models/care_task.dart';
+import 'package:petfolio/core/domain/models/care_task.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_dashboard_controller.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_streak_stream_provider.dart';
 import 'package:petfolio/features/care/presentation/controllers/pet_awards_provider.dart';
 
-import '../../data/models/pet.dart';
-import '../controllers/active_pet_controller.dart';
-import '../controllers/pet_list_controller.dart';
-import '../widgets/pet_switcher_sheet.dart';
+import 'package:petfolio/core/domain/models/pet.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/controllers/pet_list_controller.dart';
+import 'package:petfolio/core/widgets/pet_switcher_sheet.dart';
+// import '../../../../core/theme/app_theme.dart';
+
 
 class PetProfileScreen extends ConsumerWidget {
   const PetProfileScreen({super.key});
@@ -25,7 +27,7 @@ class PetProfileScreen extends ConsumerWidget {
 
     if (activePet == null) {
       return Scaffold(
-        backgroundColor: pt.surface1,
+        backgroundColor: const Color(0xFFFFFFFF),
         body: Center(
           child: petsAsync.when(
             skipLoadingOnReload: true,
@@ -57,7 +59,7 @@ class PetProfileScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
@@ -273,7 +275,7 @@ class _HeroGamifiedBanner extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(pet.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: pt.ink950)),
-                      Text('${pet.breed ?? sp.label} · ${pet.ageLabel}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: pt.ink500)),
+                      Text('${pet.breed ?? sp.label} · ${pet.ageLabel}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF64748B))),
                     ],
                   ),
                 ),
@@ -314,6 +316,8 @@ class _IconBtn extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = null;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -345,9 +349,9 @@ class _QuickStatsTrio extends ConsumerWidget {
       children: [
         Expanded(child: _StatTile(color: AppColors.sunnySoft, textColor: AppColors.sunny700, icon: const Text('🔥', style: TextStyle(fontSize: 20)), value: streakLabel, label: 'day streak')),
         const SizedBox(width: 10),
-        Expanded(child: _StatTile(color: AppColors.lilacSoft, textColor: AppColors.lilac700, icon: const Icon(Icons.star_rounded, color: AppColors.lilac700, size: 20), value: xpLabel, label: 'XP earned')),
+        Expanded(child: _StatTile(color: AppColors.lilacSoft, textColor: AppColors.lilac700, icon: Icon(Icons.star_rounded, color: AppColors.lilac700, size: 20), value: xpLabel, label: 'XP earned')),
         const SizedBox(width: 10),
-        Expanded(child: _StatTile(color: AppColors.mintSoft, textColor: AppColors.mint700, icon: const Icon(Icons.check_rounded, color: AppColors.mint700, size: 20), value: logsLabel, label: 'care logs')),
+        Expanded(child: _StatTile(color: AppColors.mintSoft, textColor: AppColors.mint700, icon: Icon(Icons.check_rounded, color: AppColors.mint700, size: 20), value: logsLabel, label: 'care logs')),
       ],
     );
   }
@@ -363,6 +367,8 @@ class _StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = null;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
@@ -406,6 +412,7 @@ class _DailyQuestsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final todayTasks = ref.watch(careDashboardProvider.select((s) => s.todayTasks));
+    // ignore: unused_local_variable
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     
     return PfCard(
@@ -424,7 +431,7 @@ class _DailyQuestsCard extends ConsumerWidget {
                   xp: t.gamificationPoints,
                   due: !t.isCompleted && t.isDueToday,
                 ),
-                if (t != tasks.take(3).last) Container(height: 1, color: pt.line, margin: const EdgeInsets.symmetric(horizontal: 4)),
+                if (t != tasks.take(3).last) Container(height: 1, color: const Color(0xFFE2E8F0), margin: const EdgeInsets.symmetric(horizontal: 4)),
               ],
             )).toList(),
           );
@@ -447,9 +454,11 @@ class _DailyQuestRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = null;
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final ink950 = pt.ink950;
-    final ink500 = pt.ink500;
+    final ink500 = const Color(0xFF64748B);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
@@ -505,6 +514,8 @@ class _MomentPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = null;
     return Container(
       height: 100,
       decoration: BoxDecoration(
@@ -561,6 +572,8 @@ class _RecentAchievementsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pc = null;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       clipBehavior: Clip.none,

@@ -7,7 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../data/models/chat_message.dart';
-import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
+import 'package:petfolio/core/widgets/pet_switcher_sheet.dart';
 import '../controllers/chat_conversation_controller.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
@@ -73,7 +73,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final myUserId = Supabase.instance.client.auth.currentUser?.id;
 
     return Scaffold(
-      backgroundColor: pt.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         child: Column(
           children: [
@@ -111,7 +111,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       const SizedBox(height: 12),
                       Text(
                         'Could not load messages',
-                        style: TextStyle(fontSize: 15, color: pt.ink500),
+                        style: TextStyle(fontSize: 15, color: const Color(0xFF64748B)),
                       ),
                       const SizedBox(height: 16),
                       FilledButton.icon(
@@ -135,7 +135,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           style: TextStyle(
                             fontSize: 15,
                             height: 1.45,
-                            color: pt.ink500,
+                            color: const Color(0xFF64748B),
                           ),
                         ),
                       ),
@@ -185,7 +185,7 @@ class _MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final bg = isMine ? AppColors.coral500 : pt.surface2;
-    final fg = isMine ? Colors.white : pt.ink500;
+    final fg = isMine ? Colors.white : const Color(0xFF64748B);
     final align = isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start;
     final radius = BorderRadius.only(
       topLeft: const Radius.circular(18),
@@ -252,7 +252,7 @@ class _Composer extends StatelessWidget {
     return Material(
       elevation: 8,
       shadowColor: Colors.black.withValues(alpha: 0.06),
-      color: pt.surface1,
+      color: const Color(0xFFFFFFFF),
       child: SafeArea(
         top: false,
         child: Padding(

@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
-import '../../data/models/app_notification.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/models/app_notification.dart';
 import '../../data/repositories/notification_repository.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────

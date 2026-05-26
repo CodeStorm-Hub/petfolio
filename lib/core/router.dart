@@ -36,7 +36,7 @@ import '../features/marketplace/presentation/screens/vendor/vendor_product_list_
 import '../features/matching/presentation/screens/chat_screen.dart';
 import '../features/matching/presentation/screens/matches_inbox_screen.dart';
 import '../features/matching/presentation/screens/matching_screen.dart';
-import '../features/pet_profile/presentation/controllers/pet_list_controller.dart';
+import 'package:petfolio/core/domain/controllers/pet_list_controller.dart';
 import '../features/pet_profile/presentation/screens/manage_pets_screen.dart';
 import '../features/pet_profile/presentation/screens/edit_profile_screen.dart';
 import '../features/pet_profile/presentation/screens/onboarding_screen.dart';
@@ -63,34 +63,53 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: notifier,
     redirect: notifier.redirect,
     routes: [
-      ShellRoute(
-        navigatorKey: _shellNavigatorKey,
-        builder: (context, state, child) => AppShell(child: child),
-        routes: [
-          GoRoute(
-            path: '/home',
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: PetProfileScreen()),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) => AppShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: PetProfileScreen()),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/care',
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: CareScreen()),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/care',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: CareScreen()),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/social',
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: SocialScreen()),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/social',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: SocialScreen()),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/matching',
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: MatchingScreen()),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/matching',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: MatchingScreen()),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/marketplace',
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: MarketplaceScreen()),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/marketplace',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: MarketplaceScreen()),
+              ),
+            ],
           ),
         ],
       ),
@@ -387,75 +406,77 @@ class _RouterNotifier extends ChangeNotifier {
 // ─────────────────────────────────────────────────────────────────────────────
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AppShell — adaptive nav (bottom bar ≤ 599 dp, rail ≥ 600 dp)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class AppShell extends StatelessWidget {
-  const AppShell({super.key, required this.child});
+  const AppShell({super.key, required this.navigationShell});
 
-  final Widget child;
+  final StatefulNavigationShell navigationShell;
 
   static const _destinations = [
-    _NavDestination(icon: Icons.pets_outlined, activeIcon: Icons.pets, label: 'Pets', path: '/home'),
-    _NavDestination(icon: Icons.local_fire_department_outlined, activeIcon: Icons.local_fire_department, label: 'Care', path: '/care'),
-    _NavDestination(icon: Icons.favorite_border, activeIcon: Icons.favorite, label: 'Social', path: '/social'),
-    _NavDestination(icon: Icons.auto_awesome_outlined, activeIcon: Icons.auto_awesome, label: 'Match', path: '/matching'),
-    _NavDestination(icon: Icons.storefront_outlined, activeIcon: Icons.storefront, label: 'Market', path: '/marketplace'),
+    _NavDestination(icon: Icons.pets_outlined, activeIcon: Icons.pets, label: 'Pets'),
+    _NavDestination(icon: Icons.local_fire_department_outlined, activeIcon: Icons.local_fire_department, label: 'Care'),
+    _NavDestination(icon: Icons.favorite_border, activeIcon: Icons.favorite, label: 'Social'),
+    _NavDestination(icon: Icons.auto_awesome_outlined, activeIcon: Icons.auto_awesome, label: 'Match'),
+    _NavDestination(icon: Icons.storefront_outlined, activeIcon: Icons.storefront, label: 'Market'),
   ];
 
-  int _selectedIndex(BuildContext context) {
-    final location = GoRouterState.of(context).matchedLocation;
-    for (var i = 0; i < _destinations.length; i++) {
-      if (location.startsWith(_destinations[i].path)) return i;
-    }
-    return 0;
+  void _onSelect(int index) {
+    navigationShell.goBranch(
+      index,
+      initialLocation: index == navigationShell.currentIndex,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final selectedIndex = _selectedIndex(context);
+    final selectedIndex = navigationShell.currentIndex;
     final isWide = MediaQuery.sizeOf(context).width >= 600;
 
     if (isWide) {
       return Scaffold(
-        body: Row(
-          children: [
-            _WideNavRail(
-              selectedIndex: selectedIndex,
-              destinations: _destinations,
-              onSelect: (i) => context.go(_destinations[i].path),
-            ),
-            const VerticalDivider(thickness: 1, width: 1),
-            Expanded(child: child),
-          ],
+        body: SafeArea(
+          bottom: false,
+          child: Row(
+            children: [
+              _WideNavRail(
+                selectedIndex: selectedIndex,
+                destinations: _destinations,
+                onSelect: _onSelect,
+              ),
+              const VerticalDivider(thickness: 1, width: 1),
+              Expanded(child: navigationShell),
+            ],
+          ),
         ),
       );
     }
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Stack(
-        children: [
-          // Main content with padding for floating nav
-          Positioned.fill(
-            bottom: 0,
-            child: child,
-          ),
-          // Floating pill bottom nav, raised above system home indicator
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 12 + MediaQuery.paddingOf(context).bottom,
-            child: _FloatingNav(
-              selectedIndex: selectedIndex,
-              destinations: _destinations,
-              onSelect: (i) => context.go(_destinations[i].path),
+      body: SafeArea(
+        bottom: false,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              bottom: 0,
+              child: navigationShell,
             ),
-          ),
-        ],
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 12 + MediaQuery.paddingOf(context).bottom,
+              child: _FloatingNav(
+                selectedIndex: selectedIndex,
+                destinations: _destinations,
+                onSelect: _onSelect,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -492,13 +513,11 @@ class _NavDestination {
     required this.icon,
     required this.activeIcon,
     required this.label,
-    required this.path,
   });
 
   final IconData icon;
   final IconData activeIcon;
   final String label;
-  final String path;
 }
 
 // ─── Tab accent colors (matches design system pillar colors) ─────────────────
@@ -540,18 +559,47 @@ class _FloatingNav extends StatelessWidget {
           BoxShadow(color: shadowColor, blurRadius: 24, spreadRadius: -4, offset: const Offset(0, 8)),
         ],
       ),
-      child: Row(
+      child: Stack(
         children: [
-          for (var i = 0; i < destinations.length; i++)
-            Expanded(
-              child: _NavTab(
-                destination: destinations[i],
-                isSelected: i == selectedIndex,
-                accentColor: _tabColors[i],
-                isDark: isDark,
-                onTap: () => onSelect(i),
+          // Sliding focus background window
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            alignment: Alignment(
+              -1.0 + (2.0 * selectedIndex / (destinations.length - 1)),
+              0.0,
+            ),
+            child: FractionallySizedBox(
+              widthFactor: 1.0 / destinations.length,
+              heightFactor: 1.0,
+              child: Center(
+                child: Container(
+                  height: 40,
+                  width: double.infinity,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: Color.alphaBlend(_tabColors[selectedIndex].withAlpha(36), Colors.transparent),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
               ),
             ),
+          ),
+          // Foreground icons
+          Row(
+            children: [
+              for (var i = 0; i < destinations.length; i++)
+                Expanded(
+                  child: _NavTab(
+                    destination: destinations[i],
+                    isSelected: i == selectedIndex,
+                    accentColor: _tabColors[i],
+                    isDark: isDark,
+                    onTap: () => onSelect(i),
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
     );
@@ -577,7 +625,6 @@ class _NavTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final unselectedColor = isDark ? AppColors.ink500D : AppColors.ink500;
     final iconColor = isSelected ? accentColor : unselectedColor;
-    final softColor = Color.alphaBlend(accentColor.withAlpha(36), Colors.transparent);
 
     return GestureDetector(
       onTap: onTap,
@@ -585,13 +632,8 @@ class _NavTab extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
+          Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            decoration: BoxDecoration(
-              color: isSelected ? softColor : Colors.transparent,
-              borderRadius: BorderRadius.circular(999),
-            ),
             child: Icon(
               isSelected ? destination.activeIcon : destination.icon,
               color: iconColor,

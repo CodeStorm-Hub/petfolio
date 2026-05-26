@@ -7,6 +7,8 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/buyer_orders_controller.dart';
 import '../../../data/models/marketplace_order.dart';
+import '../../../../../core/theme/app_theme.dart';
+
 
 class BuyerOrderDetailScreen extends ConsumerWidget {
   const BuyerOrderDetailScreen({
@@ -35,7 +37,7 @@ class BuyerOrderDetailScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text('Order not found',
-                    style: TextStyle(color: AppColors.ink500)),
+                    style: TextStyle(color: Color(0xFF64748B))),
                 const SizedBox(height: 12),
                 TextButton(
                     onPressed: () => context.pop(),
@@ -48,7 +50,7 @@ class BuyerOrderDetailScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.surface1,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
@@ -63,12 +65,12 @@ class BuyerOrderDetailScreen extends ConsumerWidget {
                       onTap: () => context.pop(),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Order Detail',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 20,
-                        color: AppColors.ink950,
+                        color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950,
                       ),
                     ),
                   ],
@@ -108,12 +110,14 @@ class _StatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     final color = switch (order.status) {
-      OrderStatus.pending    => AppColors.warning,
-      OrderStatus.processing => AppColors.info,
-      OrderStatus.shipped    => AppColors.blue500,
-      OrderStatus.delivered  => AppColors.success,
-      OrderStatus.cancelled  => AppColors.danger,
+      OrderStatus.pending    => pt.warning,
+      OrderStatus.processing => pt.info,
+      OrderStatus.shipped    => pt.info,
+      OrderStatus.delivered  => pt.success,
+      OrderStatus.cancelled  => cs.error,
     };
     final icon = switch (order.status) {
       OrderStatus.pending    => Icons.hourglass_empty_rounded,
@@ -158,7 +162,7 @@ class _StatusCard extends StatelessWidget {
                 Text(
                   _statusMessage(order.status),
                   style:
-                      const TextStyle(fontSize: 12, color: AppColors.ink500),
+                      TextStyle(fontSize: 12, color: const Color(0xFF64748B)),
                 ),
               ],
             ),
@@ -184,15 +188,18 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-          color: AppColors.surface0,
+          color: cs.surfaceContainerLowest,
           boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+            BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
           ],
         ),
         child: Column(
@@ -204,7 +211,7 @@ class _SummaryCard extends StatelessWidget {
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.88,
-                color: AppColors.ink500,
+                color: Color(0xFF64748B),
               ),
             ),
             const SizedBox(height: 12),
@@ -241,15 +248,17 @@ class _LineItemsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-          color: AppColors.surface0,
+          color: cs.surfaceContainerLowest,
           boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+            BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
           ],
         ),
         child: Column(
@@ -261,7 +270,7 @@ class _LineItemsCard extends StatelessWidget {
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.88,
-                color: AppColors.ink500,
+                color: Color(0xFF64748B),
               ),
             ),
             const SizedBox(height: 12),
@@ -273,10 +282,10 @@ class _LineItemsCard extends StatelessWidget {
                     height: 40,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: AppColors.surface2,
+                      color: pt.surface2,
                     ),
-                    child: const Icon(Icons.shopping_bag_outlined,
-                        size: 18, color: AppColors.ink300),
+                    child: Icon(Icons.shopping_bag_outlined,
+                        size: 18, color: pt.ink300),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -285,10 +294,10 @@ class _LineItemsCard extends StatelessWidget {
                       children: [
                         Text(
                           item.productName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: AppColors.ink950,
+                            color: pt.ink950,
                           ),
                         ),
                         if (item.isSubscribed)
@@ -306,16 +315,16 @@ class _LineItemsCard extends StatelessWidget {
                     children: [
                       Text(
                         '\$${(item.lineTotalCents / 100).toStringAsFixed(2)}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
-                          color: AppColors.ink950,
+                          color: pt.ink950,
                         ),
                       ),
                       Text(
                         '×${item.quantity}',
                         style: const TextStyle(
-                            fontSize: 12, color: AppColors.ink500),
+                            fontSize: 12, color: Color(0xFF64748B)),
                       ),
                     ],
                   ),
@@ -337,15 +346,18 @@ class _TrackingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-          color: AppColors.surface0,
+          color: cs.surfaceContainerLowest,
           boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+            BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
           ],
         ),
         child: Column(
@@ -357,7 +369,7 @@ class _TrackingCard extends StatelessWidget {
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.88,
-                color: AppColors.ink500,
+                color: Color(0xFF64748B),
               ),
             ),
             const SizedBox(height: 12),
@@ -400,17 +412,20 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    // ignore: unused_local_variable
+    final cs = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label,
             style:
-                const TextStyle(fontSize: 13, color: AppColors.ink500)),
+                TextStyle(fontSize: 13, color: const Color(0xFF64748B))),
         Text(value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppColors.ink950,
+              color: pt.ink950,
             )),
       ],
     );
@@ -425,6 +440,9 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -432,12 +450,12 @@ class _IconBtn extends StatelessWidget {
         height: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.surface0,
+          color: cs.surfaceContainerLowest,
           boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+            BoxShadow(color: Color(0xFFE2E8F0), spreadRadius: 0.5),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: const Color(0xFF334155)),
       ),
     );
   }

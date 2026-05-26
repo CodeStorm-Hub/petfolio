@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'active_pet_controller.dart';
-import 'pet_list_controller.dart';
+import 'package:petfolio/core/domain/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/domain/controllers/pet_list_controller.dart';
 
 final discoveryVisibilityControllerProvider =
     NotifierProvider<DiscoveryVisibilityController, bool>(
