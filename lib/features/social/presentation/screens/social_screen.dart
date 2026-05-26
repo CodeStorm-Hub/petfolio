@@ -419,6 +419,7 @@ class _StoriesRow extends ConsumerWidget {
   void _showOwnStoryOptions(BuildContext context, WidgetRef ref, Pet pet) {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -829,12 +830,16 @@ class _PostCardState extends State<_PostCard> {
                               _reacted != null 
                                 ? Text(_emojiForKind(_reacted!), style: const TextStyle(fontSize: 20))
                                 : Icon(Icons.pets, size: 20, color: pt.ink700),
-                              const SizedBox(width: 6),
-                              Text(
-                                _reacted != null ? '${_reacted![0].toUpperCase()}${_reacted!.substring(1)}' : 'React',
-                                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                      color: _reacted != null ? _colorForKind(_reacted!) : pt.ink700,
-                                    ),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  _reacted != null ? '${_reacted![0].toUpperCase()}${_reacted!.substring(1)}' : 'React',
+                                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                        color: _reacted != null ? _colorForKind(_reacted!) : pt.ink700,
+                                      ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
                               ),
                             ],
                           ),
@@ -926,8 +931,15 @@ class _ActionBtn extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, size: 20, color: pt.ink700),
-          const SizedBox(width: 8),
-          Text(label, style: style),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              label,
+              style: style,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
         ],
       ),
     );

@@ -289,7 +289,7 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
               bufferAsync: bufferAsync,
             ),
           ),
-        const SizedBox(height: 16),
+        SizedBox(height: isWide ? 16 : (92 + MediaQuery.paddingOf(context).bottom)),
       ],
     );
 

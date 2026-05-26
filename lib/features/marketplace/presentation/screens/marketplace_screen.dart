@@ -72,6 +72,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       constraints: const BoxConstraints(maxWidth: 560),
       builder: (ctx) => _CartDrawer(),
@@ -502,7 +503,7 @@ class _ShopBody extends ConsumerWidget {
                           : 2,
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
-                  childAspectRatio: 0.70,
+                  childAspectRatio: 0.64,
                 ),
                 itemCount: filtered.length,
                 itemBuilder: (_, i) => _NewProductTile(

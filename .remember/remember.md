@@ -38,3 +38,14 @@ This file contains high-signal architectural, structural, and feature-related co
   - Wrap database auth checks in subselects: `(select auth.uid())` for RLS performance.
 - **Errors & UI Alerts**:
   - App-wide notifier-triggered failures must utilize `AppSnackBar.showError` and `appSnackBarMessengerKey` instead of assigning transient errors to long-lived state providers.
+
+
+## 4. Responsiveness & Bottom Navigation Layout
+- **Unified Breakpoints**:
+  - Built a shared `ResponsiveLayout` helper (`lib/core/widgets/responsive_layout.dart`) with breakpoints `mobileMax = 600` and `tabletMax = 1024`.
+  - Core screens are responsive, constraining main view content to centered columns (typically `560px` to `800px`) on wider screens (Tablets/Web/Desktop) to prevent stretching.
+- **Mobile Bottom Spacing**:
+  - Because `_FloatingNav` overlays screen content inside the shell route layout, bottom-docked interactive buttons on full-screen non-scrollable layouts (e.g., the Matching screen's `_ActionDock`) must use dynamic bottom padding on mobile viewports (`SizedBox(height: isWide ? 16 : (92 + MediaQuery.paddingOf(context).bottom))`) to sit cleanly above the floating navigation bar.
+- **Root Navigator for Modal Sheets**:
+  - Modal bottom sheets shown from screens wrapped by the shell navigator (such as the switcher, cart drawer, story options, and care forms) must set `useRootNavigator: true`. This forces them to render on the root navigator, rendering above the floating navigation bar.
+

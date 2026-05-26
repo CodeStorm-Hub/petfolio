@@ -51,6 +51,16 @@
 - **Error UI Handling**: For optimistic UI actions (like toggling care tasks or seller onboarding), show errors using `AppSnackBar.showError` (via `appSnackBarMessengerKey` on `MaterialApp.router`). Do not put long-lived state providers in `AsyncValue.error` states for transient/action-level failures.
 - **Web Safe Target**: Marionette execution runs exclusively in debug builds via conditional compiler imports (`marionette_debug_gate_stub.dart` vs `_io.dart`) to keep `main.dart` from importing `dart:io` on web targets.
 
+## 2026-05-26 — Responsiveness Refactoring & Spacing Fixes
+
+- **Responsive Layout Helper**: Created a unified `ResponsiveLayout` widget to handle standard Mobile, Tablet, and Desktop/Web breakpoints consistently across all views.
+- **Responsive Screen Refactoring**: Center-constrained and scaled layouts on `pet_profile_screen.dart`, `social_screen.dart`, `matching_screen.dart`, `marketplace_screen.dart`, and `onboarding_screen.dart` to prevent infinite visual stretching on large viewports.
+- **Bottom Navigation Bar Spacing**: Adjusted Matching screen spacing dynamically to `92 + MediaQuery.paddingOf(context).bottom` on Mobile, pushing the swipe `_ActionDock` above the floating bottom navigation bar.
+- **Modal Bottom Sheets (useRootNavigator)**: Configured all shell-launched modal bottom sheets (including switcher, cart drawer, story options, and care task forms) to specify `useRootNavigator: true`. This fixes the floating bottom navigation bar rendering on top of/blocking bottom sheets.
+- **Static Analysis & Tests**: Ran `analyze_files` and `run_tests` MCP tools; all tests passed successfully with no errors or regressions.
+
+---
+
 ## 2026-05-25 — UI Redesign Phase 8: Browser Cross-Validation Fixes
 
 Served `PetFolio Redesign.html` via local HTTP server, navigated all 5 tabs via Chrome MCP JS tool, extracted computed styles and rendered text from each screen. Confirmed gaps vs. previous session's text-only analysis, plus found new ones:

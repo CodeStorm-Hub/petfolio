@@ -12,6 +12,7 @@ class MatchPreferencesSheet extends ConsumerWidget {
   static Future<void> show(BuildContext context) => showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
+        useRootNavigator: true,
         backgroundColor: Colors.transparent,
         barrierColor: const Color(0x6B0B1220),
         useSafeArea: true,

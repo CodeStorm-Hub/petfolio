@@ -146,6 +146,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
           context: context,
           isScrollControlled: true,
           useSafeArea: true,
+          useRootNavigator: true,
           backgroundColor: Colors.transparent,
           builder: (_) => _CareTaskFormSheet(
             petId: activePet.id,
@@ -733,6 +734,7 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
     final logOnly = task.isLogDerived;
     showModalBottomSheet<void>(
       context: ctx,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _TaskContextMenu(
         taskTitle: task.title,
@@ -744,6 +746,7 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
                   context: ctx,
                   isScrollControlled: true,
                   useSafeArea: true,
+                  useRootNavigator: true,
                   backgroundColor: Colors.transparent,
                   builder: (_) => _CareTaskFormSheet(
                     petId: widget.petId,
@@ -774,6 +777,7 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
                   context: ctx,
                   isScrollControlled: true,
                   useSafeArea: true,
+                  useRootNavigator: true,
                   backgroundColor: Colors.transparent,
                   builder: (_) => _CareTaskFormSheet(
                     petId: widget.petId,
