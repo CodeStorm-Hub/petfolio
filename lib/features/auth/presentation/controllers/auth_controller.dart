@@ -26,6 +26,20 @@ final isLoggedInProvider = Provider<bool>((ref) {
   );
 });
 
+/// True when the current user's email has been confirmed.
+/// With Supabase's default email-confirmation flow a session only exists after
+/// confirmation, so this is almost always true for logged-in users.  It guards
+/// the edge case where a session exists but emailConfirmedAt is still null.
+final isEmailVerifiedProvider = Provider<bool>((ref) {
+  final asyncState = ref.watch(authStateProvider);
+  return asyncState.when(
+    data: (s) => s.session?.user.emailConfirmedAt != null,
+    loading: () =>
+        Supabase.instance.client.auth.currentUser?.emailConfirmedAt != null,
+    error: (_, _) => false,
+  );
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Password reset
 // ─────────────────────────────────────────────────────────────────────────────

@@ -1,6 +1,63 @@
 # Petfolio — Progress Log
 
 
+## 2026-05-27 — Care Module Refactoring
+
+- **`care_screen.dart` decomposed** (1929 → ~320 lines): Extracted three widget files — `care_routine_generator_button.dart` (`CareRoutineGeneratorButton`), `care_task_form_sheet.dart` (`CareTaskFormSheet` with static `.show()` helper), `care_task_list.dart` (`CareTaskList` + `CareTaskDoneCounter` + all private task card/context menu/skeleton/error/empty-state widgets). Dead code `_HorizontalDatePicker` removed.
+- **`_isGeneratingRoutine` moved to controller**: `DailyRoutineState` now has `isGeneratingRoutine` field; `CareDashboard.generateRoutine(Pet)` method added — sets flag, calls `CareRecommendationService`, returns tasks or rethrows. Screen reads `dashboard.isGeneratingRoutine` instead of local state.
+- **SnackBar race condition fixed**: Removed `context.go('/care')` call that was clearing the onboarding SnackBar before the user could read it. `_onboardingSuccessHandled` flag prevents replay.
+- **NutritionScreen empty state**: Replaced `SizedBox.shrink()` in `_HistoryList` with `PetfolioEmptyState(icon: monitor_weight_outlined, title: 'No weight entries yet', ...)`.
+- `dart analyze` → **No issues found**.
+- **Next step**: Health vitals UI and repository scaffold.
+
+## 2026-05-27 — Profile UI Rendering Fixes
+
+- **Bottom nav clipping fixed** (all 5 tab screens): Replaced hardcoded pixel values with `MediaQuery.paddingOf(context).bottom + 80` (nav height 68 + bottom margin 12 = 80 logical pixels above system inset). `matching_screen` was already correct. Changes: `pet_profile_screen` SizedBox 100→dynamic, `care_screen` ListView padding 120→dynamic, `social_screen` footer Padding 120→dynamic, `marketplace_screen` SliverPadding 100→dynamic.
+- **`PetProfileScreen` `RefreshIndicator`**: Wrapped `CustomScrollView` with `RefreshIndicator.adaptive`. Pull-to-refresh invalidates `petListProvider`, `careDashboardProvider`, and `petAwardsSummaryProvider`, then awaits `petListProvider.future`. Added `AlwaysScrollableScrollPhysics` to `CustomScrollView` so pull gesture fires even when content is short.
+- `flutter analyze` → **No issues found**.
+- **Next step**: UI screen redesigns (pending design approval).
+
+## 2026-05-27 — Auth UX & Security Enhancements
+
+- **Keyboard types**: `TextInputType.visiblePassword` added to all password fields (login + registration × 2). Email fields already had `TextInputType.emailAddress`.
+- **Show/hide toggle**: Already present; no change needed.
+- **Field-level error routing** (login): `_emailError` / `_passwordError` state vars replace the catch-all `AuthErrorBanner` for classified server errors. "Invalid credentials" → password field inline error. "Email not confirmed" → email field inline error. Network/generic errors still fall through to the banner. Errors auto-clear when the user types in the relevant field. `AuthField` gained an `errorText` parameter for this.
+- **Field-level error routing** (registration): "Email already registered" routes to `_emailError` on the email field. Other errors use the banner.
+- **Email verification gate**: `EmailVerificationScreen` (`/verify-email`) created — shows email, resend button (60 s cooldown), spam hint. `AuthRepository.signUp` now returns `AuthResponse`; if `session == null` (confirmation required), registration navigates to `/verify-email?email=...`. `isEmailVerifiedProvider` added to `auth_controller.dart`. `_RouterNotifier` now listens to `isEmailVerifiedProvider` and blocks unverified logged-in users at `/verify-email`. `/login`, `/register`, `/verify-email` are the only routes accessible to unauthenticated users.
+- `flutter analyze` → **No issues found**.
+- **Next step**: UI screen redesigns (pending design approval).
+
+## 2026-05-27 — Standardize State Management, GoRouter & Material 3 Accessibility
+
+- **StateNotifier migration**: Already completed in a prior session — no legacy providers found.
+- **Nav color coupling fixed** (`router.dart`): Added `color` field directly to `_NavDestination`; removed separate `_tabColors` const. Reordering tabs can no longer silently misassign colors.
+- **WCAG AA contrast** (`router.dart`, `app_theme.dart`): Unselected nav items and label text styles (labelLarge/Medium/Small) now use `ink700` (~4.5:1) instead of `ink500` (~2.8:1).
+- **Tablet NavigationRail** (`router.dart`): Removed `indicatorColor: Colors.transparent` override; icons wrapped in `Semantics`; uses `destination.color` directly.
+- **`GestureDetector` → `InkWell` + `Semantics`** (`router.dart`): Bottom nav tabs now have Material ripple feedback and screen-reader labels.
+- **Spacing token `xxl=20` added** (`app_theme.dart`): `AppThemeSpacing.xxl` inserted between `lg` and `xl`.
+- **Legacy color aliases removed** (`app_colors.dart`): Deleted 31-line alias block (`blue50`–`blue900D`, `sunset500`, `coral500`, `meadow500`, `apricot500`, `mulberry500`, `line100/200`). All 34 consumer files updated to canonical names.
+- **Duplicate route removed** (`router.dart`): Deleted `/profile/orders/:id` GoRoute (duplicate of `/marketplace/orders/:id`).
+- **`_PetEditMissingScreen` fallback fixed** (`router.dart`): "Back to Pets" now navigates to `/pets/manage` instead of `/home`.
+- **`care_repository.dart` stub deleted**: Single caller (`care_dashboard_controller.dart`) updated to import `pet_care_repository.dart` directly.
+- **Pet model import path consolidated**: 3 care files updated from `core/models/pet.dart` → `features/pet_profile/data/models/pet.dart`.
+- `flutter analyze` → **No issues found**.
+- **Next step**: UI screen redesigns (pending design approval).
+
+## 2026-05-27 — P0/P1 Backend Security & Data Integrity
+
+- **stripe-webhook redeployed (v7)**: Handles `payment_intent.succeeded` → transitions order to `processing/paid`, upserts vendor ledger. Also handles `payment_intent.payment_failed` and `account.updated` (Stripe Connect KYC). JWT verification disabled (Stripe HMAC only).
+- **bank_account_details removed**: Dropped raw JSONB column from `shops`; replaced with `stripe_bank_account_token text`. 3 affected shops had raw bank data — purged. Vendors must re-submit via Stripe tokenisation flow.
+- **follows NOT NULL enforced**: Added `NOT NULL` to `pet_follows.follower_pet_id/following_pet_id` and `follows.follower_id/following_id`. Zero NULL rows confirmed before migration.
+- **vendor_ledgers now always populated**: Added `UNIQUE(order_id)` constraint; updated `process_checkout` RPC to INSERT ledger row at order creation (`pending_clearance`). Webhook upserts on payment confirmation — no double-counting.
+- **products.inventory_count default removed**: Dropped `DEFAULT 0` — vendors must now explicitly supply stock count on product insertion.
+- **cleanup-stories Edge Function deployed (v1)**: Calls `cleanup_expired_stories()` RPC. pg_cron unavailable on this project; schedule hourly via **Supabase Dashboard → Edge Functions → cleanup-stories → Schedule** (`0 * * * *`).
+
+New migrations: `20260527000000`, `20260527010000`, `20260527020000`, `20260527030000`.
+
+**Next step**: Phase complete — please run (/remember) to save tokens. Remaining P1: notifications bell (#6), bottom nav padding (#7), KYC rejection reason in seller dashboard (#8), `inventory_count > 0` filter in `fetchProducts` (#9).
+
+---
+
 ## AI AGENT HANDOVER & ARCHITECTURE GUIDE
 
 > [!IMPORTANT]

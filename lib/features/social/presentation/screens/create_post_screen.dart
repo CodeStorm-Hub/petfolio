@@ -217,7 +217,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           child: FilledButton(
             onPressed: canPost ? _submit : null,
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.sunset500,
+              backgroundColor: AppColors.tangerine,
               disabledBackgroundColor: pt.line,
               foregroundColor: Colors.white,
               disabledForegroundColor: pt.ink300,
@@ -298,20 +298,20 @@ class _PetIdentityRow extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.sunset500.withAlpha(26),
+              color: AppColors.tangerine.withAlpha(26),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.public_rounded, size: 12, color: AppColors.sunset500),
+                Icon(Icons.public_rounded, size: 12, color: AppColors.tangerine),
                 const SizedBox(width: 4),
                 Text(
                   'Public',
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.sunset500,
+                    color: AppColors.tangerine,
                   ),
                 ),
               ],
@@ -472,13 +472,13 @@ class _EmptyImagePlaceholder extends StatelessWidget {
                     width: 72,
                     height: 72,
                     decoration: BoxDecoration(
-                      color: AppColors.sunset500.withAlpha(20),
+                      color: AppColors.tangerine.withAlpha(20),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.add_photo_alternate_rounded,
                       size: 34,
-                      color: AppColors.sunset500,
+                      color: AppColors.tangerine,
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -514,13 +514,13 @@ class _EmptyImagePlaceholder extends StatelessWidget {
                 _SourceChip(
                   icon: Icons.photo_library_outlined,
                   label: 'Gallery',
-                  color: AppColors.blue500,
+                  color: AppColors.tangerine,
                 ),
                 const SizedBox(width: 10),
                 _SourceChip(
                   icon: Icons.camera_alt_outlined,
                   label: 'Camera',
-                  color: AppColors.meadow500,
+                  color: AppColors.mint,
                 ),
               ],
             ),
@@ -690,10 +690,10 @@ class _VisibilityInfo extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.sunset500.withAlpha(20),
+              color: AppColors.tangerine.withAlpha(20),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.public_rounded, size: 18, color: AppColors.sunset500),
+            child: const Icon(Icons.public_rounded, size: 18, color: AppColors.tangerine),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -765,7 +765,7 @@ class _ImageSourceSheet extends StatelessWidget {
             const SizedBox(height: 20),
             _SheetOption(
               icon: Icons.photo_library_rounded,
-              color: AppColors.blue500,
+              color: AppColors.tangerine,
               title: 'Photo Library',
               subtitle: 'Choose from your gallery',
               onTap: () => Navigator.of(context).pop(ImageSource.gallery),
@@ -773,7 +773,7 @@ class _ImageSourceSheet extends StatelessWidget {
             const SizedBox(height: 10),
             _SheetOption(
               icon: Icons.camera_alt_rounded,
-              color: AppColors.meadow500,
+              color: AppColors.mint,
               title: 'Take Photo',
               subtitle: 'Use your camera',
               onTap: () => Navigator.of(context).pop(ImageSource.camera),
@@ -916,7 +916,7 @@ class _UploadOverlay extends StatelessWidget {
               height: 48,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                color: AppColors.sunset500,
+                color: AppColors.tangerine,
               ),
             ),
             const SizedBox(height: 20),
@@ -957,17 +957,17 @@ class _ErrorBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: AppColors.coral500.withAlpha(20),
+      color: AppColors.poppy.withAlpha(20),
       child: Row(
         children: [
-          const Icon(Icons.error_outline_rounded, color: AppColors.coral500, size: 18),
+          const Icon(Icons.error_outline_rounded, color: AppColors.poppy, size: 18),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               message,
               style: const TextStyle(
                 fontSize: 13,
-                color: AppColors.coral500,
+                color: AppColors.poppy,
                 fontWeight: FontWeight.w500,
               ),
             ),

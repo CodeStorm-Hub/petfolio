@@ -27,6 +27,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
   bool _obscureConfirm = true;
   bool _isLoading = false;
   String? _error;
+  String? _emailError;
 
   late final AnimationController _fadeCtrl;
   late final Animation<double> _fadeAnim;
@@ -41,6 +42,11 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
       duration: PetfolioThemeExtension.durationMd,
     )..forward();
     _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
+    _emailController.addListener(_clearEmailError);
+  }
+
+  void _clearEmailError() {
+    if (_emailError != null) setState(() => _emailError = null);
   }
 
   @override
@@ -58,16 +64,31 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
     setState(() {
       _isLoading = true;
       _error = null;
+      _emailError = null;
     });
 
     try {
-      await ref.read(authRepositoryProvider).signUp(
+      final response = await ref.read(authRepositoryProvider).signUp(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
-      // GoRouter redirects to /home or /onboarding after auth state changes.
+      if (!mounted) return;
+      if (response.session == null) {
+        // Email confirmation required — navigate to the verification gate.
+        final email = Uri.encodeComponent(_emailController.text.trim());
+        context.go('/verify-email?email=$email');
+      }
+      // If session != null (auto-confirm enabled), GoRouter handles redirect.
     } on AuthException catch (e) {
-      if (mounted) setState(() => _error = e.message);
+      if (!mounted) return;
+      final lower = e.message.toLowerCase();
+      if (lower.contains('already registered') ||
+          lower.contains('already in use') ||
+          lower.contains('user already exists')) {
+        setState(() => _emailError = 'An account with this email already exists.');
+      } else {
+        setState(() => _error = e.message);
+      }
     } catch (_) {
       if (mounted) {
         setState(() => _error = 'Something went wrong. Please try again.');
@@ -120,6 +141,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           autocorrect: false,
+                          errorText: _emailError,
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
                               return 'Email is required';
@@ -136,6 +158,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                         AuthField(
                           controller: _passwordController,
                           label: 'Password',
+                          keyboardType: TextInputType.visiblePassword,
                           obscureText: _obscurePassword,
                           textInputAction: TextInputAction.next,
                           suffixIcon: VisibilityToggle(
@@ -160,6 +183,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                         AuthField(
                           controller: _confirmController,
                           label: 'Confirm password',
+                          keyboardType: TextInputType.visiblePassword,
                           obscureText: _obscureConfirm,
                           textInputAction: TextInputAction.done,
                           onSubmitted: (_) => _submit(),

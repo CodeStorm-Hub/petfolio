@@ -289,11 +289,12 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
 // ─────────────────────────────────────────────────────────────────────────────
 final class AppThemeSpacing {
   const AppThemeSpacing();
-  double get xs => 4;
-  double get sm => 8;
-  double get md => 12;
-  double get lg => 16;
-  double get xl => 24;
+  double get xs  => 4;
+  double get sm  => 8;
+  double get md  => 12;
+  double get lg  => 16;
+  double get xxl => 20;
+  double get xl  => 24;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -517,7 +518,7 @@ abstract final class AppTheme {
   static TextTheme _textTheme(bool isDark) {
     final headColor = isDark ? AppColors.ink950D : AppColors.ink950;
     final bodyColor = isDark ? AppColors.ink700D : AppColors.ink700;
-    final mutedColor = isDark ? AppColors.ink500D : AppColors.ink500;
+    final mutedColor = isDark ? AppColors.ink700D : AppColors.ink700;
 
     // Bundled weights: Sora → w600 (SemiBold), w700 (Bold)
     //                  Inter → w400 (Regular), w500 (Medium), w600 (SemiBold), w700 (Bold)

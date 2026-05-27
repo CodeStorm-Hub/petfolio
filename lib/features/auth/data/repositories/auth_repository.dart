@@ -13,11 +13,14 @@ class AuthRepository {
   Future<void> signIn({required String email, required String password}) =>
       _client.auth.signInWithPassword(email: email, password: password);
 
-  Future<void> signUp({required String email, required String password}) =>
+  Future<AuthResponse> signUp({required String email, required String password}) =>
       _client.auth.signUp(email: email, password: password);
 
   Future<void> signOut() => _client.auth.signOut();
 
   Future<void> resetPassword(String email) =>
       _client.auth.resetPasswordForEmail(email.trim());
+
+  Future<void> resendVerificationEmail(String email) =>
+      _client.auth.resend(type: OtpType.signup, email: email.trim());
 }

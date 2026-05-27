@@ -166,7 +166,7 @@ class _NotificationTile extends StatelessWidget {
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: AppColors.coral500,
+                  color: AppColors.poppy,
                   shape: BoxShape.circle,
                 ),
               )
@@ -178,11 +178,11 @@ class _NotificationTile extends StatelessWidget {
   Color _iconColor(String type) {
     switch (type) {
       case 'like':
-        return AppColors.coral500;
+        return AppColors.poppy;
       case 'follow':
-        return AppColors.meadow500;
+        return AppColors.mint;
       case 'comment':
-        return AppColors.blue500;
+        return AppColors.tangerine;
       default:
         return AppColors.ink500;
     }

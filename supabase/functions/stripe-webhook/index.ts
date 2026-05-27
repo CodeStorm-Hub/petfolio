@@ -222,45 +222,42 @@ serve(async (req) => {
           );
         }
 
-        // Create the vendor ledger entry so the payout flow can proceed.
-        // Resolve the shop's platform fee to calculate the split.
+        // Upsert the vendor ledger entry.
+        // process_checkout already creates the row in 'pending_clearance'.
+        // ON CONFLICT: the upsert is a no-op for existing rows — amounts were
+        // set at order creation and should not be overwritten by a replayed event.
         const { data: shop } = await admin
           .from('shops')
           .select('platform_fee_percent')
           .eq('id', orderRow.shop_id)
           .maybeSingle();
 
-        const feePercent        = shop?.platform_fee_percent ?? 10;
-        const platformFeeCents  = Math.floor((orderRow.amount_cents * feePercent) / 100);
+        const feePercent          = shop?.platform_fee_percent ?? 10;
+        const platformFeeCents    = Math.floor((orderRow.amount_cents * feePercent) / 100);
         const vendorEarningsCents = orderRow.amount_cents - platformFeeCents;
 
         const { error: ledgerErr } = await admin
           .from('vendor_ledgers')
-          .insert({
-            shop_id:               orderRow.shop_id,
-            order_id:              orderId,
-            order_total_cents:     orderRow.amount_cents,
-            platform_fee_cents:    platformFeeCents,
-            vendor_earnings_cents: vendorEarningsCents,
-            status:                'pending_clearance',
-          });
+          .upsert(
+            {
+              shop_id:               orderRow.shop_id,
+              order_id:              orderId,
+              order_total_cents:     orderRow.amount_cents,
+              platform_fee_cents:    platformFeeCents,
+              vendor_earnings_cents: vendorEarningsCents,
+              status:                'pending_clearance',
+            },
+            { onConflict: 'order_id', ignoreDuplicates: false },
+          );
 
         if (ledgerErr) {
-          // Code 23505 = unique_violation: ledger already exists (replayed webhook).
-          // Not fatal — the order transition succeeded; just log and continue.
-          if ((ledgerErr as { code?: string }).code === '23505') {
-            console.warn(
-              `payment_intent.succeeded: ledger already exists for order ${orderId}`,
-            );
-          } else {
-            console.error(
-              'payment_intent.succeeded: ledger insert failed (non-fatal)',
-              ledgerErr,
-            );
-          }
+          console.error(
+            'payment_intent.succeeded: ledger upsert failed (non-fatal)',
+            ledgerErr,
+          );
         } else {
           console.log(
-            `payment_intent.succeeded: ledger created for order ${orderId} ` +
+            `payment_intent.succeeded: ledger upserted for order ${orderId} ` +
             `(vendor +${vendorEarningsCents}¢, platform +${platformFeeCents}¢)`,
           );
         }

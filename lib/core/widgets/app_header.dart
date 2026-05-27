@@ -339,7 +339,7 @@ class _BadgePill extends StatelessWidget {
         constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
         padding: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
-          color: AppColors.coral500,
+          color: AppColors.poppy,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: pt.surface1, width: 1.5),
         ),
@@ -359,7 +359,7 @@ class _BadgePill extends StatelessWidget {
       width: 9,
       height: 9,
       decoration: BoxDecoration(
-        color: AppColors.coral500,
+        color: AppColors.poppy,
         shape: BoxShape.circle,
         border: Border.all(color: pt.surface1, width: 1.5),
       ),

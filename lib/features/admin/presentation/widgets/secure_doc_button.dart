@@ -65,7 +65,7 @@ class _SecureDocButtonState extends ConsumerState<SecureDocButton> {
       style: OutlinedButton.styleFrom(
         visualDensity: VisualDensity.compact,
         side: const BorderSide(color: AppColors.line),
-        foregroundColor: AppColors.blue500,
+        foregroundColor: AppColors.tangerine,
       ),
     );
   }

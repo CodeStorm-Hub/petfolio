@@ -27,7 +27,7 @@ class SubscriptionToggle extends StatelessWidget {
         height: 26,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(13),
-          color: value ? AppColors.meadow500 : AppColors.line,
+          color: value ? AppColors.mint : AppColors.line,
         ),
         child: AnimatedAlign(
           duration: const Duration(milliseconds: 200),

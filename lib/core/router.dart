@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'theme/app_colors.dart';
 
 import '../features/auth/presentation/controllers/auth_controller.dart';
+import '../features/auth/presentation/screens/email_verification_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/registration_screen.dart';
 import '../features/care/presentation/screens/care_screen.dart';
@@ -103,6 +104,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const RegistrationScreen(),
       ),
       GoRoute(
+        path: '/verify-email',
+        builder: (context, state) => EmailVerificationScreen(
+          email: state.uri.queryParameters['email'] ?? '',
+        ),
+      ),
+      GoRoute(
         path: '/onboarding',
         builder: (context, state) {
           // `?mode=add` means an authenticated user adding a second-or-later
@@ -164,14 +171,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/profile/orders',
         builder: (context, state) => const BuyerOrderListScreen(),
-      ),
-      GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
-        path: '/profile/orders/:id',
-        builder: (context, state) => BuyerOrderDetailScreen(
-          orderId: state.pathParameters['id']!,
-          order: state.extra as MarketplaceOrder?,
-        ),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
@@ -339,6 +338,9 @@ class _RouterNotifier extends ChangeNotifier {
       }
       notifyListeners();
     });
+    // Also re-evaluate when emailConfirmedAt changes (e.g. user confirms email
+    // while the app is open) without a sign-in/sign-out transition.
+    _ref.listen<bool>(isEmailVerifiedProvider, (_, _) => notifyListeners());
     _ref.listen(petListProvider, (_, _) => notifyListeners());
   }
 
@@ -348,13 +350,24 @@ class _RouterNotifier extends ChangeNotifier {
     final isLoggedIn = _ref.read(isLoggedInProvider);
     final loc = state.matchedLocation;
 
-    // ── Not logged in → only /login and /register are allowed ────────
+    // ── Not logged in → only public auth screens are allowed ─────────
     if (!isLoggedIn) {
-      return (loc == '/login' || loc == '/register') ? null : '/login';
+      final isPublic = loc == '/login' ||
+          loc == '/register' ||
+          loc == '/verify-email';
+      return isPublic ? null : '/login';
     }
 
-    // ── Logged in on an auth screen → leave ─────────────────────────
-    if (loc == '/login' || loc == '/register') return '/home';
+    // ── Logged in but email not yet confirmed → gate to /verify-email ─
+    final isVerified = _ref.read(isEmailVerifiedProvider);
+    if (!isVerified) {
+      return loc == '/verify-email' ? null : '/verify-email';
+    }
+
+    // ── Logged in & verified — redirect away from auth screens ────────
+    if (loc == '/login' || loc == '/register' || loc == '/verify-email') {
+      return '/home';
+    }
 
     // ── Logged in but no pets → go to /onboarding ───────────────────
     // Only redirect when the pet list has finished loading AND is empty,
@@ -399,11 +412,11 @@ class AppShell extends StatelessWidget {
   final Widget child;
 
   static const _destinations = [
-    _NavDestination(icon: Icons.pets_outlined, activeIcon: Icons.pets, label: 'Pets', path: '/home'),
-    _NavDestination(icon: Icons.local_fire_department_outlined, activeIcon: Icons.local_fire_department, label: 'Care', path: '/care'),
-    _NavDestination(icon: Icons.favorite_border, activeIcon: Icons.favorite, label: 'Social', path: '/social'),
-    _NavDestination(icon: Icons.auto_awesome_outlined, activeIcon: Icons.auto_awesome, label: 'Match', path: '/matching'),
-    _NavDestination(icon: Icons.storefront_outlined, activeIcon: Icons.storefront, label: 'Market', path: '/marketplace'),
+    _NavDestination(icon: Icons.pets_outlined,                   activeIcon: Icons.pets,                   label: 'Pets',   path: '/home',        color: AppColors.tangerine),
+    _NavDestination(icon: Icons.local_fire_department_outlined,  activeIcon: Icons.local_fire_department,  label: 'Care',   path: '/care',        color: AppColors.sunny),
+    _NavDestination(icon: Icons.favorite_border,                 activeIcon: Icons.favorite,               label: 'Social', path: '/social',      color: AppColors.poppy),
+    _NavDestination(icon: Icons.auto_awesome_outlined,           activeIcon: Icons.auto_awesome,           label: 'Match',  path: '/matching',    color: AppColors.lilac),
+    _NavDestination(icon: Icons.storefront_outlined,             activeIcon: Icons.storefront,             label: 'Market', path: '/marketplace', color: AppColors.mint),
   ];
 
   int _selectedIndex(BuildContext context) {
@@ -477,7 +490,7 @@ class _PetEditMissingScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             FilledButton(
-              onPressed: () => context.go('/home'),
+              onPressed: () => context.go('/pets/manage'),
               child: const Text('Back to Pets'),
             ),
           ],
@@ -493,22 +506,17 @@ class _NavDestination {
     required this.activeIcon,
     required this.label,
     required this.path,
+    required this.color,
   });
 
   final IconData icon;
   final IconData activeIcon;
   final String label;
   final String path;
+  /// Tab accent color — must stay co-located with its destination so a reorder
+  /// never silently mismatches color and route.
+  final Color color;
 }
-
-// ─── Tab accent colors (matches design system pillar colors) ─────────────────
-const _tabColors = [
-  AppColors.tangerine,  // Pets
-  AppColors.sunny,      // Care
-  AppColors.poppy,      // Social
-  AppColors.lilac,      // Match
-  AppColors.mint,       // Market
-];
 
 // ─── Floating pill bottom nav ─────────────────────────────────────────────────
 
@@ -547,7 +555,6 @@ class _FloatingNav extends StatelessWidget {
               child: _NavTab(
                 destination: destinations[i],
                 isSelected: i == selectedIndex,
-                accentColor: _tabColors[i],
                 isDark: isDark,
                 onTap: () => onSelect(i),
               ),
@@ -562,53 +569,59 @@ class _NavTab extends StatelessWidget {
   const _NavTab({
     required this.destination,
     required this.isSelected,
-    required this.accentColor,
     required this.isDark,
     required this.onTap,
   });
 
   final _NavDestination destination;
   final bool isSelected;
-  final Color accentColor;
   final bool isDark;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final unselectedColor = isDark ? AppColors.ink500D : AppColors.ink500;
-    final iconColor = isSelected ? accentColor : unselectedColor;
-    final softColor = Color.alphaBlend(accentColor.withAlpha(36), Colors.transparent);
+    final accentColor    = destination.color;
+    final unselectedColor = isDark ? AppColors.ink500D : AppColors.ink700;
+    final iconColor      = isSelected ? accentColor : unselectedColor;
+    final softColor      = Color.alphaBlend(accentColor.withAlpha(36), Colors.transparent);
 
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            decoration: BoxDecoration(
-              color: isSelected ? softColor : Colors.transparent,
-              borderRadius: BorderRadius.circular(999),
+    return Semantics(
+      label: destination.label,
+      selected: isSelected,
+      button: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        splashColor: accentColor.withAlpha(30),
+        highlightColor: Colors.transparent,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              decoration: BoxDecoration(
+                color: isSelected ? softColor : Colors.transparent,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Icon(
+                isSelected ? destination.activeIcon : destination.icon,
+                color: iconColor,
+                size: 22,
+              ),
             ),
-            child: Icon(
-              isSelected ? destination.activeIcon : destination.icon,
-              color: iconColor,
-              size: 22,
+            const SizedBox(height: 2),
+            Text(
+              destination.label,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: iconColor,
+                height: 1.0,
+              ),
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            destination.label,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              color: iconColor,
-              height: 1.0,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -635,21 +648,30 @@ class _WideNavRail extends StatelessWidget {
       selectedIndex: selectedIndex,
       labelType: NavigationRailLabelType.all,
       backgroundColor: isDark ? AppColors.surface0D : AppColors.surface0,
-      indicatorColor: Colors.transparent,
       onDestinationSelected: onSelect,
       destinations: [
         for (var i = 0; i < destinations.length; i++)
           NavigationRailDestination(
             padding: EdgeInsets.zero,
-            icon: Icon(destinations[i].icon,
-                color: selectedIndex == i ? _tabColors[i] : (isDark ? AppColors.ink500D : AppColors.ink500)),
-            selectedIcon: Icon(destinations[i].activeIcon, color: _tabColors[i]),
+            icon: Semantics(
+              label: destinations[i].label,
+              selected: selectedIndex == i,
+              child: Icon(
+                destinations[i].icon,
+                color: selectedIndex == i
+                    ? destinations[i].color
+                    : (isDark ? AppColors.ink500D : AppColors.ink700),
+              ),
+            ),
+            selectedIcon: Icon(destinations[i].activeIcon, color: destinations[i].color),
             label: Text(
               destinations[i].label,
               style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: selectedIndex == i ? FontWeight.w700 : FontWeight.w500,
-                color: selectedIndex == i ? _tabColors[i] : (isDark ? AppColors.ink500D : AppColors.ink500),
+                color: selectedIndex == i
+                    ? destinations[i].color
+                    : (isDark ? AppColors.ink500D : AppColors.ink700),
               ),
             ),
           ),

@@ -184,7 +184,7 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final bg = isMine ? AppColors.coral500 : pt.surface2;
+    final bg = isMine ? AppColors.poppy : pt.surface2;
     final fg = isMine ? Colors.white : pt.ink500;
     final align = isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start;
     final radius = BorderRadius.only(
@@ -287,7 +287,7 @@ class _Composer extends StatelessWidget {
                 key: const ValueKey<String>('chat_send_button'),
                 onPressed: sending ? null : onSend,
                 style: IconButton.styleFrom(
-                  backgroundColor: AppColors.coral500,
+                  backgroundColor: AppColors.poppy,
                   foregroundColor: Colors.white,
                 ),
                 icon: sending

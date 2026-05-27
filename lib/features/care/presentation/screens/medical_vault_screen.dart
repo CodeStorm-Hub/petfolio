@@ -541,7 +541,7 @@ class _MedicalRecordCard extends ConsumerWidget {
                           Icon(
                             Icons.attach_file_rounded,
                             size: 14,
-                            color: AppColors.blue500,
+                            color: AppColors.tangerine,
                           ),
                           SizedBox(width: 4),
                           Text(
@@ -549,7 +549,7 @@ class _MedicalRecordCard extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.blue500,
+                              color: AppColors.tangerine,
                             ),
                           ),
                         ],

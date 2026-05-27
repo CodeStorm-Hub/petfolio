@@ -254,7 +254,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const CircularProgressIndicator(
-                    color: AppColors.sunset500,
+                    color: AppColors.tangerine,
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -411,11 +411,11 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(30),
                     gradient: const LinearGradient(
-                      colors: [AppColors.sunset500, AppColors.coral500],
+                      colors: [AppColors.tangerine, AppColors.poppy],
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.sunset500.withAlpha(100),
+                        color: AppColors.tangerine.withAlpha(100),
                         blurRadius: 16,
                         offset: const Offset(0, 6),
                       ),
@@ -504,7 +504,7 @@ class _BrowseLibraryTile extends StatelessWidget {
               ),
               child: const Icon(
                 Icons.photo_library_rounded,
-                color: AppColors.sunset500,
+                color: AppColors.tangerine,
                 size: 18,
               ),
             ),
@@ -721,7 +721,7 @@ class _CameraViewfinderCardState extends State<_CameraViewfinderCard>
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.center_focus_weak_rounded, color: AppColors.sunset500, size: 14),
+                        const Icon(Icons.center_focus_weak_rounded, color: AppColors.tangerine, size: 14),
                         const SizedBox(width: 4),
                         Text(
                           'AF-S Auto',
@@ -868,7 +868,7 @@ class _UploadOverlay extends StatelessWidget {
               height: 48,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                color: AppColors.sunset500,
+                color: AppColors.tangerine,
               ),
             ),
             const SizedBox(height: 20),

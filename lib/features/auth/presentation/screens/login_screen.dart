@@ -164,6 +164,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   bool _obscurePassword = true;
   bool _isLoading = false;
   String? _error;
+  String? _emailError;
+  String? _passwordError;
 
   late final AnimationController _fadeCtrl;
   late final Animation<double> _fadeAnim;
@@ -178,6 +180,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       duration: PetfolioThemeExtension.durationMd,
     )..forward();
     _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
+    _emailController.addListener(_clearEmailError);
+    _passwordController.addListener(_clearPasswordError);
+  }
+
+  void _clearEmailError() {
+    if (_emailError != null) setState(() => _emailError = null);
+  }
+
+  void _clearPasswordError() {
+    if (_passwordError != null) setState(() => _passwordError = null);
   }
 
   @override
@@ -201,6 +213,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     setState(() {
       _isLoading = true;
       _error = null;
+      _emailError = null;
+      _passwordError = null;
     });
 
     try {
@@ -210,13 +224,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           );
       // GoRouter's authStateProvider listener triggers redirect to /home.
     } on AuthException catch (e) {
-      if (mounted) setState(() => _error = _friendlyAuthError(e.message));
+      if (mounted) setState(() => _routeError(e.message));
     } catch (e) {
-      if (mounted) {
-        setState(() => _error = _friendlyAuthError(e.toString()));
-      }
+      if (mounted) setState(() => _error = _friendlyAuthError(e.toString()));
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  /// Routes the server error to the most relevant field, or falls back to the
+  /// generic banner for network / unclassified errors.
+  void _routeError(String raw) {
+    final lower = raw.toLowerCase();
+    if (lower.contains('invalid login') ||
+        lower.contains('invalid_grant') ||
+        lower.contains('invalid credentials')) {
+      _passwordError = 'Incorrect email or password.';
+    } else if (lower.contains('email not confirmed')) {
+      _emailError = 'Please verify your email before signing in.';
+    } else {
+      _error = _friendlyAuthError(raw);
     }
   }
 
@@ -290,6 +317,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           autocorrect: false,
+                          errorText: _emailError,
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
                               return 'Email is required';
@@ -306,9 +334,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         AuthField(
                           controller: _passwordController,
                           label: 'Password',
+                          keyboardType: TextInputType.visiblePassword,
                           obscureText: _obscurePassword,
                           textInputAction: TextInputAction.done,
                           onSubmitted: (_) => _submit(),
+                          errorText: _passwordError,
                           suffixIcon: VisibilityToggle(
                             obscure: _obscurePassword,
                             onTap: () => setState(

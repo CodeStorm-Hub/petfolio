@@ -24,13 +24,13 @@ class AuthBrand extends StatelessWidget {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [AppColors.blue400, AppColors.blue600],
+              colors: [AppColors.tangerine, AppColors.tangerine700],
             ),
             borderRadius:
                 BorderRadius.circular(PetfolioThemeExtension.radiusXl),
             boxShadow: [
               BoxShadow(
-                color: AppColors.blue500.withAlpha(80),
+                color: AppColors.tangerine.withAlpha(80),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
@@ -100,6 +100,7 @@ class AuthField extends StatefulWidget {
     this.suffixIcon,
     this.autocorrect = true,
     this.validator,
+    this.errorText,
   });
 
   final TextEditingController controller;
@@ -111,6 +112,8 @@ class AuthField extends StatefulWidget {
   final Widget? suffixIcon;
   final bool autocorrect;
   final FormFieldValidator<String>? validator;
+  /// Server-side error displayed below the field, overriding any validator message.
+  final String? errorText;
 
   @override
   State<AuthField> createState() => _AuthFieldState();
@@ -210,6 +213,9 @@ class _AuthFieldState extends State<AuthField> {
               const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
           suffixIcon: widget.suffixIcon,
           // ── Inline validation errors ──────────────────────────────────────
+          // errorText (server error) takes precedence over the validator message
+          // when non-null; the field still validates on form submission.
+          errorText: widget.errorText,
           errorStyle: TextStyle(
             color: cs.error,
             fontSize: 12,

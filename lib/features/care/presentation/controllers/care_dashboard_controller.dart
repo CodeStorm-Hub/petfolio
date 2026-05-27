@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/widgets/app_snack_bar.dart';
+import '../../../pet_profile/data/models/pet.dart' show Pet;
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/care_streak.dart';
 import '../../data/models/care_task.dart';
-import '../../data/repositories/care_repository.dart';
+import '../../data/repositories/pet_care_repository.dart';
+import '../../domain/services/care_recommendation_service.dart';
 import 'care_streak_stream_provider.dart';
 
 part 'care_dashboard_controller.g.dart';
@@ -18,6 +20,7 @@ class DailyRoutineState {
     required this.streak,
     required this.weekGoalHit,
     required this.badgeTypes,
+    this.isGeneratingRoutine = false,
   });
 
   final DateTime selectedDate;
@@ -26,6 +29,7 @@ class DailyRoutineState {
   final AsyncValue<CareStreak> streak;
   final AsyncValue<List<bool>> weekGoalHit;
   final Set<String> badgeTypes;
+  final bool isGeneratingRoutine;
 
   DailyRoutineState copyWith({
     DateTime? selectedDate,
@@ -34,6 +38,7 @@ class DailyRoutineState {
     AsyncValue<CareStreak>? streak,
     AsyncValue<List<bool>>? weekGoalHit,
     Set<String>? badgeTypes,
+    bool? isGeneratingRoutine,
   }) =>
       DailyRoutineState(
         selectedDate: selectedDate ?? this.selectedDate,
@@ -42,6 +47,7 @@ class DailyRoutineState {
         streak: streak ?? this.streak,
         weekGoalHit: weekGoalHit ?? this.weekGoalHit,
         badgeTypes: badgeTypes ?? this.badgeTypes,
+        isGeneratingRoutine: isGeneratingRoutine ?? this.isGeneratingRoutine,
       );
 }
 
@@ -197,6 +203,22 @@ class CareDashboard extends _$CareDashboard {
     final petId = ref.read(activePetIdProvider);
     if (petId == null) return;
     await _load(petId, _routine.selectedDate);
+  }
+
+  Future<List<CareTask>?> generateRoutine(Pet activePet) async {
+    _routine = _routine.copyWith(isGeneratingRoutine: true);
+    state = _routine;
+    try {
+      final service = CareRecommendationService();
+      final tasks = await service.generateRecommendations(activePet);
+      _routine = _routine.copyWith(isGeneratingRoutine: false);
+      state = _routine;
+      return tasks;
+    } catch (_) {
+      _routine = _routine.copyWith(isGeneratingRoutine: false);
+      state = _routine;
+      rethrow;
+    }
   }
 
   Future<void> createTask(CareTask task) async {
