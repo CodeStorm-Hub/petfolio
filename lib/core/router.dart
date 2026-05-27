@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'theme/app_colors.dart';
 
 import '../features/auth/presentation/controllers/auth_controller.dart';
+import '../features/auth/presentation/screens/email_verification_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/registration_screen.dart';
 import '../features/care/presentation/screens/care_screen.dart';
@@ -101,6 +102,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegistrationScreen(),
+      ),
+      GoRoute(
+        path: '/verify-email',
+        builder: (context, state) => EmailVerificationScreen(
+          email: state.uri.queryParameters['email'] ?? '',
+        ),
       ),
       GoRoute(
         path: '/onboarding',
@@ -331,6 +338,9 @@ class _RouterNotifier extends ChangeNotifier {
       }
       notifyListeners();
     });
+    // Also re-evaluate when emailConfirmedAt changes (e.g. user confirms email
+    // while the app is open) without a sign-in/sign-out transition.
+    _ref.listen<bool>(isEmailVerifiedProvider, (_, _) => notifyListeners());
     _ref.listen(petListProvider, (_, _) => notifyListeners());
   }
 
@@ -340,13 +350,24 @@ class _RouterNotifier extends ChangeNotifier {
     final isLoggedIn = _ref.read(isLoggedInProvider);
     final loc = state.matchedLocation;
 
-    // ── Not logged in → only /login and /register are allowed ────────
+    // ── Not logged in → only public auth screens are allowed ─────────
     if (!isLoggedIn) {
-      return (loc == '/login' || loc == '/register') ? null : '/login';
+      final isPublic = loc == '/login' ||
+          loc == '/register' ||
+          loc == '/verify-email';
+      return isPublic ? null : '/login';
     }
 
-    // ── Logged in on an auth screen → leave ─────────────────────────
-    if (loc == '/login' || loc == '/register') return '/home';
+    // ── Logged in but email not yet confirmed → gate to /verify-email ─
+    final isVerified = _ref.read(isEmailVerifiedProvider);
+    if (!isVerified) {
+      return loc == '/verify-email' ? null : '/verify-email';
+    }
+
+    // ── Logged in & verified — redirect away from auth screens ────────
+    if (loc == '/login' || loc == '/register' || loc == '/verify-email') {
+      return '/home';
+    }
 
     // ── Logged in but no pets → go to /onboarding ───────────────────
     // Only redirect when the pet list has finished loading AND is empty,

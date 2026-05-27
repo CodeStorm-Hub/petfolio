@@ -1,6 +1,16 @@
 # Petfolio — Progress Log
 
 
+## 2026-05-27 — Auth UX & Security Enhancements
+
+- **Keyboard types**: `TextInputType.visiblePassword` added to all password fields (login + registration × 2). Email fields already had `TextInputType.emailAddress`.
+- **Show/hide toggle**: Already present; no change needed.
+- **Field-level error routing** (login): `_emailError` / `_passwordError` state vars replace the catch-all `AuthErrorBanner` for classified server errors. "Invalid credentials" → password field inline error. "Email not confirmed" → email field inline error. Network/generic errors still fall through to the banner. Errors auto-clear when the user types in the relevant field. `AuthField` gained an `errorText` parameter for this.
+- **Field-level error routing** (registration): "Email already registered" routes to `_emailError` on the email field. Other errors use the banner.
+- **Email verification gate**: `EmailVerificationScreen` (`/verify-email`) created — shows email, resend button (60 s cooldown), spam hint. `AuthRepository.signUp` now returns `AuthResponse`; if `session == null` (confirmation required), registration navigates to `/verify-email?email=...`. `isEmailVerifiedProvider` added to `auth_controller.dart`. `_RouterNotifier` now listens to `isEmailVerifiedProvider` and blocks unverified logged-in users at `/verify-email`. `/login`, `/register`, `/verify-email` are the only routes accessible to unauthenticated users.
+- `flutter analyze` → **No issues found**.
+- **Next step**: UI screen redesigns (pending design approval).
+
 ## 2026-05-27 — Standardize State Management, GoRouter & Material 3 Accessibility
 
 - **StateNotifier migration**: Already completed in a prior session — no legacy providers found.
