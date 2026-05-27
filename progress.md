@@ -1,6 +1,15 @@
 # Petfolio — Progress Log
 
 
+## 2026-05-27 — Care Module Refactoring
+
+- **`care_screen.dart` decomposed** (1929 → ~320 lines): Extracted three widget files — `care_routine_generator_button.dart` (`CareRoutineGeneratorButton`), `care_task_form_sheet.dart` (`CareTaskFormSheet` with static `.show()` helper), `care_task_list.dart` (`CareTaskList` + `CareTaskDoneCounter` + all private task card/context menu/skeleton/error/empty-state widgets). Dead code `_HorizontalDatePicker` removed.
+- **`_isGeneratingRoutine` moved to controller**: `DailyRoutineState` now has `isGeneratingRoutine` field; `CareDashboard.generateRoutine(Pet)` method added — sets flag, calls `CareRecommendationService`, returns tasks or rethrows. Screen reads `dashboard.isGeneratingRoutine` instead of local state.
+- **SnackBar race condition fixed**: Removed `context.go('/care')` call that was clearing the onboarding SnackBar before the user could read it. `_onboardingSuccessHandled` flag prevents replay.
+- **NutritionScreen empty state**: Replaced `SizedBox.shrink()` in `_HistoryList` with `PetfolioEmptyState(icon: monitor_weight_outlined, title: 'No weight entries yet', ...)`.
+- `dart analyze` → **No issues found**.
+- **Next step**: Health vitals UI and repository scaffold.
+
 ## 2026-05-27 — Profile UI Rendering Fixes
 
 - **Bottom nav clipping fixed** (all 5 tab screens): Replaced hardcoded pixel values with `MediaQuery.paddingOf(context).bottom + 80` (nav height 68 + bottom margin 12 = 80 logical pixels above system inset). `matching_screen` was already correct. Changes: `pet_profile_screen` SizedBox 100→dynamic, `care_screen` ListView padding 120→dynamic, `social_screen` footer Padding 120→dynamic, `marketplace_screen` SliverPadding 100→dynamic.

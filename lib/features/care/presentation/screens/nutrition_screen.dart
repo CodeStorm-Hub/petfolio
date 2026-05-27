@@ -593,7 +593,13 @@ class _HistoryList extends StatelessWidget {
     return history.when(
       data: (logs) {
         final weights = logs.where((l) => l.weightKg != null).toList();
-        if (weights.isEmpty) return const SizedBox.shrink();
+        if (weights.isEmpty) {
+          return PetfolioEmptyState(
+            icon: Icons.monitor_weight_outlined,
+            title: 'No weight entries yet',
+            subtitle: 'Log your first weight entry to start tracking your pet\'s progress.',
+          );
+        }
         return Container(
           decoration: BoxDecoration(
             color: cs.surface,
