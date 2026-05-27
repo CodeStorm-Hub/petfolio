@@ -8,6 +8,7 @@ import 'package:petfolio/features/care/data/models/care_task.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_dashboard_controller.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_streak_stream_provider.dart';
 import 'package:petfolio/features/care/presentation/controllers/pet_awards_provider.dart';
+import 'package:petfolio/features/care/presentation/controllers/pet_badges_provider.dart';
 
 import '../../data/models/pet.dart';
 import '../controllers/active_pet_controller.dart';
@@ -129,7 +130,7 @@ class PetProfileScreen extends ConsumerWidget {
                 ),
                 _RecentAchievementsRow(),
                 
-                SizedBox(height: MediaQuery.paddingOf(context).bottom + 80),
+                SizedBox(height: MediaQuery.paddingOf(context).bottom + 120),
               ],
             ),
           ),
@@ -574,38 +575,48 @@ class _MomentPlaceholder extends StatelessWidget {
   }
 }
 
-class _RecentAchievementsRow extends StatelessWidget {
-  static const _badges = [
-    (AppColors.sunny, '🔥', '7-Day Hero'),
-    (AppColors.mint, '🏥', 'Vet Visit'),
-    (AppColors.poppy, '💖', '100 Likes'),
-    (AppColors.lilac, '🎓', 'Trained'),
-    (AppColors.tangerine, '🦴', 'Treat Master'),
-  ];
-
+class _RecentAchievementsRow extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      clipBehavior: Clip.none,
-      child: Row(
-        children: [
-          for (int i = 0; i < _badges.length; i++)
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: SizedBox(
-                width: 86,
-                child: PfAchievementTile(
-                  color: _badges[i].$1,
-                  emoji: _badges[i].$2,
-                  label: _badges[i].$3,
-                  index: i,
-                  boxSize: 76,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activePet = ref.watch(activePetControllerProvider);
+    if (activePet == null) return const SizedBox.shrink();
+
+    final badgesAsync = ref.watch(petBadgesProvider(activePet.id));
+
+    return badgesAsync.when(
+      loading: () => const SizedBox(height: 86, child: Center(child: CircularProgressIndicator.adaptive())),
+      error: (_, _) => const SizedBox(height: 86, child: Center(child: Text('Error loading badges'))),
+      data: (badges) {
+        if (badges.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.only(left: 16, top: 10, bottom: 20),
+            child: Text('No recent achievements yet.', style: TextStyle(color: Colors.grey)),
+          );
+        }
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          child: Row(
+            children: [
+              for (int i = 0; i < badges.length; i++)
+                Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: SizedBox(
+                    width: 86,
+                    child: PfAchievementTile(
+                      color: badges[i].color,
+                      emoji: badges[i].emoji,
+                      label: badges[i].title,
+                      owned: true,
+                      index: i,
+                      boxSize: 76,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-        ],
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -5,6 +5,8 @@ import '../../../../core/theme/theme.dart';
 import '../../../../core/models/pet.dart';
 import '../../../../core/widgets/pf_achievement_tile.dart';
 import '../controllers/care_dashboard_controller.dart';
+import '../controllers/pet_badges_provider.dart';
+import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 
 class CareGamifiedHeader extends ConsumerStatefulWidget {
   const CareGamifiedHeader({
@@ -377,36 +379,51 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
   }
 }
 
-class CareGamifiedTrophyRoom extends StatelessWidget {
+class CareGamifiedTrophyRoom extends ConsumerWidget {
   const CareGamifiedTrophyRoom({super.key});
 
-  static const _badges = [
-    ('🔥', AppColors.sunny, '7-Day', true),
-    ('💯', AppColors.poppy, '100 XP', true),
-    ('🦴', AppColors.tangerine, 'Treat Pro', true),
-    ('💉', AppColors.mint, 'Vaccinated', true),
-  ];
-
   @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 0.75,
-      ),
-      itemCount: _badges.length,
-      itemBuilder: (context, i) => PfAchievementTile(
-        emoji: _badges[i].$1,
-        color: _badges[i].$2,
-        label: _badges[i].$3,
-        owned: _badges[i].$4,
-        index: i,
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activePet = ref.watch(activePetControllerProvider);
+    if (activePet == null) return const SizedBox.shrink();
+
+    final badgesAsync = ref.watch(petBadgesProvider(activePet.id));
+
+    return badgesAsync.when(
+      loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator.adaptive())),
+      error: (_, _) => const SizedBox(height: 100, child: Center(child: Text('Failed to load badges'))),
+      data: (badges) {
+        if (badges.isEmpty) {
+          return const SizedBox(
+            height: 100,
+            child: Center(
+              child: Text(
+                'No badges earned yet.',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+          );
+        }
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            childAspectRatio: 0.75,
+          ),
+          itemCount: badges.length,
+          itemBuilder: (context, i) => PfAchievementTile(
+            emoji: badges[i].emoji,
+            color: badges[i].color,
+            label: badges[i].title,
+            owned: true,
+            index: i,
+          ),
+        );
+      },
     );
   }
 }

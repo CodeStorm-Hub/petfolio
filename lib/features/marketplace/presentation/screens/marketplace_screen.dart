@@ -12,6 +12,7 @@ import '../../data/models/cart_item.dart';
 import '../../data/models/product.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/product_list_controller.dart';
+import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FlyToCart Animation Layer
@@ -238,6 +239,8 @@ class _MarketHeader extends ConsumerWidget {
     final cart = ref.watch(cartProvider);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final activePet = ref.watch(activePetControllerProvider);
+    final petName = activePet?.name.toUpperCase() ?? "YOUR PET";
 
     return Container(
       decoration: BoxDecoration(
@@ -258,7 +261,7 @@ class _MarketHeader extends ConsumerWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('SHIP TO MOCHI\'S HOUSE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: pt.ink500, letterSpacing: 0.6)),
+                  Text('SHIP TO $petName\'S HOUSE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: pt.ink500, letterSpacing: 0.6)),
                   Row(
                     children: [
                       const Icon(Icons.location_on, size: 16, color: AppColors.tangerine),
@@ -490,7 +493,7 @@ class _ShopBody extends ConsumerWidget {
             ),
             
             SliverPadding(
-              padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.paddingOf(context).bottom + 80),
+              padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.paddingOf(context).bottom + 120),
               sliver: SliverGrid.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: MediaQuery.sizeOf(context).width >= ResponsiveLayout.tabletMax

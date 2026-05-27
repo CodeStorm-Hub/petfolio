@@ -289,7 +289,7 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
               bufferAsync: bufferAsync,
             ),
           ),
-        SizedBox(height: isWide ? 16 : (92 + MediaQuery.paddingOf(context).bottom)),
+        SizedBox(height: isWide ? 16 : (120 + MediaQuery.paddingOf(context).bottom)),
       ],
     );
 
@@ -496,7 +496,7 @@ class _LocationAccessEmpty extends StatelessWidget {
               subtitle,
               textAlign: TextAlign.center,
               style: tt.bodySmall?.copyWith(
-                color: pt.ink300,
+                color: pt.ink500,
                 height: 1.45,
               ),
             ),
@@ -552,7 +552,7 @@ class _EmptyDeck extends StatelessWidget {
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: tt.bodySmall?.copyWith(color: pt.ink300, height: 1.45),
+              style: tt.bodySmall?.copyWith(color: pt.ink500, height: 1.45),
             ),
           ],
         ),
@@ -975,7 +975,7 @@ class _ActionDock extends StatelessWidget {
         children: [
           _DockButton(
             size: 56,
-            color: AppColors.ink500,
+            color: AppColors.ink950,
             bgColor: Theme.of(context).colorScheme.surface,
             label: '✕',
             fontSize: 22,
@@ -984,7 +984,7 @@ class _ActionDock extends StatelessWidget {
           const SizedBox(width: 16),
           _DockButton(
             size: 48,
-            color: Colors.white,
+            color: AppColors.ink950,
             bgColor: AppColors.lilac,
             label: '⭐',
             fontSize: 19,
@@ -993,7 +993,7 @@ class _ActionDock extends StatelessWidget {
           const SizedBox(width: 16),
           _DockButton(
             size: 72,
-            color: Colors.white,
+            color: AppColors.ink950,
             bgColor: AppColors.poppy,
             label: '🐾',
             fontSize: 32,
@@ -1002,7 +1002,7 @@ class _ActionDock extends StatelessWidget {
           const SizedBox(width: 16),
           const _DockButton(
             size: 48,
-            color: Colors.white,
+            color: AppColors.ink950,
             bgColor: AppColors.sunny,
             label: '🦴',
             fontSize: 19,
@@ -1011,7 +1011,7 @@ class _ActionDock extends StatelessWidget {
           const SizedBox(width: 16),
           const _DockButton(
             size: 56,
-            color: Colors.white,
+            color: AppColors.ink950,
             bgColor: AppColors.mint,
             label: '↺',
             fontSize: 22,

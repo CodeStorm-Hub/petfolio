@@ -256,7 +256,7 @@ class _PetRow extends StatelessWidget {
               PetAvatar(
                 imageUrl: pet.avatarUrl,
                 size: PetAvatarSize.xl,
-                initials: pet.name.isNotEmpty ? pet.name[0] : null,
+                initials: pet.name.isNotEmpty ? pet.name[0].toUpperCase() : null,
                 borderColor: isActive ? species.accent : null,
                 semanticLabel: pet.name,
               ),

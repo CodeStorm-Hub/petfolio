@@ -216,7 +216,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                     ),
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.paddingOf(context).bottom + 80),
+                      padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.paddingOf(context).bottom + 120),
                       child: Center(
                         child: Text(
                           "You're all caught up 🐾",
