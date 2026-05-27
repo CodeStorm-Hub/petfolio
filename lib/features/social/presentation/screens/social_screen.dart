@@ -375,7 +375,7 @@ class _StoriesRow extends ConsumerWidget {
                   label: 'Your story',
                   avatarUrl: pet.avatarUrl,
                   ringColors: activePetStack.hasUnviewed(userId)
-                      ? const [AppColors.sunset500, AppColors.coral500]
+                      ? const [AppColors.tangerine, AppColors.poppy]
                       : [pt.ink300, pt.ink300],
                   onTap: () => context.push('/social/stories?petId=${pet.id}'),
                   onLongPress: () => _showOwnStoryOptions(context, ref, pet),
@@ -385,7 +385,7 @@ class _StoriesRow extends ConsumerWidget {
                   initial: pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
                   label: 'Your story',
                   avatarUrl: pet.avatarUrl,
-                  ringColors: const [AppColors.sunset500, AppColors.coral500],
+                  ringColors: const [AppColors.tangerine, AppColors.poppy],
                   isAdd: true,
                   onTap: () {
                     ref.read(createPostControllerProvider.notifier).setIsStory(true);
@@ -403,7 +403,7 @@ class _StoriesRow extends ConsumerWidget {
                     label: stack.petName,
                     avatarUrl: stack.petAvatarUrl,
                     ringColors: stack.hasUnviewed(userId)
-                        ? const [AppColors.sunset500, AppColors.coral500]
+                        ? const [AppColors.tangerine, AppColors.poppy]
                         : [pt.ink300, pt.ink300],
                     onTap: () => context.push('/social/stories?petId=${stack.petId}'),
                   ),

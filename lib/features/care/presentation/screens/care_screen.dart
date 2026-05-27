@@ -11,7 +11,7 @@ import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_
 import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 
 import 'package:petfolio/core/errors/app_exception.dart';
-import 'package:petfolio/core/models/pet.dart' show Pet;
+import 'package:petfolio/features/pet_profile/data/models/pet.dart' show Pet;
 
 import 'package:petfolio/features/care/data/models/care_task.dart' as dbtask;
 import 'package:petfolio/features/care/data/models/care_task_log.dart';

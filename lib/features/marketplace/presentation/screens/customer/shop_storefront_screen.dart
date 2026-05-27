@@ -112,7 +112,7 @@ class ShopStorefrontScreen extends ConsumerWidget {
                           height: 16,
                           decoration: const BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AppColors.coral500,
+                            color: AppColors.poppy,
                           ),
                           child: Center(
                             child: Text(
@@ -141,7 +141,7 @@ class ShopStorefrontScreen extends ConsumerWidget {
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [AppColors.apricot500, AppColors.coral500],
+                          colors: [AppColors.sunny, AppColors.poppy],
                         ),
                       ),
                     ),
@@ -406,9 +406,9 @@ class _SocialBtn extends StatelessWidget {
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.blue500.withAlpha(20),
+              color: AppColors.tangerine.withAlpha(20),
             ),
-            child: Icon(icon, size: 18, color: AppColors.blue500),
+            child: Icon(icon, size: 18, color: AppColors.tangerine),
           ),
         ),
       ),

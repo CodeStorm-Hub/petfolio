@@ -302,7 +302,7 @@ class _DashboardBody extends ConsumerWidget {
                     icon: Icons.inventory_2_outlined,
                     label: 'Products',
                     value: '$productCount',
-                    color: AppColors.apricot500,
+                    color: AppColors.sunny,
                     onTap: () => context.push('/seller/products'),
                   ),
                 ),
@@ -312,7 +312,7 @@ class _DashboardBody extends ConsumerWidget {
                     icon: Icons.receipt_long_outlined,
                     label: 'Pending orders',
                     value: '$pendingOrders',
-                    color: AppColors.coral500,
+                    color: AppColors.poppy,
                     onTap: () => context.push('/seller/orders'),
                   ),
                 ),
@@ -527,7 +527,7 @@ class _ShopStatusChip extends StatelessWidget {
       return switch (shop.kycStatus) {
         KycStatus.submitted => (
             'Under Review',
-            AppColors.blue500,
+            AppColors.tangerine,
             Icons.hourglass_top_rounded,
             false,
           ),

@@ -93,7 +93,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to post comment: ${e.toString()}'),
-            backgroundColor: AppColors.coral500,
+            backgroundColor: AppColors.poppy,
           ),
         );
       }
@@ -506,7 +506,7 @@ class _StatsBar extends ConsumerWidget {
           IconButton(
             icon: Icon(
               post.isLiked ? Icons.pets_rounded : Icons.pets_outlined,
-              color: post.isLiked ? AppColors.coral500 : pt.ink500,
+              color: post.isLiked ? AppColors.poppy : pt.ink500,
             ),
             onPressed: () {
               final activePet = ref.read(activePetControllerProvider);
@@ -629,11 +629,11 @@ class _CommentTile extends ConsumerWidget {
               // Delete action
               ListTile(
                 leading: const Icon(Icons.delete_outline_rounded,
-                    color: AppColors.coral500),
+                    color: AppColors.poppy),
                 title: Text(
                   'Delete Comment',
                   style: tt.bodyMedium?.copyWith(
-                    color: AppColors.coral500,
+                    color: AppColors.poppy,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -723,7 +723,7 @@ class _CommentTile extends ConsumerWidget {
                   const SizedBox(height: 16),
                   FilledButton(
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.coral500,
+                      backgroundColor: AppColors.poppy,
                       foregroundColor: Colors.white,
                       minimumSize: const Size.fromHeight(48),
                       shape: RoundedRectangleBorder(
@@ -780,7 +780,7 @@ class _CommentTile extends ConsumerWidget {
               onTap: () => context.push('/social/profile/${comment.petId}'),
               child: CircleAvatar(
                 radius: isReply ? 12 : 16,
-                backgroundColor: AppColors.coral500.withAlpha(200),
+                backgroundColor: AppColors.poppy.withAlpha(200),
                 backgroundImage: comment.avatarUrl != null
                     ? CachedNetworkImageProvider(comment.avatarUrl!)
                     : null,
@@ -875,7 +875,7 @@ class _CommentTile extends ConsumerWidget {
               icon: Icon(
                 comment.isLiked ? Icons.pets_rounded : Icons.pets_outlined,
                 size: 16,
-                color: comment.isLiked ? AppColors.coral500 : pt.ink300,
+                color: comment.isLiked ? AppColors.poppy : pt.ink300,
               ),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(
@@ -1019,9 +1019,9 @@ class _PostOptionsSheet extends ConsumerWidget {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.delete_outline, color: AppColors.coral500),
+                leading: Icon(Icons.delete_outline, color: AppColors.poppy),
                 title: Text('Delete Post',
-                    style: TextStyle(color: AppColors.coral500)),
+                    style: TextStyle(color: AppColors.poppy)),
                 onTap: () {
                   Navigator.pop(context);
                   _confirmDelete(context, ref, post);
@@ -1089,7 +1089,7 @@ class _PostOptionsSheet extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.coral500),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.poppy),
             onPressed: () async {
               Navigator.pop(ctx);
               final activePet = ref.read(activePetControllerProvider);

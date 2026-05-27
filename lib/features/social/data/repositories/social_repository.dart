@@ -198,26 +198,26 @@ class SocialRepository {
     switch (species.toLowerCase()) {
       case 'cat':
         return const _SpeciesPalette(
-          accent: AppColors.mulberry500,
+          accent: AppColors.lilac,
           subject: Color(0xFF7A4570),
           gradient: [
             Color(0xFFF5ECD7),
             Color(0xFFD4B896),
-            AppColors.mulberry500,
+            AppColors.lilac,
           ],
         );
       case 'rabbit':
         return const _SpeciesPalette(
-          accent: AppColors.meadow500,
+          accent: AppColors.mint,
           subject: Color(0xFF4F8C72),
-          gradient: [Color(0xFFE3F1E9), Color(0xFF9CCDB3), AppColors.meadow500],
+          gradient: [Color(0xFFE3F1E9), Color(0xFF9CCDB3), AppColors.mint],
         );
       case 'dog':
       default:
         return const _SpeciesPalette(
-          accent: AppColors.blue500,
+          accent: AppColors.tangerine,
           subject: Color(0xFF1D4ED8),
-          gradient: [Color(0xFFBFD7FF), Color(0xFF6EA8FE), AppColors.blue500],
+          gradient: [Color(0xFFBFD7FF), Color(0xFF6EA8FE), AppColors.tangerine],
         );
     }
   }

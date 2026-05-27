@@ -92,10 +92,10 @@ class _CodOrderCardState extends State<_CodOrderCard> {
             decoration: BoxDecoration(
               borderRadius:
                   BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-              color: AppColors.blue500.withAlpha(15),
+              color: AppColors.tangerine.withAlpha(15),
             ),
             child: const Icon(Icons.payments_outlined,
-                size: 22, color: AppColors.blue500),
+                size: 22, color: AppColors.tangerine),
           ),
           const SizedBox(width: 14),
           Expanded(

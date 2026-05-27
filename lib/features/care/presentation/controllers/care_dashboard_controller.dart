@@ -5,7 +5,7 @@ import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/care_streak.dart';
 import '../../data/models/care_task.dart';
-import '../../data/repositories/care_repository.dart';
+import '../../data/repositories/pet_care_repository.dart';
 import 'care_streak_stream_provider.dart';
 
 part 'care_dashboard_controller.g.dart';

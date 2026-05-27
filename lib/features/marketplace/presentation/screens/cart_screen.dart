@@ -368,10 +368,10 @@ class _PaymentChip extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: selected
-              ? AppColors.blue500.withAlpha(15)
+              ? AppColors.tangerine.withAlpha(15)
               : AppColors.surface1,
           border: Border.all(
-            color: selected ? AppColors.blue500 : AppColors.line,
+            color: selected ? AppColors.tangerine : AppColors.line,
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -381,7 +381,7 @@ class _PaymentChip extends StatelessWidget {
             Icon(
               icon,
               size: 16,
-              color: selected ? AppColors.blue500 : AppColors.ink500,
+              color: selected ? AppColors.tangerine : AppColors.ink500,
             ),
             const SizedBox(width: 6),
             Flexible(
@@ -390,7 +390,7 @@ class _PaymentChip extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: selected ? AppColors.blue500 : AppColors.ink700,
+                  color: selected ? AppColors.tangerine : AppColors.ink700,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),

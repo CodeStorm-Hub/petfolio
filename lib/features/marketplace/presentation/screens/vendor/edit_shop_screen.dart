@@ -200,8 +200,8 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen>
               controller: _tabController,
               labelStyle: tt.labelMedium!.copyWith(fontWeight: FontWeight.w600),
               unselectedLabelStyle: tt.labelMedium,
-              indicatorColor: AppColors.blue500,
-              labelColor: AppColors.blue500,
+              indicatorColor: AppColors.tangerine,
+              labelColor: AppColors.tangerine,
               unselectedLabelColor: AppColors.ink500,
               tabs: const [
                 Tab(text: 'Branding'),
@@ -378,12 +378,12 @@ class _BannerPicker extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.photo_camera_outlined, size: 16, color: AppColors.blue500),
+                    Icon(Icons.photo_camera_outlined, size: 16, color: AppColors.tangerine),
                     const SizedBox(width: 6),
                     Text(
                       'Change Banner',
                       style: Theme.of(context).textTheme.labelMedium!
-                          .copyWith(color: AppColors.blue500, fontWeight: FontWeight.w600),
+                          .copyWith(color: AppColors.tangerine, fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
@@ -396,8 +396,8 @@ class _BannerPicker extends StatelessWidget {
   }
 
   Widget _bannerPlaceholder(BuildContext context) => Container(
-    color: AppColors.blue500.withAlpha(15),
-    child: const Icon(Icons.storefront_outlined, size: 40, color: AppColors.blue500),
+    color: AppColors.tangerine.withAlpha(15),
+    child: const Icon(Icons.storefront_outlined, size: 40, color: AppColors.tangerine),
   );
 }
 
@@ -422,9 +422,9 @@ class _LogoPicker extends StatelessWidget {
     } else if (existingUrl != null) {
       image = Image.network(existingUrl!, fit: BoxFit.cover,
         errorBuilder: (context2, error, stack) => const Icon(
-          Icons.storefront_outlined, size: 28, color: AppColors.blue500));
+          Icons.storefront_outlined, size: 28, color: AppColors.tangerine));
     } else {
-      image = const Icon(Icons.storefront_outlined, size: 28, color: AppColors.blue500);
+      image = const Icon(Icons.storefront_outlined, size: 28, color: AppColors.tangerine);
     }
 
     return GestureDetector(
@@ -435,7 +435,7 @@ class _LogoPicker extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-          color: AppColors.blue500.withAlpha(15),
+          color: AppColors.tangerine.withAlpha(15),
           border: Border.all(color: AppColors.line),
           boxShadow: pt.shadowE1,
         ),
@@ -450,7 +450,7 @@ class _LogoPicker extends StatelessWidget {
                 width: 22,
                 height: 22,
                 decoration: const BoxDecoration(
-                  color: AppColors.blue500,
+                  color: AppColors.tangerine,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.edit, size: 12, color: Colors.white),
@@ -700,7 +700,7 @@ class _FormField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-              borderSide: BorderSide(color: AppColors.blue500, width: 1.5),
+              borderSide: BorderSide(color: AppColors.tangerine, width: 1.5),
             ),
           ),
         ),

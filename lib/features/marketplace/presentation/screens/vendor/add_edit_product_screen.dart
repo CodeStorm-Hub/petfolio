@@ -260,7 +260,7 @@ class _AddEditProductScreenState
                             value: _subscribable,
                             onChanged: (v) =>
                                 setState(() => _subscribable = v),
-                            activeTrackColor: AppColors.blue500,
+                            activeTrackColor: AppColors.tangerine,
                           ),
                           const SizedBox(width: 10),
                           const Column(
@@ -322,7 +322,7 @@ class _AddEditProductScreenState
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.blue500, width: 1.5),
+        borderSide: const BorderSide(color: AppColors.tangerine, width: 1.5),
       ),
     );
   }
@@ -385,7 +385,7 @@ class _Field extends StatelessWidget {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide:
-              const BorderSide(color: AppColors.blue500, width: 1.5),
+              const BorderSide(color: AppColors.tangerine, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

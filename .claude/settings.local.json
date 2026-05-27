@@ -89,7 +89,10 @@
       "mcp__Windows-MCP__Snapshot",
       "mcp__Claude_in_Chrome__find",
       "Bash(dir \"G:\\\\GitHub\\\\petfolio\\\\google_fonts\" /b)",
-      "mcp__5d4f3e29-8e00-4c0a-a2e0-3f9d9a2735f2__list_projects"
+      "mcp__5d4f3e29-8e00-4c0a-a2e0-3f9d9a2735f2__list_projects",
+      "mcp__5d4f3e29-8e00-4c0a-a2e0-3f9d9a2735f2__deploy_edge_function",
+      "Bash(Remove-Item \"G:\\\\GitHub\\\\petfolio\\\\lib\\\\features\\\\care\\\\data\\\\repositories\\\\care_repository.dart\")",
+      "PowerShell(Remove-Item \"G:\\\\GitHub\\\\petfolio\\\\lib\\\\features\\\\care\\\\data\\\\repositories\\\\care_repository.dart\" -Confirm:$false)"
     ]
   }
 }

@@ -222,7 +222,7 @@ class _LocationTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           color: AppColors.surface0,
           border: Border.all(
-            color: selected ? AppColors.blue500 : AppColors.line,
+            color: selected ? AppColors.tangerine : AppColors.line,
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -234,13 +234,13 @@ class _LocationTile extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: selected
-                    ? AppColors.blue500.withAlpha(20)
+                    ? AppColors.tangerine.withAlpha(20)
                     : AppColors.surface2,
               ),
               child: Icon(
                 icon,
                 size: 18,
-                color: selected ? AppColors.blue500 : AppColors.ink300,
+                color: selected ? AppColors.tangerine : AppColors.ink300,
               ),
             ),
             const SizedBox(width: 12),
@@ -253,7 +253,7 @@ class _LocationTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: selected ? AppColors.blue500 : AppColors.ink950,
+                      color: selected ? AppColors.tangerine : AppColors.ink950,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -270,7 +270,7 @@ class _LocationTile extends StatelessWidget {
                   ? Icons.radio_button_checked_rounded
                   : Icons.radio_button_unchecked_rounded,
               size: 20,
-              color: selected ? AppColors.blue500 : AppColors.ink300,
+              color: selected ? AppColors.tangerine : AppColors.ink300,
             ),
           ],
         ),
@@ -332,7 +332,7 @@ class _Field extends StatelessWidget {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide:
-              const BorderSide(color: AppColors.blue500, width: 1.5),
+              const BorderSide(color: AppColors.tangerine, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

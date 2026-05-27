@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:petfolio/core/models/pet.dart';
+import 'package:petfolio/features/pet_profile/data/models/pet.dart';
 import 'package:petfolio/features/care/data/models/care_task.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_dashboard_controller.dart';
 import 'package:petfolio/core/widgets/app_snack_bar.dart';

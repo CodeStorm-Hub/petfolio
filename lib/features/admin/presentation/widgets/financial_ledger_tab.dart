@@ -106,7 +106,7 @@ class _PayoutCardState extends ConsumerState<_PayoutCard> {
                 children: [
                   Text(
                     'Bank details',
-                    style: tt.labelMedium!.copyWith(color: AppColors.blue500),
+                    style: tt.labelMedium!.copyWith(color: AppColors.tangerine),
                   ),
                   const SizedBox(width: 4),
                   Icon(
@@ -114,7 +114,7 @@ class _PayoutCardState extends ConsumerState<_PayoutCard> {
                         ? Icons.keyboard_arrow_up_rounded
                         : Icons.keyboard_arrow_down_rounded,
                     size: 16,
-                    color: AppColors.blue500,
+                    color: AppColors.tangerine,
                   ),
                 ],
               ),

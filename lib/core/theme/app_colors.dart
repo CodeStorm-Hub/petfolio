@@ -110,39 +110,4 @@ abstract final class AppColors {
   static const shadowE3D = Color(0x8C000000);
   static const shadowE4D = Color(0xA6000000);
   static const shadowGlassD = Color(0x8C000000);
-
-  // ── Backward-compat aliases (used by existing screens) ──────────────────────
-  static const blue50   = Color(0xFFFFE0CB); // → tangerineSoft
-  static const blue100  = tangerineSoft;
-  static const blue200  = tangerineSoft;
-  static const blue300  = tangerine;
-  static const blue400  = tangerine;
-  static const blue500  = tangerine;
-  static const blue600  = tangerine700;
-  static const blue700  = tangerine700;
-  static const blue100D = tangerineSoftD;
-  static const blue200D = tangerineSoftD;
-  static const blue300D = tangerineD;
-  static const blue400D = tangerineD;
-  static const blue500D = tangerineD;
-  static const blue600D = tangerine700D;
-  static const blue700D = tangerine700D;
-  static const blue800D = tangerine700D;
-  static const blue900D = tangerine700D;
-
-  static const sunset500  = tangerine;
-  static const sunset500D = tangerineD;
-  static const coral500   = poppy;
-  static const coral500D  = poppyD;
-  static const meadow500  = mint;
-  static const meadow500D = mintD;
-  static const apricot500  = sunny;
-  static const apricot500D = sunnyD;
-  static const mulberry500  = lilac;
-  static const mulberry500D = lilacD;
-
-  static const line200  = line;
-  static const line200D = lineD;
-  static const line100  = line2;
-  static const line100D = line2D;
 }

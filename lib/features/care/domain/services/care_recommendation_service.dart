@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
-import 'package:petfolio/core/models/pet.dart';
+import 'package:petfolio/features/pet_profile/data/models/pet.dart';
 import 'package:petfolio/features/care/data/models/care_task.dart';
 
 final careRecommendationServiceProvider = Provider<CareRecommendationService>(

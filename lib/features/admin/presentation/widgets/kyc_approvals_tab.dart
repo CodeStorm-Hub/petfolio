@@ -398,7 +398,7 @@ class _ShopAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius:
             BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-        color: AppColors.blue500.withAlpha(15),
+        color: AppColors.tangerine.withAlpha(15),
         border: Border.all(color: AppColors.line),
       ),
       clipBehavior: Clip.antiAlias,
@@ -414,7 +414,7 @@ class _ShopAvatar extends StatelessWidget {
 
   Widget get _fallback => const Center(
         child: Icon(Icons.storefront_outlined,
-            size: 22, color: AppColors.blue500),
+            size: 22, color: AppColors.tangerine),
       );
 }
 

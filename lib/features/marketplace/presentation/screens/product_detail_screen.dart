@@ -519,7 +519,7 @@ class _SubscribeCard extends StatelessWidget {
                 height: 44,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  color: subscribe ? AppColors.meadow500 : AppColors.surface2,
+                  color: subscribe ? AppColors.mint : AppColors.surface2,
                 ),
                 child: Icon(
                   Icons.autorenew_rounded,
