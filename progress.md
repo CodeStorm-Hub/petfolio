@@ -1,6 +1,13 @@
 # Petfolio — Progress Log
 
 
+## 2026-05-27 — Profile UI Rendering Fixes
+
+- **Bottom nav clipping fixed** (all 5 tab screens): Replaced hardcoded pixel values with `MediaQuery.paddingOf(context).bottom + 80` (nav height 68 + bottom margin 12 = 80 logical pixels above system inset). `matching_screen` was already correct. Changes: `pet_profile_screen` SizedBox 100→dynamic, `care_screen` ListView padding 120→dynamic, `social_screen` footer Padding 120→dynamic, `marketplace_screen` SliverPadding 100→dynamic.
+- **`PetProfileScreen` `RefreshIndicator`**: Wrapped `CustomScrollView` with `RefreshIndicator.adaptive`. Pull-to-refresh invalidates `petListProvider`, `careDashboardProvider`, and `petAwardsSummaryProvider`, then awaits `petListProvider.future`. Added `AlwaysScrollableScrollPhysics` to `CustomScrollView` so pull gesture fires even when content is short.
+- `flutter analyze` → **No issues found**.
+- **Next step**: UI screen redesigns (pending design approval).
+
 ## 2026-05-27 — Auth UX & Security Enhancements
 
 - **Keyboard types**: `TextInputType.visiblePassword` added to all password fields (login + registration × 2). Email fields already had `TextInputType.emailAddress`.

@@ -59,7 +59,8 @@ class PetProfileScreen extends ConsumerWidget {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isWide = screenWidth >= ResponsiveLayout.mobileMax;
 
-    final view = CustomScrollView(
+    final scrollView = CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverToBoxAdapter(
           child: _HeroGamifiedBanner(pet: activePet),
@@ -128,12 +129,22 @@ class PetProfileScreen extends ConsumerWidget {
                 ),
                 _RecentAchievementsRow(),
                 
-                const SizedBox(height: 100),
+                SizedBox(height: MediaQuery.paddingOf(context).bottom + 80),
               ],
             ),
           ),
         ),
       ],
+    );
+
+    final view = RefreshIndicator.adaptive(
+      onRefresh: () async {
+        ref.invalidate(petListProvider);
+        ref.invalidate(careDashboardProvider);
+        ref.invalidate(petAwardsSummaryProvider);
+        await ref.read(petListProvider.future).catchError((_) => <Pet>[]);
+      },
+      child: scrollView,
     );
 
     return Scaffold(

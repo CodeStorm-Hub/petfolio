@@ -190,7 +190,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                 builder: (context, constraints) {
                   final wide = constraints.maxWidth >= 600;
                   final list = ListView(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 120),
+                    padding: EdgeInsets.fromLTRB(0, 0, 0, MediaQuery.paddingOf(context).bottom + 80),
                     children: [
                       CareGamifiedHeader(
                         activePet: activePet,
