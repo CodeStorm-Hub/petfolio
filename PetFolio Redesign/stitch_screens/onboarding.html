@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PetFolio Onboarding</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800;900&amp;family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#cfbdff",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#351000",
+                        "surface": "#FFFFFF",
+                        "tertiary": "#6849b9",
+                        "on-tertiary-fixed": "#21005d",
+                        "tertiary-fixed": "#e8ddff",
+                        "tangerine-soft": "#FFE0CB",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#002117",
+                        "cream-bg": "#FFF4E6",
+                        "line-dark": "#EFD8BB",
+                        "line-light": "#F4E2CB",
+                        "on-tertiary": "#ffffff",
+                        "background": "#fff8f6",
+                        "error": "#ba1a1a",
+                        "ink-500": "#957762",
+                        "surface-container": "#ffeae0",
+                        "secondary-container": "#68f8ca",
+                        "secondary-fixed-dim": "#4adeb1",
+                        "surface-tint": "#9f4203",
+                        "surface-bright": "#fff8f6",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#ffdbca",
+                        "sunny": "#FFC53D",
+                        "on-primary-container": "#6c2a00",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#6cfbcd",
+                        "outline": "#8a7268",
+                        "on-surface-variant": "#564239",
+                        "on-secondary-fixed-variant": "#00513d",
+                        "tangerine-dark": "#E0651E",
+                        "primary-fixed-dim": "#ffb693",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#f8d2bf",
+                        "poppy": "#FF3D3D",
+                        "on-tertiary-fixed-variant": "#4f2fa0",
+                        "outline-variant": "#ddc1b5",
+                        "surface-container-high": "#ffe2d5",
+                        "primary-fixed": "#ffdbcb",
+                        "surface-container-highest": "#ffdbca",
+                        "inverse-on-surface": "#ffede5",
+                        "inverse-primary": "#ffb693",
+                        "ink-700": "#5E3A28",
+                        "tertiary-container": "#b49aff",
+                        "primary-container": "#ff8a4c",
+                        "inverse-surface": "#422b1e",
+                        "surface-container-low": "#fff1eb",
+                        "on-primary-fixed-variant": "#7a3000",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#2a170b",
+                        "on-tertiary-container": "#472597",
+                        "primary": "#9f4203",
+                        "on-surface": "#2a170b",
+                        "on-secondary-container": "#007056",
+                        "sky": "#6EC8FF",
+                        "secondary": "#006c52"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "squircle": "28px"
+                    },
+                    "spacing": {
+                        "container-margin": "20px",
+                        "gutter": "16px",
+                        "base": "8px",
+                        "section-gap": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Nunito Sans"],
+                        "display-lg": ["Fraunces"],
+                        "body-md": ["Nunito Sans"],
+                        "body-lg": ["Nunito Sans"],
+                        "label-sm": ["Nunito Sans"],
+                        "display-md": ["Fraunces"],
+                        "label-lg": ["Nunito Sans"],
+                        "headline-lg": ["Nunito Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "800"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "26px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                        "display-md": ["36px", {"lineHeight": "44px", "fontWeight": "700"}],
+                        "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "900"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-onboarding-gradient {
+            background: radial-gradient(circle at top right, #FFE0CB 0%, #FFF4E6 70%);
+        }
+        .card-shadow {
+            box-shadow: 0px 8px 24px rgba(120, 60, 20, 0.12);
+        }
+        .btn-3d {
+            box-shadow: 0 6px 0px 0px #7a3000;
+        }
+        .btn-3d:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0px 0px #7a3000;
+        }
+        .floating-paw {
+            position: absolute;
+            opacity: 0.08;
+            color: #E0651E;
+            pointer-events: none;
+            animation: float 20s infinite linear;
+        }
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(100vw, 100vh) rotate(360deg); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-onboarding-gradient min-h-screen flex flex-col font-body-md text-on-background relative overflow-x-hidden selection:bg-tangerine-soft">
+<!-- Background Decor -->
+<div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+<span class="material-symbols-outlined floating-paw text-6xl" style="top: 10%; left: 5%; animation-delay: -2s;">pets</span>
+<span class="material-symbols-outlined floating-paw text-4xl" style="top: 40%; left: 80%; animation-delay: -7s;">pets</span>
+<span class="material-symbols-outlined floating-paw text-7xl" style="top: 70%; left: 20%; animation-delay: -12s;">pets</span>
+<span class="material-symbols-outlined floating-paw text-5xl" style="top: 85%; left: 60%; animation-delay: -5s;">pets</span>
+</div>
+<!-- Header Section -->
+<header class="w-full px-container-margin py-base flex items-center justify-between z-10 sticky top-0">
+<button class="w-11 h-11 bg-surface rounded-full flex items-center justify-center card-shadow active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-on-surface">arrow_back</span>
+</button>
+<!-- 5-Dot Progress Indicator -->
+<div class="flex gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-tangerine-dark"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-line-dark"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-line-dark"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-line-dark"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-line-dark"></div>
+</div>
+<!-- Empty spacer to maintain centering of progress -->
+<div class="w-11"></div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow z-10 px-container-margin pt-10 pb-32 max-w-lg mx-auto w-full">
+<div class="text-center mb-10">
+<h1 class="font-display-md text-display-md text-on-background mb-4">
+                Who are we welcoming home?
+            </h1>
+<p class="font-body-lg text-body-lg text-ink-500">
+                Pick your pet — the app will dress up to match.
+            </p>
+</div>
+<!-- Selection Grid -->
+<div class="grid grid-cols-3 gap-4" id="pet-selection-grid">
+<!-- Dog (Selected) -->
+<button class="pet-card group bg-tangerine-dark text-white rounded-squircle p-4 flex flex-col items-center justify-center gap-3 transition-all duration-300 card-shadow scale-105" onclick="selectPet(this)">
+<div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center text-3xl">
+                    🐶
+                </div>
+<span class="font-label-lg text-label-lg">Dog</span>
+</button>
+<!-- Cat -->
+<button class="pet-card group bg-surface hover:bg-surface-container-low text-on-surface-variant rounded-squircle p-4 flex flex-col items-center justify-center gap-3 transition-all duration-300 border border-line-light card-shadow" onclick="selectPet(this)">
+<div class="w-14 h-14 bg-tertiary-fixed rounded-full flex items-center justify-center text-3xl">
+                    🐱
+                </div>
+<span class="font-label-lg text-label-lg">Cat</span>
+</button>
+<!-- Rabbit -->
+<button class="pet-card group bg-surface hover:bg-surface-container-low text-on-surface-variant rounded-squircle p-4 flex flex-col items-center justify-center gap-3 transition-all duration-300 border border-line-light card-shadow" onclick="selectPet(this)">
+<div class="w-14 h-14 bg-error-container rounded-full flex items-center justify-center text-3xl">
+                    🐰
+                </div>
+<span class="font-label-lg text-label-lg">Rabbit</span>
+</button>
+<!-- Bird -->
+<button class="pet-card group bg-surface hover:bg-surface-container-low text-on-surface-variant rounded-squircle p-4 flex flex-col items-center justify-center gap-3 transition-all duration-300 border border-line-light card-shadow" onclick="selectPet(this)">
+<div class="w-14 h-14 bg-sky/30 rounded-full flex items-center justify-center text-3xl">
+                    🐦
+                </div>
+<span class="font-label-lg text-label-lg">Bird</span>
+</button>
+<!-- Fish -->
+<button class="pet-card group bg-surface hover:bg-surface-container-low text-on-surface-variant rounded-squircle p-4 flex flex-col items-center justify-center gap-3 transition-all duration-300 border border-line-light card-shadow" onclick="selectPet(this)">
+<div class="w-14 h-14 bg-secondary-fixed rounded-full flex items-center justify-center text-3xl">
+                    🐟
+                </div>
+<span class="font-label-lg text-label-lg">Fish</span>
+</button>
+<!-- Reptile -->
+<button class="pet-card group bg-surface hover:bg-surface-container-low text-on-surface-variant rounded-squircle p-4 flex flex-col items-center justify-center gap-3 transition-all duration-300 border border-line-light card-shadow" onclick="selectPet(this)">
+<div class="w-14 h-14 bg-sunny/30 rounded-full flex items-center justify-center text-3xl">
+                    🦎
+                </div>
+<span class="font-label-lg text-label-lg">Reptile</span>
+</button>
+</div>
+</main>
+<!-- Footer Action -->
+<footer class="fixed bottom-0 left-0 right-0 p-container-margin z-20 bg-gradient-to-t from-cream-bg via-cream-bg/90 to-transparent pt-8">
+<div class="max-w-lg mx-auto">
+<button class="w-full bg-primary-container text-on-primary-fixed btn-3d rounded-full py-5 px-8 flex items-center justify-center gap-2 group transition-all">
+<span class="font-label-lg text-headline-md tracking-wider">CONTINUE</span>
+<span class="material-symbols-outlined text-2xl transition-transform group-hover:translate-x-1">chevron_right</span>
+</button>
+</div>
+</footer>
+<script>
+        function selectPet(element) {
+            // Remove active classes from all cards
+            const allCards = document.querySelectorAll('.pet-card');
+            allCards.forEach(card => {
+                card.classList.remove('bg-tangerine-dark', 'text-white', 'scale-105');
+                card.classList.add('bg-surface', 'text-on-surface-variant', 'border', 'border-line-light');
+                
+                // Reset internal icon background transparency
+                const iconContainer = card.querySelector('div');
+                if (iconContainer) {
+                    iconContainer.classList.remove('bg-white/20');
+                }
+            });
+
+            // Add active classes to selected card
+            element.classList.remove('bg-surface', 'text-on-surface-variant', 'border', 'border-line-light');
+            element.classList.add('bg-tangerine-dark', 'text-white', 'scale-105');
+            
+            const iconContainer = element.querySelector('div');
+            if (iconContainer) {
+                iconContainer.classList.add('bg-white/20');
+            }
+
+            // Haptic-like feedback interaction
+            element.animate([
+                { transform: 'scale(1.05)' },
+                { transform: 'scale(1.1)' },
+                { transform: 'scale(1.05)' }
+            ], {
+                duration: 200,
+                easing: 'ease-out'
+            });
+        }
+    </script>
+</body></html>

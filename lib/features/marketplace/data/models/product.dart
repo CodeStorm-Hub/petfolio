@@ -11,7 +11,8 @@ enum ProductCategory {
   toys,
   treats,
   health,
-  grooming;
+  grooming,
+  apparel;
 
   String get label => switch (this) {
         ProductCategory.all      => 'All',
@@ -21,6 +22,7 @@ enum ProductCategory {
         ProductCategory.treats   => 'Treats',
         ProductCategory.health   => 'Health',
         ProductCategory.grooming => 'Grooming',
+        ProductCategory.apparel  => 'Apparel',
       };
 
   static ProductCategory fromString(String s) => values.firstWhere(

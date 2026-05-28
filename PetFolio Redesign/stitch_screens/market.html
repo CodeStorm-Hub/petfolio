@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&amp;family=Nunito+Sans:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#f8d2bf",
+                        "surface-container-high": "#ffe2d5",
+                        "surface-tint": "#9f4203",
+                        "on-tertiary-container": "#472597",
+                        "poppy": "#FF3D3D",
+                        "secondary-fixed-dim": "#4adeb1",
+                        "ink-700": "#5E3A28",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#351000",
+                        "background": "#fff8f6",
+                        "on-surface": "#2a170b",
+                        "tertiary-fixed": "#e8ddff",
+                        "tertiary-container": "#b49aff",
+                        "line-light": "#F4E2CB",
+                        "line-dark": "#EFD8BB",
+                        "inverse-surface": "#422b1e",
+                        "on-secondary-fixed": "#002117",
+                        "on-tertiary-fixed-variant": "#4f2fa0",
+                        "surface-container-low": "#fff1eb",
+                        "primary-container": "#ff8a4c",
+                        "surface": "#FFFFFF",
+                        "on-surface-variant": "#564239",
+                        "sky": "#6EC8FF",
+                        "tangerine-soft": "#FFE0CB",
+                        "on-primary-container": "#6c2a00",
+                        "on-background": "#2a170b",
+                        "surface-container": "#ffeae0",
+                        "secondary-fixed": "#6cfbcd",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#ffdbca",
+                        "on-tertiary-fixed": "#21005d",
+                        "inverse-primary": "#ffb693",
+                        "surface-variant": "#ffdbca",
+                        "primary-fixed": "#ffdbcb",
+                        "secondary": "#006c52",
+                        "outline": "#8a7268",
+                        "ink-500": "#957762",
+                        "inverse-on-surface": "#ffede5",
+                        "secondary-container": "#68f8ca",
+                        "on-secondary": "#ffffff",
+                        "tangerine-dark": "#E0651E",
+                        "tertiary-fixed-dim": "#cfbdff",
+                        "on-secondary-container": "#007056",
+                        "error": "#ba1a1a",
+                        "outline-variant": "#ddc1b5",
+                        "surface-bright": "#fff8f6",
+                        "error-container": "#ffdad6",
+                        "cream-bg": "#FFF4E6",
+                        "primary-fixed-dim": "#ffb693",
+                        "on-secondary-fixed-variant": "#00513d",
+                        "tertiary": "#6849b9",
+                        "on-primary-fixed-variant": "#7a3000",
+                        "on-error": "#ffffff",
+                        "primary": "#9f4203",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "sunny": "#FFC53D"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "squircle": "28px"
+                    },
+                    "spacing": {
+                        "section-gap": "32px",
+                        "container-margin": "20px",
+                        "gutter": "16px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "display-md": ["Fraunces"],
+                        "headline-md": ["Nunito Sans"],
+                        "body-md": ["Nunito Sans"],
+                        "label-sm": ["Nunito Sans"],
+                        "display-lg": ["Fraunces"],
+                        "label-lg": ["Nunito Sans"],
+                        "headline-lg": ["Nunito Sans"],
+                        "body-lg": ["Nunito Sans"]
+                    },
+                    "fontSize": {
+                        "display-md": ["36px", {"lineHeight": "44px", "fontWeight": "700"}],
+                        "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "fontWeight": "700"}],
+                        "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "900"}],
+                        "body-lg": ["18px", {"lineHeight": "26px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .squircle { border-radius: 28px; }
+        .organic-shadow { box-shadow: 0 8px 30px rgba(120, 60, 20, 0.12); }
+        .tactile-button { box-shadow: 0 6px 0 #E0651E; transition: all 0.1s ease-out; }
+        .tactile-button:active { box-shadow: 0 2px 0 #E0651E; transform: translateY(4px); }
+        .wave-container { position: relative; overflow: hidden; }
+        .wave-mask {
+            clip-path: ellipse(80% 50% at 50% 0%);
+        }
+        ::-webkit-scrollbar { display: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-cream-bg font-body-md text-on-background min-h-screen">
+<!-- Top App Bar Area with Gradient -->
+<header class="bg-gradient-to-b from-[#FFEDB3] to-cream-bg pb-6 pt-4 sticky top-0 z-40 transition-all duration-300">
+<div class="px-container-margin flex justify-between items-center mb-4">
+<!-- Delivery Info -->
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-ink-500 tracking-wider">SHIP TO MOCHI'S HOUSE</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="location_on">location_on</span>
+<span class="font-headline-md text-body-md text-on-surface">Brooklyn, NY</span>
+</div>
+</div>
+<!-- Shopping Cart Button -->
+<div class="relative">
+<button class="w-11 h-11 bg-primary-container rounded-full flex items-center justify-center text-on-primary-container shadow-lg hover:scale-105 transition-transform active:scale-95">
+<span class="material-symbols-outlined" data-icon="shopping_basket">shopping_basket</span>
+<span class="absolute -top-1 -right-1 bg-poppy text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-[#FFEDB3]">3</span>
+</button>
+</div>
+</div>
+<!-- Search Input -->
+<div class="px-container-margin">
+<div class="relative group">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-ink-500 group-focus-within:text-primary transition-colors" data-icon="search">search</span>
+<input class="w-full h-12 pl-12 pr-4 bg-surface rounded-full border border-line-dark focus:ring-2 focus:ring-primary-container focus:border-transparent outline-none font-body-md shadow-sm" placeholder="Search for treats, toys..." type="text"/>
+</div>
+</div>
+</header>
+<main class="pb-32">
+<!-- Categories Scrolling Bar -->
+<section class="mt-4 mb-8">
+<div class="flex overflow-x-auto px-container-margin gap-4 py-2 no-scrollbar">
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-16 h-16 squircle bg-surface border border-line-light flex items-center justify-center shadow-sm group-hover:bg-primary-container transition-all group-active:scale-90">
+<span class="material-symbols-outlined text-primary text-2xl group-hover:text-white" data-icon="lunch_dining">lunch_dining</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface-variant">Food</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-16 h-16 squircle bg-surface border border-line-light flex items-center justify-center shadow-sm group-hover:bg-primary-container transition-all group-active:scale-90">
+<span class="material-symbols-outlined text-primary text-2xl group-hover:text-white" data-icon="pets">pets</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface-variant">Treats</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-16 h-16 squircle bg-surface border border-line-light flex items-center justify-center shadow-sm group-hover:bg-primary-container transition-all group-active:scale-90">
+<span class="material-symbols-outlined text-primary text-2xl group-hover:text-white" data-icon="sports_tennis">sports_tennis</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface-variant">Toys</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-16 h-16 squircle bg-surface border border-line-light flex items-center justify-center shadow-sm group-hover:bg-primary-container transition-all group-active:scale-90">
+<span class="material-symbols-outlined text-primary text-2xl group-hover:text-white" data-icon="bed">bed</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface-variant">Beds</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-16 h-16 squircle bg-surface border border-line-light flex items-center justify-center shadow-sm group-hover:bg-primary-container transition-all group-active:scale-90">
+<span class="material-symbols-outlined text-primary text-2xl group-hover:text-white" data-icon="apparel">apparel</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface-variant">Apparel</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-16 h-16 squircle bg-surface border border-line-light flex items-center justify-center shadow-sm group-hover:bg-primary-container transition-all group-active:scale-90">
+<span class="material-symbols-outlined text-primary text-2xl group-hover:text-white" data-icon="brush">brush</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface-variant">Grooming</span>
+</div>
+</div>
+</section>
+<!-- Hero Banner -->
+<section class="px-container-margin mb-section-gap">
+<div class="bg-gradient-to-br from-poppy to-primary-container squircle p-6 organic-shadow relative overflow-hidden">
+<div class="absolute right-[-20px] bottom-[-20px] opacity-20">
+<span class="material-symbols-outlined text-[120px] text-white" data-icon="card_membership">card_membership</span>
+</div>
+<div class="relative z-10 flex flex-col items-start gap-3">
+<span class="bg-white/20 px-3 py-1 rounded-full text-white font-label-lg text-label-sm backdrop-blur-sm">FOR MEMBERS</span>
+<h2 class="font-headline-lg text-headline-lg text-white leading-tight">20% off treats<br/>this week 🦴</h2>
+<button class="bg-white text-primary px-6 py-2 rounded-full font-label-lg text-label-lg tactile-button-white shadow-md active:scale-95 transition-all">Claim</button>
+</div>
+</div>
+</section>
+<!-- Product Grid Section -->
+<section class="px-container-margin">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h3 class="font-display-md text-headline-lg text-on-surface">Trending in your pack</h3>
+<p class="font-body-md text-ink-500">Based on Mochi's favorites</p>
+</div>
+<button class="text-primary font-label-lg text-label-lg hover:underline underline-offset-4">See All</button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Product Card 1 -->
+<div class="bg-surface border border-line-light squircle p-4 organic-shadow flex flex-col gap-3 group">
+<div class="w-full aspect-square rounded-2xl bg-gradient-to-br from-sky/20 to-sky/5 flex items-center justify-center relative overflow-hidden">
+<span class="text-5xl group-hover:scale-110 transition-transform duration-300">🥣</span>
+<div class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-sunny text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-[10px] font-bold text-on-surface">4.8</span>
+</div>
+</div>
+<div>
+<h4 class="font-headline-md text-body-md text-on-surface line-clamp-1">Organic Salmon</h4>
+<p class="font-body-md text-ink-500 text-sm">150g • Adult</p>
+</div>
+<div class="flex justify-between items-center mt-auto">
+<span class="font-headline-md text-headline-md text-primary">$12.99</span>
+<button class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center tactile-button shadow-sm">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="bg-surface border border-line-light squircle p-4 organic-shadow flex flex-col gap-3 group">
+<div class="w-full aspect-square rounded-2xl bg-gradient-to-br from-sunny/20 to-sunny/5 flex items-center justify-center relative overflow-hidden">
+<span class="text-5xl group-hover:scale-110 transition-transform duration-300">🦴</span>
+<div class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-sunny text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-[10px] font-bold text-on-surface">4.9</span>
+</div>
+</div>
+<div>
+<h4 class="font-headline-md text-body-md text-on-surface line-clamp-1">Dental Chew Toy</h4>
+<p class="font-body-md text-ink-500 text-sm">Medium • Durable</p>
+</div>
+<div class="flex justify-between items-center mt-auto">
+<span class="font-headline-md text-headline-md text-primary">$8.50</span>
+<button class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center tactile-button shadow-sm">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="bg-surface border border-line-light squircle p-4 organic-shadow flex flex-col gap-3 group">
+<div class="w-full aspect-square rounded-2xl bg-gradient-to-br from-tertiary-container/20 to-tertiary-container/5 flex items-center justify-center relative overflow-hidden">
+<span class="text-5xl group-hover:scale-110 transition-transform duration-300">🪶</span>
+<div class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-sunny text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-[10px] font-bold text-on-surface">4.7</span>
+</div>
+</div>
+<div>
+<h4 class="font-headline-md text-body-md text-on-surface line-clamp-1">Feather Wand</h4>
+<p class="font-body-md text-ink-500 text-sm">Interactive • Fun</p>
+</div>
+<div class="flex justify-between items-center mt-auto">
+<span class="font-headline-md text-headline-md text-primary">$6.99</span>
+<button class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center tactile-button shadow-sm">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+<!-- Product Card 4 -->
+<div class="bg-surface border border-line-light squircle p-4 organic-shadow flex flex-col gap-3 group">
+<div class="w-full aspect-square rounded-2xl bg-gradient-to-br from-poppy/20 to-poppy/5 flex items-center justify-center relative overflow-hidden">
+<span class="text-5xl group-hover:scale-110 transition-transform duration-300">🎾</span>
+<div class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-sunny text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-[10px] font-bold text-on-surface">4.8</span>
+</div>
+</div>
+<div>
+<h4 class="font-headline-md text-body-md text-on-surface line-clamp-1">Bouncy Ball 3-Pk</h4>
+<p class="font-body-md text-ink-500 text-sm">Small • High Bounce</p>
+</div>
+<div class="flex justify-between items-center mt-auto">
+<span class="font-headline-md text-headline-md text-primary">$15.00</span>
+<button class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center tactile-button shadow-sm">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-40px)] max-w-md z-50 flex justify-around items-center p-2 bg-surface dark:bg-surface-container-lowest rounded-full shadow-[0_8px_30px_rgb(120,60,20,0.18)]">
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-5 py-2 transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="explore" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="font-label-lg text-[10px]">Discover</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-2 hover:bg-surface-container-high rounded-full transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="pets">pets</span>
+<span class="font-label-lg text-[10px]">Matches</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-2 hover:bg-surface-container-high rounded-full transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+<span class="font-label-lg text-[10px]">Social</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-2 hover:bg-surface-container-high rounded-full transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-lg text-[10px]">Profile</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction for the top bar on scroll
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 20) {
+                header.classList.add('shadow-md');
+                header.classList.remove('bg-gradient-to-b');
+                header.classList.add('bg-white/90', 'backdrop-blur-md');
+            } else {
+                header.classList.remove('shadow-md');
+                header.classList.add('bg-gradient-to-b');
+                header.classList.remove('bg-white/90', 'backdrop-blur-md');
+            }
+        });
+
+        // Simple button click feedback
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                let ripple = document.createElement('span');
+                ripple.style.position = 'absolute';
+                ripple.style.width = '10px';
+                ripple.style.height = '10px';
+                ripple.style.background = 'rgba(255, 255, 255, 0.4)';
+                ripple.style.borderRadius = '50%';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.style.transform = 'translate(-50%, -50%) scale(0)';
+                ripple.style.animation = 'ripple 0.6s linear';
+                ripple.style.pointerEvents = 'none';
+                
+                btn.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Add ripple animation style
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes ripple {
+                to { transform: translate(-50%, -50%) scale(20); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body></html>

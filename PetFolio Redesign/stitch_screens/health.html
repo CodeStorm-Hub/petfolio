@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mochi · Medical Vault</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800;900&amp;family=Fraunces:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tangerine-dark": "#E0651E",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "line-light": "#F4E2CB",
+                        "on-tertiary-fixed-variant": "#4f2fa0",
+                        "secondary-fixed-dim": "#4adeb1",
+                        "cream-bg": "#FFF4E6",
+                        "surface-container-highest": "#ffdbca",
+                        "line-dark": "#EFD8BB",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#ffb693",
+                        "primary-fixed-dim": "#ffb693",
+                        "on-primary-fixed-variant": "#7a3000",
+                        "surface-bright": "#fff8f6",
+                        "on-tertiary-fixed": "#21005d",
+                        "ink-700": "#5E3A28",
+                        "tangerine-soft": "#FFE0CB",
+                        "outline": "#8a7268",
+                        "sunny": "#FFC53D",
+                        "on-error-container": "#93000a",
+                        "secondary-container": "#68f8ca",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#f8d2bf",
+                        "primary-container": "#ff8a4c",
+                        "inverse-surface": "#422b1e",
+                        "outline-variant": "#ddc1b5",
+                        "on-surface-variant": "#564239",
+                        "tertiary-container": "#b49aff",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#ffe2d5",
+                        "on-secondary-container": "#007056",
+                        "background": "#fff8f6",
+                        "ink-500": "#957762",
+                        "on-secondary-fixed-variant": "#00513d",
+                        "surface-variant": "#ffdbca",
+                        "on-primary-container": "#6c2a00",
+                        "on-background": "#2a170b",
+                        "tertiary-fixed": "#e8ddff",
+                        "surface": "#FFFFFF",
+                        "surface-tint": "#9f4203",
+                        "on-surface": "#2a170b",
+                        "tertiary": "#6849b9",
+                        "tertiary-fixed-dim": "#cfbdff",
+                        "on-secondary-fixed": "#002117",
+                        "secondary-fixed": "#6cfbcd",
+                        "inverse-on-surface": "#ffede5",
+                        "primary-fixed": "#ffdbcb",
+                        "primary": "#9f4203",
+                        "secondary": "#006c52",
+                        "poppy": "#FF3D3D",
+                        "on-primary-fixed": "#351000",
+                        "on-tertiary-container": "#472597",
+                        "surface-container-low": "#fff1eb",
+                        "sky": "#6EC8FF",
+                        "surface-container": "#ffeae0",
+                        "error": "#ba1a1a",
+                        "mint-soft": "#BFF1E0",
+                        "mint-dark": "#198C6E",
+                        "ink-950": "#2a170b",
+                        "mint-accent": "#2FCBA0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "squircle": "28px"
+                    },
+                    "spacing": {
+                        "section-gap": "32px",
+                        "container-margin": "20px",
+                        "gutter": "16px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Nunito Sans"],
+                        "display-md": ["Fraunces"],
+                        "display-lg": ["Fraunces"],
+                        "label-lg": ["Nunito Sans"],
+                        "headline-lg": ["Nunito Sans"],
+                        "body-lg": ["Nunito Sans"],
+                        "body-md": ["Nunito Sans"],
+                        "label-sm": ["Nunito Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "800"}],
+                        "display-md": ["36px", {"lineHeight": "44px", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "fontWeight": "700"}],
+                        "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "900"}],
+                        "body-lg": ["18px", {"lineHeight": "26px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #FFF4E6;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .organic-wave {
+            mask-image: url("data:image/svg+xml,%3Csvg width='1440' height='100' viewBox='0 0 1440 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 100C240 100 240 0 480 0C720 0 720 100 960 100C1200 100 1200 0 1440 0V100H0Z' fill='white'/%3E%3C/svg%3E");
+            mask-repeat: no-repeat;
+            mask-size: cover;
+            mask-position: bottom;
+        }
+        .tactile-btn {
+            box-shadow: 0 6px 0 0 rgba(0, 0, 0, 0.1);
+        }
+        .tactile-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.1);
+        }
+        .mint-shadow {
+            box-shadow: 0 6px 0 0 #126b54;
+        }
+        .card-elevation {
+            box-shadow: 0 4px 20px rgba(120, 60, 20, 0.08);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-background min-h-screen pb-32">
+<!-- Header Section with Gradient -->
+<header class="bg-gradient-to-b from-mint-soft to-cream-bg pt-4 pb-12 relative">
+<!-- Top Bar -->
+<nav class="flex items-center justify-between px-container-margin mb-8">
+<button class="w-11 h-11 flex items-center justify-center bg-surface rounded-full shadow-sm active:scale-90 duration-150">
+<span class="material-symbols-outlined text-mint-dark">arrow_back</span>
+</button>
+<h1 class="font-[Fraunces] font-[500] text-lg text-mint-dark tracking-wide uppercase">
+                MOCHI · MEDICAL VAULT
+            </h1>
+<button class="w-11 h-11 flex items-center justify-center bg-surface rounded-full shadow-sm active:scale-90 duration-150">
+<span class="material-symbols-outlined text-mint-dark">add</span>
+</button>
+</nav>
+<!-- Hero Heading -->
+<div class="px-container-margin mb-8">
+<h2 class="font-[Fraunces] font-[700] text-4xl leading-tight text-ink-950">
+                Everything healthy,<br/>in one cozy spot.
+            </h2>
+</div>
+<!-- Health Pills (Summary Cards) -->
+<div class="flex gap-3 px-container-margin overflow-x-auto no-scrollbar">
+<!-- Vitals -->
+<div class="flex-shrink-0 bg-surface px-4 py-3 rounded-squircle border border-line-light card-elevation flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-mint-dark text-[18px]" style="font-variation-settings: 'FILL' 1;">monitor_heart</span>
+</div>
+<div>
+<p class="text-ink-500 text-[10px] uppercase font-extrabold tracking-wider">Vitals</p>
+<p class="font-headline-md text-sm text-on-surface">Strong</p>
+</div>
+</div>
+<!-- Vaccines -->
+<div class="flex-shrink-0 bg-surface px-4 py-3 rounded-squircle border border-line-light card-elevation flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-mint-dark text-[18px]" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</div>
+<div>
+<p class="text-ink-500 text-[10px] uppercase font-extrabold tracking-wider">Vaccines</p>
+<p class="font-headline-md text-sm text-on-surface">Up to date</p>
+</div>
+</div>
+<!-- Next Visit -->
+<div class="flex-shrink-0 bg-surface px-4 py-3 rounded-squircle border border-line-light card-elevation flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-sunny/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-sunny text-[18px]" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+</div>
+<div>
+<p class="text-ink-500 text-[10px] uppercase font-extrabold tracking-wider">Next visit</p>
+<p class="font-headline-md text-sm text-on-surface">14 Jun</p>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Body -->
+<main class="px-container-margin space-y-8 mt-2">
+<!-- Vault Section 1: Vaccines -->
+<section>
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-mint-accent">vaccines</span>
+<h3 class="font-headline-md text-mint-accent">Vaccines</h3>
+</div>
+<div class="bg-surface rounded-squircle border border-line-light card-elevation p-6">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline-md text-on-surface">Rabies (Core)</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Annual</span>
+<span class="text-ink-500 font-label-sm">20 May 2024</span>
+</div>
+</div>
+<div class="bg-mint-soft text-mint-dark px-3 py-1.5 rounded-full text-xs font-bold">
+                        Up to date
+                    </div>
+</div>
+</div>
+</section>
+<!-- Vault Section 2: Medications -->
+<section>
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-poppy">medication</span>
+<h3 class="font-headline-md text-poppy">Medications</h3>
+</div>
+<div class="bg-surface rounded-squircle border border-line-light card-elevation p-6">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h4 class="font-headline-md text-on-surface">Heartworm pill</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="bg-error-container text-poppy px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Monthly</span>
+<span class="text-poppy font-bold font-label-sm">Due tomorrow</span>
+</div>
+</div>
+<div class="bg-error-container text-poppy px-3 py-1.5 rounded-full text-xs font-bold">
+                        Upcoming
+                    </div>
+</div>
+<div class="flex items-center gap-2 p-3 bg-surface-container-low rounded-xl border border-dashed border-outline-variant">
+<span class="material-symbols-outlined text-ink-500 text-sm">info</span>
+<p class="text-sm text-on-surface-variant italic">Give with dinner</p>
+</div>
+</div>
+</section>
+<!-- Vault Section 3: Vet Visits -->
+<section>
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-primary-container">event</span>
+<h3 class="font-headline-md text-primary-container">Vet visits</h3>
+</div>
+<div class="bg-surface rounded-squircle border border-line-light card-elevation p-6">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline-md text-on-surface">Routine Checkup</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="bg-surface-container-highest text-tangerine-dark px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Physical</span>
+<span class="text-ink-500 font-label-sm">14 Jun 2024</span>
+</div>
+</div>
+<div class="bg-surface-container-highest text-tangerine-dark px-3 py-1.5 rounded-full text-xs font-bold">
+                        Scheduled
+                    </div>
+</div>
+</div>
+</section>
+<!-- Share with Vet Card -->
+<section class="mt-12">
+<div class="bg-surface border-2 border-dashed border-mint-accent rounded-squircle p-8 text-center flex flex-col items-center gap-4">
+<div class="w-14 h-14 bg-secondary-container rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-mint-dark text-3xl">stethoscope</span>
+</div>
+<p class="font-headline-md text-on-surface max-w-[240px]">
+                    Need to send Mochi's records to your vet?
+                </p>
+<button class="w-full max-w-[200px] bg-mint-accent text-white py-4 rounded-full font-extrabold text-lg tactile-btn mint-shadow transition-all duration-150 mt-2">
+                    Share
+                </button>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 w-full px-container-margin pb-base flex justify-around items-center bg-surface border-t border-line-light h-20 md:hidden z-50">
+<button class="flex flex-col items-center justify-center text-ink-500 px-4 py-2 hover:bg-surface-container-low transition-colors duration-200">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-ink-500 px-4 py-2 hover:bg-surface-container-low transition-colors duration-200">
+<span class="material-symbols-outlined">medical_services</span>
+<span class="font-label-sm text-label-sm">Health</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-tangerine-soft text-on-primary-container rounded-full px-4 py-2 active:scale-90 duration-200 ease-out">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">folder_shared</span>
+<span class="font-label-sm text-label-sm font-bold">Records</span>
+</button>
+<button class="flex flex-col items-center justify-center text-ink-500 px-4 py-2 hover:bg-surface-container-low transition-colors duration-200">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</button>
+</nav>
+<!-- Micro-interaction script -->
+<script>
+        // Simple logic for the active state highlighting
+        document.querySelectorAll('nav button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active classes from all
+                document.querySelectorAll('nav button').forEach(b => {
+                    b.classList.remove('bg-tangerine-soft', 'text-on-primary-container', 'rounded-full');
+                    b.classList.add('text-ink-500');
+                    const icon = b.querySelector('.material-symbols-outlined');
+                    if (icon) icon.style.fontVariationSettings = "'FILL' 0";
+                });
+                // Add to current
+                this.classList.remove('text-ink-500');
+                this.classList.add('bg-tangerine-soft', 'text-on-primary-container', 'rounded-full');
+                const icon = this.querySelector('.material-symbols-outlined');
+                if (icon) icon.style.fontVariationSettings = "'FILL' 1";
+            });
+        });
+    </script>
+</body></html>

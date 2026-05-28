@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Side-by-Side Comparison</title>
+    <style>
+        body { margin: 0; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; background: #222; color: #fff; }
+        header { padding: 12px 20px; display: flex; align-items: center; gap: 20px; background: #111; border-bottom: 1px solid #333; }
+        select { padding: 6px 12px; font-size: 14px; border-radius: 4px; }
+        .container { display: flex; flex: 1; overflow: hidden; }
+        .pane { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #444; }
+        .pane:last-child { border-right: none; }
+        .pane-title { padding: 10px; text-align: center; font-weight: bold; background: #333; font-size: 14px; }
+        iframe { flex: 1; border: none; width: 100%; height: 100%; background: #fff; }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Stitch Comparison Dashboard</h2>
+        <select id="screen-select" onchange="updateScreens()">
+            <option value="onboarding">Onboarding</option>
+            <option value="home">Home</option>
+            <option value="care">Care</option>
+            <option value="social">Social</option>
+            <option value="match">Match</option>
+            <option value="market">Market</option>
+            <option value="health">Health</option>
+        </select>
+    </header>
+    <div class="container">
+        <div class="pane">
+            <div class="pane-title">Original React UI (Navigate manually to match screen)</div>
+            <iframe src="PetFolio Redesign.html"></iframe>
+        </div>
+        <div class="pane">
+            <div class="pane-title">Stitch Generated HTML</div>
+            <iframe id="stitch-frame" src="stitch_screens/onboarding.html"></iframe>
+        </div>
+    </div>
+    <script>
+        function updateScreens() {
+            const screen = document.getElementById('screen-select').value;
+            document.getElementById('stitch-frame').src = `stitch_screens/${screen}.html`;
+        }
+    </script>
+</body>
+</html>

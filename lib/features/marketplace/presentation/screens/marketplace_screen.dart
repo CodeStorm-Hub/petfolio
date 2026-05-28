@@ -389,7 +389,7 @@ const _cats = [
   _CategoryModel(ProductCategory.treats, 'Treats', '🦴', AppColors.sunny),
   _CategoryModel(ProductCategory.toys, 'Toys', '🎾', AppColors.mint),
   _CategoryModel(ProductCategory.gear, 'Beds', '🛏️', AppColors.poppy),
-  _CategoryModel(ProductCategory.all, 'Apparel', '🧶', AppColors.lilac), // Reuse 'all' for Apparel demo
+  _CategoryModel(ProductCategory.apparel, 'Apparel', '🧶', AppColors.lilac),
   _CategoryModel(ProductCategory.grooming, 'Grooming', '🛁', AppColors.sky),
 ];
 

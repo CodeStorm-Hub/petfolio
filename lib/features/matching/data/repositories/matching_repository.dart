@@ -95,7 +95,6 @@ class MatchingRepository {
   }) async {
     try {
       if (_dataSource.currentUserId == null) return;
-      if (swipedPetId.startsWith('demo-')) return;
 
       final swipeAction = switch (action) {
         'pass' => SwipeTableAction.pass,

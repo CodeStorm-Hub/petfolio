@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PetFolio - Pet Dating</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800;900&amp;family=Fraunces:wght@700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@100..900&amp;family=Nunito+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed": "#ffdbcb",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#21005d",
+                    "tertiary-fixed-dim": "#cfbdff",
+                    "surface-container-high": "#ffe2d5",
+                    "surface-variant": "#ffdbca",
+                    "inverse-primary": "#ffb693",
+                    "error": "#ba1a1a",
+                    "on-error-container": "#93000a",
+                    "background": "#fff8f6",
+                    "on-primary": "#ffffff",
+                    "inverse-surface": "#422b1e",
+                    "secondary-container": "#68f8ca",
+                    "on-tertiary-fixed-variant": "#4f2fa0",
+                    "tangerine-dark": "#E0651E",
+                    "surface-tint": "#9f4203",
+                    "secondary-fixed-dim": "#4adeb1",
+                    "on-primary-container": "#6c2a00",
+                    "on-surface": "#2a170b",
+                    "line-light": "#F4E2CB",
+                    "on-tertiary-container": "#472597",
+                    "inverse-on-surface": "#ffede5",
+                    "outline-variant": "#ddc1b5",
+                    "secondary-fixed": "#6cfbcd",
+                    "surface-container-low": "#fff1eb",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed-variant": "#7a3000",
+                    "tangerine-soft": "#FFE0CB",
+                    "surface-container": "#ffeae0",
+                    "tertiary-fixed": "#e8ddff",
+                    "surface-bright": "#fff8f6",
+                    "sunny": "#FFC53D",
+                    "ink-700": "#5E3A28",
+                    "tertiary": "#6849b9",
+                    "poppy": "#FF3D3D",
+                    "cream-bg": "#FFF4E6",
+                    "on-secondary-container": "#007056",
+                    "on-secondary-fixed": "#002117",
+                    "outline": "#8a7268",
+                    "on-secondary-fixed-variant": "#00513d",
+                    "surface": "#FFFFFF",
+                    "primary-container": "#ff8a4c",
+                    "surface-dim": "#f8d2bf",
+                    "secondary": "#006c52",
+                    "surface-container-highest": "#ffdbca",
+                    "ink-500": "#957762",
+                    "on-primary-fixed": "#351000",
+                    "on-error": "#ffffff",
+                    "primary-fixed-dim": "#ffb693",
+                    "error-container": "#ffdad6",
+                    "on-surface-variant": "#564239",
+                    "on-background": "#2a170b",
+                    "line-dark": "#EFD8BB",
+                    "sky": "#6EC8FF",
+                    "tertiary-container": "#b49aff",
+                    "primary": "#9f4203"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "16px",
+                    "section-gap": "32px",
+                    "base": "8px",
+                    "container-margin": "20px"
+            },
+            "fontFamily": {
+                    "label-sm": ["Nunito Sans"],
+                    "display-lg": ["Fraunces"],
+                    "body-md": ["Nunito Sans"],
+                    "headline-md": ["Nunito Sans"],
+                    "body-lg": ["Nunito Sans"],
+                    "label-lg": ["Nunito Sans"],
+                    "display-md": ["Fraunces"],
+                    "headline-lg": ["Nunito Sans"]
+            },
+            "fontSize": {
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "26px", "fontWeight": "400"}],
+                    "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                    "display-md": ["36px", {"lineHeight": "44px", "fontWeight": "700"}],
+                    "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "900"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .swipe-card-shadow {
+            box-shadow: 0 8px 32px rgba(120, 60, 20, 0.18);
+        }
+        .btn-3d {
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .btn-3d:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 var(--shadow-color);
+        }
+        .lilac-gradient {
+            background: linear-gradient(135deg, #E2D6FF 0%, #A98BFF 100%);
+        }
+        .glass-overlay {
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-cream-bg text-on-surface font-body-md min-h-screen flex flex-col items-center">
+<!-- TopAppBar -->
+<header class="bg-background dark:bg-on-background shadow-sm docked full-width top-0 z-40 fixed w-full">
+<div class="flex justify-between items-center px-container-margin py-base w-full max-w-2xl mx-auto">
+<div class="flex items-center gap-2">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary">
+<img alt="Current pet profile picture" class="w-full h-auto" data-alt="A close-up, joyful portrait of a fluffy white puppy with bright eyes and a happy expression. The setting is a soft-focus garden with golden hour lighting, reflecting a playful and warm aesthetic. The overall color palette features creamy whites and soft greens, maintaining a modern and approachable UI style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFXbW0s5z06ciFPE09tp60PLpPIqOa2T2FkTfev1LJKCC04_fKqj0gFVGtywpU7-39osfX_J0xfgWLrpSIgit4fL_7nJ39GZAbMb2zG-e281UO19dc_0klhUktCknn-G7cUhbm7SW4Vxuq-TIAFNpTAOxz_VJYisBuEf3UT01nP8CsetEwcdHRQs3bgrQJUWw3RE0n-DESuZEluhfVRtRYaja17UNsNjsPhgIXYk-2Q6FrqEHP1eIncGPJ5oYObkzTOoiswPhxIFY"/>
+</div>
+</div>
+<div class="flex items-center gap-1 cursor-pointer hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-95 duration-150">
+<h1 class="font-headline-md text-headline-md text-primary select-none">Match as Mochi</h1>
+<span class="material-symbols-outlined text-primary">keyboard_arrow_down</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-primary text-2xl">tune</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-md pt-20 pb-32 px-container-margin flex flex-col items-center">
+<!-- Filter Chips Section -->
+<section class="w-full flex gap-2 mb-6">
+<div class="flex items-center gap-1 px-4 py-2 rounded-full bg-[#FFE0E0] text-[#C41818] font-label-lg text-label-lg shadow-sm border border-poppy/10">
+<span>🔥 Within 5 km</span>
+</div>
+<div class="flex items-center gap-1 px-4 py-2 rounded-full bg-[#BFF1E0] text-[#198C6E] font-label-lg text-label-lg shadow-sm border border-secondary/10">
+<span>Playdates ON</span>
+</div>
+</section>
+<!-- Main Swipe Stack -->
+<div class="relative w-full aspect-[4/5] perspective-1000">
+<!-- Background cards for stack effect -->
+<div class="absolute inset-0 bg-surface border border-line-light rounded-[28px] rotate-2 scale-95 opacity-50 translate-y-4"></div>
+<div class="absolute inset-0 bg-surface border border-line-light rounded-[28px] -rotate-1 scale-[0.98] opacity-80 translate-y-2"></div>
+<!-- Top Active Card -->
+<div class="absolute inset-0 bg-surface border border-line-light rounded-[28px] swipe-card-shadow overflow-hidden cursor-grab active:cursor-grabbing transition-transform duration-300" id="petCard">
+<!-- Lilac Gradient Background -->
+<div class="lilac-gradient w-full h-full flex items-center justify-center relative overflow-hidden">
+<div class="text-[120px] select-none transform hover:scale-110 transition-transform duration-500">🐶</div>
+<!-- Proximity Tag -->
+<div class="absolute top-4 right-4 bg-surface/90 px-3 py-1 rounded-full border border-line-light">
+<span class="font-label-sm text-label-sm text-ink-700">1.2 km away</span>
+</div>
+<!-- Photo Placeholder for visual richness -->
+<img alt="Bailey the Golden Retriever" class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay" data-alt="A professional, high-resolution photograph of a majestic Golden Retriever standing in an open field of tall, golden wheat. The sun is setting behind the dog, creating a warm, backlit glow that highlights its soft fur. The image captures a serene and friendly mood, perfectly aligned with the playful and modern PetFolio design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQwZPRzudcZiWtE9gdJEeeW_1Fhfdu2zoQwCzoNyYZKFpFaZ5S8jb63rCK1qloi64xMcUmyHmUZH9bjhbbQHA8Ztqy13dxTc3T9uOwFbljM98qX3sGCtQmh6rh3v1C3wL7fFCQoFJbhxiFoAF-Dp5tgXoj9jOfK4BHcsRn16i6LPx8GNL7GCoV6MbwcO5gQkz9Z1JNKjLh0-f7A8aI1AIO8qZc6dh2gmUrLOHHy_HX9uCYuNUUoZ7s7kP-xsVwfHtbxIl9QrbB-dg"/>
+<!-- Info Overlay -->
+<div class="absolute inset-x-0 bottom-0 glass-overlay p-6 flex flex-col justify-end min-h-[50%]">
+<div class="flex items-baseline gap-2 mb-1">
+<h2 class="font-display-md text-display-md text-white">Bailey, 2</h2>
+</div>
+<p class="font-headline-md text-headline-md text-surface-container-low mb-2">Golden Retriever</p>
+<p class="font-body-md text-body-md text-white/90 mb-4 leading-snug">Professional squirrel chaser and treat connoisseur.</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface/20 backdrop-blur-md rounded-full border border-white/20 text-white font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">nutrition</span> Treat fiend
+                            </span>
+<span class="px-3 py-1 bg-surface/20 backdrop-blur-md rounded-full border border-white/20 text-white font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">sports_baseball</span> Ball is life
+                            </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center justify-between w-full mt-10 gap-2">
+<!-- Pass -->
+<button class="w-14 h-14 bg-surface rounded-full flex items-center justify-center swipe-card-shadow border border-line-light active:scale-90 transition-all text-ink-500 hover:text-ink-700">
+<span class="material-symbols-outlined text-3xl">close</span>
+</button>
+<!-- Super Like -->
+<button class="w-12 h-12 bg-tertiary-fixed rounded-full flex items-center justify-center swipe-card-shadow border border-tertiary-container active:scale-90 transition-all text-tertiary">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<!-- Match (Paw) -->
+<button class="w-20 h-20 bg-poppy rounded-full flex items-center justify-center swipe-card-shadow border-b-[6px] border-b-[#C41818] active:translate-y-[4px] active:border-b-0 transition-all text-white">
+<span class="material-symbols-outlined text-5xl" style="font-variation-settings: 'FILL' 1;">pets</span>
+</button>
+<!-- Treat/Bone -->
+<button class="w-12 h-12 bg-sunny rounded-full flex items-center justify-center swipe-card-shadow border border-[#E0AC00] active:scale-90 transition-all text-on-surface">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">shutter_speed</span>
+</button>
+<!-- Undo -->
+<button class="w-14 h-14 bg-surface rounded-full flex items-center justify-center swipe-card-shadow border border-line-light active:scale-90 transition-all text-secondary">
+<span class="material-symbols-outlined text-3xl">undo</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] bg-surface rounded-full z-50 shadow-[0_8px_32px_rgba(120,60,20,0.18)] max-w-xl">
+<div class="flex justify-around items-center h-20 px-2">
+<!-- Discover Active -->
+<div class="flex flex-col items-center justify-center bg-tangerine-soft text-primary rounded-full px-6 py-2 transition-all duration-200 active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pets</span>
+<span class="font-label-lg text-label-lg">Discover</span>
+</div>
+<!-- Matches -->
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:opacity-80 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-label-lg text-label-lg">Matches</span>
+</div>
+<!-- Social -->
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:opacity-80 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label-lg text-label-lg">Social</span>
+</div>
+<!-- Profile -->
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:opacity-80 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-lg text-label-lg">Profile</span>
+</div>
+</div>
+</nav>
+<script>
+        const card = document.getElementById('petCard');
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        card.addEventListener('mousedown', startDrag);
+        card.addEventListener('touchstart', startDrag);
+
+        function startDrag(e) {
+            isDragging = true;
+            startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            card.classList.remove('transition-transform');
+            
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('touchmove', onDrag);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchend', endDrag);
+        }
+
+        function onDrag(e) {
+            if (!isDragging) return;
+            currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const diff = currentX - startX;
+            const rotation = diff / 15;
+            card.style.transform = `translateX(${diff}px) rotate(${rotation}deg)`;
+        }
+
+        function endDrag() {
+            isDragging = false;
+            card.classList.add('transition-transform');
+            const diff = currentX - startX;
+            
+            if (Math.abs(diff) > 150) {
+                const direction = diff > 0 ? 1000 : -1000;
+                card.style.transform = `translateX(${direction}px) rotate(${direction / 15}deg)`;
+                // In a real app, logic to load next card would go here
+                setTimeout(() => {
+                    card.style.transform = 'translateX(0) rotate(0)';
+                }, 1000);
+            } else {
+                card.style.transform = 'translateX(0) rotate(0)';
+            }
+
+            document.removeEventListener('mousemove', onDrag);
+            document.removeEventListener('touchmove', onDrag);
+            document.removeEventListener('mouseup', endDrag);
+            document.removeEventListener('touchend', endDrag);
+        }
+    </script>
+</body></html>

@@ -30,6 +30,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
   bool _isDownloadingMock = false;
   Uint8List? _previewBytes;
 
+  // Fallback mock images used on emulators or when the device gallery is empty.
   static const _mockPetImages = [
     'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&auto=format&fit=crop', // Golden Retriever
     'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&auto=format&fit=crop', // Cat close-up

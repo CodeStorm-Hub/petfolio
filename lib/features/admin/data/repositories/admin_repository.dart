@@ -6,6 +6,7 @@ import '../../../marketplace/data/models/shop.dart';
 import '../../../marketplace/data/models/vendor_ledger.dart';
 import '../models/post_report.dart';
 import '../models/shop_deletion_request.dart';
+import '../models/audit_log.dart';
 
 final adminRepositoryProvider = Provider<AdminRepository>(
   (_) => AdminRepository(Supabase.instance.client),
@@ -177,6 +178,27 @@ class AdminRepository {
         .update({'status': LedgerStatus.paid.name})
         .eq('shop_id', shopId)
         .eq('status', LedgerStatus.available.name);
+  }
+
+  // ── Audit Logs ────────────────────────────────────────────────────────────
+
+  Future<List<AuditLog>> fetchAuditLogs({int limit = 50}) async {
+    final adminId = _client.auth.currentUser?.id;
+    if (adminId == null) throw NotAdminException();
+    final rows = await _client
+        .from('audit_logs')
+        .select('*, admin:users!audit_logs_admin_id_fkey(display_name, username)')
+        .order('created_at', ascending: false)
+        .limit(limit);
+        
+    return (rows as List).map((r) {
+      final map = Map<String, dynamic>.from(r as Map);
+      final adminMap = map['admin'] as Map?;
+      if (adminMap != null) {
+        map['admin_name'] = adminMap['display_name'] ?? adminMap['username'] ?? 'Admin';
+      }
+      return AuditLog.fromJson(map);
+    }).toList();
   }
 
   // ── Dashboard ─────────────────────────────────────────────────────────────

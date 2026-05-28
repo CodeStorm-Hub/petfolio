@@ -280,8 +280,6 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
   final double progressPercent;
 
   static const _dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-  // Demo heights matching the JSX design (indices 0-5 = Mon-Sat, index 6 = today/dynamic)
-  static const _demoHeights = [0.86, 0.94, 0.70, 1.0, 0.88, 0.60];
   static const _colors = [
     AppColors.tangerine, AppColors.poppy, AppColors.mint,
     AppColors.sunny, AppColors.lilac, AppColors.tangerine, AppColors.poppy,
@@ -305,9 +303,10 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: List.generate(7, (i) {
             final isToday = i == 6;
+            final hit = weekHits.length > i && weekHits[i];
             final h = isToday
                 ? progressPercent.clamp(0.15, 1.0)
-                : _demoHeights[i];
+                : (hit ? 1.0 : 0.2);
             final color = _colors[i];
 
             return Expanded(

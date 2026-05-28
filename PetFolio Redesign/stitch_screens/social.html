@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pawsfeed - PetFolio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&amp;family=Nunito+Sans:ital,opsz,wght@0,200..1000;1,200..1000&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#ffffff",
+                    "ink-500": "#957762",
+                    "tertiary-container": "#b49aff",
+                    "secondary-container": "#68f8ca",
+                    "on-error-container": "#93000a",
+                    "inverse-primary": "#ffb693",
+                    "tangerine-soft": "#FFE0CB",
+                    "on-primary-fixed": "#351000",
+                    "line-light": "#F4E2CB",
+                    "line-dark": "#EFD8BB",
+                    "secondary-fixed": "#6cfbcd",
+                    "surface-container-highest": "#ffdbca",
+                    "error": "#ba1a1a",
+                    "ink-700": "#5E3A28",
+                    "surface-variant": "#ffdbca",
+                    "secondary-fixed-dim": "#4adeb1",
+                    "sky": "#6EC8FF",
+                    "on-surface": "#2a170b",
+                    "on-tertiary-fixed-variant": "#4f2fa0",
+                    "tertiary-fixed-dim": "#cfbdff",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#ff8a4c",
+                    "surface-container-low": "#fff1eb",
+                    "secondary": "#006c52",
+                    "poppy": "#FF3D3D",
+                    "cream-bg": "#FFF4E6",
+                    "tertiary-fixed": "#e8ddff",
+                    "background": "#fff8f6",
+                    "on-secondary-fixed-variant": "#00513d",
+                    "inverse-on-surface": "#ffede5",
+                    "outline-variant": "#ddc1b5",
+                    "primary": "#9f4203",
+                    "surface-container-high": "#ffe2d5",
+                    "on-surface-variant": "#564239",
+                    "on-primary": "#ffffff",
+                    "on-background": "#2a170b",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed": "#002117",
+                    "tertiary": "#6849b9",
+                    "surface-container": "#ffeae0",
+                    "surface-dim": "#f8d2bf",
+                    "on-secondary-container": "#007056",
+                    "on-tertiary-fixed": "#21005d",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#422b1e",
+                    "on-primary-container": "#6c2a00",
+                    "surface-tint": "#9f4203",
+                    "primary-fixed": "#ffdbcb",
+                    "surface": "#FFFFFF",
+                    "outline": "#8a7268",
+                    "tangerine-dark": "#E0651E",
+                    "primary-fixed-dim": "#ffb693",
+                    "on-secondary": "#ffffff",
+                    "sunny": "#FFC53D",
+                    "on-primary-fixed-variant": "#7a3000",
+                    "surface-bright": "#fff8f6",
+                    "on-tertiary-container": "#472597"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "32px",
+                    "container-margin": "20px",
+                    "gutter": "16px",
+                    "base": "8px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Nunito Sans"],
+                    "body-md": ["Nunito Sans"],
+                    "label-lg": ["Nunito Sans"],
+                    "body-lg": ["Nunito Sans"],
+                    "headline-md": ["Nunito Sans"],
+                    "display-lg": ["Fraunces"],
+                    "label-sm": ["Nunito Sans"],
+                    "display-md": ["Fraunces"]
+            },
+            "fontSize": {
+                    "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "900"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "26px", "fontWeight": "400"}],
+                    "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "800"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                    "display-md": ["36px", {"lineHeight": "44px", "fontWeight": "700"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        .organic-wave {
+            clip-path: url(#wave-mask);
+        }
+        .story-ring {
+            padding: 3px;
+            background: conic-gradient(from 0deg, #ff8a4c, #6EC8FF, #68f8ca, #ff8a4c);
+            border-radius: 50%;
+        }
+        .shadow-card {
+            box-shadow: 0 8px 32px rgba(120, 60, 20, 0.12);
+        }
+        .tactile-btn {
+            box-shadow: 0 6px 0 #E0651E;
+        }
+        .tactile-btn:active {
+            box-shadow: 0 0px 0 #E0651E;
+            transform: translateY(6px);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-cream-bg font-body-md text-on-surface selection:bg-tangerine-soft">
+<!-- Top Sticky Header -->
+<header class="sticky top-0 z-40 bg-cream-bg/90 backdrop-blur-md px-container-margin py-4 border-b border-line-light">
+<div class="flex justify-between items-center max-w-2xl mx-auto">
+<div class="flex flex-col">
+<h1 class="font-display-md text-display-md-mobile text-on-surface leading-tight">Pawsfeed</h1>
+<p class="font-body-md text-label-sm text-ink-500">Your pack · 124 new posts today</p>
+</div>
+<div class="flex gap-2">
+<button class="w-11 h-11 flex items-center justify-center bg-surface rounded-full shadow-sm border border-line-light active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+</button>
+<button class="w-11 h-11 flex items-center justify-center bg-primary text-on-primary rounded-full shadow-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined filled-icon">send</span>
+</button>
+</div>
+</div>
+</header>
+<main class="max-w-2xl mx-auto pb-32">
+<!-- Story Bar -->
+<section class="py-6 px-container-margin overflow-hidden">
+<div class="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+<!-- User Story -->
+<div class="flex-shrink-0 flex flex-col items-center gap-1.5 w-20">
+<div class="relative w-16 h-16 rounded-full border-2 border-dashed border-primary-container p-1 flex items-center justify-center bg-white group cursor-pointer">
+<span class="material-symbols-outlined text-primary-container text-3xl group-hover:scale-110 transition-transform">photo_camera</span>
+<div class="absolute bottom-0 right-0 w-6 h-6 bg-primary text-on-primary rounded-full flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-sm font-bold">add</span>
+</div>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant truncate">Your story</span>
+</div>
+<!-- Pet Story 1 -->
+<div class="flex-shrink-0 flex flex-col items-center gap-1.5 w-20 cursor-pointer group">
+<div class="story-ring">
+<div class="w-[60px] h-[60px] rounded-full border-2 border-white overflow-hidden bg-sky/30">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A portrait of a curious orange tabby cat with bright green eyes, set against a soft pastel background. The lighting is warm and golden, emphasizing the fluffy texture of its fur in a high-key, modern lifestyle pet photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBT2wkrVCox3XnARizkly_XIPRLUJHO85qtt1Vu0ym-79C7rDLDEGSjVeL2xdPyJUtDNRGS3QRrSMglnq3bCDCfH-ba_5mmlA6TmoBBajhndsIB030cjd0x2zAnd6waa_58n8m8FlLTr6i3XGL0nrj1fHBnuA4mxY0btxmdkxOS9aeYN7-6sXp3DEQ3W10hjL-hzSdZ2PHkqpfwZ6rLl8ggCy84OxLv0e0gZcL2gr8tGwuujxH1CZN4Ugd5u-BZX-_Bla3dC6m5v98"/>
+</div>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant truncate">Mochi</span>
+</div>
+<!-- Pet Story 2 -->
+<div class="flex-shrink-0 flex flex-col items-center gap-1.5 w-20 cursor-pointer group">
+<div class="story-ring">
+<div class="w-[60px] h-[60px] rounded-full border-2 border-white overflow-hidden bg-sunny/30">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A close-up shot of a happy golden retriever puppy with its tongue out, sitting in a field of daisies. The image is bathed in soft, natural sunlight, creating a cheerful and organic aesthetic with a shallow depth of field." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcfLrdkpCRGaCWk0X0xDo_3rqrJXNdiwo-gfXAQ-Kc0gQj0QXY3EGTEynOa3MrAEjkPAB-kHJnzzj9YP-uXukO6ZR3ilEql_fC1IeyWZqheLQqZQTYgTEqFrIKv6PhN13HOVyiR-85GxNaGQmlu-FtoSs34nq6p5ZonjsHJowg_YY7zTAENQ5BwDbDTv3VNDjn1ITeSUlfVl8KbM9K65OY7rFmq2NCHYcq1wjmd0wRfXxWGle2zpvqYKFHbLNKQTZX-EcZJehB7hg"/>
+</div>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant truncate">Bailey</span>
+</div>
+<!-- Pet Story 3 -->
+<div class="flex-shrink-0 flex flex-col items-center gap-1.5 w-20 cursor-pointer group">
+<div class="story-ring">
+<div class="w-[60px] h-[60px] rounded-full border-2 border-white overflow-hidden bg-tertiary-container/30">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A cute black and white French Bulldog wearing a stylish tiny bandana, sitting on a modern cream-colored rug. The mood is sophisticated and playful, with clean lines and a vibrant, color-corrected palette that matches the PetFolio design language." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9VTnsg-URV-q4Cz28uhzT2RrGs5UUUivcgeaLLGTW361A20-Y7z4Q35X-DYp2CcZC8EffxlqoXLtd6BvyddUGH155gxDRm76hHQx0tHgmer7D6ZhJd30w0PSw6shwcrayUPXe3LIPDDFVt4tvXuLGhKMeaW-_3ycXMt1l4lk3L6EqZq0Jw-gZ05tC6MSHDX6Tqq1mvhTr4sWTGFITVQN8bVv3vGTaznunN6GAH-jHVMyEx0pwEpJwQlcag37AQoPHaonZPhkxu9A"/>
+</div>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant truncate">Luna</span>
+</div>
+<!-- Pet Story 4 -->
+<div class="flex-shrink-0 flex flex-col items-center gap-1.5 w-20 cursor-pointer group">
+<div class="story-ring">
+<div class="w-[60px] h-[60px] rounded-full border-2 border-white overflow-hidden bg-secondary-container/30">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A fluffy white Pomeranian dog looking directly at the camera with a playful tilt of the head. The background is a soft, out-of-focus cream garden, and the lighting is diffused and airy, reflecting a joyful and premium pet-focused visual identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvQzRh4iOf8Daz4qbzuNvu03mfTv6MRzOzHnW2Nkw9Wr1Ct53K6fAbMQSzMzEgV5koCPkfxjMe3OCm99MMnvUbjX__XVq4KT8EXUZt9F3YodnQgK0rY_Fh9JDzq_vz9T5MgwU6urB5sLSdd_52R-MZDBAphZyFJ_JxEEXAdDTo298lBsV7aXvM2uKaYVwE7k39MBC_oBAg6nNvyAOFDqlJ22i1FMaBxbpAaFKU5agbxBSHndFHMJVzYtNicymgczwcGAZFBBjK4oI"/>
+</div>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant truncate">Puff</span>
+</div>
+<!-- Pet Story 5 -->
+<div class="flex-shrink-0 flex flex-col items-center gap-1.5 w-20 cursor-pointer group">
+<div class="story-ring">
+<div class="w-[60px] h-[60px] rounded-full border-2 border-white overflow-hidden bg-poppy/10">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A majestic Ragdoll cat with striking blue eyes resting on a velvet cushion. The composition is elegant and modern, featuring soft textures and a warm, organic color palette dominated by creams and soft browns." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBq0vKkFImq0m3gNa5Z-yeBrmZBJI1uGyrGtU84YlfdiDh-JFq1bPxB3r7fn_mrVi1AEgFvXqhJVFL-p513d7mdeWS20_0sy4RjGXoGR6VTP2X4Se5dzlo0r9hsE54ZaaS2euHD8zszNO08aXpR6Ee_9AMTtrq2FRaap5yWjvUZo072ji8LJ6QIJqq9StV8Uhtc_Elnea-DDK_efwPvurLxaCewSrleMIJT71KtgmibWzpeL1uIjNPXZGiHRWBVtqi5FKDRyrJFxco"/>
+</div>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant truncate">Simba</span>
+</div>
+</div>
+</section>
+<!-- Main Feed -->
+<div class="px-container-margin space-y-gutter">
+<!-- Feed Card 1 -->
+<article class="bg-surface rounded-[28px] border border-line-light shadow-card p-5">
+<!-- Card Header -->
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full overflow-hidden border border-line-light bg-tangerine-soft p-0.5">
+<img class="w-full h-full object-cover rounded-full" data-alt="A professional pet avatar photo of a ginger cat with alert ears and vibrant eyes. The portrait is framed in a clean, circular composition with a warm tonal gradient background that feels tactile and modern." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuuC0GqEHHSrjSIHB1zgFNDAugjYt7bobLZt_DrgHsoEaFRXwmARyCpyv9Hc_6Jv0XqcWvs8-yyB70O99rKRbrCJVPtw0LGTYSLldAo1DurJ7cYxLarvl6D3s9NLuhZB71laTRNUeh4fpUT7jG1QhxtIRAsfnV-9kVrwi1316XVprTBqanF-eZEfAsfHTPmLpbJ0XtFG_oJvgSH-uR1_x1mkk0HRFdIOKfiNn6wuA7OcnXJYE9rWAShvXJtEfCQ9q88er-1VEaG0k"/>
+</div>
+<div>
+<h3 class="font-headline-md text-on-surface">Mochi</h3>
+<div class="flex items-center gap-1 text-label-sm text-ink-500">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span>Central Park · 2h ago</span>
+</div>
+</div>
+</div>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<!-- Card Body -->
+<div class="rounded-2xl overflow-hidden mb-4 aspect-square bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A stunning action shot of a cat playfully jumping toward a dangling toy in a sun-drenched minimalist living room. The image captures the dynamic energy and joy of the pet, with soft bokeh highlighting the movement and the warm cream tones of the environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQUf3wQhp9l7uuMunqx0KLBnbHm3hTc8OzujZ0w-FIO2Oz2PEm44H51XV-TcNh6odPvFNw9uxDI2711AHCxAYjeyH37-nt-qELJalz_gtOMQVraaauOfb7MN_qEJfZRjuKPInvZV1wuZcAhzzCky76yzdeHf8yopJoNqQLDlWrJFbV9tWWoLTSxoi68OAsz6E1zuWh4VWmJ3d9W3TtMhGmk-uf9_VSvchqzqH2DJwY7dBugPBSW0I7xWnkmHPNWLYS_0vrDqu3F6I"/>
+</div>
+<p class="font-body-md text-on-surface-variant mb-4 leading-relaxed">
+                    Caught the morning sun today! Feeling like the king of the jungle 🦁✨
+                    <span class="text-primary font-bold">#CatLife #SunBasking</span>
+</p>
+<!-- Reaction Visualizer -->
+<div class="flex items-center justify-between pb-4 border-b border-line-light mb-4">
+<div class="flex items-center">
+<div class="flex -space-x-2 mr-3">
+<div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white border-2 border-white">
+<span class="material-symbols-outlined text-[14px] filled-icon">pets</span>
+</div>
+<div class="w-7 h-7 rounded-full bg-poppy flex items-center justify-center text-white border-2 border-white">
+<span class="material-symbols-outlined text-[14px] filled-icon">favorite</span>
+</div>
+<div class="w-7 h-7 rounded-full bg-sunny flex items-center justify-center text-white border-2 border-white">
+<span class="material-symbols-outlined text-[14px] filled-icon">pets</span>
+</div>
+</div>
+<span class="text-label-sm text-ink-700 font-bold">142 reacted</span>
+</div>
+<span class="text-label-sm text-ink-500">24 comments</span>
+</div>
+<!-- Action Bar -->
+<div class="grid grid-cols-4 gap-2">
+<button class="flex flex-col items-center py-2 gap-1 rounded-xl hover:bg-surface-container transition-colors group">
+<span class="material-symbols-outlined text-ink-700 group-hover:scale-110 transition-transform">pets</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-ink-500">React</span>
+</button>
+<button class="flex flex-col items-center py-2 gap-1 rounded-xl hover:bg-surface-container transition-colors group">
+<span class="material-symbols-outlined text-ink-700 group-hover:scale-110 transition-transform">mode_comment</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-ink-500">Comment</span>
+</button>
+<button class="flex flex-col items-center py-2 gap-1 rounded-xl hover:bg-surface-container transition-colors group">
+<span class="material-symbols-outlined text-ink-700 group-hover:scale-110 transition-transform">share</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-ink-500">Share</span>
+</button>
+<button class="flex flex-col items-center py-2 gap-1 rounded-xl hover:bg-surface-container transition-colors group">
+<span class="material-symbols-outlined text-ink-700 group-hover:scale-110 transition-transform">bookmark</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-ink-500">Save</span>
+</button>
+</div>
+</article>
+<!-- Feed Card 2 -->
+<article class="bg-surface rounded-[28px] border border-line-light shadow-card p-5">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full overflow-hidden border border-line-light bg-sky/20 p-0.5">
+<img class="w-full h-full object-cover rounded-full" data-alt="A portrait-style pet avatar of a happy golden retriever, with soft lighting coming from the side to accentuate the fur texture. The background is a soft, warm pastel orange, creating a welcoming and professional social media profile aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOTbMxay6ZTD848E3bk0bFFGYcvPJHqfuCMeu-TnvVS39f0Ob63lBIilwdLE0OykJKRxt6jCC8Podau67oj2v7z4KSjhdv2_B0dyU_am-mB7QPRV0wh6zmApAg9tn7j58-n-mcL2gIu9yfc9TYyGKQkIMl1IFzUzE60WrPkDj3gaBQcWrngA0O8UaIMoevyNeiOZL4tqvw1MJObLpsz5OwEQjOJ3LcS9Y6T2VlCAKvN-o975ofU1RLQ_PjGA_V_WszUkMfp94vHr0"/>
+</div>
+<div>
+<h3 class="font-headline-md text-on-surface">Bailey</h3>
+<div class="flex items-center gap-1 text-label-sm text-ink-500">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span>PetFolio Park · 5h ago</span>
+</div>
+</div>
+</div>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<div class="rounded-2xl overflow-hidden mb-4 aspect-[4/3] bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A group of diverse dogs sitting together on a grassy hill during a sunny afternoon. The lighting is golden and warm, casting long shadows and creating a peaceful, community-focused mood that aligns with the organic and friendly PetFolio brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDO9uXAOD4WASs15T1cCiizebSeb-4vOCS4K5nHpnEz4kP3Av97YfYBxbuP1_X-Wx6jwpvFSaYxNHIbUWCKlmzMwLjMew6cxvp_n1o__Lq0CUuk-bsQ0KUgfVxn6XAw0fz1gvJPyau9TpuIRQmOGtOnO7yZTyMfPIJgpA41JlJHxRA4N1_5ohl3yhrdLpD7ZdSIhfSF2_GzwvpMrg74ZtVnKH3538Y1Bu6171_s7DYx9hcoT6iVHqyNzj9x_OcEK8gEbZpW3OqlJ3E"/>
+</div>
+<p class="font-body-md text-on-surface-variant mb-4 leading-relaxed">
+                    New friends made at the dog park today! The treats were 10/10 🦴🦴🦴
+                </p>
+<div class="flex items-center justify-between pb-4 border-b border-line-light mb-4">
+<div class="flex items-center">
+<div class="flex -space-x-2 mr-3">
+<div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white border-2 border-white">
+<span class="material-symbols-outlined text-[14px] filled-icon">pets</span>
+</div>
+<div class="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-white border-2 border-white">
+<span class="material-symbols-outlined text-[14px] filled-icon">star</span>
+</div>
+</div>
+<span class="text-label-sm text-ink-700 font-bold">89 reacted</span>
+</div>
+<span class="text-label-sm text-ink-500">12 comments</span>
+</div>
+<div class="grid grid-cols-4 gap-2">
+<button class="flex flex-col items-center py-2 gap-1 rounded-xl hover:bg-surface-container transition-colors group">
+<span class="material-symbols-outlined text-ink-700 group-hover:scale-110 transition-transform">pets</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-ink-500">React</span>
+</button>
+<button class="flex flex-col items-center py-2 gap-1 rounded-xl hover:bg-surface-container transition-colors group">
+<span class="material-symbols-outlined text-ink-700 group-hover:scale-110 transition-transform">mode_comment</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-ink-500">Comment</span>
+</button>
+<button class="flex flex-col items-center py-2 gap-1 rounded-xl hover:bg-surface-container transition-colors group">
+<span class="material-symbols-outlined text-ink-700 group-hover:scale-110 transition-transform">share</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-ink-500">Share</span>
+</button>
+<button class="flex flex-col items-center py-2 gap-1 rounded-xl hover:bg-surface-container transition-colors group">
+<span class="material-symbols-outlined text-ink-700 group-hover:scale-110 transition-transform">bookmark</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-ink-500">Save</span>
+</button>
+</div>
+</article>
+</div>
+</main>
+<!-- FAB for New Post -->
+<div class="fixed bottom-28 right-6 z-50">
+<button class="tactile-btn w-16 h-16 bg-primary text-on-primary rounded-full flex items-center justify-center transition-all">
+<span class="material-symbols-outlined text-3xl font-bold">add</span>
+</button>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 flex justify-between items-center p-2 backdrop-blur-md bg-surface-container-lowest/90 border border-line-light shadow-xl rounded-full">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center bg-tangerine-soft text-on-primary-container rounded-full px-5 py-2 transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined filled-icon">home</span>
+<span class="font-label-lg text-label-lg-mobile mt-0.5">Home</span>
+</a>
+<!-- Health -->
+<a class="flex flex-col items-center justify-center text-ink-500 px-5 py-2 hover:bg-surface-container rounded-full transition-all" href="#">
+<span class="material-symbols-outlined">pets</span>
+<span class="font-label-lg text-label-lg-mobile mt-0.5">Health</span>
+</a>
+<!-- Activities -->
+<a class="flex flex-col items-center justify-center text-ink-500 px-5 py-2 hover:bg-surface-container rounded-full transition-all" href="#">
+<span class="material-symbols-outlined">fitness_center</span>
+<span class="font-label-lg text-label-lg-mobile mt-0.5">Activities</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-ink-500 px-5 py-2 hover:bg-surface-container rounded-full transition-all" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-lg text-label-lg-mobile mt-0.5">Profile</span>
+</a>
+</nav>
+<!-- Wave Definition for clipping if needed -->
+<svg height="0" width="0">
+<defs>
+<clippath clippathunits="objectBoundingBox" id="wave-mask">
+<path d="M0,1 L1,1 L1,0 C0.8,0.1 0.6,0.15 0.5,0.15 C0.4,0.15 0.2,0.1 0,0 L0,1 Z"></path>
+</clippath>
+</defs>
+</svg>
+<script>
+        // Simple micro-interaction for reaction buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('touchstart', function() {
+                this.classList.add('scale-95');
+            });
+            btn.addEventListener('touchend', function() {
+                this.classList.remove('scale-95');
+            });
+        });
+
+        // Story Ring dynamic animation speed
+        document.querySelectorAll('.story-ring').forEach((ring, index) => {
+            ring.style.animation = `spin ${10 + index * 2}s linear infinite`;
+        });
+    </script>
+</body></html>
