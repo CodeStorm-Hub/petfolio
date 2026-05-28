@@ -135,23 +135,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           .read(discoveryVisibilityControllerProvider.notifier)
           .setDiscoverable(value);
       if (mounted && value) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-                SizedBox(width: 12),
-                Text(
-                  'Match discovery enabled',
-                ),
-              ],
-            ),
-            backgroundColor: Colors.green.shade600,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            margin: const EdgeInsets.all(16),
-          ),
-        );
+        AppSnackBar.showSuccess('Match discovery enabled');
       }
     } catch (e) {
       if (mounted) AppSnackBar.showError(e);
@@ -165,14 +149,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     if (!mounted) return;
     if (ok) {
       ref.invalidate(petMatchLocationProvider(widget.pet.id));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Match location updated'),
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
+      AppSnackBar.showSuccess('Match location updated');
     }
   }
 
@@ -182,9 +159,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     if (weightText.isNotEmpty && weight == null) {
       ref.read(editProfileControllerProvider.notifier).clearError();
       setState(() {});
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a valid weight in kg')),
-      );
+      AppSnackBar.showError('Enter a valid weight in kg');
       return;
     }
 
@@ -205,23 +180,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     if (success && mounted) {
       ref.invalidate(petMatchLocationProvider(widget.pet.id));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(
-            children: [
-              Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-              SizedBox(width: 12),
-              Text(
-                'Profile saved',
-              ),
-            ],
-          ),
-          backgroundColor: Colors.green.shade600,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
+      AppSnackBar.showSuccess('Profile saved');
       context.pop();
     }
   }

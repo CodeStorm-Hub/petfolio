@@ -8,13 +8,54 @@ final GlobalKey<ScaffoldMessengerState> appSnackBarMessengerKey =
 class AppSnackBar {
   AppSnackBar._();
 
-  static void show(String message) {
+  static void show(String message, {SnackBarAction? action}) {
     final messenger = appSnackBarMessengerKey.currentState;
     if (messenger == null) return;
     messenger.showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
         content: Text(message),
+        action: action,
+      ),
+    );
+  }
+
+  static void showSuccess(String message, {SnackBarAction? action}) {
+    final messenger = appSnackBarMessengerKey.currentState;
+    if (messenger == null) return;
+    messenger.showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF2FCBA0), // Theme Success color (mint)
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+        action: action,
+      ),
+    );
+  }
+
+  static void showInfo(String message, {SnackBarAction? action}) {
+    final messenger = appSnackBarMessengerKey.currentState;
+    if (messenger == null) return;
+    messenger.showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        content: Text(message),
+        action: action,
       ),
     );
   }
@@ -23,7 +64,28 @@ class AppSnackBar {
     final messenger = appSnackBarMessengerKey.currentState;
     if (messenger == null) return;
     final text = error is AppException ? error.message : error.toString();
-    messenger.showSnackBar(SnackBar(content: Text(text)));
+    messenger.showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFFFF3D3D), // Theme Danger color (poppy)
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline_rounded, color: Colors.white, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                text,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   static void showBadgeUnlocked([String badgeType = '7_day_hero']) {
