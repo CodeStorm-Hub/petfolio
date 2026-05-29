@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
@@ -6,36 +6,24 @@ import '../../data/models/comment.dart';
 import '../../data/repositories/comment_repository.dart';
 import 'social_controller.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Provider
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Provides the comment list for a given post, keyed by [postId].
-///
-/// Auto-disposes when the PostDetailScreen is closed, freeing memory.
-final commentListProvider =
-    AsyncNotifierProvider.family<CommentNotifier, List<Comment>, String>(
-  CommentNotifier.new,
-);
+part 'comment_controller.g.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Notifier
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Manages the comment list for a single post (identified by [arg] = postId).
+/// Manages the comment list for a single post (identified by [postId]).
 ///
 /// Optimistic UI pattern on [delete] and [toggleLike].
 ///
 /// [add] is non-optimistic because we need the server-generated
 /// timestamp and ID to display the comment correctly.
-class CommentNotifier extends AsyncNotifier<List<Comment>> {
-  CommentNotifier(this.arg);
-  final String arg;
-
+@riverpod
+class CommentList extends _$CommentList {
   @override
-  Future<List<Comment>> build() {
-    final activePetId = ref.read(activePetControllerProvider)?.id ?? '';
-    return _repo.fetchComments(postId: arg, activePetId: activePetId);
+  FutureOr<List<Comment>> build(String postId) {
+    final activePetId = ref.watch(activePetControllerProvider)?.id ?? '';
+    return ref.read(commentRepositoryProvider).fetchComments(postId: postId, activePetId: activePetId);
   }
 
   CommentRepository get _repo => ref.read(commentRepositoryProvider);
@@ -54,11 +42,10 @@ class CommentNotifier extends AsyncNotifier<List<Comment>> {
     if (content.trim().isEmpty) return;
 
     final previousComments = state.value ?? [];
-    state = const AsyncLoading();
 
     try {
       final newComment = await _repo.addComment(
-        postId: arg,
+        postId: postId,
         petId: petId,
         content: content,
         activePetId: petId, // the new comment is always "own"
@@ -68,10 +55,10 @@ class CommentNotifier extends AsyncNotifier<List<Comment>> {
       state = AsyncData([...previousComments, newComment]);
       
       // Optimistically update the parent feed's comment count
-      ref.read(socialControllerProvider(petId).notifier).incrementCommentCount(arg);
+      ref.read(socialControllerProvider(petId).notifier).incrementCommentCount(postId);
       
       // Invalidate the post detail cache to refresh stats if loaded standalone
-      ref.invalidate(postDetailProvider(arg));
+      ref.invalidate(postDetailProvider(postId));
     } catch (e) {
       // Restore previous state so the list doesn't disappear on error.
       state = AsyncData(previousComments);
@@ -95,11 +82,11 @@ class CommentNotifier extends AsyncNotifier<List<Comment>> {
       // Optimistically update the parent feed's comment count
       final activePetId = ref.read(activePetControllerProvider)?.id;
       if (activePetId != null) {
-        ref.read(socialControllerProvider(activePetId).notifier).decrementCommentCount(arg);
+        ref.read(socialControllerProvider(activePetId).notifier).decrementCommentCount(postId);
       }
       
       // Invalidate the post detail cache to refresh stats if loaded standalone
-      ref.invalidate(postDetailProvider(arg));
+      ref.invalidate(postDetailProvider(postId));
     } catch (e) {
       // 3. Rollback on failure.
       state = AsyncData(prev);
@@ -167,11 +154,10 @@ class CommentNotifier extends AsyncNotifier<List<Comment>> {
     state = const AsyncLoading();
     try {
       state = AsyncData(
-        await _repo.fetchComments(postId: arg, activePetId: _activePetId),
+        await _repo.fetchComments(postId: postId, activePetId: _activePetId),
       );
     } catch (e, st) {
       state = AsyncError(e, st);
     }
   }
 }
-

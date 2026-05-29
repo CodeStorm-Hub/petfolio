@@ -1,10 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../../features/pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/feed_post.dart';
 import '../../data/repositories/social_repository.dart';
+
+part 'social_controller.g.dart';
 
 const int _feedPageSize = 15;
 
@@ -40,96 +43,30 @@ class SocialFeedState {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Providers
+// Providers & Notifiers
 // ─────────────────────────────────────────────────────────────────────────────
 
-final socialControllerProvider =
-    AsyncNotifierProvider.family<SocialNotifier, SocialFeedState, String>(
-  SocialNotifier.new,
-);
+final supabaseClientProvider = Provider<SupabaseClient>((ref) => Supabase.instance.client);
 
-final postDetailProvider =
-    FutureProvider.family<FeedPost, String>((ref, postId) async {
-  final activePetId = ref.watch(activePetIdProvider) ?? '';
-  return ref
-      .read(socialRepositoryProvider)
-      .fetchPostById(postId: postId, activePetId: activePetId);
-});
-
-final postProvider = Provider.family<FeedPost?, String>((ref, postId) {
-  final activePetId = ref.watch(activePetIdProvider) ?? '';
-  final feedState = ref.watch(socialControllerProvider(activePetId)).value;
-  if (feedState == null) return null;
-  try {
-    return feedState.posts.firstWhere((p) => p.id == postId);
-  } catch (_) {
-    return null;
-  }
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Notifier
-// ─────────────────────────────────────────────────────────────────────────────
-
-class SocialNotifier extends AsyncNotifier<SocialFeedState> {
-  SocialNotifier(this.arg);
-  final String arg;
-
+@riverpod
+class SocialController extends _$SocialController {
   RealtimeChannel? _channel;
 
   @override
-  Future<SocialFeedState> build() async {
-    final petId = arg;
-
-    // Register cleanup BEFORE the async gap. If the provider is disposed while
-    // the fetch is in flight, this callback still fires and prevents a zombie
-    // channel from being created below (the mounted guard handles that).
+  FutureOr<SocialFeedState> build(String petId) async {
+    // Register cleanup on dispose
     ref.onDispose(() {
       _channel?.unsubscribe();
       _channel = null;
     });
 
-    final posts = await _repo.fetchFeed(
+    final posts = await ref.read(socialRepositoryProvider).fetchFeed(
       activePetId: petId,
       limit: _feedPageSize,
       offset: 0,
     );
 
-    // Skip channel setup if the provider was disposed during the fetch.
-    if (ref.mounted) {
-      // Use a unique channel name per arg so concurrent instances (different
-      // active pets) don't collide and silently drop each other's callbacks.
-      _channel = Supabase.instance.client
-          .channel('social_feed_$petId')
-          .onPostgresChanges(
-            event: PostgresChangeEvent.update,
-            schema: 'public',
-            table: 'posts',
-            callback: (payload) {
-              final newRow = payload.newRecord;
-              final postId = newRow['id'] as String?;
-              if (postId == null) return;
-
-              final likeCount = newRow['like_count'] as int?;
-              final commentCount = newRow['comment_count'] as int?;
-
-              final current = state.value;
-              if (current == null) return;
-
-              final idx = current.posts.indexWhere((p) => p.id == postId);
-              if (idx == -1) return;
-
-              final updated = List<FeedPost>.from(current.posts)
-                ..[idx] = current.posts[idx].copyWithCounts(
-                  likes: likeCount,
-                  comments: commentCount,
-                );
-
-              state = AsyncData(current.copyWith(posts: updated));
-            },
-          )
-          .subscribe();
-    }
+    _subscribeToRealtime(petId);
 
     return SocialFeedState(
       posts: posts,
@@ -138,13 +75,45 @@ class SocialNotifier extends AsyncNotifier<SocialFeedState> {
     );
   }
 
-  SocialRepository get _repo => ref.read(socialRepositoryProvider);
+  void _subscribeToRealtime(String petId) {
+    if (!ref.mounted) return;
+    _channel = ref.read(supabaseClientProvider)
+        .channel('social_feed_$petId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'posts',
+          callback: (payload) {
+            final newRow = payload.newRecord;
+            final postId = newRow['id'] as String?;
+            if (postId == null) return;
+
+            final likeCount = newRow['like_count'] as int?;
+            final commentCount = newRow['comment_count'] as int?;
+
+            final current = state.value;
+            if (current == null) return;
+
+            final idx = current.posts.indexWhere((p) => p.id == postId);
+            if (idx == -1) return;
+
+            final updated = List<FeedPost>.from(current.posts)
+              ..[idx] = current.posts[idx].copyWithCounts(
+                likes: likeCount,
+                comments: commentCount,
+              );
+
+            state = AsyncData(current.copyWith(posts: updated));
+          },
+        )
+        .subscribe();
+  }
 
   Future<void> refresh() async {
     state = const AsyncLoading();
     try {
-      final posts = await _repo.fetchFeed(
-        activePetId: arg,
+      final posts = await ref.read(socialRepositoryProvider).fetchFeed(
+        activePetId: petId,
         limit: _feedPageSize,
         offset: 0,
       );
@@ -165,8 +134,8 @@ class SocialNotifier extends AsyncNotifier<SocialFeedState> {
     state = AsyncData(current.copyWith(isLoadingMore: true));
 
     try {
-      final more = await _repo.fetchFeed(
-        activePetId: arg,
+      final more = await ref.read(socialRepositoryProvider).fetchFeed(
+        activePetId: petId,
         limit: _feedPageSize,
         offset: current.nextOffset,
       );
@@ -208,7 +177,11 @@ class SocialNotifier extends AsyncNotifier<SocialFeedState> {
     state = AsyncData(current.copyWith(posts: updated));
 
     try {
-      await _repo.toggleLike(postId: postId, petId: arg, liked: nowLiked);
+      await ref.read(socialRepositoryProvider).toggleLike(
+        postId: postId,
+        petId: petId,
+        liked: nowLiked,
+      );
     } catch (e) {
       state = AsyncData(current);
       AppSnackBar.showError(e);
@@ -229,7 +202,10 @@ class SocialNotifier extends AsyncNotifier<SocialFeedState> {
     state = AsyncData(current.copyWith(posts: updated));
 
     try {
-      await _repo.updatePostCaption(postId: postId, newCaption: newCaption);
+      await ref.read(socialRepositoryProvider).updatePostCaption(
+        postId: postId,
+        newCaption: newCaption,
+      );
     } catch (e) {
       state = AsyncData(current);
       AppSnackBar.showError(e);
@@ -247,7 +223,7 @@ class SocialNotifier extends AsyncNotifier<SocialFeedState> {
     ));
 
     try {
-      await _repo.deletePost(postId);
+      await ref.read(socialRepositoryProvider).deletePost(postId);
     } catch (e) {
       state = AsyncData(current);
       AppSnackBar.showError(e);
@@ -276,5 +252,27 @@ class SocialNotifier extends AsyncNotifier<SocialFeedState> {
     final updated = List<FeedPost>.from(current.posts)
       ..[idx] = current.posts[idx].copyWithDecrementedComment();
     state = AsyncData(current.copyWith(posts: updated));
+  }
+}
+
+@riverpod
+Future<FeedPost?> postDetail(Ref ref, String postId) async {
+  final activePetId = ref.watch(activePetIdProvider);
+  if (activePetId == null || activePetId.isEmpty) return null;
+  return ref
+      .read(socialRepositoryProvider)
+      .fetchPostById(postId: postId, activePetId: activePetId);
+}
+
+@riverpod
+FeedPost? post(Ref ref, String postId) {
+  final activePetId = ref.watch(activePetIdProvider);
+  if (activePetId == null || activePetId.isEmpty) return null;
+  final feedState = ref.watch(socialControllerProvider(activePetId)).value;
+  if (feedState == null) return null;
+  try {
+    return feedState.posts.firstWhere((p) => p.id == postId);
+  } catch (_) {
+    return null;
   }
 }

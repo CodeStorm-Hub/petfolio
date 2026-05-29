@@ -1,18 +1,17 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../data/models/story.dart';
 import '../../data/repositories/story_repository.dart';
 
-final storiesProvider = AsyncNotifierProvider<StoriesController, List<Story>>(
-  StoriesController.new,
-);
+part 'story_controller.g.dart';
 
-class StoriesController extends AsyncNotifier<List<Story>> {
+@riverpod
+class Stories extends _$Stories {
   @override
-  Future<List<Story>> build() async {
+  FutureOr<List<Story>> build() async {
     return ref.read(storyRepositoryProvider).fetchActiveStories();
   }
 

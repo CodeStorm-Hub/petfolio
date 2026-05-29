@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -22,6 +23,7 @@ import '../controllers/create_post_controller.dart';
 import '../controllers/story_controller.dart';
 import 'story_viewer_screen.dart';
 import '../widgets/reaction_burst.dart';
+import '../widgets/post_comments_bottom_sheet.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entry point
@@ -32,8 +34,8 @@ class SocialScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pet = ref.watch(activePetControllerProvider);
-    if (pet != null) return _SocialView(pet: pet);
+    final petId = ref.watch(activePetIdProvider);
+    if (petId != null) return _SocialView(key: ValueKey(petId), petId: petId);
 
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final petsAsync = ref.watch(petListProvider);
@@ -70,8 +72,8 @@ class SocialScreen extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _SocialView extends ConsumerStatefulWidget {
-  const _SocialView({required this.pet});
-  final Pet pet;
+  const _SocialView({super.key, required this.petId});
+  final String petId;
 
   @override
   ConsumerState<_SocialView> createState() => _SocialViewState();
@@ -98,15 +100,15 @@ class _SocialViewState extends ConsumerState<_SocialView> {
     if (pos.maxScrollExtent <= 0) return;
     if (pos.pixels >= pos.maxScrollExtent - 300) {
       ref
-          .read(socialControllerProvider(widget.pet.id).notifier)
+          .read(socialControllerProvider(widget.petId).notifier)
           .loadMore();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final feedAsync = ref.watch(socialControllerProvider(widget.pet.id));
-    final notifier = ref.read(socialControllerProvider(widget.pet.id).notifier);
+    final feedAsync = ref.watch(socialControllerProvider(widget.petId));
+    final notifier = ref.read(socialControllerProvider(widget.petId).notifier);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     final screenWidth = MediaQuery.sizeOf(context).width;
@@ -172,8 +174,8 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                  SliverToBoxAdapter(
-                    child: _StoriesRow(pet: widget.pet),
+                  const SliverToBoxAdapter(
+                    child: _StoriesRow(),
                   ),
                   if (feedState.posts.isEmpty)
                     SliverFillRemaining(
@@ -195,7 +197,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                           return Padding(
                             padding: EdgeInsets.only(bottom: i == feedState.posts.length - 1 ? 0 : 18),
                             child: RepaintBoundary(
-                              child: _PostCard(
+                              child: PostCard(
                                 post: post,
                                 onLike: () => notifier.toggleLike(post.id),
                                 onTapPost: () => context.push('/social/post/${post.id}', extra: post),
@@ -298,11 +300,12 @@ class _IconBtn extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _StoriesRow extends ConsumerWidget {
-  const _StoriesRow({required this.pet});
-  final Pet pet;
+  const _StoriesRow();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final pet = ref.watch(activePetControllerProvider);
+    if (pet == null) return const SizedBox.shrink();
     final storiesAsync = ref.watch(storiesProvider);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final userId = Supabase.instance.client.auth.currentUser?.id;
@@ -603,8 +606,9 @@ class _StoryItem extends StatelessWidget {
 // Regular post
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _PostCard extends StatefulWidget {
-  const _PostCard({
+class PostCard extends StatefulWidget {
+  const PostCard({
+    super.key,
     required this.post,
     required this.onLike,
     required this.onTapPost,
@@ -614,13 +618,23 @@ class _PostCard extends StatefulWidget {
   final VoidCallback onTapPost;
 
   @override
-  State<_PostCard> createState() => _PostCardState();
+  State<PostCard> createState() => _PostCardState();
 }
 
-class _PostCardState extends State<_PostCard> {
+class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin {
   String? _reacted;
   bool _pickerOpen = false;
   final List<ReactionBurstItem> _bursts = [];
+  TapDownDetails? _doubleTapPosition;
+  String? _hoveredReaction;
+
+  Timer? _longPressTimer;
+  Offset _pointerDownPosition = Offset.zero;
+  bool _dragCancelledTap = false;
+
+  late AnimationController _pickerController;
+  late Animation<double> _pickerScaleAnimation;
+  late Animation<double> _pickerFadeAnimation;
 
   void _fireBurst(String kind, double x, double y) {
     final count = 8 + Random().nextInt(4);
@@ -636,7 +650,14 @@ class _PostCardState extends State<_PostCard> {
     setState(() {
       _bursts.addAll(newItems);
       _reacted = kind;
-      _pickerOpen = false;
+    });
+
+    _pickerController.reverse().then((_) {
+      if (mounted) {
+        setState(() {
+          _pickerOpen = false;
+        });
+      }
     });
 
     Future.delayed(const Duration(milliseconds: 1100), () {
@@ -647,6 +668,129 @@ class _PostCardState extends State<_PostCard> {
         });
       }
     });
+  }
+
+  void _onPickerSelected(String kind, [Offset? globalPosition]) {
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox != null && globalPosition != null) {
+      final localOffset = renderBox.globalToLocal(globalPosition);
+      _fireBurst(kind, localOffset.dx, localOffset.dy);
+    } else {
+      _fireBurst(kind, 50, 0);
+    }
+    if (!widget.post.isLiked) {
+      widget.onLike();
+    }
+  }
+
+  void _togglePicker() {
+    if (_pickerOpen) {
+      _pickerController.reverse().then((_) {
+        if (mounted) {
+          setState(() {
+            _pickerOpen = false;
+          });
+        }
+      });
+    } else {
+      setState(() {
+        _pickerOpen = true;
+      });
+      _pickerController.forward();
+    }
+  }
+
+  void _onPointerDown(PointerDownEvent event) {
+    _pointerDownPosition = event.position;
+    _dragCancelledTap = false;
+    _longPressTimer?.cancel();
+    _longPressTimer = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        setState(() {
+          _pickerOpen = true;
+          _hoveredReaction = null;
+        });
+        _pickerController.forward();
+      }
+    });
+  }
+
+  void _onPointerMove(PointerMoveEvent event) {
+    if (!_pickerOpen) {
+      if ((event.position - _pointerDownPosition).distance > 15) {
+        _longPressTimer?.cancel();
+        _dragCancelledTap = true;
+      }
+      return;
+    }
+
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      final localOffset = renderBox.globalToLocal(event.position);
+      final x = localOffset.dx;
+      final y = localOffset.dy;
+
+      final cardHeight = renderBox.size.height;
+      final pickerYStart = cardHeight - 140;
+      final pickerYEnd = cardHeight - 10;
+
+      if (y >= pickerYStart && y <= pickerYEnd) {
+        final relativeX = x - 12 - 6;
+        if (relativeX >= 0 && relativeX <= 192) {
+          final index = (relativeX / 48.0).floor().clamp(0, 3);
+          final kinds = ['paw', 'heart', 'treat', 'star'];
+          final nextHover = kinds[index];
+          if (_hoveredReaction != nextHover) {
+            setState(() {
+              _hoveredReaction = nextHover;
+            });
+          }
+        } else {
+          if (_hoveredReaction != null) {
+            setState(() {
+              _hoveredReaction = null;
+            });
+          }
+        }
+      } else {
+        if (_hoveredReaction != null) {
+          setState(() {
+            _hoveredReaction = null;
+          });
+        }
+      }
+    }
+  }
+
+  void _onPointerUp(PointerUpEvent event) {
+    _longPressTimer?.cancel();
+    if (_pickerOpen) {
+      if (_hoveredReaction != null) {
+        final selected = _hoveredReaction!;
+        setState(() {
+          _hoveredReaction = null;
+        });
+        _onPickerSelected(selected, event.position);
+      } else {
+        _togglePicker();
+      }
+    } else {
+      if (!_dragCancelledTap) {
+        _handleShortTap();
+      }
+    }
+  }
+
+  void _handleShortTap() {
+    if (_reacted == null) {
+      _fireBurst('paw', 50, 0);
+      widget.onLike();
+    } else {
+      setState(() {
+        _reacted = null;
+      });
+      widget.onLike();
+    }
   }
 
   String _emojiForKind(String kind) {
@@ -674,6 +818,39 @@ class _PostCardState extends State<_PostCard> {
     super.initState();
     if (widget.post.isLiked) {
       _reacted = 'paw';
+    }
+    _pickerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _pickerScaleAnimation = CurvedAnimation(
+      parent: _pickerController,
+      curve: Curves.easeOutBack,
+    );
+    _pickerFadeAnimation = CurvedAnimation(
+      parent: _pickerController,
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _longPressTimer?.cancel();
+    _pickerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant PostCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.post.isLiked != oldWidget.post.isLiked) {
+      setState(() {
+        if (widget.post.isLiked) {
+          _reacted ??= 'paw';
+        } else {
+          _reacted = null;
+        }
+      });
     }
   }
 
@@ -728,7 +905,25 @@ class _PostCardState extends State<_PostCard> {
               // Photo
               GestureDetector(
                 onTap: widget.onTapPost,
-                onDoubleTap: () => _fireBurst('paw', (context.size?.width ?? 320) / 2, 100),
+                onDoubleTapDown: (details) {
+                  _doubleTapPosition = details;
+                },
+                onDoubleTap: () {
+                  if (_doubleTapPosition != null) {
+                    final renderBox = context.findRenderObject() as RenderBox?;
+                    if (renderBox != null) {
+                      final localOffset = renderBox.globalToLocal(_doubleTapPosition!.globalPosition);
+                      _fireBurst('paw', localOffset.dx, localOffset.dy);
+                    } else {
+                      _fireBurst('paw', (context.size?.width ?? 320) / 2, 100);
+                    }
+                  } else {
+                    _fireBurst('paw', (context.size?.width ?? 320) / 2, 100);
+                  }
+                  if (!widget.post.isLiked) {
+                    widget.onLike();
+                  }
+                },
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
                   child: AspectRatio(
@@ -813,42 +1008,58 @@ class _PostCardState extends State<_PostCard> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          if (_reacted == null) {
-                            _fireBurst('paw', 50, 0); // Simplified position
-                            widget.onLike();
-                          }
-                        },
-                        onLongPress: () => setState(() => _pickerOpen = !_pickerOpen),
-                        child: Container(
-                          height: 44,
-                          color: Colors.transparent,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _reacted != null 
-                                ? Text(_emojiForKind(_reacted!), style: const TextStyle(fontSize: 20))
-                                : Icon(Icons.pets, size: 20, color: pt.ink700),
-                              const SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  _reacted != null ? '${_reacted![0].toUpperCase()}${_reacted!.substring(1)}' : 'React',
-                                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                        color: _reacted != null ? _colorForKind(_reacted!) : pt.ink700,
-                                      ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
+                      child: Listener(
+                        onPointerDown: _onPointerDown,
+                        onPointerMove: _onPointerMove,
+                        onPointerUp: _onPointerUp,
+                        onPointerCancel: (event) => _longPressTimer?.cancel(),
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          child: Container(
+                            height: 44,
+                            color: Colors.transparent,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _reacted != null 
+                                  ? Text(_emojiForKind(_reacted!), style: const TextStyle(fontSize: 20))
+                                  : Icon(Icons.pets, size: 20, color: pt.ink700),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    _reacted != null ? '${_reacted![0].toUpperCase()}${_reacted!.substring(1)}' : 'React',
+                                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                          color: _reacted != null ? _colorForKind(_reacted!) : pt.ink700,
+                                        ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    Expanded(child: _ActionBtn(icon: Icons.chat_bubble_outline_rounded, label: 'Comment')),
-                    Expanded(child: _ActionBtn(icon: Icons.ios_share_rounded, label: 'Share')),
-                    Expanded(child: _ActionBtn(icon: Icons.bookmark_border_rounded, label: 'Save')),
+                    Expanded(
+                      child: _ActionBtn(
+                        icon: Icons.chat_bubble_outline_rounded,
+                        label: 'Comment',
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            useRootNavigator: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => PostCommentsBottomSheet(
+                              postId: widget.post.id,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Expanded(child: const _ActionBtn(icon: Icons.ios_share_rounded, label: 'Share')),
+                    Expanded(child: const _ActionBtn(icon: Icons.bookmark_border_rounded, label: 'Save')),
                   ],
                 ),
               ),
@@ -860,20 +1071,30 @@ class _PostCardState extends State<_PostCard> {
             Positioned(
               bottom: 52,
               left: 12,
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(999),
-                  boxShadow: [BoxShadow(color: Color(0x4D783C14), blurRadius: 32, spreadRadius: -10, offset: const Offset(0, 16)), BorderSide(color: Theme.of(context).extension<PetfolioThemeExtension>()!.line).toBoxShadow()],
-                ),
-                child: Row(
-                  children: [
-                    _ReactPickerBtn(emoji: '🐾', kind: 'paw', onTap: (x,y) => _fireBurst('paw', x, y)),
-                    _ReactPickerBtn(emoji: '❤️', kind: 'heart', onTap: (x,y) => _fireBurst('heart', x, y)),
-                    _ReactPickerBtn(emoji: '🦴', kind: 'treat', onTap: (x,y) => _fireBurst('treat', x, y)),
-                    _ReactPickerBtn(emoji: '⭐', kind: 'star', onTap: (x,y) => _fireBurst('star', x, y)),
-                  ],
+              child: FadeTransition(
+                opacity: _pickerFadeAnimation,
+                child: ScaleTransition(
+                  scale: _pickerScaleAnimation,
+                  alignment: Alignment.bottomLeft,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(999),
+                      boxShadow: [
+                        BoxShadow(color: Color(0x4D783C14), blurRadius: 32, spreadRadius: -10, offset: const Offset(0, 16)),
+                        BorderSide(color: Theme.of(context).extension<PetfolioThemeExtension>()!.line).toBoxShadow()
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        _ReactPickerBtn(emoji: '🐾', kind: 'paw', onTap: (details) => _onPickerSelected('paw', details.globalPosition), isHovered: _hoveredReaction == 'paw'),
+                        _ReactPickerBtn(emoji: '❤️', kind: 'heart', onTap: (details) => _onPickerSelected('heart', details.globalPosition), isHovered: _hoveredReaction == 'heart'),
+                        _ReactPickerBtn(emoji: '🦴', kind: 'treat', onTap: (details) => _onPickerSelected('treat', details.globalPosition), isHovered: _hoveredReaction == 'treat'),
+                        _ReactPickerBtn(emoji: '⭐', kind: 'star', onTap: (details) => _onPickerSelected('star', details.globalPosition), isHovered: _hoveredReaction == 'star'),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -917,56 +1138,73 @@ class _EmojiCircle extends StatelessWidget {
 }
 
 class _ActionBtn extends StatelessWidget {
-  const _ActionBtn({required this.icon, required this.label});
+  const _ActionBtn({required this.icon, required this.label, this.onTap});
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final style = Theme.of(context).textTheme.labelLarge?.copyWith(color: pt.ink700);
-    return SizedBox(
-      height: 44,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 20, color: pt.ink700),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              label,
-              style: style,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 44,
+        color: Colors.transparent,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 20, color: pt.ink700),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                style: style,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
 class _ReactPickerBtn extends StatelessWidget {
-  const _ReactPickerBtn({required this.emoji, required this.kind, required this.onTap});
+  const _ReactPickerBtn({
+    required this.emoji,
+    required this.kind,
+    required this.onTap,
+    required this.isHovered,
+  });
   final String emoji;
   final String kind;
-  final Function(double, double) onTap;
+  final Function(TapDownDetails) onTap;
+  final bool isHovered;
 
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return GestureDetector(
-      onTapDown: (d) => onTap(d.globalPosition.dx, d.globalPosition.dy - 300), // simplified offset
-      child: Container(
-        width: 42,
-        height: 42,
+      onTapDown: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        width: isHovered ? 48 : 42,
+        height: isHovered ? 48 : 42,
         margin: const EdgeInsets.symmetric(horizontal: 3),
         decoration: BoxDecoration(
-          color: pt.surface2,
+          color: isHovered ? pt.cream : pt.surface2,
           shape: BoxShape.circle,
+          border: isHovered ? Border.all(color: AppColors.tangerine, width: 2) : null,
         ),
         alignment: Alignment.center,
-        child: Text(emoji, style: const TextStyle(fontSize: 24)),
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 150),
+          scale: isHovered ? 1.25 : 1.0,
+          child: Text(emoji, style: const TextStyle(fontSize: 24)),
+        ),
       ),
     );
   }

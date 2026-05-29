@@ -93,7 +93,7 @@ class CommentRepository {
           'author_id': _uid,
           'pet_id': petId,
           'content': content.trim(),
-          'parent_id': ?parentId,
+          'parent_id': parentId,
         })
         .select('id, post_id, pet_id, content, created_at, parent_id, like_count, pet:pets(name, handle, avatar_url)')
         .single();

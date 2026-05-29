@@ -1,8 +1,10 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../data/repositories/social_repository.dart';
 import 'story_controller.dart';
+
+part 'create_post_controller.g.dart';
 
 enum PostStep { idle, uploading, posting }
 
@@ -42,7 +44,8 @@ class CreatePostState {
   }
 }
 
-class CreatePostNotifier extends Notifier<CreatePostState> {
+@riverpod
+class CreatePostController extends _$CreatePostController {
   @override
   CreatePostState build() => CreatePostState();
 
@@ -112,8 +115,3 @@ class CreatePostNotifier extends Notifier<CreatePostState> {
     }
   }
 }
-
-final createPostControllerProvider =
-    NotifierProvider<CreatePostNotifier, CreatePostState>(
-  CreatePostNotifier.new,
-);

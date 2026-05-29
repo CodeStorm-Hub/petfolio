@@ -134,3 +134,8 @@ tmp_window_dump.xml
 /PetFolio-UI-Screens
 /PetFolio Redesign/screenshots
 /PetFolio Redesign/ref
+
+# Local IDE/telemetry artifacts
+.dart-tool/
+tmp_home/
+.idea/caches/

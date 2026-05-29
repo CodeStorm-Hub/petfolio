@@ -84,20 +84,17 @@ class _ManagePetsScreenState extends ConsumerState<ManagePetsScreen> {
     try {
       await ref.read(petListProvider.notifier).archive(pet.id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text('${pet.name} archived.'),
-          action: SnackBarAction(
-            label: 'Undo',
-            onPressed: () async {
-              try {
-                await ref.read(petListProvider.notifier).unarchive(pet.id);
-              } catch (e) {
-                if (mounted) AppSnackBar.showError(e);
-              }
-            },
-          ),
+      AppSnackBar.show(
+        '${pet.name} archived.',
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () async {
+            try {
+              await ref.read(petListProvider.notifier).unarchive(pet.id);
+            } catch (e) {
+              if (mounted) AppSnackBar.showError(e);
+            }
+          },
         ),
       );
     } catch (e) {

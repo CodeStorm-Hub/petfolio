@@ -1377,3 +1377,29 @@ Phase complete and to log to .remember/remember.md, Please run (/remember) to sa
 **Next step:** None.
 
 Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-27 — Social Feature Refactoring & Press-and-Hold Gestures (Dart)
+
+- **Riverpod 3 Migration** — Migrated all manual providers in the `social` feature (`NotificationController`, `SocialController`, `CommentController`, `CreatePostController`, `StoryController`) to generated `@riverpod` syntax, ensuring architectural consistency across components.
+- **Supabase Realtime Join Fix** — Refactored `NotificationController` subscription to handle Postgres changes stream correctly. Instead of client-side data joins, the stream triggers database re-queries to fetch joined notification records.
+- **Press-and-Hold Reaction Picker** — Implemented a long-press gesture (300ms) on the React button using a raw listener sequence. Dragging highlights the target emoji slot with premium scale and border transitions. Releasing selects the hovered reaction, triggers visual bursts, and registers a like; releasing outside closes the picker immediately. Short taps retain the toggle like/unlike behavior.
+- **Widget & Unit Testing** — Added comprehensive widget tests in `post_card_widget_test.dart` and unit tests in `social_controller_test.dart` to simulate pointer interactions, verifying gesture flows and optimistic database states.
+
+**Next step:** None.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-05-28 — Social Feed Inline Comments Bottom Sheet (Dart)
+
+- **Inline Comments Bottom Sheet** — Created `PostCommentsBottomSheet` inside `lib/features/social/presentation/widgets/post_comments_bottom_sheet.dart` to list and post comments inline on the feed screen without navigating to the post details page.
+- **Feed Comment Action Update** — Configured the "Comment" action button on `PostCard` to trigger the `PostCommentsBottomSheet` modal (using `showModalBottomSheet(isScrollControlled: true)`) instead of routing to the details page. Tapping the post's image continues to navigate to the details page.
+- **Widget Testing Integration** — Added a widget test `tapping Comment button opens PostCommentsBottomSheet` in `post_card_widget_test.dart` to verify modal rendering and correctly configured a mock comment repository.
+
+**Next step:** None.
+
+Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
