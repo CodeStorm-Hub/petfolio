@@ -1,52 +1,65 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/app_notification.dart';
 import '../../data/repositories/notification_repository.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Provider
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Provides the real-time notification list for the active pet.
-///
-/// Backed by a Supabase Realtime stream, so the list auto-updates
-/// whenever a new notification row is inserted.
-final notificationsProvider =
-    StreamNotifierProvider<NotificationNotifier, List<AppNotification>>(
-  NotificationNotifier.new,
-);
-
-/// Derived provider: counts unread notifications for the badge.
-final unreadCountProvider = Provider<int>((ref) {
-  return ref
-          .watch(notificationsProvider)
-          .value
-          ?.where((n) => !n.isRead)
-          .length ??
-      0;
-});
+part 'notification_controller.g.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Notifier
+// Providers & Notifiers
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Streams in-app notifications for the currently active pet.
-///
-/// Uses [StreamNotifier] so Flutter rebuilds automatically whenever
-/// the Supabase Realtime channel receives a new notification row.
-class NotificationNotifier extends StreamNotifier<List<AppNotification>> {
+@riverpod
+class Notifications extends _$Notifications {
+  RealtimeChannel? _channel;
+
   @override
-  Stream<List<AppNotification>> build() {
-    final activePet = ref.read(activePetControllerProvider);
-    if (activePet == null) return const Stream.empty();
+  FutureOr<List<AppNotification>> build() async {
+    final activePet = ref.watch(activePetControllerProvider);
+    if (activePet == null) return const [];
 
-    return _repo.watchNotifications(activePet.id);
+    ref.onDispose(() {
+      _channel?.unsubscribe();
+      _channel = null;
+    });
+
+    final repo = ref.read(notificationRepositoryProvider);
+
+    // Initial load utilizing join query
+    final notifications = await repo.fetchNotifications(activePet.id);
+
+    // Setup Postgres Changes subscription to update state on modification
+    if (ref.mounted) {
+      _channel = Supabase.instance.client
+          .channel('notifications_${activePet.id}')
+          .onPostgresChanges(
+            event: PostgresChangeEvent.all,
+            schema: 'public',
+            table: 'notifications',
+            filter: PostgresChangeFilter(
+              type: PostgresChangeFilterType.eq,
+              column: 'recipient_pet_id',
+              value: activePet.id,
+            ),
+            callback: (payload) async {
+              try {
+                // Re-fetch the full list with joins to avoid missing actor details
+                final updated = await ref
+                    .read(notificationRepositoryProvider)
+                    .fetchNotifications(activePet.id);
+                state = AsyncData(updated);
+              } catch (_) {
+                // Ignore transient failures in realtime syncing
+              }
+            },
+          )
+          .subscribe();
+    }
+
+    return notifications;
   }
-
-  NotificationRepository get _repo => ref.read(notificationRepositoryProvider);
-
-  // ── Public actions ────────────────────────────────────────────────────────
 
   /// Marks all unread notifications as read and updates the local state.
   Future<void> markAllRead() async {
@@ -62,9 +75,22 @@ class NotificationNotifier extends StreamNotifier<List<AppNotification>> {
     );
 
     try {
-      await _repo.markAllRead(activePet.id);
+      await ref.read(notificationRepositoryProvider).markAllRead(activePet.id);
     } catch (_) {
-      // On failure, the stream will eventually reconcile the state.
+      // Reconciles on next event or manual refresh
     }
   }
 }
+
+/// Derived provider: counts unread notifications for the badge.
+@riverpod
+int unreadCount(Ref ref) {
+  return ref
+          .watch(notificationsProvider)
+          .value
+          ?.where((n) => !n.isRead)
+          .length ??
+      0;
+}
+
+

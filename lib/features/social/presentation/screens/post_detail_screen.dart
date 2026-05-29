@@ -301,6 +301,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                           key: ValueKey(item.comment.id),
                           comment: item.comment,
                           postId: widget.postId,
+                          parentContext: context,
                           isReply: item.isReply,
                           onReplyTap: (c) {
                             setState(() {
@@ -554,12 +555,14 @@ class _CommentTile extends ConsumerWidget {
     super.key,
     required this.comment,
     required this.postId,
+    required this.parentContext,
     this.isReply = false,
     this.onReplyTap,
   });
 
   final Comment comment;
   final String postId;
+  final BuildContext parentContext;
   final bool isReply;
   final ValueChanged<Comment>? onReplyTap;
 
@@ -570,11 +573,11 @@ class _CommentTile extends ConsumerWidget {
   void _showContextMenu(BuildContext context, WidgetRef ref) {
     if (!comment.isOwnComment) return;
 
-    final tt = Theme.of(context).textTheme;
-    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(parentContext).textTheme;
+    final cs = Theme.of(parentContext).colorScheme;
 
     showModalBottomSheet<void>(
-      context: context,
+      context: parentContext,
       useRootNavigator: true,
       backgroundColor: cs.surface,
       shape: const RoundedRectangleBorder(
@@ -621,8 +624,11 @@ class _CommentTile extends ConsumerWidget {
                 onTap: () {
                   Navigator.of(sheetCtx).pop();
                   // Small delay so the first sheet is fully dismissed first.
+                  final ctx = parentContext;
                   Future.delayed(const Duration(milliseconds: 120), () {
-                    if (context.mounted) _showEditSheet(context, ref);
+                    if (ctx.mounted) {
+                      _showEditSheet(ctx, ref);
+                    }
                   });
                 },
               ),
@@ -901,7 +907,7 @@ class _CommentTile extends ConsumerWidget {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _CommentInputBar extends StatelessWidget {
+class _CommentInputBar extends StatefulWidget {
   const _CommentInputBar({
     required this.controller,
     required this.isSending,
@@ -921,32 +927,101 @@ class _CommentInputBar extends StatelessWidget {
   final String? replyingToHandle;
 
   @override
+  State<_CommentInputBar> createState() => _CommentInputBarState();
+}
+
+class _CommentInputBarState extends State<_CommentInputBar> {
+  late FocusNode _focusNode;
+  bool _isFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = widget.focusNode ?? FocusNode();
+    _focusNode.addListener(_onFocusChange);
+    widget.controller.addListener(_onTextChange);
+  }
+
+  @override
+  void didUpdateWidget(covariant _CommentInputBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.focusNode != oldWidget.focusNode) {
+      _focusNode.removeListener(_onFocusChange);
+      _focusNode = widget.focusNode ?? FocusNode();
+      _focusNode.addListener(_onFocusChange);
+    }
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller.removeListener(_onTextChange);
+      widget.controller.addListener(_onTextChange);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onTextChange);
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    } else {
+      _focusNode.removeListener(_onFocusChange);
+    }
+    super.dispose();
+  }
+
+  void _onFocusChange() {
+    setState(() {
+      _isFocused = _focusNode.hasFocus;
+    });
+  }
+
+  void _onTextChange() {
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final pt = widget.pt;
+    final primary = Theme.of(context).colorScheme.primary;
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        border: Border(top: BorderSide(color: pt.line)),
+        border: Border(top: BorderSide(color: pt.line.withAlpha(180))),
       ),
       padding: EdgeInsets.only(
         left: 16,
-        right: 8,
-        top: 10,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 10,
+        right: 12,
+        top: 12,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 12,
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Expanded(
-            child: Container(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
               decoration: BoxDecoration(
-                color: pt.surface1,
+                color: _isFocused ? Theme.of(context).colorScheme.surface : pt.surface1,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: pt.line),
+                border: Border.all(
+                  color: _isFocused ? primary : pt.line,
+                  width: _isFocused ? 1.5 : 1.0,
+                ),
+                boxShadow: _isFocused
+                    ? [
+                        BoxShadow(
+                          color: primary.withAlpha(20),
+                          blurRadius: 8,
+                          spreadRadius: 0,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: TextField(
-                controller: controller,
-                focusNode: focusNode,
-                autofocus: autofocus,
+                controller: widget.controller,
+                focusNode: _focusNode,
+                autofocus: widget.autofocus,
                 minLines: 1,
                 maxLines: 4,
                 style: TextStyle(
@@ -955,33 +1030,65 @@ class _CommentInputBar extends StatelessWidget {
                 ),
                 decoration: InputDecoration(
                   border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  filled: false,
                   isDense: true,
-                  hintText: replyingToHandle != null
-                      ? 'Reply to $replyingToHandle...'
+                  hintText: widget.replyingToHandle != null
+                      ? 'Reply to ${widget.replyingToHandle}...'
                       : 'Add a comment...',
                   hintStyle: TextStyle(color: pt.ink300, fontSize: 14),
-                  contentPadding: EdgeInsets.zero,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 4),
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          // Send button
+          const SizedBox(width: 12),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
-            child: isSending
+            child: widget.isSending
                 ? const SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : IconButton(
-                    key: const ValueKey('send'),
-                    icon: Icon(
-                      Icons.send_rounded,
-                      color: Theme.of(context).colorScheme.primary,
+                    width: 38,
+                    height: 38,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation(AppColors.coral500),
+                      ),
                     ),
-                    onPressed: onSend,
+                  )
+                : GestureDetector(
+                    key: const ValueKey('send'),
+                    onTap: widget.onSend,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: widget.controller.text.trim().isNotEmpty
+                            ? primary
+                            : pt.surface2,
+                        shape: BoxShape.circle,
+                        boxShadow: widget.controller.text.trim().isNotEmpty
+                            ? [
+                                BoxShadow(
+                                  color: primary.withAlpha(50),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Icon(
+                        Icons.arrow_upward_rounded,
+                        color: widget.controller.text.trim().isNotEmpty
+                            ? Colors.white
+                            : pt.ink300,
+                        size: 20,
+                      ),
+                    ),
                   ),
           ),
         ],
