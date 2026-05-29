@@ -345,9 +345,7 @@ class _CommentTile extends ConsumerWidget {
   }
 
   void _showEditSheet(BuildContext context, WidgetRef ref) {
-    final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
-    final editController = TextEditingController(text: comment.content);
 
     showModalBottomSheet<void>(
       context: context,
@@ -358,84 +356,12 @@ class _CommentTile extends ConsumerWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (sheetCtx) {
-        return StatefulBuilder(
-          builder: (ctx, setSheetState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 20,
-                bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: cs.onSurfaceVariant.withAlpha(60),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Edit Comment',
-                    style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: editController,
-                    autofocus: true,
-                    maxLines: 5,
-                    minLines: 1,
-                    style: tt.bodyMedium,
-                    decoration: InputDecoration(
-                      hintText: 'Update your comment…',
-                      hintStyle: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
-                      filled: true,
-                      fillColor: cs.surfaceContainerHighest,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.coral500,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(48),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      final newText = editController.text.trim();
-                      if (newText.isEmpty) return;
-                      Navigator.of(sheetCtx).pop();
-                      ref.read(commentListProvider(postId).notifier).edit(comment.id, newText);
-                    },
-                    child: Text(
-                      'Save',
-                      style: tt.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+        return _EditCommentSheet(
+          comment: comment,
+          postId: postId,
         );
       },
-    ).whenComplete(() => editController.dispose());
+    );
   }
 
   @override
@@ -745,6 +671,114 @@ class _CommentInputBarState extends State<_CommentInputBar> {
                       ),
                     ),
                   ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EditCommentSheet extends ConsumerStatefulWidget {
+  const _EditCommentSheet({
+    required this.comment,
+    required this.postId,
+  });
+
+  final Comment comment;
+  final String postId;
+
+  @override
+  ConsumerState<_EditCommentSheet> createState() => _EditCommentSheetState();
+}
+
+class _EditCommentSheetState extends ConsumerState<_EditCommentSheet> {
+  late final TextEditingController _editController;
+
+  @override
+  void initState() {
+    super.initState();
+    _editController = TextEditingController(text: widget.comment.content);
+  }
+
+  @override
+  void dispose() {
+    _editController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: cs.onSurfaceVariant.withAlpha(60),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Edit Comment',
+            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _editController,
+            autofocus: true,
+            maxLines: 5,
+            minLines: 1,
+            style: tt.bodyMedium,
+            decoration: InputDecoration(
+              hintText: 'Update your comment…',
+              hintStyle: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+              filled: true,
+              fillColor: cs.surfaceContainerHighest,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            ),
+          ),
+          const SizedBox(height: 16),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.coral500,
+              foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(48),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              final newText = _editController.text.trim();
+              if (newText.isEmpty) return;
+              Navigator.of(context).pop();
+              ref.read(commentListProvider(widget.postId).notifier).edit(widget.comment.id, newText);
+            },
+            child: Text(
+              'Save',
+              style: tt.labelLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
           ),
         ],
       ),
