@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../errors/app_exception.dart';
+import '../theme/app_colors.dart';
 
 final GlobalKey<ScaffoldMessengerState> appSnackBarMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
@@ -26,7 +27,7 @@ class AppSnackBar {
     messenger.showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF2FCBA0), // Theme Success color (mint)
+        backgroundColor: AppColors.success,
         content: Row(
           children: [
             const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
@@ -67,7 +68,7 @@ class AppSnackBar {
     messenger.showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFFFF3D3D), // Theme Danger color (poppy)
+        backgroundColor: AppColors.danger,
         content: Row(
           children: [
             const Icon(Icons.error_outline_rounded, color: Colors.white, size: 20),
@@ -93,16 +94,16 @@ class AppSnackBar {
     if (messenger == null) return;
 
     final label = _badgeLabel(badgeType);
-    final icon  = _badgeIcon(badgeType);
+    final icon = _badgeIcon(badgeType);
 
     messenger.showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF1C7C54),
+        backgroundColor: AppColors.mint700,
         duration: const Duration(seconds: 5),
         content: Row(
           children: [
-            Icon(icon, color: const Color(0xFFFFD54F), size: 28),
+            Icon(icon, color: AppColors.sunny, size: 28),
             const SizedBox(width: 12),
             Expanded(
               child: Text(

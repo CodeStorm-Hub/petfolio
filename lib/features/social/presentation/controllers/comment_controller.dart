@@ -22,7 +22,7 @@ part 'comment_controller.g.dart';
 class CommentList extends _$CommentList {
   @override
   FutureOr<List<Comment>> build(String postId) {
-    final activePetId = ref.read(activePetControllerProvider)?.id ?? '';
+    final activePetId = ref.watch(activePetControllerProvider)?.id ?? '';
     return ref.read(commentRepositoryProvider).fetchComments(postId: postId, activePetId: activePetId);
   }
 
