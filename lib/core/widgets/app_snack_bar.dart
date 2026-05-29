@@ -24,6 +24,19 @@ class AppSnackBar {
   static void showSuccess(String message, {SnackBarAction? action}) {
     final messenger = appSnackBarMessengerKey.currentState;
     if (messenger == null) return;
+    final context = messenger.context;
+    final themeStyle = Theme.of(context).snackBarTheme.contentTextStyle ??
+                       Theme.of(context).textTheme.bodyMedium;
+    final style = themeStyle?.copyWith(
+      fontWeight: FontWeight.w600,
+      fontSize: 14,
+      color: Colors.white,
+    ) ?? const TextStyle(
+      fontWeight: FontWeight.w600,
+      fontSize: 14,
+      color: Colors.white,
+    );
+
     messenger.showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
@@ -35,11 +48,7 @@ class AppSnackBar {
             Expanded(
               child: Text(
                 message,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: Colors.white,
-                ),
+                style: style,
               ),
             ),
           ],
@@ -65,6 +74,19 @@ class AppSnackBar {
     final messenger = appSnackBarMessengerKey.currentState;
     if (messenger == null) return;
     final text = error is AppException ? error.message : error.toString();
+    final context = messenger.context;
+    final themeStyle = Theme.of(context).snackBarTheme.contentTextStyle ??
+                       Theme.of(context).textTheme.bodyMedium;
+    final style = themeStyle?.copyWith(
+      fontWeight: FontWeight.w600,
+      fontSize: 14,
+      color: Colors.white,
+    ) ?? const TextStyle(
+      fontWeight: FontWeight.w600,
+      fontSize: 14,
+      color: Colors.white,
+    );
+
     messenger.showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
@@ -76,11 +98,7 @@ class AppSnackBar {
             Expanded(
               child: Text(
                 text,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: Colors.white,
-                ),
+                style: style,
               ),
             ),
           ],
@@ -95,6 +113,18 @@ class AppSnackBar {
 
     final label = _badgeLabel(badgeType);
     final icon = _badgeIcon(badgeType);
+    final context = messenger.context;
+    final themeStyle = Theme.of(context).snackBarTheme.contentTextStyle ??
+                       Theme.of(context).textTheme.bodyMedium;
+    final style = themeStyle?.copyWith(
+      fontWeight: FontWeight.w600,
+      fontSize: 15,
+      color: Colors.white,
+    ) ?? const TextStyle(
+      fontWeight: FontWeight.w600,
+      fontSize: 15,
+      color: Colors.white,
+    );
 
     messenger.showSnackBar(
       SnackBar(
@@ -108,11 +138,7 @@ class AppSnackBar {
             Expanded(
               child: Text(
                 '$label badge unlocked! 🎉',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
-                  color: Colors.white,
-                ),
+                style: style,
               ),
             ),
           ],

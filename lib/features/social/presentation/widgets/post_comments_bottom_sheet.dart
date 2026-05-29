@@ -36,7 +36,7 @@ class _PostCommentsBottomSheetState extends ConsumerState<PostCommentsBottomShee
 
   Future<void> _sendComment() async {
     final text = _commentController.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _isSending) return;
 
     final activePet = ref.read(activePetControllerProvider);
     if (activePet == null) {
@@ -62,6 +62,7 @@ class _PostCommentsBottomSheetState extends ConsumerState<PostCommentsBottomShee
       // Scroll to bottom after adding a comment
       if (_scrollController.hasClients) {
         Future.delayed(const Duration(milliseconds: 100), () {
+          if (!mounted) return;
           if (_scrollController.hasClients) {
             _scrollController.animateTo(
               _scrollController.position.maxScrollExtent,

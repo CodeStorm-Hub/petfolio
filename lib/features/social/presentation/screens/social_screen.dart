@@ -630,6 +630,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
 
   Timer? _longPressTimer;
   Offset _pointerDownPosition = Offset.zero;
+  bool _dragCancelledTap = false;
 
   late AnimationController _pickerController;
   late Animation<double> _pickerScaleAnimation;
@@ -701,6 +702,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
 
   void _onPointerDown(PointerDownEvent event) {
     _pointerDownPosition = event.position;
+    _dragCancelledTap = false;
     _longPressTimer?.cancel();
     _longPressTimer = Timer(const Duration(milliseconds: 300), () {
       if (mounted) {
@@ -717,6 +719,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
     if (!_pickerOpen) {
       if ((event.position - _pointerDownPosition).distance > 15) {
         _longPressTimer?.cancel();
+        _dragCancelledTap = true;
       }
       return;
     }
@@ -772,7 +775,9 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
         _togglePicker();
       }
     } else {
-      _handleShortTap();
+      if (!_dragCancelledTap) {
+        _handleShortTap();
+      }
     }
   }
 
@@ -830,6 +835,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
 
   @override
   void dispose() {
+    _longPressTimer?.cancel();
     _pickerController.dispose();
     super.dispose();
   }
@@ -1006,6 +1012,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                         onPointerDown: _onPointerDown,
                         onPointerMove: _onPointerMove,
                         onPointerUp: _onPointerUp,
+                        onPointerCancel: (event) => _longPressTimer?.cancel(),
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           child: Container(

@@ -42,7 +42,6 @@ class CommentList extends _$CommentList {
     if (content.trim().isEmpty) return;
 
     final previousComments = state.value ?? [];
-    state = const AsyncLoading();
 
     try {
       final newComment = await _repo.addComment(

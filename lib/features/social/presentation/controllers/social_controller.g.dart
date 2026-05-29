@@ -50,7 +50,7 @@ final class SocialControllerProvider
   }
 }
 
-String _$socialControllerHash() => r'23b3d12092092086461f43459e45d41ab0712721';
+String _$socialControllerHash() => r'78b8a00628eba2afc24ae42bd34443981678b3e0';
 
 final class SocialControllerFamily extends $Family
     with
@@ -103,8 +103,12 @@ final postDetailProvider = PostDetailFamily._();
 
 final class PostDetailProvider
     extends
-        $FunctionalProvider<AsyncValue<FeedPost>, FeedPost, FutureOr<FeedPost>>
-    with $FutureModifier<FeedPost>, $FutureProvider<FeedPost> {
+        $FunctionalProvider<
+          AsyncValue<FeedPost?>,
+          FeedPost?,
+          FutureOr<FeedPost?>
+        >
+    with $FutureModifier<FeedPost?>, $FutureProvider<FeedPost?> {
   PostDetailProvider._({
     required PostDetailFamily super.from,
     required String super.argument,
@@ -128,11 +132,11 @@ final class PostDetailProvider
 
   @$internal
   @override
-  $FutureProviderElement<FeedPost> $createElement($ProviderPointer pointer) =>
+  $FutureProviderElement<FeedPost?> $createElement($ProviderPointer pointer) =>
       $FutureProviderElement(pointer);
 
   @override
-  FutureOr<FeedPost> create(Ref ref) {
+  FutureOr<FeedPost?> create(Ref ref) {
     final argument = this.argument as String;
     return postDetail(ref, argument);
   }
@@ -148,10 +152,10 @@ final class PostDetailProvider
   }
 }
 
-String _$postDetailHash() => r'98cb4a069d9ff5970f1ab0bd284edd93b3a7247e';
+String _$postDetailHash() => r'1cf9945c782e27e96b76e6092df4b286799a2621';
 
 final class PostDetailFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<FeedPost>, String> {
+    with $FunctionalFamilyOverride<FutureOr<FeedPost?>, String> {
   PostDetailFamily._()
     : super(
         retry: null,
@@ -225,7 +229,7 @@ final class PostProvider
   }
 }
 
-String _$postHash() => r'2e903bedf13eb468f7b61893427c12c750cf4a0a';
+String _$postHash() => r'06f8a0e7821b3ba0ef0ca3ce9f1b215b7ace91ce';
 
 final class PostFamily extends $Family
     with $FunctionalFamilyOverride<FeedPost?, String> {

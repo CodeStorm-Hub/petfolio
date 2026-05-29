@@ -33,7 +33,7 @@ final class NotificationsProvider
   Notifications create() => Notifications();
 }
 
-String _$notificationsHash() => r'378979b129b47df6077fd0b3bf30e55ba5583c43';
+String _$notificationsHash() => r'ed6b49329d41f98c1fa6b07c424984166ad9d55e';
 
 abstract class _$Notifications extends $AsyncNotifier<List<AppNotification>> {
   FutureOr<List<AppNotification>> build();
@@ -101,4 +101,4 @@ final class UnreadCountProvider extends $FunctionalProvider<int, int, int>
   }
 }
 
-String _$unreadCountHash() => r'177654d3258066b14cf3b101162a85363e56e261';
+String _$unreadCountHash() => r'930e7f185024d1ec5ce02a03e0c42fcfb041ae20';

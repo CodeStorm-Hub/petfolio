@@ -256,8 +256,9 @@ class SocialController extends _$SocialController {
 }
 
 @riverpod
-Future<FeedPost> postDetail(Ref ref, String postId) async {
-  final activePetId = ref.watch(activePetIdProvider) ?? '';
+Future<FeedPost?> postDetail(Ref ref, String postId) async {
+  final activePetId = ref.watch(activePetIdProvider);
+  if (activePetId == null || activePetId.isEmpty) return null;
   return ref
       .read(socialRepositoryProvider)
       .fetchPostById(postId: postId, activePetId: activePetId);
@@ -265,7 +266,8 @@ Future<FeedPost> postDetail(Ref ref, String postId) async {
 
 @riverpod
 FeedPost? post(Ref ref, String postId) {
-  final activePetId = ref.watch(activePetIdProvider) ?? '';
+  final activePetId = ref.watch(activePetIdProvider);
+  if (activePetId == null || activePetId.isEmpty) return null;
   final feedState = ref.watch(socialControllerProvider(activePetId)).value;
   if (feedState == null) return null;
   try {

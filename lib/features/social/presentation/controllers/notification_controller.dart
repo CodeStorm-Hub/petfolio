@@ -17,6 +17,9 @@ class Notifications extends _$Notifications {
 
   @override
   FutureOr<List<AppNotification>> build() async {
+    _channel?.unsubscribe();
+    _channel = null;
+
     final activePet = ref.watch(activePetControllerProvider);
     if (activePet == null) return const [];
 
@@ -44,11 +47,13 @@ class Notifications extends _$Notifications {
               value: activePet.id,
             ),
             callback: (payload) async {
+              if (!ref.mounted) return;
               try {
                 // Re-fetch the full list with joins to avoid missing actor details
                 final updated = await ref
                     .read(notificationRepositoryProvider)
                     .fetchNotifications(activePet.id);
+                if (!ref.mounted) return;
                 state = AsyncData(updated);
               } catch (_) {
                 // Ignore transient failures in realtime syncing
