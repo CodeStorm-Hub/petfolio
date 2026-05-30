@@ -8,7 +8,6 @@ import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart';
-import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 
 import 'package:petfolio/core/errors/app_exception.dart';
 import 'package:petfolio/core/models/pet.dart' show Pet;
@@ -103,7 +102,6 @@ class _CareScreenState extends ConsumerState<CareScreen> {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final activePet = ref.watch(activePetControllerProvider);
-    final themeMode = ref.watch(themeProvider);
 
     final petsAsync = ref.watch(petListProvider);
     if (activePet == null) {
@@ -161,47 +159,22 @@ class _CareScreenState extends ConsumerState<CareScreen> {
         onPressed: openAddSheet,
         child: const Icon(Icons.add_rounded),
       ),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            AppHeader(
-              eyebrow: 'Care · ${activePet.name}',
-              onOpenSwitcher: () => PetSwitcherSheet.show(context),
-              onBack: Navigator.of(context).canPop()
-                  ? () => Navigator.of(context).maybePop()
-                  : null,
-              actions: [
-                AppHeaderAction(
-                  iconKey: const ValueKey<String>('care_action_theme'),
-                  icon: themeMode == ThemeMode.dark
-                      ? Icons.light_mode_outlined
-                      : Icons.dark_mode_outlined,
-                  tooltip: themeMode == ThemeMode.dark
-                      ? 'Switch to light theme'
-                      : 'Switch to dark theme',
-                  onTap: () =>
-                      ref.read(themeProvider.notifier).toggleTheme(),
-                ),
-              ],
-            ),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final wide = constraints.maxWidth >= 600;
-                  final list = ListView(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 120),
-                    children: [
-                      CareGamifiedHeader(
-                        activePet: activePet,
-                        dashboard: dashboard,
-                      ),
-                      Padding(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 600;
+          final list = ListView(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 120),
+            children: [
+              CareGamifiedHeader(
+                activePet: activePet,
+                dashboard: dashboard,
+              ),
+              Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 12.0),
                             PfSectionTitle(
                               title: 'Trophy room',
                               accent: AppColors.lilac,
@@ -281,10 +254,6 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                   );
                 },
               ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

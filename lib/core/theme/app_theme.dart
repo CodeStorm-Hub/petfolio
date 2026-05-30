@@ -315,6 +315,7 @@ abstract final class AppTheme {
       brightness: brightness,
       colorScheme: cs,
       textTheme: tt,
+      fontFamily: GoogleFonts.inter().fontFamily,
       extensions: [ext],
 
       scaffoldBackgroundColor: isDark ? AppColors.creamD : AppColors.cream,

@@ -12,7 +12,7 @@ import 'package:petfolio/features/care/presentation/controllers/pet_awards_provi
 import '../../data/models/pet.dart';
 import '../controllers/active_pet_controller.dart';
 import '../controllers/pet_list_controller.dart';
-import '../widgets/pet_switcher_sheet.dart';
+
 
 class PetProfileScreen extends ConsumerWidget {
   const PetProfileScreen({super.key});
@@ -175,61 +175,12 @@ class _HeroGamifiedBanner extends ConsumerWidget {
           color: color,
           child: Column(
             children: [
-              // Status row
-              Padding(
-                padding: EdgeInsets.fromLTRB(18, MediaQuery.paddingOf(context).top + 16, 18, 6),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: () => PetSwitcherSheet.show(context),
-                      child: Container(
-                        padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(56),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Row(
-                          children: [
-                            PetAvatar(
-                              imageUrl: pet.avatarUrl,
-                              species: sp,
-                              size: PetAvatarSize.sm,
-                              showRing: true,
-                            ),
-                            const SizedBox(width: 10),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Text('ACTIVE PET', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 0.6)),
-                                Row(
-                                  children: [
-                                    Text(pet.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
-                                    const SizedBox(width: 4),
-                                    const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 16),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        _IconBtn(icon: Icons.notifications_rounded, onTap: () => context.push('/social/notifications')),
-                        const SizedBox(width: 8),
-                        _IconBtn(icon: Icons.settings_rounded, onTap: () => context.push('/pets/manage')),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+              // Spacer for fixed AppShell status header
+              SizedBox(height: MediaQuery.paddingOf(context).top + 76.0),
               
               // Big hero greeting
               Padding(
-                padding: const EdgeInsets.fromLTRB(22, 20, 22, 0),
+                padding: const EdgeInsets.fromLTRB(22, 8, 22, 0),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Column(
@@ -255,7 +206,7 @@ class _HeroGamifiedBanner extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 90),
+              const SizedBox(height: 75.0),
             ],
           ),
         ),
@@ -321,26 +272,7 @@ class _HeroGamifiedBanner extends ConsumerWidget {
   }
 }
 
-class _IconBtn extends StatelessWidget {
-  const _IconBtn({required this.icon, required this.onTap});
-  final IconData icon;
-  final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: Colors.white.withAlpha(56),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: Colors.white, size: 20),
-      ),
-    );
-  }
-}
+
 
 class _QuickStatsTrio extends ConsumerWidget {
   const _QuickStatsTrio({required this.pet});

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/theme.dart';
+import 'package:petfolio/core/theme/theme.dart';
+import 'package:petfolio/core/widgets/widgets.dart';
+
 import '../../../../core/models/pet.dart';
-import '../../../../core/widgets/pf_achievement_tile.dart';
 import '../controllers/care_dashboard_controller.dart';
 
 class CareGamifiedHeader extends ConsumerStatefulWidget {
@@ -63,8 +64,6 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
 
   @override
   Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
 
     final streak = widget.dashboard.streak.maybeWhen(
       data: (s) => s.currentStreak,
@@ -77,181 +76,203 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
         .fold(0, (sum, t) => sum + t.gamificationPoints);
     const petXp = 482;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppColors.sunnySoft, cs.surface],
-        ),
-      ),
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+
+    final sp = widget.activePet.speciesEnum;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    Color headerColor = sp.resolvedAccent(isDark);
+    final dbAccent = widget.activePet.accentColor;
+    if (dbAccent != null && dbAccent.isNotEmpty && dbAccent != '#FF6B9D') {
+      try {
+        final hex = dbAccent.replaceAll('#', '');
+        if (hex.length == 6) {
+          headerColor = Color(int.parse('FF$hex', radix: 16));
+        } else if (hex.length == 8) {
+          headerColor = Color(int.parse(hex, radix: 16));
+        }
+      } catch (_) {}
+    }
+
+    return WaveHeader(
+      color: headerColor,
+      child: Column(
         children: [
-          // Streak flame circle with bounce + pulse ring
-          SizedBox(
-            width: 120,
-            height: 120,
-            child: Stack(
-              alignment: Alignment.center,
+          // Spacer for fixed AppShell status header
+          SizedBox(height: MediaQuery.paddingOf(context).top + 76.0),
+
+          // Main gamified stats row
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Expanding pulse ring
-                AnimatedBuilder(
-                  animation: _pulseCtrl,
-                  builder: (_, child) => Transform.scale(
-                    scale: _pulseScale.value,
-                    child: Opacity(
-                      opacity: _pulseOpacity.value,
-                      child: child,
-                    ),
-                  ),
-                  child: Container(
-                    width: 112,
-                    height: 112,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.tangerine,
-                        width: 3,
-                      ),
-                    ),
-                  ),
-                ),
-                // Floating flame circle
-                AnimatedBuilder(
-                  animation: _bounceCtrl,
-                  builder: (_, child) => Transform.translate(
-                    offset: Offset(0, _bounceAnim.value),
-                    child: child,
-                  ),
-                  child: Container(
-                    width: 104,
-                    height: 104,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        center: Alignment(0, 0.2),
-                        radius: 0.7,
-                        colors: [AppColors.sunny, AppColors.tangerine],
-                        stops: [0.0, 0.7],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.tangerine,
-                          blurRadius: 28,
-                          offset: Offset(0, 14),
-                          spreadRadius: -8,
-                        ),
-                      ],
-                    ),
+                // Streak flame circle with bounce + pulse ring
+                SizedBox(
+                  width: 120,
+                  height: 120,
+                  child: Stack(
                     alignment: Alignment.center,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('🔥', style: TextStyle(fontSize: 36, height: 1.0)),
-                        const SizedBox(height: 2),
-                        Text(
-                          '$streak',
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            height: 1.0,
+                    children: [
+                      // Expanding pulse ring
+                      AnimatedBuilder(
+                        animation: _pulseCtrl,
+                        builder: (_, child) => Transform.scale(
+                          scale: _pulseScale.value,
+                          child: Opacity(
+                            opacity: _pulseOpacity.value,
+                            child: child,
                           ),
                         ),
-                        const Text(
-                          'DAY STREAK',
+                        child: Container(
+                          width: 112,
+                          height: 112,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.tangerine,
+                              width: 3,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Floating flame circle
+                      AnimatedBuilder(
+                        animation: _bounceCtrl,
+                        builder: (_, child) => Transform.translate(
+                          offset: Offset(0, _bounceAnim.value),
+                          child: child,
+                        ),
+                        child: Container(
+                          width: 104,
+                          height: 104,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              center: Alignment(0, 0.2),
+                              radius: 0.7,
+                              colors: [AppColors.sunny, AppColors.tangerine],
+                              stops: [0.0, 0.7],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.tangerine,
+                                blurRadius: 28,
+                                offset: Offset(0, 14),
+                                spreadRadius: -8,
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('🔥', style: TextStyle(fontSize: 36, height: 1.0)),
+                              const SizedBox(height: 2),
+                              Text(
+                                '$streak',
+                                style: const TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  height: 1.0,
+                                ),
+                              ),
+                              const Text(
+                                'DAY STREAK',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                  letterSpacing: 0.6,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 16),
+
+                // XP & level
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          const Text(
+                            'Lv 7',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              height: 1.0,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Caretaker',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white.withAlpha(200),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${petXp + earned} / 600 XP',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white.withAlpha(200),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        height: 12,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(999),
+                          color: Colors.white.withAlpha(56),
+                          border: Border.all(color: Colors.white.withAlpha(40)),
+                        ),
+                        child: FractionallySizedBox(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: ((petXp + earned) / 600).clamp(0.0, 1.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(999),
+                              gradient: const LinearGradient(
+                                colors: [AppColors.sunny, AppColors.tangerine, AppColors.poppy],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text.rich(
+                        TextSpan(
+                          text: '${600 - (petXp + earned)} XP to ',
                           style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                            letterSpacing: 0.6,
+                            fontSize: 11,
+                            color: Colors.white.withAlpha(200),
+                            fontWeight: FontWeight.w700,
                           ),
+                          children: const [
+                            TextSpan(
+                              text: 'Lv 8 · Pet Whisperer',
+                              style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(width: 16),
-
-          // XP & level
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    const Text(
-                      'Lv 7',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        height: 1.0,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Caretaker',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        color: pt.ink500,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${petXp + earned} / 600 XP',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: pt.ink500,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  height: 12,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(999),
-                    color: cs.surface,
-                    border: Border.all(color: pt.line),
-                  ),
-                  child: FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: ((petXp + earned) / 600).clamp(0.0, 1.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(999),
-                        gradient: const LinearGradient(
-                          colors: [AppColors.sunny, AppColors.tangerine, AppColors.poppy],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text.rich(
-                  TextSpan(
-                    text: '${600 - (petXp + earned)} XP to ',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: pt.ink500,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    children: const [
-                      TextSpan(
-                        text: 'Lv 8 · Pet Whisperer',
-                        style: TextStyle(fontWeight: FontWeight.w900),
                       ),
                     ],
                   ),
@@ -259,6 +280,7 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
               ],
             ),
           ),
+          const SizedBox(height: 55.0),
         ],
       ),
     );

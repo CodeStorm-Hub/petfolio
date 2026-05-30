@@ -110,40 +110,44 @@ class _SocialViewState extends ConsumerState<_SocialView> {
     final feedAsync = ref.watch(socialControllerProvider(widget.petId));
     final notifier = ref.read(socialControllerProvider(widget.petId).notifier);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isWide = screenWidth >= ResponsiveLayout.mobileMax;
+    final activePet = ref.watch(activePetControllerProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    Color headerColor = AppColors.poppy; // default social accent
+    if (activePet != null) {
+      headerColor = activePet.speciesEnum.resolvedAccent(isDark);
+      final dbAccent = activePet.accentColor;
+      if (dbAccent != null && dbAccent.isNotEmpty && dbAccent != '#FF6B9D') {
+        try {
+          final hex = dbAccent.replaceAll('#', '');
+          if (hex.length == 6) {
+            headerColor = Color(int.parse('FF$hex', radix: 16));
+          } else if (hex.length == 8) {
+            headerColor = Color(int.parse(hex, radix: 16));
+          }
+        } catch (_) {}
+      }
+    }
 
     Widget content = Column(
       children: [
         // Sticky Pawsfeed Header
-        Container(
-          padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
-          decoration: BoxDecoration(
-            color: pt.surface1,
-            boxShadow: const [BoxShadow(color: Color(0x19783C14), blurRadius: 8, offset: Offset(0, 8), spreadRadius: -8)],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        SizedBox(
+          height: MediaQuery.paddingOf(context).top + 92.0,
+          child: Stack(
+            clipBehavior: Clip.none,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Pawsfeed',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: pt.ink950)),
-                    Text('Your pack · 124 new posts today',
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(color: pt.ink500),
-                        overflow: TextOverflow.ellipsis),
-                  ],
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: WaveHeader(
+                  color: headerColor,
+                  height: MediaQuery.paddingOf(context).top + 100.0,
+                  child: const SizedBox.shrink(),
                 ),
-              ),
-              Row(
-                children: [
-                  _IconBtn(icon: Icons.search, onTap: () {}),
-                  const SizedBox(width: 8),
-                  _IconBtn(icon: Icons.send_rounded, bg: AppColors.tangerine, color: Colors.white, onTap: () => context.push('/matching/inbox')),
-                ],
               ),
             ],
           ),
@@ -170,13 +174,16 @@ class _SocialViewState extends ConsumerState<_SocialView> {
             ),
             data: (feedState) => RefreshIndicator.adaptive(
               onRefresh: notifier.refresh,
-              child: CustomScrollView(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  const SliverToBoxAdapter(
-                    child: _StoriesRow(),
-                  ),
+              child: MediaQuery.removePadding(
+                context: context,
+                removeTop: true,
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    const SliverToBoxAdapter(
+                      child: _StoriesRow(),
+                    ),
                   if (feedState.posts.isEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,
@@ -230,6 +237,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                 ],
               ),
             ),
+           ),
           ),
         ),
       ],
@@ -247,10 +255,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
 
     return Scaffold(
       backgroundColor: pt.surface1,
-      body: SafeArea(
-        bottom: false,
-        child: content,
-      ),
+      body: content,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           ref.read(createPostControllerProvider.notifier).setIsStory(false);
@@ -270,10 +275,8 @@ class _SocialViewState extends ConsumerState<_SocialView> {
 }
 
 class _IconBtn extends StatelessWidget {
-  const _IconBtn({required this.icon, this.bg, this.color, required this.onTap});
+  const _IconBtn({required this.icon, required this.onTap});
   final IconData icon;
-  final Color? bg;
-  final Color? color;
   final VoidCallback onTap;
   
   @override
@@ -287,9 +290,9 @@ class _IconBtn extends StatelessWidget {
       child: Container(
         width: 36,
         height: 36,
-        decoration: BoxDecoration(color: bg ?? defaultBg, shape: BoxShape.circle),
+        decoration: BoxDecoration(color: defaultBg, shape: BoxShape.circle),
         alignment: Alignment.center,
-        child: Icon(icon, size: 20, color: color ?? defaultColor),
+        child: Icon(icon, size: 20, color: defaultColor),
       ),
     );
   }
@@ -366,10 +369,10 @@ class _StoriesRow extends ConsumerWidget {
           });
 
         return SizedBox(
-          height: 104,
+          height: 118,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 8),
             children: [
               // Own Pet Story Item
               if (activePetStack != null)

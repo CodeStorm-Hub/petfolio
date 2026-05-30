@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'theme/app_colors.dart';
 
 import '../features/auth/presentation/controllers/auth_controller.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
@@ -49,6 +48,14 @@ import '../features/social/presentation/screens/post_detail_screen.dart';
 import '../features/social/presentation/screens/social_profile_screen.dart';
 import '../features/social/presentation/screens/social_screen.dart';
 import '../features/social/presentation/screens/story_viewer_screen.dart';
+
+import 'package:petfolio/core/widgets/pet_avatar.dart';
+import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
+import 'package:petfolio/features/matching/presentation/matching_navigation.dart';
+import 'package:petfolio/features/matching/presentation/widgets/match_preferences_sheet.dart';
+import 'package:petfolio/features/marketplace/presentation/controllers/cart_controller.dart';
+import 'package:petfolio/core/theme/theme.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Router provider — must be consumed with ref.watch in the app widget.
@@ -393,7 +400,7 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 // AppShell — adaptive nav (bottom bar ≤ 599 dp, rail ≥ 600 dp)
 // ─────────────────────────────────────────────────────────────────────────────
 
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child});
 
   final Widget child;
@@ -415,7 +422,7 @@ class AppShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final selectedIndex = _selectedIndex(context);
     final isWide = MediaQuery.sizeOf(context).width >= 600;
 
@@ -429,7 +436,23 @@ class AppShell extends StatelessWidget {
               onSelect: (i) => context.go(_destinations[i].path),
             ),
             const VerticalDivider(thickness: 1, width: 1),
-            Expanded(child: child),
+            Expanded(
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    top: 0,
+                    bottom: 0,
+                    child: child,
+                  ),
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: _AppShellHeader(selectedIndex: selectedIndex),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       );
@@ -439,10 +462,18 @@ class AppShell extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // Main content with padding for floating nav
+          // Main content
           Positioned.fill(
+            top: 0,
             bottom: 0,
             child: child,
+          ),
+          // Fixed wavy header at the top
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _AppShellHeader(selectedIndex: selectedIndex),
           ),
           // Floating pill bottom nav, raised above system home indicator
           Positioned(
@@ -456,6 +487,252 @@ class AppShell extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AppShellHeader extends ConsumerWidget {
+  const _AppShellHeader({required this.selectedIndex});
+  final int selectedIndex;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activePet = ref.watch(activePetControllerProvider);
+
+    String eyebrow = 'ACTIVE PET';
+    switch (selectedIndex) {
+      case 0:
+        eyebrow = 'ACTIVE PET';
+        break;
+      case 1:
+        eyebrow = activePet != null ? 'CARE · ${activePet.name.toUpperCase()}' : 'CARE';
+        break;
+      case 2:
+        eyebrow = 'PAWSFEED';
+        break;
+      case 3:
+        eyebrow = 'MATCH · NEARBY';
+        break;
+      case 4:
+        eyebrow = 'SHOP FOR';
+        break;
+    }
+
+    Widget trailingActions = const SizedBox.shrink();
+    switch (selectedIndex) {
+      case 0: // Home
+        trailingActions = Row(
+          children: [
+            _HeaderIconBtn(
+              icon: Icons.notifications_rounded,
+              onTap: () => context.push('/social/notifications'),
+            ),
+            const SizedBox(width: 8),
+            _HeaderIconBtn(
+              icon: Icons.settings_rounded,
+              onTap: () => context.push('/pets/manage'),
+            ),
+          ],
+        );
+        break;
+      case 1: // Care
+        trailingActions = Consumer(
+          builder: (context, ref, child) {
+            final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+            return _HeaderIconBtn(
+              icon: isDarkTheme ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+              onTap: () => ref.read(themeProvider.notifier).toggleTheme(),
+            );
+          },
+        );
+        break;
+      case 2: // Social
+        trailingActions = Row(
+          children: [
+            _HeaderIconBtn(
+              icon: Icons.search,
+              onTap: () {},
+            ),
+            const SizedBox(width: 8),
+            _HeaderIconBtn(
+              icon: Icons.send_rounded,
+              onTap: () => context.push('/matching/inbox'),
+            ),
+          ],
+        );
+        break;
+      case 3: // Match
+        trailingActions = Row(
+          children: [
+            _HeaderIconBtn(
+              icon: Icons.chat_bubble_outline_rounded,
+              onTap: () => openMatchesInbox(context),
+            ),
+            const SizedBox(width: 8),
+            _HeaderIconBtn(
+              icon: Icons.tune_rounded,
+              onTap: () => MatchPreferencesSheet.show(context),
+            ),
+          ],
+        );
+        break;
+      case 4: // Market
+        trailingActions = Consumer(
+          builder: (context, ref, child) {
+            final cart = ref.watch(cartProvider);
+            return GestureDetector(
+              onTap: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                useRootNavigator: true,
+                backgroundColor: Colors.transparent,
+                constraints: const BoxConstraints(maxWidth: 560),
+                builder: (ctx) => const CartDrawer(),
+              ),
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: const BoxDecoration(
+                  color: AppColors.tangerine,
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(color: AppColors.tangerine700, offset: Offset(0, 4))],
+                ),
+                alignment: Alignment.center,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 20),
+                    if (cart.itemCount > 0)
+                      Positioned(
+                        top: -6,
+                        right: -8,
+                        child: Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: AppColors.poppy,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppColors.cream, width: 2),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            cart.itemCount.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+        break;
+    }
+
+    final topPadding = MediaQuery.paddingOf(context).top;
+    final headerHeight = topPadding + 76.0;
+
+    return Container(
+      color: Colors.transparent,
+      height: headerHeight,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(18, topPadding + 8, 18, 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            GestureDetector(
+              onTap: () => PetSwitcherSheet.show(context),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(56),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (activePet != null) ...[
+                      PetAvatar(
+                        imageUrl: activePet.avatarUrl,
+                        species: activePet.speciesEnum,
+                        size: PetAvatarSize.sm,
+                        showRing: true,
+                      ),
+                      const SizedBox(width: 10),
+                    ],
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          eyebrow,
+                          style: const TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            letterSpacing: 0.6,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              activePet?.name ?? (selectedIndex == 4 ? 'Market' : 'PetFolio'),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            trailingActions,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeaderIconBtn extends StatelessWidget {
+  const _HeaderIconBtn({
+    required this.icon,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: Colors.white.withAlpha(56),
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: Icon(icon, color: Colors.white, size: 18),
       ),
     );
   }

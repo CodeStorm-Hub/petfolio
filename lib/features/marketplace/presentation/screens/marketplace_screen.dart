@@ -12,6 +12,9 @@ import '../../data/models/cart_item.dart';
 import '../../data/models/product.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/product_list_controller.dart';
+import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
+
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FlyToCart Animation Layer
@@ -72,7 +75,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
       constraints: const BoxConstraints(maxWidth: 560),
-      builder: (ctx) => _CartDrawer(),
+      builder: (ctx) => const CartDrawer(),
     );
   }
 
@@ -113,10 +116,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
       backgroundColor: pt.surface1,
       body: Stack(
         children: [
-          SafeArea(
-            bottom: false,
-            child: bodyContent,
-          ),
+          bodyContent,
           
           // Fly to cart overlay
           ..._flyingItems.map((item) {
@@ -235,85 +235,43 @@ class _MarketHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cart = ref.watch(cartProvider);
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: isDark
-            ? [AppColors.sunnySoft.withAlpha(40), AppColors.surface1D]
-            : [AppColors.sunnySoft, AppColors.surface1],
+    final activePet = ref.watch(activePetControllerProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    Color headerColor = AppColors.sunny; // default sunny market accent
+    if (activePet != null) {
+      headerColor = activePet.speciesEnum.resolvedAccent(isDark);
+      final dbAccent = activePet.accentColor;
+      if (dbAccent != null && dbAccent.isNotEmpty && dbAccent != '#FF6B9D') {
+        try {
+          final hex = dbAccent.replaceAll('#', '');
+          if (hex.length == 6) {
+            headerColor = Color(int.parse('FF$hex', radix: 16));
+          } else if (hex.length == 8) {
+            headerColor = Color(int.parse(hex, radix: 16));
+          }
+        } catch (_) {}
+      }
+    }
+
+    return WaveHeader(
+      color: headerColor,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
+        child: Column(
+          children: [
+            // Spacer for fixed AppShell status header
+            SizedBox(height: MediaQuery.paddingOf(context).top + 76.0),
+            _SearchBar(),
+            const SizedBox(height: 32), // Spacing adjusted to prevent wave overlap
+          ],
         ),
-      ),
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('SHIP TO MOCHI\'S HOUSE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: pt.ink500, letterSpacing: 0.6)),
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on, size: 16, color: AppColors.tangerine),
-                      const SizedBox(width: 4),
-                      Text('Brooklyn, NY', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: pt.ink950)),
-                      const SizedBox(width: 4),
-                      Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: pt.ink950),
-                    ],
-                  ),
-                ],
-              ),
-              GestureDetector(
-                onTap: onCart,
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: const BoxDecoration(
-                    color: AppColors.tangerine,
-                    shape: BoxShape.circle,
-                    boxShadow: [BoxShadow(color: AppColors.tangerine700, offset: Offset(0, 6))],
-                  ),
-                  alignment: Alignment.center,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 20),
-                      if (cart.itemCount > 0)
-                        Positioned(
-                          top: -6,
-                          right: -8,
-                          child: Container(
-                            width: 22,
-                            height: 22,
-                            decoration: BoxDecoration(
-                              color: AppColors.poppy,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.cream, width: 2),
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(cart.itemCount.toString(), style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900)),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          _SearchBar(),
-        ],
       ),
     );
   }
 }
+
 
 class _SearchBar extends ConsumerStatefulWidget {
   @override
@@ -325,16 +283,20 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    final hasText = ref.watch(marketplaceSearchQueryProvider.select((q) => q.isNotEmpty));
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final hasText = ref.watch(marketplaceSearchQueryProvider.select((q) => q.isNotEmpty));
 
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        color: pt.surface1,
+        color: isDark ? pt.surface2 : Colors.white,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: pt.line, width: 1.5),
-        boxShadow: const [BoxShadow(color: Color(0x0C000000), blurRadius: 8, offset: Offset(0, 2))],
+        border: Border.all(
+          color: isDark ? pt.line : pt.line.withAlpha(160),
+          width: 1.2,
+        ),
+        boxShadow: const [BoxShadow(color: Color(0x08000000), blurRadius: 8, offset: Offset(0, 2))],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
@@ -351,6 +313,10 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
                 hintStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: pt.ink500),
                 isDense: true,
                 border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
               ),
             ),
@@ -723,7 +689,8 @@ class _NewProductTileState extends State<_NewProductTile> {
 // Cart Drawer
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _CartDrawer extends ConsumerWidget {
+class CartDrawer extends ConsumerWidget {
+  const CartDrawer({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cart = ref.watch(cartProvider);

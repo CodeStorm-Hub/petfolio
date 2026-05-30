@@ -14,7 +14,7 @@ import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
-import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
+
 import '../../data/models/discovery_candidate.dart';
 import '../../data/models/pet_mutual_match.dart';
 import '../controllers/discovery_candidates_controller.dart';
@@ -22,7 +22,7 @@ import '../controllers/discovery_controller.dart';
 import '../controllers/mutual_match_realtime_provider.dart';
 import '../matching_navigation.dart';
 import '../widgets/match_celebration_overlay.dart';
-import '../widgets/match_preferences_sheet.dart';
+
 
 
 
@@ -239,30 +239,42 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isWide = screenWidth >= ResponsiveLayout.mobileMax;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    Color headerColor = AppColors.lilac; // default lilac match accent
+    if (activePet != null) {
+      headerColor = activePet.speciesEnum.resolvedAccent(isDark);
+      final dbAccent = activePet.accentColor;
+      if (dbAccent != null && dbAccent.isNotEmpty && dbAccent != '#FF6B9D') {
+        try {
+          final hex = dbAccent.replaceAll('#', '');
+          if (hex.length == 6) {
+            headerColor = Color(int.parse('FF$hex', radix: 16));
+          } else if (hex.length == 8) {
+            headerColor = Color(int.parse(hex, radix: 16));
+          }
+        } catch (_) {}
+      }
+    }
+
     Widget mainContent = Column(
       children: [
-        AppHeader(
-          eyebrow: 'Match · Nearby',
-          onOpenSwitcher: () => PetSwitcherSheet.show(context),
-          dense: true,
-          actions: [
-            AppHeaderAction(
-              iconKey: const ValueKey<String>('match_action_inbox'),
-              icon: Icons.chat_bubble_outline_rounded,
-              tooltip: 'Matches & messages',
-              onTap: overlayActive
-                  ? () {}
-                  : () => openMatchesInbox(context),
-            ),
-            AppHeaderAction(
-              iconKey: const ValueKey<String>('match_action_filter'),
-              icon: Icons.tune_rounded,
-              tooltip: 'Filters',
-              onTap: overlayActive
-                  ? () {}
-                  : () => MatchPreferencesSheet.show(context),
-            ),
-          ],
+        SizedBox(
+          height: MediaQuery.paddingOf(context).top + 92.0,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: WaveHeader(
+                  color: headerColor,
+                  height: MediaQuery.paddingOf(context).top + 100.0,
+                  child: const SizedBox.shrink(),
+                ),
+              ),
+            ],
+          ),
         ),
         Expanded(
           child: Padding(
@@ -305,33 +317,30 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
 
     return Scaffold(
       backgroundColor: pt.surface1,
-      body: SafeArea(
-        bottom: false,
-        child: Stack(
-          children: [
-            mainContent,
-            if (overlayActive)
-              MatchCelebrationOverlay(
-                activePet: activePet,
-                matchedPetName: _matchedPetLabel(ref, _celebrationMatch!),
-                matchedPetAvatarUrl:
-                    _matchedPetAvatarUrl(ref, _celebrationMatch!),
-                onSendMessage: () {
-                  final match = _celebrationMatch!;
-                  final label = _matchedPetLabel(ref, match);
-                  setState(() => _celebrationMatch = null);
-                  openMatchChat(
-                    context,
-                    ref,
-                    matchId: match.id,
-                    actorPetId: petId,
-                    otherPetName: label,
-                  );
-                },
-                onKeepSwiping: () => setState(() => _celebrationMatch = null),
-              ),
-          ],
-        ),
+      body: Stack(
+        children: [
+          mainContent,
+          if (overlayActive)
+            MatchCelebrationOverlay(
+              activePet: activePet,
+              matchedPetName: _matchedPetLabel(ref, _celebrationMatch!),
+              matchedPetAvatarUrl:
+                  _matchedPetAvatarUrl(ref, _celebrationMatch!),
+              onSendMessage: () {
+                final match = _celebrationMatch!;
+                final label = _matchedPetLabel(ref, match);
+                setState(() => _celebrationMatch = null);
+                openMatchChat(
+                  context,
+                  ref,
+                  matchId: match.id,
+                  actorPetId: petId,
+                  otherPetName: label,
+                );
+              },
+              onKeepSwiping: () => setState(() => _celebrationMatch = null),
+            ),
+        ],
       ),
     );
   }

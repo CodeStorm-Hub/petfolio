@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
+import '../theme/theme.dart';
 
 // ─── Wave clipper ─────────────────────────────────────────────────────────────
+
+
 
 // Exact SVG path from home.jsx:
 // M0,40 C90,10 160,70 220,40 C280,15 340,60 412,30 L412,60 L0,60 Z
@@ -87,7 +89,9 @@ class WaveHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final pageColor = waveColor ?? (isDark ? AppColors.creamD : AppColors.cream);
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>();
+    final pageColor = waveColor ?? (isDark ? (pt?.surface1 ?? AppColors.creamD) : (pt?.surface1 ?? AppColors.cream));
+
 
     return Stack(
       clipBehavior: Clip.none,
@@ -99,6 +103,7 @@ class WaveHeader extends StatelessWidget {
             child: Container(
               color: color,
               height: height,
+              width: double.infinity,
               child: child,
             ),
           )
@@ -106,6 +111,7 @@ class WaveHeader extends StatelessWidget {
           Container(
             color: color,
             height: height,
+            width: double.infinity,
             child: child,
           ),
         // Wave transition at the bottom
