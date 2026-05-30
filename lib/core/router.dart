@@ -582,6 +582,7 @@ class _AppShellHeader extends ConsumerWidget {
           builder: (context, ref, child) {
             final cart = ref.watch(cartProvider);
             return GestureDetector(
+              key: const ValueKey<String>('market_action_cart'),
               onTap: () => showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,

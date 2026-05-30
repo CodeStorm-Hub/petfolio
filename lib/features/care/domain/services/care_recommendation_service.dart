@@ -87,7 +87,7 @@ class CareRecommendationService {
 
     final tasksFuture = supabase
         .from('care_tasks')
-        .select('task_type')
+        .select('task_type, title')
         .eq('pet_id', pet.id);
 
     final results = await Future.wait([vaultFuture, healthFuture, tasksFuture]);
@@ -100,16 +100,15 @@ class CareRecommendationService {
         .map((r) => Map<String, dynamic>.from(r as Map))
         .toList();
 
-    final existingTypes = (results[2] as List)
-        .map((r) => r['task_type'] as String?)
-        .whereType<String>()
-        .toSet();
+    final existingTasks = (results[2] as List)
+        .map((r) => {'type': r['task_type'] as String?, 'title': r['title'] as String?})
+        .toList();
 
     final prompt = _buildPrompt(
       pet: pet,
       vault: vault,
       healthLogs: healthLogs,
-      existingTypes: existingTypes,
+      existingTasks: existingTasks,
     );
 
     try {
@@ -223,7 +222,7 @@ class CareRecommendationService {
     required Pet pet,
     required List<Map<String, dynamic>> vault,
     required List<Map<String, dynamic>> healthLogs,
-    required Set<String> existingTypes,
+    required List<Map<String, dynamic>> existingTasks,
   }) {
     final buf = StringBuffer();
 
@@ -279,10 +278,13 @@ class CareRecommendationService {
       }
     }
 
-    if (existingTypes.isNotEmpty) {
+    if (existingTasks.isNotEmpty) {
       buf.writeln();
+      final taskStrings = existingTasks
+          .map((t) => '"${t['title']}" (${t['type']})')
+          .join(", ");
       buf.writeln(
-          'EXISTING TASKS (avoid exact duplicates): ${existingTypes.join(", ")}');
+          'EXISTING TASKS (DO NOT generate tasks with identical titles or overlapping intent): $taskStrings');
     }
 
     buf.writeln();

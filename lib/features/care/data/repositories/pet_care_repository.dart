@@ -445,13 +445,28 @@ class PetCareRepository {
     try {
       if (tasks.isEmpty) return [];
       _requireAuth();
-      final payloads = tasks.map((task) {
+      final petId = tasks.first.petId;
+      final existingRows = await _client
+          .from('care_tasks')
+          .select('title, task_type')
+          .eq('pet_id', petId);
+          
+      final existingTaskSet = existingRows
+          .map((r) => '${r['title'].toString().toLowerCase().trim()}_${r['task_type']}')
+          .toSet();
+
+      final payloads = tasks.where((task) {
+        final key = '${task.title.toLowerCase().trim()}_${task.taskType.name}';
+        return !existingTaskSet.contains(key);
+      }).map((task) {
         final payload = Map<String, dynamic>.from(task.toJson())
           ..remove('id')
           ..remove('category_icon');
         if (isAiSuggested) payload['is_ai_suggested'] = true;
         return payload;
       }).toList();
+
+      if (payloads.isEmpty) return [];
 
       final rows = await _client
           .from('care_tasks')

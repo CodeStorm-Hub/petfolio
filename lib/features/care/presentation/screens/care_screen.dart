@@ -963,6 +963,7 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
                 ),
                 const SizedBox(height: 6),
                 GestureDetector(
+                  key: ValueKey('care_task_check_${task.id}'),
                   onTap: _toggle,
                   behavior: HitTestBehavior.opaque,
                   child: AnimatedContainer(

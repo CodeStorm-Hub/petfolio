@@ -347,10 +347,14 @@ class _AddPetButton extends StatelessWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
-    return GestureDetector(
-      key: const ValueKey<String>('pet_switcher_add_pet'),
+    return Semantics(
+      button: true,
+      label: 'Add another pet',
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
+      child: GestureDetector(
+        key: const ValueKey<String>('pet_switcher_add_pet'),
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
       child: CustomPaint(
         painter: _DashedRoundedBorderPainter(
           color: AppColors.blue400,
@@ -403,7 +407,7 @@ class _AddPetButton extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 
