@@ -877,27 +877,35 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 22,
-                      backgroundColor: widget.post.accentColor,
-                      backgroundImage: widget.post.petAvatarUrl != null ? CachedNetworkImageProvider(widget.post.petAvatarUrl!) : null,
-                      child: widget.post.petAvatarUrl == null ? Text(widget.post.petName.isNotEmpty ? widget.post.petName[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)) : null,
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => context.push('/social/profile/${widget.post.petId}'),
+                      child: CircleAvatar(
+                        radius: 22,
+                        backgroundColor: widget.post.accentColor,
+                        backgroundImage: widget.post.petAvatarUrl != null ? CachedNetworkImageProvider(widget.post.petAvatarUrl!) : null,
+                        child: widget.post.petAvatarUrl == null ? Text(widget.post.petName.isNotEmpty ? widget.post.petName[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)) : null,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(widget.post.petName,
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(color: ink950)),
-                          Text(
-                            widget.post.fuzzyLocation.isEmpty
-                                ? '@${widget.post.handle} · ${widget.post.timeAgo}'
-                                : '@${widget.post.handle} · ${widget.post.fuzzyLocation} · ${widget.post.timeAgo}',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ink500),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => context.push('/social/profile/${widget.post.petId}'),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(widget.post.petName,
+                                style: Theme.of(context).textTheme.titleSmall?.copyWith(color: ink950)),
+                            Text(
+                              widget.post.fuzzyLocation.isEmpty
+                                  ? '@${widget.post.handle} · ${widget.post.timeAgo}'
+                                  : '@${widget.post.handle} · ${widget.post.fuzzyLocation} · ${widget.post.timeAgo}',
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ink500),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     _IconBtn(icon: Icons.more_horiz, onTap: () {}),
