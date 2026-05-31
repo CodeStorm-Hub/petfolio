@@ -46,6 +46,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   Future<void> _showImageSourceSheet() async {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => _ImageSourceSheet(),
     );

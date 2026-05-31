@@ -51,6 +51,53 @@
 - **Error UI Handling**: For optimistic UI actions (like toggling care tasks or seller onboarding), show errors using `AppSnackBar.showError` (via `appSnackBarMessengerKey` on `MaterialApp.router`). Do not put long-lived state providers in `AsyncValue.error` states for transient/action-level failures.
 - **Web Safe Target**: Marionette execution runs exclusively in debug builds via conditional compiler imports (`marionette_debug_gate_stub.dart` vs `_io.dart`) to keep `main.dart` from importing `dart:io` on web targets.
 
+## 2026-05-31 — Matching Feature P0/P1/P2 Systematic Fixes
+
+### Database (applied to `jqyjvhwlcqcsuwcqgcwf` ✅)
+- **[C-1] `chat_messages` RLS**: Enabled RLS + idempotent `select by participant` and `insert by participant` policies — fixes privacy regression where any authenticated user could read all chat messages.
+- **[C-2] N+1 elimination**: Replaced correlated owner subquery in `matching_discovery_candidates` with `LEFT JOIN LATERAL` — cuts 21 queries → 1 per discovery page load.
+- **[H-2] Keyset cursor pagination**: Dropped old 7-param `matching_discovery_candidates`; new 8-param version uses `(p_cursor_created_at, p_cursor_pet_id)` for stable pagination — no more skipped/duplicate candidates.
+- **[H-3a] Downgrade trigger**: `BEFORE UPDATE` trigger on `swipes` raises `cannot_downgrade_matched_swipe` if a match exists for the pair — prevents LIKE→PASS orphaning a match row.
+- **[H-3b] UPDATE path trigger**: `AFTER UPDATE OF action` trigger fires `swipes_after_insert_mutual_match()` for PASS→LIKE upgrades — previously mutual matches were silently never created on upsert updates.
+
+### Dart — Data Layer
+- **`matching_supabase_data_source.dart`**: `fetchDiscoveryCandidates` replaced `offset` param with `cursorCreatedAt/cursorPetId`. `fetchMessages` now accepts `limit: 50` (default) + `beforeCreatedAt` for page-back loading; filter is applied before `.limit()` to avoid `PostgrestTransformBuilder` constraint.
+- **`matching_repository.dart`**: `fetchCandidates` passes cursor params through. `recordSwipe()` now rethrows after logging — callers can surface failures. `fetchMessages` exposes `limit` + `beforeCreatedAt`.
+
+### Dart — Discovery Controller
+- **`discovery_candidates_controller.dart`**: Added `DiscoveryCursor({createdAt, petId})` class. `DiscoveryCandidatesBuffer` replaces `nextOffset: int` with `cursor: DiscoveryCursor?`. `_fetchPage` extracts cursor from `rows.last`. `_replenishIfLow` and `_ensureDepth` pass cursor through the full pagination chain. Added `swipeErrorProvider` one-shot error bus (same pattern as `locationSyncErrorProvider`). Fixed `_distanceLabel` — all-miles → consistent metric km.
+- **`discovery_controller.dart`**: `swipe()` wraps `_repo.recordSwipe()` in `.catchError()` and posts to `swipeErrorProvider` on failure.
+- **`matching_screen.dart`**: `_DiscoveryViewState.build()` listens to `swipeErrorProvider` and shows a `SnackBar` on swipe record failure.
+
+### Dart — Chat Pagination (P1)
+- **`chat_conversation_controller.dart`**: Initial `fetchMessages` limited to 50. Added `hasMore` flag and `loadOlderMessages()` method — guards against concurrent calls with `_loadingOlder`, prepends older page to state list.
+- **`chat_screen.dart`**: Added `_onScroll` listener on `ScrollController` — triggers `loadOlderMessages()` when the user scrolls within 200px of the top. Shows a `CircularProgressIndicator.adaptive` spinner at the visual top while `hasMore == true`.
+
+### Dart — State & Polish (P2)
+- **`match_preference_controller.dart`**: Loads species/distance/age from `SharedPreferences` on `build()` asynchronously (state defaults until loaded). Each setter persists changes immediately — preferences survive hot-restart and app kills.
+- **`edit_profile_controller.dart`**: Calls `matchingRepository.invalidatePetLocationCache(originalPet.id)` after successful profile save — ensures the next discovery load re-queries the DB rather than using a stale in-memory cache entry.
+- **Lock safety**: `_replenishLocked` already released in `finally` block (confirmed — no change needed).
+
+`flutter analyze lib/features/matching/ lib/features/pet_profile/presentation/controllers/` — **No issues found.**
+
+**Next step:** Phase complete — please run (/remember) to save tokens before proceeding.
+
+---
+
+## 2026-05-31 — Code Audit & Stability Fixes
+
+- **Feature Teardown**: Completely removed the "Treat" and "Undo" buttons from the Match Screen, eliminating the stubbed snackbars and unnecessary UI code.
+- **Database & Storage**: Created a new database migration (`20260531_audit_fixes.sql`) adding an optimized admin read policy for the `medical-documents` storage bucket with cached `public.is_admin()` resolution.
+- **Riverpod & State Management**: Fixed `ref.listen` duplicate listener registration in `CareNotifier` build phase using a microtask-deferred `ref.watch` approach.
+- **Routing & Deep-Links**: Resolved the cold-start deep-link race condition for the pet edit route in `router.dart` by wrapping the builder in a `Consumer` to handle async loading states.
+- **Unbounded Queries**: Added `limit` boundaries to Supabase streams and queries in matching matches repository (`fetchMatchesForPet`), care logs repository (`fetchLogsForPet`), and `HealthVaultController` stream.
+- **UI/UX & Rendering**: Virtualized list views in `care_screen.dart` and `matches_inbox_screen.dart` by converting to `ListView.builder`.
+- **Social Overflows**: Wired the feed post card's three-dot menu to show the public `PostOptionsSheet` and removed the stubbed search icon from the header.
+- **Robust Error Handling**: Added error retry UI layouts and debug logs to the five swallowed error sections across nutrition, social, switcher, and quest cards.
+- **MediaQuery Optimizations**: Swapped full media query subscriptions to specific `sizeOf` and `viewInsetsOf` fields.
+- **Global Crash Handling**: Registered global handlers for uncaught flutter errors and platform dispatcher errors in `main.dart`.
+- **Modal Sheets Positioning**: Configured the remaining modal bottom sheets (including create post, post options, share access, and weight logging) to use `useRootNavigator: true` so they display on top of the persistent bottom navigation bar.
+
 ## 2026-05-26 — Responsiveness Refactoring & Spacing Fixes
 
 - **Responsive Layout Helper**: Created a unified `ResponsiveLayout` widget to handle standard Mobile, Tablet, and Desktop/Web breakpoints consistently across all views.

@@ -307,8 +307,8 @@ class _FloatingPawsState extends State<_FloatingPaws> with SingleTickerProviderS
 
   Widget _buildPaw(double x, double y, double size, double rot, double offset, Color color) {
     return Positioned(
-      left: MediaQuery.of(context).size.width * (x / 100),
-      top: MediaQuery.of(context).size.height * (y / 100) + offset,
+      left: MediaQuery.sizeOf(context).width * (x / 100),
+      top: MediaQuery.sizeOf(context).height * (y / 100) + offset,
       child: Transform.rotate(
         angle: rot * math.pi / 180,
         child: Icon(Icons.pets_rounded, size: size, color: color),

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -109,6 +110,10 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
   final Set<String> _shownMatchIds = {};
   PetMutualMatch? _celebrationMatch;
 
+  // Track the last known access state so we only reload candidates when it
+  // transitions from blocked → granted (H-4 fix).
+  LocationAccessState? _lastKnownAccess;
+
   String get petId => widget.petId;
 
   @override
@@ -126,15 +131,24 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _refreshLocationState();
+    if (state != AppLifecycleState.resumed) return;
+    ref.invalidate(locationAccessProvider);
+    ref.invalidate(deviceLatLngProvider);
+    final current = ref.read(locationAccessProvider).asData?.value;
+    // Full candidate reload only when access changes from blocked → granted.
+    final wasBlocked = _isLocationBlocked(_lastKnownAccess);
+    final nowGranted = current == LocationAccessState.granted;
+    if (wasBlocked && nowGranted) {
+      ref.invalidate(discoveryCandidatesControllerProvider);
     }
+    _lastKnownAccess = current;
   }
 
   void _refreshLocationState() {
     ref.invalidate(locationAccessProvider);
     ref.invalidate(deviceLatLngProvider);
     ref.invalidate(discoveryCandidatesControllerProvider);
+    _lastKnownAccess = ref.read(locationAccessProvider).asData?.value;
   }
 
   @override
@@ -155,6 +169,20 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
       locationSyncErrorProvider,
       (_, error) {
         if (error != null) AppSnackBar.showError(error);
+      },
+    );
+
+    ref.listen<String?>(
+      swipeErrorProvider,
+      (_, message) {
+        if (message != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
       },
     );
 
@@ -817,25 +845,69 @@ class _CardSurface extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Emoji blob
-            Center(
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 60),
-                child: Text(
-                  emoji,
-                  style: const TextStyle(
-                    fontSize: 160,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black26,
-                        blurRadius: 28,
-                        offset: Offset(0, 12),
+            if (candidate.avatarUrl != null && candidate.avatarUrl!.isNotEmpty)
+              Positioned.fill(
+                child: CachedNetworkImage(
+                  imageUrl: candidate.avatarUrl!,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Center(
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 60),
+                      child: Text(
+                        emoji,
+                        style: const TextStyle(
+                          fontSize: 160,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black26,
+                              blurRadius: 28,
+                              offset: Offset(0, 12),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Center(
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 60),
+                      child: Text(
+                        emoji,
+                        style: const TextStyle(
+                          fontSize: 160,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black26,
+                              blurRadius: 28,
+                              offset: Offset(0, 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            else
+              // Emoji blob
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 60),
+                  child: Text(
+                    emoji,
+                    style: const TextStyle(
+                      fontSize: 160,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black26,
+                          blurRadius: 28,
+                          offset: Offset(0, 12),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
 
             // Distance Pill
             Positioned(
@@ -1008,24 +1080,7 @@ class _ActionDock extends StatelessWidget {
             fontSize: 32,
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.match),
           ),
-          const SizedBox(width: 16),
-          const _DockButton(
-            size: 48,
-            color: Colors.white,
-            bgColor: AppColors.sunny,
-            label: '🦴',
-            fontSize: 19,
-            onTap: null,
-          ),
-          const SizedBox(width: 16),
-          const _DockButton(
-            size: 56,
-            color: Colors.white,
-            bgColor: AppColors.mint,
-            label: '↺',
-            fontSize: 22,
-            onTap: null,
-          ),
+
         ],
       ),
     );

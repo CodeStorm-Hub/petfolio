@@ -10,6 +10,29 @@ import '../../data/models/chat_message.dart';
 import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../controllers/chat_conversation_controller.dart';
 
+// ---------------------------------------------------------------------------
+// Chat item hierarchy for date-grouped rendering (L-2)
+// ---------------------------------------------------------------------------
+
+sealed class _ChatItem {
+  const _ChatItem();
+}
+
+class _MessageItem extends _ChatItem {
+  const _MessageItem(this.message, {this.showTime = false});
+  final ChatMessage message;
+  final bool showTime;
+}
+
+class _DateSeparatorItem extends _ChatItem {
+  const _DateSeparatorItem(this.date);
+  final DateTime date;
+}
+
+// ---------------------------------------------------------------------------
+// Screen
+// ---------------------------------------------------------------------------
+
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({
     super.key,
@@ -33,6 +56,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _scrollController = ScrollController();
   bool _sending = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    // reverse: true means position 0 is the bottom; maxScrollExtent is the top.
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref
+          .read(chatConversationControllerProvider(_args).notifier)
+          .loadOlderMessages();
+    }
+  }
+
   ChatConversationArgs get _args => (
         threadId: widget.threadId,
         matchId: widget.matchId,
@@ -41,6 +80,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -56,9 +96,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       await Future<void>.delayed(const Duration(milliseconds: 80));
       if (_scrollController.hasClients) {
         await _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
+          0.0,
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOut,
+        );
+      }
+    } catch (_) {
+      // M-2: surface send failures to the user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Message failed to send. Please try again.'),
+            duration: Duration(seconds: 3),
+          ),
         );
       }
     } finally {
@@ -142,14 +192,47 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     );
                   }
 
+                  final notifier = ref.read(
+                    chatConversationControllerProvider(_args).notifier,
+                  );
+                  final hasMore = notifier.hasMore;
+                  final items = _buildChatItems(messages);
+                  final n = items.length;
+                  // +1 slot at the top (index n in reverse) for the load-more indicator.
+                  final totalCount = n + (hasMore ? 1 : 0);
+
                   return ListView.builder(
                     controller: _scrollController,
+                    reverse: true,
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                    itemCount: messages.length,
+                    itemCount: totalCount,
                     itemBuilder: (context, index) {
-                      final msg = messages[index];
-                      final isMine = msg.senderId == myUserId;
-                      return _MessageBubble(message: msg, isMine: isMine);
+                      // The oldest-messages slot sits at the visual top (largest index).
+                      if (hasMore && index == totalCount - 1) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator.adaptive(
+                                strokeWidth: 2,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      final item = items[n - 1 - index];
+                      return switch (item) {
+                        _MessageItem(:final message, :final showTime) =>
+                          _MessageBubble(
+                            message: message,
+                            isMine: message.senderId == myUserId,
+                            showTime: showTime,
+                          ),
+                        _DateSeparatorItem(:final date) =>
+                          _DateSeparator(date: date),
+                      };
                     },
                   );
                 },
@@ -165,7 +248,94 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ),
     );
   }
+
+  // L-2: Build an ascending list of chat items, inserting date separators at
+  // day boundaries and showing timestamps only on the last message of each
+  // sender burst (same sender, messages within 60 s of each other).
+  static List<_ChatItem> _buildChatItems(List<ChatMessage> messages) {
+    final items = <_ChatItem>[];
+    DateTime? lastDate;
+
+    for (int i = 0; i < messages.length; i++) {
+      final msg = messages[i];
+      final msgLocal = msg.createdAt.toLocal();
+
+      // Date separator on day boundary.
+      if (lastDate == null || !_isSameDay(lastDate, msgLocal)) {
+        items.add(_DateSeparatorItem(msgLocal));
+        lastDate = msgLocal;
+      }
+
+      // Show timestamp only on the last message of a sender group.
+      final next = i + 1 < messages.length ? messages[i + 1] : null;
+      final isLastInGroup = next == null
+          || next.senderId != msg.senderId
+          || next.createdAt.difference(msg.createdAt).inSeconds > 60;
+
+      items.add(_MessageItem(msg, showTime: isLastInGroup));
+    }
+
+    return items;
+  }
+
+  static bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 }
+
+// ---------------------------------------------------------------------------
+// Date separator widget
+// ---------------------------------------------------------------------------
+
+class _DateSeparator extends StatelessWidget {
+  const _DateSeparator({required this.date});
+  final DateTime date;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final now = DateTime.now();
+    final local = date.toLocal();
+    final String label;
+    if (_isSameDay(local, now)) {
+      label = 'Today';
+    } else if (_isSameDay(local, now.subtract(const Duration(days: 1)))) {
+      label = 'Yesterday';
+    } else {
+      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      label = '${months[local.month - 1]} ${local.day}';
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        children: [
+          Expanded(child: Divider(color: pt.ink300.withAlpha(60), thickness: 1)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: pt.ink300,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          Expanded(child: Divider(color: pt.ink300.withAlpha(60), thickness: 1)),
+        ],
+      ),
+    );
+  }
+
+  static bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 String _formatTime(DateTime dt) {
   final local = dt.toLocal();
@@ -176,10 +346,19 @@ String _formatTime(DateTime dt) {
   return '$hour12:$m $period';
 }
 
+// ---------------------------------------------------------------------------
+// Message bubble — timestamp shown only at end of sender group (L-2)
+// ---------------------------------------------------------------------------
+
 class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.message, required this.isMine});
+  const _MessageBubble({
+    required this.message,
+    required this.isMine,
+    required this.showTime,
+  });
   final ChatMessage message;
   final bool isMine;
+  final bool showTime;
 
   @override
   Widget build(BuildContext context) {
@@ -195,7 +374,7 @@ class _MessageBubble extends StatelessWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 2),
       child: Column(
         crossAxisAlignment: align,
         children: [
@@ -224,16 +403,26 @@ class _MessageBubble extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            _formatTime(message.createdAt),
-            style: TextStyle(fontSize: 11, color: pt.ink300),
-          ),
+          if (showTime) ...[
+            const SizedBox(height: 3),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                _formatTime(message.createdAt),
+                style: TextStyle(fontSize: 11, color: pt.ink300),
+              ),
+            ),
+          ] else
+            const SizedBox(height: 2),
         ],
       ),
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Composer
+// ---------------------------------------------------------------------------
 
 class _Composer extends StatelessWidget {
   const _Composer({

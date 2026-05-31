@@ -22,6 +22,7 @@ import '../controllers/social_controller.dart';
 import '../controllers/create_post_controller.dart';
 import '../controllers/story_controller.dart';
 import 'story_viewer_screen.dart';
+import 'post_detail_screen.dart';
 import '../widgets/reaction_burst.dart';
 import '../widgets/post_comments_bottom_sheet.dart';
 
@@ -120,14 +121,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
       headerColor = activePet.speciesEnum.resolvedAccent(isDark);
       final dbAccent = activePet.accentColor;
       if (dbAccent != null && dbAccent.isNotEmpty && dbAccent != '#FF6B9D') {
-        try {
-          final hex = dbAccent.replaceAll('#', '');
-          if (hex.length == 6) {
-            headerColor = Color(int.parse('FF$hex', radix: 16));
-          } else if (hex.length == 8) {
-            headerColor = Color(int.parse(hex, radix: 16));
-          }
-        } catch (_) {}
+        headerColor = AppColors.fromHexString(dbAccent, fallback: headerColor);
       }
     }
 
@@ -331,7 +325,35 @@ class _StoriesRow extends ConsumerWidget {
           ),
         ),
       ),
-      error: (err, stack) => const SizedBox.shrink(),
+      error: (err, stack) {
+        debugPrint('Stories load failure: $err\n$stack');
+        return SizedBox(
+          height: 100,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                const Icon(Icons.error_outline_rounded, color: AppColors.poppy, size: 16),
+                const SizedBox(width: 8),
+                Text(
+                  'Failed to load stories',
+                  style: TextStyle(fontSize: 12, color: pt.ink500),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () => ref.invalidate(storiesProvider),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text('Retry', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
       data: (stories) {
         // Group stories by petId
         final grouped = <String, List<Story>>{};
@@ -908,7 +930,19 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                         ),
                       ),
                     ),
-                    _IconBtn(icon: Icons.more_horiz, onTap: () {}),
+                    _IconBtn(
+                      icon: Icons.more_horiz,
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          useRootNavigator: true,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          builder: (_) => PostOptionsSheet(post: widget.post),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),

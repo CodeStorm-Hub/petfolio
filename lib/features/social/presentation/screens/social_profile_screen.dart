@@ -97,7 +97,39 @@ class SocialProfileScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: awardsAsync.when(
                   loading: () => const _AwardsSkeleton(),
-                  error: (e, st) => const SizedBox.shrink(),
+                  error: (e, st) {
+                    debugPrint('Awards load failure: $e\n$st');
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: cs.surface,
+                        borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+                        border: Border.all(color: pt.line),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error_outline_rounded, color: AppColors.poppy, size: 16),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Failed to load achievements',
+                            style: TextStyle(fontSize: 12, color: pt.ink500),
+                          ),
+                          const SizedBox(width: 8),
+                          TextButton(
+                            onPressed: () => ref.invalidate(petAwardsSummaryProvider(petId)),
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: const Size(0, 0),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: const Text('Retry', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                   data: (awards) {
                     if (awards.logsCount == 0 && awards.unlockedBadges.isEmpty) {
                       return const SizedBox.shrink();

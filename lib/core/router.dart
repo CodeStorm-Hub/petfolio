@@ -315,11 +315,25 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/pet/:petId/edit',
         builder: (context, state) {
           final petId = state.pathParameters['petId']!;
-          final pets = ref.read(petListProvider).value ?? [];
-          for (final p in pets) {
-            if (p.id == petId) return EditProfileScreen(pet: p);
-          }
-          return const _PetEditMissingScreen();
+          return Consumer(
+            builder: (context, ref, _) {
+              final petsAsync = ref.watch(petListProvider);
+              return petsAsync.when(
+                loading: () => const Scaffold(
+                  body: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                error: (err, stack) => const _PetEditMissingScreen(),
+                data: (pets) {
+                  for (final p in pets) {
+                    if (p.id == petId) return EditProfileScreen(pet: p);
+                  }
+                  return const _PetEditMissingScreen();
+                },
+              );
+            },
+          );
         },
       ),
     ],
@@ -550,11 +564,6 @@ class _AppShellHeader extends ConsumerWidget {
       case 2: // Social
         trailingActions = Row(
           children: [
-            _HeaderIconBtn(
-              icon: Icons.search,
-              onTap: () {},
-            ),
-            const SizedBox(width: 8),
             _HeaderIconBtn(
               icon: Icons.send_rounded,
               onTap: () => context.push('/matching/inbox'),

@@ -120,46 +120,26 @@ class _MatchesInboxView extends ConsumerWidget {
                     );
                   }
 
-                  return RefreshIndicator(
-                    onRefresh: () => ref
-                        .read(matchesInboxControllerProvider(pet.id).notifier)
-                        .refresh(),
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      children: [
-                        if (snapshot.newMatches.isNotEmpty) ...[
-                          _SectionTitle(label: 'New matches'),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            height: 108,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: snapshot.newMatches.length,
-                              separatorBuilder: (_, _) =>
-                                  const SizedBox(width: 14),
-                              itemBuilder: (context, index) {
-                                final item = snapshot.newMatches[index];
-                                return _NewMatchAvatar(
-                                  item: item,
-                                  onTap: () => openMatchChat(
-                                    context,
-                                    ref,
-                                    matchId: item.matchId,
-                                    actorPetId: pet.id,
-                                    otherPetName: item.otherPetName,
-                                    threadId: item.threadId,
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 28),
-                        ],
-                        if (snapshot.conversations.isNotEmpty) ...[
-                          _SectionTitle(label: 'Messages'),
-                          const SizedBox(height: 8),
-                          ...snapshot.conversations.map(
-                            (item) => _ConversationTile(
+                  final newMatches = snapshot.newMatches;
+                  final conversations = snapshot.conversations;
+                  final hasNewMatches = newMatches.isNotEmpty;
+                  final hasConversations = conversations.isNotEmpty;
+
+                  final List<Widget> listItems = [];
+                  if (hasNewMatches) {
+                    listItems.add(const _SectionTitle(label: 'New matches'));
+                    listItems.add(const SizedBox(height: 12));
+                    listItems.add(
+                      SizedBox(
+                        height: 108,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: newMatches.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(width: 14),
+                          itemBuilder: (context, index) {
+                            final item = newMatches[index];
+                            return _NewMatchAvatar(
                               item: item,
                               onTap: () => openMatchChat(
                                 context,
@@ -169,10 +149,45 @@ class _MatchesInboxView extends ConsumerWidget {
                                 otherPetName: item.otherPetName,
                                 threadId: item.threadId,
                               ),
-                            ),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                    listItems.add(const SizedBox(height: 28));
+                  }
+                  if (hasConversations) {
+                    listItems.add(const _SectionTitle(label: 'Messages'));
+                    listItems.add(const SizedBox(height: 8));
+                  }
+
+                  final int baseCount = listItems.length;
+                  final int totalCount = baseCount + conversations.length;
+
+                  return RefreshIndicator(
+                    onRefresh: () => ref
+                        .read(matchesInboxControllerProvider(pet.id).notifier)
+                        .refresh(),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                      itemCount: totalCount,
+                      itemBuilder: (context, index) {
+                        if (index < baseCount) {
+                          return listItems[index];
+                        }
+                        final item = conversations[index - baseCount];
+                        return _ConversationTile(
+                          item: item,
+                          onTap: () => openMatchChat(
+                            context,
+                            ref,
+                            matchId: item.matchId,
+                            actorPetId: pet.id,
+                            otherPetName: item.otherPetName,
+                            threadId: item.threadId,
                           ),
-                        ],
-                      ],
+                        );
+                      },
                     ),
                   );
                 },

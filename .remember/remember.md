@@ -49,3 +49,14 @@ This file contains high-signal architectural, structural, and feature-related co
 - **Root Navigator for Modal Sheets**:
   - Modal bottom sheets shown from screens wrapped by the shell navigator (such as the switcher, cart drawer, story options, and care forms) must set `useRootNavigator: true`. This forces them to render on the root navigator, rendering above the floating navigation bar.
 
+
+## 5. Code Audit & Stability Fixes (May 31, 2026)
+- **Feature Teardown**: Completely removed legacy "Treat" (🦴) and "Undo" (↺) buttons from the Matching swipe deck to keep features tightly focused.
+- **Database & Storage**: Added an optimized bucket read policy to `medical-documents` storage bucket wrapping the `public.is_admin()` check in a cached subselect.
+- **State Management & Lifecycles**: Resolved build-phase state mutation exceptions inside `CareNotifier` using a microtask-deferred state sync watcher.
+- **GoRouter Cold Starts**: Resolved race conditions on deep-linked screens (like pet editing) by wrapping GoRouter builders in dynamic consumer contexts to handle loading states cleanly.
+- **Query Boundaries**: Configured strict `.limit(100)` boundaries on matching queries, medical vault streams, and care logs to prevent full table scans/excessive data fetching.
+- **Robust Error Handling**: Added error boundaries and retry UI triggers to switcher, stories, quest cards, achievements, and weight lists to replace swallowed error screens.
+- **Modal Sheets Positioning**: Added `useRootNavigator: true` to the remaining modal bottom sheets (including image picking in create post, post options, share access, and weight logging) to ensure they render above the persistent bottom navigation bar.
+
+

@@ -162,88 +162,90 @@ class _CareScreenState extends ConsumerState<CareScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final wide = constraints.maxWidth >= 600;
-          final list = ListView(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 120),
-            children: [
-              CareGamifiedHeader(
-                activePet: activePet,
-                dashboard: dashboard,
-              ),
-              Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const SizedBox(height: 12.0),
-                            PfSectionTitle(
-                              title: 'Trophy room',
-                              accent: AppColors.lilac,
-                              trailing: GestureDetector(
-                                onTap: () {},
-                                child: const Text(
-                                  'Vault →',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.lilac700,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const CareGamifiedTrophyRoom(),
-                            const SizedBox(height: 32),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    "TODAY'S QUESTS",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 0.08 * 12,
-                                      color: pt.ink500,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  _DoneCounter(tasks: dashboard.tasks.value ?? []),
-                                ],
-                              ),
-                            ),
-                            _AiRoutineBanner(
-                              activePetId: activePet.id,
-                              hasNoTasks: dashboard.tasks.value?.isEmpty == true,
-                              isGenerating: _isGeneratingRoutine,
-                              onTap: () => _generateRoutine(activePet),
-                            ),
-                            _DailyTasksDashboard(
-                              state: dashboard,
-                              petId: activePet.id,
-                              petName: activePet.name,
-                              species: species,
-                              onAddTask: openAddSheet,
-                            ),
-                            const SizedBox(height: 32),
-                            PfSectionTitle(
-                              title: 'This week',
-                              accent: AppColors.mint,
-                            ),
-                            CareGamifiedWeeklyChart(
-                              selectedDay: dashboard.selectedDate,
-                              weekHits: dashboard.weekGoalHit.value ?? List.filled(7, false),
-                              progressPercent: (dashboard.tasks.value != null && dashboard.tasks.value!.isNotEmpty)
-                                  ? (dashboard.tasks.value!.where((t) => t.isCompleted).length / dashboard.tasks.value!.length)
-                                  : 0.0,
-                            ),
-                            const SizedBox(height: 32),
-                            _NutritionBanner(pt: pt),
-                            const SizedBox(height: 16),
-                            _MedicalVaultBanner(pt: pt),
-                          ],
+          final children = [
+            CareGamifiedHeader(
+              activePet: activePet,
+              dashboard: dashboard,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 12.0),
+                  PfSectionTitle(
+                    title: 'Trophy room',
+                    accent: AppColors.lilac,
+                    trailing: GestureDetector(
+                      onTap: () {},
+                      child: const Text(
+                        'Vault →',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.lilac700,
                         ),
                       ),
-                    ],
-                  );
+                    ),
+                  ),
+                  const CareGamifiedTrophyRoom(),
+                  const SizedBox(height: 32),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+                    child: Row(
+                      children: [
+                        Text(
+                          "TODAY'S QUESTS",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.08 * 12,
+                            color: pt.ink500,
+                          ),
+                        ),
+                        const Spacer(),
+                        _DoneCounter(tasks: dashboard.tasks.value ?? []),
+                      ],
+                    ),
+                  ),
+                  _AiRoutineBanner(
+                    activePetId: activePet.id,
+                    hasNoTasks: dashboard.tasks.value?.isEmpty == true,
+                    isGenerating: _isGeneratingRoutine,
+                    onTap: () => _generateRoutine(activePet),
+                  ),
+                  _DailyTasksDashboard(
+                    state: dashboard,
+                    petId: activePet.id,
+                    petName: activePet.name,
+                    species: species,
+                    onAddTask: openAddSheet,
+                  ),
+                  const SizedBox(height: 32),
+                  PfSectionTitle(
+                    title: 'This week',
+                    accent: AppColors.mint,
+                  ),
+                  CareGamifiedWeeklyChart(
+                    selectedDay: dashboard.selectedDate,
+                    weekHits: dashboard.weekGoalHit.value ?? List.filled(7, false),
+                    progressPercent: (dashboard.tasks.value != null && dashboard.tasks.value!.isNotEmpty)
+                        ? (dashboard.tasks.value!.where((t) => t.isCompleted).length / dashboard.tasks.value!.length)
+                        : 0.0,
+                  ),
+                  const SizedBox(height: 32),
+                  _NutritionBanner(pt: pt),
+                  const SizedBox(height: 16),
+                  _MedicalVaultBanner(pt: pt),
+                ],
+              ),
+            ),
+          ];
+          final list = ListView.builder(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 120),
+            itemCount: children.length,
+            itemBuilder: (context, index) => children[index],
+          );
                   if (!wide) return list;
                   return Align(
                     alignment: Alignment.topCenter,
@@ -403,6 +405,7 @@ class _HorizontalDatePickerState extends State<_HorizontalDatePicker> {
   }
 
   void _scrollToToday() {
+    if (!mounted) return;
     if (!_scroll.hasClients) return;
     final screenW = context.size?.width ?? 360;
     final todayOffset =

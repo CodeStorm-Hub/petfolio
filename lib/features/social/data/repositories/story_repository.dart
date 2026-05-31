@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/errors/app_exception.dart';
+
 import '../models/story.dart';
 
 final storyRepositoryProvider = Provider<StoryRepository>(
@@ -16,7 +17,7 @@ class StoryRepository {
 
   String get _uid {
     final id = _client.auth.currentUser?.id;
-    if (id == null) throw Exception('Not authenticated');
+    if (id == null) throw const NotAuthenticatedException();
     return id;
   }
 

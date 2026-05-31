@@ -24,6 +24,7 @@ class HealthVaultController extends StreamNotifier<List<MedicalRecord>> {
         .from('medical_vault')
         .stream(primaryKey: ['id'])
         .eq('pet_id', petId)
+        .limit(100)
         .map((rows) {
           final records = rows
               .where((r) => r['is_active'] == true)

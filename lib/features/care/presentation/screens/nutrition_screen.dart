@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/data/models/pet.dart';
 import 'package:petfolio/features/pet_profile/data/models/activity_level.dart';
@@ -50,6 +51,7 @@ class _NutritionBodyState extends ConsumerState<_NutritionBody> {
   void _openLogSheet() {
     showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
@@ -83,7 +85,7 @@ class _NutritionBodyState extends ConsumerState<_NutritionBody> {
                   history: nutrition.history,
                 ),
                 const SizedBox(height: 16),
-                _HistoryList(pt: pt, history: nutrition.history),
+                _HistoryList(pt: pt, history: nutrition.history, petId: widget.pet.id),
               ]),
             ),
           ),
@@ -581,14 +583,19 @@ class _CalorieDivider extends StatelessWidget {
 // Weight History List
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _HistoryList extends StatelessWidget {
-  const _HistoryList({required this.pt, required this.history});
+class _HistoryList extends ConsumerWidget {
+  const _HistoryList({
+    required this.pt,
+    required this.history,
+    required this.petId,
+  });
 
   final PetfolioThemeExtension pt;
   final AsyncValue<List<HealthLog>> history;
+  final String petId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     return history.when(
       data: (logs) {
@@ -630,7 +637,33 @@ class _HistoryList extends StatelessWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (err, st) => const SizedBox.shrink(),
+      error: (err, st) {
+        debugPrint('Weight history load failure: $err\n$st');
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline_rounded, color: AppColors.poppy, size: 16),
+              const SizedBox(width: 8),
+              Text(
+                'Failed to load history',
+                style: TextStyle(fontSize: 12, color: pt.ink500),
+              ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: () => ref.read(nutritionProvider(petId).notifier).refresh(),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text('Retry', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -790,7 +823,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
-    final mq = MediaQuery.of(context);
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Container(
       decoration: BoxDecoration(
@@ -799,7 +832,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
           top: Radius.circular(PetfolioThemeExtension.radius2xl),
         ),
       ),
-      padding: EdgeInsets.fromLTRB(24, 0, 24, mq.viewInsets.bottom + 24),
+      padding: EdgeInsets.fromLTRB(24, 0, 24, bottomInset + 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

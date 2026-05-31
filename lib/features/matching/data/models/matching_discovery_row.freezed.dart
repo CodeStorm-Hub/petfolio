@@ -277,7 +277,7 @@ as String?,
 /// @nodoc
 mixin _$MatchingDiscoveryRow {
 
- String get id; String get ownerId; String get name; String get species; String? get breed; DateTime? get dateOfBirth; String? get avatarUrl; String? get bio; double? get distanceMeters; bool get isDiscoverable; MatchingDiscoveryOwner? get owner;
+ String get id; String get ownerId; String get name; String get species; String? get breed; DateTime? get dateOfBirth; String? get avatarUrl; String? get bio; double? get distanceMeters; bool get isDiscoverable; DateTime? get createdAt; MatchingDiscoveryOwner? get owner;
 /// Create a copy of MatchingDiscoveryRow
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -288,16 +288,16 @@ $MatchingDiscoveryRowCopyWith<MatchingDiscoveryRow> get copyWith => _$MatchingDi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MatchingDiscoveryRow&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.name, name) || other.name == name)&&(identical(other.species, species) || other.species == species)&&(identical(other.breed, breed) || other.breed == breed)&&(identical(other.dateOfBirth, dateOfBirth) || other.dateOfBirth == dateOfBirth)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.isDiscoverable, isDiscoverable) || other.isDiscoverable == isDiscoverable)&&(identical(other.owner, owner) || other.owner == owner));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MatchingDiscoveryRow&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.name, name) || other.name == name)&&(identical(other.species, species) || other.species == species)&&(identical(other.breed, breed) || other.breed == breed)&&(identical(other.dateOfBirth, dateOfBirth) || other.dateOfBirth == dateOfBirth)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.isDiscoverable, isDiscoverable) || other.isDiscoverable == isDiscoverable)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.owner, owner) || other.owner == owner));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,ownerId,name,species,breed,dateOfBirth,avatarUrl,bio,distanceMeters,isDiscoverable,owner);
+int get hashCode => Object.hash(runtimeType,id,ownerId,name,species,breed,dateOfBirth,avatarUrl,bio,distanceMeters,isDiscoverable,createdAt,owner);
 
 @override
 String toString() {
-  return 'MatchingDiscoveryRow(id: $id, ownerId: $ownerId, name: $name, species: $species, breed: $breed, dateOfBirth: $dateOfBirth, avatarUrl: $avatarUrl, bio: $bio, distanceMeters: $distanceMeters, isDiscoverable: $isDiscoverable, owner: $owner)';
+  return 'MatchingDiscoveryRow(id: $id, ownerId: $ownerId, name: $name, species: $species, breed: $breed, dateOfBirth: $dateOfBirth, avatarUrl: $avatarUrl, bio: $bio, distanceMeters: $distanceMeters, isDiscoverable: $isDiscoverable, createdAt: $createdAt, owner: $owner)';
 }
 
 
@@ -308,7 +308,7 @@ abstract mixin class $MatchingDiscoveryRowCopyWith<$Res>  {
   factory $MatchingDiscoveryRowCopyWith(MatchingDiscoveryRow value, $Res Function(MatchingDiscoveryRow) _then) = _$MatchingDiscoveryRowCopyWithImpl;
 @useResult
 $Res call({
- String id, String ownerId, String name, String species, String? breed, DateTime? dateOfBirth, String? avatarUrl, String? bio, double? distanceMeters, bool isDiscoverable, MatchingDiscoveryOwner? owner
+ String id, String ownerId, String name, String species, String? breed, DateTime? dateOfBirth, String? avatarUrl, String? bio, double? distanceMeters, bool isDiscoverable, DateTime? createdAt, MatchingDiscoveryOwner? owner
 });
 
 
@@ -325,7 +325,7 @@ class _$MatchingDiscoveryRowCopyWithImpl<$Res>
 
 /// Create a copy of MatchingDiscoveryRow
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? ownerId = null,Object? name = null,Object? species = null,Object? breed = freezed,Object? dateOfBirth = freezed,Object? avatarUrl = freezed,Object? bio = freezed,Object? distanceMeters = freezed,Object? isDiscoverable = null,Object? owner = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? ownerId = null,Object? name = null,Object? species = null,Object? breed = freezed,Object? dateOfBirth = freezed,Object? avatarUrl = freezed,Object? bio = freezed,Object? distanceMeters = freezed,Object? isDiscoverable = null,Object? createdAt = freezed,Object? owner = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,ownerId: null == ownerId ? _self.ownerId : ownerId // ignore: cast_nullable_to_non_nullable
@@ -337,7 +337,8 @@ as DateTime?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ig
 as String?,bio: freezed == bio ? _self.bio : bio // ignore: cast_nullable_to_non_nullable
 as String?,distanceMeters: freezed == distanceMeters ? _self.distanceMeters : distanceMeters // ignore: cast_nullable_to_non_nullable
 as double?,isDiscoverable: null == isDiscoverable ? _self.isDiscoverable : isDiscoverable // ignore: cast_nullable_to_non_nullable
-as bool,owner: freezed == owner ? _self.owner : owner // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,owner: freezed == owner ? _self.owner : owner // ignore: cast_nullable_to_non_nullable
 as MatchingDiscoveryOwner?,
   ));
 }
@@ -435,10 +436,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String ownerId,  String name,  String species,  String? breed,  DateTime? dateOfBirth,  String? avatarUrl,  String? bio,  double? distanceMeters,  bool isDiscoverable,  MatchingDiscoveryOwner? owner)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String ownerId,  String name,  String species,  String? breed,  DateTime? dateOfBirth,  String? avatarUrl,  String? bio,  double? distanceMeters,  bool isDiscoverable,  DateTime? createdAt,  MatchingDiscoveryOwner? owner)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MatchingDiscoveryRow() when $default != null:
-return $default(_that.id,_that.ownerId,_that.name,_that.species,_that.breed,_that.dateOfBirth,_that.avatarUrl,_that.bio,_that.distanceMeters,_that.isDiscoverable,_that.owner);case _:
+return $default(_that.id,_that.ownerId,_that.name,_that.species,_that.breed,_that.dateOfBirth,_that.avatarUrl,_that.bio,_that.distanceMeters,_that.isDiscoverable,_that.createdAt,_that.owner);case _:
   return orElse();
 
 }
@@ -456,10 +457,10 @@ return $default(_that.id,_that.ownerId,_that.name,_that.species,_that.breed,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String ownerId,  String name,  String species,  String? breed,  DateTime? dateOfBirth,  String? avatarUrl,  String? bio,  double? distanceMeters,  bool isDiscoverable,  MatchingDiscoveryOwner? owner)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String ownerId,  String name,  String species,  String? breed,  DateTime? dateOfBirth,  String? avatarUrl,  String? bio,  double? distanceMeters,  bool isDiscoverable,  DateTime? createdAt,  MatchingDiscoveryOwner? owner)  $default,) {final _that = this;
 switch (_that) {
 case _MatchingDiscoveryRow():
-return $default(_that.id,_that.ownerId,_that.name,_that.species,_that.breed,_that.dateOfBirth,_that.avatarUrl,_that.bio,_that.distanceMeters,_that.isDiscoverable,_that.owner);case _:
+return $default(_that.id,_that.ownerId,_that.name,_that.species,_that.breed,_that.dateOfBirth,_that.avatarUrl,_that.bio,_that.distanceMeters,_that.isDiscoverable,_that.createdAt,_that.owner);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -476,10 +477,10 @@ return $default(_that.id,_that.ownerId,_that.name,_that.species,_that.breed,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String ownerId,  String name,  String species,  String? breed,  DateTime? dateOfBirth,  String? avatarUrl,  String? bio,  double? distanceMeters,  bool isDiscoverable,  MatchingDiscoveryOwner? owner)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String ownerId,  String name,  String species,  String? breed,  DateTime? dateOfBirth,  String? avatarUrl,  String? bio,  double? distanceMeters,  bool isDiscoverable,  DateTime? createdAt,  MatchingDiscoveryOwner? owner)?  $default,) {final _that = this;
 switch (_that) {
 case _MatchingDiscoveryRow() when $default != null:
-return $default(_that.id,_that.ownerId,_that.name,_that.species,_that.breed,_that.dateOfBirth,_that.avatarUrl,_that.bio,_that.distanceMeters,_that.isDiscoverable,_that.owner);case _:
+return $default(_that.id,_that.ownerId,_that.name,_that.species,_that.breed,_that.dateOfBirth,_that.avatarUrl,_that.bio,_that.distanceMeters,_that.isDiscoverable,_that.createdAt,_that.owner);case _:
   return null;
 
 }
@@ -491,7 +492,7 @@ return $default(_that.id,_that.ownerId,_that.name,_that.species,_that.breed,_tha
 
 
 class _MatchingDiscoveryRow implements MatchingDiscoveryRow {
-  const _MatchingDiscoveryRow({required this.id, required this.ownerId, required this.name, required this.species, this.breed, this.dateOfBirth, this.avatarUrl, this.bio, this.distanceMeters, this.isDiscoverable = false, this.owner});
+  const _MatchingDiscoveryRow({required this.id, required this.ownerId, required this.name, required this.species, this.breed, this.dateOfBirth, this.avatarUrl, this.bio, this.distanceMeters, this.isDiscoverable = false, this.createdAt, this.owner});
   
 
 @override final  String id;
@@ -504,6 +505,7 @@ class _MatchingDiscoveryRow implements MatchingDiscoveryRow {
 @override final  String? bio;
 @override final  double? distanceMeters;
 @override@JsonKey() final  bool isDiscoverable;
+@override final  DateTime? createdAt;
 @override final  MatchingDiscoveryOwner? owner;
 
 /// Create a copy of MatchingDiscoveryRow
@@ -516,16 +518,16 @@ _$MatchingDiscoveryRowCopyWith<_MatchingDiscoveryRow> get copyWith => __$Matchin
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MatchingDiscoveryRow&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.name, name) || other.name == name)&&(identical(other.species, species) || other.species == species)&&(identical(other.breed, breed) || other.breed == breed)&&(identical(other.dateOfBirth, dateOfBirth) || other.dateOfBirth == dateOfBirth)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.isDiscoverable, isDiscoverable) || other.isDiscoverable == isDiscoverable)&&(identical(other.owner, owner) || other.owner == owner));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MatchingDiscoveryRow&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.name, name) || other.name == name)&&(identical(other.species, species) || other.species == species)&&(identical(other.breed, breed) || other.breed == breed)&&(identical(other.dateOfBirth, dateOfBirth) || other.dateOfBirth == dateOfBirth)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.isDiscoverable, isDiscoverable) || other.isDiscoverable == isDiscoverable)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.owner, owner) || other.owner == owner));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,ownerId,name,species,breed,dateOfBirth,avatarUrl,bio,distanceMeters,isDiscoverable,owner);
+int get hashCode => Object.hash(runtimeType,id,ownerId,name,species,breed,dateOfBirth,avatarUrl,bio,distanceMeters,isDiscoverable,createdAt,owner);
 
 @override
 String toString() {
-  return 'MatchingDiscoveryRow(id: $id, ownerId: $ownerId, name: $name, species: $species, breed: $breed, dateOfBirth: $dateOfBirth, avatarUrl: $avatarUrl, bio: $bio, distanceMeters: $distanceMeters, isDiscoverable: $isDiscoverable, owner: $owner)';
+  return 'MatchingDiscoveryRow(id: $id, ownerId: $ownerId, name: $name, species: $species, breed: $breed, dateOfBirth: $dateOfBirth, avatarUrl: $avatarUrl, bio: $bio, distanceMeters: $distanceMeters, isDiscoverable: $isDiscoverable, createdAt: $createdAt, owner: $owner)';
 }
 
 
@@ -536,7 +538,7 @@ abstract mixin class _$MatchingDiscoveryRowCopyWith<$Res> implements $MatchingDi
   factory _$MatchingDiscoveryRowCopyWith(_MatchingDiscoveryRow value, $Res Function(_MatchingDiscoveryRow) _then) = __$MatchingDiscoveryRowCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String ownerId, String name, String species, String? breed, DateTime? dateOfBirth, String? avatarUrl, String? bio, double? distanceMeters, bool isDiscoverable, MatchingDiscoveryOwner? owner
+ String id, String ownerId, String name, String species, String? breed, DateTime? dateOfBirth, String? avatarUrl, String? bio, double? distanceMeters, bool isDiscoverable, DateTime? createdAt, MatchingDiscoveryOwner? owner
 });
 
 
@@ -553,7 +555,7 @@ class __$MatchingDiscoveryRowCopyWithImpl<$Res>
 
 /// Create a copy of MatchingDiscoveryRow
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? ownerId = null,Object? name = null,Object? species = null,Object? breed = freezed,Object? dateOfBirth = freezed,Object? avatarUrl = freezed,Object? bio = freezed,Object? distanceMeters = freezed,Object? isDiscoverable = null,Object? owner = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? ownerId = null,Object? name = null,Object? species = null,Object? breed = freezed,Object? dateOfBirth = freezed,Object? avatarUrl = freezed,Object? bio = freezed,Object? distanceMeters = freezed,Object? isDiscoverable = null,Object? createdAt = freezed,Object? owner = freezed,}) {
   return _then(_MatchingDiscoveryRow(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,ownerId: null == ownerId ? _self.ownerId : ownerId // ignore: cast_nullable_to_non_nullable
@@ -565,7 +567,8 @@ as DateTime?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ig
 as String?,bio: freezed == bio ? _self.bio : bio // ignore: cast_nullable_to_non_nullable
 as String?,distanceMeters: freezed == distanceMeters ? _self.distanceMeters : distanceMeters // ignore: cast_nullable_to_non_nullable
 as double?,isDiscoverable: null == isDiscoverable ? _self.isDiscoverable : isDiscoverable // ignore: cast_nullable_to_non_nullable
-as bool,owner: freezed == owner ? _self.owner : owner // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,owner: freezed == owner ? _self.owner : owner // ignore: cast_nullable_to_non_nullable
 as MatchingDiscoveryOwner?,
   ));
 }

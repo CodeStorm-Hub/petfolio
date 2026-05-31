@@ -53,9 +53,12 @@ class CommentList extends _$CommentList {
       );
 
       state = AsyncData([...previousComments, newComment]);
-      
+
       // Optimistically update the parent feed's comment count
-      ref.read(socialControllerProvider(petId).notifier).incrementCommentCount(postId);
+      final activePetId = ref.read(activePetControllerProvider)?.id;
+      if (activePetId != null) {
+        ref.read(socialControllerProvider(activePetId).notifier).incrementCommentCount(postId);
+      }
       
       // Invalidate the post detail cache to refresh stats if loaded standalone
       ref.invalidate(postDetailProvider(postId));
