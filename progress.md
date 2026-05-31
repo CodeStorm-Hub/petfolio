@@ -51,7 +51,38 @@
 - **Error UI Handling**: For optimistic UI actions (like toggling care tasks or seller onboarding), show errors using `AppSnackBar.showError` (via `appSnackBarMessengerKey` on `MaterialApp.router`). Do not put long-lived state providers in `AsyncValue.error` states for transient/action-level failures.
 - **Web Safe Target**: Marionette execution runs exclusively in debug builds via conditional compiler imports (`marionette_debug_gate_stub.dart` vs `_io.dart`) to keep `main.dart` from importing `dart:io` on web targets.
 
+## 2026-05-31 — Care Module Gamification & Data Integrity Fixes
+
+**Phase 1 — Database (migration `20260531100700_care_tasks_dedupe_and_unique_index.sql`)**
+- Removed 27 duplicate rows from `care_tasks` (keeping the oldest); applied a `UNIQUE INDEX care_tasks_pet_dedup_uidx ON care_tasks (pet_id, task_type, frequency, lower(btrim(title)))` to prevent future duplicates at the DB level.
+- Verified: 169 total rows = 169 unique combos; 0 duplicates remain.
+
+**Phase 2 — Models (`pet_level.dart`)**
+- Created `PetLevel.fromXp(int totalXp)`: 10-level ladder derived from real `total_points` in `pet_care_gamification`. Each level has XP thresholds, title strings, progress fraction, and `xpToNext` for next-level display.
+- Created `BadgeInfo` value class + `kBadgeCatalog` const list mapping all 6 real `pet_badges.badge_type` values (`first_log`, `3_day_streak`, `7_day_hero`, `routine_master`, `30_day_legend`, `care_champion`) to emoji, label, color, and description.
+- Added `badgeInfoFor(String type)` lookup helper.
+
+**Phase 3 — Repository (`pet_care_repository.dart`)**
+- Fixed `bulkCreateTasks` de-dup key mismatch: DB stores `vet_visit`/`nail_trim` (snake_case) but Dart enum `.name` produced `vetVisit`/`nailTrim` (camelCase) — keys never matched, silently inserting duplicates on every "Refresh AI Routine". Both sides now normalised via `_taskTypeToLogCareType` and `_frequencyToDbString` helpers.
+- Added `_frequencyToDbString` static helper: maps `twiceDaily→twice_daily`, `asNeeded→as_needed`, others pass through.
+
+**Phase 4 — UI wiring**
+- **`CareGamifiedHeader`** → `petAwardsSummaryProvider(petId)` (→ `get_pet_awards_summary` RPC) drives XP, level number, title, progress bar, and `xpToNext` text. Skeleton loader shown while loading. Error falls back to level 0.
+- **`CareGamifiedTrophyRoom`** → `petAwardsSummaryProvider` drives `owned` flag on each `PfAchievementTile` via `a.unlockedTypes`. All 6 catalog badges shown; owned ones are highlighted.
+- **`CareGamifiedWeeklyChart`** → `weekHits` (real 7-bool list from `dashboard.weekGoalHit`) drives bar heights. Past hit→0.85, miss→0.20, future→0.15 placeholder. Today uses live `progressPercent`.
+- **Vault → button** (`care_screen.dart:182`): `onTap: () {}` → `onTap: () => context.push('/care/medical-vault')`.
+- **`_DoneCounter`**: Excludes `isLogDerived` synthetic tasks from denominator; previously inflated "X/Y done" count.
+- **`_frequencyPill` helper**: Biweekly tasks now show `BIWEEKLY` pill, not `WEEKLY`.
+
+**Phase 5 — AI Prompt Consistency**
+- `care_recommendation_service.dart`: Aligned prompt instruction from "Generate 6-8 tasks" → "Generate 4-8 tasks" to match the enforced `minItems:4, maxItems:8` guided JSON schema, preventing model-guardrail conflicts.
+
+`dart analyze lib` — **No issues found.**
+
+---
+
 ## 2026-05-26 — Responsiveness Refactoring & Spacing Fixes
+
 
 - **Responsive Layout Helper**: Created a unified `ResponsiveLayout` widget to handle standard Mobile, Tablet, and Desktop/Web breakpoints consistently across all views.
 - **Responsive Screen Refactoring**: Center-constrained and scaled layouts on `pet_profile_screen.dart`, `social_screen.dart`, `matching_screen.dart`, `marketplace_screen.dart`, and `onboarding_screen.dart` to prevent infinite visual stretching on large viewports.
@@ -1402,4 +1433,23 @@ Phase complete and to log to .remember/remember.md, Please run (/remember) to sa
 **Next step:** None.
 
 Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-05-31 — Security & Performance Hardening (DB migrations + repo hygiene)
+
+Acted on the codebase/schema review findings. Six fixes:
+
+- **Repo hygiene** — Untracked `scratch/` (`git rm -r --cached`, kept on disk) and added `scratch/` to `.gitignore`; it held a committed Supabase anon JWT in `check_connection.dart`.
+- **`20260531100000_notifications_insert_check.sql`** — Replaced `notifications_insert_policy` `WITH CHECK (true)` with actor-pet ownership binding (stops notification spoofing). Admin/system notifications still flow through SECURITY DEFINER RPCs.
+- **`20260531100100_function_search_path.sql`** — Added `SET search_path = ''` to `is_admin`, `handle_post_like_sync`, `handle_comment_like_sync`, `handle_post_comment_sync`, `handle_new_chat_message`.
+- **`20260531100200_bucket_listing_lockdown.sql`** — Dropped broad public SELECT policies on `storage.objects` for `pets` & `shops` buckets (stops file listing; public URLs unaffected — app only uses getPublicUrl).
+- **`20260531100300_fk_covering_indexes.sql`** — Added covering indexes for 11 unindexed FKs.
+- **`20260531100400_consolidate_rls_policies.sql`** — Merged duplicate/overlapping permissive policies on users, chat_threads, pet_follows, posts, shops, marketplace_orders, reported_posts, vendor_ledgers, shop_deletion_requests (access-preserving OR-merge).
+
+All applied to remote project `jqyjvhwlcqcsuwcqgcwf`. Re-ran advisors: `function_search_path_mutable`, `rls_policy_always_true`, `public_bucket_allows_listing`, `unindexed_foreign_keys`, and `multiple_permissive_policies` warnings all cleared. Remaining advisor items are intentional (SECURITY DEFINER RPCs with internal checks) or dashboard config (leaked-password protection).
+
+**Not done (deferred, optional):** revoke EXECUTE-from-anon on `cleanup_expired_stories`/`get_pet_awards_summary`/`mark_story_viewed`; drop genuinely-unused indexes; route vendor order writes through `vendor_update_order` RPC; de-dupe care date logic; enable leaked-password protection in Auth dashboard.
+
+**Next step:** None — no Dart source changed, so analyzer/tests unaffected.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
 

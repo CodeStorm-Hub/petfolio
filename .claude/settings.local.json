@@ -89,7 +89,11 @@
       "mcp__Windows-MCP__Snapshot",
       "mcp__Claude_in_Chrome__find",
       "Bash(dir \"G:\\\\GitHub\\\\petfolio\\\\google_fonts\" /b)",
-      "mcp__5d4f3e29-8e00-4c0a-a2e0-3f9d9a2735f2__list_projects"
+      "mcp__5d4f3e29-8e00-4c0a-a2e0-3f9d9a2735f2__list_projects",
+      "Bash(grep -v '\\\\.g\\\\.dart$')",
+      "Bash(grep -v '\\\\.freezed\\\\.dart$')",
+      "Bash(gh pr *)",
+      "Bash(git rm *)"
     ]
   }
 }

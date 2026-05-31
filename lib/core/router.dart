@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-
+import '../features/admin/presentation/controllers/admin_auth_controller.dart';
+import '../features/admin/presentation/screens/admin_screen.dart';
 import '../features/auth/presentation/controllers/auth_controller.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/registration_screen.dart';
@@ -22,12 +22,10 @@ import '../features/marketplace/presentation/screens/marketplace_screen.dart';
 import '../features/marketplace/presentation/screens/order_confirmation_screen.dart';
 import '../features/marketplace/presentation/screens/product_detail_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/add_edit_product_screen.dart';
-import '../features/marketplace/presentation/screens/vendor/seller_dashboard_screen.dart';
-import '../features/marketplace/presentation/screens/vendor/shop_setup_screen.dart';
-import '../features/admin/presentation/controllers/admin_auth_controller.dart';
-import '../features/admin/presentation/screens/admin_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/edit_shop_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/manual_kyc_screen.dart';
+import '../features/marketplace/presentation/screens/vendor/seller_dashboard_screen.dart';
+import '../features/marketplace/presentation/screens/vendor/shop_setup_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/stripe_onboarding_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/vendor_order_detail_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/vendor_order_queue_screen.dart';
@@ -36,8 +34,8 @@ import '../features/matching/presentation/screens/chat_screen.dart';
 import '../features/matching/presentation/screens/matches_inbox_screen.dart';
 import '../features/matching/presentation/screens/matching_screen.dart';
 import '../features/pet_profile/presentation/controllers/pet_list_controller.dart';
-import '../features/pet_profile/presentation/screens/manage_pets_screen.dart';
 import '../features/pet_profile/presentation/screens/edit_profile_screen.dart';
+import '../features/pet_profile/presentation/screens/manage_pets_screen.dart';
 import '../features/pet_profile/presentation/screens/onboarding_screen.dart';
 import '../features/pet_profile/presentation/screens/pet_profile_screen.dart';
 import '../features/social/data/models/feed_post.dart';
@@ -48,14 +46,7 @@ import '../features/social/presentation/screens/post_detail_screen.dart';
 import '../features/social/presentation/screens/social_profile_screen.dart';
 import '../features/social/presentation/screens/social_screen.dart';
 import '../features/social/presentation/screens/story_viewer_screen.dart';
-
-import 'package:petfolio/core/widgets/pet_avatar.dart';
-import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
-import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
-import 'package:petfolio/features/matching/presentation/matching_navigation.dart';
-import 'package:petfolio/features/matching/presentation/widgets/match_preferences_sheet.dart';
-import 'package:petfolio/features/marketplace/presentation/controllers/cart_controller.dart';
-import 'package:petfolio/core/theme/theme.dart';
+import 'package:petfolio/core/widgets/app_shell.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Router provider — must be consumed with ref.watch in the app widget.
@@ -397,346 +388,8 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 // ─────────────────────────────────────────────────────────────────────────────
-// AppShell — adaptive nav (bottom bar ≤ 599 dp, rail ≥ 600 dp)
+// Fallback screen shown when a pet edit route can't resolve the pet
 // ─────────────────────────────────────────────────────────────────────────────
-
-class AppShell extends ConsumerWidget {
-  const AppShell({super.key, required this.child});
-
-  final Widget child;
-
-  static const _destinations = [
-    _NavDestination(icon: Icons.pets_outlined, activeIcon: Icons.pets, label: 'Pets', path: '/home'),
-    _NavDestination(icon: Icons.local_fire_department_outlined, activeIcon: Icons.local_fire_department, label: 'Care', path: '/care'),
-    _NavDestination(icon: Icons.favorite_border, activeIcon: Icons.favorite, label: 'Social', path: '/social'),
-    _NavDestination(icon: Icons.auto_awesome_outlined, activeIcon: Icons.auto_awesome, label: 'Match', path: '/matching'),
-    _NavDestination(icon: Icons.storefront_outlined, activeIcon: Icons.storefront, label: 'Market', path: '/marketplace'),
-  ];
-
-  int _selectedIndex(BuildContext context) {
-    final location = GoRouterState.of(context).matchedLocation;
-    for (var i = 0; i < _destinations.length; i++) {
-      if (location.startsWith(_destinations[i].path)) return i;
-    }
-    return 0;
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedIndex = _selectedIndex(context);
-    final isWide = MediaQuery.sizeOf(context).width >= 600;
-
-    if (isWide) {
-      return Scaffold(
-        body: Row(
-          children: [
-            _WideNavRail(
-              selectedIndex: selectedIndex,
-              destinations: _destinations,
-              onSelect: (i) => context.go(_destinations[i].path),
-            ),
-            const VerticalDivider(thickness: 1, width: 1),
-            Expanded(
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    top: 0,
-                    bottom: 0,
-                    child: child,
-                  ),
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: _AppShellHeader(selectedIndex: selectedIndex),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Stack(
-        children: [
-          // Main content
-          Positioned.fill(
-            top: 0,
-            bottom: 0,
-            child: child,
-          ),
-          // Fixed wavy header at the top
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: _AppShellHeader(selectedIndex: selectedIndex),
-          ),
-          // Floating pill bottom nav, raised above system home indicator
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 12 + MediaQuery.paddingOf(context).bottom,
-            child: _FloatingNav(
-              selectedIndex: selectedIndex,
-              destinations: _destinations,
-              onSelect: (i) => context.go(_destinations[i].path),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AppShellHeader extends ConsumerWidget {
-  const _AppShellHeader({required this.selectedIndex});
-  final int selectedIndex;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final activePet = ref.watch(activePetControllerProvider);
-
-    String eyebrow = 'ACTIVE PET';
-    switch (selectedIndex) {
-      case 0:
-        eyebrow = 'ACTIVE PET';
-        break;
-      case 1:
-        eyebrow = activePet != null ? 'CARE · ${activePet.name.toUpperCase()}' : 'CARE';
-        break;
-      case 2:
-        eyebrow = 'PAWSFEED';
-        break;
-      case 3:
-        eyebrow = 'MATCH · NEARBY';
-        break;
-      case 4:
-        eyebrow = 'SHOP FOR';
-        break;
-    }
-
-    Widget trailingActions = const SizedBox.shrink();
-    switch (selectedIndex) {
-      case 0: // Home
-        trailingActions = Row(
-          children: [
-            _HeaderIconBtn(
-              icon: Icons.notifications_rounded,
-              onTap: () => context.push('/social/notifications'),
-            ),
-            const SizedBox(width: 8),
-            _HeaderIconBtn(
-              icon: Icons.settings_rounded,
-              onTap: () => context.push('/pets/manage'),
-            ),
-          ],
-        );
-        break;
-      case 1: // Care
-        trailingActions = Consumer(
-          builder: (context, ref, child) {
-            final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-            return _HeaderIconBtn(
-              icon: isDarkTheme ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-              onTap: () => ref.read(themeProvider.notifier).toggleTheme(),
-            );
-          },
-        );
-        break;
-      case 2: // Social
-        trailingActions = Row(
-          children: [
-            _HeaderIconBtn(
-              icon: Icons.search,
-              onTap: () {},
-            ),
-            const SizedBox(width: 8),
-            _HeaderIconBtn(
-              icon: Icons.send_rounded,
-              onTap: () => context.push('/matching/inbox'),
-            ),
-          ],
-        );
-        break;
-      case 3: // Match
-        trailingActions = Row(
-          children: [
-            _HeaderIconBtn(
-              icon: Icons.chat_bubble_outline_rounded,
-              onTap: () => openMatchesInbox(context),
-            ),
-            const SizedBox(width: 8),
-            _HeaderIconBtn(
-              icon: Icons.tune_rounded,
-              onTap: () => MatchPreferencesSheet.show(context),
-            ),
-          ],
-        );
-        break;
-      case 4: // Market
-        trailingActions = Consumer(
-          builder: (context, ref, child) {
-            final cart = ref.watch(cartProvider);
-            return GestureDetector(
-              onTap: () => showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                useRootNavigator: true,
-                backgroundColor: Colors.transparent,
-                constraints: const BoxConstraints(maxWidth: 560),
-                builder: (ctx) => const CartDrawer(),
-              ),
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: const BoxDecoration(
-                  color: AppColors.tangerine,
-                  shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: AppColors.tangerine700, offset: Offset(0, 4))],
-                ),
-                alignment: Alignment.center,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 20),
-                    if (cart.itemCount > 0)
-                      Positioned(
-                        top: -6,
-                        right: -8,
-                        child: Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: AppColors.poppy,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.cream, width: 2),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            cart.itemCount.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-        break;
-    }
-
-    final topPadding = MediaQuery.paddingOf(context).top;
-    final headerHeight = topPadding + 76.0;
-
-    return Container(
-      color: Colors.transparent,
-      height: headerHeight,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(18, topPadding + 8, 18, 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            GestureDetector(
-              onTap: () => PetSwitcherSheet.show(context),
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(56),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (activePet != null) ...[
-                      PetAvatar(
-                        imageUrl: activePet.avatarUrl,
-                        species: activePet.speciesEnum,
-                        size: PetAvatarSize.sm,
-                        showRing: true,
-                      ),
-                      const SizedBox(width: 10),
-                    ],
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          eyebrow,
-                          style: const TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                            letterSpacing: 0.6,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              activePet?.name ?? (selectedIndex == 4 ? 'Market' : 'PetFolio'),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              color: Colors.white,
-                              size: 14,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            trailingActions,
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _HeaderIconBtn extends StatelessWidget {
-  const _HeaderIconBtn({
-    required this.icon,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: Colors.white.withAlpha(56),
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: Icon(icon, color: Colors.white, size: 18),
-      ),
-    );
-  }
-}
 
 class _PetEditMissingScreen extends StatelessWidget {
   const _PetEditMissingScreen();
@@ -748,10 +401,7 @@ class _PetEditMissingScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Pet not found',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('Pet not found', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () => context.go('/home'),
@@ -764,173 +414,5 @@ class _PetEditMissingScreen extends StatelessWidget {
   }
 }
 
-class _NavDestination {
-  const _NavDestination({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-    required this.path,
-  });
-
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
-  final String path;
-}
-
-// ─── Tab accent colors (matches design system pillar colors) ─────────────────
-const _tabColors = [
-  AppColors.tangerine,  // Pets
-  AppColors.sunny,      // Care
-  AppColors.poppy,      // Social
-  AppColors.lilac,      // Match
-  AppColors.mint,       // Market
-];
-
-// ─── Floating pill bottom nav ─────────────────────────────────────────────────
-
-class _FloatingNav extends StatelessWidget {
-  const _FloatingNav({
-    required this.selectedIndex,
-    required this.destinations,
-    required this.onSelect,
-  });
-
-  final int selectedIndex;
-  final List<_NavDestination> destinations;
-  final ValueChanged<int> onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? AppColors.surface0D : AppColors.surface0;
-    final border = isDark ? AppColors.lineD : AppColors.line;
-    final shadowColor = isDark ? AppColors.shadowE3D : AppColors.shadowE3L;
-
-    return Container(
-      height: 68,
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(34),
-        border: Border.all(color: border),
-        boxShadow: [
-          BoxShadow(color: shadowColor, blurRadius: 24, spreadRadius: -4, offset: const Offset(0, 8)),
-        ],
-      ),
-      child: Row(
-        children: [
-          for (var i = 0; i < destinations.length; i++)
-            Expanded(
-              child: _NavTab(
-                destination: destinations[i],
-                isSelected: i == selectedIndex,
-                accentColor: _tabColors[i],
-                isDark: isDark,
-                onTap: () => onSelect(i),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NavTab extends StatelessWidget {
-  const _NavTab({
-    required this.destination,
-    required this.isSelected,
-    required this.accentColor,
-    required this.isDark,
-    required this.onTap,
-  });
-
-  final _NavDestination destination;
-  final bool isSelected;
-  final Color accentColor;
-  final bool isDark;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final unselectedColor = isDark ? AppColors.ink500D : AppColors.ink500;
-    final iconColor = isSelected ? accentColor : unselectedColor;
-    final softColor = Color.alphaBlend(accentColor.withAlpha(36), Colors.transparent);
-
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            decoration: BoxDecoration(
-              color: isSelected ? softColor : Colors.transparent,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Icon(
-              isSelected ? destination.activeIcon : destination.icon,
-              color: iconColor,
-              size: 22,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            destination.label,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              color: iconColor,
-              height: 1.0,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Wide nav rail ───────────────────────────────────────────────────────────
-
-class _WideNavRail extends StatelessWidget {
-  const _WideNavRail({
-    required this.selectedIndex,
-    required this.destinations,
-    required this.onSelect,
-  });
-
-  final int selectedIndex;
-  final List<_NavDestination> destinations;
-  final ValueChanged<int> onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return NavigationRail(
-      selectedIndex: selectedIndex,
-      labelType: NavigationRailLabelType.all,
-      backgroundColor: isDark ? AppColors.surface0D : AppColors.surface0,
-      indicatorColor: Colors.transparent,
-      onDestinationSelected: onSelect,
-      destinations: [
-        for (var i = 0; i < destinations.length; i++)
-          NavigationRailDestination(
-            padding: EdgeInsets.zero,
-            icon: Icon(destinations[i].icon,
-                color: selectedIndex == i ? _tabColors[i] : (isDark ? AppColors.ink500D : AppColors.ink500)),
-            selectedIcon: Icon(destinations[i].activeIcon, color: _tabColors[i]),
-            label: Text(
-              destinations[i].label,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: selectedIndex == i ? FontWeight.w700 : FontWeight.w500,
-                color: selectedIndex == i ? _tabColors[i] : (isDark ? AppColors.ink500D : AppColors.ink500),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
+// DELETED: AppShell, _AppShellHeader, _HeaderIconBtn, _FloatingNav, _NavTab,
+// _WideNavRail, _NavDestination — moved to lib/core/widgets/app_shell.dart

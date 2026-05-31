@@ -42,6 +42,7 @@ flutter run --dart-define-from-file=.env
 SUPABASE_URL=https://jqyjvhwlcqcsuwcqgcwf.supabase.co
 SUPABASE_ANON_KEY=<anon-key>
 STRIPE_PUBLISHABLE_KEY=pk_test_...
+NVIDIA_API_KEY=<nvidia-api-key>   # AI care-routine suggestions (CareRecommendationService)
 ```
 
 Individual overrides:

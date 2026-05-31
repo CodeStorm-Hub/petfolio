@@ -7,6 +7,7 @@ import '../../data/models/care_streak.dart';
 import '../../data/models/care_task.dart';
 import '../../data/repositories/care_repository.dart';
 import 'care_streak_stream_provider.dart';
+import 'pet_awards_provider.dart';
 
 part 'care_dashboard_controller.g.dart';
 
@@ -281,6 +282,7 @@ class CareDashboard extends _$CareDashboard {
         badgeTypes: _badgeBaseline,
       );
       state = _routine;
+      if (isCompleted) ref.invalidate(petAwardsSummaryProvider(petId));
       if (outcome.badgeUnlocked && outcome.unlockedBadges.isNotEmpty) {
         for (final badge in outcome.unlockedBadges) {
           AppSnackBar.showBadgeUnlocked(badge);
