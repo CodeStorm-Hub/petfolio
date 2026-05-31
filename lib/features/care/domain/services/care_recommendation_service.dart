@@ -301,7 +301,7 @@ class CareRecommendationService {
     if (existingTasks.isNotEmpty) {
       buf.writeln();
       final taskStrings = existingTasks
-          .map((t) => '"${t['title']}" (${t['task_type']})')
+          .map((t) => '"${t['title']}" (${t['type']})')
           .join(", ");
       buf.writeln(
           'EXISTING TASKS (DO NOT generate tasks with identical titles or overlapping intent): $taskStrings');

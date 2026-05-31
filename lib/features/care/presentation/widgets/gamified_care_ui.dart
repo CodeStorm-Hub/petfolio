@@ -360,18 +360,22 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     final today = DateUtils.dateOnly(DateTime.now());
-    final todayWeekday = today.weekday; // 1=Mon .. 7=Sun
-    final weekStart = today.subtract(Duration(days: todayWeekday - 1));
+    final anchor = DateUtils.dateOnly(selectedDay);
+    final weekStart = anchor.subtract(const Duration(days: 6));
 
-    // Compute week summary
-    final todayIndex = todayWeekday - 1; // 0-indexed
+    // Count completed days in this 7-day window up to and including today.
     int hitsCount = 0;
-    for (int i = 0; i <= todayIndex && i < weekHits.length; i++) {
-      if (weekHits[i]) hitsCount++;
+    for (int i = 0; i < 7; i++) {
+      final dayDate = weekStart.add(Duration(days: i));
+      if (dayDate.isAfter(today)) break;
+      if (i < weekHits.length && weekHits[i]) hitsCount++;
     }
-    // Today counts as a hit if progressPercent == 1.0
-    if (progressPercent >= 1.0 && !weekHits[todayIndex]) hitsCount++;
-    final totalDaysSoFar = todayIndex + 1;
+    // Count today as a hit if all tasks done and DB hasn't recorded it yet.
+    if (anchor == today && progressPercent >= 1.0) {
+      final todaySlot = today.difference(weekStart).inDays;
+      if (todaySlot >= 0 && todaySlot < weekHits.length && !weekHits[todaySlot]) hitsCount++;
+    }
+    final totalDaysSoFar = (today.difference(weekStart).inDays + 1).clamp(1, 7);
 
     return Container(
       decoration: BoxDecoration(
@@ -500,7 +504,7 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
                       const SizedBox(height: 4),
                       // Day letter
                       Text(
-                        _dayLetters[i],
+                        _dayLetters[dayDate.weekday - 1],
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,

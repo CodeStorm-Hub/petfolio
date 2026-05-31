@@ -462,7 +462,7 @@ class _HorizontalDatePickerState extends State<_HorizontalDatePicker> {
             padding: EdgeInsets.only(right: i < _totalDays - 1 ? _chipGap : 0),
             child: GestureDetector(
               key: ValueKey<String>('care_date_$ymd'),
-              onTap: () => widget.onDateSelected(date),
+              onTap: isFuture ? null : () => widget.onDateSelected(date),
               child: AnimatedContainer(
                 duration: PetfolioThemeExtension.durationSm,
                 width: _chipW,
