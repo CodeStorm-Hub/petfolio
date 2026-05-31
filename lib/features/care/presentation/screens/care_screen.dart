@@ -175,6 +175,14 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             const SizedBox(height: 12.0),
+                            // ── Date picker ────────────────────────────────
+                            _HorizontalDatePicker(
+                              selectedDate: dashboard.selectedDate,
+                              onDateSelected: (d) => ref
+                                  .read(careDashboardProvider.notifier)
+                                  .selectDate(d),
+                            ),
+                            const SizedBox(height: 16.0),
                             PfSectionTitle(
                               title: 'Trophy room',
                               accent: AppColors.lilac,
@@ -192,6 +200,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                             ),
                             CareGamifiedTrophyRoom(petId: activePet.id),
                             const SizedBox(height: 32),
+                            // ── TODAY'S QUESTS header with AI refresh ──────
                             Padding(
                               padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
                               child: Row(
@@ -207,15 +216,48 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                   ),
                                   const Spacer(),
                                   _DoneCounter(tasks: dashboard.tasks.value ?? []),
+                                  const SizedBox(width: 8),
+                                  // Compact AI Routine refresh icon button
+                                  GestureDetector(
+                                    onTap: _isGeneratingRoutine ? null : () => _generateRoutine(activePet),
+                                    child: Tooltip(
+                                      message: 'Refresh AI Routine',
+                                      child: Container(
+                                        width: 30,
+                                        height: 30,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.lilacSoft,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: _isGeneratingRoutine
+                                            ? const SizedBox(
+                                                width: 14,
+                                                height: 14,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  color: AppColors.lilac,
+                                                ),
+                                              )
+                                            : const Icon(
+                                                Icons.auto_awesome,
+                                                size: 15,
+                                                color: AppColors.lilac,
+                                              ),
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-                            _AiRoutineBanner(
-                              activePetId: activePet.id,
-                              hasNoTasks: dashboard.tasks.value?.isEmpty == true,
-                              isGenerating: _isGeneratingRoutine,
-                              onTap: () => _generateRoutine(activePet),
-                            ),
+                            // ── AI empty-state full banner ─────────────────
+                            if (dashboard.tasks.value?.isEmpty == true)
+                              _AiRoutineBanner(
+                                activePetId: activePet.id,
+                                hasNoTasks: true,
+                                isGenerating: _isGeneratingRoutine,
+                                onTap: () => _generateRoutine(activePet),
+                              ),
                             _DailyTasksDashboard(
                               state: dashboard,
                               petId: activePet.id,
@@ -277,32 +319,9 @@ class _AiRoutineBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!hasNoTasks) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: OutlinedButton.icon(
-          onPressed: isGenerating ? null : onTap,
-          icon: isGenerating
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: AppColors.lilac,
-                  ),
-                )
-              : const Icon(Icons.auto_awesome, size: 16, color: AppColors.lilac),
-          label: Text(isGenerating ? 'Generating…' : 'Refresh AI Routine'),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.lilac,
-            side: const BorderSide(color: AppColors.lilac),
-            minimumSize: const Size.fromHeight(44),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14)),
-          ),
-        ),
-      );
-    }
+    // When tasks exist, show only the compact refresh icon (moved to section header).
+    // When there are NO tasks at all, show the full empty-state banner.
+    if (!hasNoTasks) return const SizedBox.shrink();
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -539,21 +558,99 @@ class _DailyTasksDashboard extends ConsumerWidget {
         error: err,
         onRetry: () => ref.read(careDashboardProvider.notifier).refresh(),
       ),
-      data: (tasks) => tasks.isEmpty
-          ? _EmptyRoutineState(petName: petName, date: state.selectedDate, onAddTask: onAddTask)
-          : Column(
-              children: tasks
-                  .map(
-                    (t) => _CareTaskCard(
-                      task: t,
-                      petId: petId,
-                      petName: petName,
-                      species: species,
-                    ),
-                  )
-                  .toList(),
+      data: (tasks) {
+        if (tasks.isEmpty) {
+          return _EmptyRoutineState(
+            petName: petName,
+            date: state.selectedDate,
+            onAddTask: onAddTask,
+          );
+        }
+
+        // Check if all planned tasks are done
+        final planned = tasks.where((t) => !t.isLogDerived).toList();
+        final allDone = planned.isNotEmpty &&
+            planned.every((t) => t.isCompleted);
+
+        // Group tasks by frequency bucket
+        final daily = tasks
+            .where((t) =>
+                t.frequency == dbtask.CareFrequency.daily ||
+                t.frequency == dbtask.CareFrequency.twiceDaily ||
+                t.frequency == dbtask.CareFrequency.once ||
+                t.isLogDerived)
+            .toList();
+        final weekly = tasks
+            .where((t) => t.frequency == dbtask.CareFrequency.weekly)
+            .toList();
+        final lessOften = tasks
+            .where((t) =>
+                t.frequency == dbtask.CareFrequency.biweekly ||
+                t.frequency == dbtask.CareFrequency.monthly ||
+                t.frequency == dbtask.CareFrequency.asNeeded)
+            .toList();
+
+        final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // All-done celebration banner
+            if (allDone)
+              _AllDoneBanner(tasks: planned),
+            // Daily tasks
+            if (daily.isNotEmpty) ..._frequencyGroup(
+              context, pt, 'DAILY', daily, petId, petName, species,
             ),
+            // Weekly tasks
+            if (weekly.isNotEmpty) ..._frequencyGroup(
+              context, pt, 'WEEKLY', weekly, petId, petName, species,
+            ),
+            // Bi-weekly / Monthly / As-needed
+            if (lessOften.isNotEmpty) ..._frequencyGroup(
+              context, pt, 'LESS OFTEN', lessOften, petId, petName, species,
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  List<Widget> _frequencyGroup(
+    BuildContext context,
+    PetfolioThemeExtension pt,
+    String label,
+    List<dbtask.CareTask> tasks,
+    String petId,
+    String petName,
+    PetSpecies species,
+  ) {
+    return [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
+        child: Row(
+          children: [
+            Expanded(child: Divider(color: pt.line, thickness: 1, endIndent: 8)),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.08 * 10,
+                color: pt.ink300,
+              ),
+            ),
+            Expanded(child: Divider(color: pt.line, thickness: 1, indent: 8)),
+          ],
+        ),
+      ),
+      ...tasks.map((t) => _CareTaskCard(
+            task: t,
+            petId: petId,
+            petName: petName,
+            species: species,
+          )),
+    ];
   }
 }
 
@@ -567,9 +664,6 @@ class _DoneCounter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Exclude log-derived synthetic tasks — they are always completed and
-    // would inflate the denominator, showing e.g. "3/5 done" when only 2
-    // real scheduled tasks exist.
     final planned = tasks.where((t) => !t.isLogDerived).toList();
     if (planned.isEmpty) return const SizedBox.shrink();
     final done = planned.where((t) => t.isCompleted).length;
@@ -577,14 +671,80 @@ class _DoneCounter extends StatelessWidget {
     final allDone = done == total;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
-      child: Text(
+      child: Container(
         key: ValueKey('$done/$total'),
-        allDone ? 'All done! 🎉' : '$done/$total done',
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w800,
-          color: allDone ? AppColors.mint700 : AppColors.sunny700,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: allDone ? AppColors.mintSoft : AppColors.sunnySoft,
+          borderRadius: BorderRadius.circular(999),
         ),
+        child: Text(
+          allDone ? 'All done! 🎉' : '$done/$total done',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            color: allDone ? AppColors.mint700 : AppColors.sunny700,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// All-done Celebration Banner
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _AllDoneBanner extends StatelessWidget {
+  const _AllDoneBanner({required this.tasks});
+  final List<dbtask.CareTask> tasks;
+
+  @override
+  Widget build(BuildContext context) {
+    final totalXp = tasks.fold<int>(
+      0, (sum, t) => sum + t.gamificationPoints,
+    );
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.mintSoft, AppColors.sunnySoft],
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.mint.withAlpha(80)),
+      ),
+      child: Row(
+        children: [
+          const Text('🎉', style: TextStyle(fontSize: 28)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'All done for today!',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.mint700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'You earned $totalXp XP today ⭐',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.mint700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -687,9 +847,17 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
     final t = widget.task;
     if (t.isLogDerived) return 'Activity log · Today';
     if (t.scheduledTime != null) {
-      return (!t.isCompleted && t.isDueToday)
-          ? 'Due ${t.scheduledTime}'
-          : t.scheduledTime!;
+      // Format as HH:MM AM/PM — strip seconds
+      final tod = parseCareScheduledTimeOfDay(t.scheduledTime);
+      if (tod != null) {
+        final h = tod.hourOfPeriod == 0 ? 12 : tod.hourOfPeriod;
+        final m = tod.minute.toString().padLeft(2, '0');
+        final period = tod.period == DayPeriod.am ? 'AM' : 'PM';
+        final formatted = '$h:$m $period';
+        return (!t.isCompleted && t.isDueToday)
+            ? 'Due $formatted'
+            : formatted;
+      }
     }
     switch (t.frequency) {
       case dbtask.CareFrequency.once:       return 'Once';
@@ -1387,54 +1555,58 @@ class _MedicalVaultBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       key: const ValueKey<String>('care_medical_vault_banner'),
       onTap: () => context.push('/care/medical-vault'),
       child: Container(
         decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius:
-              BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-          border: Border.all(color: pt.pillarHealth.withAlpha(80)),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.mintSoft,
+              Color.lerp(AppColors.mintSoft, AppColors.mint.withAlpha(40), 0.5)!,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+          border: Border.all(color: AppColors.mint.withAlpha(60)),
           boxShadow: pt.shadowE1,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Row(
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 46,
+              height: 46,
               decoration: BoxDecoration(
-                color: pt.pillarHealth.withAlpha(30),
-                borderRadius: BorderRadius.circular(
-                    PetfolioThemeExtension.radiusMd),
+                color: AppColors.mint.withAlpha(40),
+                borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
               ),
-              child: Icon(Icons.folder_special_outlined,
-                  color: pt.pillarHealth, size: 22),
+              child: const Icon(Icons.folder_special_outlined,
+                  color: AppColors.mint700, size: 24),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Automated medical vault',
+                  const Text(
+                    'Medical Vault',
                     style: TextStyle(
                       fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.mint700,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     'Vaccines · Medications · Vet visits',
-                    style: TextStyle(fontSize: 13, color: pt.ink300),
+                    style: TextStyle(fontSize: 13, color: pt.ink500),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: pt.ink300),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.mint700),
           ],
         ),
       ),
@@ -1449,54 +1621,58 @@ class _NutritionBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       key: const ValueKey<String>('care_nutrition_banner'),
       onTap: () => context.push('/care/nutrition'),
       child: Container(
         decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius:
-              BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-          border: Border.all(color: pt.pillarHealth.withAlpha(80)),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.sunnySoft,
+              Color.lerp(AppColors.sunnySoft, AppColors.tangerine.withAlpha(40), 0.5)!,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+          border: Border.all(color: AppColors.tangerine.withAlpha(60)),
           boxShadow: pt.shadowE1,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Row(
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 46,
+              height: 46,
               decoration: BoxDecoration(
-                color: pt.pillarHealth.withAlpha(30),
-                borderRadius: BorderRadius.circular(
-                    PetfolioThemeExtension.radiusMd),
+                color: AppColors.tangerine.withAlpha(40),
+                borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
               ),
-              child: Icon(Icons.monitor_weight_outlined,
-                  color: pt.pillarHealth, size: 22),
+              child: const Icon(Icons.monitor_weight_outlined,
+                  color: AppColors.tangerine, size: 24),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Smart Nutrition & Weight',
                     style: TextStyle(
                       fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.tangerine,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     'Track weight history · View caloric needs',
-                    style: TextStyle(fontSize: 13, color: pt.ink300),
+                    style: TextStyle(fontSize: 13, color: pt.ink500),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: pt.ink300),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.tangerine),
           ],
         ),
       ),

@@ -5,6 +5,7 @@ import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 
 import '../../../../core/models/pet.dart';
+import '../../data/models/pet_awards_summary.dart';
 import '../../data/models/pet_level.dart';
 import '../controllers/care_dashboard_controller.dart';
 import '../controllers/pet_awards_provider.dart';
@@ -252,12 +253,12 @@ class _LevelContent extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Container(
-          height: 12,
+          height: 16,
           width: double.infinity,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
             color: Colors.white.withAlpha(56),
-            border: Border.all(color: Colors.white.withAlpha(40)),
+            border: Border.all(color: Colors.white.withAlpha(80), width: 1.5),
           ),
           child: FractionallySizedBox(
             alignment: Alignment.centerLeft,
@@ -268,6 +269,13 @@ class _LevelContent extends StatelessWidget {
                 gradient: const LinearGradient(
                   colors: [AppColors.sunny, AppColors.tangerine, AppColors.poppy],
                 ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: AppColors.tangerine,
+                    blurRadius: 8,
+                    spreadRadius: -2,
+                  ),
+                ],
               ),
             ),
           ),
@@ -351,11 +359,19 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
-    // weekHits is 7 bools Mon→Sun. The last entry covers today.
-    // Use real hit bools to drive bar heights.
     final today = DateUtils.dateOnly(DateTime.now());
     final todayWeekday = today.weekday; // 1=Mon .. 7=Sun
     final weekStart = today.subtract(Duration(days: todayWeekday - 1));
+
+    // Compute week summary
+    final todayIndex = todayWeekday - 1; // 0-indexed
+    int hitsCount = 0;
+    for (int i = 0; i <= todayIndex && i < weekHits.length; i++) {
+      if (weekHits[i]) hitsCount++;
+    }
+    // Today counts as a hit if progressPercent == 1.0
+    if (progressPercent >= 1.0 && !weekHits[todayIndex]) hitsCount++;
+    final totalDaysSoFar = todayIndex + 1;
 
     return Container(
       decoration: BoxDecoration(
@@ -363,93 +379,154 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
         borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius2xl),
         border: Border.all(color: pt.line),
       ),
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      child: SizedBox(
-        height: 128,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: List.generate(7, (i) {
-            final dayDate = weekStart.add(Duration(days: i));
-            final isFuture = dayDate.isAfter(today);
-            final isToday = dayDate == today;
-
-            // For past/today: use real hit bool; future: show faint placeholder.
-            final hit = i < weekHits.length ? weekHits[i] : false;
-            final h = isFuture
-                ? 0.15
-                : isToday
-                    ? progressPercent.clamp(0.15, 1.0)
-                    : (hit ? 0.85 : 0.20);
-
-            final color = isFuture ? pt.line : (hit || isToday ? _colors[i] : pt.ink300);
-
-            return Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  SizedBox(
-                    height: 20,
-                    child: isToday
-                        ? const Align(
-                            alignment: Alignment.bottomCenter,
-                            child: Text('🐾', style: TextStyle(fontSize: 13)),
-                          )
-                        : null,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Week summary header
+          Row(
+            children: [
+              Text(
+                '$hitsCount/$totalDaysSoFar goals this week',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: pt.ink500,
+                ),
+              ),
+              const Spacer(),
+              if (hitsCount > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppColors.mintSoft,
+                    borderRadius: BorderRadius.circular(999),
                   ),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: FractionallySizedBox(
-                        heightFactor: h,
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            border: isToday
-                                ? Border.all(color: AppColors.ink950, width: 2)
-                                : null,
-                            boxShadow: (isToday && !isFuture)
-                                ? [
-                                    BoxShadow(
-                                      color: color.withAlpha(100),
-                                      blurRadius: 16,
-                                      offset: const Offset(0, 8),
-                                      spreadRadius: -4,
-                                    )
-                                  ]
-                                : null,
-                            gradient: isFuture
-                                ? null
-                                : LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      color,
-                                      Color.lerp(color, Colors.white, 0.45)!,
-                                    ],
-                                  ),
-                            color: isFuture ? pt.surface2 : null,
+                  child: Text(
+                    '$hitsCount 🔥',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.mint700,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 112,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: List.generate(7, (i) {
+                final dayDate = weekStart.add(Duration(days: i));
+                final isFuture = dayDate.isAfter(today);
+                final isToday = dayDate == today;
+
+                final hit = i < weekHits.length ? weekHits[i] : false;
+                final h = isFuture
+                    ? 0.10
+                    : isToday
+                        ? progressPercent.clamp(0.15, 1.0)
+                        : (hit ? 0.85 : 0.30);
+
+                final color = isFuture
+                    ? pt.line
+                    : (hit || isToday ? _colors[i] : pt.ink300);
+
+                return Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      // 🐾 paw or empty above bar
+                      SizedBox(
+                        height: 18,
+                        child: isToday
+                            ? const Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Text('🐾', style: TextStyle(fontSize: 13)),
+                              )
+                            : null,
+                      ),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: FractionallySizedBox(
+                            heightFactor: h,
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                border: isToday && !isFuture
+                                    ? Border.all(
+                                        color: _colors[i].withAlpha(180),
+                                        width: 2,
+                                      )
+                                    : (!hit && !isFuture && !isToday
+                                        ? Border.all(
+                                            color: pt.line,
+                                            width: 1,
+                                            strokeAlign: BorderSide.strokeAlignInside,
+                                          )
+                                        : null),
+                                boxShadow: (isToday && !isFuture)
+                                    ? [
+                                        BoxShadow(
+                                          color: color.withAlpha(120),
+                                          blurRadius: 16,
+                                          offset: const Offset(0, 6),
+                                          spreadRadius: -4,
+                                        ),
+                                      ]
+                                    : null,
+                                gradient: isFuture || (!hit && !isToday)
+                                    ? null
+                                    : LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          color,
+                                          Color.lerp(color, Colors.white, 0.45)!,
+                                        ],
+                                      ),
+                                color: isFuture
+                                    ? pt.surface2
+                                    : (!hit && !isToday ? pt.surface2 : null),
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      // Day letter
+                      Text(
+                        _dayLetters[i],
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: isToday
+                              ? _colors[i]
+                              : (isFuture ? pt.ink300 : pt.ink500),
+                        ),
+                      ),
+                      // Day number
+                      Text(
+                        '${dayDate.day}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: isToday
+                              ? _colors[i]
+                              : (isFuture ? pt.ink300 : pt.ink300),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _dayLetters[i],
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: isToday
-                          ? AppColors.ink950
-                          : (isFuture ? pt.ink300 : pt.ink500),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-        ),
+                );
+              }),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -462,36 +539,352 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
 
   final String petId;
 
+  String _progressHint(BadgeInfo badge, PetAwardsSummary awards) {
+    switch (badge.type) {
+      case '3_day_streak':
+        return '${awards.currentStreak}/3 days 🔥';
+      case '7_day_hero':
+        return '${awards.currentStreak}/7 days 🦸';
+      case 'routine_master':
+        return '${awards.currentStreak}/14 days 💯';
+      case '30_day_legend':
+        return '${awards.currentStreak}/30 days 👑';
+      case 'care_champion':
+        return '${awards.logsCount}/100 logs 🏆';
+      default:
+        return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final awardsAsync = ref.watch(petAwardsSummaryProvider(petId));
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
-    final ownedTypes = awardsAsync.maybeWhen(
-      data: (a) => a.unlockedTypes,
-      orElse: () => <String>{},
+    final awards = awardsAsync.maybeWhen(
+      data: (a) => a,
+      orElse: () => PetAwardsSummary.empty,
     );
+    final ownedTypes = awards.unlockedTypes;
+    final ownedCount = ownedTypes.length;
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 0.75,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // N/6 earned sub-label
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: ownedCount > 0 ? AppColors.mintSoft : pt.surface2,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '$ownedCount / ${kBadgeCatalog.length} earned',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: ownedCount > 0 ? AppColors.mint700 : pt.ink300,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 0.82,
+          ),
+          itemCount: kBadgeCatalog.length,
+          itemBuilder: (context, i) {
+            final badge = kBadgeCatalog[i];
+            final owned = ownedTypes.contains(badge.type);
+            final hint = owned ? '' : _progressHint(badge, awards);
+            return _BadgeTile(
+              badge: badge,
+              owned: owned,
+              progressHint: hint,
+              index: i,
+              onTap: () => _showBadgeDetail(context, badge, owned, hint),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  void _showBadgeDetail(
+    BuildContext context,
+    BadgeInfo badge,
+    bool owned,
+    String hint,
+  ) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: BoxDecoration(
+          color: pt.surface1,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: EdgeInsets.fromLTRB(
+            24, 0, 24, MediaQuery.paddingOf(context).bottom + 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: pt.line,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                gradient: owned
+                    ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          badge.color,
+                          Color.lerp(badge.color, Colors.white, 0.3)!,
+                        ],
+                      )
+                    : null,
+                color: owned ? null : pt.surface2,
+                boxShadow: owned
+                    ? [
+                        BoxShadow(
+                          color: badge.color.withAlpha(120),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
+                          spreadRadius: -8,
+                        )
+                      ]
+                    : null,
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                badge.emoji,
+                style: TextStyle(
+                  fontSize: 40,
+                  color: owned ? null : Colors.grey,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              badge.label,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              badge.description,
+              style: TextStyle(fontSize: 14, color: pt.ink500),
+            ),
+            if (!owned && hint.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: pt.surface2,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Progress: $hint',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: pt.ink500,
+                  ),
+                ),
+              ),
+            ],
+            if (owned) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.mintSoft,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  '✅ Earned!',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.mint700,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
-      itemCount: kBadgeCatalog.length,
-      itemBuilder: (context, i) {
-        final badge = kBadgeCatalog[i];
-        return PfAchievementTile(
-          emoji: badge.emoji,
-          color: badge.color,
-          label: badge.label,
-          owned: ownedTypes.contains(badge.type),
-          index: i,
-        );
-      },
+    );
+  }
+}
+
+// Individual badge tile with lock overlay and progress hint
+class _BadgeTile extends StatelessWidget {
+  const _BadgeTile({
+    required this.badge,
+    required this.owned,
+    required this.progressHint,
+    required this.index,
+    required this.onTap,
+  });
+
+  final BadgeInfo badge;
+  final bool owned;
+  final String progressHint;
+  final int index;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final labelColor = isDark ? AppColors.ink950D : AppColors.ink950;
+    final angle = (index % 2 != 0 ? -2.5 : 2.5) * 3.14159 / 180;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Expanded(
+            child: Transform.rotate(
+              angle: angle,
+              child: Stack(
+                children: [
+                  // Badge box
+                  Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(22),
+                      color: owned ? null : pt.surface2,
+                      gradient: owned
+                          ? LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                badge.color,
+                                Color.lerp(badge.color, Colors.white, 0.3)!,
+                              ],
+                            )
+                          : null,
+                      border: owned
+                          ? null
+                          : Border.all(color: pt.line, width: 1),
+                      boxShadow: owned
+                          ? [
+                              BoxShadow(
+                                color: badge.color.withAlpha(130),
+                                blurRadius: 16,
+                                offset: const Offset(0, 6),
+                                spreadRadius: -8,
+                              ),
+                            ]
+                          : null,
+                    ),
+                    alignment: Alignment.center,
+                    child: owned
+                        ? Text(
+                            badge.emoji,
+                            style: const TextStyle(fontSize: 32),
+                          )
+                        : Opacity(
+                            opacity: 0.35,
+                            child: ColorFiltered(
+                              colorFilter: const ColorFilter.mode(
+                                Colors.grey,
+                                BlendMode.saturation,
+                              ),
+                              child: Text(
+                                badge.emoji,
+                                style: const TextStyle(fontSize: 32),
+                              ),
+                            ),
+                          ),
+                  ),
+                  // Lock icon overlay for locked badges
+                  if (!owned)
+                    Positioned(
+                      right: 6,
+                      bottom: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: pt.surface1,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: pt.line),
+                        ),
+                        child: Icon(
+                          Icons.lock_rounded,
+                          size: 10,
+                          color: pt.ink300,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            badge.label,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              color: labelColor,
+              height: 1.2,
+            ),
+          ),
+          if (!owned && progressHint.isNotEmpty)
+            Text(
+              progressHint,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w600,
+                color: pt.ink300,
+                height: 1.2,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
