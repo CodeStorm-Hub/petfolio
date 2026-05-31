@@ -179,7 +179,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                               title: 'Trophy room',
                               accent: AppColors.lilac,
                               trailing: GestureDetector(
-                                onTap: () {},
+                                onTap: () => context.push('/care/medical-vault'),
                                 child: const Text(
                                   'Vault →',
                                   style: TextStyle(
@@ -190,7 +190,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                 ),
                               ),
                             ),
-                            const CareGamifiedTrophyRoom(),
+                            CareGamifiedTrophyRoom(petId: activePet.id),
                             const SizedBox(height: 32),
                             Padding(
                               padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
@@ -567,9 +567,13 @@ class _DoneCounter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (tasks.isEmpty) return const SizedBox.shrink();
-    final done = tasks.where((t) => t.isCompleted).length;
-    final total = tasks.length;
+    // Exclude log-derived synthetic tasks — they are always completed and
+    // would inflate the denominator, showing e.g. "3/5 done" when only 2
+    // real scheduled tasks exist.
+    final planned = tasks.where((t) => !t.isLogDerived).toList();
+    if (planned.isEmpty) return const SizedBox.shrink();
+    final done = planned.where((t) => t.isCompleted).length;
+    final total = planned.length;
     final allDone = done == total;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
@@ -901,9 +905,7 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Text(
-                            task.frequency == dbtask.CareFrequency.monthly
-                                ? 'MONTHLY'
-                                : 'WEEKLY',
+                            _frequencyPill(task.frequency),
                             style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w900,
@@ -1332,6 +1334,15 @@ class _EmptyRoutineState extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // Task type helpers (shared by card + sheet)
 // ─────────────────────────────────────────────────────────────────────────────
+
+String _frequencyPill(dbtask.CareFrequency f) {
+  switch (f) {
+    case dbtask.CareFrequency.monthly:   return 'MONTHLY';
+    case dbtask.CareFrequency.biweekly:  return 'BIWEEKLY';
+    case dbtask.CareFrequency.weekly:    return 'WEEKLY';
+    default:                             return 'WEEKLY';
+  }
+}
 
 String _typeLabel(dbtask.CareTaskType type) {
   switch (type) {

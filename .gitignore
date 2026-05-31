@@ -123,6 +123,9 @@ app.*.symbols
 # Generated seeding output from scripts/generate_inserts.dart — not a versioned migration
 inserts.sql
 
+# Throwaway dev scripts — must never be committed (may contain keys/tokens)
+scratch/
+
 .cursor/hooks/state/
 tmp_window_dump.xml
 .claude/worktrees/

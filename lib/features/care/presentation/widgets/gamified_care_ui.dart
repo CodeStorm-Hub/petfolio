@@ -5,7 +5,11 @@ import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 
 import '../../../../core/models/pet.dart';
+import '../../data/models/pet_level.dart';
 import '../controllers/care_dashboard_controller.dart';
+import '../controllers/pet_awards_provider.dart';
+
+// ── Gamified Care Header ──────────────────────────────────────────────────────
 
 class CareGamifiedHeader extends ConsumerStatefulWidget {
   const CareGamifiedHeader({
@@ -32,8 +36,6 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
   @override
   void initState() {
     super.initState();
-
-    // Gentle vertical bob — 2.4s ease-in-out infinite (mirrors pf-bounce-soft)
     _bounceCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2400),
@@ -42,7 +44,6 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
       CurvedAnimation(parent: _bounceCtrl, curve: Curves.easeInOut),
     );
 
-    // Expanding + fading ring — 2s ease-out infinite (mirrors pf-pulse-ring)
     _pulseCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
@@ -64,22 +65,25 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
 
   @override
   Widget build(BuildContext context) {
+    final petId = widget.activePet.id;
 
+    // Real streak from realtime stream already in dashboard state.
     final streak = widget.dashboard.streak.maybeWhen(
       data: (s) => s.currentStreak,
       orElse: () => 0,
     );
 
-    final tasks = widget.dashboard.tasks.value ?? [];
-    final earned = tasks
-        .where((t) => t.isCompleted && t.gamificationPoints > 0)
-        .fold(0, (sum, t) => sum + t.gamificationPoints);
-    const petXp = 482;
-
+    // Real XP + level from Supabase RPC (same provider used by profile screen).
+    final awardsAsync = ref.watch(petAwardsSummaryProvider(petId));
+    final totalXp = awardsAsync.maybeWhen(
+      data: (a) => a.totalXp,
+      orElse: () => 0,
+    );
+    final lv = PetLevel.fromXp(totalXp);
 
     final sp = widget.activePet.speciesEnum;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     Color headerColor = sp.resolvedAccent(isDark);
     final dbAccent = widget.activePet.accentColor;
     if (dbAccent != null && dbAccent.isNotEmpty && dbAccent != '#FF6B9D') {
@@ -97,45 +101,34 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
       color: headerColor,
       child: Column(
         children: [
-          // Spacer for fixed AppShell status header
           SizedBox(height: MediaQuery.paddingOf(context).top + 76.0),
-
-          // Main gamified stats row
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Streak flame circle with bounce + pulse ring
+                // ── Streak flame circle ─────────────────────────────────────
                 SizedBox(
                   width: 120,
                   height: 120,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Expanding pulse ring
                       AnimatedBuilder(
                         animation: _pulseCtrl,
                         builder: (_, child) => Transform.scale(
                           scale: _pulseScale.value,
-                          child: Opacity(
-                            opacity: _pulseOpacity.value,
-                            child: child,
-                          ),
+                          child: Opacity(opacity: _pulseOpacity.value, child: child),
                         ),
                         child: Container(
                           width: 112,
                           height: 112,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppColors.tangerine,
-                              width: 3,
-                            ),
+                            border: Border.all(color: AppColors.tangerine, width: 3),
                           ),
                         ),
                       ),
-                      // Floating flame circle
                       AnimatedBuilder(
                         animation: _bounceCtrl,
                         builder: (_, child) => Transform.translate(
@@ -196,85 +189,12 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
 
                 const SizedBox(width: 16),
 
-                // XP & level
+                // ── XP & level (real data) ───────────────────────────────────
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          const Text(
-                            'Lv 7',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              height: 1.0,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Caretaker',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white.withAlpha(200),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${petXp + earned} / 600 XP',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white.withAlpha(200),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        height: 12,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(999),
-                          color: Colors.white.withAlpha(56),
-                          border: Border.all(color: Colors.white.withAlpha(40)),
-                        ),
-                        child: FractionallySizedBox(
-                          alignment: Alignment.centerLeft,
-                          widthFactor: ((petXp + earned) / 600).clamp(0.0, 1.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(999),
-                              gradient: const LinearGradient(
-                                colors: [AppColors.sunny, AppColors.tangerine, AppColors.poppy],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text.rich(
-                        TextSpan(
-                          text: '${600 - (petXp + earned)} XP to ',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.white.withAlpha(200),
-                            fontWeight: FontWeight.w700,
-                          ),
-                          children: const [
-                            TextSpan(
-                              text: 'Lv 8 · Pet Whisperer',
-                              style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  child: awardsAsync.when(
+                    loading: () => _LevelSkeleton(),
+                    error: (e, st) => _LevelContent(lv: PetLevel.fromXp(0)),
+                    data: (_) => _LevelContent(lv: lv),
                   ),
                 ),
               ],
@@ -286,6 +206,127 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
     );
   }
 }
+
+class _LevelContent extends StatelessWidget {
+  const _LevelContent({required this.lv});
+  final PetLevel lv;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              'Lv ${lv.level}',
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                height: 1.0,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              lv.title,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: Colors.white.withAlpha(200),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${lv.currentXp} / ${lv.levelEndXp} XP',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: Colors.white.withAlpha(200),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          height: 12,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            color: Colors.white.withAlpha(56),
+            border: Border.all(color: Colors.white.withAlpha(40)),
+          ),
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: lv.progress,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
+                gradient: const LinearGradient(
+                  colors: [AppColors.sunny, AppColors.tangerine, AppColors.poppy],
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (!lv.isMaxLevel)
+          Text.rich(
+            TextSpan(
+              text: '${lv.xpToNext} XP to ',
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.white.withAlpha(200),
+                fontWeight: FontWeight.w700,
+              ),
+              children: [
+                TextSpan(
+                  text: 'Lv ${lv.level + 1} · ${lv.nextTitle}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          Text(
+            'Max level reached!',
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.white.withAlpha(200),
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _LevelSkeleton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: const [
+        SkeletonLoader(width: 100, height: 22, borderRadius: 8),
+        SizedBox(height: 8),
+        SkeletonLoader(width: 80, height: 12, borderRadius: 6),
+        SizedBox(height: 8),
+        SkeletonLoader(width: double.infinity, height: 12, borderRadius: 999),
+        SizedBox(height: 8),
+        SkeletonLoader(width: 130, height: 11, borderRadius: 6),
+      ],
+    );
+  }
+}
+
+// ── Weekly Activity Chart (real weekGoalHit data) ─────────────────────────────
 
 class CareGamifiedWeeklyChart extends StatelessWidget {
   const CareGamifiedWeeklyChart({
@@ -300,8 +341,6 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
   final double progressPercent;
 
   static const _dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-  // Demo heights matching the JSX design (indices 0-5 = Mon-Sat, index 6 = today/dynamic)
-  static const _demoHeights = [0.86, 0.94, 0.70, 1.0, 0.88, 0.60];
   static const _colors = [
     AppColors.tangerine, AppColors.poppy, AppColors.mint,
     AppColors.sunny, AppColors.lilac, AppColors.tangerine, AppColors.poppy,
@@ -311,6 +350,12 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
+
+    // weekHits is 7 bools Mon→Sun. The last entry covers today.
+    // Use real hit bools to drive bar heights.
+    final today = DateUtils.dateOnly(DateTime.now());
+    final todayWeekday = today.weekday; // 1=Mon .. 7=Sun
+    final weekStart = today.subtract(Duration(days: todayWeekday - 1));
 
     return Container(
       decoration: BoxDecoration(
@@ -324,17 +369,24 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: List.generate(7, (i) {
-            final isToday = i == 6;
-            final h = isToday
-                ? progressPercent.clamp(0.15, 1.0)
-                : _demoHeights[i];
-            final color = _colors[i];
+            final dayDate = weekStart.add(Duration(days: i));
+            final isFuture = dayDate.isAfter(today);
+            final isToday = dayDate == today;
+
+            // For past/today: use real hit bool; future: show faint placeholder.
+            final hit = i < weekHits.length ? weekHits[i] : false;
+            final h = isFuture
+                ? 0.15
+                : isToday
+                    ? progressPercent.clamp(0.15, 1.0)
+                    : (hit ? 0.85 : 0.20);
+
+            final color = isFuture ? pt.line : (hit || isToday ? _colors[i] : pt.ink300);
 
             return Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Paw above today bar — reserve 20px for it
                   SizedBox(
                     height: 20,
                     child: isToday
@@ -344,7 +396,6 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
                           )
                         : null,
                   ),
-                  // Bar
                   Expanded(
                     child: Align(
                       alignment: Alignment.bottomCenter,
@@ -357,7 +408,7 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
                             border: isToday
                                 ? Border.all(color: AppColors.ink950, width: 2)
                                 : null,
-                            boxShadow: isToday
+                            boxShadow: (isToday && !isFuture)
                                 ? [
                                     BoxShadow(
                                       color: color.withAlpha(100),
@@ -367,14 +418,17 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
                                     )
                                   ]
                                 : null,
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                color,
-                                Color.lerp(color, Colors.white, 0.45)!,
-                              ],
-                            ),
+                            gradient: isFuture
+                                ? null
+                                : LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      color,
+                                      Color.lerp(color, Colors.white, 0.45)!,
+                                    ],
+                                  ),
+                            color: isFuture ? pt.surface2 : null,
                           ),
                         ),
                       ),
@@ -386,7 +440,9 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
-                      color: isToday ? AppColors.ink950 : pt.ink500,
+                      color: isToday
+                          ? AppColors.ink950
+                          : (isFuture ? pt.ink300 : pt.ink500),
                     ),
                   ),
                 ],
@@ -399,18 +455,22 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
   }
 }
 
-class CareGamifiedTrophyRoom extends StatelessWidget {
-  const CareGamifiedTrophyRoom({super.key});
+// ── Trophy Room (real badges) ─────────────────────────────────────────────────
 
-  static const _badges = [
-    ('🔥', AppColors.sunny, '7-Day', true),
-    ('💯', AppColors.poppy, '100 XP', true),
-    ('🦴', AppColors.tangerine, 'Treat Pro', true),
-    ('💉', AppColors.mint, 'Vaccinated', true),
-  ];
+class CareGamifiedTrophyRoom extends ConsumerWidget {
+  const CareGamifiedTrophyRoom({super.key, required this.petId});
+
+  final String petId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final awardsAsync = ref.watch(petAwardsSummaryProvider(petId));
+
+    final ownedTypes = awardsAsync.maybeWhen(
+      data: (a) => a.unlockedTypes,
+      orElse: () => <String>{},
+    );
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -421,14 +481,17 @@ class CareGamifiedTrophyRoom extends StatelessWidget {
         crossAxisSpacing: 16,
         childAspectRatio: 0.75,
       ),
-      itemCount: _badges.length,
-      itemBuilder: (context, i) => PfAchievementTile(
-        emoji: _badges[i].$1,
-        color: _badges[i].$2,
-        label: _badges[i].$3,
-        owned: _badges[i].$4,
-        index: i,
-      ),
+      itemCount: kBadgeCatalog.length,
+      itemBuilder: (context, i) {
+        final badge = kBadgeCatalog[i];
+        return PfAchievementTile(
+          emoji: badge.emoji,
+          color: badge.color,
+          label: badge.label,
+          owned: ownedTypes.contains(badge.type),
+          index: i,
+        );
+      },
     );
   }
 }

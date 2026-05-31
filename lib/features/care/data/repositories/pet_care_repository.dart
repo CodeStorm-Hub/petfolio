@@ -70,77 +70,6 @@ class PetCareRepository {
     }
   }
 
-  Future<List<CareTask>> fetchTasksForDate(String petId, DateTime date) async {
-    try {
-      _requireAuth();
-
-      final dayLocal = DateUtils.dateOnly(date);
-      final dayStr = _fmtYmd(dayLocal);
-
-      final tasksRows = await _client
-          .from('care_tasks')
-          .select()
-          .eq('pet_id', petId)
-          .order('created_at');
-      final definitions = tasksRows.map(CareTask.fromJson).toList();
-
-      final logResponse = await _client
-          .from('care_logs')
-          .select('id, care_type, occurred_at')
-          .eq('pet_id', petId)
-          .eq('logged_date', dayStr);
-      final logRows = (logResponse as List)
-          .map((e) => Map<String, dynamic>.from(e as Map))
-          .toList();
-
-      final doneTypes = logRows
-          .map((r) => r['care_type'] as String?)
-          .whereType<String>()
-          .toSet();
-
-      final out = <CareTask>[];
-      for (final task in definitions) {
-        if (!_appliesOnDay(task, dayLocal)) continue;
-        final careType = _taskTypeToLogCareType(task.taskType);
-        final fromLog = doneTypes.contains(careType);
-        final done = _doneForDay(task, dayLocal, fromLog);
-        out.add(
-          task.copyWith(
-            isCompleted: done,
-            completedAt: done ? DateTime.now() : null,
-          ),
-        );
-      }
-
-      final byCareTypeFirstRow = <String, Map<String, dynamic>>{};
-      for (final row in logRows) {
-        final ct = row['care_type'] as String?;
-        if (ct == null) continue;
-        byCareTypeFirstRow.putIfAbsent(ct, () => row);
-      }
-      for (final entry in byCareTypeFirstRow.entries) {
-        final ct = entry.key;
-        if (out.any((t) => _taskTypeToLogCareType(t.taskType) == ct)) continue;
-        final row = entry.value;
-        out.add(_careTaskFromLogRow(row, petId, dayLocal));
-      }
-
-      out.sort((a, b) {
-        final la = a.isLogDerived;
-        final lb = b.isLogDerived;
-        if (la != lb) return la ? 1 : -1;
-        return a.title.toLowerCase().compareTo(b.title.toLowerCase());
-      });
-      return out;
-    } on AppException {
-      rethrow;
-    } on PostgrestException catch (e) {
-      throw DatabaseException.fromPostgrest(e);
-    } catch (e) {
-      throw NetworkException(message: e.toString());
-    }
-  }
-
   Future<Set<String>> fetchPetBadgeTypes(String petId) async {
     try {
       _requireAuth();
@@ -152,73 +81,6 @@ class PetCareRepository {
           .map((e) => e['badge_type'] as String?)
           .whereType<String>()
           .toSet();
-    } on AppException {
-      rethrow;
-    } on PostgrestException catch (e) {
-      throw DatabaseException.fromPostgrest(e);
-    } catch (e) {
-      throw NetworkException(message: e.toString());
-    }
-  }
-
-  Future<List<bool>> fetchDailyGoalsHitForDates(
-    String petId,
-    List<DateTime> dates,
-  ) async {
-    try {
-      _requireAuth();
-      if (dates.isEmpty) return [];
-
-      final normalized = dates.map(DateUtils.dateOnly).toList();
-      final minD = normalized.reduce((a, b) => a.isBefore(b) ? a : b);
-      final maxD = normalized.reduce((a, b) => a.isAfter(b) ? a : b);
-      final minStr = _fmtYmd(minD);
-      final maxStr = _fmtYmd(maxD);
-
-      final taskTypeRows = await _client
-          .from('care_tasks')
-          .select('task_type, frequency')
-          .eq('pet_id', petId);
-
-      final expected = <String>{};
-      for (final row in taskTypeRows) {
-        final f = row['frequency'] as String?;
-        final tt = row['task_type'] as String?;
-        if (tt == null || f == null) continue;
-        if (f == 'daily' || f == 'twice_daily') {
-          expected.add(tt);
-        }
-      }
-      if (expected.isEmpty) {
-        expected.addAll({'feeding', 'walk', 'medication'});
-      }
-
-      final logs = await _client
-          .from('care_logs')
-          .select('care_type, logged_date')
-          .eq('pet_id', petId)
-          .gte('logged_date', minStr)
-          .lte('logged_date', maxStr);
-
-      final byDay = <String, Set<String>>{};
-      for (final d in normalized) {
-        byDay[_fmtYmd(d)] = <String>{};
-      }
-      for (final row in logs) {
-        final day = _loggedDayKey(row['logged_date']);
-        final ct = row['care_type'] as String?;
-        if (day.isEmpty || ct == null) continue;
-        byDay.putIfAbsent(day, () => <String>{}).add(ct);
-      }
-
-      return dates.map((d) {
-        final key = _fmtYmd(DateUtils.dateOnly(d));
-        final done = byDay[key] ?? {};
-        for (final e in expected) {
-          if (!done.contains(e)) return false;
-        }
-        return true;
-      }).toList();
     } on AppException {
       rethrow;
     } on PostgrestException catch (e) {
@@ -255,6 +117,14 @@ class PetCareRepository {
         return 'nail_trim';
       default:
         return t.name;
+    }
+  }
+
+  static String _frequencyToDbString(CareFrequency f) {
+    switch (f) {
+      case CareFrequency.twiceDaily:  return 'twice_daily';
+      case CareFrequency.asNeeded:    return 'as_needed';
+      default:                        return f.name;
     }
   }
 
@@ -448,15 +318,23 @@ class PetCareRepository {
       final petId = tasks.first.petId;
       final existingRows = await _client
           .from('care_tasks')
-          .select('title, task_type')
+          .select('title, task_type, frequency')
           .eq('pet_id', petId);
-          
+
+      // Both sides normalised to DB snake_case so multi-word types like
+      // vetVisit/vet_visit and frequencies like twiceDaily/twice_daily match.
       final existingTaskSet = existingRows
-          .map((r) => '${r['title'].toString().toLowerCase().trim()}_${r['task_type']}')
+          .map((r) =>
+              '${r['task_type']}'
+              '|${r['frequency']}'
+              '|${(r['title'] as String).toLowerCase().trim()}')
           .toSet();
 
-      final payloads = tasks.where((task) {
-        final key = '${task.title.toLowerCase().trim()}_${task.taskType.name}';
+      final payloads = tasks.where((t) {
+        final key =
+            '${_taskTypeToLogCareType(t.taskType)}'
+            '|${_frequencyToDbString(t.frequency)}'
+            '|${t.title.toLowerCase().trim()}';
         return !existingTaskSet.contains(key);
       }).map((task) {
         final payload = Map<String, dynamic>.from(task.toJson())
@@ -607,7 +485,8 @@ class PetCareRepository {
     }
   }
 
-  /// Replicates `fetchTasksForDate` logic against pre-fetched snapshot data.
+  /// Builds the per-day task list (applies-on-day + done state) from
+  /// pre-fetched snapshot data.
   List<CareTask> _buildTasksFromSnapshotData(
     String petId,
     List<CareTask> definitions,
@@ -654,7 +533,8 @@ class PetCareRepository {
     return out;
   }
 
-  /// Replicates `fetchDailyGoalsHitForDates` logic against snapshot data.
+  /// Computes whether each day's expected daily tasks were all completed,
+  /// from pre-fetched snapshot data.
   List<bool> _computeWeekGoalHitFromSnapshotData(
     List<CareTask> definitions,
     List<Map<String, dynamic>> logsWeek,

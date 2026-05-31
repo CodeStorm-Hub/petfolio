@@ -14,4 +14,5 @@ export 'tail_wag_loader.dart';
 export 'wave_header.dart';
 export 'pf_card.dart';
 export 'responsive_layout.dart';
+export 'app_shell.dart';
 

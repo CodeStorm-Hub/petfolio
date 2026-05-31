@@ -11,6 +11,17 @@ final careRecommendationServiceProvider = Provider<CareRecommendationService>(
   (_) => CareRecommendationService(),
 );
 
+class CareRecommendationException implements Exception {
+  const CareRecommendationException(this.message, {this.cause, this.isConfigError = false});
+
+  final String message;
+  final Object? cause;
+  final bool isConfigError;
+
+  @override
+  String toString() => message;
+}
+
 class CareRecommendationService {
   final _uuid = const Uuid();
 
@@ -111,13 +122,14 @@ class CareRecommendationService {
       existingTasks: existingTasks,
     );
 
+    if (_apiKey.isEmpty) {
+      throw const CareRecommendationException(
+        'AI routine suggestions are not configured on this build.',
+        isConfigError: true,
+      );
+    }
+
     try {
-      if (_apiKey.isEmpty) {
-        throw Exception(
-          'NVIDIA_API_KEY is not configured. '
-          'Pass --dart-define=NVIDIA_API_KEY=<key> when building.',
-        );
-      }
       final response = await http.post(
         Uri.parse(_url),
         headers: {
@@ -139,9 +151,12 @@ class CareRecommendationService {
       ).timeout(const Duration(seconds: 45));
 
       if (response.statusCode != 200) {
-        throw Exception(
-          'API returned ${response.statusCode}. '
-          'Body: ${response.body.length > 300 ? response.body.substring(0, 300) : response.body}',
+        final detail = response.body.length > 300
+            ? response.body.substring(0, 300)
+            : response.body;
+        throw CareRecommendationException(
+          'The suggestion service is unavailable right now. Please try again later.',
+          cause: 'HTTP ${response.statusCode}: $detail',
         );
       }
 
@@ -213,8 +228,13 @@ class CareRecommendationService {
         ));
       }
       return tasks;
+    } on CareRecommendationException {
+      rethrow;
     } catch (e) {
-      throw Exception('Could not generate recommendations: $e');
+      throw CareRecommendationException(
+        'Could not generate care suggestions. Please try again.',
+        cause: e,
+      );
     }
   }
 
@@ -281,7 +301,7 @@ class CareRecommendationService {
     if (existingTasks.isNotEmpty) {
       buf.writeln();
       final taskStrings = existingTasks
-          .map((t) => '"${t['title']}" (${t['type']})')
+          .map((t) => '"${t['title']}" (${t['task_type']})')
           .join(", ");
       buf.writeln(
           'EXISTING TASKS (DO NOT generate tasks with identical titles or overlapping intent): $taskStrings');
@@ -304,7 +324,7 @@ class CareRecommendationService {
     buf.writeln(
         'notes: 1-2 sentences specific to this pet\'s breed, age, and activity level');
     buf.writeln();
-    buf.writeln('Generate 6-8 tasks. Mix: 2-3 daily, 2-3 weekly, 1-2 monthly.');
+    buf.writeln('Generate 4-8 tasks. Mix: 2-3 daily, 1-2 weekly, 1-2 monthly.');
     buf.writeln('Return ONLY the JSON array. No markdown, no extra text.');
 
     return buf.toString();

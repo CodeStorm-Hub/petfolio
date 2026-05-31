@@ -124,10 +124,10 @@ class OrderRepository {
     required String orderId,
     required OrderStatus status,
   }) async {
-    await _client
-        .from('marketplace_orders')
-        .update({'status': status.name})
-        .eq('id', orderId);
+    await _client.rpc('vendor_update_order', params: {
+      'p_order_id': orderId,
+      'p_status':   status.name,
+    });
   }
 
   /// Vendor pastes tracking info after shipping.
@@ -137,16 +137,13 @@ class OrderRepository {
     required String trackingUrl,
     required String carrier,
   }) async {
-    await _client
-        .from('marketplace_orders')
-        .update({
-          'shipping_tracking_number': trackingNumber,
-          'shipping_tracking_url':    trackingUrl,
-          'shipping_carrier':         carrier,
-          'shipped_at':               DateTime.now().toIso8601String(),
-          'status':                   OrderStatus.shipped.name,
-        })
-        .eq('id', orderId);
+    await _client.rpc('vendor_update_order', params: {
+      'p_order_id':        orderId,
+      'p_status':          OrderStatus.shipped.name,
+      'p_tracking_number': trackingNumber,
+      'p_tracking_url':    trackingUrl,
+      'p_carrier':         carrier,
+    });
   }
 
   // ── Read ───────────────────────────────────────────────────────────────────
