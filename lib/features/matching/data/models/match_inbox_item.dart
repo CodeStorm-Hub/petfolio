@@ -1,6 +1,6 @@
 class MatchInboxItem {
   const MatchInboxItem({
-    required this.matchId,
+    this.matchId,
     required this.otherPetId,
     required this.otherPetName,
     this.otherPetAvatarUrl,
@@ -9,9 +9,10 @@ class MatchInboxItem {
     this.threadId,
     this.lastMessageAt,
     this.lastMessagePreview,
+    this.threadType = 'match',
   });
 
-  final String matchId;
+  final String? matchId;
   final String otherPetId;
   final String otherPetName;
   final String? otherPetAvatarUrl;
@@ -20,6 +21,10 @@ class MatchInboxItem {
   final String? threadId;
   final DateTime? lastMessageAt;
   final String? lastMessagePreview;
+  final String threadType;
 
-  bool get isNewMatch => lastMessageAt == null;
+  bool get isDm => threadType == 'dm';
+
+  // DM threads are never in the "new match" bubble row.
+  bool get isNewMatch => !isDm && lastMessageAt == null;
 }

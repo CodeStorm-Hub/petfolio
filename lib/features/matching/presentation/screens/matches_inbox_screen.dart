@@ -144,7 +144,7 @@ class _MatchesInboxView extends ConsumerWidget {
                               onTap: () => openMatchChat(
                                 context,
                                 ref,
-                                matchId: item.matchId,
+                                matchId: item.matchId!, // non-null: isNewMatch implies isDm==false
                                 actorPetId: pet.id,
                                 otherPetName: item.otherPetName,
                                 threadId: item.threadId,
@@ -176,17 +176,23 @@ class _MatchesInboxView extends ConsumerWidget {
                           return listItems[index];
                         }
                         final item = conversations[index - baseCount];
-                        return _ConversationTile(
-                          item: item,
-                          onTap: () => openMatchChat(
-                            context,
-                            ref,
-                            matchId: item.matchId,
-                            actorPetId: pet.id,
-                            otherPetName: item.otherPetName,
-                            threadId: item.threadId,
-                          ),
-                        );
+                        final onTap = item.isDm
+                            ? () => openDirectChat(
+                                  context,
+                                  ref,
+                                  actorPetId: pet.id,
+                                  otherPetId: item.otherPetId,
+                                  otherPetName: item.otherPetName,
+                                )
+                            : () => openMatchChat(
+                                  context,
+                                  ref,
+                                  matchId: item.matchId!,
+                                  actorPetId: pet.id,
+                                  otherPetName: item.otherPetName,
+                                  threadId: item.threadId,
+                                );
+                        return _ConversationTile(item: item, onTap: onTap);
                       },
                     ),
                   );
@@ -283,7 +289,7 @@ class _ConversationTile extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        key: ValueKey<String>('conversation_${item.matchId}'),
+        key: ValueKey<String>('conversation_${item.matchId ?? item.otherPetId}'),
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
@@ -304,13 +310,44 @@ class _ConversationTile extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            item.otherPetName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                          child: Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  item.otherPetName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              if (item.isDm) ...[
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.poppy.withAlpha(20),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: AppColors.poppy.withAlpha(60),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'DM',
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.poppy,
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                         Text(

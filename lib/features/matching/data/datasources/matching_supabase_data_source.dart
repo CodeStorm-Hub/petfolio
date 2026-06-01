@@ -159,17 +159,17 @@ class MatchingSupabaseDataSource {
       return const MatchInboxSnapshot(newMatches: [], conversations: []);
     }
 
+    // get_chat_inbox returns both match-based threads and direct message threads.
     final raw = await _client.rpc(
-      'get_match_inbox',
+      'get_chat_inbox',
       params: {'p_actor_pet_id': actorPetId},
     );
     if (raw == null) {
       return const MatchInboxSnapshot(newMatches: [], conversations: []);
     }
 
-    final list = raw as List;
     final items = <MatchInboxItem>[];
-    for (final row in list) {
+    for (final row in raw as List) {
       final map = Map<String, dynamic>.from(row as Map);
       final matchedAtRaw = map['matched_at'] as String?;
       if (matchedAtRaw == null) continue;
@@ -178,7 +178,8 @@ class MatchingSupabaseDataSource {
       final lastAtRaw = map['last_message_at'] as String?;
       items.add(
         MatchInboxItem(
-          matchId: map['match_id'] as String,
+          matchId: map['match_id'] as String?,
+          threadType: map['thread_type'] as String? ?? 'match',
           otherPetId: map['other_pet_id'] as String,
           otherPetName: map['other_pet_name'] as String? ?? 'Pet',
           otherPetAvatarUrl: map['other_pet_avatar_url'] as String?,
@@ -212,6 +213,20 @@ class MatchingSupabaseDataSource {
       newMatches: newMatches,
       conversations: conversations,
     );
+  }
+
+  Future<String> ensureDirectChatThread({
+    required String actorPetId,
+    required String otherPetId,
+  }) async {
+    final raw = await _client.rpc(
+      'ensure_direct_chat_thread',
+      params: {
+        'p_actor_pet_id': actorPetId,
+        'p_other_pet_id': otherPetId,
+      },
+    );
+    return raw as String;
   }
 
   Future<String> ensureChatThreadForMatch({

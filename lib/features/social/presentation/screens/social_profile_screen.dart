@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../care/data/models/pet_awards_summary.dart';
 import '../../../care/presentation/controllers/pet_awards_provider.dart';
+import '../../../matching/presentation/matching_navigation.dart';
 import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../controllers/follow_controller.dart';
@@ -324,7 +325,12 @@ class _ProfileHeader extends StatelessWidget {
           if (isOwnProfile && resolvedPet != null)
             _OwnProfileButtons(pet: resolvedPet!, pt: pt, cs: cs)
           else
-            _OtherProfileButtons(petId: petId, pt: pt, cs: cs),
+            _OtherProfileButtons(
+              petId: petId,
+              petName: petName,
+              pt: pt,
+              cs: cs,
+            ),
         ],
       ),
     );
@@ -707,9 +713,15 @@ class _OwnProfileButtons extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _OtherProfileButtons extends ConsumerWidget {
-  const _OtherProfileButtons({required this.petId, required this.pt, required this.cs});
+  const _OtherProfileButtons({
+    required this.petId,
+    required this.petName,
+    required this.pt,
+    required this.cs,
+  });
 
   final String petId;
+  final String petName;
   final PetfolioThemeExtension pt;
   final ColorScheme cs;
 
@@ -717,14 +729,22 @@ class _OtherProfileButtons extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final followAsync = ref.watch(followStatusProvider(petId));
     final isFollowing = followAsync.value ?? false;
+    final activePet = ref.watch(activePetControllerProvider);
 
     return Row(
       children: [
+        // ── Follow / Following toggle ─────────────────────────────────────
         Expanded(
           child: SizedBox(
             height: 36,
             child: followAsync.isLoading
-                ? const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
+                ? const Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
                 : AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
                     child: isFollowing
@@ -732,7 +752,8 @@ class _OtherProfileButtons extends ConsumerWidget {
                             key: const ValueKey('following'),
                             label: 'Following',
                             filled: false,
-                            onPressed: () => ref.read(followStatusProvider(petId).notifier).toggle(),
+                            onPressed: () =>
+                                ref.read(followStatusProvider(petId).notifier).toggle(),
                             cs: cs,
                             pt: pt,
                           )
@@ -740,7 +761,8 @@ class _OtherProfileButtons extends ConsumerWidget {
                             key: const ValueKey('follow'),
                             label: 'Follow',
                             filled: true,
-                            onPressed: () => ref.read(followStatusProvider(petId).notifier).toggle(),
+                            onPressed: () =>
+                                ref.read(followStatusProvider(petId).notifier).toggle(),
                             cs: cs,
                             pt: pt,
                           ),
@@ -748,6 +770,29 @@ class _OtherProfileButtons extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 8),
+        // ── Message button ────────────────────────────────────────────────
+        Expanded(
+          child: SizedBox(
+            height: 36,
+            child: _ActionButton(
+              label: 'Message',
+              filled: false,
+              onPressed: activePet == null
+                  ? null
+                  : () => openDirectChat(
+                        context,
+                        ref,
+                        actorPetId: activePet.id,
+                        otherPetId: petId,
+                        otherPetName: petName,
+                      ),
+              cs: cs,
+              pt: pt,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        // ── Share icon ────────────────────────────────────────────────────
         SizedBox(
           height: 36,
           width: 36,
@@ -759,7 +804,8 @@ class _OtherProfileButtons extends ConsumerWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () {
-              final text = "Check out this pet's profile on Petfolio! 🐾\nhttps://petfolio.app/social/profile/$petId";
+              final text =
+                  "Check out this pet's profile on Petfolio! 🐾\nhttps://petfolio.app/social/profile/$petId";
               SharePlus.instance.share(ShareParams(text: text));
             },
             child: Icon(Icons.ios_share_rounded, size: 18, color: cs.onSurface),
@@ -783,7 +829,7 @@ class _ActionButton extends StatelessWidget {
 
   final String label;
   final bool filled;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final ColorScheme cs;
   final PetfolioThemeExtension pt;
 

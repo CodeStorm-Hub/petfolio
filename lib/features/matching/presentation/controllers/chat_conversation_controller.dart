@@ -11,6 +11,7 @@ typedef ChatConversationArgs = ({
   String threadId,
   String? matchId,
   String actorPetId,
+  String? otherPetId, // null for match chats; set when opening a social DM
 });
 
 final chatConversationControllerProvider = AsyncNotifierProvider.family<
@@ -37,14 +38,23 @@ class ChatConversationController extends AsyncNotifier<List<ChatMessage>> {
 
     if (_resolvedThreadId == null) {
       var threadId = arg.threadId;
-      if (threadId.isEmpty &&
-          arg.matchId != null &&
-          arg.matchId!.isNotEmpty) {
+
+      if (threadId.isEmpty && arg.matchId != null && arg.matchId!.isNotEmpty) {
+        // Match-based chat: resolve via the mutual match ID.
         threadId = await repo.ensureChatThreadForMatch(
           matchId: arg.matchId!,
           actorPetId: arg.actorPetId,
         );
+      } else if (threadId.isEmpty &&
+          arg.otherPetId != null &&
+          arg.otherPetId!.isNotEmpty) {
+        // Social DM: create or fetch the direct thread between two pets.
+        threadId = await repo.ensureDirectChatThread(
+          actorPetId: arg.actorPetId,
+          otherPetId: arg.otherPetId!,
+        );
       }
+
       _resolvedThreadId = threadId;
     }
 

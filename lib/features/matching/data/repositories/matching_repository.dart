@@ -158,6 +158,15 @@ class MatchingRepository {
         actorPetId: actorPetId,
       );
 
+  Future<String> ensureDirectChatThread({
+    required String actorPetId,
+    required String otherPetId,
+  }) =>
+      _dataSource.ensureDirectChatThread(
+        actorPetId: actorPetId,
+        otherPetId: otherPetId,
+      );
+
   Future<List<ChatMessage>> fetchMessages(
     String threadId, {
     int limit = 50,

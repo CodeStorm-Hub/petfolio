@@ -304,6 +304,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             threadId: state.pathParameters['threadId']!,
             actorPetId: query['actorPetId'] ?? '',
             matchId: query['matchId'],
+            otherPetId: query['otherPetId'],
             otherPetName: petNameRaw != null
                 ? Uri.decodeComponent(petNameRaw)
                 : 'Match',

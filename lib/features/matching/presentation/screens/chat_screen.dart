@@ -39,12 +39,14 @@ class ChatScreen extends ConsumerStatefulWidget {
     required this.threadId,
     required this.actorPetId,
     this.matchId,
+    this.otherPetId,
     required this.otherPetName,
   });
 
   final String threadId;
   final String actorPetId;
   final String? matchId;
+  final String? otherPetId; // non-null for social DMs, null for match chats
   final String otherPetName;
 
   @override
@@ -76,6 +78,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         threadId: widget.threadId,
         matchId: widget.matchId,
         actorPetId: widget.actorPetId,
+        otherPetId: widget.otherPetId,
       );
 
   @override
@@ -128,7 +131,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         child: Column(
           children: [
             AppHeader(
-              eyebrow: 'Match · Chat',
+              eyebrow: widget.otherPetId != null ? 'Social · Chat' : 'Match · Chat',
               onOpenSwitcher: () => PetSwitcherSheet.show(context),
               onBack: () => context.pop(),
               dense: true,
@@ -176,11 +179,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 ),
                 data: (messages) {
                   if (messages.isEmpty) {
+                    final emptyHint = widget.otherPetId != null
+                        ? 'Send ${widget.otherPetName} a message to start the conversation.'
+                        : 'You matched with ${widget.otherPetName}. Break the ice with a friendly hello.';
                     return Center(
                       child: Padding(
                         padding: const EdgeInsets.all(24),
                         child: Text(
-                          'You matched with ${widget.otherPetName}. Break the ice with a friendly hello.',
+                          emptyHint,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 15,

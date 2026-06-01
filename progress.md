@@ -1440,6 +1440,41 @@ Phase complete and to log to .remember/remember.md, Please run (/remember) to sa
 
 ---
 
+## 2026-06-01 — Social DM Chat (Instagram-style Direct Messages)
+
+### DB (migration: `20260601_social_dm_chat.sql`, applied to `jqyjvhwlcqcsuwcqgcwf`)
+- Added `dm_pet_a_id` + `dm_pet_b_id` columns to `chat_threads` (NULL for match threads)
+- `UNIQUE INDEX chat_threads_dm_pets_uidx` on `(dm_pet_a_id, dm_pet_b_id) WHERE mutual_match_id IS NULL` — one thread per pet pair
+- New RPC `ensure_direct_chat_thread(p_actor_pet_id, p_other_pet_id)` — ownership-verified, canonical UUID ordering, idempotent UPSERT
+- New RPC `get_chat_inbox(p_actor_pet_id)` — UNION of match threads + DM threads; `get_match_inbox` left intact
+
+### Data layer
+- `MatchInboxItem.matchId` → nullable (`String?`); added `threadType` field + `isDm` getter + updated `isNewMatch` (DMs excluded)
+- `fetchMatchInboxSnapshot` → now calls `get_chat_inbox`; parses `thread_type` + nullable `match_id`
+- Added `ensureDirectChatThread` to datasource + repository
+
+### State / controller
+- `ChatConversationArgs` typedef: added `String? otherPetId` (null for match chats)
+- `ChatConversationController.build()`: added DM resolution branch — calls `ensureDirectChatThread` when `threadId` is empty and `otherPetId` is set
+
+### UI
+- `ChatScreen`: added `otherPetId` param; eyebrow reads `'Social · Chat'` for DMs; empty-state hint differs per type
+- `router.dart`: `/matching/chat/:threadId` now reads `otherPetId` query param
+- `matching_navigation.dart`: added `openDirectChat(context, ref, actorPetId, otherPetId, otherPetName)`
+- `social_profile_screen.dart`: `_OtherProfileButtons` now shows **Message** button (calls `openDirectChat`); `_ActionButton.onPressed` is nullable
+- `matches_inbox_screen.dart`: DM tiles tap to `openDirectChat`; match tiles use `item.matchId!`; DM tiles show a coral "DM" badge
+
+### Zero regressions
+- Existing match chat flow untouched — `get_match_inbox` and `ensure_chat_thread_for_match` unchanged
+- All existing `ChatConversationArgs` call sites work: `otherPetId` defaults to `null`
+- `dart analyze`: 0 issues
+
+**Next step:** None.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-05-28 — Social Feed Inline Comments Bottom Sheet (Dart)
 
 - **Inline Comments Bottom Sheet** — Created `PostCommentsBottomSheet` inside `lib/features/social/presentation/widgets/post_comments_bottom_sheet.dart` to list and post comments inline on the feed screen without navigating to the post details page.
