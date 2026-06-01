@@ -162,42 +162,39 @@ class _CareScreenState extends ConsumerState<CareScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final wide = constraints.maxWidth >= 600;
-          final list = ListView(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 120),
-            children: [
-              CareGamifiedHeader(
-                activePet: activePet,
-                dashboard: dashboard,
+          final view = CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: CareGamifiedHeader(
+                  activePet: activePet,
+                  dashboard: dashboard,
+                ),
               ),
-              Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const SizedBox(height: 12.0),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 12.0),
                             // ── Date picker ────────────────────────────────
-                            _HorizontalDatePicker(
+                            _DateStrip(
                               selectedDate: dashboard.selectedDate,
                               onDateSelected: (d) => ref
                                   .read(careDashboardProvider.notifier)
                                   .selectDate(d),
                             ),
-                            const SizedBox(height: 16.0),
-                            PfSectionTitle(
-                              title: 'Trophy room',
-                              accent: AppColors.lilac,
-                              trailing: GestureDetector(
-                                onTap: () => context.push('/care/medical-vault'),
-                                child: const Text(
-                                  'Vault →',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.lilac700,
-                                  ),
-                                ),
-                              ),
+                            const SizedBox(height: 32.0),
+                            const _SectionLabel(title: 'CARE ACTIVITY'),
+                            CareGamifiedWeeklyChart(
+                              selectedDay: dashboard.selectedDate,
+                              weekHits: dashboard.weekGoalHit.value ?? List.filled(7, false),
+                              progressPercent: (dashboard.tasks.value != null && dashboard.tasks.value!.isNotEmpty)
+                                  ? (dashboard.tasks.value!.where((t) => t.isCompleted).length / dashboard.tasks.value!.length)
+                                  : 0.0,
                             ),
+                            const SizedBox(height: 32),
+                            const _SectionLabel(title: 'TROPHY ROOM'),
                             CareGamifiedTrophyRoom(petId: activePet.id),
                             const SizedBox(height: 32),
                             // ── TODAY'S QUESTS header with AI refresh ──────
@@ -225,7 +222,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                       child: Container(
                                         width: 30,
                                         height: 30,
-                                        decoration: BoxDecoration(
+                                        decoration: const BoxDecoration(
                                           color: AppColors.lilacSoft,
                                           shape: BoxShape.circle,
                                         ),
@@ -266,34 +263,22 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                               onAddTask: openAddSheet,
                             ),
                             const SizedBox(height: 32),
-                            PfSectionTitle(
-                              title: 'This week',
-                              accent: AppColors.mint,
-                            ),
-                            CareGamifiedWeeklyChart(
-                              selectedDay: dashboard.selectedDate,
-                              weekHits: dashboard.weekGoalHit.value ?? List.filled(7, false),
-                              progressPercent: (dashboard.tasks.value != null && dashboard.tasks.value!.isNotEmpty)
-                                  ? (dashboard.tasks.value!.where((t) => t.isCompleted).length / dashboard.tasks.value!.length)
-                                  : 0.0,
-                            ),
-                            const SizedBox(height: 32),
-                            _NutritionBanner(pt: pt),
-                            const SizedBox(height: 16),
-                            _MedicalVaultBanner(pt: pt),
+                            _UtilityBanners(pt: pt),
                           ],
                         ),
                       ),
-                    ],
-                  );
-                  if (!wide) return list;
-                  return Align(
-                    alignment: Alignment.topCenter,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 560),
-                      child: list,
                     ),
-                  );
+                  ],
+                );
+                
+                if (!wide) return view;
+                return Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 560),
+                    child: view,
+                  ),
+                );
                 },
               ),
     );
@@ -392,8 +377,8 @@ class _AiRoutineBanner extends StatelessWidget {
 // Streak Banner
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _HorizontalDatePicker extends StatefulWidget {
-  const _HorizontalDatePicker({
+class _DateStrip extends StatefulWidget {
+  const _DateStrip({
     required this.selectedDate,
     required this.onDateSelected,
   });
@@ -402,14 +387,11 @@ class _HorizontalDatePicker extends StatefulWidget {
   final ValueChanged<DateTime> onDateSelected;
 
   @override
-  State<_HorizontalDatePicker> createState() => _HorizontalDatePickerState();
+  State<_DateStrip> createState() => _DateStripState();
 }
 
-class _HorizontalDatePickerState extends State<_HorizontalDatePicker> {
+class _DateStripState extends State<_DateStrip> {
   late final ScrollController _scroll;
-
-  static const _chipW = 52.0;
-  static const _chipGap = 8.0;
   static const _daysBack = 7;
   static const _daysAhead = 6;
   static const _totalDays = _daysBack + 1 + _daysAhead;
@@ -418,15 +400,10 @@ class _HorizontalDatePickerState extends State<_HorizontalDatePicker> {
   void initState() {
     super.initState();
     _scroll = ScrollController();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToToday());
-  }
-
-  void _scrollToToday() {
-    if (!_scroll.hasClients) return;
-    final screenW = context.size?.width ?? 360;
-    final todayOffset =
-        _daysBack * (_chipW + _chipGap) - (screenW / 2 - _chipW / 2) + 16;
-    _scroll.jumpTo(todayOffset.clamp(0.0, _scroll.position.maxScrollExtent));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scroll.hasClients) return;
+      _scroll.jumpTo((_daysBack * 58.0) - (MediaQuery.of(context).size.width / 2) + 24);
+    });
   }
 
   @override
@@ -440,15 +417,14 @@ class _HorizontalDatePickerState extends State<_HorizontalDatePicker> {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
     final today = DateUtils.dateOnly(DateTime.now());
 
     return SizedBox(
-      height: 76,
+      height: 64,
       child: ListView.builder(
         controller: _scroll,
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
         itemCount: _totalDays,
         itemBuilder: (context, i) {
           final date = today.subtract(Duration(days: _daysBack - i));
@@ -456,64 +432,26 @@ class _HorizontalDatePickerState extends State<_HorizontalDatePicker> {
           final isToday = date == today;
           final isFuture = date.isAfter(today);
 
-          final ymd =
-              '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+          final ymd = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
           return Padding(
-            padding: EdgeInsets.only(right: i < _totalDays - 1 ? _chipGap : 0),
+            padding: const EdgeInsets.only(right: 6),
             child: GestureDetector(
               key: ValueKey<String>('care_date_$ymd'),
               onTap: isFuture ? null : () => widget.onDateSelected(date),
               child: AnimatedContainer(
-                duration: PetfolioThemeExtension.durationSm,
-                width: _chipW,
+                duration: const Duration(milliseconds: 200),
+                width: 52,
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? cs.primary
-                      : (isToday ? cs.primary.withAlpha(15) : pt.surface2),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: isSelected
-                        ? Colors.transparent
-                        : (isToday ? cs.primary.withAlpha(80) : pt.line),
-                    width: isToday && !isSelected ? 1.5 : 0.5,
-                  ),
+                  color: isSelected ? pt.ink950 : pt.surface1,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: isSelected ? pt.ink950 : pt.line, width: isToday && !isSelected ? 1.5 : 1),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      _dayLetters[date.weekday - 1],
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                        color: isSelected
-                            ? Colors.white.withAlpha(200)
-                            : (isFuture ? pt.ink300 : pt.ink500),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${date.day}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18,
-                        height: 1,
-                        color: isSelected
-                            ? Colors.white
-                            : (isToday
-                                ? cs.primary
-                                : (isFuture ? pt.ink300 : cs.onSurface)),
-                      ),
-                    ),
-                    if (isToday && !isSelected) ...[
-                      const SizedBox(height: 4),
-                      Container(
-                        width: 4,
-                        height: 4,
-                        decoration: BoxDecoration(color: cs.primary, shape: BoxShape.circle),
-                      ),
-                    ],
+                    Text(_dayLetters[date.weekday - 1], style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: isSelected ? Colors.white70 : pt.ink500)),
+                    Text('${date.day}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: isSelected ? Colors.white : (isFuture ? pt.ink300 : pt.ink950), height: 1.1)),
+                    if (isToday && !isSelected) Container(margin: const EdgeInsets.only(top: 2), width: 4, height: 4, decoration: BoxDecoration(color: pt.ink950, shape: BoxShape.circle)),
                   ],
                 ),
               ),
@@ -838,10 +776,6 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
     }
   }
 
-  bool get _isWeeklyish =>
-      widget.task.frequency == dbtask.CareFrequency.weekly ||
-      widget.task.frequency == dbtask.CareFrequency.biweekly ||
-      widget.task.frequency == dbtask.CareFrequency.monthly;
 
   String get _sublabel {
     final t = widget.task;
@@ -982,253 +916,122 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
     final task = widget.task;
     final done = task.isCompleted;
     final due = !done && task.isDueToday;
     final color = _color;
 
-    final yAnim = Tween<double>(begin: 0.0, end: -72.0).animate(
-      CurvedAnimation(parent: _xpCtrl, curve: const Cubic(0.2, 0.8, 0.2, 1.0)),
-    );
+    final yAnim = Tween<double>(begin: 0.0, end: -72.0).animate(CurvedAnimation(parent: _xpCtrl, curve: const Cubic(0.2, 0.8, 0.2, 1.0)));
     final opacityAnim = TweenSequence<double>([
       TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 15),
       TweenSequenceItem(tween: ConstantTween(1.0), weight: 55),
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 30),
     ]).animate(_xpCtrl);
 
-    Widget card = GestureDetector(
-      onTap: _toggle,
-      onLongPress: () => _showContextMenu(context),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 240),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        decoration: BoxDecoration(
-          color: done
-              ? Color.alphaBlend(color.withAlpha(36), cs.surface)
-              : cs.surface,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: done ? color : pt.line,
-            width: 2,
-          ),
-          boxShadow: due
-              ? [BoxShadow(color: AppColors.poppy.withAlpha(64), blurRadius: 0, spreadRadius: 4)]
-              : pt.shadowE1,
-        ),
-        child: Row(
-          children: [
-            // ── Icon box ──────────────────────────────────────────────────
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 240),
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: done ? color : color.withAlpha(48),
-              ),
-              alignment: Alignment.center,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: Text(
-                  key: ValueKey(done),
-                  done ? '✅' : _emoji,
-                  style: const TextStyle(fontSize: 26, height: 1.0),
-                ),
-              ),
+    Widget card = Container(
+      padding: const EdgeInsets.fromLTRB(14, 14, 18, 14),
+      decoration: BoxDecoration(
+        color: done ? pt.surface2 : pt.surface1,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: pt.line, width: 1),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: done ? pt.surface2 : color.withValues(alpha: 0.1),
+              border: Border.all(color: done ? pt.line : color.withValues(alpha: 0.3)),
             ),
-            const SizedBox(width: 12),
-            // ── Content ───────────────────────────────────────────────────
+            alignment: Alignment.center,
+            child: Opacity(
+              opacity: done ? 0.4 : 1.0,
+              child: Text(_emoji, style: const TextStyle(fontSize: 22)),
+            ),
+          ),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: AnimatedDefaultTextStyle(
-                          duration: const Duration(milliseconds: 200),
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            color: done ? pt.ink500 : cs.onSurface,
-                            decoration: done ? TextDecoration.lineThrough : null,
-                            decorationColor: pt.ink300,
-                          ),
-                          child: Text(
-                            task.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
-                      if (_isWeeklyish) ...[
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.lilacSoft,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            _frequencyPill(task.frequency),
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.lilac700,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
+                  Text(
+                    task.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: done ? pt.ink300 : pt.ink950,
+                      decoration: done ? TextDecoration.lineThrough : null,
+                    ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     _sublabel,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: due ? AppColors.poppy700 : pt.ink500,
-                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: done ? pt.ink300 : (due ? AppColors.poppy700 : pt.ink500),
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            // ── XP chip + check button ────────────────────────────────────
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 9, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: done ? AppColors.mintSoft : AppColors.sunnySoft,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '+${task.gamificationPoints}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w900,
-                          color: done
-                              ? AppColors.mint700
-                              : AppColors.sunny700,
-                        ),
-                      ),
-                      const SizedBox(width: 2),
-                      const Text('⭐',
-                          style: TextStyle(fontSize: 11)),
-                    ],
-                  ),
+            const SizedBox(width: 12),
+            GestureDetector(
+              onTap: _toggle,
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: done ? AppColors.mint700 : pt.surface1,
+                  border: Border.all(color: done ? AppColors.mint700 : pt.ink300, width: 2),
                 ),
-                const SizedBox(height: 6),
-                GestureDetector(
-                  key: ValueKey('care_task_check_${task.id}'),
-                  onTap: _toggle,
-                  behavior: HitTestBehavior.opaque,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: done ? color : cs.surface,
-                      border: Border.all(
-                        color: done ? color : pt.line,
-                        width: 2,
-                      ),
-                    ),
-                    alignment: Alignment.center,
-                    child: done
-                        ? const Icon(Icons.check_rounded,
-                            color: Colors.white, size: 18)
-                        : null,
-                  ),
-                ),
-              ],
+                alignment: Alignment.center,
+                child: done ? const Icon(Icons.check_rounded, size: 20, color: Colors.white) : null,
+              ),
             ),
-          ],
-        ),
+        ],
       ),
     );
 
-    // ── XP burst overlay ─────────────────────────────────────────────────
-    card = Stack(
-      clipBehavior: Clip.none,
-      children: [
-        card,
-        if (_showBurst)
-          Positioned(
-            right: 14,
-            bottom: 52,
-            child: AnimatedBuilder(
-              animation: _xpCtrl,
-              builder: (_, child) => Transform.translate(
-                offset: Offset(0, yAnim.value),
-                child: Opacity(
-                  opacity: opacityAnim.value.clamp(0.0, 1.0),
-                  child: Text(
-                    '+${task.gamificationPoints} XP ⭐',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.sunny700,
-                      shadows: [
-                        Shadow(
-                          color: AppColors.sunny,
-                          blurRadius: 12,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+    if (_showBurst) {
+      card = Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          card,
+          AnimatedBuilder(
+            animation: _xpCtrl,
+            builder: (context, _) => Positioned(
+              right: 28,
+              bottom: 30 + yAnim.value,
+              child: Opacity(
+                opacity: opacityAnim.value,
+                child: Text('+${task.gamificationPoints} XP', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.sunny700, shadows: [Shadow(color: Colors.white, blurRadius: 4)])),
               ),
             ),
           ),
-      ],
-    );
-
-    // ── Swipe-to-toggle (Dismissible) for non-log tasks ──────────────────
-    if (!task.isLogDerived) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Dismissible(
-          key: ValueKey('d_${task.id}'),
-          direction: DismissDirection.startToEnd,
-          background: Container(
-            decoration: BoxDecoration(
-              color: done ? pt.surface2 : AppColors.success,
-              borderRadius: BorderRadius.circular(22),
-            ),
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.only(left: 22),
-            child: Icon(
-              done ? Icons.replay_rounded : Icons.check_circle_outline_rounded,
-              color: done ? pt.ink300 : Colors.white,
-              size: 28,
-            ),
-          ),
-          confirmDismiss: (_) async {
-            _toggle();
-            return false;
-          },
-          child: card,
-        ),
+        ],
       );
     }
 
-    return Padding(padding: const EdgeInsets.only(bottom: 10), child: card);
+    if (task.isLogDerived) {
+      return Padding(padding: const EdgeInsets.only(bottom: 10), child: card);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: GestureDetector(
+        onLongPress: () => _showContextMenu(context),
+        child: card,
+      ),
+    );
   }
 }
 
@@ -1503,14 +1306,7 @@ class _EmptyRoutineState extends StatelessWidget {
 // Task type helpers (shared by card + sheet)
 // ─────────────────────────────────────────────────────────────────────────────
 
-String _frequencyPill(dbtask.CareFrequency f) {
-  switch (f) {
-    case dbtask.CareFrequency.monthly:   return 'MONTHLY';
-    case dbtask.CareFrequency.biweekly:  return 'BIWEEKLY';
-    case dbtask.CareFrequency.weekly:    return 'WEEKLY';
-    default:                             return 'WEEKLY';
-  }
-}
+
 
 String _typeLabel(dbtask.CareTaskType type) {
   switch (type) {
@@ -1548,133 +1344,101 @@ String _defaultTitle(dbtask.CareTaskType type) {
 // Medical vault & nutrition entry banners
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _MedicalVaultBanner extends StatelessWidget {
-  const _MedicalVaultBanner({required this.pt});
-
+class _UtilityBanners extends StatelessWidget {
+  const _UtilityBanners({required this.pt});
   final PetfolioThemeExtension pt;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      key: const ValueKey<String>('care_medical_vault_banner'),
-      onTap: () => context.push('/care/medical-vault'),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.mintSoft,
-              Color.lerp(AppColors.mintSoft, AppColors.mint.withAlpha(40), 0.5)!,
-            ],
-          ),
-          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-          border: Border.all(color: AppColors.mint.withAlpha(60)),
-          boxShadow: pt.shadowE1,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            Container(
-              width: 46,
-              height: 46,
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: () => context.push('/care/nutrition'),
+            child: Container(
+              height: 100,
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.mint.withAlpha(40),
-                borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
+                color: pt.surface1,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: pt.line),
+                boxShadow: pt.shadowE1,
               ),
-              child: const Icon(Icons.folder_special_outlined,
-                  color: AppColors.mint700, size: 24),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Medical Vault',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.mint700,
-                    ),
+                  Container(
+                    width: 32, height: 32,
+                    decoration: BoxDecoration(color: AppColors.tangerine.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
+                    child: const Icon(Icons.monitor_weight_outlined, color: AppColors.tangerine, size: 18),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Vaccines · Medications · Vet visits',
-                    style: TextStyle(fontSize: 13, color: pt.ink500),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Nutrition', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.tangerine, height: 1.1)),
+                      Text('Weight & diets', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: pt.ink500)),
+                    ],
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.mint700),
-          ],
+          ),
         ),
-      ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: GestureDetector(
+            onTap: () => context.push('/care/medical-vault'),
+            child: Container(
+              height: 100,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: pt.surface1,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: pt.line),
+                boxShadow: pt.shadowE1,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 32, height: 32,
+                    decoration: BoxDecoration(color: AppColors.mint.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
+                    child: const Icon(Icons.folder_special_outlined, color: AppColors.mint700, size: 18),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Medical Vault', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.mint700, height: 1.1)),
+                      Text('Vaccines & vet', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: pt.ink500)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _NutritionBanner extends StatelessWidget {
-  const _NutritionBanner({required this.pt});
-
-  final PetfolioThemeExtension pt;
-
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({required this.title});
+  final String title;
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      key: const ValueKey<String>('care_nutrition_banner'),
-      onTap: () => context.push('/care/nutrition'),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.sunnySoft,
-              Color.lerp(AppColors.sunnySoft, AppColors.tangerine.withAlpha(40), 0.5)!,
-            ],
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+      child: Row(
+        children: [
+          Text(
+            title.toUpperCase(),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: pt.ink500),
           ),
-          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
-          border: Border.all(color: AppColors.tangerine.withAlpha(60)),
-          boxShadow: pt.shadowE1,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                color: AppColors.tangerine.withAlpha(40),
-                borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
-              ),
-              child: const Icon(Icons.monitor_weight_outlined,
-                  color: AppColors.tangerine, size: 24),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Smart Nutrition & Weight',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.tangerine,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Track weight history · View caloric needs',
-                    style: TextStyle(fontSize: 13, color: pt.ink500),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.tangerine),
-          ],
-        ),
+        ],
       ),
     );
   }

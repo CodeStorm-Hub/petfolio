@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PetFolio — Care · Redesign</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FFF4E6;
+    --cream-2: #FFEAD2;
+    --surface: #FFFFFF;
+    --surface-2: #FFFAF3;
+    --ink-950: #261308;
+    --ink-700: #5E3A28;
+    --ink-500: #957762;
+    --ink-300: #D6C2B0;
+    --line: #F4E2CB;
+    --line-2: #EFD8BB;
+
+    --tangerine: #FF8A4C;
+    --tangerine-700: #E0651E;
+    --tangerine-soft: #FFE0CB;
+    --poppy: #FF4D52;
+    --poppy-700: #C41818;
+    --poppy-soft: #FFE0E0;
+    --mint: #2FCBA0;
+    --mint-700: #198C6E;
+    --mint-soft: #BFF1E0;
+    --sunny: #FFC53D;
+    --sunny-700: #C68B0F;
+    --sunny-soft: #FFEDB3;
+    --lilac: #A98BFF;
+    --lilac-700: #6E4DDB;
+    --lilac-soft: #E2D6FF;
+    --sky: #6EC8FF;
+    --sky-soft: #CDEAFF;
+
+    --shadow-soft: 0 8px 24px -10px rgba(120, 60, 20, 0.18);
+    --shadow-card: 0 2px 0 0 rgba(120,60,20,0.04), 0 12px 28px -16px rgba(120,60,20,0.18);
+    --shadow-pop: 0 18px 40px -16px rgba(255, 80, 90, 0.45);
+  }
+
+  [data-theme="dark"] {
+    --cream: #18100F;
+    --cream-2: #201513;
+    --surface: #271917;
+    --surface-2: #2F1E1B;
+    --ink-950: #FFF1E1;
+    --ink-700: #E9CFB8;
+    --ink-500: #B89685;
+    --ink-300: #7C6256;
+    --line: #3D2A26;
+    --line-2: #4C352F;
+    --tangerine-soft: #3A2014;
+    --poppy-soft: #3D1416;
+    --mint-soft: #11342A;
+    --sunny-soft: #392808;
+    --lilac-soft: #281E3F;
+    --tangerine-700: #FFB886;
+    --poppy-700: #FF9DA0;
+    --mint-700: #62E8BE;
+    --sunny-700: #FFD96E;
+    --lilac-700: #C8AEFF;
+    --shadow-card: 0 1px 0 0 rgba(0,0,0,0.3), 0 16px 30px -16px rgba(0,0,0,0.65);
+    --shadow-soft: 0 8px 24px -10px rgba(0,0,0,0.6);
+    --shadow-pop: 0 18px 40px -16px rgba(0,0,0,0.7);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Nunito', system-ui, sans-serif;
+    background: #ECE6DD;
+    color: var(--ink-950);
+    overflow: hidden;
+  }
+  [data-theme="dark"] body { background: #0E0908; }
+
+  .stage {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background:
+      radial-gradient(circle at 16% 12%, rgba(255,138,76,0.20), transparent 38%),
+      radial-gradient(circle at 84% 86%, rgba(255,77,82,0.18), transparent 40%),
+      radial-gradient(circle at 90% 10%, rgba(255,197,61,0.20), transparent 36%),
+      radial-gradient(circle at 10% 88%, rgba(47,203,160,0.16), transparent 38%),
+      #ECE6DD;
+  }
+  [data-theme="dark"] .stage {
+    background:
+      radial-gradient(circle at 16% 12%, rgba(255,138,76,0.10), transparent 40%),
+      radial-gradient(circle at 84% 86%, rgba(255,77,82,0.08), transparent 42%),
+      #0E0908;
+  }
+
+  .device-wrap { transform-origin: center; will-change: transform; }
+  .app, .app * { font-family: 'Nunito', system-ui, sans-serif; }
+  .display { font-family: 'Sora', 'Nunito', sans-serif; letter-spacing: -0.02em; }
+
+  .app *::-webkit-scrollbar { width: 0; height: 0; }
+  .app * { scrollbar-width: none; }
+  #root *::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none; }
+  #root * { scrollbar-width: none; -ms-overflow-style: none; }
+
+  @keyframes pf-pop-in { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes pf-float-up {
+    0% { transform: translate(var(--dx,0), 0) scale(0.5) rotate(var(--rot,0deg)); opacity: 0; }
+    18% { opacity: 1; }
+    100% { transform: translate(var(--dx,0), -90px) scale(1.15) rotate(var(--rot,0deg)); opacity: 0; }
+  }
+  @keyframes pf-confetti {
+    0% { transform: translate(0,-10px) rotate(0); opacity: 0; }
+    12% { opacity: 1; }
+    100% { transform: translate(var(--cdx,20px), 320px) rotate(var(--crot,720deg)); opacity: 0; }
+  }
+  @keyframes pf-pulse-ring { 0% { transform: scale(0.85); opacity: 0.7; } 100% { transform: scale(1.7); opacity: 0; } }
+  @keyframes pf-fade-up { 0% { transform: translateY(14px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+  @keyframes pf-coin-spin { 0% { transform: rotateY(-18deg); } 50% { transform: rotateY(18deg); } 100% { transform: rotateY(-18deg); } }
+  @keyframes pf-badge-float { 0%,100%{ transform:perspective(300px) rotateX(-8deg) rotateY(-4deg) translateY(0); } 50%{ transform:perspective(300px) rotateX(6deg) rotateY(6deg) translateY(-5px); } }
+  @keyframes pf-badge-glow { 0%,100%{ opacity:0.6; transform:scale(0.88); } 50%{ opacity:1; transform:scale(1.18); } }
+  @keyframes pf-holo-sweep { 0%{ transform:translateX(-160%) skewX(-18deg); } 100%{ transform:translateX(260%) skewX(-18deg); } }
+  @keyframes pf-badge-pop { 0%{ transform:scale(0) rotateY(180deg); opacity:0; } 60%{ transform:scale(1.1) rotateY(-8deg); opacity:1; } 100%{ transform:scale(1) rotateY(0); opacity:1; } }
+  @keyframes pf-medal-rim { 0%,100%{ box-shadow:0 6px 0 0 var(--rim,#b85), 0 14px 24px -8px rgba(0,0,0,0.3); } 50%{ box-shadow:0 8px 0 0 var(--rim,#b85), 0 18px 28px -8px rgba(0,0,0,0.4); } }
+  @keyframes pf-flame-bob { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-3px) scale(1.06); } }
+  @keyframes pf-sheen { 0% { transform: translateX(-120%) skewX(-18deg); } 100% { transform: translateX(220%) skewX(-18deg); } }
+  @keyframes pf-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+  .reduce-motion * { animation: none !important; }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div id="root" class="device-wrap"></div>
+  </div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="ios-frame.jsx"></script>
+  <script type="text/babel" src="care_screen.jsx"></script>
+
+  <script>
+    function scaleDevice() {
+      const root = document.getElementById('root');
+      if (!root) return;
+      const child = root.firstElementChild;
+      if (!child) return;
+      const W = window.innerWidth, H = window.innerHeight;
+      const dw = 402 + 48, dh = 874 + 48;
+      const s = Math.min(W / dw, H / dh, 1);
+      root.style.transform = `scale(${s})`;
+    }
+    window.addEventListener('resize', scaleDevice);
+    const _scaleObs = new MutationObserver(scaleDevice);
+    document.addEventListener('DOMContentLoaded', () => {
+      _scaleObs.observe(document.getElementById('root'), { childList: true, subtree: true });
+      setTimeout(scaleDevice, 50);
+      setTimeout(scaleDevice, 300);
+      setTimeout(scaleDevice, 700);
+    });
+  </script>
+</body>
+</html>
