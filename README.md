@@ -74,3 +74,46 @@ flutter build apk --release --dart-define-from-file=.env
 ## Architecture
 
 Feature-first structure under `lib/features/`. Core shared code in `lib/core/`. See [CLAUDE.md](CLAUDE.md) and [docs/](docs/) for full architecture, schema, and implementation status.
+
+## Pending: Kotlin Gradle Plugin (KGP) Migration
+
+Flutter 3.44 introduced built-in Kotlin support in AGP, deprecating the explicit `id("kotlin-android")` + `kotlinOptions {}` pattern. The app and several plugins need to migrate before AGP 9.0 enforces the change.
+
+**Current workaround** — `android/gradle.properties` holds two compat flags added by the Flutter migrator:
+
+```properties
+android.builtInKotlin=false
+android.newDsl=false
+```
+
+These suppress build failures today but will be removed in a future Flutter release.
+
+**Blocked on these plugins releasing KGP-migrated versions:**
+
+| Plugin | Status |
+|---|---|
+| `image_picker_android` | Awaiting upstream release |
+| `shared_preferences_android` | Awaiting upstream release |
+| `url_launcher_android` | Awaiting upstream release |
+| `share_plus` | Awaiting upstream release |
+| `stripe_android` | Awaiting upstream release |
+
+**Migration steps (do all at once, after all plugins above are updated):**
+
+1. `flutter pub upgrade` — pull in the migrated plugin versions
+2. In `android/app/build.gradle.kts`:
+   - Remove `id("kotlin-android")` from the `plugins {}` block
+   - Replace `kotlinOptions { jvmTarget = ... }` inside `android {}` with:
+     ```kotlin
+     kotlin {
+         compilerOptions {
+             jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+         }
+     }
+     ```
+3. In `android/gradle.properties`, delete (or flip to `true`) both compat flags:
+   ```properties
+   android.builtInKotlin=true
+   android.newDsl=true
+   ```
+4. Run `flutter build apk --debug` to confirm a clean build.

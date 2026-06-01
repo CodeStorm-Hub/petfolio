@@ -24,7 +24,7 @@ class NotificationService {
     );
 
     await _plugin.initialize(
-      const InitializationSettings(android: androidSettings, iOS: iosSettings),
+      settings: const InitializationSettings(android: androidSettings, iOS: iosSettings),
     );
 
     final androidPlugin =
@@ -76,20 +76,18 @@ class NotificationService {
     );
 
     await _plugin.zonedSchedule(
-      _idFor(taskId),
-      'Care Reminder',
-      title,
-      scheduled,
-      NotificationDetails(android: androidDetails),
+      id: _idFor(taskId),
+      title: 'Care Reminder',
+      body: title,
+      scheduledDate: scheduled,
+      notificationDetails: NotificationDetails(android: androidDetails),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: repeating ? DateTimeComponents.time : null,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
   Future<void> cancelForTask(String taskId) async {
-    await _plugin.cancel(_idFor(taskId));
+    await _plugin.cancel(id: _idFor(taskId));
   }
 
   Future<void> cancelAll() async {
