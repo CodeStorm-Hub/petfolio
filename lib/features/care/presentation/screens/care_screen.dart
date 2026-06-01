@@ -188,7 +188,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                       ),
                     ),
                   ),
-                  const CareGamifiedTrophyRoom(),
+                  CareGamifiedTrophyRoom(petId: activePet.id),
                   const SizedBox(height: 32),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
