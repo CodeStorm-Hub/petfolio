@@ -191,11 +191,11 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "TODAY'S QUESTS",
+                                    "Today's Quests",
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 13,
                                       fontWeight: FontWeight.w700,
-                                      letterSpacing: 0.08 * 12,
+                                      letterSpacing: 0.2,
                                       color: pt.ink500,
                                     ),
                                   ),
@@ -276,24 +276,6 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                 return planned.where((t) => t.isCompleted).length / planned.length;
                               }(),
                             ),
-                            const SizedBox(height: 28),
-                            PfSectionTitle(
-                              title: 'Trophy room',
-                              accent: AppColors.lilac,
-                              trailing: GestureDetector(
-                                onTap: () => context.push('/care/medical-vault'),
-                                child: const Text(
-                                  'Vault →',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.lilac700,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            CareGamifiedTrophyRoom(petId: activePet.id),
                             const SizedBox(height: 28),
                             _UtilityBanner(pt: pt),
                           ],
@@ -458,83 +440,99 @@ class _HorizontalDatePickerState extends State<_HorizontalDatePicker> {
     final cs = Theme.of(context).colorScheme;
     final today = DateUtils.dateOnly(DateTime.now());
 
-    return SizedBox(
-      height: 76,
-      child: ListView.builder(
-        controller: _scroll,
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.zero,
-        itemCount: _totalDays,
-        itemBuilder: (context, i) {
-          final date = today.subtract(Duration(days: _daysBack - i));
-          final isSelected = DateUtils.dateOnly(widget.selectedDate) == date;
-          final isToday = date == today;
-          final isFuture = date.isAfter(today);
+    return ClipRect(
+      child: SizedBox(
+        height: 76,
+        child: Stack(
+          children: [
+            ListView.builder(
+              controller: _scroll,
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.zero,
+              itemCount: _totalDays,
+              itemBuilder: (context, i) {
+                final date = today.subtract(Duration(days: _daysBack - i));
+                final isSelected =
+                    DateUtils.dateOnly(widget.selectedDate) == date;
+                final isToday = date == today;
+                final isFuture = date.isAfter(today);
 
-          final ymd =
-              '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-          return Padding(
-            padding: EdgeInsets.only(right: i < _totalDays - 1 ? _chipGap : 0),
-            child: GestureDetector(
-              key: ValueKey<String>('care_date_$ymd'),
-              onTap: isFuture ? null : () => widget.onDateSelected(date),
-              child: AnimatedContainer(
-                duration: PetfolioThemeExtension.durationSm,
-                width: _chipW,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? cs.primary
-                      : (isToday ? cs.primary.withAlpha(15) : pt.surface2),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: isSelected
-                        ? Colors.transparent
-                        : (isToday ? cs.primary.withAlpha(80) : pt.line),
-                    width: isToday && !isSelected ? 1.5 : 0.5,
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _dayLetters[date.weekday - 1],
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
+                final ymd =
+                    '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+                return Padding(
+                  padding: EdgeInsets.only(
+                      right: i < _totalDays - 1 ? _chipGap : 0),
+                  child: GestureDetector(
+                    key: ValueKey<String>('care_date_$ymd'),
+                    onTap: isFuture ? null : () => widget.onDateSelected(date),
+                    child: AnimatedContainer(
+                      duration: PetfolioThemeExtension.durationSm,
+                      width: _chipW,
+                      decoration: BoxDecoration(
                         color: isSelected
-                            ? Colors.white.withAlpha(200)
-                            : (isFuture ? pt.ink300 : pt.ink500),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${date.day}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18,
-                        height: 1,
-                        color: isSelected
-                            ? Colors.white
+                            ? cs.primary
                             : (isToday
-                                ? cs.primary
-                                : (isFuture ? pt.ink300 : cs.onSurface)),
+                                ? cs.primary.withAlpha(15)
+                                : pt.surface2),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isSelected
+                              ? Colors.transparent
+                              : (isToday
+                                  ? cs.primary.withAlpha(80)
+                                  : pt.line),
+                          width: isToday && !isSelected ? 1.5 : 0.5,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _dayLetters[date.weekday - 1],
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                              color: isSelected
+                                  ? Colors.white.withAlpha(200)
+                                  : (isFuture ? pt.ink300 : pt.ink500),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${date.day}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                              height: 1,
+                              color: isSelected
+                                  ? Colors.white
+                                  : (isToday
+                                      ? cs.primary
+                                      : (isFuture
+                                          ? pt.ink300
+                                          : cs.onSurface)),
+                            ),
+                          ),
+                          if (isToday && !isSelected) ...[
+                            const SizedBox(height: 4),
+                            Container(
+                              width: 4,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                  color: cs.primary,
+                                  shape: BoxShape.circle),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                    if (isToday && !isSelected) ...[
-                      const SizedBox(height: 4),
-                      Container(
-                        width: 4,
-                        height: 4,
-                        decoration: BoxDecoration(color: cs.primary, shape: BoxShape.circle),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }

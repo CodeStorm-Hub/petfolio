@@ -127,7 +127,7 @@ class AppShellHeader extends ConsumerWidget {
 
     final eyebrows = [
       'ACTIVE PET',
-      activePet != null ? 'CARE · ${activePet.name.toUpperCase()}' : 'CARE',
+      'CARE',
       'PAWSFEED',
       'MATCH · NEARBY',
       'SHOP FOR',
@@ -146,6 +146,7 @@ class AppShellHeader extends ConsumerWidget {
           final isDark = Theme.of(context).brightness == Brightness.dark;
           return _HeaderIconBtn(
             icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+            tooltip: isDark ? 'Switch to light mode' : 'Switch to dark mode',
             onTap: () => ref.read(themeProvider.notifier).toggleTheme(),
           );
         });
@@ -278,14 +279,19 @@ class AppShellHeader extends ConsumerWidget {
 // ── Header icon button ────────────────────────────────────────────────────────
 
 class _HeaderIconBtn extends StatelessWidget {
-  const _HeaderIconBtn({required this.icon, required this.onTap});
+  const _HeaderIconBtn({
+    required this.icon,
+    required this.onTap,
+    this.tooltip,
+  });
 
   final IconData icon;
   final VoidCallback onTap;
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final btn = GestureDetector(
       onTap: onTap,
       child: Container(
         width: 36, height: 36,
@@ -297,6 +303,10 @@ class _HeaderIconBtn extends StatelessWidget {
         child: Icon(icon, color: Colors.white, size: 18),
       ),
     );
+    if (tooltip != null) {
+      return Tooltip(message: tooltip!, child: btn);
+    }
+    return btn;
   }
 }
 

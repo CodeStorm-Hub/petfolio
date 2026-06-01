@@ -619,7 +619,7 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
-                    '$hitsCount 🔥',
+                    '$hitsCount 🔥 day${hitsCount == 1 ? '' : 's'}',
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
@@ -655,12 +655,25 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       SizedBox(
-                        height: 18,
+                        height: 26,
                         child: isToday
-                            ? const Align(
-                                alignment: Alignment.bottomCenter,
-                                child:
-                                    Text('🐾', style: TextStyle(fontSize: 13)),
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    'Today',
+                                    style: TextStyle(
+                                      fontSize: 7,
+                                      fontWeight: FontWeight.w700,
+                                      color: _colors[i],
+                                      height: 1.1,
+                                    ),
+                                  ),
+                                  const Text(
+                                    '🐾',
+                                    style: TextStyle(fontSize: 11, height: 1.1),
+                                  ),
+                                ],
                               )
                             : null,
                       ),
@@ -747,29 +760,29 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
   }
 }
 
-// ── Trophy Room (real badges) ─────────────────────────────────────────────────
+// ── Trophy Room (horizontal slider) ──────────────────────────────────────────
+
+String _badgeProgressHint(BadgeInfo badge, PetAwardsSummary awards) {
+  switch (badge.type) {
+    case '3_day_streak':
+      return '${awards.currentStreak}/3 days 🦴';
+    case '7_day_hero':
+      return '${awards.currentStreak}/7 days 🌿';
+    case 'routine_master':
+      return '${awards.currentStreak}/14 days ❤️';
+    case '30_day_legend':
+      return '${awards.currentStreak}/30 days 🌟';
+    case 'care_champion':
+      return '${awards.logsCount}/100 logs 👑';
+    default:
+      return '';
+  }
+}
 
 class CareGamifiedTrophyRoom extends ConsumerWidget {
   const CareGamifiedTrophyRoom({super.key, required this.petId});
 
   final String petId;
-
-  String _progressHint(BadgeInfo badge, PetAwardsSummary awards) {
-    switch (badge.type) {
-      case '3_day_streak':
-        return '${awards.currentStreak}/3 days 🔥';
-      case '7_day_hero':
-        return '${awards.currentStreak}/7 days 🦸';
-      case 'routine_master':
-        return '${awards.currentStreak}/14 days 💯';
-      case '30_day_legend':
-        return '${awards.currentStreak}/30 days 👑';
-      case 'care_champion':
-        return '${awards.logsCount}/100 logs 🏆';
-      default:
-        return '';
-    }
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -780,8 +793,7 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
       data: (a) => a,
       orElse: () => PetAwardsSummary.empty,
     );
-    final ownedTypes = awards.unlockedTypes;
-    final ownedCount = ownedTypes.length;
+    final ownedCount = awards.unlockedTypes.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -804,29 +816,10 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
             ),
           ),
         ),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: 0.78,
-          ),
-          itemCount: kBadgeCatalog.length,
-          itemBuilder: (context, i) {
-            final badge = kBadgeCatalog[i];
-            final owned = ownedTypes.contains(badge.type);
-            final hint = owned ? '' : _progressHint(badge, awards);
-            return _BadgeMedal(
-              badge: badge,
-              owned: owned,
-              progressHint: hint,
-              index: i,
-              onTap: () => _showBadgeDetail(context, pt, badge, owned, hint),
-            );
-          },
+        _TrophySlider(
+          awards: awards,
+          onTapBadge: (badge, owned, hint) =>
+              _showBadgeDetail(context, pt, badge, owned, hint),
         ),
       ],
     );
@@ -866,10 +859,9 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
                 ),
               ),
             ),
-            // Medal in sheet
             Container(
-              width: 84,
-              height: 84,
+              width: 96,
+              height: 96,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: owned
@@ -890,8 +882,8 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
                     ? [
                         BoxShadow(
                           color: badge.color.withAlpha(120),
-                          blurRadius: 24,
-                          offset: const Offset(0, 8),
+                          blurRadius: 28,
+                          offset: const Offset(0, 10),
                           spreadRadius: -8,
                         )
                       ]
@@ -899,7 +891,7 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
               ),
               alignment: Alignment.center,
               child: owned
-                  ? Text(badge.emoji, style: const TextStyle(fontSize: 40))
+                  ? Text(badge.emoji, style: const TextStyle(fontSize: 44))
                   : Opacity(
                       opacity: 0.4,
                       child: ColorFiltered(
@@ -907,8 +899,8 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
                           Colors.grey,
                           BlendMode.saturation,
                         ),
-                        child:
-                            Text(badge.emoji, style: const TextStyle(fontSize: 40)),
+                        child: Text(badge.emoji,
+                            style: const TextStyle(fontSize: 44)),
                       ),
                     ),
             ),
@@ -916,36 +908,54 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
             Text(
               badge.label,
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.w800,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: owned
+                    ? badge.color
+                    : Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 6),
             Text(
               badge.description,
-              style: TextStyle(
-                fontSize: 14,
-                color: pt.ink500,
-              ),
+              style: TextStyle(fontSize: 14, color: pt.ink500),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: owned ? AppColors.mintSoft : pt.surface2,
+                color: owned ? badge.color.withAlpha(20) : pt.surface2,
                 borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                owned
-                    ? '✅ Earned!'
-                    : (hint.isNotEmpty ? 'Progress: $hint' : 'Keep logging care'),
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  color: owned ? AppColors.mint700 : pt.ink500,
+                border: Border.all(
+                  color: owned ? badge.color.withAlpha(60) : pt.line,
                 ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    owned
+                        ? Icons.check_circle_rounded
+                        : Icons.lock_rounded,
+                    size: 16,
+                    color: owned ? badge.color : pt.ink300,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    owned
+                        ? 'Earned!'
+                        : (hint.isNotEmpty
+                            ? 'Progress: $hint'
+                            : 'Keep logging care'),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: owned ? badge.color : pt.ink500,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -955,10 +965,113 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
   }
 }
 
-// ── Badge Medal (circular 3D medal style) ─────────────────────────────────────
+// ── Trophy Slider ─────────────────────────────────────────────────────────────
 
-class _BadgeMedal extends StatefulWidget {
-  const _BadgeMedal({
+class _TrophySlider extends StatefulWidget {
+  const _TrophySlider({
+    required this.awards,
+    required this.onTapBadge,
+  });
+
+  final PetAwardsSummary awards;
+  final void Function(BadgeInfo badge, bool owned, String hint) onTapBadge;
+
+  @override
+  State<_TrophySlider> createState() => _TrophySliderState();
+}
+
+class _TrophySliderState extends State<_TrophySlider> {
+  late final PageController _ctrl;
+  int _page = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = PageController(viewportFraction: 0.46);
+    _ctrl.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final p = (_ctrl.page ?? 0).round();
+    if (p != _page) setState(() => _page = p);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.removeListener(_onScroll);
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final ownedTypes = widget.awards.unlockedTypes;
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 172,
+          child: PageView.builder(
+            controller: _ctrl,
+            padEnds: false,
+            itemCount: kBadgeCatalog.length,
+            itemBuilder: (context, i) {
+              final badge = kBadgeCatalog[i];
+              final owned = ownedTypes.contains(badge.type);
+              final hint =
+                  owned ? '' : _badgeProgressHint(badge, widget.awards);
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  i == 0 ? 0 : 7,
+                  4,
+                  i == kBadgeCatalog.length - 1 ? 8 : 7,
+                  10,
+                ),
+                child: _TrophyCard(
+                  badge: badge,
+                  owned: owned,
+                  progressHint: hint,
+                  index: i,
+                  onTap: () => widget.onTapBadge(badge, owned, hint),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(kBadgeCatalog.length, (i) {
+            final badge = kBadgeCatalog[i];
+            final owned = ownedTypes.contains(badge.type);
+            final active = i == _page;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              width: active ? 20 : 6,
+              height: 6,
+              margin: const EdgeInsets.symmetric(horizontal: 2.5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
+                color: active
+                    ? badge.color
+                    : (owned
+                        ? badge.color.withAlpha(90)
+                        : pt.line),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Trophy Card ───────────────────────────────────────────────────────────────
+
+class _TrophyCard extends StatefulWidget {
+  const _TrophyCard({
     required this.badge,
     required this.owned,
     required this.progressHint,
@@ -973,29 +1086,32 @@ class _BadgeMedal extends StatefulWidget {
   final VoidCallback onTap;
 
   @override
-  State<_BadgeMedal> createState() => _BadgeMedalState();
+  State<_TrophyCard> createState() => _TrophyCardState();
 }
 
-class _BadgeMedalState extends State<_BadgeMedal> with TickerProviderStateMixin {
+class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin {
   late final AnimationController _floatCtrl;
   late final AnimationController _sheenCtrl;
 
   @override
   void initState() {
     super.initState();
-    final delayMs = widget.index * 300;
     _floatCtrl = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 3200 + widget.index * 200),
     )..repeat(reverse: true);
-    _sheenCtrl = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 3800 + widget.index * 200),
-    )..forward(from: (delayMs / (3800 + widget.index * 200)).clamp(0.0, 1.0));
 
-    _sheenCtrl.addStatusListener((s) {
-      if (s == AnimationStatus.completed && mounted) _sheenCtrl.repeat();
-    });
+    final sheenDuration = Duration(milliseconds: 3800 + widget.index * 200);
+    _sheenCtrl = AnimationController(vsync: this, duration: sheenDuration);
+
+    if (widget.owned) {
+      final delayFraction =
+          (widget.index * 300 / sheenDuration.inMilliseconds).clamp(0.0, 1.0);
+      _sheenCtrl.forward(from: delayFraction);
+      _sheenCtrl.addStatusListener((s) {
+        if (s == AnimationStatus.completed && mounted) _sheenCtrl.repeat();
+      });
+    }
   }
 
   @override
@@ -1011,241 +1127,454 @@ class _BadgeMedalState extends State<_BadgeMedal> with TickerProviderStateMixin 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final owned = widget.owned;
     final badge = widget.badge;
-    final labelColor = isDark ? AppColors.ink950D : AppColors.ink950;
+
+    final bgTop = owned
+        ? Color.lerp(badge.color, Colors.white, isDark ? 0.50 : 0.82)!
+        : (isDark ? const Color(0xFF252020) : const Color(0xFFF9F6F2));
+    final bgBottom = owned
+        ? Color.lerp(badge.color, Colors.white, isDark ? 0.24 : 0.52)!
+        : (isDark ? const Color(0xFF1C1818) : pt.line.withAlpha(130));
 
     return GestureDetector(
       onTap: widget.onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Float bob animation wrapper
-          AnimatedBuilder(
-            animation: _floatCtrl,
-            builder: (_, child) => Transform.translate(
-              offset: Offset(0, _floatCtrl.value * -5),
-              child: child,
-            ),
-            child: SizedBox(
-              width: 82,
-              height: 82,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Outer glow ring derived from _floatCtrl (no separate controller)
-                  if (owned)
-                    AnimatedBuilder(
-                      animation: _floatCtrl,
-                      builder: (_, _) {
-                        final t = math.sin(_floatCtrl.value * math.pi);
-                        return Transform.scale(
-                          scale: 0.92 + t * 0.14,
-                          child: Opacity(
-                            opacity: (0.50 + t * 0.38).clamp(0.0, 1.0),
-                            child: Container(
-                              width: 82,
-                              height: 82,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: badge.color,
-                                  width: 2,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-
-                  // Medal disc
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: owned
-                          ? RadialGradient(
-                              center: const Alignment(-0.24, -0.4),
-                              radius: 0.85,
-                              colors: [
-                                Color.lerp(badge.color, Colors.white, 0.55)!,
-                                badge.color,
-                                Color.lerp(badge.color, Colors.black, 0.4)!,
-                              ],
-                              stops: const [0.0, 0.58, 1.0],
-                            )
-                          : RadialGradient(
-                              center: const Alignment(-0.24, -0.4),
-                              radius: 0.85,
-                              colors: [
-                                pt.ink300.withAlpha(160),
-                                pt.ink300,
-                              ],
-                            ),
-                      boxShadow: owned
-                          ? [
-                              BoxShadow(
-                                color: Colors.black.withAlpha(77),
-                                blurRadius: 0,
-                                offset: const Offset(0, 5),
-                              ),
-                              BoxShadow(
-                                color: badge.color.withAlpha(120),
-                                blurRadius: 14,
-                                offset: const Offset(0, 8),
-                                spreadRadius: -8,
-                              ),
-                            ]
-                          : [
-                              BoxShadow(
-                                color: Colors.black.withAlpha(46),
-                                blurRadius: 0,
-                                offset: const Offset(0, 4),
-                              ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [bgTop, bgBottom],
+          ),
+          border: Border.all(
+            color:
+                owned ? badge.color.withAlpha(75) : pt.line,
+            width: owned ? 1.5 : 1.0,
+          ),
+          boxShadow: owned
+              ? [
+                  BoxShadow(
+                    color: badge.color.withAlpha(isDark ? 55 : 40),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                    spreadRadius: -5,
+                  ),
+                ]
+              : null,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(23),
+          child: Stack(
+            children: [
+              // Holographic sheen sweep for owned badges
+              if (owned)
+                AnimatedBuilder(
+                  animation: _sheenCtrl,
+                  builder: (_, _) {
+                    final x = _sheenCtrl.value * 3.0 - 0.7;
+                    return Positioned(
+                      top: 0,
+                      bottom: 0,
+                      left: x * 170,
+                      width: 52,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Colors.transparent,
+                              Color(0x50FFFFFF),
+                              Colors.transparent,
                             ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 14, 10, 10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Floating medal disc
+                    Expanded(
+                      child: Center(
+                        child: AnimatedBuilder(
+                          animation: _floatCtrl,
+                          builder: (_, child) => Transform.translate(
+                            offset: Offset(0, _floatCtrl.value * -6),
+                            child: child,
+                          ),
+                          child: _MedalDisc(badge: badge, owned: owned),
+                        ),
+                      ),
                     ),
-                    child: ClipOval(
-                      child: Stack(
-                        alignment: Alignment.center,
+                    const SizedBox(height: 6),
+                    // Badge name
+                    Text(
+                      badge.label,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        height: 1.2,
+                        color: owned
+                            ? (isDark
+                                ? Color.lerp(badge.color, Colors.white, 0.30)!
+                                : badge.color)
+                            : pt.ink500,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    // Progress / earned status pill
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: owned
+                            ? badge.color.withAlpha(isDark ? 50 : 28)
+                            : pt.surface2.withAlpha(200),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: owned
+                              ? badge.color.withAlpha(65)
+                              : pt.line,
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Concentric depth rings
-                          Positioned.fill(
-                            child: Container(
-                              margin: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: owned
-                                      ? Colors.white.withAlpha(77)
-                                      : Colors.black.withAlpha(15),
-                                  width: 1.5,
-                                ),
+                          Icon(
+                            owned
+                                ? Icons.check_circle_rounded
+                                : Icons.lock_rounded,
+                            size: 11,
+                            color: owned ? badge.color : pt.ink300,
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              owned
+                                  ? 'Earned!'
+                                  : (widget.progressHint.isNotEmpty
+                                      ? widget.progressHint
+                                      : 'Locked'),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: owned ? badge.color : pt.ink500,
+                                height: 1,
                               ),
                             ),
                           ),
-                          Positioned.fill(
-                            child: Container(
-                              margin: const EdgeInsets.all(11),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: owned
-                                      ? Colors.white.withAlpha(46)
-                                      : Colors.black.withAlpha(8),
-                                  width: 1,
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Badge emoji
-                          owned
-                              ? Text(
-                                  badge.emoji,
-                                  style: const TextStyle(
-                                    fontSize: 28,
-                                    shadows: [
-                                      Shadow(
-                                        color: Color(0x47000000),
-                                        blurRadius: 5,
-                                        offset: Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              : Opacity(
-                                  opacity: 0.65,
-                                  child: ColorFiltered(
-                                    colorFilter: const ColorFilter.mode(
-                                      Colors.grey,
-                                      BlendMode.saturation,
-                                    ),
-                                    child: Text(
-                                      badge.emoji,
-                                      style: const TextStyle(fontSize: 28),
-                                    ),
-                                  ),
-                                ),
-                          // Holographic sheen sweep (owned)
-                          if (owned)
-                            AnimatedBuilder(
-                              animation: _sheenCtrl,
-                              builder: (_, _) {
-                                final x = _sheenCtrl.value * 2.6 - 0.6;
-                                return Transform.translate(
-                                  offset: Offset(x * 72, 0),
-                                  child: Container(
-                                    width: 72 * 0.45,
-                                    height: 72,
-                                    decoration: const BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Colors.transparent,
-                                          Color(0xA6FFFFFF),
-                                          Colors.transparent,
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
                         ],
                       ),
                     ),
-                  ),
-
-                  // Lock pip for locked badges
-                  if (!owned)
-                    Positioned(
-                      right: 5,
-                      bottom: 5,
-                      child: Container(
-                        width: 18,
-                        height: 18,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: pt.surface1,
-                          border: Border.all(color: pt.line),
-                        ),
-                        child: Icon(
-                          Icons.lock_rounded,
-                          size: 10,
-                          color: pt.ink300,
-                        ),
-                      ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
+
+              // Lock pip top-right for locked badges
+              if (!owned)
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: pt.surface1,
+                      border: Border.all(color: pt.line),
+                    ),
+                    child: Icon(
+                      Icons.lock_rounded,
+                      size: 11,
+                      color: pt.ink300,
+                    ),
+                  ),
+                ),
+            ],
           ),
-          const SizedBox(height: 5),
-          Text(
-            badge.label,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              color: labelColor,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            owned ? '✓ earned' : widget.progressHint,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w700,
-              color: owned ? AppColors.mint700 : pt.ink300,
-              height: 1,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
+}
+
+// ── Medal Disc ────────────────────────────────────────────────────────────────
+
+class _MedalDisc extends StatelessWidget {
+  const _MedalDisc({required this.badge, required this.owned});
+
+  final BadgeInfo badge;
+  final bool owned;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final iconWidget = CustomPaint(
+      painter: _BadgePainter(badge.type, badge.color, owned),
+    );
+    return Container(
+      width: 62,
+      height: 62,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: owned
+            ? RadialGradient(
+                center: const Alignment(-0.24, -0.40),
+                radius: 0.88,
+                colors: [
+                  Color.lerp(badge.color, Colors.white, 0.56)!,
+                  badge.color,
+                  Color.lerp(badge.color, Colors.black, 0.38)!,
+                ],
+                stops: const [0.0, 0.55, 1.0],
+              )
+            : RadialGradient(
+                center: const Alignment(-0.24, -0.40),
+                radius: 0.88,
+                colors: [
+                  pt.ink300.withAlpha(100),
+                  pt.ink300.withAlpha(160),
+                ],
+              ),
+        boxShadow: owned
+            ? [
+                BoxShadow(
+                  color: badge.color.withAlpha(100),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                  spreadRadius: -4,
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.black.withAlpha(22),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: ClipOval(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Concentric ring
+            Positioned.fill(
+              child: Container(
+                margin: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: owned
+                        ? Colors.white.withAlpha(60)
+                        : Colors.black.withAlpha(10),
+                    width: 1,
+                  ),
+                ),
+              ),
+            ),
+            // Specular highlight
+            if (owned)
+              Positioned(
+                left: 4, top: 4, right: 20, bottom: 10,
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Colors.white.withAlpha(90), Colors.transparent],
+                    ),
+                  ),
+                ),
+              ),
+            // Custom icon
+            Positioned.fill(
+              child: owned
+                  ? iconWidget
+                  : Opacity(
+                      opacity: 0.45,
+                      child: ColorFiltered(
+                        colorFilter: const ColorFilter.mode(
+                            Colors.grey, BlendMode.saturation),
+                        child: iconWidget,
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Badge Icon Painter ────────────────────────────────────────────────────────
+
+class _BadgePainter extends CustomPainter {
+  _BadgePainter(this.type, this.color, this.owned);
+
+  final String type;
+  final Color color;
+  final bool owned;
+
+  Paint _fill(Color c) => Paint()..color = c..style = PaintingStyle.fill;
+  Paint _stroke(Color c, double w) => Paint()
+    ..color = c
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = w
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.round;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final u = size.width / 42;
+    final white = Colors.white.withAlpha(owned ? 230 : 180);
+
+    switch (type) {
+      case 'first_log':    _drawPaw(canvas, cx, cy, u, white); break;
+      case '3_day_streak': _drawBone(canvas, cx, cy, u, white); break;
+      case '7_day_hero':   _drawSprout(canvas, cx, cy, u, white); break;
+      case 'routine_master': _drawHeartPaw(canvas, cx, cy, u, white); break;
+      case '30_day_legend':  _drawStar(canvas, cx, cy, u, white); break;
+      case 'care_champion':  _drawCrown(canvas, cx, cy, u, white); break;
+    }
+  }
+
+  // 🐾 Paw print: palm oval + 4 toe circles
+  void _drawPaw(Canvas canvas, double cx, double cy, double u, Color c) {
+    final p = _fill(c);
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(cx, cy + 4 * u), width: 15 * u, height: 11 * u),
+      p,
+    );
+    canvas.drawCircle(Offset(cx - 7 * u, cy - 1 * u), 3.5 * u, p);
+    canvas.drawCircle(Offset(cx - 2 * u, cy - 5.5 * u), 3.5 * u, p);
+    canvas.drawCircle(Offset(cx + 3 * u, cy - 5.5 * u), 3.5 * u, p);
+    canvas.drawCircle(Offset(cx + 8 * u, cy - 1 * u), 3.5 * u, p);
+  }
+
+  // 🦴 Dog bone: bar + rounded knobs each end
+  void _drawBone(Canvas canvas, double cx, double cy, double u, Color c) {
+    final p = _fill(c);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset(cx, cy), width: 24 * u, height: 7 * u),
+        Radius.circular(3.5 * u),
+      ),
+      p,
+    );
+    for (final dx in [-13.0 * u, 13.0 * u]) {
+      canvas.drawCircle(Offset(cx + dx, cy - 4.5 * u), 4.5 * u, p);
+      canvas.drawCircle(Offset(cx + dx, cy + 4.5 * u), 4.5 * u, p);
+    }
+  }
+
+  // 🌱 Sprout: curved stem + two leaves + sun bud
+  void _drawSprout(Canvas canvas, double cx, double cy, double u, Color c) {
+    // Stem
+    final stem = Path()
+      ..moveTo(cx, cy + 10 * u)
+      ..cubicTo(cx, cy + 4 * u, cx - 1.5 * u, cy, cx, cy - 1.5 * u);
+    canvas.drawPath(stem, _stroke(c, 2.8 * u));
+    // Left leaf
+    final left = Path()
+      ..moveTo(cx, cy + 1 * u)
+      ..cubicTo(cx - 10 * u, cy - 1 * u, cx - 10 * u, cy - 11 * u, cx, cy - 7 * u)
+      ..close();
+    canvas.drawPath(left, _fill(c));
+    // Right leaf
+    final right = Path()
+      ..moveTo(cx, cy - 1 * u)
+      ..cubicTo(cx + 9 * u, cy - 3 * u, cx + 9 * u, cy - 13 * u, cx, cy - 9 * u)
+      ..close();
+    canvas.drawPath(right, _fill(c));
+    // Bud
+    canvas.drawCircle(Offset(cx, cy - 13.5 * u), 3.5 * u, _fill(c));
+  }
+
+  // ❤️ Heart + mini paw inside
+  void _drawHeartPaw(Canvas canvas, double cx, double cy, double u, Color c) {
+    final heart = Path()
+      ..moveTo(cx, cy + 9 * u)
+      ..cubicTo(cx - 14 * u, cy + 1 * u, cx - 17 * u, cy - 11 * u, cx, cy - 7 * u)
+      ..cubicTo(cx + 17 * u, cy - 11 * u, cx + 14 * u, cy + 1 * u, cx, cy + 9 * u);
+    canvas.drawPath(heart, _fill(c));
+    // Mini paw inside (white)
+    final pw = Colors.white.withAlpha(owned ? 200 : 140);
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(cx, cy + 1.5 * u), width: 6.5 * u, height: 4.5 * u),
+      _fill(pw),
+    );
+    for (final d in [Offset(-3.5 * u, -1.5 * u), Offset(-1 * u, -4 * u), Offset(1.5 * u, -4 * u), Offset(4 * u, -1.5 * u)]) {
+      canvas.drawCircle(Offset(cx + d.dx, cy + d.dy), 1.5 * u, _fill(pw));
+    }
+  }
+
+  // ⭐ 5-pt star + sparkle dots
+  void _drawStar(Canvas canvas, double cx, double cy, double u, Color c) {
+    const n = 5;
+    const outerR = 14.0;
+    const innerR = 5.5;
+    final star = Path();
+    for (int i = 0; i < n * 2; i++) {
+      final angle = (i * math.pi / n) - math.pi / 2;
+      final r = (i.isEven ? outerR : innerR) * u;
+      final pt = Offset(cx + r * math.cos(angle), cy + r * math.sin(angle));
+      i == 0 ? star.moveTo(pt.dx, pt.dy) : star.lineTo(pt.dx, pt.dy);
+    }
+    star.close();
+    canvas.drawPath(star, _fill(c));
+    // Sparkle dots
+    for (final pos in [
+      Offset(-16 * u, -7 * u), Offset(16 * u, 5 * u), Offset(11 * u, -15 * u)
+    ]) {
+      canvas.drawCircle(Offset(cx + pos.dx, cy + pos.dy), 1.8 * u, _fill(c));
+    }
+  }
+
+  // 👑 Crown: 3-pointed body + gem circles + base band
+  void _drawCrown(Canvas canvas, double cx, double cy, double u, Color c) {
+    final crown = Path()
+      ..moveTo(cx - 14 * u, cy + 7 * u)
+      ..lineTo(cx + 14 * u, cy + 7 * u)
+      ..lineTo(cx + 11 * u, cy - 3 * u)
+      ..lineTo(cx + 4.5 * u, cy + 2.5 * u)
+      ..lineTo(cx, cy - 12 * u)
+      ..lineTo(cx - 4.5 * u, cy + 2.5 * u)
+      ..lineTo(cx - 11 * u, cy - 3 * u)
+      ..close();
+    canvas.drawPath(crown, _fill(c));
+    // Base band
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset(cx, cy + 9 * u), width: 28 * u, height: 5 * u),
+        Radius.circular(2.5 * u),
+      ),
+      _fill(c),
+    );
+    // Gems (white circles)
+    final gem = Colors.white.withAlpha(owned ? 210 : 150);
+    canvas.drawCircle(Offset(cx, cy - 12 * u), 2.8 * u, _fill(gem));
+    canvas.drawCircle(Offset(cx - 11 * u, cy - 3 * u), 2.2 * u, _fill(gem));
+    canvas.drawCircle(Offset(cx + 11 * u, cy - 3 * u), 2.2 * u, _fill(gem));
+  }
+
+  @override
+  bool shouldRepaint(covariant _BadgePainter old) =>
+      old.type != type || old.color != color || old.owned != owned;
 }

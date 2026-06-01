@@ -95,7 +95,23 @@
       "Bash(gh pr *)",
       "Bash(git rm *)",
       "Bash(dir \"G:\\\\GitHub\\\\petfolio\\\\PetFolio Redesign\\\\Care Redesign\" /b)",
-      "mcp__292a7621-3089-4236-bd52-07a54bf59881__list_tables"
+      "mcp__292a7621-3089-4236-bd52-07a54bf59881__list_tables",
+      "mcp__mobile-mcp__mobile_list_available_devices",
+      "mcp__mobile-mcp__mobile_take_screenshot",
+      "mcp__mobile-mcp__mobile_click_on_screen_at_coordinates",
+      "mcp__mobile-mcp__mobile_list_elements_on_screen",
+      "mcp__mobile-mcp__mobile_save_screenshot",
+      "mcp__mobile-mcp__mobile_swipe_on_screen",
+      "Bash(grep -E \"\\\\.\\(dart\\)$\")",
+      "Bash(Get-Content \"C:\\\\Users\\\\syedr\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\G--GitHub-petfolio\\\\83d1e98f-3a1c-41fb-a000-787a9c3f0b74\\\\tasks\\\\bn6o3o4cc.output\" -Wait -Tail 30)",
+      "Bash(Select-Object -First 30)",
+      "mcp__marionette-mcp__take_screenshots",
+      "Bash(flutter run *)",
+      "Bash(Start-Sleep -Seconds 25)",
+      "Bash(Get-Content \"C:\\\\Users\\\\syedr\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\G--GitHub-petfolio\\\\83d1e98f-3a1c-41fb-a000-787a9c3f0b74\\\\tasks\\\\bbq53bd0b.output\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object -Last 30)",
+      "mcp__dart__hot_reload",
+      "mcp__dart__dtd"
     ]
   }
 }
