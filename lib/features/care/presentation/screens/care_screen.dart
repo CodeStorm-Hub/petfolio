@@ -177,7 +177,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                     title: 'Trophy room',
                     accent: AppColors.lilac,
                     trailing: GestureDetector(
-                      onTap: () {},
+                      onTap: () => context.push('/care/medical-vault'),
                       child: const Text(
                         'Vault →',
                         style: TextStyle(

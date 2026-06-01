@@ -65,6 +65,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   void _onScroll() {
+    // Guard: controller may have no attached ScrollPosition before the
+    // ListView is built or after dispose.
+    if (!_scrollController.hasClients) return;
     // reverse: true means position 0 is the bottom; maxScrollExtent is the top.
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {

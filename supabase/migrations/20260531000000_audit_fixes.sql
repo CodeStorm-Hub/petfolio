@@ -12,8 +12,8 @@
 
 -- ----------------------------------------------------------------
 -- C-1: chat_messages RLS
--- Ensures the table has RLS on and exactly the two policies
--- needed for safe participant-only access.
+-- Ensures the table has RLS on and creates the two policies
+-- needed for safe participant-only access if they don't already exist.
 -- ----------------------------------------------------------------
 
 ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
