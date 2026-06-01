@@ -93,7 +93,9 @@
       "Bash(grep -v '\\\\.g\\\\.dart$')",
       "Bash(grep -v '\\\\.freezed\\\\.dart$')",
       "Bash(gh pr *)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(dir \"G:\\\\GitHub\\\\petfolio\\\\PetFolio Redesign\\\\Care Redesign\" /b)",
+      "mcp__292a7621-3089-4236-bd52-07a54bf59881__list_tables"
     ]
   }
 }

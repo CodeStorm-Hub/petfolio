@@ -37,7 +37,6 @@ class _ManagePetsScreenState extends ConsumerState<ManagePetsScreen> {
 
   Future<void> _onReorder(List<Pet> pets, int oldIndex, int newIndex) async {
     if (_reordering) return;
-    if (newIndex > oldIndex) newIndex -= 1;
     if (oldIndex == newIndex) return;
 
     final next = [...pets];
@@ -306,7 +305,7 @@ class _PetList extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           sliver: SliverReorderableList(
             itemCount: pets.length,
-            onReorder: onReorder,
+            onReorderItem: onReorder,
             proxyDecorator: (child, _, animation) => Material(
               color: Colors.transparent,
               child: AnimatedBuilder(
