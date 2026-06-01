@@ -100,6 +100,7 @@
 
 ## 2026-05-26 — Responsiveness Refactoring & Spacing Fixes
 
+
 - **Responsive Layout Helper**: Created a unified `ResponsiveLayout` widget to handle standard Mobile, Tablet, and Desktop/Web breakpoints consistently across all views.
 - **Responsive Screen Refactoring**: Center-constrained and scaled layouts on `pet_profile_screen.dart`, `social_screen.dart`, `matching_screen.dart`, `marketplace_screen.dart`, and `onboarding_screen.dart` to prevent infinite visual stretching on large viewports.
 - **Bottom Navigation Bar Spacing**: Adjusted Matching screen spacing dynamically to `92 + MediaQuery.paddingOf(context).bottom` on Mobile, pushing the swipe `_ActionDock` above the floating bottom navigation bar.
@@ -1484,4 +1485,23 @@ Phase complete — please run (/remember) to save tokens before proceeding to th
 **Next step:** None.
 
 Phase complete and to log to .remember/remember.md, Please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-05-31 — Security & Performance Hardening (DB migrations + repo hygiene)
+
+Acted on the codebase/schema review findings. Six fixes:
+
+- **Repo hygiene** — Untracked `scratch/` (`git rm -r --cached`, kept on disk) and added `scratch/` to `.gitignore`; it held a committed Supabase anon JWT in `check_connection.dart`.
+- **`20260531100000_notifications_insert_check.sql`** — Replaced `notifications_insert_policy` `WITH CHECK (true)` with actor-pet ownership binding (stops notification spoofing). Admin/system notifications still flow through SECURITY DEFINER RPCs.
+- **`20260531100100_function_search_path.sql`** — Added `SET search_path = ''` to `is_admin`, `handle_post_like_sync`, `handle_comment_like_sync`, `handle_post_comment_sync`, `handle_new_chat_message`.
+- **`20260531100200_bucket_listing_lockdown.sql`** — Dropped broad public SELECT policies on `storage.objects` for `pets` & `shops` buckets (stops file listing; public URLs unaffected — app only uses getPublicUrl).
+- **`20260531100300_fk_covering_indexes.sql`** — Added covering indexes for 11 unindexed FKs.
+- **`20260531100400_consolidate_rls_policies.sql`** — Merged duplicate/overlapping permissive policies on users, chat_threads, pet_follows, posts, shops, marketplace_orders, reported_posts, vendor_ledgers, shop_deletion_requests (access-preserving OR-merge).
+
+All applied to remote project `jqyjvhwlcqcsuwcqgcwf`. Re-ran advisors: `function_search_path_mutable`, `rls_policy_always_true`, `public_bucket_allows_listing`, `unindexed_foreign_keys`, and `multiple_permissive_policies` warnings all cleared. Remaining advisor items are intentional (SECURITY DEFINER RPCs with internal checks) or dashboard config (leaked-password protection).
+
+**Not done (deferred, optional):** revoke EXECUTE-from-anon on `cleanup_expired_stories`/`get_pet_awards_summary`/`mark_story_viewed`; drop genuinely-unused indexes; route vendor order writes through `vendor_update_order` RPC; de-dupe care date logic; enable leaked-password protection in Auth dashboard.
+
+**Next step:** None — no Dart source changed, so analyzer/tests unaffected.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
 

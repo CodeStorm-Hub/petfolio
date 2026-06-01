@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-
+import '../features/admin/presentation/controllers/admin_auth_controller.dart';
+import '../features/admin/presentation/screens/admin_screen.dart';
 import '../features/auth/presentation/controllers/auth_controller.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/registration_screen.dart';
@@ -22,12 +22,10 @@ import '../features/marketplace/presentation/screens/marketplace_screen.dart';
 import '../features/marketplace/presentation/screens/order_confirmation_screen.dart';
 import '../features/marketplace/presentation/screens/product_detail_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/add_edit_product_screen.dart';
-import '../features/marketplace/presentation/screens/vendor/seller_dashboard_screen.dart';
-import '../features/marketplace/presentation/screens/vendor/shop_setup_screen.dart';
-import '../features/admin/presentation/controllers/admin_auth_controller.dart';
-import '../features/admin/presentation/screens/admin_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/edit_shop_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/manual_kyc_screen.dart';
+import '../features/marketplace/presentation/screens/vendor/seller_dashboard_screen.dart';
+import '../features/marketplace/presentation/screens/vendor/shop_setup_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/stripe_onboarding_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/vendor_order_detail_screen.dart';
 import '../features/marketplace/presentation/screens/vendor/vendor_order_queue_screen.dart';
@@ -36,8 +34,8 @@ import '../features/matching/presentation/screens/chat_screen.dart';
 import '../features/matching/presentation/screens/matches_inbox_screen.dart';
 import '../features/matching/presentation/screens/matching_screen.dart';
 import '../features/pet_profile/presentation/controllers/pet_list_controller.dart';
-import '../features/pet_profile/presentation/screens/manage_pets_screen.dart';
 import '../features/pet_profile/presentation/screens/edit_profile_screen.dart';
+import '../features/pet_profile/presentation/screens/manage_pets_screen.dart';
 import '../features/pet_profile/presentation/screens/onboarding_screen.dart';
 import '../features/pet_profile/presentation/screens/pet_profile_screen.dart';
 import '../features/social/data/models/feed_post.dart';
@@ -48,14 +46,7 @@ import '../features/social/presentation/screens/post_detail_screen.dart';
 import '../features/social/presentation/screens/social_profile_screen.dart';
 import '../features/social/presentation/screens/social_screen.dart';
 import '../features/social/presentation/screens/story_viewer_screen.dart';
-
-import 'package:petfolio/core/widgets/pet_avatar.dart';
-import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
-import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
-import 'package:petfolio/features/matching/presentation/matching_navigation.dart';
-import 'package:petfolio/features/matching/presentation/widgets/match_preferences_sheet.dart';
-import 'package:petfolio/features/marketplace/presentation/controllers/cart_controller.dart';
-import 'package:petfolio/core/theme/theme.dart';
+import 'package:petfolio/core/widgets/app_shell.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Router provider — must be consumed with ref.watch in the app widget.
@@ -412,7 +403,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 // ─────────────────────────────────────────────────────────────────────────────
-// AppShell — adaptive nav (bottom bar ≤ 599 dp, rail ≥ 600 dp)
+// Fallback screen shown when a pet edit route can't resolve the pet
 // ─────────────────────────────────────────────────────────────────────────────
 
 class AppShell extends ConsumerWidget {
@@ -758,10 +749,7 @@ class _PetEditMissingScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Pet not found',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('Pet not found', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () => context.go('/home'),
@@ -774,173 +762,5 @@ class _PetEditMissingScreen extends StatelessWidget {
   }
 }
 
-class _NavDestination {
-  const _NavDestination({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-    required this.path,
-  });
-
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
-  final String path;
-}
-
-// ─── Tab accent colors (matches design system pillar colors) ─────────────────
-const _tabColors = [
-  AppColors.tangerine,  // Pets
-  AppColors.sunny,      // Care
-  AppColors.poppy,      // Social
-  AppColors.lilac,      // Match
-  AppColors.mint,       // Market
-];
-
-// ─── Floating pill bottom nav ─────────────────────────────────────────────────
-
-class _FloatingNav extends StatelessWidget {
-  const _FloatingNav({
-    required this.selectedIndex,
-    required this.destinations,
-    required this.onSelect,
-  });
-
-  final int selectedIndex;
-  final List<_NavDestination> destinations;
-  final ValueChanged<int> onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? AppColors.surface0D : AppColors.surface0;
-    final border = isDark ? AppColors.lineD : AppColors.line;
-    final shadowColor = isDark ? AppColors.shadowE3D : AppColors.shadowE3L;
-
-    return Container(
-      height: 68,
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(34),
-        border: Border.all(color: border),
-        boxShadow: [
-          BoxShadow(color: shadowColor, blurRadius: 24, spreadRadius: -4, offset: const Offset(0, 8)),
-        ],
-      ),
-      child: Row(
-        children: [
-          for (var i = 0; i < destinations.length; i++)
-            Expanded(
-              child: _NavTab(
-                destination: destinations[i],
-                isSelected: i == selectedIndex,
-                accentColor: _tabColors[i],
-                isDark: isDark,
-                onTap: () => onSelect(i),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NavTab extends StatelessWidget {
-  const _NavTab({
-    required this.destination,
-    required this.isSelected,
-    required this.accentColor,
-    required this.isDark,
-    required this.onTap,
-  });
-
-  final _NavDestination destination;
-  final bool isSelected;
-  final Color accentColor;
-  final bool isDark;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final unselectedColor = isDark ? AppColors.ink500D : AppColors.ink500;
-    final iconColor = isSelected ? accentColor : unselectedColor;
-    final softColor = Color.alphaBlend(accentColor.withAlpha(36), Colors.transparent);
-
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            decoration: BoxDecoration(
-              color: isSelected ? softColor : Colors.transparent,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Icon(
-              isSelected ? destination.activeIcon : destination.icon,
-              color: iconColor,
-              size: 22,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            destination.label,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              color: iconColor,
-              height: 1.0,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Wide nav rail ───────────────────────────────────────────────────────────
-
-class _WideNavRail extends StatelessWidget {
-  const _WideNavRail({
-    required this.selectedIndex,
-    required this.destinations,
-    required this.onSelect,
-  });
-
-  final int selectedIndex;
-  final List<_NavDestination> destinations;
-  final ValueChanged<int> onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return NavigationRail(
-      selectedIndex: selectedIndex,
-      labelType: NavigationRailLabelType.all,
-      backgroundColor: isDark ? AppColors.surface0D : AppColors.surface0,
-      indicatorColor: Colors.transparent,
-      onDestinationSelected: onSelect,
-      destinations: [
-        for (var i = 0; i < destinations.length; i++)
-          NavigationRailDestination(
-            padding: EdgeInsets.zero,
-            icon: Icon(destinations[i].icon,
-                color: selectedIndex == i ? _tabColors[i] : (isDark ? AppColors.ink500D : AppColors.ink500)),
-            selectedIcon: Icon(destinations[i].activeIcon, color: _tabColors[i]),
-            label: Text(
-              destinations[i].label,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: selectedIndex == i ? FontWeight.w700 : FontWeight.w500,
-                color: selectedIndex == i ? _tabColors[i] : (isDark ? AppColors.ink500D : AppColors.ink500),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
+// DELETED: AppShell, _AppShellHeader, _HeaderIconBtn, _FloatingNav, _NavTab,
+// _WideNavRail, _NavDestination — moved to lib/core/widgets/app_shell.dart
