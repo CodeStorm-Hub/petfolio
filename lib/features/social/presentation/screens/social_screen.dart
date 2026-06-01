@@ -125,32 +125,22 @@ class _SocialViewState extends ConsumerState<_SocialView> {
       }
     }
 
-    Widget content = Column(
+    final headerHeight = MediaQuery.paddingOf(context).top + 92.0;
+
+    Widget content = Stack(
       children: [
-        // Sticky Pawsfeed Header
-        SizedBox(
-          height: MediaQuery.paddingOf(context).top + 92.0,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: WaveHeader(
-                  color: headerColor,
-                  height: MediaQuery.paddingOf(context).top + 100.0,
-                  child: const SizedBox.shrink(),
-                ),
-              ),
-            ],
+        // Feed scrolls from y=0; top padding reserves space below the wave header.
+        feedAsync.when(
+          skipLoadingOnReload: true,
+          loading: () => Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: headerHeight),
+              child: const TailWagLoader(label: 'Loading feed…'),
+            ),
           ),
-        ),
-        Expanded(
-          child: feedAsync.when(
-            skipLoadingOnReload: true,
-            loading: () => const Center(child: TailWagLoader(label: 'Loading feed…')),
-            error: (_, _) => Center(
+          error: (_, _) => Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: headerHeight),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -166,18 +156,23 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                 ],
               ),
             ),
-            data: (feedState) => RefreshIndicator.adaptive(
-              onRefresh: notifier.refresh,
-              child: MediaQuery.removePadding(
-                context: context,
-                removeTop: true,
-                child: CustomScrollView(
-                  controller: _scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
-                    const SliverToBoxAdapter(
-                      child: _StoriesRow(),
-                    ),
+          ),
+          data: (feedState) => RefreshIndicator.adaptive(
+            onRefresh: notifier.refresh,
+            child: MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              child: CustomScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  // Push content below the wave header — no white gap.
+                  SliverToBoxAdapter(
+                    child: SizedBox(height: headerHeight),
+                  ),
+                  const SliverToBoxAdapter(
+                    child: _StoriesRow(),
+                  ),
                   if (feedState.posts.isEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,
@@ -231,7 +226,20 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                 ],
               ),
             ),
-           ),
+          ),
+        ),
+
+        // Wave header floats on top — waveColor: transparent so the WavePainter
+        // draws nothing below the curve; content scrolls through underneath.
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: WaveHeader(
+            color: headerColor,
+            waveColor: Colors.transparent,
+            height: MediaQuery.paddingOf(context).top + 100.0,
+            child: const SizedBox.shrink(),
           ),
         ),
       ],
