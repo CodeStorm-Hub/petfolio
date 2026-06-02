@@ -111,7 +111,14 @@
       "Bash(Get-Content \"C:\\\\Users\\\\syedr\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\G--GitHub-petfolio\\\\83d1e98f-3a1c-41fb-a000-787a9c3f0b74\\\\tasks\\\\bbq53bd0b.output\" -ErrorAction SilentlyContinue)",
       "Bash(Select-Object -Last 30)",
       "mcp__dart__hot_reload",
-      "mcp__dart__dtd"
+      "mcp__dart__dtd",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:openjdk.org)",
+      "Bash(java -version)",
+      "WebFetch(domain:inside.java)",
+      "WebFetch(domain:stackoverflow.com)",
+      "WebFetch(domain:docs.gradle.org)",
+      "Bash(grep -E \"stripe_android|geolocator_android|flutter_local_notifications|permission_handler_android\" /c/Users/syedr/AppData/Local/Pub/Cache/hosted/pub.dev/../../../../../../../GitHub/petfolio/pubspec.lock | head -20)"
     ]
   }
 }
