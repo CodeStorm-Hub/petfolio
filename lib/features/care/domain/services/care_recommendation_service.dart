@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -122,7 +123,7 @@ class CareRecommendationService {
       existingTasks: existingTasks,
     );
 
-    if (_apiKey.isEmpty) {
+    if (!kIsWeb && _apiKey.isEmpty) {
       throw const CareRecommendationException(
         'AI routine suggestions are not configured on this build.',
         isConfigError: true,
@@ -130,37 +131,56 @@ class CareRecommendationService {
     }
 
     try {
-      final response = await http.post(
-        Uri.parse(_url),
-        headers: {
-          'Authorization': 'Bearer $_apiKey',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({
-          'model': 'google/gemma-3n-e4b-it',
-          'messages': [
-            {'role': 'user', 'content': prompt}
-          ],
-          'max_tokens': 1500,
-          'temperature': 0.25,
-          'top_p': 0.75,
-          'stream': false,
-          'nvext': {'guided_json': _guidedSchema},
-        }),
-      ).timeout(const Duration(seconds: 45));
+      final Map<String, dynamic> body;
 
-      if (response.statusCode != 200) {
-        final detail = response.body.length > 300
-            ? response.body.substring(0, 300)
-            : response.body;
-        throw CareRecommendationException(
-          'The suggestion service is unavailable right now. Please try again later.',
-          cause: 'HTTP ${response.statusCode}: $detail',
-        );
+      if (kIsWeb) {
+        // On web, proxy through the Supabase Edge Function to avoid CORS.
+        final fnResp = await Supabase.instance.client.functions
+            .invoke('recommend-care-tasks', body: {'prompt': prompt})
+            .timeout(const Duration(seconds: 60));
+        if (fnResp.status != 200) {
+          final detail = fnResp.data?.toString() ?? '';
+          throw CareRecommendationException(
+            'The suggestion service is unavailable right now. Please try again later.',
+            cause: 'Edge function ${fnResp.status}: ${detail.length > 300 ? detail.substring(0, 300) : detail}',
+          );
+        }
+        body = (fnResp.data is Map)
+            ? Map<String, dynamic>.from(fnResp.data as Map)
+            : jsonDecode(jsonEncode(fnResp.data)) as Map<String, dynamic>;
+      } else {
+        final response = await http.post(
+          Uri.parse(_url),
+          headers: {
+            'Authorization': 'Bearer $_apiKey',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: jsonEncode({
+            'model': 'google/gemma-3n-e4b-it',
+            'messages': [
+              {'role': 'user', 'content': prompt}
+            ],
+            'max_tokens': 1500,
+            'temperature': 0.25,
+            'top_p': 0.75,
+            'stream': false,
+            'nvext': {'guided_json': _guidedSchema},
+          }),
+        ).timeout(const Duration(seconds: 45));
+
+        if (response.statusCode != 200) {
+          final detail = response.body.length > 300
+              ? response.body.substring(0, 300)
+              : response.body;
+          throw CareRecommendationException(
+            'The suggestion service is unavailable right now. Please try again later.',
+            cause: 'HTTP ${response.statusCode}: $detail',
+          );
+        }
+        body = jsonDecode(response.body) as Map<String, dynamic>;
       }
 
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
       final content = body['choices'][0]['message']['content'] as String;
 
       final cleaned = content
