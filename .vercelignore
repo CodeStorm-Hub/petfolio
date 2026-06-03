@@ -1,0 +1,15 @@
+.git
+build
+android
+ios
+macos
+linux
+windows
+qa_artifacts
+docs
+.claude
+"PetFolio Redesign"
+.dart_tool
+.agents
+.cursor
+.gemini
