@@ -1,10 +1,17 @@
 # ==========================================
-# 1. PETFOLIO SPECIFIC NOISE (CRITICAL TO IGNORE)
+# 1. SECURITY & SECRETS (CRITICAL)
 # ==========================================
-# These folders contain hundreds of HTML, JSX, XML, and PNG 
-# files from UI audits and design stitches. They will flood 
-# the context window and cause severe token bloat.
-docs/resolved-deprecated/claude_design/
+
+*.key
+*.pem
+credentials.json
+supabase/.temp/
+
+# ==========================================
+# 2. PETFOLIO SPECIFIC NOISE
+# ==========================================
+# Prevents AI from reading massive UI mockups & QA logs
+claude_design/
 docs/logs/
 qa-screens/
 redesign_stitch/
@@ -14,7 +21,7 @@ stitch_petsphere_app_redesign/
 *.jsx
 
 # ==========================================
-# 2. FLUTTER BUILD & CACHE
+# 3. FLUTTER BUILD & CACHE
 # ==========================================
 build/
 .dart_tool/
@@ -22,96 +29,68 @@ build/
 .pub/
 
 # ==========================================
-# 3. CODE GENERATION
+# 4. CODE GENERATION
 # ==========================================
-# Ignore generated files so the AI doesn't try to edit them directly
+# Forces AI to rely on your models, not the generated outputs
 *.g.dart
 *.freezed.dart
 *.mocks.dart
 *.part.dart
 
 # ==========================================
-# 4. NATIVE PLATFORM DIRECTORIES
+# 5. NATIVE PLATFORM DIRECTORIES
 # ==========================================
-# Unless you are specifically asking the agent to write Kotlin/Swift, 
-# keep these ignored so it focuses on the `lib/` directory.
+android/.gradle
+android/.kotlin
+android/gradle-wrapper.jar
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/GeneratedPluginRegistrant.java
+android/.cxx/
 
-# Android related
-**/android/**/gradle-wrapper.jar
-.gradle/
-**/android/captures/
-**/android/gradlew
-**/android/gradlew.bat
-**/android/local.properties
-**/android/**/GeneratedPluginRegistrant.java
-**/android/key.properties
-*.jks
+ios/**/dgph
+ios/*.mode1v3
+ios/*.mode2v3
+ios/*.moved-aside
+ios/*.pbxuser
+ios/*.perspectivev3
+ios/**/*sync/
+ios/.sconsign.dblite
+ios/.tags*
+ios/**/.vagrant/
+ios/**/DerivedData/
+ios/Icon?
+ios/**/Pods/
+ios/**/.symlinks/
+ios/profile
+ios/xcuserdata
+ios/**/.generated/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/Flutter/app.flx
+ios/Flutter/app.zip
+ios/Flutter/flutter_assets/
+ios/Flutter/flutter_export_environment.sh
+ios/ServiceDefinitions.json
+ios/Runner/GeneratedPluginRegistrant.*
 
-# iOS/XCode related
-**/ios/**/*.mode1v3
-**/ios/**/*.mode2v3
-**/ios/**/*.moved-aside
-**/ios/**/*.pbxuser
-**/ios/**/*.perspectivev3
-**/ios/**/*sync/
-**/ios/**/.sconsign.dblite
-**/ios/**/.tags*
-**/ios/**/.vagrant/
-**/ios/**/DerivedData/
-**/ios/**/Icon?
-**/ios/**/Pods/
-**/ios/**/.symlinks/
-**/ios/**/profile
-**/ios/**/xcuserdata
-**/ios/.generated/
-**/ios/Flutter/.last_build_id
-**/ios/Flutter/App.framework
-**/ios/Flutter/Flutter.framework
-**/ios/Flutter/Flutter.podspec
-**/ios/Flutter/Generated.xcconfig
-**/ios/Flutter/ephemeral
-**/ios/Flutter/app.flx
-**/ios/Flutter/app.zip
-**/ios/Flutter/flutter_assets/
-**/ios/Flutter/flutter_export_environment.sh
-**/ios/ServiceDefinitions.json
-**/ios/Runner/GeneratedPluginRegistrant.*
 
-# macOS
-**/Flutter/ephemeral/
-**/Pods/
-**/macos/Flutter/GeneratedPluginRegistrant.swift
-**/macos/Flutter/ephemeral
-**/xcuserdata/
 
-# Windows
-**/windows/flutter/generated_plugin_registrant.cc
-**/windows/flutter/generated_plugin_registrant.h
-**/windows/flutter/generated_plugins.cmake
-
-# Linux
-**/linux/flutter/generated_plugin_registrant.cc
-**/linux/flutter/generated_plugin_registrant.h
-**/linux/flutter/generated_plugins.cmake
-
-# Coverage
-coverage/
-
-# Symbols
-app.*.symbols
-
-# Exceptions to above rules.
-!**/ios/**/default.mode1v3
-!**/ios/**/default.mode2v3
-!**/ios/**/default.pbxuser
-!**/ios/**/default.perspectivev3
-!/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
-!/dev/ci/**/Gemfile.lock
+web/
+macos/
+windows/
+linux/
 
 # ==========================================
-# 5. ASSETS & MEDIA
+# 6. ASSETS & MEDIA
 # ==========================================
-
+assets/
+google_fonts/
 *.png
 *.jpg
 *.jpeg
@@ -122,23 +101,13 @@ app.*.symbols
 *.zip
 
 # ==========================================
-# 6. SUPABASE LOCAL STATE
-# ==========================================
-supabase/.temp/
-
-# ==========================================
-# 7. DEPENDENCY LOCKS
-# ==========================================
-pubspec.lock
-skills-lock.json
-
-# ==========================================
-# 8. IDE & ENVIRONMENT
+# 7. IDE & ENVIRONMENT
 # ==========================================
 .idea/
 .vscode/
 .claude/
-
-.cursor/
+.cursor/hooks/
 *.iml
 .metadata
+pubspec.lock
+skills-lock.json

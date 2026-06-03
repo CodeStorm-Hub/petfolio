@@ -53,33 +53,6 @@ flutter run \
   --dart-define=STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
-## Codebase Map
-
-```
-lib/
-  core/
-    router.dart            # All GoRouter routes — add new routes here
-    theme/
-      app_colors.dart      # Colour palette — never hardcode colours, use this
-      app_theme.dart       # ThemeData — use AppTheme.light / AppTheme.dark
-    services/              # Cross-feature services (e.g. CareRecommendationService)
-    widgets/               # Shared UI widgets
-  features/
-    auth/                  # Sign-in, sign-up, session
-    care/                  # Health logs, medical records, streaks, badges
-    marketplace/           # Shops, products, cart, checkout, KYC, vendor ledger
-    matching/              # Discovery/swipe, mutual matches, chat
-    pet_profile/           # Pet creation, onboarding, profile editing
-    social/                # Feed, stories, follows, search
-    admin/                 # Moderation, KYC review, ledger, COD orders
-supabase/
-  migrations/              # Timestamped SQL migrations (yyyyMMddHHmmss_name.sql)
-  functions/
-    create-payment-intent/ # Called by CheckoutController before Stripe confirm
-    stripe-onboard-vendor/ # KYC vendor onboarding flow
-    stripe-webhook/        # Stripe event handler — has service-role RLS bypass
-```
-
 ## Common Commands
 
 ### Run The App
@@ -90,12 +63,12 @@ flutter run
 ### Code Generation
 Run after modifying any `@freezed`, `@JsonSerializable`, or `@riverpod` annotated class:
 ```bash
-dart run build_runner build -d
+flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
 Watch mode:
 ```bash
-dart run build_runner watch
+flutter pub run build_runner watch
 ```
 
 ### Static Analysis
@@ -113,39 +86,6 @@ flutter test
 flutter build apk --debug    # debug
 flutter build apk --release  # release
 ```
-
-### Supabase Edge Functions
-```bash
-npx supabase functions deploy <function-name>   # deploy a single function
-npx supabase functions deploy                   # deploy all functions
-npx supabase db reset                           # apply all migrations locally
-```
-
-## Claude Automations
-
-### Skills (user-invocable via `/`)
-| Skill | Purpose |
-|-------|---------|
-| `/create-migration` | Scaffolds a timestamped `supabase/migrations/` SQL file with RLS template |
-| `/new-feature` | Scaffolds the full `lib/features/<name>/` directory tree |
-| `/flutter-ui-ux` | Flutter UI/UX implementation patterns |
-
-### Agents
-| Agent | When to invoke |
-|-------|---------------|
-| `security-reviewer` | Before merging any PR touching payments, KYC, auth, or admin |
-
-### Pending MCP Setup
-- **context7** — live docs for riverpod/go_router/supabase_flutter/stripe (all on fast-moving versions). Install: `claude mcp add context7 -- npx -y @upstash/context7-mcp`
-
-### Hooks (`.claude/settings.json`)
-- **PreToolUse** on Edit/Write: blocks accidental edits to `.g.dart` / `.freezed.dart` generated files
-- **PostToolUse** on Edit/Write: hints `dart run build_runner build -d` when an annotated source file is saved
-
-### Config Files
-- `.claude/settings.json` — project hooks (checked into git, shared)
-- `.claude/settings.local.json` — personal tool permissions (gitignored, not shared)
-- When writing PowerShell hook commands: always end with `;exit 0` — caught exceptions still set exit code 1 otherwise
 
 ## Project Rules & Token Optimization Strategy
 

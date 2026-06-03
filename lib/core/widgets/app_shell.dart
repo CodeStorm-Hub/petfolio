@@ -11,7 +11,6 @@ import 'package:petfolio/features/matching/presentation/matching_navigation.dart
 import 'package:petfolio/features/matching/presentation/widgets/match_preferences_sheet.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
 import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
-import 'package:petfolio/core/widgets/pwa_onboarding_prompt.dart';
 
 // ── Tab accent colors (matches design system pillar colors) ──────────────────
 const tabAccentColors = [
@@ -63,9 +62,6 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      PwaOnboardingPrompt.checkAndShow(context);
-    });
     final selectedIndex = _selectedIndex(context);
     final isWide = MediaQuery.sizeOf(context).width >= 600;
 

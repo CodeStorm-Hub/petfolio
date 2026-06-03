@@ -118,26 +118,7 @@
       "WebFetch(domain:inside.java)",
       "WebFetch(domain:stackoverflow.com)",
       "WebFetch(domain:docs.gradle.org)",
-      "Bash(grep -E \"stripe_android|geolocator_android|flutter_local_notifications|permission_handler_android\" /c/Users/syedr/AppData/Local/Pub/Cache/hosted/pub.dev/../../../../../../../GitHub/petfolio/pubspec.lock | head -20)",
-      "Bash(find ~/.claude -name \"CLAUDE.md\" 2>/dev/null | head -10)",
-      "Skill(deep-research)",
-      "Skill(deep-research:*)",
-      "WebFetch(domain:cleancodestack.com)",
-      "WebFetch(domain:vinova.sg)",
-      "WebFetch(domain:firt.dev)",
-      "WebFetch(domain:www.magicbell.com)",
-      "Bash(gh issue *)",
-      "WebFetch(domain:ravi6997.medium.com)",
-      "WebFetch(domain:brainhub.eu)",
-      "WebFetch(domain:www.mobiloud.com)",
-      "WebFetch(domain:scandiweb.com)",
-      "WebFetch(domain:mohanrajmuthukumaran.hashnode.dev)",
-      "WebFetch(domain:dev.to)",
-      "WebFetch(domain:medium.com)",
-      "WebFetch(domain:flutternest.com)",
-      "WebFetch(domain:firebase.google.com)",
-      "WebFetch(domain:chipsoffury.com)",
-      "WebFetch(domain:dasroot.net)"
+      "Bash(grep -E \"stripe_android|geolocator_android|flutter_local_notifications|permission_handler_android\" /c/Users/syedr/AppData/Local/Pub/Cache/hosted/pub.dev/../../../../../../../GitHub/petfolio/pubspec.lock | head -20)"
     ]
   }
 }
