@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:petfolio/core/models/pet.dart';
@@ -25,8 +24,6 @@ class CareRecommendationException implements Exception {
 class CareRecommendationService {
   final _uuid = const Uuid();
 
-  static const _apiKey = String.fromEnvironment('NVIDIA_API_KEY');
-  static const _url = 'https://integrate.api.nvidia.com/v1/chat/completions';
 
   static const _guidedSchema = {
     'type': 'array',
@@ -122,45 +119,24 @@ class CareRecommendationService {
       existingTasks: existingTasks,
     );
 
-    if (_apiKey.isEmpty) {
-      throw const CareRecommendationException(
-        'AI routine suggestions are not configured on this build.',
-        isConfigError: true,
-      );
-    }
-
     try {
-      final response = await http.post(
-        Uri.parse(_url),
-        headers: {
-          'Authorization': 'Bearer $_apiKey',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+      final response = await supabase.functions.invoke(
+        'generate-care-routine',
+        body: {
+          'prompt': prompt,
+          'guidedSchema': _guidedSchema,
         },
-        body: jsonEncode({
-          'model': 'google/gemma-3n-e4b-it',
-          'messages': [
-            {'role': 'user', 'content': prompt}
-          ],
-          'max_tokens': 1500,
-          'temperature': 0.25,
-          'top_p': 0.75,
-          'stream': false,
-          'nvext': {'guided_json': _guidedSchema},
-        }),
-      ).timeout(const Duration(seconds: 45));
+      );
 
-      if (response.statusCode != 200) {
-        final detail = response.body.length > 300
-            ? response.body.substring(0, 300)
-            : response.body;
+      final status = response.status;
+      if (status >= 400) {
         throw CareRecommendationException(
           'The suggestion service is unavailable right now. Please try again later.',
-          cause: 'HTTP ${response.statusCode}: $detail',
+          cause: 'HTTP $status: ${response.data}',
         );
       }
 
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      final body = response.data as Map<String, dynamic>;
       final content = body['choices'][0]['message']['content'] as String;
 
       final cleaned = content

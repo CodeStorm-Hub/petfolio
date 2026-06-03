@@ -142,3 +142,4 @@ tmp_window_dump.xml
 .dart-tool/
 tmp_home/
 .idea/caches/
+.vercel
