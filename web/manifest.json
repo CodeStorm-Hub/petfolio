@@ -1,11 +1,11 @@
 {
-    "name": "petfolio",
-    "short_name": "petfolio",
+    "name": "PetFolio",
+    "short_name": "PetFolio",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFF4E6",
+    "theme_color": "#FF8A4C",
+    "description": "Progressive Web App for PetFolio - Your ultimate pet companion.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

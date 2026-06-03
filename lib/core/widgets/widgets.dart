@@ -15,4 +15,5 @@ export 'wave_header.dart';
 export 'pf_card.dart';
 export 'responsive_layout.dart';
 export 'app_shell.dart';
+export 'pwa_onboarding_prompt.dart';
 

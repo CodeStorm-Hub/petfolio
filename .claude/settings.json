@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NonInteractive -Command \"$raw=[Console]::In.ReadToEnd();try{$f=($raw|ConvertFrom-Json).file_path;if($f-match'[.](g|freezed)[.]dart$'){Write-Host 'ERROR: Do not edit generated files. Edit the source and run build_runner.';exit 2}}catch{};exit 0\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NonInteractive -Command \"$raw=[Console]::In.ReadToEnd();try{$f=($raw|ConvertFrom-Json).file_path;if($f-match'[.]dart$'-and$f-notmatch'[.](g|freezed)[.]dart$'){$c=Get-Content $f -Raw -EA SilentlyContinue;if($c-and$c-match'@(freezed|Riverpod|JsonSerializable)'){Write-Host 'HINT: Annotation detected — remember to run: dart run build_runner build -d'}}}catch{};exit 0\""
+          }
+        ]
+      }
+    ]
+  }
+}
