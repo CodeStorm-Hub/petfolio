@@ -121,7 +121,10 @@
       "Bash(grep -E \"stripe_android|geolocator_android|flutter_local_notifications|permission_handler_android\" /c/Users/syedr/AppData/Local/Pub/Cache/hosted/pub.dev/../../../../../../../GitHub/petfolio/pubspec.lock | head -20)",
       "Bash(grep -v \"^$\")",
       "Bash(supabase status *)",
-      "mcp__visualize__read_me"
+      "mcp__visualize__read_me",
+      "Bash(git fetch *)",
+      "Bash(git merge *)",
+      "Bash(git stash *)"
     ]
   }
 }
