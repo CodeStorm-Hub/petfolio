@@ -1701,3 +1701,16 @@ Phase complete — please run (/remember) to save tokens before proceeding to th
 
 Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
 
+## 2026-06-05 — iOS mobile web PWA startup fix
+
+- **Root cause:** `flutter-first-frame` never fired on iOS WebKit — CanvasKit from gstatic CDN, Flutter service worker vs FCM SW contention, blocking Firebase/FCM before `runApp`, and `COEP`/`COOP` on `.wasm` responses.
+- **`web/flutter_bootstrap.js`:** Skip Flutter `serviceWorkerSettings` on Apple WebKit (iPhone/iPad); desktop/Android keep SW caching.
+- **`web/index.html`:** Unregister stale `flutter_service_worker.js` on iOS before boot; bootstrap `onerror` + `main.dart.js` error surfacing.
+- **`deploy-web.yml`:** `--no-web-resources-cdn` (local `canvaskit/`), `--no-wasm-dry-run`.
+- **`vercel.json`:** Removed `Cross-Origin-Embedder-Policy` / `Cross-Origin-Opener-Policy` from `.wasm` (not using threaded skwasm).
+- **`lib/main.dart`:** `runApp` first on web; Firebase/FCM via `unawaited(_initializeWebPushStack())`.
+
+**Next:** Push to `main` (or `workflow_dispatch`) so Vercel serves the new build; hard-refresh on iPhone Chrome (close tab, reopen `https://petfolio.live/`).
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+

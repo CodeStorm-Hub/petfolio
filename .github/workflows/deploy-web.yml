@@ -58,6 +58,8 @@ jobs:
       - name: Build Flutter Web (release)
         run: |
           flutter build web --release \
+            --no-web-resources-cdn \
+            --no-wasm-dry-run \
             --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
             --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
             --dart-define=STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }} \

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -77,18 +78,33 @@ Future<void> main() async {
 
   await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
 
-  if (!kIsWeb) {
-    await NotificationService.instance.initialize(
-      onTap: FcmService.instance.handleNotificationTap,
-    );
-    await PlatformNotifications.instance.initialize();
+  if (kIsWeb) {
+    runApp(const ProviderScope(child: PetfolioApp()));
+    unawaited(_initializeWebPushStack());
+    return;
   }
+
+  await NotificationService.instance.initialize(
+    onTap: FcmService.instance.handleNotificationTap,
+  );
+  await PlatformNotifications.instance.initialize();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await FcmService.instance.initialize();
 
   runApp(const ProviderScope(child: PetfolioApp()));
+}
+
+Future<void> _initializeWebPushStack() async {
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    await FcmService.instance.initialize();
+  } catch (e, stack) {
+    debugPrint('Web push stack init failed: $e\n$stack');
+  }
 }
 
 class PetfolioApp extends ConsumerWidget {
