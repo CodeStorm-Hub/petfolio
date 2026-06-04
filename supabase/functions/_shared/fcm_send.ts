@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const ANDROID_CHANNEL_PUSH = "petfolio_push";
-const ANDROID_CHANNEL_CHAT = "petfolio_chat";
+const ANDROID_CHANNEL_CHAT = "petfolio_chat_v2";
 const CHAT_SOUND = "chat_message";
 
 function base64UrlEncode(bytes: Uint8Array): string {
@@ -137,8 +137,10 @@ export async function sendFcmToUser(
 
   const accessToken = await getAccessToken(serviceAccount);
   const projectId = serviceAccount.project_id;
-  const fcmData = stringifyData(data);
-  const isChat = fcmData.type === "chat_message";
+  const isChat = data?.type === "chat_message";
+  const fcmData = stringifyData(
+    isChat ? { ...data, title, body } : data,
+  );
   const androidChannelId = isChat ? ANDROID_CHANNEL_CHAT : ANDROID_CHANNEL_PUSH;
   const androidSound = isChat ? CHAT_SOUND : "default";
   const apnsSound = isChat ? "chat_message.wav" : "default";
@@ -147,6 +149,41 @@ export async function sendFcmToUser(
   const errors: string[] = [];
 
   for (const token of tokens) {
+    const messagePayload: Record<string, unknown> = {
+      token,
+      data: fcmData,
+    };
+
+    if (isChat) {
+      messagePayload.android = { priority: "HIGH" };
+      messagePayload.apns = {
+        payload: {
+          aps: {
+            alert: { title, body },
+            sound: apnsSound,
+            badge: 1,
+          },
+        },
+      };
+    } else {
+      messagePayload.notification = { title, body };
+      messagePayload.android = {
+        priority: "HIGH",
+        notification: {
+          channel_id: androidChannelId,
+          sound: androidSound,
+        },
+      };
+      messagePayload.apns = {
+        payload: {
+          aps: {
+            sound: apnsSound,
+            badge: 1,
+          },
+        },
+      };
+    }
+
     const res = await fetch(
       `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
       {
@@ -155,28 +192,7 @@ export async function sendFcmToUser(
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          message: {
-            token,
-            notification: { title, body },
-            data: fcmData,
-            android: {
-              priority: "HIGH",
-              notification: {
-                channel_id: androidChannelId,
-                sound: androidSound,
-              },
-            },
-            apns: {
-              payload: {
-                aps: {
-                  sound: apnsSound,
-                  badge: 1,
-                },
-              },
-            },
-          },
-        }),
+        body: JSON.stringify({ message: messagePayload }),
       },
     );
     if (res.ok) {

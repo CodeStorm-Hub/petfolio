@@ -17,14 +17,26 @@ class NotificationService {
   static const _channelName = 'Care Reminders';
   static const pushChannelId = 'petfolio_push';
   static const pushChannelName = 'PetFolio';
-  static const chatChannelId = 'petfolio_chat';
+  static const chatChannelId = 'petfolio_chat_v2';
   static const chatChannelName = 'Chat messages';
   static const chatSoundResource = 'chat_message';
+  static const _legacyChatChannelId = 'petfolio_chat';
 
   NotificationTapCallback? _onTap;
+  bool _pluginReady = false;
 
   Future<void> initialize({NotificationTapCallback? onTap}) async {
     _onTap = onTap;
+    await _ensurePluginReady();
+    await _requestAndroidPermissions();
+  }
+
+  Future<void> initializeForBackgroundMessaging() async {
+    await _ensurePluginReady();
+  }
+
+  Future<void> _ensurePluginReady() async {
+    if (_pluginReady) return;
     tz.initializeTimeZones();
     _setLocalTimezone();
 
@@ -44,6 +56,9 @@ class NotificationService {
     final androidPlugin =
         _plugin.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
+    await androidPlugin?.deleteNotificationChannel(
+      channelId: _legacyChatChannelId,
+    );
     await androidPlugin?.createNotificationChannel(
       const AndroidNotificationChannel(
         pushChannelId,
@@ -59,14 +74,23 @@ class NotificationService {
         chatChannelId,
         chatChannelName,
         description: 'New chat messages',
-        importance: Importance.high,
+        importance: Importance.max,
         playSound: true,
         enableVibration: true,
         sound: RawResourceAndroidNotificationSound(chatSoundResource),
       ),
     );
-    await androidPlugin?.requestNotificationsPermission();
-    await androidPlugin?.requestExactAlarmsPermission();
+    _pluginReady = true;
+  }
+
+  Future<void> _requestAndroidPermissions() async {
+    final androidPlugin =
+        _plugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    try {
+      await androidPlugin?.requestNotificationsPermission();
+      await androidPlugin?.requestExactAlarmsPermission();
+    } catch (_) {}
   }
 
   @pragma('vm:entry-point')

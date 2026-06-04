@@ -13,7 +13,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
   }
-  await NotificationService.instance.initialize();
+  await NotificationService.instance.initializeForBackgroundMessaging();
   await showFcmAsLocalNotification(message);
   if (kDebugMode) {
     debugPrint('[FCM] background: ${message.messageId} ${message.data}');

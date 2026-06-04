@@ -80,9 +80,9 @@ npx supabase functions deploy process-care-fcm-reminders --no-verify-jwt
 
 ## Chat notification sound
 
-- Android: `android/app/src/main/res/raw/chat_message.wav` + channel `petfolio_chat` (created at app start).
+- Android: `android/app/src/main/res/raw/chat_message.wav` + channel `petfolio_chat_v2` (created at app start; legacy `petfolio_chat` is removed on launch).
 - iOS: `ios/Runner/chat_message.wav` in the app bundle.
-- Server: FCM uses channel `petfolio_chat` and sound `chat_message` when `data.type` is `chat_message`.
+- Server: Chat Android pushes are **data-only** (tray + sound via `flutter_local_notifications`); iOS uses APNs alert + `chat_message.wav`.
 - Replace `chat_message.wav` with your own short sound (keep the filename) and reinstall the app so Android recreates the channel.
 
 ## Test
