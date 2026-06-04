@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 
@@ -109,6 +110,7 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
     with WidgetsBindingObserver {
   final Set<String> _shownMatchIds = {};
   PetMutualMatch? _celebrationMatch;
+  Timer? _refreshDebounce;
 
   // Track the last known access state so we only reload candidates when it
   // transitions from blocked → granted (H-4 fix).
@@ -125,6 +127,7 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
 
   @override
   void dispose() {
+    _refreshDebounce?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -144,11 +147,17 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
     _lastKnownAccess = current;
   }
 
+  // Debounced so rapid lifecycle transitions (e.g. debug-VM attach, permission
+  // dialogs) collapse into a single invalidation instead of a request storm.
   void _refreshLocationState() {
-    ref.invalidate(locationAccessProvider);
-    ref.invalidate(deviceLatLngProvider);
-    ref.invalidate(discoveryCandidatesControllerProvider);
-    _lastKnownAccess = ref.read(locationAccessProvider).asData?.value;
+    _refreshDebounce?.cancel();
+    _refreshDebounce = Timer(const Duration(milliseconds: 600), () {
+      if (!mounted) return;
+      ref.invalidate(locationAccessProvider);
+      ref.invalidate(deviceLatLngProvider);
+      ref.invalidate(discoveryCandidatesControllerProvider);
+      _lastKnownAccess = ref.read(locationAccessProvider).asData?.value;
+    });
   }
 
   @override

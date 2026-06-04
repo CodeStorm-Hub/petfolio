@@ -142,3 +142,8 @@ tmp_window_dump.xml
 .dart-tool/
 tmp_home/
 .idea/caches/
+
+# Vercel — keep project.json, ignore the rest
+.vercel/output/
+.vercel/*.json
+!.vercel/project.json

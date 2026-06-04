@@ -1,13 +1,16 @@
 {
-    "name": "petfolio",
-    "short_name": "petfolio",
-    "start_url": ".",
+    "name": "PetFolio",
+    "short_name": "PetFolio",
+    "description": "Your pet's social network, health tracker & marketplace.",
+    "start_url": "/",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFF4E6",
+    "theme_color": "#FF8A4C",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "categories": ["lifestyle", "social", "health"],
+    "scope": "/",
+    "lang": "en",
     "icons": [
         {
             "src": "icons/Icon-192.png",
@@ -31,5 +34,6 @@
             "type": "image/png",
             "purpose": "maskable"
         }
-    ]
+    ],
+    "screenshots": []
 }

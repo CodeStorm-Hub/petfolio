@@ -51,6 +51,30 @@
 - **Error UI Handling**: For optimistic UI actions (like toggling care tasks or seller onboarding), show errors using `AppSnackBar.showError` (via `appSnackBarMessengerKey` on `MaterialApp.router`). Do not put long-lived state providers in `AsyncValue.error` states for transient/action-level failures.
 - **Web Safe Target**: Marionette execution runs exclusively in debug builds via conditional compiler imports (`marionette_debug_gate_stub.dart` vs `_io.dart`) to keep `main.dart` from importing `dart:io` on web targets.
 
+## 2026-06-01 — Care Screen Redesign (from PetFolio Redesign/Care Redesign.html)
+
+**Files changed**: `gamified_care_ui.dart`, `care_screen.dart`
+
+- **`CareGamifiedHeader` rewritten** — Removed tall `WaveHeader`; replaced with compact inline design:
+  - Status-bar-aware top padding + pet switcher row (`PetAvatar` + "CARE" label + pet name + chevron)
+  - Slim gradient hero card (`poppy→#FF6B45→tangerine`, radius 26, shadow-pop) with paw watermark
+  - `_StreakCoin`: 78px golden radial-gradient circle with 3D `Matrix4.rotateY` coin-spin + pulse-ring
+  - `_HeroLevelContent`: inline Lv + title + done-today pill + XP progress bar + XP-to-next text
+- **`_BadgeMedal` (replaces `_BadgeTile`)** — Circular medal design:
+  - 72px disc with radial gradient (owned: badge color, locked: grey), concentric depth rings, emoji
+  - Float bob animation (translateY 0→-5px, repeating reverse)
+  - Holographic sheen sweep (owned only); pulsing outer glow ring with scale+opacity (owned only)
+  - Lock pip (18px circle, bottom-right) for locked badges; `childAspectRatio: 0.72` grid
+- **`_UtilityBanner` (replaces `_NutritionBanner` + `_MedicalVaultBanner`)** — Side-by-side split card:
+  - Single rounded `Container` with `VerticalDivider` between two `_UtilityHalf` widgets
+  - Left: Nutrition (sunny palette), Right: Medical Vault (mint palette); both tappable
+- All existing Supabase providers and controllers unchanged; same data flow
+- `flutter analyze` — **No issues found.**
+
+**Next step:** Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-05-31 — Matching Feature P0/P1/P2 Systematic Fixes
 
 ### Database (applied to `jqyjvhwlcqcsuwcqgcwf` ✅)

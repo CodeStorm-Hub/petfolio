@@ -1,0 +1,20 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "flutter-web",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": [
+        "run",
+        "-d", "web-server",
+        "--web-port=8080",
+        "--web-hostname=localhost",
+        "--dart-define=SUPABASE_URL=https://jqyjvhwlcqcsuwcqgcwf.supabase.co",
+        "--dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxeWp2aHdsY3Fjc3V3Y3FnY3dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjI4MjgsImV4cCI6MjA5NDA5ODgyOH0.3bF68bNG0IwAc50YbOC3sem4k8O-d1vkvNNqBt1HbRw",
+        "--dart-define=STRIPE_PUBLISHABLE_KEY=pk_test_51TQvlrPcVRApxzIxJ8RmKYA1WEw7k8zubumbIfsDjRSGgDyAcSU22RhsZRtKIP1lAZ0wtGjpLfzjI4fozMZxGSlo006zuZrbon",
+        "--dart-define=NVIDIA_API_KEY=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"
+      ],
+      "port": 8080
+    }
+  ]
+}

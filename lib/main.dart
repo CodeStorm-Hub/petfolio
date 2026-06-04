@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
@@ -64,7 +65,7 @@ Future<void> main() async {
 
   await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
 
-  await NotificationService.instance.initialize();
+  if (!kIsWeb) await NotificationService.instance.initialize();
 
   runApp(const ProviderScope(child: PetfolioApp()));
 }
