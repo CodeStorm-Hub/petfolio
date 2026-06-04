@@ -104,6 +104,7 @@ class _ManagePetsScreenState extends ConsumerState<ManagePetsScreen> {
   void _openShareSheet(Pet pet) {
     showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
@@ -478,16 +479,6 @@ class _PetRow extends StatelessWidget {
                 }
               },
               itemBuilder: (_) => const [
-                PopupMenuItem(
-                  value: 'share',
-                  child: ListTile(
-                    leading: Icon(Icons.person_add_alt_1_rounded),
-                    title: Text('Share access'),
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ),
-                PopupMenuDivider(),
                 PopupMenuItem(
                   value: 'archive',
                   child: ListTile(

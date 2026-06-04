@@ -40,21 +40,6 @@ class NotificationRepository {
         .toList();
   }
 
-  /// Provides a real-time [Stream] of notifications for [recipientPetId].
-  ///
-  /// Emits a fresh list every time a new notification row is inserted.
-  Stream<List<AppNotification>> watchNotifications(String recipientPetId) {
-    return _client
-        .from('notifications')
-        .stream(primaryKey: ['id'])
-        .eq('recipient_pet_id', recipientPetId)
-        .order('created_at', ascending: false)
-        .limit(50)
-        .map((rows) => rows
-            .map((row) => AppNotification.fromJson(row))
-            .toList());
-  }
-
   // ── Write ────────────────────────────────────────────────────────────────
 
   /// Marks all unread notifications for [recipientPetId] as read.

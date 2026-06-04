@@ -368,10 +368,11 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
   void _showPostOptions(BuildContext context, FeedPost post) {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => _PostOptionsSheet(post: post),
+      builder: (_) => PostOptionsSheet(post: post),
     );
   }
 }
@@ -1101,8 +1102,8 @@ class _CommentInputBarState extends State<_CommentInputBar> {
 // Post options bottom sheet (Edit / Delete / Report)
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _PostOptionsSheet extends ConsumerWidget {
-  const _PostOptionsSheet({required this.post});
+class PostOptionsSheet extends ConsumerWidget {
+  const PostOptionsSheet({super.key, required this.post});
   final FeedPost post;
 
   @override

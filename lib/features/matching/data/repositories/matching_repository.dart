@@ -25,8 +25,19 @@ class MatchingRepository {
   final Ref _ref;
   final MatchingSupabaseDataSource _dataSource;
 
-  Future<bool> actorPetHasLocation(String petId) =>
-      _dataSource.petHasLocation(petId);
+  // Cache only confirmed-true results (location set is stable; "no location" can change).
+  final Map<String, bool> _petLocationCache = {};
+
+  Future<bool> actorPetHasLocation(String petId) async {
+    if (_petLocationCache[petId] == true) return true;
+    final hasLoc = await _dataSource.petHasLocation(petId);
+    if (hasLoc) _petLocationCache[petId] = true;
+    return hasLoc;
+  }
+
+  void invalidatePetLocationCache(String petId) {
+    _petLocationCache.remove(petId);
+  }
 
   /// Syncs the device's current GPS position to the pet's `location` column.
   ///
@@ -47,6 +58,7 @@ class MatchingRepository {
         latitude: coords.latitude,
         longitude: coords.longitude,
       );
+      _petLocationCache[activePetId] = true;
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     }
@@ -55,7 +67,8 @@ class MatchingRepository {
   Future<List<MatchingDiscoveryRow>> fetchCandidates({
     required String activePetId,
     int limit = 20,
-    int offset = 0,
+    DateTime? cursorCreatedAt,
+    String? cursorPetId,
     double radiusMeters = 80467,
     List<String>? speciesFilters,
     int? minAgeYears,
@@ -64,10 +77,8 @@ class MatchingRepository {
     final uid = _dataSource.currentUserId;
     if (uid == null) return [];
 
-    final hasStoredLocation = await _dataSource.petHasLocation(activePetId);
+    final hasStoredLocation = await actorPetHasLocation(activePetId);
     if (!hasStoredLocation) {
-      // Best-effort background sync — errors are surfaced by the controller
-      // layer (DiscoveryCandidatesController) which awaits a separate call.
       unawaited(
         syncActorLocationFromDevice(activePetId).catchError((_) {}),
       );
@@ -80,7 +91,8 @@ class MatchingRepository {
       actorPetId: activePetId,
       radiusMeters: radiusMeters,
       limit: limit,
-      offset: offset,
+      cursorCreatedAt: cursorCreatedAt,
+      cursorPetId: cursorPetId,
       speciesFilters: species,
       minAgeYears: minAgeYears,
       maxAgeYears: maxAgeYears,
@@ -93,17 +105,17 @@ class MatchingRepository {
     required String swipedOwnerUserId,
     required String action,
   }) async {
+    if (_dataSource.currentUserId == null) return;
+    if (swipedPetId.startsWith('demo-')) return;
+
+    final swipeAction = switch (action) {
+      'pass' => SwipeTableAction.pass,
+      'greet' => SwipeTableAction.greet,
+      'superPaw' => SwipeTableAction.superPaw,
+      _ => SwipeTableAction.like,
+    };
+
     try {
-      if (_dataSource.currentUserId == null) return;
-      if (swipedPetId.startsWith('demo-')) return;
-
-      final swipeAction = switch (action) {
-        'pass' => SwipeTableAction.pass,
-        'greet' => SwipeTableAction.greet,
-        'superPaw' => SwipeTableAction.superPaw,
-        _ => SwipeTableAction.like,
-      };
-
       await _dataSource.insertSwipe(
         actorPetId: swiperPetId,
         targetPetId: swipedPetId,
@@ -111,6 +123,7 @@ class MatchingRepository {
       );
     } catch (e) {
       debugPrint('[MatchingRepository] recordSwipe failed: $e');
+      rethrow;
     }
   }
 
@@ -124,15 +137,14 @@ class MatchingRepository {
     required String petId,
     required double latitude,
     required double longitude,
-  }) =>
-      _dataSource.setPetLocationPoint(
-        petId: petId,
-        latitude: latitude,
-        longitude: longitude,
-      );
-
-  Stream<List<Map<String, dynamic>>> chatThreadStream() =>
-      _dataSource.chatThreadStream();
+  }) async {
+    await _dataSource.setPetLocationPoint(
+      petId: petId,
+      latitude: latitude,
+      longitude: longitude,
+    );
+    _petLocationCache[petId] = true;
+  }
 
   Future<MatchInboxSnapshot> fetchMatchInbox(String activePetId) =>
       _dataSource.fetchMatchInboxSnapshot(activePetId);
@@ -146,8 +158,25 @@ class MatchingRepository {
         actorPetId: actorPetId,
       );
 
-  Future<List<ChatMessage>> fetchMessages(String threadId) =>
-      _dataSource.fetchMessages(threadId);
+  Future<String> ensureDirectChatThread({
+    required String actorPetId,
+    required String otherPetId,
+  }) =>
+      _dataSource.ensureDirectChatThread(
+        actorPetId: actorPetId,
+        otherPetId: otherPetId,
+      );
+
+  Future<List<ChatMessage>> fetchMessages(
+    String threadId, {
+    int limit = 50,
+    DateTime? beforeCreatedAt,
+  }) =>
+      _dataSource.fetchMessages(
+        threadId,
+        limit: limit,
+        beforeCreatedAt: beforeCreatedAt,
+      );
 
   Future<ChatMessage> sendMessage({
     required String threadId,

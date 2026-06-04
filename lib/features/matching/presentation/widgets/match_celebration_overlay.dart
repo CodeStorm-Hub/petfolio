@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../pet_profile/data/models/pet.dart';
@@ -22,6 +23,14 @@ class MatchCelebrationOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final activeEmoji = switch (activePet.species.toLowerCase()) {
+      'cat' => '🐱',
+      'rabbit' => '🐰',
+      'bird' => '🦜',
+      'reptile' => '🦎',
+      _ => '🐶',
+    };
+
     return Positioned.fill(
       child: Material(
         color: Colors.transparent,
@@ -105,7 +114,10 @@ class MatchCelebrationOverlay extends StatelessWidget {
                       children: [
                         Transform.rotate(
                           angle: -8 * math.pi / 180,
-                          child: const _AvatarCircle(emoji: '🐶'),
+                          child: _AvatarCircle(
+                            avatarUrl: activePet.avatarUrl,
+                            fallbackEmoji: activeEmoji,
+                          ),
                         ),
                         Transform.translate(
                           offset: const Offset(-20, 0),
@@ -137,7 +149,10 @@ class MatchCelebrationOverlay extends StatelessWidget {
                           offset: const Offset(-40, 0),
                           child: Transform.rotate(
                             angle: 8 * math.pi / 180,
-                            child: const _AvatarCircle(emoji: '🐱'),
+                            child: _AvatarCircle(
+                              avatarUrl: matchedPetAvatarUrl,
+                              fallbackEmoji: '🐾',
+                            ),
                           ),
                         ),
                       ],
@@ -198,8 +213,13 @@ class MatchCelebrationOverlay extends StatelessWidget {
 }
 
 class _AvatarCircle extends StatelessWidget {
-  const _AvatarCircle({required this.emoji});
-  final String emoji;
+  const _AvatarCircle({
+    required this.avatarUrl,
+    required this.fallbackEmoji,
+  });
+
+  final String? avatarUrl;
+  final String fallbackEmoji;
 
   @override
   Widget build(BuildContext context) {
@@ -224,11 +244,31 @@ class _AvatarCircle extends StatelessWidget {
           shape: BoxShape.circle,
           color: Colors.white,
         ),
+        clipBehavior: Clip.antiAlias,
         alignment: Alignment.center,
-        child: Text(
-          emoji,
-          style: const TextStyle(fontSize: 70),
-        ),
+        child: avatarUrl != null && avatarUrl!.isNotEmpty
+            ? CachedNetworkImage(
+                imageUrl: avatarUrl!,
+                width: double.infinity,
+                height: double.infinity,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Center(
+                  child: Text(
+                    fallbackEmoji,
+                    style: const TextStyle(fontSize: 70),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Center(
+                  child: Text(
+                    fallbackEmoji,
+                    style: const TextStyle(fontSize: 70),
+                  ),
+                ),
+              )
+            : Text(
+                fallbackEmoji,
+                style: const TextStyle(fontSize: 70),
+              ),
       ),
     );
   }

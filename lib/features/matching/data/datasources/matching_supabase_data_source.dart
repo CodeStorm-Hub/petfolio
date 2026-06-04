@@ -31,7 +31,8 @@ class MatchingSupabaseDataSource {
     required String actorPetId,
     required double radiusMeters,
     int limit = 20,
-    int offset = 0,
+    DateTime? cursorCreatedAt,
+    String? cursorPetId,
     List<String>? speciesFilters,
     int? minAgeYears,
     int? maxAgeYears,
@@ -39,21 +40,20 @@ class MatchingSupabaseDataSource {
     final uid = currentUserId;
     if (uid == null) return [];
 
-    final params = <String, dynamic>{
-      'p_actor_pet_id': actorPetId,
-      'p_radius_meters': radiusMeters,
-      'p_limit': limit,
-      'p_offset': offset,
-      'p_min_age_years': minAgeYears,
-      'p_max_age_years': maxAgeYears,
-    };
-    if (speciesFilters != null && speciesFilters.isNotEmpty) {
-      params['p_species'] = speciesFilters;
-    }
-
     final raw = await _client.rpc(
       'matching_discovery_candidates',
-      params: params,
+      params: <String, dynamic>{
+        'p_actor_pet_id': actorPetId,
+        'p_radius_meters': radiusMeters,
+        'p_limit': limit,
+        'p_cursor_created_at': cursorCreatedAt?.toUtc().toIso8601String(),
+        'p_cursor_pet_id': cursorPetId,
+        'p_species': (speciesFilters != null && speciesFilters.isNotEmpty)
+            ? speciesFilters
+            : null,
+        'p_min_age_years': minAgeYears,
+        'p_max_age_years': maxAgeYears,
+      },
     );
     if (raw == null) return [];
     final list = raw as List;
@@ -86,7 +86,8 @@ class MatchingSupabaseDataSource {
         .from('matches')
         .select()
         .or('pet_a_id.eq.$petId,pet_b_id.eq.$petId')
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .limit(100);
 
     return (rows as List)
         .cast<Map<String, dynamic>>()
@@ -120,13 +121,6 @@ class MatchingSupabaseDataSource {
         'p_latitude': latitude,
       },
     );
-  }
-
-  Stream<List<Map<String, dynamic>>> chatThreadStream() {
-    return _client
-        .from('chat_threads')
-        .stream(primaryKey: ['id'])
-        .order('created_at', ascending: false);
   }
 
   Future<List<Map<String, dynamic>>> fetchParticipantThreads() async {
@@ -165,17 +159,17 @@ class MatchingSupabaseDataSource {
       return const MatchInboxSnapshot(newMatches: [], conversations: []);
     }
 
+    // get_chat_inbox returns both match-based threads and direct message threads.
     final raw = await _client.rpc(
-      'get_match_inbox',
+      'get_chat_inbox',
       params: {'p_actor_pet_id': actorPetId},
     );
     if (raw == null) {
       return const MatchInboxSnapshot(newMatches: [], conversations: []);
     }
 
-    final list = raw as List;
     final items = <MatchInboxItem>[];
-    for (final row in list) {
+    for (final row in raw as List) {
       final map = Map<String, dynamic>.from(row as Map);
       final matchedAtRaw = map['matched_at'] as String?;
       if (matchedAtRaw == null) continue;
@@ -184,7 +178,8 @@ class MatchingSupabaseDataSource {
       final lastAtRaw = map['last_message_at'] as String?;
       items.add(
         MatchInboxItem(
-          matchId: map['match_id'] as String,
+          matchId: map['match_id'] as String?,
+          threadType: map['thread_type'] as String? ?? 'match',
           otherPetId: map['other_pet_id'] as String,
           otherPetName: map['other_pet_name'] as String? ?? 'Pet',
           otherPetAvatarUrl: map['other_pet_avatar_url'] as String?,
@@ -220,6 +215,20 @@ class MatchingSupabaseDataSource {
     );
   }
 
+  Future<String> ensureDirectChatThread({
+    required String actorPetId,
+    required String otherPetId,
+  }) async {
+    final raw = await _client.rpc(
+      'ensure_direct_chat_thread',
+      params: {
+        'p_actor_pet_id': actorPetId,
+        'p_other_pet_id': otherPetId,
+      },
+    );
+    return raw as String;
+  }
+
   Future<String> ensureChatThreadForMatch({
     required String matchId,
     required String actorPetId,
@@ -234,16 +243,31 @@ class MatchingSupabaseDataSource {
     return raw as String;
   }
 
-  Future<List<ChatMessage>> fetchMessages(String threadId) async {
-    final rows = await _client
+  Future<List<ChatMessage>> fetchMessages(
+    String threadId, {
+    int limit = 50,
+    DateTime? beforeCreatedAt,
+  }) async {
+    var builder = _client
         .from('chat_messages')
         .select()
-        .eq('thread_id', threadId)
-        .order('created_at', ascending: true);
+        .eq('thread_id', threadId);
 
-    return (rows as List)
+    if (beforeCreatedAt != null) {
+      builder = builder.lt(
+        'created_at',
+        beforeCreatedAt.toUtc().toIso8601String(),
+      );
+    }
+
+    final rows = await builder
+        .order('created_at', ascending: false)
+        .limit(limit);
+
+    final messages = (rows as List)
         .map((row) => ChatMessage.fromJson(Map<String, dynamic>.from(row as Map)))
         .toList(growable: false);
+    return messages.reversed.toList(growable: false);
   }
 
   Future<ChatMessage> sendMessage({

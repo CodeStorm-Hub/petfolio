@@ -118,7 +118,10 @@
       "WebFetch(domain:inside.java)",
       "WebFetch(domain:stackoverflow.com)",
       "WebFetch(domain:docs.gradle.org)",
-      "Bash(grep -E \"stripe_android|geolocator_android|flutter_local_notifications|permission_handler_android\" /c/Users/syedr/AppData/Local/Pub/Cache/hosted/pub.dev/../../../../../../../GitHub/petfolio/pubspec.lock | head -20)"
+      "Bash(grep -E \"stripe_android|geolocator_android|flutter_local_notifications|permission_handler_android\" /c/Users/syedr/AppData/Local/Pub/Cache/hosted/pub.dev/../../../../../../../GitHub/petfolio/pubspec.lock | head -20)",
+      "Bash(grep -v \"^$\")",
+      "Bash(supabase status *)",
+      "mcp__visualize__read_me"
     ]
   }
 }

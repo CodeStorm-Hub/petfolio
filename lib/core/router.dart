@@ -295,6 +295,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             threadId: state.pathParameters['threadId']!,
             actorPetId: query['actorPetId'] ?? '',
             matchId: query['matchId'],
+            otherPetId: query['otherPetId'],
             otherPetName: petNameRaw != null
                 ? Uri.decodeComponent(petNameRaw)
                 : 'Match',
@@ -306,11 +307,25 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/pet/:petId/edit',
         builder: (context, state) {
           final petId = state.pathParameters['petId']!;
-          final pets = ref.read(petListProvider).value ?? [];
-          for (final p in pets) {
-            if (p.id == petId) return EditProfileScreen(pet: p);
-          }
-          return const _PetEditMissingScreen();
+          return Consumer(
+            builder: (context, ref, _) {
+              final petsAsync = ref.watch(petListProvider);
+              return petsAsync.when(
+                loading: () => const Scaffold(
+                  body: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                error: (err, stack) => const _PetEditMissingScreen(),
+                data: (pets) {
+                  for (final p in pets) {
+                    if (p.id == petId) return EditProfileScreen(pet: p);
+                  }
+                  return const _PetEditMissingScreen();
+                },
+              );
+            },
+          );
         },
       ),
     ],
@@ -390,6 +405,8 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 // ─────────────────────────────────────────────────────────────────────────────
 // Fallback screen shown when a pet edit route can't resolve the pet
 // ─────────────────────────────────────────────────────────────────────────────
+
+
 
 class _PetEditMissingScreen extends StatelessWidget {
   const _PetEditMissingScreen();

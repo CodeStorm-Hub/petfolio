@@ -36,3 +36,33 @@ Future<void> openMatchChat(
 void openMatchesInbox(BuildContext context) {
   context.push('/matching/inbox');
 }
+
+/// Opens (or creates) a direct message thread between [actorPetId] and [otherPetId].
+/// Safe to call from any widget — handles errors with a snack bar.
+Future<void> openDirectChat(
+  BuildContext context,
+  WidgetRef ref, {
+  required String actorPetId,
+  required String otherPetId,
+  required String otherPetName,
+}) async {
+  try {
+    final threadId = await ref.read(matchingRepositoryProvider).ensureDirectChatThread(
+      actorPetId: actorPetId,
+      otherPetId: otherPetId,
+    );
+    if (!context.mounted) return;
+    final encodedName = Uri.encodeComponent(otherPetName);
+    context.push(
+      '/matching/chat/$threadId'
+      '?otherPetId=$otherPetId'
+      '&petName=$encodedName'
+      '&actorPetId=$actorPetId',
+    );
+  } catch (e, st) {
+    debugPrint('[openDirectChat] failed: $e\n$st');
+    if (context.mounted) {
+      AppSnackBar.showError('Could not open chat. Please try again.');
+    }
+  }
+}

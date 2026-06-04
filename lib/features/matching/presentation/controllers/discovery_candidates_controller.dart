@@ -20,8 +20,8 @@ const Duration _prefsDebounceDuration = Duration(milliseconds: 450);
 
 // One-shot error bus for location-sync failures.  The controller posts here
 // when syncActorLocationFromDevice throws; the screen listens and shows a
-// snackbar, then the notifier auto-clears via a microtask so the next error
-// can fire independently.
+// snackbar, then the notifier auto-clears via a post-frame callback so the
+// next error can fire independently.
 final locationSyncErrorProvider =
     NotifierProvider<_LocationSyncErrorNotifier, AppException?>(
   _LocationSyncErrorNotifier.new,
@@ -33,10 +33,18 @@ class _LocationSyncErrorNotifier extends Notifier<AppException?> {
 
   void post(AppException e) {
     state = e;
-    Future.microtask(() {
+    // M-4: clear after the frame so ref.listen fires before the state resets.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (ref.mounted) state = null;
     });
   }
+}
+
+// Keyset cursor for stable discovery pagination (no skipped/duplicated rows).
+class DiscoveryCursor {
+  const DiscoveryCursor({required this.createdAt, required this.petId});
+  final DateTime createdAt;
+  final String petId;
 }
 
 final discoveryCandidatesControllerProvider =
@@ -47,24 +55,41 @@ final discoveryCandidatesControllerProvider =
 class DiscoveryCandidatesBuffer {
   const DiscoveryCandidatesBuffer({
     this.candidates = const [],
-    this.nextOffset = 0,
+    this.cursor,
     this.mayHaveMore = true,
   });
 
   final List<DiscoveryCandidate> candidates;
-  final int nextOffset;
+  final DiscoveryCursor? cursor;
   final bool mayHaveMore;
 
   DiscoveryCandidatesBuffer copyWith({
     List<DiscoveryCandidate>? candidates,
-    int? nextOffset,
+    DiscoveryCursor? cursor,
     bool? mayHaveMore,
   }) =>
       DiscoveryCandidatesBuffer(
         candidates: candidates ?? this.candidates,
-        nextOffset: nextOffset ?? this.nextOffset,
+        cursor: cursor ?? this.cursor,
         mayHaveMore: mayHaveMore ?? this.mayHaveMore,
       );
+}
+
+// One-shot error bus for swipe record failures.
+final swipeErrorProvider = NotifierProvider<_SwipeErrorNotifier, String?>(
+  _SwipeErrorNotifier.new,
+);
+
+class _SwipeErrorNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void post(String message) {
+    state = message;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (ref.mounted) state = null;
+    });
+  }
 }
 
 class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuffer> {
@@ -97,9 +122,7 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
 
     final petId = ref.watch(activePetIdProvider);
     if (petId == null) {
-      return const DiscoveryCandidatesBuffer(
-        mayHaveMore: false,
-      );
+      return const DiscoveryCandidatesBuffer(mayHaveMore: false);
     }
 
     ref.listen(deviceLatLngProvider, (previous, next) {
@@ -116,7 +139,7 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
       repo: repo,
       petId: petId,
       prefs: prefs,
-      offset: 0,
+      cursor: null,
     );
     if (buffer.candidates.isEmpty) {
       final hasLocation = await repo.actorPetHasLocation(petId);
@@ -174,10 +197,7 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
     MatchPreferencesState prefs,
     int epoch,
   ) async {
-    if (_replenishLocked) {
-      Future.microtask(() => unawaited(_replenishIfLow(petId, prefs, epoch)));
-      return;
-    }
+    if (_replenishLocked) return;
     _replenishLocked = true;
     final repo = ref.read(matchingRepositoryProvider);
     try {
@@ -194,7 +214,7 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
             repo: repo,
             petId: petId,
             prefs: prefs,
-            offset: snap.nextOffset,
+            cursor: snap.cursor,
           );
         } catch (_) {
           if (epoch == _epoch) {
@@ -223,7 +243,7 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
         state = AsyncData(
           DiscoveryCandidatesBuffer(
             candidates: merged,
-            nextOffset: more.nextOffset,
+            cursor: more.cursor,
             mayHaveMore: more.candidates.length >= _discoveryPageSize,
           ),
         );
@@ -248,7 +268,7 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
         repo: repo,
         petId: petId,
         prefs: prefs,
-        offset: out.nextOffset,
+        cursor: out.cursor,
       );
       if (epoch != _epoch) return out;
       final existing = out.candidates.map((e) => e.petId).toSet();
@@ -259,7 +279,7 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
       }
       out = DiscoveryCandidatesBuffer(
         candidates: [...out.candidates, ...newOnes],
-        nextOffset: more.nextOffset,
+        cursor: more.cursor,
         mayHaveMore: more.candidates.length >= _discoveryPageSize,
       );
     }
@@ -270,21 +290,32 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
     required MatchingRepository repo,
     required String petId,
     required MatchPreferencesState prefs,
-    required int offset,
+    required DiscoveryCursor? cursor,
   }) async {
     final rows = await repo.fetchCandidates(
       activePetId: petId,
       limit: _discoveryPageSize,
-      offset: offset,
+      cursorCreatedAt: cursor?.createdAt,
+      cursorPetId: cursor?.petId,
       radiusMeters: prefs.maxDistanceMeters,
       speciesFilters: prefs.selectedSpecies,
       minAgeYears: prefs.ageMinYears,
       maxAgeYears: prefs.ageMaxYears,
     );
     final candidates = rows.map(_discoveryRowToCandidate).toList(growable: false);
+
+    // Advance cursor to the last returned row so next page starts after it.
+    DiscoveryCursor? nextCursor;
+    if (rows.isNotEmpty) {
+      final last = rows.last;
+      if (last.createdAt != null) {
+        nextCursor = DiscoveryCursor(createdAt: last.createdAt!, petId: last.id);
+      }
+    }
+
     return DiscoveryCandidatesBuffer(
       candidates: candidates,
-      nextOffset: offset + rows.length,
+      cursor: nextCursor,
       mayHaveMore: rows.length >= _discoveryPageSize,
     );
   }
@@ -316,7 +347,7 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
       playStyle: _defaultPlayStyle(species),
       energy: _defaultEnergy(species),
       bestWith: _defaultBestWith(species),
-      vaccinated: true,
+      vaccinated: false,
       gradientColors: gradient,
       subjectColor: subject,
       avatarUrl: r.avatarUrl,
@@ -325,13 +356,11 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
 
   static String _distanceLabel(double? meters) {
     if (meters == null || meters.isNaN) return 'Nearby';
-    final mi = meters / 1609.34;
-    if (mi <= 0.5) return 'Within 0.5 miles';
-    if (mi <= 1) return 'Within 1 mile';
-    if (mi <= 2) return 'Within 2 miles';
-    if (mi <= 5) return 'Within 5 miles';
-    if (mi <= 10) return 'Within 10 miles';
-    return 'Over 10 miles';
+    final km = meters / 1000.0;
+    if (km < 0.5) return 'Under 0.5 km';
+    if (km < 1.0) return 'Within 1 km';
+    if (km < 10.0) return '${km.toStringAsFixed(1)} km away';
+    return '${km.round()} km away';
   }
 
   static String _ageString(DateTime? dob) {

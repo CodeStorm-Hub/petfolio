@@ -126,10 +126,23 @@ class PetSwitcherSheet extends ConsumerWidget {
                   loading: () => const Center(
                     child: CircularProgressIndicator.adaptive(),
                   ),
-                  error: (e, _) => Center(
-                    child: Text('Could not load pets',
-                        style: TextStyle(color: pt.ink500)),
-                  ),
+                  error: (e, st) {
+                    debugPrint('Pet switcher sheet load failure: $e\n$st');
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Could not load pets',
+                              style: TextStyle(color: pt.ink500)),
+                          const SizedBox(height: 8),
+                          TextButton(
+                            onPressed: () => ref.invalidate(petListProvider),
+                            child: const Text('Retry', style: TextStyle(fontWeight: FontWeight.w700)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                   data: (pets) => ListView(
                     controller: scrollController,
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),

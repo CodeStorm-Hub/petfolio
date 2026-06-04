@@ -145,4 +145,16 @@ abstract final class AppColors {
   static const line200D = lineD;
   static const line100  = line2;
   static const line100D = line2D;
+
+  /// Parses a CSS hex string (`#RRGGBB` or `#AARRGGBB`) into a [Color].
+  /// Returns [fallback] if the string is null, empty, or unparseable.
+  static Color fromHexString(String? hex, {Color fallback = tangerine}) {
+    if (hex == null || hex.isEmpty) return fallback;
+    final clean = hex.replaceAll('#', '');
+    try {
+      if (clean.length == 6) return Color(int.parse('FF$clean', radix: 16));
+      if (clean.length == 8) return Color(int.parse(clean, radix: 16));
+    } catch (_) {}
+    return fallback;
+  }
 }

@@ -75,35 +75,52 @@
 
 ---
 
-## 2026-05-31 — Care Module Gamification & Data Integrity Fixes
+## 2026-05-31 — Matching Feature P0/P1/P2 Systematic Fixes
 
-**Phase 1 — Database (migration `20260531100700_care_tasks_dedupe_and_unique_index.sql`)**
-- Removed 27 duplicate rows from `care_tasks` (keeping the oldest); applied a `UNIQUE INDEX care_tasks_pet_dedup_uidx ON care_tasks (pet_id, task_type, frequency, lower(btrim(title)))` to prevent future duplicates at the DB level.
-- Verified: 169 total rows = 169 unique combos; 0 duplicates remain.
+### Database (applied to `jqyjvhwlcqcsuwcqgcwf` ✅)
+- **[C-1] `chat_messages` RLS**: Enabled RLS + idempotent `select by participant` and `insert by participant` policies — fixes privacy regression where any authenticated user could read all chat messages.
+- **[C-2] N+1 elimination**: Replaced correlated owner subquery in `matching_discovery_candidates` with `LEFT JOIN LATERAL` — cuts 21 queries → 1 per discovery page load.
+- **[H-2] Keyset cursor pagination**: Dropped old 7-param `matching_discovery_candidates`; new 8-param version uses `(p_cursor_created_at, p_cursor_pet_id)` for stable pagination — no more skipped/duplicate candidates.
+- **[H-3a] Downgrade trigger**: `BEFORE UPDATE` trigger on `swipes` raises `cannot_downgrade_matched_swipe` if a match exists for the pair — prevents LIKE→PASS orphaning a match row.
+- **[H-3b] UPDATE path trigger**: `AFTER UPDATE OF action` trigger fires `swipes_after_insert_mutual_match()` for PASS→LIKE upgrades — previously mutual matches were silently never created on upsert updates.
 
-**Phase 2 — Models (`pet_level.dart`)**
-- Created `PetLevel.fromXp(int totalXp)`: 10-level ladder derived from real `total_points` in `pet_care_gamification`. Each level has XP thresholds, title strings, progress fraction, and `xpToNext` for next-level display.
-- Created `BadgeInfo` value class + `kBadgeCatalog` const list mapping all 6 real `pet_badges.badge_type` values (`first_log`, `3_day_streak`, `7_day_hero`, `routine_master`, `30_day_legend`, `care_champion`) to emoji, label, color, and description.
-- Added `badgeInfoFor(String type)` lookup helper.
+### Dart — Data Layer
+- **`matching_supabase_data_source.dart`**: `fetchDiscoveryCandidates` replaced `offset` param with `cursorCreatedAt/cursorPetId`. `fetchMessages` now accepts `limit: 50` (default) + `beforeCreatedAt` for page-back loading; filter is applied before `.limit()` to avoid `PostgrestTransformBuilder` constraint.
+- **`matching_repository.dart`**: `fetchCandidates` passes cursor params through. `recordSwipe()` now rethrows after logging — callers can surface failures. `fetchMessages` exposes `limit` + `beforeCreatedAt`.
 
-**Phase 3 — Repository (`pet_care_repository.dart`)**
-- Fixed `bulkCreateTasks` de-dup key mismatch: DB stores `vet_visit`/`nail_trim` (snake_case) but Dart enum `.name` produced `vetVisit`/`nailTrim` (camelCase) — keys never matched, silently inserting duplicates on every "Refresh AI Routine". Both sides now normalised via `_taskTypeToLogCareType` and `_frequencyToDbString` helpers.
-- Added `_frequencyToDbString` static helper: maps `twiceDaily→twice_daily`, `asNeeded→as_needed`, others pass through.
+### Dart — Discovery Controller
+- **`discovery_candidates_controller.dart`**: Added `DiscoveryCursor({createdAt, petId})` class. `DiscoveryCandidatesBuffer` replaces `nextOffset: int` with `cursor: DiscoveryCursor?`. `_fetchPage` extracts cursor from `rows.last`. `_replenishIfLow` and `_ensureDepth` pass cursor through the full pagination chain. Added `swipeErrorProvider` one-shot error bus (same pattern as `locationSyncErrorProvider`). Fixed `_distanceLabel` — all-miles → consistent metric km.
+- **`discovery_controller.dart`**: `swipe()` wraps `_repo.recordSwipe()` in `.catchError()` and posts to `swipeErrorProvider` on failure.
+- **`matching_screen.dart`**: `_DiscoveryViewState.build()` listens to `swipeErrorProvider` and shows a `SnackBar` on swipe record failure.
 
-**Phase 4 — UI wiring**
-- **`CareGamifiedHeader`** → `petAwardsSummaryProvider(petId)` (→ `get_pet_awards_summary` RPC) drives XP, level number, title, progress bar, and `xpToNext` text. Skeleton loader shown while loading. Error falls back to level 0.
-- **`CareGamifiedTrophyRoom`** → `petAwardsSummaryProvider` drives `owned` flag on each `PfAchievementTile` via `a.unlockedTypes`. All 6 catalog badges shown; owned ones are highlighted.
-- **`CareGamifiedWeeklyChart`** → `weekHits` (real 7-bool list from `dashboard.weekGoalHit`) drives bar heights. Past hit→0.85, miss→0.20, future→0.15 placeholder. Today uses live `progressPercent`.
-- **Vault → button** (`care_screen.dart:182`): `onTap: () {}` → `onTap: () => context.push('/care/medical-vault')`.
-- **`_DoneCounter`**: Excludes `isLogDerived` synthetic tasks from denominator; previously inflated "X/Y done" count.
-- **`_frequencyPill` helper**: Biweekly tasks now show `BIWEEKLY` pill, not `WEEKLY`.
+### Dart — Chat Pagination (P1)
+- **`chat_conversation_controller.dart`**: Initial `fetchMessages` limited to 50. Added `hasMore` flag and `loadOlderMessages()` method — guards against concurrent calls with `_loadingOlder`, prepends older page to state list.
+- **`chat_screen.dart`**: Added `_onScroll` listener on `ScrollController` — triggers `loadOlderMessages()` when the user scrolls within 200px of the top. Shows a `CircularProgressIndicator.adaptive` spinner at the visual top while `hasMore == true`.
 
-**Phase 5 — AI Prompt Consistency**
-- `care_recommendation_service.dart`: Aligned prompt instruction from "Generate 6-8 tasks" → "Generate 4-8 tasks" to match the enforced `minItems:4, maxItems:8` guided JSON schema, preventing model-guardrail conflicts.
+### Dart — State & Polish (P2)
+- **`match_preference_controller.dart`**: Loads species/distance/age from `SharedPreferences` on `build()` asynchronously (state defaults until loaded). Each setter persists changes immediately — preferences survive hot-restart and app kills.
+- **`edit_profile_controller.dart`**: Calls `matchingRepository.invalidatePetLocationCache(originalPet.id)` after successful profile save — ensures the next discovery load re-queries the DB rather than using a stale in-memory cache entry.
+- **Lock safety**: `_replenishLocked` already released in `finally` block (confirmed — no change needed).
 
-`dart analyze lib` — **No issues found.**
+`flutter analyze lib/features/matching/ lib/features/pet_profile/presentation/controllers/` — **No issues found.**
+
+**Next step:** Phase complete — please run (/remember) to save tokens before proceeding.
 
 ---
+
+## 2026-05-31 — Code Audit & Stability Fixes
+
+- **Feature Teardown**: Completely removed the "Treat" and "Undo" buttons from the Match Screen, eliminating the stubbed snackbars and unnecessary UI code.
+- **Database & Storage**: Created a new database migration (`20260531_audit_fixes.sql`) adding an optimized admin read policy for the `medical-documents` storage bucket with cached `public.is_admin()` resolution.
+- **Riverpod & State Management**: Fixed `ref.listen` duplicate listener registration in `CareNotifier` build phase using a microtask-deferred `ref.watch` approach.
+- **Routing & Deep-Links**: Resolved the cold-start deep-link race condition for the pet edit route in `router.dart` by wrapping the builder in a `Consumer` to handle async loading states.
+- **Unbounded Queries**: Added `limit` boundaries to Supabase streams and queries in matching matches repository (`fetchMatchesForPet`), care logs repository (`fetchLogsForPet`), and `HealthVaultController` stream.
+- **UI/UX & Rendering**: Virtualized list views in `care_screen.dart` and `matches_inbox_screen.dart` by converting to `ListView.builder`.
+- **Social Overflows**: Wired the feed post card's three-dot menu to show the public `PostOptionsSheet` and removed the stubbed search icon from the header.
+- **Robust Error Handling**: Added error retry UI layouts and debug logs to the five swallowed error sections across nutrition, social, switcher, and quest cards.
+- **MediaQuery Optimizations**: Swapped full media query subscriptions to specific `sizeOf` and `viewInsetsOf` fields.
+- **Global Crash Handling**: Registered global handlers for uncaught flutter errors and platform dispatcher errors in `main.dart`.
+- **Modal Sheets Positioning**: Configured the remaining modal bottom sheets (including create post, post options, share access, and weight logging) to use `useRootNavigator: true` so they display on top of the persistent bottom navigation bar.
 
 ## 2026-05-26 — Responsiveness Refactoring & Spacing Fixes
 
@@ -1448,6 +1465,41 @@ Phase complete and to log to .remember/remember.md, Please run (/remember) to sa
 
 ---
 
+## 2026-06-01 — Social DM Chat (Instagram-style Direct Messages)
+
+### DB (migration: `20260601_social_dm_chat.sql`, applied to `jqyjvhwlcqcsuwcqgcwf`)
+- Added `dm_pet_a_id` + `dm_pet_b_id` columns to `chat_threads` (NULL for match threads)
+- `UNIQUE INDEX chat_threads_dm_pets_uidx` on `(dm_pet_a_id, dm_pet_b_id) WHERE mutual_match_id IS NULL` — one thread per pet pair
+- New RPC `ensure_direct_chat_thread(p_actor_pet_id, p_other_pet_id)` — ownership-verified, canonical UUID ordering, idempotent UPSERT
+- New RPC `get_chat_inbox(p_actor_pet_id)` — UNION of match threads + DM threads; `get_match_inbox` left intact
+
+### Data layer
+- `MatchInboxItem.matchId` → nullable (`String?`); added `threadType` field + `isDm` getter + updated `isNewMatch` (DMs excluded)
+- `fetchMatchInboxSnapshot` → now calls `get_chat_inbox`; parses `thread_type` + nullable `match_id`
+- Added `ensureDirectChatThread` to datasource + repository
+
+### State / controller
+- `ChatConversationArgs` typedef: added `String? otherPetId` (null for match chats)
+- `ChatConversationController.build()`: added DM resolution branch — calls `ensureDirectChatThread` when `threadId` is empty and `otherPetId` is set
+
+### UI
+- `ChatScreen`: added `otherPetId` param; eyebrow reads `'Social · Chat'` for DMs; empty-state hint differs per type
+- `router.dart`: `/matching/chat/:threadId` now reads `otherPetId` query param
+- `matching_navigation.dart`: added `openDirectChat(context, ref, actorPetId, otherPetId, otherPetName)`
+- `social_profile_screen.dart`: `_OtherProfileButtons` now shows **Message** button (calls `openDirectChat`); `_ActionButton.onPressed` is nullable
+- `matches_inbox_screen.dart`: DM tiles tap to `openDirectChat`; match tiles use `item.matchId!`; DM tiles show a coral "DM" badge
+
+### Zero regressions
+- Existing match chat flow untouched — `get_match_inbox` and `ensure_chat_thread_for_match` unchanged
+- All existing `ChatConversationArgs` call sites work: `otherPetId` defaults to `null`
+- `dart analyze`: 0 issues
+
+**Next step:** None.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-05-28 — Social Feed Inline Comments Bottom Sheet (Dart)
 
 - **Inline Comments Bottom Sheet** — Created `PostCommentsBottomSheet` inside `lib/features/social/presentation/widgets/post_comments_bottom_sheet.dart` to list and post comments inline on the feed screen without navigating to the post details page.
@@ -1474,6 +1526,17 @@ All applied to remote project `jqyjvhwlcqcsuwcqgcwf`. Re-ran advisors: `function
 **Not done (deferred, optional):** revoke EXECUTE-from-anon on `cleanup_expired_stories`/`get_pet_awards_summary`/`mark_story_viewed`; drop genuinely-unused indexes; route vendor order writes through `vendor_update_order` RPC; de-dupe care date logic; enable leaked-password protection in Auth dashboard.
 
 **Next step:** None — no Dart source changed, so analyzer/tests unaffected.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-06-04 — PR #15 Copilot review fixes (Dart + DB)
+
+- **Care** — Restored `_HorizontalDatePicker` on `CareScreen` wired to `careDashboardProvider.notifier.selectDate()`; Vault → navigates to `/care/medical-vault`.
+- **Chat** — `loadOlderMessages()` forces provider rebuild when `_hasMore` becomes false (stops infinite load-more spinner); scroll guard already uses `hasClients`.
+- **DB** (`20260604120000_pr15_review_fixes.sql`, applied to `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP) — Social like/comment/follow notification triggers + `notifications` realtime; `REVOKE ALL … FROM PUBLIC` on trigger functions; `get_chat_inbox` wrapped with `ORDER BY COALESCE(last_message_at, matched_at) DESC`.
+- **Migrations** — Aligned `20260601000000_social_fixes`, `20260601010000_social_dm_chat`, `20260601020000_security_definer_search_path_fix` with same REVOKE/search_path/ORDER BY patterns.
+
+**Next step:** Update PR #15 description to reflect full scope (social DM, matching pagination, migrations) or split follow-up PRs.
 
 Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
 
