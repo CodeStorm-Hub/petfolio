@@ -62,7 +62,7 @@
   document.body.appendChild(banner);
 
   document.getElementById('pwa-banner-close').addEventListener('click', function () {
-    localStorage.setItem('pwa_banner_dismissed', '1');
+    try { localStorage.setItem('pwa_banner_dismissed', '1'); } catch (_) {}
     banner.style.animation = 'slideUp .25s cubic-bezier(.16,1,.3,1) reverse both';
     setTimeout(function () { banner.remove(); }, 280);
   });

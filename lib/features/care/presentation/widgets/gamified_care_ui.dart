@@ -7,6 +7,7 @@ import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 
 import '../../../../core/models/pet.dart';
+import '../../data/models/care_task.dart' show CareFrequency;
 import '../../data/models/care_task_log.dart';
 import '../../data/models/pet_awards_summary.dart';
 import '../../data/models/pet_level.dart';
@@ -69,7 +70,9 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
     );
 
     final tasks = widget.dashboard.tasks.value ?? [];
-    final planned = tasks.where((t) => !t.isLogDerived).toList();
+    final planned = tasks
+        .where((t) => !t.isLogDerived && t.frequency != CareFrequency.asNeeded)
+        .toList();
     final doneToday = planned.where((t) => t.isCompleted).length;
     final totalToday = planned.length;
     final pct = lv.progress.clamp(0.0, 1.0);
@@ -1107,6 +1110,19 @@ class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin 
     if (widget.owned) {
       final delayFraction =
           (widget.index * 300 / sheenDuration.inMilliseconds).clamp(0.0, 1.0);
+      _sheenCtrl.forward(from: delayFraction);
+      _sheenCtrl.addStatusListener((s) {
+        if (s == AnimationStatus.completed && mounted) _sheenCtrl.repeat();
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(_TrophyCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.owned && widget.owned && !_sheenCtrl.isAnimating) {
+      final delayFraction =
+          (widget.index * 300 / _sheenCtrl.duration!.inMilliseconds).clamp(0.0, 1.0);
       _sheenCtrl.forward(from: delayFraction);
       _sheenCtrl.addStatusListener((s) {
         if (s == AnimationStatus.completed && mounted) _sheenCtrl.repeat();
