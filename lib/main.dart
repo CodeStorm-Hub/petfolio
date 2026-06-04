@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'marionette_debug_gate_stub.dart'
     if (dart.library.io) 'marionette_debug_gate_io.dart'
     as marionette_gate;
+import 'core/firebase/fcm_background_handler.dart';
 import 'core/firebase/fcm_service.dart';
 import 'firebase_options.dart';
 import 'core/router.dart';
@@ -78,6 +80,7 @@ Future<void> main() async {
   }
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await FcmService.instance.initialize();
 
   runApp(const ProviderScope(child: PetfolioApp()));

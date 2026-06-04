@@ -51,8 +51,23 @@ class FcmMessageRouter {
     }
   }
 
+  static bool usePushForPath(String path) {
+    return path.startsWith('/matching/chat/') ||
+        path == '/matching/inbox' ||
+        path.startsWith('/social/post/') ||
+        path == '/social/notifications' ||
+        path.startsWith('/profile/orders/') ||
+        path.startsWith('/seller/orders/') ||
+        path == '/seller/kyc';
+  }
+
   static void navigate(GoRouter router, Map<String, dynamic> data) {
     final path = routeFromData(data);
-    if (path != null) router.go(path);
+    if (path == null) return;
+    if (usePushForPath(path)) {
+      router.push(path);
+    } else {
+      router.go(path);
+    }
   }
 }

@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'fcm_background_handler.dart';
 import 'fcm_message_router.dart';
 import 'fcm_push_display.dart';
 import 'fcm_token_repository.dart';
@@ -33,8 +32,6 @@ class FcmService {
     }
 
     _router = router;
-
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
     final messaging = FirebaseMessaging.instance;
     await messaging.setForegroundNotificationPresentationOptions(

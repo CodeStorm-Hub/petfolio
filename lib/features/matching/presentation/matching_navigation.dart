@@ -37,6 +37,14 @@ void openMatchesInbox(BuildContext context) {
   context.push('/matching/inbox');
 }
 
+void popOrGo(BuildContext context, String fallbackLocation) {
+  if (context.canPop()) {
+    context.pop();
+  } else {
+    context.go(fallbackLocation);
+  }
+}
+
 /// Opens (or creates) a direct message thread between [actorPetId] and [otherPetId].
 /// Safe to call from any widget — handles errors with a snack bar.
 Future<void> openDirectChat(

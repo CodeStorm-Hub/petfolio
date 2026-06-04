@@ -46,5 +46,15 @@ void main() {
         '/seller',
       );
     });
+
+    test('usePushForPath for chat and inbox', () {
+      expect(
+        FcmMessageRouter.usePushForPath('/matching/chat/t1'),
+        isTrue,
+      );
+      expect(FcmMessageRouter.usePushForPath('/matching/inbox'), isTrue);
+      expect(FcmMessageRouter.usePushForPath('/care'), isFalse);
+      expect(FcmMessageRouter.usePushForPath('/seller'), isFalse);
+    });
   });
 }
