@@ -124,7 +124,9 @@
       "mcp__visualize__read_me",
       "Bash(git fetch *)",
       "Bash(git merge *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_snapshot"
     ]
   }
 }
