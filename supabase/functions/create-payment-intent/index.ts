@@ -35,6 +35,37 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
+function allowedRedirectOrigins(): string[] {
+  const raw =
+    Deno.env.get('ALLOWED_REDIRECT_ORIGINS') ?? Deno.env.get('PUBLIC_APP_ORIGIN') ?? '';
+  return raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function isAllowedRedirectUrl(url: string): boolean {
+  const origins = allowedRedirectOrigins();
+  if (origins.length === 0) return false;
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+  if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+    return true;
+  }
+  return origins.some((origin) => {
+    try {
+      return parsed.origin === new URL(origin).origin;
+    } catch {
+      return false;
+    }
+  });
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -191,6 +222,9 @@ serve(async (req) => {
     if (checkout_mode) {
       if (!success_url || !cancel_url) {
         return json({ error: 'success_url and cancel_url are required for checkout_mode' }, 400);
+      }
+      if (!isAllowedRedirectUrl(success_url) || !isAllowedRedirectUrl(cancel_url)) {
+        return json({ error: 'Redirect URL origin is not allowed' }, 400);
       }
 
       if (order.stripe_checkout_session_id) {

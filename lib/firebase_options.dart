@@ -40,8 +40,8 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDW3jiVahlDqTey6aj0zsj9Z-Dj-kvamgE',
-    appId: '1:86798095066:android:5b5d6008f7ab957f68cbe3',
+    apiKey: 'AIzaSyC5xx8ZU50o8VHMVsFCQIGOsbnVt11Q4sM',
+    appId: '1:86798095066:ios:0fdb00b077c71cc668cbe3',
     messagingSenderId: '86798095066',
     projectId: 'petfolio-v1',
     storageBucket: 'petfolio-v1.firebasestorage.app',

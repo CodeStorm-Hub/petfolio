@@ -3,7 +3,10 @@ import 'dart:io';
 Future<void> main() async {
   final envFile = File('.env');
   if (!await envFile.exists()) {
-    stderr.writeln('.env not found. Copy .env.example and set FIREBASE_VAPID_KEY.');
+    stderr.writeln(
+      '.env not found. Copy .env.example and set FIREBASE_WEB_API_KEY, '
+      'FIREBASE_WEB_APP_ID, FIREBASE_PROJECT_ID, and FIREBASE_MESSAGING_SENDER_ID.',
+    );
     exitCode = 1;
     return;
   }

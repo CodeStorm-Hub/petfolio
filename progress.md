@@ -1692,3 +1692,12 @@ Phase complete — please run (/remember) to save tokens before proceeding to th
 
 Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
 
+## 2026-06-05 — Production Vercel + Supabase web checkout
+
+- **Vercel (`petfolio`):** `prj_hMHouLWimZvr5dDOlZeAhbH8xtop` · production domains `petfolio.live`, `www.petfolio.live`, `petfolio-woad.vercel.app`.
+- **Supabase secrets:** `PUBLIC_APP_ORIGIN=https://petfolio.live`, `ALLOWED_REDIRECT_ORIGINS` (live + www + Vercel prod alias).
+- **`create-payment-intent`:** redeployed (redirect URL allowlist).
+- **`deploy-web.yml`:** production-only (`main` push + `workflow_dispatch`; no PR preview deploy).
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
