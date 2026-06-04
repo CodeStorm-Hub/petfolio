@@ -1660,3 +1660,25 @@ Phase complete — please run (/remember) to save tokens before proceeding to th
 
 Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
 
+## 2026-06-05 — FCM push fix (server JWT + client heads-up)
+
+- **Root cause (hosted)** — `send-fcm-notification` HTTP 500: `FIREBASE_SERVICE_ACCOUNT_JSON` Supabase secret is invalid JSON; edge logs failed on chat INSERT (~20:54 UTC) despite 2 Android tokens in `user_fcm_devices`.
+- **Server** — `fcm_send.ts` base64url JWT fix, Android `petfolio_push` channel, stale token cleanup; functions redeployed.
+- **Client** — FCM foreground/background shows tray notifications via `fcm_push_display.dart` + `NotificationService.showPushNotification`; tap → `FcmMessageRouter`; Android default channel meta-data.
+- **Tool** — `tool/set_fcm_supabase_secrets.ps1`.
+
+**Manual:** Re-run secret script with Firebase adminsdk JSON, hot-restart both devices, test chat with recipient app backgrounded.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-06-05 — FCM secrets + VAPID wired (hosted verified)
+
+- **`petfolio-v1-firebase-adminsdk-fbsvc-849086572f.json`** in repo root (gitignored); `.\tool\set_fcm_supabase_secrets.ps1` uploads minified `FIREBASE_SERVICE_ACCOUNT_JSON` + `FCM_DISPATCH_SECRET` to Supabase.
+- **Hosted test:** `send-fcm-notification` → `{"sent":1,"total":1}` (server push pipeline live).
+- **`.env`:** `FIREBASE_VAPID_KEY` matches Web Push certificate public key; `dart run tool/sync_firebase_web_config.dart` refreshed `web/firebase-config.js`.
+- **Script fixes:** PowerShell `Join-Path` + optional default adminsdk path; `supabase/.secrets.fcm.env` gitignored.
+
+**Manual:** Full restart on both Android devices + web (`flutter run --dart-define-from-file=.env`); test chat with recipient backgrounded; web Care tab → Enable push banner if token not auto-registered.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+

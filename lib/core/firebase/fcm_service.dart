@@ -6,14 +6,12 @@ import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../widgets/app_snack_bar.dart';
 import 'fcm_background_handler.dart';
 import 'fcm_message_router.dart';
+import 'fcm_push_display.dart';
 import 'fcm_token_repository.dart';
 import '../../firebase_options.dart';
 import 'firebase_env.dart';
-
-typedef FcmForegroundHandler = void Function(RemoteMessage message);
 
 class FcmService {
   FcmService._();
@@ -24,14 +22,10 @@ class FcmService {
   FcmTokenRepository get _tokenRepo =>
       FcmTokenRepository(Supabase.instance.client);
   GoRouter? _router;
-  FcmForegroundHandler? _onForeground;
 
   bool get isAvailable => Firebase.apps.isNotEmpty;
 
-  Future<void> initialize({
-    GoRouter? router,
-    FcmForegroundHandler? onForeground,
-  }) async {
+  Future<void> initialize({GoRouter? router}) async {
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
@@ -39,7 +33,6 @@ class FcmService {
     }
 
     _router = router;
-    _onForeground = onForeground;
 
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
@@ -61,7 +54,9 @@ class FcmService {
       );
     });
 
-    FirebaseMessaging.onMessage.listen(_handleForeground);
+    FirebaseMessaging.onMessage.listen((message) {
+      _handleForeground(message);
+    });
     FirebaseMessaging.onMessageOpenedApp.listen(_handleOpened);
     final initial = await messaging.getInitialMessage();
     if (initial != null) _handleOpened(initial);
@@ -99,6 +94,9 @@ class FcmService {
         token: token,
         platform: FirebaseEnv.platformLabel,
       );
+      if (kDebugMode) {
+        debugPrint('[FCM] token synced (${FirebaseEnv.platformLabel})');
+      }
       return true;
     } catch (e) {
       if (kDebugMode) debugPrint('[FCM] syncToken failed: $e');
@@ -117,17 +115,8 @@ class FcmService {
     } catch (_) {}
   }
 
-  void _handleForeground(RemoteMessage message) {
-    final custom = _onForeground;
-    if (custom != null) {
-      custom(message);
-      return;
-    }
-    final title = message.notification?.title ?? message.data['title'] as String?;
-    final body = message.notification?.body ?? message.data['body'] as String?;
-    if (title != null || body != null) {
-      AppSnackBar.show([title, body].whereType<String>().join(': '));
-    }
+  Future<void> _handleForeground(RemoteMessage message) async {
+    await showFcmAsLocalNotification(message);
   }
 
   void _handleOpened(RemoteMessage message) {
@@ -137,6 +126,12 @@ class FcmService {
   }
 
   void updateRouter(GoRouter router) => _router = router;
+
+  void handleNotificationTap(Map<String, dynamic> data) {
+    final router = _router;
+    if (router == null) return;
+    FcmMessageRouter.navigate(router, data);
+  }
 
   Future<void> dispose() async {
     await _tokenRefreshSub?.cancel();

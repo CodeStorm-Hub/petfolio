@@ -11,7 +11,7 @@ class _IoPlatformNotifications implements PlatformNotifications {
   final _native = NotificationService.instance;
 
   @override
-  Future<void> initialize() => _native.initialize();
+  Future<void> initialize() async {}
 
   @override
   Future<void> scheduleTaskReminder({

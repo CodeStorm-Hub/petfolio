@@ -1,11 +1,26 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
+const ANDROID_CHANNEL_ID = "petfolio_push";
+
+function base64UrlEncode(bytes: Uint8Array): string {
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+function base64UrlEncodeJson(value: unknown): string {
+  return base64UrlEncode(new TextEncoder().encode(JSON.stringify(value)));
+}
+
 async function getAccessToken(serviceAccount: {
   client_email: string;
   private_key: string;
 }): Promise<string> {
-  const header = btoa(JSON.stringify({ alg: "RS256", typ: "JWT" }));
   const now = Math.floor(Date.now() / 1000);
+  const header = base64UrlEncodeJson({ alg: "RS256", typ: "JWT" });
   const claim = {
     iss: serviceAccount.client_email,
     sub: serviceAccount.client_email,
@@ -14,7 +29,7 @@ async function getAccessToken(serviceAccount: {
     exp: now + 3600,
     scope: "https://www.googleapis.com/auth/firebase.messaging",
   };
-  const payload = btoa(JSON.stringify(claim));
+  const payload = base64UrlEncodeJson(claim);
   const unsigned = `${header}.${payload}`;
 
   const pem = serviceAccount.private_key.replace(/\\n/g, "\n");
@@ -35,10 +50,7 @@ async function getAccessToken(serviceAccount: {
     key,
     new TextEncoder().encode(unsigned),
   );
-  const signature = btoa(String.fromCharCode(...new Uint8Array(sig)))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+  const signature = base64UrlEncode(new Uint8Array(sig));
   const jwt = `${unsigned}.${signature}`;
 
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
@@ -51,9 +63,38 @@ async function getAccessToken(serviceAccount: {
   });
   const tokenJson = await tokenRes.json();
   if (!tokenRes.ok) {
-    throw new Error(tokenJson.error_description ?? "OAuth token failed");
+    throw new Error(
+      (tokenJson as { error_description?: string }).error_description ??
+        "OAuth token failed",
+    );
   }
-  return tokenJson.access_token as string;
+  return (tokenJson as { access_token: string }).access_token;
+}
+
+function parseServiceAccount(): {
+  client_email: string;
+  private_key: string;
+  project_id: string;
+} {
+  const raw = Deno.env.get("FIREBASE_SERVICE_ACCOUNT_JSON");
+  if (!raw?.trim()) {
+    throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON not set");
+  }
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is invalid JSON");
+  }
+  const client_email = parsed.client_email as string | undefined;
+  const private_key = parsed.private_key as string | undefined;
+  const project_id = parsed.project_id as string | undefined;
+  if (!client_email || !private_key || !project_id) {
+    throw new Error(
+      "FIREBASE_SERVICE_ACCOUNT_JSON missing client_email, private_key, or project_id",
+    );
+  }
+  return { client_email, private_key, project_id };
 }
 
 function stringifyData(data?: Record<string, string>): Record<string, string> {
@@ -65,18 +106,19 @@ function stringifyData(data?: Record<string, string>): Record<string, string> {
   return out;
 }
 
+function isUnregisteredTokenError(body: unknown): boolean {
+  if (!body || typeof body !== "object") return false;
+  const err = body as { error?: { details?: Array<{ errorCode?: string }> } };
+  return (err.error?.details ?? []).some((d) => d.errorCode === "UNREGISTERED");
+}
+
 export async function sendFcmToUser(
   userId: string,
   title: string,
   body: string,
   data?: Record<string, string>,
-): Promise<{ sent: number; total: number }> {
-  const serviceAccountJson = Deno.env.get("FIREBASE_SERVICE_ACCOUNT_JSON");
-  if (!serviceAccountJson) {
-    throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON not set");
-  }
-
-  const serviceAccount = JSON.parse(serviceAccountJson);
+): Promise<{ sent: number; total: number; errors: string[] }> {
+  const serviceAccount = parseServiceAccount();
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
@@ -89,13 +131,15 @@ export async function sendFcmToUser(
 
   if (error) throw error;
   const tokens = (devices ?? []).map((d) => d.fcm_token as string).filter(Boolean);
-  if (tokens.length === 0) return { sent: 0, total: 0 };
+  if (tokens.length === 0) return { sent: 0, total: 0, errors: [] };
 
   const accessToken = await getAccessToken(serviceAccount);
-  const projectId = serviceAccount.project_id as string;
+  const projectId = serviceAccount.project_id;
   const fcmData = stringifyData(data);
 
   let sent = 0;
+  const errors: string[] = [];
+
   for (const token of tokens) {
     const res = await fetch(
       `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
@@ -110,12 +154,47 @@ export async function sendFcmToUser(
             token,
             notification: { title, body },
             data: fcmData,
+            android: {
+              priority: "HIGH",
+              notification: {
+                channel_id: ANDROID_CHANNEL_ID,
+                sound: "default",
+              },
+            },
+            apns: {
+              payload: {
+                aps: {
+                  sound: "default",
+                  badge: 1,
+                },
+              },
+            },
           },
         }),
       },
     );
-    if (res.ok) sent += 1;
+    if (res.ok) {
+      sent += 1;
+      continue;
+    }
+
+    const errBody = await res.json().catch(() => ({}));
+    const message =
+      (errBody as { error?: { message?: string } })?.error?.message ??
+      `FCM HTTP ${res.status}`;
+    errors.push(message);
+
+    if (isUnregisteredTokenError(errBody)) {
+      await supabase
+        .from("user_fcm_devices")
+        .delete()
+        .eq("fcm_token", token);
+    }
   }
 
-  return { sent, total: tokens.length };
+  if (sent === 0 && errors.length > 0) {
+    throw new Error(errors[0]);
+  }
+
+  return { sent, total: tokens.length, errors };
 }

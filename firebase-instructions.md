@@ -35,7 +35,15 @@ Repo files: `.firebaserc`, `firebase.json`, `lib/firebase_options.dart`, `androi
 
 ## Server push (Supabase)
 
-Set secrets via CLI (from repo root):
+Set secrets via CLI (from repo root). The JSON **must** be a single minified line (invalid JSON in the secret causes `send-fcm-notification` HTTP 500):
+
+```powershell
+# Place petfolio-v1-firebase-adminsdk-*.json in repo root (gitignored), then:
+.\tool\set_fcm_supabase_secrets.ps1
+# Or: .\tool\set_fcm_supabase_secrets.ps1 -ServiceAccountPath "C:\path\to\key.json"
+```
+
+Or manually:
 
 ```bash
 # One-time: minify service account JSON + random dispatch UUID into a temp env file, then:

@@ -16,6 +16,7 @@ import 'firebase_options.dart';
 import 'core/router.dart';
 import 'features/auth/presentation/controllers/auth_controller.dart';
 import 'core/platform/platform_notifications.dart';
+import 'core/services/notification_service.dart';
 import 'core/services/stripe_init_service.dart';
 import 'core/theme/theme.dart';
 import 'core/widgets/app_snack_bar.dart';
@@ -69,7 +70,12 @@ Future<void> main() async {
 
   await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
 
-  if (!kIsWeb) await PlatformNotifications.instance.initialize();
+  if (!kIsWeb) {
+    await NotificationService.instance.initialize(
+      onTap: FcmService.instance.handleNotificationTap,
+    );
+    await PlatformNotifications.instance.initialize();
+  }
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await FcmService.instance.initialize();

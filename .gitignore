@@ -121,6 +121,7 @@ app.*.symbols
 .env.local
 *firebase-adminsdk*.json
 petfolio-v1-firebase-adminsdk*.json
+supabase/.secrets.fcm.env
 
 # Generated seeding output from scripts/generate_inserts.dart — not a versioned migration
 inserts.sql
