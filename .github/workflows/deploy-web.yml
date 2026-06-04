@@ -36,8 +36,13 @@ jobs:
             --dart-define=STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }} \
             --dart-define=NVIDIA_API_KEY=${{ secrets.NVIDIA_API_KEY }}
 
-      - name: Package build output (vercel build)
+      - name: Vercel build (preview)
+        if: github.event_name == 'pull_request'
         run: npx vercel build --yes --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Vercel build (production)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: npx vercel build --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy preview to Vercel (PRs)
         if: github.event_name == 'pull_request'
