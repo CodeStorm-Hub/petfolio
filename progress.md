@@ -1540,3 +1540,164 @@ Phase complete — please run (/remember) to save tokens before proceeding to th
 
 Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
 
+## 2026-06-05 — PWA Phase 1 (web/PWA P0 from PWA_WEB_AUDIT.md)
+
+- **`web/index.html`** — Removed `body` safe-area CSS (Flutter owns insets); splash 25s timeout + error copy; `touch-action: manipulation`; Stripe.js moved to `defer` at end of body; window error logging.
+- **`web/pwa_banner.js`** — Safe-area bottom padding; honest install copy (no offline claim); `role="complementary"`.
+- **`lib/core/services/stripe_init_service.dart`** — `ensureStripeReady()`; web defers `applySettings` until checkout; Android unchanged at cold start.
+- **`lib/main.dart`** — Stripe init only on non-web at startup.
+- **`lib/core/services/location_service.dart`** — Enabled `geolocator` on web (removed hard `unavailable`).
+- **`lib/features/care/data/repositories/pet_care_repository.dart`** — Skip local notification scheduling on web.
+- **`lib/features/matching/presentation/screens/matching_screen.dart`** — Web discovery unblocked when pet has profile location; no `openAppSettings` on web.
+- **`lib/core/widgets/app_shell.dart`** — Web uses `bottomNavigationBar` instead of floating stack nav.
+
+**Next step (Phase 2):** Web Push care reminders, Stripe Checkout redirect on web, web file picker for uploads, `PlatformService` facade.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-06-05 — PWA Phase 2 (parity from PWA_WEB_AUDIT.md)
+
+- **Platform layer** (`lib/core/platform/`) — notifications io/web, `pickGalleryImage`, payments flag, web push JS bridge.
+- **DB** (`20260605100000_pwa_phase2.sql`) — `stripe_checkout_session_id`, `care_web_reminders`, `user_web_push_subscriptions` + RLS.
+- **Edge functions** — `create-payment-intent` checkout_mode + URL; `register-web-push-subscription`; `stripe-webhook` `checkout.session.expired`.
+- **Web checkout** — hosted Stripe Checkout on `kIsWeb`; cart resume listener; order confirmation polls on `?stripe=success`.
+- **Care web** — reminders stored in Supabase; optional push enable banner when `WEB_PUSH_VAPID_PUBLIC_KEY` is set.
+- **Uploads** — gallery pick abstraction on profile, social, marketplace KYC, medical vault.
+
+**Deploy:** `npx supabase db push`; deploy `create-payment-intent`, `register-web-push-subscription`, `stripe-webhook`; add Stripe webhook event `checkout.session.expired`; set `WEB_PUSH_VAPID_PUBLIC_KEY` for push UI.
+
+**Next step (Phase 3):** Manifest screenshots/shortcuts, iOS startup images, image mem-cache caps on web.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-06-05 — PWA Phase 3 (polish from PWA_WEB_AUDIT.md)
+
+- **`web/manifest.json`** — `id`, `screenshots` (narrow/wide), app shortcuts for `/care`, `/matching`, `/marketplace`.
+- **`web/screenshots/`**, **`web/splash/`** — branded PNG assets; **`web/index.html`** — `apple-touch-startup-image` for common iPhone portrait sizes + fallback.
+- **`lib/core/platform/web_image_cache.dart`** — Safari-friendly `memCacheWidth` caps on web; applied to `PetAvatar`, social feed/stories/profile, matching deck, marketplace product thumbs.
+
+**Next step:** Device-verify iOS PWA install + shortcuts; replace screenshot PNGs with real marketing captures when available.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-06-05 — Match discovery RPC signature fix (web + Android)
+
+- **Root cause:** `20260604000000_fix_matching_discovery_candidates_offset_signature.sql` replaced the RPC with `p_offset` while `MatchingSupabaseDataSource` calls cursor params (`p_cursor_created_at`, `p_cursor_pet_id`) → PostgREST **404** on deck load.
+- **Fix:** `supabase/migrations/20260605120000_restore_matching_discovery_candidates_cursor.sql` — drop offset overload, restore keyset cursor RPC + grants; applied to hosted `jqyjvhwlcqcsuwcqgcwf` via `npx supabase db query --linked`.
+- **Cleanup:** `20260604000000_*` reduced to no-op for fresh migration runs.
+
+**Verify:** Hot-restart app → Match tab should load cards (or empty deck), not “Could not load profiles”. Active pet must have `location` + `is_discoverable = true`.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-06-05 — Web automation review fixes
+
+- **Router** — `#/` redirects to `/home` or `/login`; `errorBuilder` shows “Page not found” + **Go to Home** (replaces bare GoRouter 404).
+- **Web shell** — PWA install banner injects after `flutter-first-frame` (lower z-index); auto-enables Flutter semantics placeholder on first frame.
+- **Manifest** — `start_url` → `/home`.
+- **Care** — Nutrition/Medical utility halves use `InkWell` + semantics for reliable web taps.
+- **Marketplace** — Product **+** uses `IconButton` + `ValueKey` (44px target); card uses `InkWell`.
+- **Matching** — RPC errors surface as `DatabaseException`; empty-deck replenish failures become `AsyncError`; clearer deck error copy.
+- **Login** — `AutofillHints.email` / `password` on auth fields.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-06-05 — Web automation P1 fixes (modals, checkout, routes)
+
+- **Modal leak** — `dismissRootOverlayRoutes` on shell route change via `_RouterNotifier.redirect` (`lib/core/navigation/route_overlay_dismissal.dart`).
+- **Deep links** — `#/pets` → `/home`, `#/shop` → `/marketplace`.
+- **Web Stripe checkout** — `petfolioAppUrl()` hash URLs for success/cancel; `launchUrl` with `webOnlyWindowName: '_self'`; `CartDrawer` checkout wired to `checkoutProvider` (was no-op); multi-shop → `/marketplace/cart`.
+- **Stripe return** — `WebCheckoutResumeListener` + marketplace `stripe=cancel` query handling.
+- **Care a11y** — `Semantics` labels on care task cards.
+- **Social** — comment field `Semantics` + `ValueKey`.
+- **Deploy** — `npx supabase functions deploy create-payment-intent` (hosted).
+
+**Verify:** Hot-restart web → open comments, switch tab (sheet closes); add to cart → Checkout opens Stripe same tab; return URL `/#/marketplace/order/:id?stripe=success`.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-06-05 — Supabase + Stripe MCP infra pass
+
+- **Migration `pwa_phase2` applied (hosted)** — `stripe_checkout_session_id`, `user_web_push_subscriptions`, `care_web_reminders` + RLS.
+- **`register-web-push-subscription`** deployed (MCP v1, JWT on).
+- **`stripe-webhook` v11** — `checkout.session.completed` + shared `fulfillPaidOrder`; redeployed `--no-verify-jwt`.
+- **Stripe webhooks** — platform `we_1TYC0v…`: PI succeeded/failed, checkout completed/expired; Connect `we_1TYEIx…`: `account.updated`.
+- **Waitlist RLS** — `20260605130000_waitlist_insert_policy_hardening.sql` applied (email-format check).
+- **Checkout trace** — stale `pending` orders match abandoned PIs (`requires_payment_method`), not webhook gaps.
+
+**Manual:** `WEB_PUSH_VAPID_PUBLIC_KEY` in `.env`; enable Auth leaked-password protection in Supabase dashboard.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-06-06 — Firebase Cloud Messaging (Android + Web)
+
+- **Client** — `firebase_core` + `firebase_messaging`; `lib/core/firebase/` (`FirebaseEnv` dart-defines, `FcmService`, `FcmMessageRouter`, token upsert); init in `main.dart`; auth listener registers/clears tokens.
+- **Schema** — `user_fcm_devices` migration `20260606120000_user_fcm_devices.sql` (RLS own-row).
+- **Web** — `firebase-messaging-sw.js`, `tool/sync_firebase_web_config.dart` → `web/firebase-config.js` from `.env`; Care banner prefers FCM when configured (legacy VAPID fallback).
+- **Server** — `supabase/functions/send-fcm-notification` (FCM HTTP v1; needs `FIREBASE_SERVICE_ACCOUNT_JSON` secret).
+- **Payload routes** — `care_reminder`, `match`, `chat_message`, `like`/`comment`/`follow`, `order`, `seller_order` (+ optional `route` override).
+- **`.env.example`** — Firebase keys + `FIREBASE_VAPID_KEY` for web.
+
+**Manual:** Firebase Console → Android + Web apps → fill `.env` → `dart run tool/sync_firebase_web_config.dart` → `npx supabase db push` → deploy edge fn with service account JSON.
+
+## 2026-06-06 — FCM server dispatch (all modules)
+
+- **Migration `20260607140000_fcm_dispatch_system`** (hosted via `db query --linked`): `pg_net`, `private.fcm_internal_config`, `fcm_push_outbox`, DB triggers on `notifications`, `chat_messages`, `matches`, `marketplace_orders`; pg_cron for outbox + care reminders.
+- **Edge functions deployed**: `send-fcm-notification`, `process-fcm-outbox`, `process-care-fcm-reminders` (`--no-verify-jwt`, `x-fcm-dispatch-secret`).
+- **Care**: Android/web upsert `care_web_reminders` + FCM cron; local notifications kept on Android.
+- **Client**: `care_fcm_reminder_sync.dart`; router paths for KYC push types.
+- **Manual:** Set `FCM_DISPATCH_SECRET` + `FIREBASE_SERVICE_ACCOUNT_JSON` in Supabase secrets; `UPDATE private.fcm_internal_config SET dispatch_secret = ...`.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-06-06 — petfolio-v1 FCM wiring (console config)
+
+- **`lib/firebase_options.dart`** — Android + Web app IDs/keys from `google-services.json` and Firebase console (project `petfolio-v1`).
+- **FCM-only** — Removed legacy `push_register.js` / VAPID web-push banner path; web uses FCM + `firebase-messaging-sw.js` + committed `web/firebase-config.js`.
+- **Android** — `com.google.gms.google-services` + `android/app/google-services.json`.
+- **`.env`** — `FIREBASE_VAPID_KEY` required for web tokens; service account JSON gitignored → Supabase secret `FIREBASE_SERVICE_ACCOUNT_JSON`.
+- **`firebase-instructions.md`** — Sanitized (no private keys in repo).
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-06-05 — FCM push fix (server JWT + client heads-up)
+
+- **Root cause (hosted)** — `send-fcm-notification` HTTP 500: `FIREBASE_SERVICE_ACCOUNT_JSON` Supabase secret is invalid JSON; edge logs failed on chat INSERT (~20:54 UTC) despite 2 Android tokens in `user_fcm_devices`.
+- **Server** — `fcm_send.ts` base64url JWT fix, Android `petfolio_push` channel, stale token cleanup; functions redeployed.
+- **Client** — FCM foreground/background shows tray notifications via `fcm_push_display.dart` + `NotificationService.showPushNotification`; tap → `FcmMessageRouter`; Android default channel meta-data.
+- **Tool** — `tool/set_fcm_supabase_secrets.ps1`.
+
+**Manual:** Re-run secret script with Firebase adminsdk JSON, hot-restart both devices, test chat with recipient app backgrounded.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-06-05 — FCM secrets + VAPID wired (hosted verified)
+
+- **`petfolio-v1-firebase-adminsdk-fbsvc-849086572f.json`** in repo root (gitignored); `.\tool\set_fcm_supabase_secrets.ps1` uploads minified `FIREBASE_SERVICE_ACCOUNT_JSON` + `FCM_DISPATCH_SECRET` to Supabase.
+- **Hosted test:** `send-fcm-notification` → `{"sent":1,"total":1}` (server push pipeline live).
+- **`.env`:** `FIREBASE_VAPID_KEY` matches Web Push certificate public key; `dart run tool/sync_firebase_web_config.dart` refreshed `web/firebase-config.js`.
+- **Script fixes:** PowerShell `Join-Path` + optional default adminsdk path; `supabase/.secrets.fcm.env` gitignored.
+
+**Manual:** Full restart on both Android devices + web (`flutter run --dart-define-from-file=.env`); test chat with recipient backgrounded; web Care tab → Enable push banner if token not auto-registered.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-06-05 — Vercel web CI secrets + deploy workflow
+
+- **GitHub Actions secrets:** `gh secret set -f .env -R CodeStorm-Hub/petfolio` synced all `.env` keys; `VERCEL_TOKEN` unchanged (set manually).
+- **`deploy-web.yml`:** Flutter 3.44.0 pin, `FIREBASE_VAPID_KEY` dart-define, CI `.env` materialization + `dart run tool/sync_firebase_web_config.dart`, Node 22 + global Vercel CLI, concurrency + `workflow_dispatch`.
+- **`vercel.json`:** `installCommand: ""` so prebuilt Flutter output is not npm-installed.
+
+**Manual:** Confirm `VERCEL_TOKEN` is valid; push to `main` or open PR to trigger deploy.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-06-05 — Production Vercel + Supabase web checkout
+
+- **Vercel (`petfolio`):** `prj_hMHouLWimZvr5dDOlZeAhbH8xtop` · production domains `petfolio.live`, `www.petfolio.live`, `petfolio-woad.vercel.app`.
+- **Supabase secrets:** `PUBLIC_APP_ORIGIN=https://petfolio.live`, `ALLOWED_REDIRECT_ORIGINS` (live + www + Vercel prod alias).
+- **`create-payment-intent`:** redeployed (redirect URL allowlist).
+- **`deploy-web.yml`:** production-only (`main` push + `workflow_dispatch`; no PR preview deploy).
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+

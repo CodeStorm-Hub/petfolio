@@ -35,6 +35,37 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
+function allowedRedirectOrigins(): string[] {
+  const raw =
+    Deno.env.get('ALLOWED_REDIRECT_ORIGINS') ?? Deno.env.get('PUBLIC_APP_ORIGIN') ?? '';
+  return raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function isAllowedRedirectUrl(url: string): boolean {
+  const origins = allowedRedirectOrigins();
+  if (origins.length === 0) return false;
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+  if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+    return true;
+  }
+  return origins.some((origin) => {
+    try {
+      return parsed.origin === new URL(origin).origin;
+    } catch {
+      return false;
+    }
+  });
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -57,9 +88,18 @@ serve(async (req) => {
     const body = await req.json() as {
       orderId?: string;
       payment_method?: string;
+      checkout_mode?: boolean;
+      success_url?: string;
+      cancel_url?: string;
     };
 
-    const { orderId, payment_method = 'stripe' } = body;
+    const {
+      orderId,
+      payment_method = 'stripe',
+      checkout_mode = false,
+      success_url,
+      cancel_url,
+    } = body;
 
     if (!orderId) {
       return json({ error: 'orderId is required' }, 400);
@@ -77,7 +117,7 @@ serve(async (req) => {
 
     const { data: order, error: orderErr } = await admin
       .from('marketplace_orders')
-      .select('id, amount_cents, currency, buyer_id, shop_id, stripe_payment_intent_id, line_items, status')
+      .select('id, amount_cents, currency, buyer_id, shop_id, stripe_payment_intent_id, stripe_checkout_session_id, line_items, status')
       .eq('id', orderId)
       .single();
 
@@ -177,6 +217,77 @@ serve(async (req) => {
         { error: 'This seller has not completed payment setup', code: 'SHOP_NOT_VERIFIED' },
         422,
       );
+    }
+
+    if (checkout_mode) {
+      if (!success_url || !cancel_url) {
+        return json({ error: 'success_url and cancel_url are required for checkout_mode' }, 400);
+      }
+      if (!isAllowedRedirectUrl(success_url) || !isAllowedRedirectUrl(cancel_url)) {
+        return json({ error: 'Redirect URL origin is not allowed' }, 400);
+      }
+
+      if (order.stripe_checkout_session_id) {
+        const existingSession = await stripe.checkout.sessions.retrieve(
+          order.stripe_checkout_session_id,
+        );
+        if (existingSession.url && existingSession.status === 'open') {
+          return json({ checkoutUrl: existingSession.url });
+        }
+      }
+
+      type SessionParams = Parameters<typeof stripe.checkout.sessions.create>[0];
+      const paymentIntentData: NonNullable<SessionParams['payment_intent_data']> = {
+        metadata: {
+          order_id: order.id,
+          buyer_id: order.buyer_id,
+          shop_id: order.shop_id,
+        },
+      };
+
+      if (isVendorShop) {
+        const applicationFeeAmount = Math.floor(
+          (order.amount_cents * Number(shop.platform_fee_percent)) / 100,
+        );
+        paymentIntentData.application_fee_amount = applicationFeeAmount;
+        paymentIntentData.transfer_data = {
+          destination: shop.stripe_connect_account_id!,
+        };
+      }
+
+      const session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        success_url,
+        cancel_url,
+        client_reference_id: order.id,
+        line_items: [
+          {
+            price_data: {
+              currency: order.currency ?? 'usd',
+              unit_amount: order.amount_cents,
+              product_data: { name: 'PetFolio order' },
+            },
+            quantity: 1,
+          },
+        ],
+        payment_intent_data: paymentIntentData,
+      }, {
+        idempotencyKey: `cs-${orderId}`,
+      });
+
+      await admin
+        .from('marketplace_orders')
+        .update({
+          stripe_checkout_session_id: session.id,
+          payment_method: 'stripe',
+        })
+        .eq('id', orderId);
+
+      if (!session.url) {
+        return json({ error: 'Stripe Checkout session missing URL' }, 500);
+      }
+
+      return json({ checkoutUrl: session.url });
     }
 
     // Idempotency: return existing PI if one already exists.

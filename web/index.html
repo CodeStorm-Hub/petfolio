@@ -6,40 +6,37 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=Edge">
 
-  <!-- iOS PWA: safe area + no overscroll bounce -->
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
   <meta name="description"
         content="PetFolio — Your pet's social network, health tracker &amp; marketplace.">
 
-  <!-- PWA theme -->
   <meta name="theme-color" content="#FF8A4C"
         media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#1A1014"
         media="(prefers-color-scheme: dark)">
 
-  <!-- iOS PWA meta -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="PetFolio">
 
-  <!-- iOS touch icons -->
   <link rel="apple-touch-icon" sizes="192x192" href="icons/Icon-192.png">
   <link rel="apple-touch-icon" sizes="512x512" href="icons/Icon-512.png">
-
-  <!-- Favicon -->
+  <link rel="apple-touch-startup-image" href="splash/1290x2796.png"
+        media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+  <link rel="apple-touch-startup-image" href="splash/1179x2556.png"
+        media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+  <link rel="apple-touch-startup-image" href="splash/750x1334.png"
+        media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+  <link rel="apple-touch-startup-image" href="splash/1290x2796.png">
   <link rel="icon" type="image/png" href="favicon.png">
 
   <title>PetFolio</title>
   <link rel="manifest" href="manifest.json">
 
-  <!-- Stripe JS must load before Flutter -->
-  <script src="https://js.stripe.com/v3/"></script>
-
   <style>
-    /* Prevent flash of white during Flutter boot */
     html, body {
       margin: 0;
       padding: 0;
@@ -47,20 +44,12 @@
       height: 100%;
       background-color: #FFF4E6;
       overscroll-behavior: none;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
     @media (prefers-color-scheme: dark) {
       html, body { background-color: #1A1014; }
     }
-    /* iOS safe-area padding for standalone PWA */
-    @supports (padding: env(safe-area-inset-bottom)) {
-      body {
-        padding-top: env(safe-area-inset-top);
-        padding-bottom: env(safe-area-inset-bottom);
-        padding-left: env(safe-area-inset-left);
-        padding-right: env(safe-area-inset-right);
-      }
-    }
-    /* Loading splash */
     #pwa-loading {
       position: fixed; inset: 0; z-index: 9998;
       display: flex; flex-direction: column;
@@ -69,15 +58,20 @@
       transition: opacity 0.4s ease;
     }
     #pwa-loading.hidden { opacity: 0; pointer-events: none; }
+    #pwa-loading.error #pwa-loading-sub { color: #C62828; max-width: 280px; text-align: center; }
     @media (prefers-color-scheme: dark) {
       #pwa-loading { background-color: #1A1014; }
       #pwa-loading-text { color: #FFA374; }
+      #pwa-loading.error #pwa-loading-sub { color: #FF8A80; }
     }
     #pwa-loading-logo {
       width: 96px; height: 96px;
       border-radius: 22px;
       box-shadow: 0 8px 32px rgba(255,138,76,.35);
       animation: pulse 1.8s ease-in-out infinite;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #pwa-loading-logo { animation: none; }
     }
     #pwa-loading-text {
       margin-top: 20px;
@@ -97,7 +91,6 @@
   </style>
 </head>
 <body>
-  <!-- PWA splash shown while Flutter initialises -->
   <div id="pwa-loading" aria-hidden="true">
     <img id="pwa-loading-logo" src="icons/Icon-192.png" alt="">
     <div id="pwa-loading-text">PetFolio</div>
@@ -107,17 +100,64 @@
   <script src="flutter_bootstrap.js" async></script>
 
   <script>
-    // Hide the splash once Flutter's first frame is drawn
-    window.addEventListener('flutter-first-frame', function () {
-      var el = document.getElementById('pwa-loading');
-      if (el) {
+    (function () {
+      var splashTimeoutMs = 25000;
+      var splashTimeout = setTimeout(function () {
+        var el = document.getElementById('pwa-loading');
+        var sub = document.getElementById('pwa-loading-sub');
+        if (!el || el.classList.contains('hidden')) return;
+        el.classList.add('error');
+        if (sub) {
+          sub.textContent =
+            'Still loading. Check your connection and refresh the page.';
+        }
+        console.error('[PetFolio] flutter-first-frame not received within ' + splashTimeoutMs + 'ms');
+      }, splashTimeoutMs);
+
+      function hideSplash() {
+        clearTimeout(splashTimeout);
+        var el = document.getElementById('pwa-loading');
+        if (!el) return;
         el.classList.add('hidden');
         setTimeout(function () { el.remove(); }, 450);
       }
-    });
+
+      window.addEventListener('flutter-first-frame', hideSplash);
+
+      window.addEventListener('flutter-first-frame', function () {
+        var placeholder = document.querySelector('flt-semantics-placeholder');
+        if (placeholder) placeholder.click();
+      }, { once: true });
+
+      window.addEventListener('error', function (e) {
+        console.error('[PetFolio] window error', e.message || e);
+      });
+    })();
   </script>
 
-  <!-- iOS PWA install banner — runs after body is ready -->
+  <script>
+    (function () {
+      if (!('serviceWorker' in navigator)) return;
+      var swPath = '/firebase-messaging-sw.js';
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        var fcm = regs.filter(function (r) {
+          var url = (r.active && r.active.scriptURL) ||
+            (r.installing && r.installing.scriptURL) ||
+            (r.waiting && r.waiting.scriptURL) || '';
+          return url.indexOf('firebase-messaging-sw.js') !== -1;
+        });
+        if (fcm.length > 1) {
+          return Promise.all(fcm.slice(1).map(function (r) { return r.unregister(); }))
+            .then(function () { return fcm[0]; });
+        }
+        if (fcm.length === 1) return fcm[0];
+        return navigator.serviceWorker.register(swPath);
+      }).catch(function (e) {
+        console.warn('[PetFolio] FCM service worker setup failed', e);
+      });
+    })();
+  </script>
+  <script src="https://js.stripe.com/v3/" defer id="stripe-js"></script>
   <script src="pwa_banner.js" defer></script>
 </body>
 </html>

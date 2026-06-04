@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/errors/app_exception.dart';
-import '../../../../core/services/notification_service.dart';
+import '../../../../core/platform/platform_notifications.dart';
 import '../models/care_streak.dart';
 import '../models/care_task.dart';
 import '../models/care_task_log.dart';
@@ -402,7 +402,7 @@ class PetCareRepository {
         return;
       }
       await _client.from('care_tasks').delete().eq('id', taskId);
-      NotificationService.instance.cancelForTask(taskId).ignore();
+      PlatformNotifications.instance.cancelForTask(taskId).ignore();
     } on AppException {
       rethrow;
     } on PostgrestException catch (e) {
@@ -582,7 +582,7 @@ class PetCareRepository {
     final repeating = task.frequency == CareFrequency.daily ||
         task.frequency == CareFrequency.twiceDaily;
 
-    NotificationService.instance.scheduleTaskReminder(
+    PlatformNotifications.instance.scheduleTaskReminder(
       taskId: task.id,
       title: task.title,
       tod: tod,

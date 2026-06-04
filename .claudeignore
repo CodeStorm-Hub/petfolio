@@ -10,8 +10,6 @@ qa-screens/
 redesign_stitch/
 stitch_petsphere_app_redesign/
 *.xml
-*.html
-*.jsx
 
 # ==========================================
 # 2. FLUTTER BUILD & CACHE

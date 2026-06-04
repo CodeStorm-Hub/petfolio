@@ -15,10 +15,8 @@ enum LocationAccessState {
 
 class LocationService {
   Future<LocationAccessState> readAccessState() async {
-    if (kIsWeb) return LocationAccessState.unavailable;
-
     try {
-      if (!await Geolocator.isLocationServiceEnabled()) {
+      if (!kIsWeb && !await Geolocator.isLocationServiceEnabled()) {
         return LocationAccessState.servicesDisabled;
       }
       return _mapGeolocatorPermission(await Geolocator.checkPermission());
@@ -28,10 +26,8 @@ class LocationService {
   }
 
   Future<LocationAccessState> requestWhenInUseAccess() async {
-    if (kIsWeb) return LocationAccessState.unavailable;
-
     try {
-      if (!await Geolocator.isLocationServiceEnabled()) {
+      if (!kIsWeb && !await Geolocator.isLocationServiceEnabled()) {
         return LocationAccessState.servicesDisabled;
       }
       return _mapGeolocatorPermission(await Geolocator.requestPermission());
@@ -55,17 +51,8 @@ class LocationService {
   }
 
   Future<LatLng> acquireCurrentLatLng() async {
-    if (kIsWeb) {
-      throw const ValidationException(
-        message:
-            'Device location is not available in this environment. Matching uses your pet profile location.',
-      );
-    }
-
     var access = await readAccessState();
 
-    // First call — permission may simply not have been requested yet.
-    // Request it rather than failing immediately.
     if (access == LocationAccessState.denied) {
       access = await requestWhenInUseAccess();
     }
@@ -96,18 +83,15 @@ class LocationService {
     }
 
     try {
-      // Fast path: use the OS-cached fix if available — no GPS warm-up needed.
       final last = await Geolocator.getLastKnownPosition();
       if (last != null) {
         return LatLng(latitude: last.latitude, longitude: last.longitude);
       }
 
-      // Slow path: request a fresh fix with a generous timeout so cold-start
-      // GPS (and emulators with a mock location set) have time to respond.
       final pos = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
+        locationSettings: LocationSettings(
           accuracy: LocationAccuracy.medium,
-          timeLimit: Duration(seconds: 20),
+          timeLimit: Duration(seconds: kIsWeb ? 15 : 20),
         ),
       );
       return LatLng(latitude: pos.latitude, longitude: pos.longitude);

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
+import '../../../../core/platform/media_picker.dart';
 
 import 'my_shop_controller.dart';
 
@@ -109,19 +109,13 @@ class ManualKycNotifier extends Notifier<KycFormState> {
   void prevStep() => state = state.copyWith(step: state.step - 1, clearDocError: true);
 
   Future<void> pickNidImage() async {
-    final file = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-    );
+    final file = await pickGalleryImage(imageQuality: 80);
     if (file == null) return;
     state = state.copyWith(nidBytes: await file.readAsBytes(), clearDocError: true);
   }
 
   Future<void> pickTradeLicenseImage() async {
-    final file = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-    );
+    final file = await pickGalleryImage(imageQuality: 80);
     if (file == null) return;
     state = state.copyWith(tradeLicenseBytes: await file.readAsBytes(), clearDocError: true);
   }

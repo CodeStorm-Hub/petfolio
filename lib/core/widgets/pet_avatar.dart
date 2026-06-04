@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:petfolio/core/platform/web_image_cache.dart';
 import 'package:petfolio/features/pet_profile/data/models/pet_species.dart';
 
 import '../theme/app_colors.dart';
@@ -64,6 +65,11 @@ class PetAvatar extends StatelessWidget {
         isDark: isDark,
         species: species,
         initials: initials,
+        memCacheWidth: networkImageMemCacheWidth(
+          context,
+          d,
+          maxPixels: webNetworkImageMemCacheAvatar,
+        ),
       );
     } else {
       avatar = _SpeciesDisc(
@@ -185,6 +191,7 @@ class _NetworkAvatar extends StatelessWidget {
     required this.isDark,
     this.species,
     this.initials,
+    this.memCacheWidth,
   });
 
   final String imageUrl;
@@ -192,6 +199,7 @@ class _NetworkAvatar extends StatelessWidget {
   final bool isDark;
   final PetSpecies? species;
   final String? initials;
+  final int? memCacheWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -200,6 +208,8 @@ class _NetworkAvatar extends StatelessWidget {
         imageUrl: imageUrl,
         width: diameter,
         height: diameter,
+        memCacheWidth: memCacheWidth,
+        memCacheHeight: memCacheWidth,
         fit: BoxFit.cover,
         placeholder: (_, _) => SkeletonLoader(
           width: diameter,

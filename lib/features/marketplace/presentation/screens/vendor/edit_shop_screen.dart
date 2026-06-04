@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
+import '../../../../../core/platform/media_picker.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_theme.dart';
@@ -95,10 +95,7 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen>
   }
 
   Future<void> _pickImage({required bool isLogo}) async {
-    final picked = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 85,
-    );
+    final picked = await pickGalleryImage(imageQuality: 85);
     if (picked == null) return;
     final bytes = await picked.readAsBytes();
     setState(() {

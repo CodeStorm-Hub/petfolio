@@ -1,10 +1,15 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/platform/platform_payments.dart';
+import '../../../../core/platform/web_app_url.dart';
+import '../../../../core/services/stripe_init_service.dart';
 import '../../data/repositories/order_repository.dart'
     show
         InsufficientStockException,
@@ -21,6 +26,7 @@ import 'cart_controller.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 
 const _petfolioOfficialShopId = 'cccccccc-0000-0000-0000-cccccccccccc';
+const _stripePublishableKey = String.fromEnvironment('STRIPE_PUBLISHABLE_KEY');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Checkout status
@@ -28,10 +34,11 @@ const _petfolioOfficialShopId = 'cccccccc-0000-0000-0000-cccccccccccc';
 
 enum CheckoutStatus {
   idle,
-  loadingIntent,  // inserting order row + calling Edge Function
-  awaitingSheet,  // Stripe Payment Sheet is visible
-  success,        // payment confirmed
-  failure,        // unrecoverable error (not cancel)
+  loadingIntent,
+  awaitingSheet,
+  awaitingRedirect,
+  success,
+  failure,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -63,7 +70,8 @@ class CheckoutState {
 
   bool get isLoading =>
       status == CheckoutStatus.loadingIntent ||
-      status == CheckoutStatus.awaitingSheet;
+      status == CheckoutStatus.awaitingSheet ||
+      status == CheckoutStatus.awaitingRedirect;
 
   /// True when [shopId]'s checkout flow is in progress.
   bool isLoadingShop(String shopId) => isLoading && activeShopId == shopId;
@@ -140,10 +148,38 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
       );
       state = state.copyWith(orderId: orderId);
 
-      // 2. Call Edge Function → get Stripe client_secret.
+      if (useStripeHostedCheckout) {
+        final checkoutUrl = await _repo.createCheckoutSession(
+          orderId: orderId,
+          successUrl: petfolioAppUrl(
+            '/marketplace/order/$orderId',
+            queryParameters: const {'stripe': 'success'},
+          ),
+          cancelUrl: petfolioAppUrl(
+            '/marketplace',
+            queryParameters: const {'stripe': 'cancel'},
+          ),
+        );
+
+        state = state.copyWith(status: CheckoutStatus.awaitingRedirect);
+
+        final launched = await launchUrl(
+          Uri.parse(checkoutUrl),
+          mode: kIsWeb
+              ? LaunchMode.platformDefault
+              : LaunchMode.externalApplication,
+          webOnlyWindowName: kIsWeb ? '_self' : null,
+        );
+        if (!launched) {
+          throw Exception('Could not open Stripe Checkout.');
+        }
+        return;
+      }
+
       final clientSecret = await _repo.createPaymentIntent(orderId);
 
-      // 3. Initialize Payment Sheet.
+      await ensureStripeReady(publishableKey: _stripePublishableKey);
+
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: clientSecret,
@@ -154,33 +190,9 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
 
       state = state.copyWith(status: CheckoutStatus.awaitingSheet);
 
-      // 4. Present Payment Sheet — suspends until dismissed.
       await Stripe.instance.presentPaymentSheet();
 
-      // 5. Verify backend received the webhook and updated the order row.
-      //    pollOrderConfirmation throws PaymentTimeoutException after 15 s if
-      //    the webhook is delayed — treated as a soft success below.
-      try {
-        await _repo.pollOrderConfirmation(orderId);
-      } on PaymentTimeoutException {
-        ref.read(cartProvider.notifier).clearShopCart(shopId);
-        ref.invalidate(buyerOrdersProvider);
-        state = state.copyWith(
-          status: CheckoutStatus.success,
-          verificationPending: true,
-          clearError: true,
-        );
-        return;
-      }
-
-      // 6. Backend confirmed — full success.
-      ref.read(cartProvider.notifier).clearShopCart(shopId);
-      ref.invalidate(buyerOrdersProvider);
-      state = state.copyWith(
-        status: CheckoutStatus.success,
-        verificationPending: false,
-        clearError: true,
-      );
+      await _finalizePaidCheckout(shopId: shopId, orderId: orderId);
     } on StripeException catch (e) {
       if (e.error.code == FailureCode.Canceled) {
         if (orderId != null) unawaited(_repo.cancelOrder(orderId));
@@ -275,13 +287,54 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
     }
   }
 
-  /// Legacy single-vendor checkout for the PetFolio Official shop.
+  Future<void> resumeWebCheckoutIfNeeded() async {
+    if (!kIsWeb) return;
+
+    final orderId = state.orderId;
+    final shopId = state.activeShopId;
+    if (state.status != CheckoutStatus.awaitingRedirect ||
+        orderId == null ||
+        shopId == null) {
+      return;
+    }
+
+    try {
+      await _finalizePaidCheckout(shopId: shopId, orderId: orderId);
+    } catch (_) {}
+  }
+
+  Future<void> _finalizePaidCheckout({
+    required String shopId,
+    required String orderId,
+  }) async {
+    try {
+      await _repo.pollOrderConfirmation(orderId);
+    } on PaymentTimeoutException {
+      ref.read(cartProvider.notifier).clearShopCart(shopId);
+      ref.invalidate(buyerOrdersProvider);
+      state = state.copyWith(
+        status: CheckoutStatus.success,
+        verificationPending: true,
+        clearError: true,
+      );
+      return;
+    }
+
+    ref.read(cartProvider.notifier).clearShopCart(shopId);
+    ref.invalidate(buyerOrdersProvider);
+    state = state.copyWith(
+      status: CheckoutStatus.success,
+      verificationPending: false,
+      clearError: true,
+    );
+  }
+
   Future<void> startCheckout() => startCheckoutForShop(_petfolioOfficialShopId);
 
   bool get isLoading =>
       state.status == CheckoutStatus.loadingIntent ||
-      state.status == CheckoutStatus.awaitingSheet;
+      state.status == CheckoutStatus.awaitingSheet ||
+      state.status == CheckoutStatus.awaitingRedirect;
 
-  /// Reset back to idle (e.g. after displaying an error snackbar).
   void reset() => state = const CheckoutState(status: CheckoutStatus.idle);
 }

@@ -1,9 +1,11 @@
 import 'dart:ui';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:marionette_flutter/marionette_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -11,8 +13,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'marionette_debug_gate_stub.dart'
     if (dart.library.io) 'marionette_debug_gate_io.dart'
     as marionette_gate;
+import 'core/firebase/fcm_background_handler.dart';
+import 'core/firebase/fcm_service.dart';
+import 'firebase_options.dart';
 import 'core/router.dart';
+import 'features/auth/presentation/controllers/auth_controller.dart';
+import 'core/platform/platform_notifications.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/stripe_init_service.dart';
 import 'core/theme/theme.dart';
 import 'core/widgets/app_snack_bar.dart';
 
@@ -47,6 +55,10 @@ Future<void> main() async {
     WidgetsFlutterBinding.ensureInitialized();
   }
 
+  if (kIsWeb) {
+    usePathUrlStrategy();
+  }
+
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
   };
@@ -57,15 +69,24 @@ Future<void> main() async {
 
   _assertEnvVars();
 
-  GoogleFonts.config.allowRuntimeFetching = false;
+  GoogleFonts.config.allowRuntimeFetching = kIsWeb;
 
-  Stripe.publishableKey = _stripePublishableKey;
-  Stripe.merchantIdentifier = 'merchant.com.petfolio';
-  await Stripe.instance.applySettings();
+  if (!kIsWeb) {
+    await ensureStripeReady(publishableKey: _stripePublishableKey);
+  }
 
   await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
 
-  if (!kIsWeb) await NotificationService.instance.initialize();
+  if (!kIsWeb) {
+    await NotificationService.instance.initialize(
+      onTap: FcmService.instance.handleNotificationTap,
+    );
+    await PlatformNotifications.instance.initialize();
+  }
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  await FcmService.instance.initialize();
 
   runApp(const ProviderScope(child: PetfolioApp()));
 }
@@ -78,16 +99,24 @@ class PetfolioApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeProvider);
 
+    FcmService.instance.updateRouter(router);
+    ref.listen(authStateProvider, (previous, next) {
+      next.whenData((state) async {
+        if (state.session != null) {
+          await FcmService.instance.syncToken();
+        } else {
+          await FcmService.instance.clearTokenForSignOut();
+        }
+      });
+    });
+
     return MaterialApp.router(
       title: 'PetFolio',
       debugShowCheckedModeBanner: false,
       scaffoldMessengerKey: appSnackBarMessengerKey,
-
-      // ── Design system themes ─────────────────────────────────────────────
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: themeMode,
-
       routerConfig: router,
     );
   }

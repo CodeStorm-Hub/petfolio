@@ -68,7 +68,7 @@ class _MatchesInboxView extends ConsumerWidget {
             AppHeader(
               eyebrow: 'Match · Inbox',
               onOpenSwitcher: () => PetSwitcherSheet.show(context),
-              onBack: () => context.pop(),
+              onBack: () => popOrGo(context, '/matching'),
               actions: [
                 AppHeaderAction(
                   iconKey: const ValueKey<String>('matches_inbox_discover'),

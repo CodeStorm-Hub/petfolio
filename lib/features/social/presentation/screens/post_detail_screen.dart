@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/app_exception.dart';
+import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
@@ -423,8 +424,16 @@ class _PostImagesState extends State<_PostImages> {
             itemBuilder: (ctx, i) => CachedNetworkImage(
               imageUrl: post.imageUrls[i],
               fit: BoxFit.cover,
-              memCacheWidth: 800, // Slightly higher for detail view
-              maxWidthDiskCache: 1200,
+              memCacheWidth: networkImageMemCacheWidth(
+                ctx,
+                MediaQuery.sizeOf(ctx).width,
+                maxPixels: webNetworkImageMemCacheMax,
+              ),
+              maxWidthDiskCache: networkImageMaxDiskCacheWidth(
+                ctx,
+                MediaQuery.sizeOf(ctx).width,
+                maxPixels: webNetworkImageMemCacheMax,
+              ),
               placeholder: (ctx, _) => Container(
                 color: Theme.of(context).colorScheme.surface,
               ),

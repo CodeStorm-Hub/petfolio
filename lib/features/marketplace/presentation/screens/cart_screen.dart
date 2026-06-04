@@ -11,6 +11,7 @@ import '../controllers/cart_controller.dart';
 import '../controllers/checkout_controller.dart';
 import '../controllers/shop_list_controller.dart';
 import '../widgets/cart_line_item.dart';
+import '../widgets/web_checkout_resume_listener.dart';
 
 const _petfolioOfficialShopId = 'cccccccc-0000-0000-0000-cccccccccccc';
 
@@ -42,7 +43,8 @@ class CartScreen extends ConsumerWidget {
 
     final groups = cart.itemsByShop.entries.toList();
 
-    return Scaffold(
+    return WebCheckoutResumeListener(
+      child: Scaffold(
       backgroundColor: AppColors.surface1,
       body: SafeArea(
         bottom: false,
@@ -109,6 +111,7 @@ class CartScreen extends ConsumerWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

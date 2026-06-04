@@ -290,6 +290,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           autocorrect: false,
+                          autofillHints: const [AutofillHints.email],
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
                               return 'Email is required';
@@ -308,6 +309,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           label: 'Password',
                           obscureText: _obscurePassword,
                           textInputAction: TextInputAction.done,
+                          autofillHints: const [AutofillHints.password],
                           onSubmitted: (_) => _submit(),
                           suffixIcon: VisibilityToggle(
                             obscure: _obscurePassword,

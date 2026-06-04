@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -9,6 +8,7 @@ import '../../../../core/widgets/widgets.dart';
 import '../../data/models/chat_message.dart';
 import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../controllers/chat_conversation_controller.dart';
+import '../matching_navigation.dart';
 
 // ---------------------------------------------------------------------------
 // Chat item hierarchy for date-grouped rendering (L-2)
@@ -136,7 +136,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             AppHeader(
               eyebrow: widget.otherPetId != null ? 'Social · Chat' : 'Match · Chat',
               onOpenSwitcher: () => PetSwitcherSheet.show(context),
-              onBack: () => context.pop(),
+              onBack: () => popOrGo(context, '/matching/inbox'),
               dense: true,
               actions: const [],
             ),

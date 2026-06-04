@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../pet_profile/data/models/pet.dart';
 
@@ -252,6 +253,16 @@ class _AvatarCircle extends StatelessWidget {
                 width: double.infinity,
                 height: double.infinity,
                 fit: BoxFit.cover,
+                memCacheWidth: networkImageMemCacheWidth(
+                  context,
+                  118,
+                  maxPixels: webNetworkImageMemCacheAvatar,
+                ),
+                memCacheHeight: networkImageMemCacheWidth(
+                  context,
+                  118,
+                  maxPixels: webNetworkImageMemCacheAvatar,
+                ),
                 placeholder: (context, url) => Center(
                   child: Text(
                     fallbackEmoji,

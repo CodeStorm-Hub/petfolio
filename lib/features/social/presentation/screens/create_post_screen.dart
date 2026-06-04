@@ -1,8 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../../../../core/platform/media_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -25,6 +27,7 @@ class CreatePostScreen extends ConsumerStatefulWidget {
 class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   final _captionController = TextEditingController();
   final _picker = ImagePicker();
+  Uint8List? _previewBytes;
   static const _maxChars = 500;
 
   @override
@@ -52,13 +55,17 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     );
     if (source == null || !mounted) return;
 
-    final pickedFile = await _picker.pickImage(
-      source: source,
-      maxWidth: 1920,
-      imageQuality: 85,
-    );
+    final XFile? pickedFile = kIsWeb && source == ImageSource.gallery
+        ? await pickGalleryImage(maxWidth: 1920, imageQuality: 85)
+        : await _picker.pickImage(
+            source: source,
+            maxWidth: 1920,
+            imageQuality: 85,
+          );
     if (pickedFile != null && mounted) {
       ref.read(createPostControllerProvider.notifier).setImage(pickedFile);
+      final bytes = await pickedFile.readAsBytes();
+      if (mounted) setState(() => _previewBytes = bytes);
     }
   }
 
@@ -140,10 +147,15 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: _ImageWell(
                         image: state.image,
+                        previewBytes: _previewBytes,
                         isSubmitting: state.isSubmitting,
                         onTap: _showImageSourceSheet,
-                        onRemove: () =>
-                            ref.read(createPostControllerProvider.notifier).removeImage(),
+                        onRemove: () {
+                          setState(() => _previewBytes = null);
+                          ref
+                              .read(createPostControllerProvider.notifier)
+                              .removeImage();
+                        },
                       ),
                     ),
 
@@ -331,12 +343,14 @@ class _PetIdentityRow extends StatelessWidget {
 class _ImageWell extends StatelessWidget {
   const _ImageWell({
     required this.image,
+    required this.previewBytes,
     required this.isSubmitting,
     required this.onTap,
     required this.onRemove,
   });
 
   final XFile? image;
+  final Uint8List? previewBytes;
   final bool isSubmitting;
   final VoidCallback onTap;
   final VoidCallback onRemove;
@@ -363,9 +377,9 @@ class _ImageWell extends StatelessWidget {
                   color: image != null ? Colors.transparent : pt.line,
                   width: 1.5,
                 ),
-                image: image != null
+                image: image != null && previewBytes != null
                     ? DecorationImage(
-                        image: FileImage(File(image!.path)),
+                        image: MemoryImage(previewBytes!),
                         fit: BoxFit.cover,
                       )
                     : null,
