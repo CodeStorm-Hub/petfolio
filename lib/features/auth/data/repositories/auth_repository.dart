@@ -1,5 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/firebase/fcm_service.dart';
+
 class AuthRepository {
   const AuthRepository(this._client);
 
@@ -16,7 +18,10 @@ class AuthRepository {
   Future<void> signUp({required String email, required String password}) =>
       _client.auth.signUp(email: email, password: password);
 
-  Future<void> signOut() => _client.auth.signOut();
+  Future<void> signOut() async {
+    await FcmService.instance.clearTokenForSignOut();
+    await _client.auth.signOut();
+  }
 
   Future<void> resetPassword(String email) =>
       _client.auth.resetPasswordForEmail(email.trim());

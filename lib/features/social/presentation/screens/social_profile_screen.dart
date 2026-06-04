@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../care/data/models/pet_awards_summary.dart';
 import '../../../care/presentation/controllers/pet_awards_provider.dart';
@@ -193,8 +194,16 @@ class SocialProfileScreen extends ConsumerWidget {
                                 CachedNetworkImage(
                                   imageUrl: post.imageUrls.first,
                                   fit: BoxFit.cover,
-                                  memCacheWidth: 400,
-                                  maxWidthDiskCache: 800,
+                                  memCacheWidth: networkImageMemCacheWidth(
+                                    context,
+                                    120,
+                                    maxPixels: webNetworkImageMemCacheThumb,
+                                  ),
+                                  maxWidthDiskCache: networkImageMaxDiskCacheWidth(
+                                    context,
+                                    120,
+                                    maxPixels: webNetworkImageMemCacheThumb,
+                                  ),
                                   placeholder: (ctx, url) => Container(color: pt.surface2),
                                   errorWidget: (ctx, url, err) => Container(
                                     color: pt.surface2,

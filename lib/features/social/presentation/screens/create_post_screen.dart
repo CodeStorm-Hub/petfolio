@@ -2,7 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../../../../core/platform/media_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -52,11 +55,13 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     );
     if (source == null || !mounted) return;
 
-    final pickedFile = await _picker.pickImage(
-      source: source,
-      maxWidth: 1920,
-      imageQuality: 85,
-    );
+    final XFile? pickedFile = kIsWeb && source == ImageSource.gallery
+        ? await pickGalleryImage(maxWidth: 1920, imageQuality: 85)
+        : await _picker.pickImage(
+            source: source,
+            maxWidth: 1920,
+            imageQuality: 85,
+          );
     if (pickedFile != null && mounted) {
       ref.read(createPostControllerProvider.notifier).setImage(pickedFile);
     }

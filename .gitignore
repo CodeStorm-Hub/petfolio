@@ -119,6 +119,8 @@ app.*.symbols
 !/dev/ci/**/Gemfile.lock
 .env
 .env.local
+*firebase-adminsdk*.json
+petfolio-v1-firebase-adminsdk*.json
 
 # Generated seeding output from scripts/generate_inserts.dart — not a versioned migration
 inserts.sql

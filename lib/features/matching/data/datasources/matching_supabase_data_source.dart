@@ -1,3 +1,4 @@
+import 'package:petfolio/core/errors/app_exception.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/chat_message.dart';
@@ -40,24 +41,29 @@ class MatchingSupabaseDataSource {
     final uid = currentUserId;
     if (uid == null) return [];
 
-    final raw = await _client.rpc(
-      'matching_discovery_candidates',
-      params: <String, dynamic>{
-        'p_actor_pet_id': actorPetId,
-        'p_radius_meters': radiusMeters,
-        'p_limit': limit,
-        'p_cursor_created_at': cursorCreatedAt?.toUtc().toIso8601String(),
-        'p_cursor_pet_id': cursorPetId,
-        'p_species': (speciesFilters != null && speciesFilters.isNotEmpty)
-            ? speciesFilters
-            : null,
-        'p_min_age_years': minAgeYears,
-        'p_max_age_years': maxAgeYears,
-      },
-    );
-    if (raw == null) return [];
-    final list = raw as List;
-    return list
+    final List<dynamic> raw;
+    try {
+      final response = await _client.rpc(
+        'matching_discovery_candidates',
+        params: <String, dynamic>{
+          'p_actor_pet_id': actorPetId,
+          'p_radius_meters': radiusMeters,
+          'p_limit': limit,
+          'p_cursor_created_at': cursorCreatedAt?.toUtc().toIso8601String(),
+          'p_cursor_pet_id': cursorPetId,
+          'p_species': (speciesFilters != null && speciesFilters.isNotEmpty)
+              ? speciesFilters
+              : null,
+          'p_min_age_years': minAgeYears,
+          'p_max_age_years': maxAgeYears,
+        },
+      );
+      if (response == null) return [];
+      raw = response as List;
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
+    }
+    return raw
         .map(
           (row) => MatchingDiscoveryRow.fromJson(
             Map<String, dynamic>.from(row as Map),

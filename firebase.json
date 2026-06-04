@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"petfolio-v1","appId":"1:86798095066:android:5b5d6008f7ab957f68cbe3","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"petfolio-v1","configurations":{"android":"1:86798095066:android:5b5d6008f7ab957f68cbe3","web":"1:86798095066:web:61021d3c9119434a68cbe3"}}}}}}

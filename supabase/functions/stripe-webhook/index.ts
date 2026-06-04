@@ -3,7 +3,8 @@
 // Receives and verifies Stripe webhook events. No Supabase JWT — Stripe HMAC only.
 //
 // Two Stripe Dashboard endpoints should point at this URL:
-//   • Platform: payment_intent.succeeded, payment_intent.payment_failed
+//   • Platform: payment_intent.succeeded, payment_intent.payment_failed,
+//     checkout.session.completed, checkout.session.expired
 //     → signed with STRIPE_WEBHOOK_SECRET
 //   • Connect: account.updated (Listen to events on Connected accounts)
 //     → signed with STRIPE_CONNECT_WEBHOOK_SECRET
@@ -35,6 +36,8 @@ const CONNECT_EVENT_TYPES = new Set([
 const PLATFORM_EVENT_TYPES = new Set([
   'payment_intent.succeeded',
   'payment_intent.payment_failed',
+  'checkout.session.completed',
+  'checkout.session.expired',
 ]);
 
 type WebhookRoute = 'connect' | 'platform';
@@ -85,6 +88,81 @@ async function constructVerifiedEvent(
       throw primaryErr;
     }
   }
+}
+
+// ─── Shared order fulfillment (idempotent) ───────────────────────────────────
+
+type SupabaseAdmin = ReturnType<typeof createClient>;
+
+async function fulfillPaidOrder(
+  admin: SupabaseAdmin,
+  orderId: string,
+  source: string,
+): Promise<Response | null> {
+  const { data: orderRow, error: updateErr } = await admin
+    .from('marketplace_orders')
+    .update({
+      status:         'processing',
+      payment_status: 'paid',
+      updated_at:     new Date().toISOString(),
+    })
+    .eq('id', orderId)
+    .eq('status', 'pending')
+    .select('id, shop_id, amount_cents')
+    .maybeSingle();
+
+  if (updateErr) {
+    console.error(`${source}: order update failed`, updateErr);
+    return new Response('DB update failed', { status: 500 });
+  }
+
+  if (!orderRow) {
+    console.log(`${source}: order ${orderId} already processed or not found`);
+    return null;
+  }
+
+  console.log(`${source}: order ${orderId} → processing, payment_status → paid`);
+
+  const { error: confirmErr } = await admin.rpc('confirm_order_inventory', {
+    p_order_id: orderId,
+  });
+  if (confirmErr) {
+    console.error(`${source}: confirm_order_inventory failed (non-fatal)`, confirmErr);
+  }
+
+  const { data: shop } = await admin
+    .from('shops')
+    .select('platform_fee_percent')
+    .eq('id', orderRow.shop_id)
+    .maybeSingle();
+
+  const feePercent          = shop?.platform_fee_percent ?? 10;
+  const platformFeeCents    = Math.floor((orderRow.amount_cents * feePercent) / 100);
+  const vendorEarningsCents = orderRow.amount_cents - platformFeeCents;
+
+  const { error: ledgerErr } = await admin.from('vendor_ledgers').insert({
+    shop_id:               orderRow.shop_id,
+    order_id:              orderId,
+    order_total_cents:     orderRow.amount_cents,
+    platform_fee_cents:    platformFeeCents,
+    vendor_earnings_cents: vendorEarningsCents,
+    status:                'pending_clearance',
+  });
+
+  if (ledgerErr) {
+    if ((ledgerErr as { code?: string }).code === '23505') {
+      console.warn(`${source}: ledger already exists for order ${orderId}`);
+    } else {
+      console.error(`${source}: ledger insert failed (non-fatal)`, ledgerErr);
+    }
+  } else {
+    console.log(
+      `${source}: ledger created for order ${orderId} ` +
+      `(vendor +${vendorEarningsCents}¢, platform +${platformFeeCents}¢)`,
+    );
+  }
+
+  return null;
 }
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
@@ -168,103 +246,80 @@ serve(async (req) => {
         break;
       }
 
-      // ── Platform: payment confirmed ─────────────────────────────────────────
       case 'payment_intent.succeeded': {
         const pi      = event.data.object as Stripe.PaymentIntent;
         const orderId = pi.metadata?.order_id;
 
         if (!orderId) {
-          // PaymentIntent not created by this app (e.g. Stripe test event).
           console.warn('payment_intent.succeeded: no order_id in metadata, skipping');
           break;
         }
 
-        // Transition the order from pending → processing and mark payment paid.
-        // The .eq('status', 'pending') guard makes this update idempotent:
-        // if the webhook fires twice, the second call matches no row.
-        const { data: orderRow, error: updateErr } = await admin
-          .from('marketplace_orders')
-          .update({
-            status:         'processing',
-            payment_status: 'paid',
-            updated_at:     new Date().toISOString(),
-          })
-          .eq('id', orderId)
-          .eq('status', 'pending')
-          .select('id, shop_id, amount_cents')
-          .maybeSingle();
+        const errResp = await fulfillPaidOrder(admin, orderId, 'payment_intent.succeeded');
+        if (errResp) return errResp;
+        break;
+      }
 
-        if (updateErr) {
-          console.error('payment_intent.succeeded: order update failed', updateErr);
-          return new Response('DB update failed', { status: 500 });
-        }
-
-        if (!orderRow) {
-          // Row not found or already transitioned — safe to acknowledge.
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        if (session.payment_status !== 'paid') {
           console.log(
-            `payment_intent.succeeded: order ${orderId} already processed or not found`,
+            `checkout.session.completed: session ${session.id} payment_status=${session.payment_status}, skipping`,
           );
           break;
         }
 
-        console.log(
-          `payment_intent.succeeded: order ${orderId} → processing, payment_status → paid`,
-        );
+        const orderId =
+          session.client_reference_id ??
+          (typeof session.metadata?.order_id === 'string'
+            ? session.metadata.order_id
+            : undefined);
 
-        // Confirm the inventory reservation → decrement stock atomically.
-        const { error: confirmErr } = await admin.rpc('confirm_order_inventory', {
+        if (!orderId) {
+          console.warn('checkout.session.completed: no order id, skipping');
+          break;
+        }
+
+        const errResp = await fulfillPaidOrder(admin, orderId, 'checkout.session.completed');
+        if (errResp) return errResp;
+        break;
+      }
+
+      case 'checkout.session.expired': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const orderId =
+          session.client_reference_id ?? session.metadata?.order_id;
+
+        if (!orderId) {
+          console.warn('checkout.session.expired: no order id, skipping');
+          break;
+        }
+
+        const { error } = await admin
+          .from('marketplace_orders')
+          .update({
+            status: 'cancelled',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', orderId)
+          .eq('status', 'pending');
+
+        if (error) {
+          console.error('checkout.session.expired: DB update failed', error);
+          return new Response('DB update failed', { status: 500 });
+        }
+
+        const { error: releaseErr } = await admin.rpc('release_order_inventory', {
           p_order_id: orderId,
         });
-        if (confirmErr) {
+        if (releaseErr) {
           console.error(
-            'payment_intent.succeeded: confirm_order_inventory failed (non-fatal)',
-            confirmErr,
+            'checkout.session.expired: release_order_inventory failed (non-fatal)',
+            releaseErr,
           );
         }
 
-        // Create the vendor ledger entry so the payout flow can proceed.
-        // Resolve the shop's platform fee to calculate the split.
-        const { data: shop } = await admin
-          .from('shops')
-          .select('platform_fee_percent')
-          .eq('id', orderRow.shop_id)
-          .maybeSingle();
-
-        const feePercent        = shop?.platform_fee_percent ?? 10;
-        const platformFeeCents  = Math.floor((orderRow.amount_cents * feePercent) / 100);
-        const vendorEarningsCents = orderRow.amount_cents - platformFeeCents;
-
-        const { error: ledgerErr } = await admin
-          .from('vendor_ledgers')
-          .insert({
-            shop_id:               orderRow.shop_id,
-            order_id:              orderId,
-            order_total_cents:     orderRow.amount_cents,
-            platform_fee_cents:    platformFeeCents,
-            vendor_earnings_cents: vendorEarningsCents,
-            status:                'pending_clearance',
-          });
-
-        if (ledgerErr) {
-          // Code 23505 = unique_violation: ledger already exists (replayed webhook).
-          // Not fatal — the order transition succeeded; just log and continue.
-          if ((ledgerErr as { code?: string }).code === '23505') {
-            console.warn(
-              `payment_intent.succeeded: ledger already exists for order ${orderId}`,
-            );
-          } else {
-            console.error(
-              'payment_intent.succeeded: ledger insert failed (non-fatal)',
-              ledgerErr,
-            );
-          }
-        } else {
-          console.log(
-            `payment_intent.succeeded: ledger created for order ${orderId} ` +
-            `(vendor +${vendorEarningsCents}¢, platform +${platformFeeCents}¢)`,
-          );
-        }
-
+        console.log(`checkout.session.expired: order ${orderId} cancelled`);
         break;
       }
 

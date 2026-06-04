@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/platform/web_image_cache.dart';
 import '../../data/models/story.dart';
 import '../controllers/story_controller.dart';
 
@@ -274,7 +275,16 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                           child: CachedNetworkImage(
                             imageUrl: story.imageUrl,
                             fit: BoxFit.cover,
-                            memCacheWidth: 1080,
+                            memCacheWidth: networkImageMemCacheWidth(
+                              context,
+                              MediaQuery.sizeOf(context).width,
+                              maxPixels: webNetworkImageMemCacheMax,
+                            ),
+                            maxWidthDiskCache: networkImageMaxDiskCacheWidth(
+                              context,
+                              MediaQuery.sizeOf(context).width,
+                              maxPixels: webNetworkImageMemCacheMax,
+                            ),
                             placeholder: (context, url) => const Center(
                               child: CircularProgressIndicator.adaptive(
                                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),

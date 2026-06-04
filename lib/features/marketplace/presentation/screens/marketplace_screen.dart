@@ -1,17 +1,23 @@
 
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../data/models/cart_item.dart';
 import '../../data/models/product.dart';
+import '../../data/repositories/order_repository.dart';
 import '../controllers/cart_controller.dart';
+import '../controllers/checkout_controller.dart';
 import '../controllers/product_list_controller.dart';
+import '../controllers/shop_list_controller.dart';
+import '../widgets/web_checkout_resume_listener.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
 
 
@@ -46,6 +52,26 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
   ProductCategory _selectedCat = ProductCategory.all;
   final List<FlyToCartItem> _flyingItems = [];
 
+  @override
+  void initState() {
+    super.initState();
+    if (kIsWeb) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _handleStripeCancelQuery());
+    }
+  }
+
+  void _handleStripeCancelQuery() {
+    if (!mounted) return;
+    final params = GoRouterState.of(context).uri.queryParameters;
+    if (params['stripe'] != 'cancel') return;
+    final orderId = ref.read(checkoutProvider).orderId;
+    if (orderId != null) {
+      ref.read(orderRepositoryProvider).cancelOrder(orderId).ignore();
+    }
+    ref.read(checkoutProvider.notifier).reset();
+    context.go('/marketplace');
+    AppSnackBar.showError('Checkout cancelled');
+  }
 
   void _addToCart(Product product, Rect? fromRect) {
     ref.read(cartProvider.notifier).add(product);
@@ -112,20 +138,20 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
       );
     }
 
-    return Scaffold(
-      backgroundColor: pt.surface1,
-      body: Stack(
-        children: [
-          bodyContent,
-          
-          // Fly to cart overlay
-          ..._flyingItems.map((item) {
-            return _FlyToCartAnim(
-              key: ValueKey(item.id),
-              item: item,
-            );
-          }),
-        ],
+    return WebCheckoutResumeListener(
+      child: Scaffold(
+        backgroundColor: pt.surface1,
+        body: Stack(
+          children: [
+            bodyContent,
+            ..._flyingItems.map((item) {
+              return _FlyToCartAnim(
+                key: ValueKey(item.id),
+                item: item,
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
@@ -214,7 +240,25 @@ class _FlyToCartAnimState extends State<_FlyToCartAnim> with SingleTickerProvide
                 ),
                 alignment: Alignment.center,
                 child: widget.item.product.imageUrls.isNotEmpty 
-                  ? ClipRRect(borderRadius: BorderRadius.circular(16), child: CachedNetworkImage(imageUrl: widget.item.product.imageUrls.first, fit: BoxFit.cover, width: 48, height: 48))
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: CachedNetworkImage(
+                        imageUrl: widget.item.product.imageUrls.first,
+                        fit: BoxFit.cover,
+                        width: 48,
+                        height: 48,
+                        memCacheWidth: networkImageMemCacheWidth(
+                          context,
+                          48,
+                          maxPixels: webNetworkImageMemCacheThumb,
+                        ),
+                        memCacheHeight: networkImageMemCacheWidth(
+                          context,
+                          48,
+                          maxPixels: webNetworkImageMemCacheThumb,
+                        ),
+                      ),
+                    )
                   : const Text('🦴', style: TextStyle(fontSize: 26)),
               ),
             ),
@@ -580,9 +624,12 @@ class _NewProductTileState extends State<_NewProductTile> {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: Container(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: widget.onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
         decoration: BoxDecoration(
           color: pt.surface1,
           borderRadius: BorderRadius.circular(24),
@@ -613,7 +660,16 @@ class _NewProductTileState extends State<_NewProductTile> {
                       duration: const Duration(milliseconds: 280),
                       curve: Curves.elasticOut,
                       child: widget.product.imageUrls.isNotEmpty
-                        ? CachedNetworkImage(imageUrl: widget.product.imageUrls.first, height: 100, fit: BoxFit.contain)
+                        ? CachedNetworkImage(
+                            imageUrl: widget.product.imageUrls.first,
+                            height: 100,
+                            fit: BoxFit.contain,
+                            memCacheWidth: networkImageMemCacheWidth(
+                              context,
+                              100,
+                              maxPixels: webNetworkImageMemCacheThumb,
+                            ),
+                          )
                         : const Text('🦴', style: TextStyle(fontSize: 60)),
                     ),
                   ),
@@ -652,14 +708,15 @@ class _NewProductTileState extends State<_NewProductTile> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('\$${(widget.product.priceCents / 100).toStringAsFixed(2)}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: pt.ink950)),
-                        GestureDetector(
-                          key: _btnKey,
-                          onTap: _handleAdd,
-                          child: AnimatedScale(
+                        IconButton(
+                          key: ValueKey<String>('marketplace_add_${widget.product.id}'),
+                          onPressed: _handleAdd,
+                          icon: AnimatedScale(
                             scale: _popping ? 1.15 : 1.0,
                             duration: const Duration(milliseconds: 280),
                             curve: Curves.elasticOut,
                             child: Container(
+                              key: _btnKey,
                               width: 36,
                               height: 36,
                               decoration: BoxDecoration(
@@ -671,6 +728,11 @@ class _NewProductTileState extends State<_NewProductTile> {
                               child: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
                             ),
                           ),
+                          style: IconButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(44, 44),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
                         ),
                       ],
                     ),
@@ -681,6 +743,7 @@ class _NewProductTileState extends State<_NewProductTile> {
           ],
         ),
       ),
+      ),
     );
   }
 }
@@ -689,21 +752,52 @@ class _NewProductTileState extends State<_NewProductTile> {
 // Cart Drawer
 // ─────────────────────────────────────────────────────────────────────────────
 
-class CartDrawer extends ConsumerWidget {
+const _petfolioOfficialShopId = 'cccccccc-0000-0000-0000-cccccccccccc';
+
+class CartDrawer extends ConsumerStatefulWidget {
   const CartDrawer({super.key});
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CartDrawer> createState() => _CartDrawerState();
+}
+
+class _CartDrawerState extends ConsumerState<CartDrawer> {
+  @override
+  Widget build(BuildContext context) {
     final cart = ref.watch(cartProvider);
+    final checkout = ref.watch(checkoutProvider);
+    final shopsAsync = ref.watch(shopListProvider);
+    final verifiedShopIds = shopsAsync.value?.map((s) => s.id).toSet() ?? {};
+
+    ref.listen(checkoutProvider, (prev, next) {
+      if (next.status == CheckoutStatus.success && next.orderId != null) {
+        Navigator.pop(context);
+        context.pushReplacement('/marketplace/order/${next.orderId}');
+        ref.read(checkoutProvider.notifier).reset();
+      }
+      if (next.status == CheckoutStatus.failure && next.errorMessage != null) {
+        AppSnackBar.showError(next.errorMessage!);
+        ref.read(checkoutProvider.notifier).reset();
+      }
+    });
+
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final ink950 = pt.ink950;
     final ink500 = pt.ink500;
     final surface = pt.surface1;
     final bg = pt.surface1;
-    
+
     final items = cart.items.toList();
     final subtotal = cart.totalCents / 100;
     final shipping = items.isNotEmpty ? 4.50 : 0.0;
     final total = subtotal + shipping;
+    final shopGroups = cart.itemsByShop.entries.toList();
+    final checkoutShopId = shopGroups.length == 1 ? shopGroups.first.key : null;
+    final canCheckout = checkoutShopId != null &&
+        (checkoutShopId == _petfolioOfficialShopId ||
+            verifiedShopIds.contains(checkoutShopId));
+    final isLoading =
+        checkoutShopId != null && checkout.isLoadingShop(checkoutShopId);
 
     return Container(
       decoration: BoxDecoration(
@@ -802,20 +896,44 @@ class CartDrawer extends ConsumerWidget {
                   
                   const SizedBox(height: 16),
                   FilledButton(
-                    onPressed: () {},
+                    key: const ValueKey<String>('marketplace_cart_checkout'),
+                    onPressed: shopGroups.length > 1
+                        ? () {
+                            Navigator.pop(context);
+                            context.push('/marketplace/cart');
+                          }
+                        : !canCheckout || isLoading
+                            ? null
+                            : () => ref
+                                .read(checkoutProvider.notifier)
+                                .startCheckoutForShop(checkoutShopId),
                     style: FilledButton.styleFrom(
                       minimumSize: const Size(double.infinity, 56),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       backgroundColor: Theme.of(context).colorScheme.primary,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Checkout · \$${total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.chevron_right_rounded),
-                      ],
-                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                shopGroups.length > 1
+                                    ? 'Checkout by shop'
+                                    : 'Checkout · \$${total.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.chevron_right_rounded),
+                            ],
+                          ),
                   ),
                   const SizedBox(height: 10),
                   Text.rich(
@@ -887,7 +1005,21 @@ class _CartItemRow extends ConsumerWidget {
             ),
             alignment: Alignment.center,
             child: item.product.imageUrls.isNotEmpty
-              ? CachedNetworkImage(imageUrl: item.product.imageUrls.first, fit: BoxFit.cover, width: 40)
+              ? CachedNetworkImage(
+                  imageUrl: item.product.imageUrls.first,
+                  fit: BoxFit.cover,
+                  width: 40,
+                  memCacheWidth: networkImageMemCacheWidth(
+                    context,
+                    40,
+                    maxPixels: webNetworkImageMemCacheThumb,
+                  ),
+                  memCacheHeight: networkImageMemCacheWidth(
+                    context,
+                    40,
+                    maxPixels: webNetworkImageMemCacheThumb,
+                  ),
+                )
               : const Text('🦴', style: TextStyle(fontSize: 30)),
           ),
           const SizedBox(width: 12),

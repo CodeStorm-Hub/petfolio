@@ -46,6 +46,7 @@ import '../features/social/presentation/screens/post_detail_screen.dart';
 import '../features/social/presentation/screens/social_profile_screen.dart';
 import '../features/social/presentation/screens/social_screen.dart';
 import '../features/social/presentation/screens/story_viewer_screen.dart';
+import 'navigation/route_overlay_dismissal.dart';
 import 'package:petfolio/core/widgets/app_shell.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -60,6 +61,9 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/home',
     refreshListenable: notifier,
     redirect: notifier.redirect,
+    errorBuilder: (context, state) => _RouterErrorScreen(
+      location: state.uri.toString(),
+    ),
     routes: [
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
@@ -337,6 +341,8 @@ final routerProvider = Provider<GoRouter>((ref) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _RouterNotifier extends ChangeNotifier {
+  String? _lastDismissedLocation;
+
   _RouterNotifier(this._ref) {
     // Re-evaluate redirects whenever auth status genuinely changes (sign-in /
     // sign-out) AND invalidate the pet list so it re-fetches for the new user.
@@ -360,6 +366,19 @@ class _RouterNotifier extends ChangeNotifier {
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
     final isLoggedIn = _ref.read(isLoggedInProvider);
     final loc = state.matchedLocation;
+    final path = state.uri.path;
+
+    if (_lastDismissedLocation != loc) {
+      _lastDismissedLocation = loc;
+      dismissRootOverlayRoutes(_rootNavigatorKey);
+    }
+
+    if (path == '/' || path.isEmpty) {
+      return isLoggedIn ? '/home' : '/login';
+    }
+
+    if (loc == '/pets') return '/home';
+    if (loc == '/shop') return '/marketplace';
 
     // ── Not logged in → only /login and /register are allowed ────────
     if (!isLoggedIn) {
@@ -425,6 +444,43 @@ class _PetEditMissingScreen extends StatelessWidget {
               child: const Text('Back to Pets'),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RouterErrorScreen extends StatelessWidget {
+  const _RouterErrorScreen({required this.location});
+
+  final String location;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Page not found',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                location,
+                style: Theme.of(context).textTheme.bodySmall,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: () => context.go('/home'),
+                child: const Text('Go to Home'),
+              ),
+            ],
+          ),
         ),
       ),
     );

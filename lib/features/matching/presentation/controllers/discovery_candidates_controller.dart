@@ -216,10 +216,12 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
             prefs: prefs,
             cursor: snap.cursor,
           );
-        } catch (_) {
+        } catch (e, st) {
           if (epoch == _epoch) {
             final cur = _bufferOrNull();
-            if (cur != null) {
+            if (cur == null || cur.candidates.isEmpty) {
+              state = AsyncError(e, st);
+            } else {
               state = AsyncData(cur.copyWith(mayHaveMore: false));
             }
           }

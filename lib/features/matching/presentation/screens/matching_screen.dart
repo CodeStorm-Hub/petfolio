@@ -3,10 +3,13 @@ import 'dart:math' as math;
 
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../../core/errors/app_exception.dart';
+import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/services/lat_lng.dart';
 import '../../../../core/services/location_providers.dart';
 import '../../../../core/services/location_service.dart';
@@ -15,6 +18,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
+import '../../../pet_profile/presentation/controllers/edit_profile_controller.dart';
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
 
 import '../../data/models/discovery_candidate.dart';
@@ -40,6 +44,19 @@ bool _isLocationBlocked(LocationAccessState? access) {
   };
 }
 
+bool _isDiscoveryLocationBlocked({
+  required LocationAccessState? access,
+  required bool actorPetHasStoredLocation,
+}) {
+  if (kIsWeb &&
+      actorPetHasStoredLocation &&
+      (access == LocationAccessState.unavailable ||
+          access == LocationAccessState.denied)) {
+    return false;
+  }
+  return _isLocationBlocked(access);
+}
+
 LocationAccessState? _accessFromDeviceError(AsyncValue<LatLng> deviceLocation) {
   if (!deviceLocation.hasError) return null;
   final message = deviceLocation.error.toString().toLowerCase();
@@ -50,6 +67,17 @@ LocationAccessState? _accessFromDeviceError(AsyncValue<LatLng> deviceLocation) {
     return LocationAccessState.servicesDisabled;
   }
   return LocationAccessState.denied;
+}
+
+String _discoveryErrorMessage(Object error) {
+  if (error is DatabaseException) {
+    final lower = error.message.toLowerCase();
+    if (lower.contains('404') || lower.contains('not found')) {
+      return 'Matching is unavailable. Try again in a moment.';
+    }
+    return error.message;
+  }
+  return 'Could not load profiles';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -205,12 +233,18 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
     final overlayActive = _celebrationMatch != null && activePet != null;
 
     final locationAccess = locationAccessAsync.asData?.value;
-    final locationBlocked = _isLocationBlocked(locationAccess);
+    final actorPetHasStoredLocation =
+        ref.watch(petMatchLocationProvider(petId)).value == true;
+    final locationBlocked = _isDiscoveryLocationBlocked(
+      access: locationAccess,
+      actorPetHasStoredLocation: actorPetHasStoredLocation,
+    );
 
     Future<void> enableLocation() async {
       final access = locationAccess ?? await ref.read(locationServiceProvider).readAccessState();
-      if (access == LocationAccessState.permanentlyDenied ||
-          access == LocationAccessState.servicesDisabled) {
+      if (!kIsWeb &&
+          (access == LocationAccessState.permanentlyDenied ||
+              access == LocationAccessState.servicesDisabled)) {
         await openAppSettings();
       } else {
         await ref.read(locationServiceProvider).requestWhenInUseAccess();
@@ -240,8 +274,9 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
               Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
               const SizedBox(height: 12),
               Text(
-                'Could not load profiles',
+                _discoveryErrorMessage(error),
                 style: TextStyle(fontSize: 15, color: pt.ink500),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               FilledButton.icon(
@@ -859,6 +894,16 @@ class _CardSurface extends StatelessWidget {
                 child: CachedNetworkImage(
                   imageUrl: candidate.avatarUrl!,
                   fit: BoxFit.cover,
+                  memCacheWidth: networkImageMemCacheWidth(
+                    context,
+                    MediaQuery.sizeOf(context).width,
+                    maxPixels: webNetworkImageMemCacheMax,
+                  ),
+                  maxWidthDiskCache: networkImageMaxDiskCacheWidth(
+                    context,
+                    MediaQuery.sizeOf(context).width,
+                    maxPixels: webNetworkImageMemCacheMax,
+                  ),
                   placeholder: (context, url) => Center(
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 60),

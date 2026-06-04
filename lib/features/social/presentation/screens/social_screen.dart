@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/dashed_circle_painter.dart';
@@ -988,7 +989,20 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                       ),
                       clipBehavior: Clip.hardEdge,
                       child: widget.post.imageUrls.isNotEmpty 
-                        ? CachedNetworkImage(imageUrl: widget.post.imageUrls.first, fit: BoxFit.cover)
+                        ? CachedNetworkImage(
+                            imageUrl: widget.post.imageUrls.first,
+                            fit: BoxFit.cover,
+                            memCacheWidth: networkImageMemCacheWidth(
+                              context,
+                              MediaQuery.sizeOf(context).width - 28,
+                              maxPixels: webNetworkImageMemCacheFeed,
+                            ),
+                            maxWidthDiskCache: networkImageMaxDiskCacheWidth(
+                              context,
+                              MediaQuery.sizeOf(context).width - 28,
+                              maxPixels: webNetworkImageMemCacheFeed,
+                            ),
+                          )
                         : Center(
                             child: Container(
                               width: 150,

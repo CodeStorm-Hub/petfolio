@@ -1,28 +1,28 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/primary_pill_button.dart';
+import '../../data/repositories/order_repository.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// OrderConfirmationScreen — shown after successful payment
-// ─────────────────────────────────────────────────────────────────────────────
-
-class OrderConfirmationScreen extends StatefulWidget {
+class OrderConfirmationScreen extends ConsumerStatefulWidget {
   const OrderConfirmationScreen({super.key, required this.orderId});
 
   final String orderId;
 
   @override
-  State<OrderConfirmationScreen> createState() =>
+  ConsumerState<OrderConfirmationScreen> createState() =>
       _OrderConfirmationScreenState();
 }
 
-class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
+class _OrderConfirmationScreenState extends ConsumerState<OrderConfirmationScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _scaleAnim;
   late final Animation<double> _fadeAnim;
+  bool _confirming = false;
 
   @override
   void initState() {
@@ -40,6 +40,23 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
       curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
     );
     _controller.forward();
+
+    if (kIsWeb) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _confirmWebPayment());
+    }
+  }
+
+  Future<void> _confirmWebPayment() async {
+    final stripe = GoRouterState.of(context).uri.queryParameters['stripe'];
+    if (stripe != 'success' || _confirming) return;
+
+    setState(() => _confirming = true);
+    try {
+      await ref.read(orderRepositoryProvider).pollOrderConfirmation(widget.orderId);
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _confirming = false);
+    }
   }
 
   @override
@@ -50,8 +67,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
 
   @override
   Widget build(BuildContext context) {
-    // bottom: false — we add bottomPad manually so SafeArea doesn't
-    // double-count the home-indicator inset.
     final bottomPad = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
@@ -61,9 +76,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
         child: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
           child: ConstrainedBox(
-            // On tall devices the Column fills the screen (Spacers absorb space).
-            // On very short devices (≤ 568 dp) the content scrolls instead of
-            // overflowing.
             constraints: BoxConstraints(
               minHeight: MediaQuery.sizeOf(context).height -
                   MediaQuery.paddingOf(context).top,
@@ -74,8 +86,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
                 child: Column(
                   children: [
                     const Spacer(),
-
-                    // Success badge
                     ScaleTransition(
                       scale: _scaleAnim,
                       child: Container(
@@ -93,7 +103,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
                       ),
                     ),
                     const SizedBox(height: 32),
-
                     FadeTransition(
                       opacity: _fadeAnim,
                       child: Column(
@@ -108,21 +117,23 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
                             ),
                           ),
                           const SizedBox(height: 12),
-                          const Text(
-                            'Your order is confirmed and will\narrive within 3–5 business days.',
+                          Text(
+                            _confirming
+                                ? 'Confirming your payment…'
+                                : 'Your order is confirmed and will\narrive within 3–5 business days.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 15,
                               height: 1.5,
                               color: AppColors.ink500,
                             ),
                           ),
                           const SizedBox(height: 24),
-
-                          // Order reference chip
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 10),
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               color: AppColors.surface2,
@@ -130,8 +141,11 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.receipt_long_outlined,
-                                    size: 16, color: AppColors.ink500),
+                                const Icon(
+                                  Icons.receipt_long_outlined,
+                                  size: 16,
+                                  color: AppColors.ink500,
+                                ),
                                 const SizedBox(width: 8),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,9 +175,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
                         ],
                       ),
                     ),
-
                     const Spacer(),
-
                     FadeTransition(
                       opacity: _fadeAnim,
                       child: Column(
@@ -179,7 +191,8 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
                             label: 'View Order',
                             size: PillButtonSize.lg,
                             isFullWidth: true,
-                            onPressed: () => context.go('/marketplace/orders/${widget.orderId}'),
+                            onPressed: () =>
+                                context.go('/marketplace/orders/${widget.orderId}'),
                           ),
                           const SizedBox(height: 12),
                           TextButton(

@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
+import '../../../../core/platform/media_picker.dart';
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/app_snack_bar.dart';
 import 'package:petfolio/core/widgets/primary_pill_button.dart';
@@ -30,8 +30,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   late final TextEditingController _breedController;
   late final TextEditingController _bioController;
   late final TextEditingController _weightController;
-  final _picker = ImagePicker();
-
   DateTime? _dateOfBirth;
   PetGender _gender = PetGender.unknown;
   String? _activityLevel;
@@ -87,7 +85,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<void> _pickImage() async {
-    final picked = await _picker.pickImage(source: ImageSource.gallery);
+    final picked = await pickGalleryImage();
     if (picked != null) {
       ref.read(editProfileControllerProvider.notifier).setImage(picked);
     }

@@ -99,6 +99,7 @@ class AuthField extends StatefulWidget {
     this.onSubmitted,
     this.suffixIcon,
     this.autocorrect = true,
+    this.autofillHints,
     this.validator,
   });
 
@@ -110,6 +111,7 @@ class AuthField extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
   final Widget? suffixIcon;
   final bool autocorrect;
+  final Iterable<String>? autofillHints;
   final FormFieldValidator<String>? validator;
 
   @override
@@ -162,6 +164,7 @@ class _AuthFieldState extends State<AuthField> {
         textInputAction: widget.textInputAction,
         onFieldSubmitted: widget.onSubmitted,
         autocorrect: widget.autocorrect,
+        autofillHints: widget.autofillHints,
         enableSuggestions: !widget.obscureText,
         validator: widget.validator,
         style: TextStyle(

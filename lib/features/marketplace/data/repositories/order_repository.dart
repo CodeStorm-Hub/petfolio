@@ -68,6 +68,37 @@ class OrderRepository {
     return clientSecret;
   }
 
+  Future<String> createCheckoutSession({
+    required String orderId,
+    required String successUrl,
+    required String cancelUrl,
+  }) async {
+    final response = await _client.functions.invoke(
+      'create-payment-intent',
+      body: {
+        'orderId': orderId,
+        'payment_method': 'stripe',
+        'checkout_mode': true,
+        'success_url': successUrl,
+        'cancel_url': cancelUrl,
+      },
+    );
+
+    if (response.status != 200) {
+      final data = response.data as Map<String, dynamic>?;
+      final code = data?['code'] as String?;
+      if (code == 'SHOP_NOT_VERIFIED') throw const ShopNotVerifiedException();
+      throw Exception('Edge Function error ${response.status}: ${response.data}');
+    }
+
+    final checkoutUrl =
+        (response.data as Map<String, dynamic>)['checkoutUrl'] as String?;
+    if (checkoutUrl == null) {
+      throw Exception('Missing checkoutUrl in response');
+    }
+    return checkoutUrl;
+  }
+
   /// Validate a CoD order via the Edge Function (inventory check, shop active
   /// guard) and stamp payment_method='cod' on the row server-side.
   /// Returns the confirmed orderId on success.

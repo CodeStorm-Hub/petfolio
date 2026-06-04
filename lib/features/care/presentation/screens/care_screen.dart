@@ -19,6 +19,7 @@ import 'package:petfolio/features/care/presentation/utils/care_scheduled_time.da
 import 'package:petfolio/features/care/presentation/widgets/routine_recommendation_sheet.dart';
 import 'package:petfolio/features/care/domain/services/care_recommendation_service.dart';
 import 'package:petfolio/features/care/presentation/widgets/gamified_care_ui.dart';
+import 'package:petfolio/features/care/presentation/widgets/web_push_enable_banner.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CareScreen
@@ -169,6 +170,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                 activePet: activePet,
                 dashboard: dashboard,
               ),
+              const WebPushEnableBanner(),
               Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Column(
@@ -1029,7 +1031,14 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 30),
     ]).animate(_xpCtrl);
 
-    Widget card = GestureDetector(
+    final taskLabel = done
+        ? '${task.title}, completed'
+        : '${task.title}, $_sublabel, mark complete';
+
+    Widget card = Semantics(
+      button: true,
+      label: taskLabel,
+      child: GestureDetector(
       onTap: _toggle,
       onLongPress: () => _showContextMenu(context),
       child: AnimatedContainer(
@@ -1252,6 +1261,7 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
           ],
         ),
       ),
+    ),
     );
 
     // ── XP burst overlay ─────────────────────────────────────────────────
@@ -1716,11 +1726,17 @@ class _UtilityHalf extends StatelessWidget {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(13),
-          child: Column(
+      child: Semantics(
+        button: true,
+        label: '$title. $subtitle',
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(22),
+            child: Padding(
+              padding: const EdgeInsets.all(13),
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -1770,6 +1786,8 @@ class _UtilityHalf extends StatelessWidget {
                 ),
               ),
             ],
+              ),
+            ),
           ),
         ),
       ),

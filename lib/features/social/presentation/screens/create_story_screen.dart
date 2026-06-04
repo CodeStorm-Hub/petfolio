@@ -1,10 +1,13 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../../../../core/platform/media_picker.dart';
+import '../../../../core/platform/web_image_cache.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../../core/theme/app_colors.dart';
@@ -70,11 +73,13 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
   }
 
   Future<void> _pickFromGallery() async {
-    final pickedFile = await _picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1920,
-      imageQuality: 85,
-    );
+    final pickedFile = kIsWeb
+        ? await pickGalleryImage(maxWidth: 1920, imageQuality: 85)
+        : await _picker.pickImage(
+            source: ImageSource.gallery,
+            maxWidth: 1920,
+            imageQuality: 85,
+          );
     if (pickedFile != null && mounted) {
       ref.read(createPostControllerProvider.notifier).setImage(pickedFile);
       await _loadPreviewBytes(pickedFile);
@@ -542,7 +547,11 @@ class _MockImageTile extends StatelessWidget {
         child: CachedNetworkImage(
           imageUrl: url,
           fit: BoxFit.cover,
-          memCacheWidth: 200,
+          memCacheWidth: networkImageMemCacheWidth(
+            context,
+            100,
+            maxPixels: webNetworkImageMemCacheThumb,
+          ),
           placeholder: (context, _) => Container(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
           ),

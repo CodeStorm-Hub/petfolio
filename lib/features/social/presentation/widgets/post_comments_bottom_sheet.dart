@@ -601,7 +601,13 @@ class _CommentInputBarState extends State<_CommentInputBar> {
                     : null,
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: TextField(
+              child: Semantics(
+                textField: true,
+                label: widget.replyingToHandle != null
+                    ? 'Reply to ${widget.replyingToHandle}'
+                    : 'Add a comment',
+                child: TextField(
+                key: const ValueKey<String>('social_comment_input'),
                 controller: widget.controller,
                 focusNode: _focusNode,
                 minLines: 1,
@@ -624,6 +630,7 @@ class _CommentInputBarState extends State<_CommentInputBar> {
                   hintStyle: TextStyle(color: pt.ink300, fontSize: 14),
                   contentPadding: const EdgeInsets.symmetric(vertical: 4),
                 ),
+              ),
               ),
             ),
           ),

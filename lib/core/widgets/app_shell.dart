@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -86,6 +87,33 @@ class AppShell extends ConsumerWidget {
               ),
             ),
           ],
+        ),
+      );
+    }
+
+    if (kIsWeb) {
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: Stack(
+          children: [
+            Positioned.fill(child: child),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: AppShellHeader(selectedIndex: selectedIndex),
+            ),
+          ],
+        ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: _FloatingNav(
+              selectedIndex: selectedIndex,
+              onSelect: (i) => context.go(appShellDestinations[i].path),
+            ),
+          ),
         ),
       );
     }
