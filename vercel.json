@@ -1,6 +1,7 @@
 {
   "outputDirectory": "build/web",
   "buildCommand": "",
+  "installCommand": "",
   "framework": null,
   "headers": [
     {

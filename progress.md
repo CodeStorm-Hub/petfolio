@@ -1682,3 +1682,13 @@ Phase complete — please run (/remember) to save tokens before proceeding to th
 
 Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
 
+## 2026-06-05 — Vercel web CI secrets + deploy workflow
+
+- **GitHub Actions secrets:** `gh secret set -f .env -R CodeStorm-Hub/petfolio` synced all `.env` keys; `VERCEL_TOKEN` unchanged (set manually).
+- **`deploy-web.yml`:** Flutter 3.44.0 pin, `FIREBASE_VAPID_KEY` dart-define, CI `.env` materialization + `dart run tool/sync_firebase_web_config.dart`, Node 22 + global Vercel CLI, concurrency + `workflow_dispatch`.
+- **`vercel.json`:** `installCommand: ""` so prebuilt Flutter output is not npm-installed.
+
+**Manual:** Confirm `VERCEL_TOKEN` is valid; push to `main` or open PR to trigger deploy.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+

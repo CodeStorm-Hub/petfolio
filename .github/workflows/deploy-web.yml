@@ -5,10 +5,16 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     env:
       VERCEL_ORG_ID: team_lC8aTJK0XiU9qDfaHeTfCJs6
@@ -21,12 +27,35 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.x'
+          flutter-version: '3.44.0'
           channel: stable
           cache: true
 
+      - name: Enable Flutter web
+        run: flutter config --enable-web
+
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Materialize CI .env from secrets
+        run: |
+          umask 077
+          {
+            echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}"
+            echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}"
+            echo "STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}"
+            echo "NVIDIA_API_KEY=${{ secrets.NVIDIA_API_KEY }}"
+            echo "FIREBASE_VAPID_KEY=${{ secrets.FIREBASE_VAPID_KEY }}"
+            echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}"
+            echo "FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}"
+            echo "FIREBASE_WEB_API_KEY=${{ secrets.FIREBASE_WEB_API_KEY }}"
+            echo "FIREBASE_WEB_APP_ID=${{ secrets.FIREBASE_WEB_APP_ID }}"
+            echo "FIREBASE_AUTH_DOMAIN=${{ secrets.FIREBASE_AUTH_DOMAIN }}"
+            echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}"
+          } > .env
+
+      - name: Sync Firebase web config for service worker
+        run: dart run tool/sync_firebase_web_config.dart
 
       - name: Build Flutter Web (release)
         run: |
@@ -34,20 +63,29 @@ jobs:
             --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
             --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
             --dart-define=STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }} \
-            --dart-define=NVIDIA_API_KEY=${{ secrets.NVIDIA_API_KEY }}
+            --dart-define=NVIDIA_API_KEY=${{ secrets.NVIDIA_API_KEY }} \
+            --dart-define=FIREBASE_VAPID_KEY=${{ secrets.FIREBASE_VAPID_KEY }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
 
       - name: Vercel build (preview)
         if: github.event_name == 'pull_request'
-        run: npx vercel build --yes --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Vercel build (production)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: npx vercel build --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: vercel build --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy preview to Vercel (PRs)
         if: github.event_name == 'pull_request'
-        run: npx vercel deploy --prebuilt --yes --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel production (main only)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: npx vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
