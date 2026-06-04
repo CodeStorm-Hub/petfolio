@@ -1,5 +1,7 @@
 {
   "outputDirectory": "build/web",
+  "buildCommand": "",
+  "framework": null,
   "headers": [
     {
       "source": "/flutter_service_worker.js",
