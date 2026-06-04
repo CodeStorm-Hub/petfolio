@@ -1,3 +1,5 @@
+import '../../../../core/utils/time_ago.dart';
+
 /// Immutable data model for a single post comment.
 ///
 /// Constructed from a Supabase row via [fromJson].
@@ -40,14 +42,7 @@ class Comment {
   final int likeCount;
   final bool isLiked;
 
-  /// Human-readable relative time string (e.g. "2h ago").
-  String get timeAgo {
-    final diff = DateTime.now().difference(createdAt);
-    if (diff.inSeconds < 60) return 'just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    return '${diff.inDays}d ago';
-  }
+  String get timeAgo => formatTimeAgo(createdAt);
 
   Comment copyWithLike({required bool liked}) => Comment(
         id: id,

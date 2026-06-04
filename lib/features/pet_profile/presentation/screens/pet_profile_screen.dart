@@ -375,7 +375,30 @@ class _DailyQuestsCard extends ConsumerWidget {
           );
         },
         loading: () => const CircularProgressIndicator.adaptive(),
-        error: (_, _) => const SizedBox(),
+        error: (e, st) {
+          debugPrint('Today quests load failure: $e\n$st');
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline_rounded, color: AppColors.poppy, size: 16),
+                const SizedBox(width: 8),
+                Text('Could not load quests', style: TextStyle(color: pt.ink500, fontSize: 12)),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () => ref.read(careDashboardProvider.notifier).refresh(),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text('Retry', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

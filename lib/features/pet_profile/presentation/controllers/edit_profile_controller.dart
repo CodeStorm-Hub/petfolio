@@ -126,6 +126,10 @@ class EditProfileController extends Notifier<EditProfileState> {
       return false;
     }
 
+    // Clear the in-memory location cache so the next discovery load re-checks
+    // the DB rather than relying on a potentially stale cached value.
+    ref.read(matchingRepositoryProvider).invalidatePetLocationCache(originalPet.id);
+
     // Location sync is best-effort: a failure must not undo a successful save.
     if (syncLocationIfDiscoverable && isDiscoverable) {
       try {

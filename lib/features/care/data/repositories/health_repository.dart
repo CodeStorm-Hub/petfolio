@@ -49,7 +49,8 @@ class HealthRepository {
           .from('health_logs')
           .select()
           .eq('pet_id', petId)
-          .order('occurred_at', ascending: false);
+          .order('occurred_at', ascending: false)
+          .limit(100);
       return rows.map(HealthLog.fromJson).toList();
     } on AppException {
       rethrow;

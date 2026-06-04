@@ -7,12 +7,12 @@ import '../../data/models/feed_post.dart';
 import '../../data/models/pet_stats.dart';
 import '../../data/repositories/social_repository.dart';
 
-/// Fetches posts authored by a specific pet.
+/// Fetches posts authored by a specific pet (first page, 30 posts).
 final socialProfilePostsProvider =
     FutureProvider.family<List<FeedPost>, String>((ref, petId) async {
   final repo = ref.watch(socialRepositoryProvider);
   final viewerPetId = ref.watch(activePetIdProvider);
-  return repo.fetchPostsForPet(petId, activePetId: viewerPetId);
+  return repo.fetchPostsForPet(petId, activePetId: viewerPetId, limit: 30, offset: 0);
 });
 
 final petStatsProvider = FutureProvider.family<PetStats, String>((ref, petId) {

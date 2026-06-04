@@ -45,6 +45,7 @@ abstract class MatchingDiscoveryRow with _$MatchingDiscoveryRow {
     String? bio,
     double? distanceMeters,
     @Default(false) bool isDiscoverable,
+    DateTime? createdAt,
     MatchingDiscoveryOwner? owner,
   }) = _MatchingDiscoveryRow;
 
@@ -61,6 +62,7 @@ abstract class MatchingDiscoveryRow with _$MatchingDiscoveryRow {
       bio: json['bio'] as String?,
       distanceMeters: _numToDouble(json['distance_meters']),
       isDiscoverable: json['is_discoverable'] as bool? ?? true,
+      createdAt: _dateTimeFromJson(json['created_at']),
       owner: ownerJson == null
           ? null
           : MatchingDiscoveryOwner.fromJson(

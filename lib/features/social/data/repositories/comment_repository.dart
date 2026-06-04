@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/errors/app_exception.dart';
 import '../models/comment.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -25,7 +26,7 @@ class CommentRepository {
 
   String get _uid {
     final id = _client.auth.currentUser?.id;
-    if (id == null) throw Exception('Not authenticated');
+    if (id == null) throw const NotAuthenticatedException();
     return id;
   }
 

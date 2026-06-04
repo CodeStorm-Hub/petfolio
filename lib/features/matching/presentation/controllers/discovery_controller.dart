@@ -105,14 +105,21 @@ class DiscoveryNotifier extends Notifier<DiscoveryState> {
       ref.read(discoveryCandidatesControllerProvider.notifier).removeFront(),
     );
 
-    unawaited(
-      _repo.recordSwipe(
-        swiperPetId: arg,
-        swipedPetId: top.petId,
-        swipedOwnerUserId: top.ownerUserId ?? '',
-        action: action.name,
-      ),
-    );
+    _repo
+        .recordSwipe(
+          swiperPetId: arg,
+          swipedPetId: top.petId,
+          swipedOwnerUserId: top.ownerUserId ?? '',
+          action: action.name,
+        )
+        .catchError((Object e) {
+          debugPrint('[DiscoveryNotifier] swipe record failed: $e');
+          if (ref.mounted) {
+            ref.read(swipeErrorProvider.notifier).post(
+              'Could not save swipe. Check your connection.',
+            );
+          }
+        });
 
     Future.delayed(Duration(milliseconds: ms), () {
       if (!ref.mounted) return;

@@ -1,3 +1,5 @@
+import '../../../../core/utils/time_ago.dart';
+
 /// Immutable data model for an in-app notification event.
 ///
 /// Represents one row from the `notifications` Supabase table.
@@ -43,14 +45,7 @@ class AppNotification {
     }
   }
 
-  /// Human-readable relative time string.
-  String get timeAgo {
-    final diff = DateTime.now().difference(createdAt);
-    if (diff.inSeconds < 60) return 'just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    return '${diff.inDays}d ago';
-  }
+  String get timeAgo => formatTimeAgo(createdAt);
 
   factory AppNotification.fromJson(Map<String, dynamic> json) {
     final actor = json['actor_pet'] as Map<String, dynamic>? ?? {};

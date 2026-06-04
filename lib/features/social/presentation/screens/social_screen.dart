@@ -22,6 +22,7 @@ import '../controllers/social_controller.dart';
 import '../controllers/create_post_controller.dart';
 import '../controllers/story_controller.dart';
 import 'story_viewer_screen.dart';
+import 'post_detail_screen.dart';
 import '../widgets/reaction_burst.dart';
 import '../widgets/post_comments_bottom_sheet.dart';
 
@@ -120,43 +121,26 @@ class _SocialViewState extends ConsumerState<_SocialView> {
       headerColor = activePet.speciesEnum.resolvedAccent(isDark);
       final dbAccent = activePet.accentColor;
       if (dbAccent != null && dbAccent.isNotEmpty && dbAccent != '#FF6B9D') {
-        try {
-          final hex = dbAccent.replaceAll('#', '');
-          if (hex.length == 6) {
-            headerColor = Color(int.parse('FF$hex', radix: 16));
-          } else if (hex.length == 8) {
-            headerColor = Color(int.parse(hex, radix: 16));
-          }
-        } catch (_) {}
+        headerColor = AppColors.fromHexString(dbAccent, fallback: headerColor);
       }
     }
 
-    Widget content = Column(
+    final headerHeight = MediaQuery.paddingOf(context).top + 92.0;
+
+    Widget content = Stack(
       children: [
-        // Sticky Pawsfeed Header
-        SizedBox(
-          height: MediaQuery.paddingOf(context).top + 92.0,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: WaveHeader(
-                  color: headerColor,
-                  height: MediaQuery.paddingOf(context).top + 100.0,
-                  child: const SizedBox.shrink(),
-                ),
-              ),
-            ],
+        // Feed scrolls from y=0; top padding reserves space below the wave header.
+        feedAsync.when(
+          skipLoadingOnReload: true,
+          loading: () => Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: headerHeight),
+              child: const TailWagLoader(label: 'Loading feed…'),
+            ),
           ),
-        ),
-        Expanded(
-          child: feedAsync.when(
-            skipLoadingOnReload: true,
-            loading: () => const Center(child: TailWagLoader(label: 'Loading feed…')),
-            error: (_, _) => Center(
+          error: (_, _) => Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: headerHeight),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -172,18 +156,23 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                 ],
               ),
             ),
-            data: (feedState) => RefreshIndicator.adaptive(
-              onRefresh: notifier.refresh,
-              child: MediaQuery.removePadding(
-                context: context,
-                removeTop: true,
-                child: CustomScrollView(
-                  controller: _scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
-                    const SliverToBoxAdapter(
-                      child: _StoriesRow(),
-                    ),
+          ),
+          data: (feedState) => RefreshIndicator.adaptive(
+            onRefresh: notifier.refresh,
+            child: MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              child: CustomScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  // Push content below the wave header — no white gap.
+                  SliverToBoxAdapter(
+                    child: SizedBox(height: headerHeight),
+                  ),
+                  const SliverToBoxAdapter(
+                    child: _StoriesRow(),
+                  ),
                   if (feedState.posts.isEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,
@@ -237,7 +226,20 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                 ],
               ),
             ),
-           ),
+          ),
+        ),
+
+        // Wave header floats on top — waveColor: transparent so the WavePainter
+        // draws nothing below the curve; content scrolls through underneath.
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: WaveHeader(
+            color: headerColor,
+            waveColor: Colors.transparent,
+            height: MediaQuery.paddingOf(context).top + 100.0,
+            child: const SizedBox.shrink(),
           ),
         ),
       ],
@@ -331,7 +333,35 @@ class _StoriesRow extends ConsumerWidget {
           ),
         ),
       ),
-      error: (err, stack) => const SizedBox.shrink(),
+      error: (err, stack) {
+        debugPrint('Stories load failure: $err\n$stack');
+        return SizedBox(
+          height: 100,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                const Icon(Icons.error_outline_rounded, color: AppColors.poppy, size: 16),
+                const SizedBox(width: 8),
+                Text(
+                  'Failed to load stories',
+                  style: TextStyle(fontSize: 12, color: pt.ink500),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () => ref.invalidate(storiesProvider),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text('Retry', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
       data: (stories) {
         // Group stories by petId
         final grouped = <String, List<Story>>{};
@@ -877,30 +907,50 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 22,
-                      backgroundColor: widget.post.accentColor,
-                      backgroundImage: widget.post.petAvatarUrl != null ? CachedNetworkImageProvider(widget.post.petAvatarUrl!) : null,
-                      child: widget.post.petAvatarUrl == null ? Text(widget.post.petName.isNotEmpty ? widget.post.petName[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)) : null,
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => context.push('/social/profile/${widget.post.petId}'),
+                      child: CircleAvatar(
+                        radius: 22,
+                        backgroundColor: widget.post.accentColor,
+                        backgroundImage: widget.post.petAvatarUrl != null ? CachedNetworkImageProvider(widget.post.petAvatarUrl!) : null,
+                        child: widget.post.petAvatarUrl == null ? Text(widget.post.petName.isNotEmpty ? widget.post.petName[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)) : null,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(widget.post.petName,
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(color: ink950)),
-                          Text(
-                            widget.post.fuzzyLocation.isEmpty
-                                ? '@${widget.post.handle} · ${widget.post.timeAgo}'
-                                : '@${widget.post.handle} · ${widget.post.fuzzyLocation} · ${widget.post.timeAgo}',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ink500),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => context.push('/social/profile/${widget.post.petId}'),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(widget.post.petName,
+                                style: Theme.of(context).textTheme.titleSmall?.copyWith(color: ink950)),
+                            Text(
+                              widget.post.fuzzyLocation.isEmpty
+                                  ? '@${widget.post.handle} · ${widget.post.timeAgo}'
+                                  : '@${widget.post.handle} · ${widget.post.fuzzyLocation} · ${widget.post.timeAgo}',
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ink500),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    _IconBtn(icon: Icons.more_horiz, onTap: () {}),
+                    _IconBtn(
+                      icon: Icons.more_horiz,
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          useRootNavigator: true,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          builder: (_) => PostOptionsSheet(post: widget.post),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
