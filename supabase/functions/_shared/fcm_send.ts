@@ -1,6 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
-const ANDROID_CHANNEL_ID = "petfolio_push";
+const ANDROID_CHANNEL_PUSH = "petfolio_push";
+const ANDROID_CHANNEL_CHAT = "petfolio_chat";
+const CHAT_SOUND = "chat_message";
 
 function base64UrlEncode(bytes: Uint8Array): string {
   let binary = "";
@@ -136,6 +138,10 @@ export async function sendFcmToUser(
   const accessToken = await getAccessToken(serviceAccount);
   const projectId = serviceAccount.project_id;
   const fcmData = stringifyData(data);
+  const isChat = fcmData.type === "chat_message";
+  const androidChannelId = isChat ? ANDROID_CHANNEL_CHAT : ANDROID_CHANNEL_PUSH;
+  const androidSound = isChat ? CHAT_SOUND : "default";
+  const apnsSound = isChat ? "chat_message.wav" : "default";
 
   let sent = 0;
   const errors: string[] = [];
@@ -157,14 +163,14 @@ export async function sendFcmToUser(
             android: {
               priority: "HIGH",
               notification: {
-                channel_id: ANDROID_CHANNEL_ID,
-                sound: "default",
+                channel_id: androidChannelId,
+                sound: androidSound,
               },
             },
             apns: {
               payload: {
                 aps: {
-                  sound: "default",
+                  sound: apnsSound,
                   badge: 1,
                 },
               },

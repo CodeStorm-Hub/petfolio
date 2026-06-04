@@ -17,6 +17,9 @@ class NotificationService {
   static const _channelName = 'Care Reminders';
   static const pushChannelId = 'petfolio_push';
   static const pushChannelName = 'PetFolio';
+  static const chatChannelId = 'petfolio_chat';
+  static const chatChannelName = 'Chat messages';
+  static const chatSoundResource = 'chat_message';
 
   NotificationTapCallback? _onTap;
 
@@ -45,8 +48,21 @@ class NotificationService {
       const AndroidNotificationChannel(
         pushChannelId,
         pushChannelName,
-        description: 'Chat, matches, social, and order alerts',
+        description: 'Matches, social, and order alerts',
         importance: Importance.high,
+        playSound: true,
+        enableVibration: true,
+      ),
+    );
+    await androidPlugin?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        chatChannelId,
+        chatChannelName,
+        description: 'New chat messages',
+        importance: Importance.high,
+        playSound: true,
+        enableVibration: true,
+        sound: RawResourceAndroidNotificationSound(chatSoundResource),
       ),
     );
     await androidPlugin?.requestNotificationsPermission();
@@ -85,11 +101,17 @@ class NotificationService {
       return;
     }
 
+    final isChat = data['type'] == 'chat_message';
     final androidDetails = AndroidNotificationDetails(
-      pushChannelId,
-      pushChannelName,
+      isChat ? chatChannelId : pushChannelId,
+      isChat ? chatChannelName : pushChannelName,
       importance: Importance.high,
       priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
+      sound: isChat
+          ? const RawResourceAndroidNotificationSound(chatSoundResource)
+          : null,
     );
 
     await _plugin.show(
@@ -98,10 +120,11 @@ class NotificationService {
       body: displayBody ?? '',
       notificationDetails: NotificationDetails(
         android: androidDetails,
-        iOS: const DarwinNotificationDetails(
+        iOS: DarwinNotificationDetails(
           presentAlert: true,
           presentBadge: true,
           presentSound: true,
+          sound: isChat ? 'chat_message.wav' : 'default',
         ),
       ),
       payload: jsonEncode(data),

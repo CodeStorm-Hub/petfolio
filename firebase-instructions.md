@@ -78,6 +78,13 @@ npx supabase functions deploy process-care-fcm-reminders --no-verify-jwt
 | Order status | `marketplace_orders` UPDATE |
 | Care reminders | `care_web_reminders` + cron |
 
+## Chat notification sound
+
+- Android: `android/app/src/main/res/raw/chat_message.wav` + channel `petfolio_chat` (created at app start).
+- iOS: `ios/Runner/chat_message.wav` in the app bundle.
+- Server: FCM uses channel `petfolio_chat` and sound `chat_message` when `data.type` is `chat_message`.
+- Replace `chat_message.wav` with your own short sound (keep the filename) and reinstall the app so Android recreates the channel.
+
 ## Test
 
 1. Run app, sign in, allow notifications.

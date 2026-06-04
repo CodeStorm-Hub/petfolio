@@ -7,10 +7,13 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function (payload) {
   const title = payload.notification?.title || payload.data?.title || 'PetFolio';
+  const isChat = payload.data?.type === 'chat_message';
   const options = {
     body: payload.notification?.body || payload.data?.body || '',
     data: payload.data || {},
     icon: '/icons/Icon-192.png',
+    silent: false,
+    tag: isChat ? 'petfolio-chat' : 'petfolio-push',
   };
   return self.registration.showNotification(title, options);
 });
