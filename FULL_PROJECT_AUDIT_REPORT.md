@@ -48,7 +48,7 @@ The "Share access" popup menu option renders a "Co-carer invites are coming soon
 **File:** `lib/core/router.dart:555` (AppHeader search action)  
 **Severity:** MEDIUM
 
-The search icon in the social feed header has `onTap: () {}`. There is no `/social/search` route, no search controller, and no Supabase full-text search integration on `posts` or `pets`. The icon should be removed or replaced with a disabled state until implemented.
+The search icon in the social feed header has `onTap: () {}`. There is no `/social/search` route, no search controller, and no Supabase full-text search integration on `posts` or `pets`. The icon should be removed or replaced with a disabled state until implemented.1q
 
 ---
 
