@@ -61,7 +61,8 @@ class _CareScreenState extends ConsumerState<CareScreen> {
         SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
       );
       if (!mounted) return;
-      if (GoRouterState.of(context).uri.queryParameters['onboardingComplete'] == '1') {
+      if (GoRouterState.of(context).uri.queryParameters['onboardingComplete'] ==
+          '1') {
         context.go('/care');
       }
     });
@@ -93,8 +94,12 @@ class _CareScreenState extends ConsumerState<CareScreen> {
       return;
     }
     if (tasks != null) {
-      RoutineRecommendationSheet.show(context, activePet, tasks,
-          isRefresh: hasTasks);
+      RoutineRecommendationSheet.show(
+        context,
+        activePet,
+        tasks,
+        isRefresh: hasTasks,
+      );
     }
   }
 
@@ -113,7 +118,10 @@ class _CareScreenState extends ConsumerState<CareScreen> {
           children: [
             Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
             const SizedBox(height: 12),
-            Text('Could not load pets', style: TextStyle(fontSize: 15, color: pt.ink500)),
+            Text(
+              'Could not load pets',
+              style: TextStyle(fontSize: 15, color: pt.ink500),
+            ),
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: () => ref.invalidate(petListProvider),
@@ -128,29 +136,32 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                 children: [
                   Icon(Icons.pets_outlined, size: 48, color: pt.ink300),
                   const SizedBox(height: 12),
-                  Text('Add a pet to track care',
-                      style: TextStyle(fontSize: 15, color: pt.ink500)),
+                  Text(
+                    'Add a pet to track care',
+                    style: TextStyle(fontSize: 15, color: pt.ink500),
+                  ),
                 ],
               )
             : const TailWagLoader(),
       );
-      return Scaffold(backgroundColor: pt.surface1, body: Center(child: body));
+      return Scaffold(
+        backgroundColor: pt.surface1,
+        body: Center(child: body),
+      );
     }
 
     final dashboard = ref.watch(careDashboardProvider);
     final species = activePet.speciesEnum;
 
     void openAddSheet() => showModalBottomSheet<void>(
-          context: context,
-          isScrollControlled: true,
-          useSafeArea: true,
-          useRootNavigator: true,
-          backgroundColor: Colors.transparent,
-          builder: (_) => _CareTaskFormSheet(
-            petId: activePet.id,
-            petName: activePet.name,
-          ),
-        );
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) =>
+          _CareTaskFormSheet(petId: activePet.id, petName: activePet.name),
+    );
 
     return Scaffold(
       backgroundColor: pt.surface1,
@@ -163,9 +174,14 @@ class _CareScreenState extends ConsumerState<CareScreen> {
         builder: (context, constraints) {
           final wide = constraints.maxWidth >= 600;
           final children = [
-            CareGamifiedHeader(
-              activePet: activePet,
-              dashboard: dashboard,
+            CareGamifiedHeader(activePet: activePet, dashboard: dashboard),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: _HorizontalDatePicker(
+                selectedDate: dashboard.selectedDate,
+                onDateSelected: (date) =>
+                    ref.read(careDashboardProvider.notifier).selectDate(date),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -222,15 +238,18 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                     onAddTask: openAddSheet,
                   ),
                   const SizedBox(height: 32),
-                  PfSectionTitle(
-                    title: 'This week',
-                    accent: AppColors.mint,
-                  ),
+                  PfSectionTitle(title: 'This week', accent: AppColors.mint),
                   CareGamifiedWeeklyChart(
                     selectedDay: dashboard.selectedDate,
-                    weekHits: dashboard.weekGoalHit.value ?? List.filled(7, false),
-                    progressPercent: (dashboard.tasks.value != null && dashboard.tasks.value!.isNotEmpty)
-                        ? (dashboard.tasks.value!.where((t) => t.isCompleted).length / dashboard.tasks.value!.length)
+                    weekHits:
+                        dashboard.weekGoalHit.value ?? List.filled(7, false),
+                    progressPercent:
+                        (dashboard.tasks.value != null &&
+                            dashboard.tasks.value!.isNotEmpty)
+                        ? (dashboard.tasks.value!
+                                  .where((t) => t.isCompleted)
+                                  .length /
+                              dashboard.tasks.value!.length)
                         : 0.0,
                   ),
                   const SizedBox(height: 32),
@@ -246,16 +265,16 @@ class _CareScreenState extends ConsumerState<CareScreen> {
             itemCount: children.length,
             itemBuilder: (context, index) => children[index],
           );
-                  if (!wide) return list;
-                  return Align(
-                    alignment: Alignment.topCenter,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 560),
-                      child: list,
-                    ),
-                  );
-                },
-              ),
+          if (!wide) return list;
+          return Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: list,
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -308,9 +327,15 @@ class _AiRoutineBanner extends StatelessWidget {
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white),
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       )
-                    : const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                    : const Icon(
+                        Icons.auto_awesome,
+                        color: Colors.white,
+                        size: 20,
+                      ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -463,8 +488,8 @@ class _HorizontalDatePickerState extends State<_HorizontalDatePicker> {
                         color: isSelected
                             ? Colors.white
                             : (isToday
-                                ? cs.primary
-                                : (isFuture ? pt.ink300 : cs.onSurface)),
+                                  ? cs.primary
+                                  : (isFuture ? pt.ink300 : cs.onSurface)),
                       ),
                     ),
                     if (isToday && !isSelected) ...[
@@ -472,7 +497,10 @@ class _HorizontalDatePickerState extends State<_HorizontalDatePicker> {
                       Container(
                         width: 4,
                         height: 4,
-                        decoration: BoxDecoration(color: cs.primary, shape: BoxShape.circle),
+                        decoration: BoxDecoration(
+                          color: cs.primary,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ],
                   ],
@@ -530,25 +558,29 @@ class _DailyTasksDashboard extends ConsumerWidget {
 
         // Check if all planned tasks are done
         final planned = tasks.where((t) => !t.isLogDerived).toList();
-        final allDone = planned.isNotEmpty &&
-            planned.every((t) => t.isCompleted);
+        final allDone =
+            planned.isNotEmpty && planned.every((t) => t.isCompleted);
 
         // Group tasks by frequency bucket
         final daily = tasks
-            .where((t) =>
-                t.frequency == dbtask.CareFrequency.daily ||
-                t.frequency == dbtask.CareFrequency.twiceDaily ||
-                t.frequency == dbtask.CareFrequency.once ||
-                t.isLogDerived)
+            .where(
+              (t) =>
+                  t.frequency == dbtask.CareFrequency.daily ||
+                  t.frequency == dbtask.CareFrequency.twiceDaily ||
+                  t.frequency == dbtask.CareFrequency.once ||
+                  t.isLogDerived,
+            )
             .toList();
         final weekly = tasks
             .where((t) => t.frequency == dbtask.CareFrequency.weekly)
             .toList();
         final lessOften = tasks
-            .where((t) =>
-                t.frequency == dbtask.CareFrequency.biweekly ||
-                t.frequency == dbtask.CareFrequency.monthly ||
-                t.frequency == dbtask.CareFrequency.asNeeded)
+            .where(
+              (t) =>
+                  t.frequency == dbtask.CareFrequency.biweekly ||
+                  t.frequency == dbtask.CareFrequency.monthly ||
+                  t.frequency == dbtask.CareFrequency.asNeeded,
+            )
             .toList();
 
         final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
@@ -557,20 +589,40 @@ class _DailyTasksDashboard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // All-done celebration banner
-            if (allDone)
-              _AllDoneBanner(tasks: planned),
+            if (allDone) _AllDoneBanner(tasks: planned),
             // Daily tasks
-            if (daily.isNotEmpty) ..._frequencyGroup(
-              context, pt, 'DAILY', daily, petId, petName, species,
-            ),
+            if (daily.isNotEmpty)
+              ..._frequencyGroup(
+                context,
+                pt,
+                'DAILY',
+                daily,
+                petId,
+                petName,
+                species,
+              ),
             // Weekly tasks
-            if (weekly.isNotEmpty) ..._frequencyGroup(
-              context, pt, 'WEEKLY', weekly, petId, petName, species,
-            ),
+            if (weekly.isNotEmpty)
+              ..._frequencyGroup(
+                context,
+                pt,
+                'WEEKLY',
+                weekly,
+                petId,
+                petName,
+                species,
+              ),
             // Bi-weekly / Monthly / As-needed
-            if (lessOften.isNotEmpty) ..._frequencyGroup(
-              context, pt, 'LESS OFTEN', lessOften, petId, petName, species,
-            ),
+            if (lessOften.isNotEmpty)
+              ..._frequencyGroup(
+                context,
+                pt,
+                'LESS OFTEN',
+                lessOften,
+                petId,
+                petName,
+                species,
+              ),
           ],
         );
       },
@@ -591,7 +643,9 @@ class _DailyTasksDashboard extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
         child: Row(
           children: [
-            Expanded(child: Divider(color: pt.line, thickness: 1, endIndent: 8)),
+            Expanded(
+              child: Divider(color: pt.line, thickness: 1, endIndent: 8),
+            ),
             Text(
               label,
               style: TextStyle(
@@ -605,12 +659,14 @@ class _DailyTasksDashboard extends ConsumerWidget {
           ],
         ),
       ),
-      ...tasks.map((t) => _CareTaskCard(
-            task: t,
-            petId: petId,
-            petName: petName,
-            species: species,
-          )),
+      ...tasks.map(
+        (t) => _CareTaskCard(
+          task: t,
+          petId: petId,
+          petName: petName,
+          species: species,
+        ),
+      ),
     ];
   }
 }
@@ -662,9 +718,7 @@ class _AllDoneBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalXp = tasks.fold<int>(
-      0, (sum, t) => sum + t.gamificationPoints,
-    );
+    final totalXp = tasks.fold<int>(0, (sum, t) => sum + t.gamificationPoints);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
@@ -740,15 +794,16 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
   @override
   void initState() {
     super.initState();
-    _xpCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1100),
-    )..addStatusListener((s) {
-        if (s == AnimationStatus.completed && mounted) {
-          setState(() => _showBurst = false);
-          _xpCtrl.reset();
-        }
-      });
+    _xpCtrl =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 1100),
+        )..addStatusListener((s) {
+          if (s == AnimationStatus.completed && mounted) {
+            setState(() => _showBurst = false);
+            _xpCtrl.reset();
+          }
+        });
   }
 
   @override
@@ -759,7 +814,8 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
 
   void _toggle() {
     final nowDone = !widget.task.isCompleted;
-    ref.read(careDashboardProvider.notifier)
+    ref
+        .read(careDashboardProvider.notifier)
         .toggleTaskCompletion(widget.task.id, isCompleted: nowDone);
     if (nowDone && widget.task.gamificationPoints > 0) {
       setState(() => _showBurst = true);
@@ -769,33 +825,55 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
 
   Color get _color {
     switch (widget.task.taskType) {
-      case dbtask.CareTaskType.feeding:    return AppColors.tangerine;
-      case dbtask.CareTaskType.medication: return AppColors.poppy;
-      case dbtask.CareTaskType.walk:       return AppColors.mint;
-      case dbtask.CareTaskType.playtime:   return AppColors.sunny;
-      case dbtask.CareTaskType.dental:     return AppColors.lilac;
-      case dbtask.CareTaskType.grooming:   return AppColors.lilac;
-      case dbtask.CareTaskType.vetVisit:   return AppColors.mint;
-      case dbtask.CareTaskType.training:   return AppColors.tangerine;
-      case dbtask.CareTaskType.nailTrim:   return AppColors.lilac;
-      case dbtask.CareTaskType.bath:       return AppColors.sky;
-      case dbtask.CareTaskType.other:      return AppColors.sunny;
+      case dbtask.CareTaskType.feeding:
+        return AppColors.tangerine;
+      case dbtask.CareTaskType.medication:
+        return AppColors.poppy;
+      case dbtask.CareTaskType.walk:
+        return AppColors.mint;
+      case dbtask.CareTaskType.playtime:
+        return AppColors.sunny;
+      case dbtask.CareTaskType.dental:
+        return AppColors.lilac;
+      case dbtask.CareTaskType.grooming:
+        return AppColors.lilac;
+      case dbtask.CareTaskType.vetVisit:
+        return AppColors.mint;
+      case dbtask.CareTaskType.training:
+        return AppColors.tangerine;
+      case dbtask.CareTaskType.nailTrim:
+        return AppColors.lilac;
+      case dbtask.CareTaskType.bath:
+        return AppColors.sky;
+      case dbtask.CareTaskType.other:
+        return AppColors.sunny;
     }
   }
 
   String get _emoji {
     switch (widget.task.taskType) {
-      case dbtask.CareTaskType.feeding:    return '🥩';
-      case dbtask.CareTaskType.walk:       return '🦮';
-      case dbtask.CareTaskType.grooming:   return '✂️';
-      case dbtask.CareTaskType.medication: return '💊';
-      case dbtask.CareTaskType.vetVisit:   return '🏥';
-      case dbtask.CareTaskType.training:   return '🎓';
-      case dbtask.CareTaskType.playtime:   return '🎾';
-      case dbtask.CareTaskType.dental:     return '🦷';
-      case dbtask.CareTaskType.nailTrim:   return '💅';
-      case dbtask.CareTaskType.bath:       return '🛁';
-      case dbtask.CareTaskType.other:      return '⭐';
+      case dbtask.CareTaskType.feeding:
+        return '🥩';
+      case dbtask.CareTaskType.walk:
+        return '🦮';
+      case dbtask.CareTaskType.grooming:
+        return '✂️';
+      case dbtask.CareTaskType.medication:
+        return '💊';
+      case dbtask.CareTaskType.vetVisit:
+        return '🏥';
+      case dbtask.CareTaskType.training:
+        return '🎓';
+      case dbtask.CareTaskType.playtime:
+        return '🎾';
+      case dbtask.CareTaskType.dental:
+        return '🦷';
+      case dbtask.CareTaskType.nailTrim:
+        return '💅';
+      case dbtask.CareTaskType.bath:
+        return '🛁';
+      case dbtask.CareTaskType.other:
+        return '⭐';
     }
   }
 
@@ -815,19 +893,24 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
         final m = tod.minute.toString().padLeft(2, '0');
         final period = tod.period == DayPeriod.am ? 'AM' : 'PM';
         final formatted = '$h:$m $period';
-        return (!t.isCompleted && t.isDueToday)
-            ? 'Due $formatted'
-            : formatted;
+        return (!t.isCompleted && t.isDueToday) ? 'Due $formatted' : formatted;
       }
     }
     switch (t.frequency) {
-      case dbtask.CareFrequency.once:       return 'Once';
-      case dbtask.CareFrequency.daily:      return 'Daily';
-      case dbtask.CareFrequency.twiceDaily: return 'Twice daily';
-      case dbtask.CareFrequency.weekly:     return 'Weekly';
-      case dbtask.CareFrequency.biweekly:   return 'Every 2 weeks';
-      case dbtask.CareFrequency.monthly:    return 'Monthly';
-      case dbtask.CareFrequency.asNeeded:   return 'As needed';
+      case dbtask.CareFrequency.once:
+        return 'Once';
+      case dbtask.CareFrequency.daily:
+        return 'Daily';
+      case dbtask.CareFrequency.twiceDaily:
+        return 'Twice daily';
+      case dbtask.CareFrequency.weekly:
+        return 'Weekly';
+      case dbtask.CareFrequency.biweekly:
+        return 'Every 2 weeks';
+      case dbtask.CareFrequency.monthly:
+        return 'Monthly';
+      case dbtask.CareFrequency.asNeeded:
+        return 'As needed';
     }
   }
 
@@ -895,7 +978,8 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
                 await _confirmDialog(
                   ctx,
                   title: 'Delete task',
-                  body: 'Remove "${task.title}" from ${widget.petName}\'s care plan?',
+                  body:
+                      'Remove "${task.title}" from ${widget.petName}\'s care plan?',
                   confirmLabel: 'Delete',
                   onConfirmed: () => ref
                       .read(careDashboardProvider.notifier)
@@ -921,12 +1005,14 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
         content: Text(body),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(d, false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(d, false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             onPressed: () => Navigator.pop(d, true),
             style: FilledButton.styleFrom(
-                backgroundColor: Theme.of(d).colorScheme.error),
+              backgroundColor: Theme.of(d).colorScheme.error,
+            ),
             child: Text(confirmLabel),
           ),
         ],
@@ -969,12 +1055,15 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
               ? Color.alphaBlend(color.withAlpha(36), cs.surface)
               : cs.surface,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: done ? color : pt.line,
-            width: 2,
-          ),
+          border: Border.all(color: done ? color : pt.line, width: 2),
           boxShadow: due
-              ? [BoxShadow(color: AppColors.poppy.withAlpha(64), blurRadius: 0, spreadRadius: 4)]
+              ? [
+                  BoxShadow(
+                    color: AppColors.poppy.withAlpha(64),
+                    blurRadius: 0,
+                    spreadRadius: 4,
+                  ),
+                ]
               : pt.shadowE1,
         ),
         child: Row(
@@ -1014,7 +1103,9 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
                             color: done ? pt.ink500 : cs.onSurface,
-                            decoration: done ? TextDecoration.lineThrough : null,
+                            decoration: done
+                                ? TextDecoration.lineThrough
+                                : null,
                             decorationColor: pt.ink300,
                           ),
                           child: Text(
@@ -1028,7 +1119,9 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
                         const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 2),
+                            horizontal: 7,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.lilacSoft,
                             borderRadius: BorderRadius.circular(999),
@@ -1068,7 +1161,9 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 9, vertical: 4),
+                    horizontal: 9,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: done ? AppColors.mintSoft : AppColors.sunnySoft,
                     borderRadius: BorderRadius.circular(999),
@@ -1081,14 +1176,11 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w900,
-                          color: done
-                              ? AppColors.mint700
-                              : AppColors.sunny700,
+                          color: done ? AppColors.mint700 : AppColors.sunny700,
                         ),
                       ),
                       const SizedBox(width: 2),
-                      const Text('⭐',
-                          style: TextStyle(fontSize: 11)),
+                      const Text('⭐', style: TextStyle(fontSize: 11)),
                     ],
                   ),
                 ),
@@ -1111,8 +1203,11 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
                     ),
                     alignment: Alignment.center,
                     child: done
-                        ? const Icon(Icons.check_rounded,
-                            color: Colors.white, size: 18)
+                        ? const Icon(
+                            Icons.check_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          )
                         : null,
                   ),
                 ),
@@ -1224,7 +1319,11 @@ class _TaskContextMenu extends StatelessWidget {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.fromLTRB(
-          20, 0, 20, MediaQuery.paddingOf(context).bottom + 16),
+        20,
+        0,
+        20,
+        MediaQuery.paddingOf(context).bottom + 16,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1235,38 +1334,46 @@ class _TaskContextMenu extends StatelessWidget {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                    color: pt.line,
-                    borderRadius: BorderRadius.circular(2)),
+                  color: pt.line,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
           ),
-          Text(taskTitle,
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface)),
+          Text(
+            taskTitle,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: cs.onSurface,
+            ),
+          ),
           const SizedBox(height: 12),
           if (onAddPlan != null)
             _MenuTile(
-                icon: Icons.add_task_rounded,
-                label: 'Add to plan',
-                onTap: onAddPlan!),
+              icon: Icons.add_task_rounded,
+              label: 'Add to plan',
+              onTap: onAddPlan!,
+            ),
           if (onRemoveDay != null)
             _MenuTile(
-                icon: Icons.remove_circle_outline_rounded,
-                label: 'Remove from day',
-                onTap: onRemoveDay!),
+              icon: Icons.remove_circle_outline_rounded,
+              label: 'Remove from day',
+              onTap: onRemoveDay!,
+            ),
           if (onEdit != null)
             _MenuTile(
-                icon: Icons.edit_outlined,
-                label: 'Edit task',
-                onTap: onEdit!),
+              icon: Icons.edit_outlined,
+              label: 'Edit task',
+              onTap: onEdit!,
+            ),
           if (onDelete != null)
             _MenuTile(
-                icon: Icons.delete_outline_rounded,
-                label: 'Delete task',
-                color: cs.error,
-                onTap: onDelete!),
+              icon: Icons.delete_outline_rounded,
+              label: 'Delete task',
+              color: cs.error,
+              onTap: onDelete!,
+            ),
         ],
       ),
     );
@@ -1274,8 +1381,12 @@ class _TaskContextMenu extends StatelessWidget {
 }
 
 class _MenuTile extends StatelessWidget {
-  const _MenuTile(
-      {required this.icon, required this.label, required this.onTap, this.color});
+  const _MenuTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color,
+  });
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -1286,7 +1397,10 @@ class _MenuTile extends StatelessWidget {
     final c = color ?? Theme.of(context).colorScheme.onSurface;
     return ListTile(
       leading: Icon(icon, color: c),
-      title: Text(label, style: TextStyle(color: c, fontWeight: FontWeight.w600)),
+      title: Text(
+        label,
+        style: TextStyle(color: c, fontWeight: FontWeight.w600),
+      ),
       onTap: onTap,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
@@ -1315,7 +1429,11 @@ class _TaskCardSkeleton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: pt.line, width: 0.5),
           boxShadow: [
-            const BoxShadow(color: AppColors.shadowE1L, blurRadius: 2, offset: Offset(0, 1)),
+            const BoxShadow(
+              color: AppColors.shadowE1L,
+              blurRadius: 2,
+              offset: Offset(0, 1),
+            ),
           ],
         ),
         child: Row(
@@ -1397,7 +1515,11 @@ class _CareErrorCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _EmptyRoutineState extends StatelessWidget {
-  const _EmptyRoutineState({required this.petName, required this.date, this.onAddTask});
+  const _EmptyRoutineState({
+    required this.petName,
+    required this.date,
+    this.onAddTask,
+  });
 
   final String petName;
   final DateTime date;
@@ -1407,7 +1529,8 @@ class _EmptyRoutineState extends StatelessWidget {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
-    final isToday = DateUtils.dateOnly(date) == DateUtils.dateOnly(DateTime.now());
+    final isToday =
+        DateUtils.dateOnly(date) == DateUtils.dateOnly(DateTime.now());
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32),
@@ -1449,8 +1572,13 @@ class _EmptyRoutineState extends StatelessWidget {
               icon: const Icon(Icons.add_rounded, size: 16),
               label: const Text('Add first task'),
               style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 11,
+                ),
               ),
             ),
           ],
@@ -1466,42 +1594,68 @@ class _EmptyRoutineState extends StatelessWidget {
 
 String _frequencyPill(dbtask.CareFrequency f) {
   switch (f) {
-    case dbtask.CareFrequency.monthly:   return 'MONTHLY';
-    case dbtask.CareFrequency.biweekly:  return 'BIWEEKLY';
-    case dbtask.CareFrequency.weekly:    return 'WEEKLY';
-    default:                             return 'WEEKLY';
+    case dbtask.CareFrequency.monthly:
+      return 'MONTHLY';
+    case dbtask.CareFrequency.biweekly:
+      return 'BIWEEKLY';
+    case dbtask.CareFrequency.weekly:
+      return 'WEEKLY';
+    default:
+      return 'WEEKLY';
   }
 }
 
 String _typeLabel(dbtask.CareTaskType type) {
   switch (type) {
-    case dbtask.CareTaskType.feeding:    return 'Feeding';
-    case dbtask.CareTaskType.walk:       return 'Walk';
-    case dbtask.CareTaskType.grooming:   return 'Grooming';
-    case dbtask.CareTaskType.medication: return 'Meds';
-    case dbtask.CareTaskType.vetVisit:   return 'Vet Visit';
-    case dbtask.CareTaskType.training:   return 'Training';
-    case dbtask.CareTaskType.playtime:   return 'Playtime';
-    case dbtask.CareTaskType.dental:     return 'Dental';
-    case dbtask.CareTaskType.nailTrim:   return 'Nail Trim';
-    case dbtask.CareTaskType.bath:       return 'Bath';
-    case dbtask.CareTaskType.other:      return 'Other';
+    case dbtask.CareTaskType.feeding:
+      return 'Feeding';
+    case dbtask.CareTaskType.walk:
+      return 'Walk';
+    case dbtask.CareTaskType.grooming:
+      return 'Grooming';
+    case dbtask.CareTaskType.medication:
+      return 'Meds';
+    case dbtask.CareTaskType.vetVisit:
+      return 'Vet Visit';
+    case dbtask.CareTaskType.training:
+      return 'Training';
+    case dbtask.CareTaskType.playtime:
+      return 'Playtime';
+    case dbtask.CareTaskType.dental:
+      return 'Dental';
+    case dbtask.CareTaskType.nailTrim:
+      return 'Nail Trim';
+    case dbtask.CareTaskType.bath:
+      return 'Bath';
+    case dbtask.CareTaskType.other:
+      return 'Other';
   }
 }
 
 String _defaultTitle(dbtask.CareTaskType type) {
   switch (type) {
-    case dbtask.CareTaskType.feeding:    return 'Feeding time';
-    case dbtask.CareTaskType.walk:       return 'Walk';
-    case dbtask.CareTaskType.grooming:   return 'Grooming session';
-    case dbtask.CareTaskType.medication: return 'Medication';
-    case dbtask.CareTaskType.vetVisit:   return 'Vet visit';
-    case dbtask.CareTaskType.training:   return 'Training';
-    case dbtask.CareTaskType.playtime:   return 'Playtime';
-    case dbtask.CareTaskType.dental:     return 'Dental care';
-    case dbtask.CareTaskType.nailTrim:   return 'Nail trim';
-    case dbtask.CareTaskType.bath:       return 'Bath time';
-    case dbtask.CareTaskType.other:      return 'New task';
+    case dbtask.CareTaskType.feeding:
+      return 'Feeding time';
+    case dbtask.CareTaskType.walk:
+      return 'Walk';
+    case dbtask.CareTaskType.grooming:
+      return 'Grooming session';
+    case dbtask.CareTaskType.medication:
+      return 'Medication';
+    case dbtask.CareTaskType.vetVisit:
+      return 'Vet visit';
+    case dbtask.CareTaskType.training:
+      return 'Training';
+    case dbtask.CareTaskType.playtime:
+      return 'Playtime';
+    case dbtask.CareTaskType.dental:
+      return 'Dental care';
+    case dbtask.CareTaskType.nailTrim:
+      return 'Nail trim';
+    case dbtask.CareTaskType.bath:
+      return 'Bath time';
+    case dbtask.CareTaskType.other:
+      return 'New task';
   }
 }
 
@@ -1526,7 +1680,11 @@ class _MedicalVaultBanner extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               AppColors.mintSoft,
-              Color.lerp(AppColors.mintSoft, AppColors.mint.withAlpha(40), 0.5)!,
+              Color.lerp(
+                AppColors.mintSoft,
+                AppColors.mint.withAlpha(40),
+                0.5,
+              )!,
             ],
           ),
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
@@ -1541,10 +1699,15 @@ class _MedicalVaultBanner extends StatelessWidget {
               height: 46,
               decoration: BoxDecoration(
                 color: AppColors.mint.withAlpha(40),
-                borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
+                borderRadius: BorderRadius.circular(
+                  PetfolioThemeExtension.radiusMd,
+                ),
               ),
-              child: const Icon(Icons.folder_special_outlined,
-                  color: AppColors.mint700, size: 24),
+              child: const Icon(
+                Icons.folder_special_outlined,
+                color: AppColors.mint700,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -1592,7 +1755,11 @@ class _NutritionBanner extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               AppColors.sunnySoft,
-              Color.lerp(AppColors.sunnySoft, AppColors.tangerine.withAlpha(40), 0.5)!,
+              Color.lerp(
+                AppColors.sunnySoft,
+                AppColors.tangerine.withAlpha(40),
+                0.5,
+              )!,
             ],
           ),
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
@@ -1607,10 +1774,15 @@ class _NutritionBanner extends StatelessWidget {
               height: 46,
               decoration: BoxDecoration(
                 color: AppColors.tangerine.withAlpha(40),
-                borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
+                borderRadius: BorderRadius.circular(
+                  PetfolioThemeExtension.radiusMd,
+                ),
               ),
-              child: const Icon(Icons.monitor_weight_outlined,
-                  color: AppColors.tangerine, size: 24),
+              child: const Icon(
+                Icons.monitor_weight_outlined,
+                color: AppColors.tangerine,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -1695,7 +1867,9 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
       _titleCtrl = TextEditingController(text: seed.title);
       _time = parseCareScheduledTimeOfDay(seed.scheduledTime);
     } else {
-      _titleCtrl = TextEditingController(text: _defaultTitle(dbtask.CareTaskType.feeding));
+      _titleCtrl = TextEditingController(
+        text: _defaultTitle(dbtask.CareTaskType.feeding),
+      );
     }
     _titleFocus.addListener(() {
       if (mounted) setState(() => _titleFocused = _titleFocus.hasFocus);
@@ -1782,7 +1956,10 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
                 child: Container(
                   width: 36,
                   height: 4,
-                  decoration: BoxDecoration(color: pt.line, borderRadius: BorderRadius.circular(2)),
+                  decoration: BoxDecoration(
+                    color: pt.line,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
             ),
@@ -1831,8 +2008,11 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(_taskTypeIcon(t), size: 22,
-                            color: selected ? Colors.white : pt.ink500),
+                        Icon(
+                          _taskTypeIcon(t),
+                          size: 22,
+                          color: selected ? Colors.white : pt.ink500,
+                        ),
                         const SizedBox(height: 5),
                         Text(
                           _typeLabel(t),
@@ -1861,7 +2041,12 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: _titleFocused
-                    ? [BoxShadow(color: cs.primary.withAlpha(30), blurRadius: 8)]
+                    ? [
+                        BoxShadow(
+                          color: cs.primary.withAlpha(30),
+                          blurRadius: 8,
+                        ),
+                      ]
                     : [],
               ),
               child: TextField(
@@ -1874,7 +2059,10 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
                   hintText: 'e.g. Morning feeding',
                   filled: true,
                   fillColor: _titleFocused ? cs.surface : pt.surface2,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(color: pt.line, width: 0.5),
@@ -1902,7 +2090,10 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
                       onTap: () => setState(() => _frequency = f),
                       child: AnimatedContainer(
                         duration: PetfolioThemeExtension.durationSm,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 9,
+                        ),
                         decoration: BoxDecoration(
                           color: selected ? cs.primary : pt.surface2,
                           borderRadius: BorderRadius.circular(40),
@@ -1939,7 +2130,10 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
                 if (picked != null && mounted) setState(() => _time = picked);
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: pt.surface2,
                   borderRadius: BorderRadius.circular(12),
@@ -1960,10 +2154,18 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
                     if (_time != null)
                       GestureDetector(
                         onTap: () => setState(() => _time = null),
-                        child: Icon(Icons.close_rounded, size: 16, color: pt.ink300),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 16,
+                          color: pt.ink300,
+                        ),
                       )
                     else
-                      Icon(Icons.chevron_right_rounded, size: 18, color: pt.ink300),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 18,
+                        color: pt.ink300,
+                      ),
                   ],
                 ),
               ),
@@ -1977,19 +2179,27 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
               child: FilledButton(
                 onPressed: _saving ? null : _save,
                 style: FilledButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
                 child: _saving
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       )
                     : Text(
                         _isEdit
                             ? 'Save changes'
                             : (_isPrefilledCreate ? 'Save plan' : 'Add Task'),
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
                       ),
               ),
             ),
@@ -2001,13 +2211,20 @@ class _CareTaskFormSheetState extends ConsumerState<_CareTaskFormSheet> {
 
   String _freqLabel(dbtask.CareFrequency f) {
     switch (f) {
-      case dbtask.CareFrequency.once:       return 'Once';
-      case dbtask.CareFrequency.daily:      return 'Daily';
-      case dbtask.CareFrequency.twiceDaily: return 'Twice daily';
-      case dbtask.CareFrequency.weekly:     return 'Weekly';
-      case dbtask.CareFrequency.biweekly:   return 'Every 2 wks';
-      case dbtask.CareFrequency.monthly:    return 'Monthly';
-      case dbtask.CareFrequency.asNeeded:   return 'As needed';
+      case dbtask.CareFrequency.once:
+        return 'Once';
+      case dbtask.CareFrequency.daily:
+        return 'Daily';
+      case dbtask.CareFrequency.twiceDaily:
+        return 'Twice daily';
+      case dbtask.CareFrequency.weekly:
+        return 'Weekly';
+      case dbtask.CareFrequency.biweekly:
+        return 'Every 2 wks';
+      case dbtask.CareFrequency.monthly:
+        return 'Monthly';
+      case dbtask.CareFrequency.asNeeded:
+        return 'As needed';
     }
   }
 }
@@ -2019,28 +2236,39 @@ class _SheetLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-        text,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.08 * 12,
-          color: pt.ink500,
-        ),
-      );
+    text,
+    style: TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.08 * 12,
+      color: pt.ink500,
+    ),
+  );
 }
 
 IconData _taskTypeIcon(dbtask.CareTaskType type) {
   switch (type) {
-    case dbtask.CareTaskType.feeding:    return Icons.restaurant_menu_rounded;
-    case dbtask.CareTaskType.walk:       return Icons.directions_walk_rounded;
-    case dbtask.CareTaskType.grooming:   return Icons.content_cut_rounded;
-    case dbtask.CareTaskType.medication: return Icons.medication_rounded;
-    case dbtask.CareTaskType.vetVisit:   return Icons.local_hospital_rounded;
-    case dbtask.CareTaskType.training:   return Icons.school_rounded;
-    case dbtask.CareTaskType.playtime:   return Icons.sports_tennis_rounded;
-    case dbtask.CareTaskType.dental:     return Icons.medical_services_rounded;
-    case dbtask.CareTaskType.nailTrim:   return Icons.cut_rounded;
-    case dbtask.CareTaskType.bath:       return Icons.water_drop_rounded;
-    case dbtask.CareTaskType.other:      return Icons.star_outline_rounded;
+    case dbtask.CareTaskType.feeding:
+      return Icons.restaurant_menu_rounded;
+    case dbtask.CareTaskType.walk:
+      return Icons.directions_walk_rounded;
+    case dbtask.CareTaskType.grooming:
+      return Icons.content_cut_rounded;
+    case dbtask.CareTaskType.medication:
+      return Icons.medication_rounded;
+    case dbtask.CareTaskType.vetVisit:
+      return Icons.local_hospital_rounded;
+    case dbtask.CareTaskType.training:
+      return Icons.school_rounded;
+    case dbtask.CareTaskType.playtime:
+      return Icons.sports_tennis_rounded;
+    case dbtask.CareTaskType.dental:
+      return Icons.medical_services_rounded;
+    case dbtask.CareTaskType.nailTrim:
+      return Icons.cut_rounded;
+    case dbtask.CareTaskType.bath:
+      return Icons.water_drop_rounded;
+    case dbtask.CareTaskType.other:
+      return Icons.star_outline_rounded;
   }
 }

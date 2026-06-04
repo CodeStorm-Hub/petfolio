@@ -1505,3 +1505,14 @@ All applied to remote project `jqyjvhwlcqcsuwcqgcwf`. Re-ran advisors: `function
 
 Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
 
+## 2026-06-04 — PR #15 Copilot review fixes (Dart + DB)
+
+- **Care** — Restored `_HorizontalDatePicker` on `CareScreen` wired to `careDashboardProvider.notifier.selectDate()`; Vault → navigates to `/care/medical-vault`.
+- **Chat** — `loadOlderMessages()` forces provider rebuild when `_hasMore` becomes false (stops infinite load-more spinner); scroll guard already uses `hasClients`.
+- **DB** (`20260604120000_pr15_review_fixes.sql`, applied to `jqyjvhwlcqcsuwcqgcwf` via Supabase MCP) — Social like/comment/follow notification triggers + `notifications` realtime; `REVOKE ALL … FROM PUBLIC` on trigger functions; `get_chat_inbox` wrapped with `ORDER BY COALESCE(last_message_at, matched_at) DESC`.
+- **Migrations** — Aligned `20260601000000_social_fixes`, `20260601010000_social_dm_chat`, `20260601020000_security_definer_search_path_fix` with same REVOKE/search_path/ORDER BY patterns.
+
+**Next step:** Update PR #15 description to reflect full scope (social DM, matching pagination, migrations) or split follow-up PRs.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+

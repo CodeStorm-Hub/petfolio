@@ -62,11 +62,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
--- Restore REVOKE: trigger functions are not callable directly.
-REVOKE EXECUTE ON FUNCTION public.handle_post_comment_sync()          FROM anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.handle_post_like_notification()     FROM anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.handle_post_comment_notification()  FROM anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.handle_pet_follow_notification()    FROM anon, authenticated;
+REVOKE ALL ON FUNCTION public.handle_post_comment_sync() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.handle_post_like_notification() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.handle_post_comment_notification() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.handle_pet_follow_notification() FROM PUBLIC;
 
 -- ── RPCs from 20260601010000_social_dm_chat.sql ──────────────────────────────
 
@@ -155,6 +154,8 @@ STABLE
 SECURITY DEFINER
 SET search_path = ''
 AS $$
+  SELECT *
+  FROM (
   SELECT
     'match'::text                               AS thread_type,
     m.id                                        AS match_id,
@@ -213,6 +214,8 @@ AS $$
   ) lm ON true
   WHERE (t.dm_pet_a_id = p_actor_pet_id OR t.dm_pet_b_id = p_actor_pet_id)
     AND t.mutual_match_id IS NULL
+  ) inbox
+  ORDER BY COALESCE(inbox.last_message_at, inbox.matched_at) DESC NULLS LAST
 $$;
 
 REVOKE ALL ON FUNCTION public.get_chat_inbox(uuid) FROM PUBLIC;

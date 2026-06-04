@@ -33,7 +33,7 @@ BEGIN
   END IF;
   RETURN NULL;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 -- Backfill: recount only top-level comments so existing posts are consistent.
 UPDATE public.posts p
@@ -57,7 +57,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 DROP TRIGGER IF EXISTS on_post_like_notification ON public.post_likes;
 CREATE TRIGGER on_post_like_notification
@@ -79,7 +79,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 DROP TRIGGER IF EXISTS on_post_comment_notification ON public.comments;
 CREATE TRIGGER on_post_comment_notification
@@ -94,14 +94,14 @@ BEGIN
   VALUES (NEW.following_pet_id, NEW.follower_pet_id, 'follow');
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 DROP TRIGGER IF EXISTS on_pet_follow_notification ON public.pet_follows;
 CREATE TRIGGER on_pet_follow_notification
   AFTER INSERT ON public.pet_follows
   FOR EACH ROW EXECUTE FUNCTION public.handle_pet_follow_notification();
 
--- Lock down trigger functions — they run via triggers only, not direct RPC.
-REVOKE EXECUTE ON FUNCTION public.handle_post_like_notification()    FROM anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.handle_post_comment_notification() FROM anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.handle_pet_follow_notification()   FROM anon, authenticated;
+REVOKE ALL ON FUNCTION public.handle_post_comment_sync() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.handle_post_like_notification() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.handle_post_comment_notification() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.handle_pet_follow_notification() FROM PUBLIC;

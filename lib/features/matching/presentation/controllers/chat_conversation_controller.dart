@@ -14,10 +14,12 @@ typedef ChatConversationArgs = ({
   String? otherPetId, // null for match chats; set when opening a social DM
 });
 
-final chatConversationControllerProvider = AsyncNotifierProvider.family<
-    ChatConversationController,
-    List<ChatMessage>,
-    ChatConversationArgs>(ChatConversationController.new);
+final chatConversationControllerProvider =
+    AsyncNotifierProvider.family<
+      ChatConversationController,
+      List<ChatMessage>,
+      ChatConversationArgs
+    >(ChatConversationController.new);
 
 class ChatConversationController extends AsyncNotifier<List<ChatMessage>> {
   ChatConversationController(this.arg);
@@ -110,13 +112,20 @@ class ChatConversationController extends AsyncNotifier<List<ChatMessage>> {
         limit: 50,
         beforeCreatedAt: oldest,
       );
-      if (older.isEmpty || older.length < 50) _hasMore = false;
+      final reachedEnd = older.isEmpty || older.length < 50;
+      if (reachedEnd) _hasMore = false;
       if (older.isNotEmpty) {
         final existingIds = current.map((m) => m.id).toSet();
-        final newOnes = older.where((m) => !existingIds.contains(m.id)).toList();
+        final newOnes = older
+            .where((m) => !existingIds.contains(m.id))
+            .toList();
         if (newOnes.isNotEmpty) {
           state = AsyncValue.data([...newOnes, ...current]);
+        } else if (reachedEnd) {
+          state = AsyncValue.data(List<ChatMessage>.from(current));
         }
+      } else if (reachedEnd) {
+        state = AsyncValue.data(List<ChatMessage>.from(current));
       }
     } finally {
       _loadingOlder = false;

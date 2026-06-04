@@ -26,7 +26,7 @@ CREATE OR REPLACE FUNCTION public.ensure_direct_chat_thread(
 RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 DECLARE
   v_actor_user_id UUID;
@@ -113,9 +113,10 @@ RETURNS TABLE (
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
-  -- ── Part 1: match-based chat threads ──────────────────────────────────────
+  SELECT *
+  FROM (
   SELECT
     'match'::text                               AS thread_type,
     m.id                                        AS match_id,
@@ -175,6 +176,8 @@ AS $$
   ) lm ON true
   WHERE (t.dm_pet_a_id = p_actor_pet_id OR t.dm_pet_b_id = p_actor_pet_id)
     AND t.mutual_match_id IS NULL
+  ) inbox
+  ORDER BY COALESCE(inbox.last_message_at, inbox.matched_at) DESC NULLS LAST
 $$;
 
 REVOKE ALL ON FUNCTION public.get_chat_inbox(uuid) FROM PUBLIC;
