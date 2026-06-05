@@ -1,0 +1,278 @@
+{
+  "0": [
+    "G:\\GitHub\\petfolio\\.agents\\skills\\dart-add-unit-test\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\dart-build-cli-app\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\dart-collect-coverage\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\dart-fix-runtime-errors\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\dart-generate-test-mocks\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\dart-migrate-to-checks-package\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\dart-resolve-package-conflicts\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\dart-run-static-analysis\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\dart-use-pattern-matching\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-add-integration-test\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-add-widget-preview\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-add-widget-test\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-apply-architecture-best-practices\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-build-responsive-layout\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-fix-layout-issues\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-implement-json-serialization\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-setup-declarative-routing\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-setup-localization\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-ui-ux\\SKILL.md"
+  ],
+  "1": [
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-ui-ux\\assets\\app-template.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-ui-ux\\references\\animation-patterns.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-ui-ux\\references\\performance-optimization.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-ui-ux\\references\\theme-templates.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-ui-ux\\references\\widget-patterns.md",
+    "G:\\GitHub\\petfolio\\.agents\\skills\\flutter-use-http-package\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.claude\\CLAUDE.md",
+    "G:\\GitHub\\petfolio\\.claude\\skills\\flutter-ui-ux\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.claude\\skills\\flutter-ui-ux\\assets\\app-template.md",
+    "G:\\GitHub\\petfolio\\.claude\\skills\\flutter-ui-ux\\references\\animation-patterns.md",
+    "G:\\GitHub\\petfolio\\.claude\\skills\\flutter-ui-ux\\references\\performance-optimization.md",
+    "G:\\GitHub\\petfolio\\.claude\\skills\\flutter-ui-ux\\references\\theme-templates.md",
+    "G:\\GitHub\\petfolio\\.claude\\skills\\flutter-ui-ux\\references\\widget-patterns.md",
+    "G:\\GitHub\\petfolio\\.claude\\skills\\graphify\\SKILL.md",
+    "G:\\GitHub\\petfolio\\.claude\\skills\\graphify\\references\\add-watch.md",
+    "G:\\GitHub\\petfolio\\.claude\\skills\\graphify\\references\\exports.md",
+    "G:\\GitHub\\petfolio\\.claude\\skills\\graphify\\references\\extraction-spec.md",
+    "G:\\GitHub\\petfolio\\.claude\\skills\\graphify\\references\\github-and-merge.md",
+    "G:\\GitHub\\petfolio\\.claude\\skills\\graphify\\references\\hooks.md"
+  ],
+  "2": [
+    "G:\\GitHub\\petfolio\\.claude\\skills\\graphify\\references\\query.md",
+    "G:\\GitHub\\petfolio\\.claude\\skills\\graphify\\references\\transcribe.md",
+    "G:\\GitHub\\petfolio\\.claude\\skills\\graphify\\references\\update.md",
+    "G:\\GitHub\\petfolio\\.github\\codeql\\codeql-config.yml.md",
+    "G:\\GitHub\\petfolio\\.github\\workflows\\codeql.yml.md",
+    "G:\\GitHub\\petfolio\\.github\\workflows\\deploy-web.yml",
+    "G:\\GitHub\\petfolio\\.playwright-mcp\\page-2026-06-04T10-51-49-473Z.yml",
+    "G:\\GitHub\\petfolio\\.remember\\remember.md",
+    "G:\\GitHub\\petfolio\\AGENTS.md",
+    "G:\\GitHub\\petfolio\\CLAUDE.md",
+    "G:\\GitHub\\petfolio\\Design System.html",
+    "G:\\GitHub\\petfolio\\FULL_PROJECT_AUDIT_REPORT.md",
+    "G:\\GitHub\\petfolio\\PWA_WEB_AUDIT.md",
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\Care Redesign.html",
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Design System.html",
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\PetFolio Redesign.html",
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\README.md",
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\index.html",
+    "G:\\GitHub\\petfolio\\README.md"
+  ],
+  "3": [
+    "G:\\GitHub\\petfolio\\REVIEW.md",
+    "G:\\GitHub\\petfolio\\SECURITY.md",
+    "G:\\GitHub\\petfolio\\analysis_options.yaml",
+    "G:\\GitHub\\petfolio\\audit_fixes_memory.md",
+    "G:\\GitHub\\petfolio\\build.yaml",
+    "G:\\GitHub\\petfolio\\care_module_report.md",
+    "G:\\GitHub\\petfolio\\care_screen_redesign_plan.md",
+    "G:\\GitHub\\petfolio\\care_walkthrough.md",
+    "G:\\GitHub\\petfolio\\docs\\ai-agent-sessions\\claude-handoff.md",
+    "G:\\GitHub\\petfolio\\docs\\ai-agent-sessions\\claude-sessions.md",
+    "G:\\GitHub\\petfolio\\docs\\ai-agent-sessions\\cursor_automated_medical_vault_ui_design_session.md",
+    "G:\\GitHub\\petfolio\\docs\\ai-agent-sessions\\prompts-for-marketplace.md",
+    "G:\\GitHub\\petfolio\\docs\\plan\\Research for Pet Care & Health Management module.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\CLAUDE.old.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\CODEBASE_PERFORMANCE_SUPABASE_UX_REVIEW_2026-05-22.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\CODEBASE_REVIEW.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\Comprehensive Code Review for PetFolio (01‑review‑implementation branch).md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\Issues and Improvement Suggestions for PetFolio.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\PETFOLIO_COMPREHENSIVE_REVIEW.md"
+  ],
+  "4": [
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\PetFolio 01-review-implementation — Comprehensive Static Review.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\PetFolio Design System.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\PetFolio-deep-research.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\PetFolio.html",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\PetFolio_Codebase_Review_Verification.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\PetFolio_Review-Implementation.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\PetFolio_Review_Verification.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\REVIEW_FINDINGS.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\VERIFIED_ISSUES.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\claude_design\\PetFolio\\PetFolio Design System.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\claude_design\\PetFolio\\PetFolio Onboarding (source).html",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\claude_design\\PetFolio\\PetFolio Onboarding (standalone).html",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\claude_design\\PetFolio\\PetFolio Onboarding-print.html",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\claude_design\\PetFolio\\PetFolio Onboarding.html",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\database_erd.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\database_schema_and_erd.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\database_schema_review.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\flutter_supabase_full_app_review_2026-05-13.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\implementation-plan-fix-verified-issues.md"
+  ],
+  "5": [
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\multi-vendor-marketplace-blueprint.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\petfolio_android_automation_execution_2026-05-22.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\petfolio_android_automation_test_plan_2026-05-22.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\petfolio_new_owner_android_execution_findings_2026-05-22.md",
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\verified-issues-01-review-implementation.md",
+    "G:\\GitHub\\petfolio\\docs\\superpowers\\specs\\2026-05-21-shop-deletion-request-design.md",
+    "G:\\GitHub\\petfolio\\firebase-instructions.md",
+    "G:\\GitHub\\petfolio\\implementation_plan.md",
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\README.md",
+    "G:\\GitHub\\petfolio\\matching_feature_review.md",
+    "G:\\GitHub\\petfolio\\petfolio_project_analysis.md",
+    "G:\\GitHub\\petfolio\\petfolio_system_review.md",
+    "G:\\GitHub\\petfolio\\petfolio_ui_ux_review.md",
+    "G:\\GitHub\\petfolio\\progress.md",
+    "G:\\GitHub\\petfolio\\pubspec.yaml",
+    "G:\\GitHub\\petfolio\\social_feature_review.md",
+    "G:\\GitHub\\petfolio\\ui_ux_audit_report.md",
+    "G:\\GitHub\\petfolio\\web\\index.html",
+    "G:\\GitHub\\petfolio\\android\\app\\src\\main\\res\\raw\\chat_message.wav"
+  ],
+  "6": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\chat_message.wav"
+  ],
+  "7": [
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\screenshots\\badge.png"
+  ],
+  "8": [
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\screenshots\\confetti.png"
+  ],
+  "9": [
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\screenshots\\dark.png"
+  ],
+  "10": [
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\screenshots\\lower.png"
+  ],
+  "11": [
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\screenshots\\lower2.png"
+  ],
+  "12": [
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\screenshots\\lower3.png"
+  ],
+  "13": [
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\screenshots\\lower4.png"
+  ],
+  "14": [
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\screenshots\\trophy.png"
+  ],
+  "15": [
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\screenshots\\trophy2.png"
+  ],
+  "16": [
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\screenshots\\tweaks.png"
+  ],
+  "17": [
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\screenshots\\tweaks2.png"
+  ],
+  "18": [
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\screenshots\\tweaks3.png"
+  ],
+  "19": [
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\screenshots\\v1.png"
+  ],
+  "20": [
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\screenshots\\v2.png"
+  ],
+  "21": [
+    "G:\\GitHub\\petfolio\\PetFolio Redesign\\Care Redesign\\screenshots\\v3.png"
+  ],
+  "22": [
+    "G:\\GitHub\\petfolio\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher.png"
+  ],
+  "23": [
+    "G:\\GitHub\\petfolio\\android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher.png"
+  ],
+  "24": [
+    "G:\\GitHub\\petfolio\\android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher.png"
+  ],
+  "25": [
+    "G:\\GitHub\\petfolio\\android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher.png"
+  ],
+  "26": [
+    "G:\\GitHub\\petfolio\\android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher.png"
+  ],
+  "27": [
+    "G:\\GitHub\\petfolio\\docs\\resolved-deprecated\\screen.png"
+  ],
+  "28": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-1024x1024@1x.png"
+  ],
+  "29": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-20x20@1x.png"
+  ],
+  "30": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-20x20@2x.png"
+  ],
+  "31": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-20x20@3x.png"
+  ],
+  "32": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-29x29@1x.png"
+  ],
+  "33": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-29x29@2x.png"
+  ],
+  "34": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-29x29@3x.png"
+  ],
+  "35": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-40x40@1x.png"
+  ],
+  "36": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-40x40@2x.png"
+  ],
+  "37": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-40x40@3x.png"
+  ],
+  "38": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-60x60@2x.png"
+  ],
+  "39": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-60x60@3x.png"
+  ],
+  "40": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-76x76@1x.png"
+  ],
+  "41": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-76x76@2x.png"
+  ],
+  "42": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-83.5x83.5@2x.png"
+  ],
+  "43": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\LaunchImage.png"
+  ],
+  "44": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\LaunchImage@2x.png"
+  ],
+  "45": [
+    "G:\\GitHub\\petfolio\\ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\LaunchImage@3x.png"
+  ],
+  "46": [
+    "G:\\GitHub\\petfolio\\web\\favicon.png"
+  ],
+  "47": [
+    "G:\\GitHub\\petfolio\\web\\icons\\Icon-192.png"
+  ],
+  "48": [
+    "G:\\GitHub\\petfolio\\web\\icons\\Icon-512.png"
+  ],
+  "49": [
+    "G:\\GitHub\\petfolio\\web\\icons\\Icon-maskable-192.png"
+  ],
+  "50": [
+    "G:\\GitHub\\petfolio\\web\\icons\\Icon-maskable-512.png"
+  ],
+  "51": [
+    "G:\\GitHub\\petfolio\\web\\screenshots\\narrow.png"
+  ],
+  "52": [
+    "G:\\GitHub\\petfolio\\web\\screenshots\\wide.png"
+  ],
+  "53": [
+    "G:\\GitHub\\petfolio\\web\\splash\\1179x2556.png"
+  ],
+  "54": [
+    "G:\\GitHub\\petfolio\\web\\splash\\1290x2796.png"
+  ],
+  "55": [
+    "G:\\GitHub\\petfolio\\web\\splash\\750x1334.png"
+  ]
+}
