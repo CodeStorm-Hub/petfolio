@@ -7,7 +7,7 @@ external JSPromise<JSAny?>? get _fcmSwReady;
 external String get _userAgent;
 
 @JS('window.__petfolioIsIosStandalonePwa')
-external bool Function() _isIosStandalonePwa;
+external bool get _isIosStandalonePwa;
 
 bool get isAppleMobileWeb {
   return _userAgent.contains('iPhone') ||
@@ -18,7 +18,7 @@ bool get isAppleMobileWeb {
 bool get isIosStandalonePwa {
   if (!isAppleMobileWeb) return false;
   try {
-    return _isIosStandalonePwa();
+    return _isIosStandalonePwa;
   } catch (_) {
     return false;
   }
