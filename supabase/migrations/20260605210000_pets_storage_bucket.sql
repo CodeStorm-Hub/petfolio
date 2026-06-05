@@ -12,12 +12,24 @@ ON CONFLICT (id) DO UPDATE SET
   allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 DROP POLICY IF EXISTS "pets: owner insert avatar" ON storage.objects;
+DROP POLICY IF EXISTS "pets: owner select avatar" ON storage.objects;
 DROP POLICY IF EXISTS "pets: owner update avatar" ON storage.objects;
 DROP POLICY IF EXISTS "pets: owner delete avatar" ON storage.objects;
 
 CREATE POLICY "pets: owner insert avatar"
   ON storage.objects FOR INSERT TO authenticated
   WITH CHECK (
+    bucket_id = 'pets'
+    AND EXISTS (
+      SELECT 1 FROM public.pets
+      WHERE pets.id::text = (string_to_array(name, '/'))[1]
+        AND pets.owner_id = (SELECT auth.uid())
+    )
+  );
+
+CREATE POLICY "pets: owner select avatar"
+  ON storage.objects FOR SELECT TO authenticated
+  USING (
     bucket_id = 'pets'
     AND EXISTS (
       SELECT 1 FROM public.pets
