@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:petfolio/core/errors/app_exception.dart';
@@ -11,26 +13,32 @@ class EditProfileState {
   const EditProfileState({
     this.isSubmitting = false,
     this.errorMessage,
-    this.newImage,
+    this.newImageBytes,
+    this.newImageFileName,
     this.isSyncingLocation = false,
   });
 
   final bool isSubmitting;
   final String? errorMessage;
-  final XFile? newImage;
+  final Uint8List? newImageBytes;
+  final String? newImageFileName;
   final bool isSyncingLocation;
 
   EditProfileState copyWith({
     bool? isSubmitting,
     String? errorMessage,
     bool clearError = false,
-    XFile? newImage,
+    Uint8List? newImageBytes,
+    String? newImageFileName,
+    bool clearNewImage = false,
     bool? isSyncingLocation,
   }) {
     return EditProfileState(
       isSubmitting: isSubmitting ?? this.isSubmitting,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      newImage: newImage ?? this.newImage,
+      newImageBytes: clearNewImage ? null : (newImageBytes ?? this.newImageBytes),
+      newImageFileName:
+          clearNewImage ? null : (newImageFileName ?? this.newImageFileName),
       isSyncingLocation: isSyncingLocation ?? this.isSyncingLocation,
     );
   }
@@ -40,8 +48,25 @@ class EditProfileController extends Notifier<EditProfileState> {
   @override
   EditProfileState build() => const EditProfileState();
 
-  void setImage(XFile file) {
-    state = state.copyWith(newImage: file, clearError: true);
+  Future<void> setImageFromPick(XFile file) async {
+    try {
+      final bytes = await file.readAsBytes();
+      if (bytes.isEmpty) {
+        state = state.copyWith(
+          errorMessage: 'Could not read the selected photo. Try another image.',
+        );
+        return;
+      }
+      state = state.copyWith(
+        newImageBytes: bytes,
+        newImageFileName: file.name,
+        clearError: true,
+      );
+    } catch (_) {
+      state = state.copyWith(
+        errorMessage: 'Could not read the selected photo. Try another image.',
+      );
+    }
   }
 
   void clearError() {
@@ -99,10 +124,13 @@ class EditProfileController extends Notifier<EditProfileState> {
     try {
       var avatarUrl = originalPet.avatarUrl;
 
-      if (state.newImage != null) {
+      if (state.newImageBytes != null) {
         final repo = ref.read(petRepositoryProvider);
-        final bytes = await state.newImage!.readAsBytes();
-        avatarUrl = await repo.uploadAvatar(bytes, originalPet.id);
+        avatarUrl = await repo.uploadAvatar(
+          state.newImageBytes!,
+          originalPet.id,
+          fileName: state.newImageFileName,
+        );
       }
 
       final listNotifier = ref.read(petListProvider.notifier);
@@ -118,6 +146,12 @@ class EditProfileController extends Notifier<EditProfileState> {
         activityLevel: activityLevel,
         isPublic: isPublic,
       );
+    } on AppException catch (e) {
+      state = state.copyWith(
+        isSubmitting: false,
+        errorMessage: e.message,
+      );
+      return false;
     } catch (_) {
       state = state.copyWith(
         isSubmitting: false,
@@ -126,11 +160,8 @@ class EditProfileController extends Notifier<EditProfileState> {
       return false;
     }
 
-    // Clear the in-memory location cache so the next discovery load re-checks
-    // the DB rather than relying on a potentially stale cached value.
     ref.read(matchingRepositoryProvider).invalidatePetLocationCache(originalPet.id);
 
-    // Location sync is best-effort: a failure must not undo a successful save.
     if (syncLocationIfDiscoverable && isDiscoverable) {
       try {
         await ref
@@ -138,13 +169,11 @@ class EditProfileController extends Notifier<EditProfileState> {
             .syncActorLocationFromDevice(originalPet.id);
       } on AppException catch (e) {
         state = state.copyWith(isSubmitting: false, errorMessage: e.message);
-        return true; // profile saved — surface location error as non-fatal banner
-      } catch (_) {
-        // silent — GPS failure must not block profile save confirmation
-      }
+        return true;
+      } catch (_) {}
     }
 
-    state = state.copyWith(isSubmitting: false);
+    state = state.copyWith(isSubmitting: false, clearNewImage: true);
     return true;
   }
 }

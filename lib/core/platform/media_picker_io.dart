@@ -8,5 +8,6 @@ Future<XFile?> pickGalleryImage({
     source: ImageSource.gallery,
     maxWidth: maxWidth?.toDouble(),
     imageQuality: imageQuality,
+    requestFullMetadata: false,
   );
 }

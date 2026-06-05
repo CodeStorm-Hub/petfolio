@@ -1,5 +1,3 @@
-import 'dart:io' show File;
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -85,9 +83,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<void> _pickImage() async {
-    final picked = await pickGalleryImage();
+    final picked = await pickGalleryImage(maxWidth: 1024, imageQuality: 85);
     if (picked != null) {
-      ref.read(editProfileControllerProvider.notifier).setImage(picked);
+      await ref
+          .read(editProfileControllerProvider.notifier)
+          .setImageFromPick(picked);
     }
   }
 
@@ -633,8 +633,11 @@ class _AvatarEditor extends StatelessWidget {
               shape: BoxShape.circle,
               color: pt.surface2,
               border: Border.all(color: pt.line, width: 2),
-              image: state.newImage != null
-                  ? DecorationImage(image: FileImage(File(state.newImage!.path)), fit: BoxFit.cover)
+              image: state.newImageBytes != null
+                  ? DecorationImage(
+                      image: MemoryImage(state.newImageBytes!),
+                      fit: BoxFit.cover,
+                    )
                   : pet.avatarUrl != null && pet.avatarUrl!.isNotEmpty
                       ? DecorationImage(
                           image: CachedNetworkImageProvider(pet.avatarUrl!),
@@ -642,7 +645,7 @@ class _AvatarEditor extends StatelessWidget {
                         )
                       : null,
             ),
-            child: state.newImage == null &&
+            child: state.newImageBytes == null &&
                     (pet.avatarUrl == null || pet.avatarUrl!.isEmpty)
                 ? Center(
                     child: Text(

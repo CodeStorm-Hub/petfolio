@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:petfolio/core/errors/app_exception.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/pet.dart';
@@ -172,13 +173,57 @@ class PetRepository {
   /// Uploads [bytes] to Supabase Storage under the `pets` bucket and returns
   /// the public URL. The `pets` bucket must be created in the Supabase dashboard
   /// with public read access enabled.
-  Future<String> uploadAvatar(Uint8List bytes, String petId) async {
-    final path = '$petId/avatar.jpg';
-    await _client.storage.from('pets').uploadBinary(
-      path,
-      bytes,
-      fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
-    );
+  static const _maxAvatarBytes = 5 * 1024 * 1024;
+  static const _allowedExtensions = {'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'};
+  static const _mimeTypes = {
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png',
+    'webp': 'image/webp',
+    'heic': 'image/heic',
+    'heif': 'image/heic',
+  };
+
+  Future<String> uploadAvatar(
+    Uint8List bytes,
+    String petId, {
+    String? fileName,
+  }) async {
+    if (bytes.isEmpty) {
+      throw const ValidationException(message: 'Image file is empty.');
+    }
+    if (bytes.length > _maxAvatarBytes) {
+      throw const ValidationException(message: 'Image must be under 5 MB.');
+    }
+
+    final ext = _avatarExtension(fileName);
+    if (!_allowedExtensions.contains(ext)) {
+      throw const ValidationException(
+        message: 'Unsupported image format. Use JPG, PNG, WebP, or HEIC.',
+      );
+    }
+
+    final path = '$petId/avatar.$ext';
+    try {
+      await _client.storage.from('pets').uploadBinary(
+        path,
+        bytes,
+        fileOptions: FileOptions(
+          contentType: _mimeTypes[ext] ?? 'image/jpeg',
+          upsert: true,
+        ),
+      );
+    } on StorageException catch (e) {
+      throw NetworkException(message: 'Photo upload failed: ${e.message}');
+    }
     return _client.storage.from('pets').getPublicUrl(path);
+  }
+
+  static String _avatarExtension(String? fileName) {
+    if (fileName != null && fileName.contains('.')) {
+      final ext = fileName.split('.').last.toLowerCase();
+      if (_allowedExtensions.contains(ext)) return ext == 'jpeg' ? 'jpg' : ext;
+    }
+    return 'jpg';
   }
 }
