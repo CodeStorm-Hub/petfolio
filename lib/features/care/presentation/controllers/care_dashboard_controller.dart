@@ -125,13 +125,21 @@ class CareDashboard extends _$CareDashboard {
   void _applyBadgeDelta(String petId, Set<String> next) {
     if (!_hydratedBadgePets.contains(petId)) {
       _hydratedBadgePets.add(petId);
+      // On first load we do NOT silently absorb all badges into the baseline.
+      // Instead we notify for any badge that exists but wasn't in the previous
+      // session's baseline (stored in _badgeBaseline, which is empty on cold
+      // start). This ensures a badge unlocked while the app was closed surfaces
+      // as a snackbar on the next session.
+      final newBadges = next.difference(_badgeBaseline);
+      for (final badge in newBadges) {
+        AppSnackBar.showBadgeUnlocked(badge);
+      }
       _badgeBaseline = Set<String>.from(next);
       return;
     }
-    final newlyHasHero =
-        next.contains('7_day_hero') && !_badgeBaseline.contains('7_day_hero');
-    if (newlyHasHero) {
-      AppSnackBar.showBadgeUnlocked();
+    final newBadges = next.difference(_badgeBaseline);
+    for (final badge in newBadges) {
+      AppSnackBar.showBadgeUnlocked(badge);
     }
     _badgeBaseline = Set<String>.from(next);
   }
@@ -244,6 +252,12 @@ class CareDashboard extends _$CareDashboard {
     final prev = _routine.tasks.value;
     if (prev == null) return;
 
+    final localTask = prev.firstWhere(
+      (t) => t.id == taskId,
+      orElse: () => throw StateError('Task $taskId not in dashboard state'),
+    );
+    final careType = _repo.taskTypeToCareType(localTask.taskType);
+
     final nextList = prev
         .map((t) => t.id == taskId
             ? t.copyWith(
@@ -267,7 +281,9 @@ class CareDashboard extends _$CareDashboard {
         taskId,
         isCompleted: isCompleted,
         petId: petId,
+        careType: careType,
         forDay: _routine.selectedDate,
+        localTask: localTask,
       );
       if (ref.read(activePetIdProvider) != petId) return;
       final current = _routine.tasks.value ?? prev;

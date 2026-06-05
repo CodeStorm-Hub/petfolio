@@ -48,6 +48,9 @@ abstract class CareTask with _$CareTask {
     String? categoryIcon,
     required DateTime createdAt,
     required DateTime updatedAt,
+    // Reference date for recurring tasks (weekly / biweekly / monthly).
+    // Defaults to createdAt on the server; never null after the first sync.
+    DateTime? anchorDate,
   }) = _CareTask;
 
   factory CareTask.fromJson(Map<String, dynamic> json) =>
@@ -62,18 +65,52 @@ abstract class CareTask with _$CareTask {
   IconData get categoryIconData =>
       careTaskCategoryIconData(resolvedCategoryIcon, taskType);
 
-  bool get isDueToday =>
-      !isCompleted &&
-      (frequency == CareFrequency.daily ||
-          frequency == CareFrequency.twiceDaily ||
-          frequency == CareFrequency.once);
+  /// The effective anchor for recurrence calculations — falls back to createdAt
+  /// for tasks saved before anchor_date was introduced.
+  DateTime get effectiveAnchor =>
+      anchorDate ?? DateUtils.dateOnly(createdAt.toLocal());
 
-  bool get isOverdue {
-    if (isCompleted || completedAt != null) return false;
-    if (frequency == CareFrequency.once) return false;
-    final today = DateTime.now();
-    return updatedAt.isBefore(DateTime(today.year, today.month, today.day));
+  /// True when this task applies on today's local date and is not yet done.
+  bool get isDueToday {
+    if (isCompleted) return false;
+    final today = DateUtils.dateOnly(DateTime.now().toLocal());
+    return appliesToDay(today);
   }
+
+  /// True when the task was due on a previous day and was not completed.
+  bool get isOverdue {
+    if (isCompleted) return false;
+    if (frequency == CareFrequency.asNeeded) return false;
+    final today = DateUtils.dateOnly(DateTime.now().toLocal());
+    final yesterday = today.subtract(const Duration(days: 1));
+    return appliesToDay(yesterday) && completedAt == null;
+  }
+
+  bool appliesToDay(DateTime dayLocal) {
+    final start = DateUtils.dateOnly(effectiveAnchor.toLocal());
+    if (dayLocal.isBefore(start)) return false;
+    switch (frequency) {
+      case CareFrequency.daily:
+      case CareFrequency.twiceDaily:
+      case CareFrequency.asNeeded:
+        return true;
+      case CareFrequency.once:
+        if (isCompleted && completedAt != null) {
+          return dayLocal == DateUtils.dateOnly(completedAt!.toLocal());
+        }
+        return true;
+      case CareFrequency.weekly:
+        return dayLocal.difference(start).inDays % 7 == 0;
+      case CareFrequency.biweekly:
+        return dayLocal.difference(start).inDays % 14 == 0;
+      case CareFrequency.monthly:
+        final lastDay = DateTime(dayLocal.year, dayLocal.month + 1, 0).day;
+        final anchor = start.day > lastDay ? lastDay : start.day;
+        return dayLocal.day == anchor;
+    }
+  }
+
+  bool get isLogDerived => id.startsWith('log:');
 
   CareTask markCompleted() => copyWith(
         isCompleted: true,

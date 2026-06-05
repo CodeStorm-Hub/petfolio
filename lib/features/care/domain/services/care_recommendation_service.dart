@@ -81,6 +81,15 @@ class CareRecommendationService {
   };
 
   Future<List<CareTask>> generateRecommendations(Pet pet) async {
+    // Guard before any network calls so we don't waste 3 Supabase round-trips
+    // on a build that has no NVIDIA key configured.
+    if (!kIsWeb && _apiKey.isEmpty) {
+      throw const CareRecommendationException(
+        'AI routine suggestions are not configured on this build.',
+        isConfigError: true,
+      );
+    }
+
     final supabase = Supabase.instance.client;
 
     final vaultFuture = supabase
@@ -122,13 +131,6 @@ class CareRecommendationService {
       healthLogs: healthLogs,
       existingTasks: existingTasks,
     );
-
-    if (!kIsWeb && _apiKey.isEmpty) {
-      throw const CareRecommendationException(
-        'AI routine suggestions are not configured on this build.',
-        isConfigError: true,
-      );
-    }
 
     try {
       final Map<String, dynamic> body;

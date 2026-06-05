@@ -68,7 +68,7 @@ final class CommentListProvider
   }
 }
 
-String _$commentListHash() => r'06ceff73ae29048bd53cf1b02ae5ff42df3df486';
+String _$commentListHash() => r'131d3e78ab2e0519c958bddbe1b8fbf28ade9144';
 
 /// Manages the comment list for a single post (identified by [postId]).
 ///

@@ -1,34 +1,32 @@
-class CareStreak {
-  const CareStreak({
-    required this.petId,
-    required this.currentStreak,
-    this.lastCompletionDate,
-    required this.bestStreak,
-  });
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  final String petId;
-  final int currentStreak;
-  final DateTime? lastCompletionDate;
-  final int bestStreak;
+part 'care_streak.freezed.dart';
+part 'care_streak.g.dart';
 
-  factory CareStreak.fromJson(Map<String, dynamic> json) {
-    final rawLast = json['last_completion_date'];
-    DateTime? last;
-    if (rawLast is String) {
-      last = DateTime.tryParse(rawLast);
-    }
-    return CareStreak(
-      petId: json['pet_id'] as String,
-      currentStreak: (json['current_streak'] as num?)?.toInt() ?? 0,
-      lastCompletionDate: last,
-      bestStreak: (json['best_streak'] as num?)?.toInt() ?? 0,
-    );
-  }
+DateTime? _lastCompletionFromJson(dynamic raw) {
+  if (raw == null) return null;
+  final s = raw is String ? raw : raw.toString();
+  if (s.isEmpty) return null;
+  return DateTime.tryParse(s)?.toLocal();
+}
 
-  Map<String, dynamic> toJson() => {
-        'pet_id': petId,
-        'current_streak': currentStreak,
-        'last_completion_date': lastCompletionDate?.toIso8601String().split('T').first,
-        'best_streak': bestStreak,
-      };
+String? _lastCompletionToJson(DateTime? dt) =>
+    dt?.toLocal().toIso8601String().split('T').first;
+
+@freezed
+abstract class CareStreak with _$CareStreak {
+  const factory CareStreak({
+    @JsonKey(name: 'pet_id') required String petId,
+    @JsonKey(name: 'current_streak') required int currentStreak,
+    @JsonKey(
+      name: 'last_completion_date',
+      fromJson: _lastCompletionFromJson,
+      toJson: _lastCompletionToJson,
+    )
+    DateTime? lastCompletionDate,
+    @JsonKey(name: 'best_streak') required int bestStreak,
+  }) = _CareStreak;
+
+  factory CareStreak.fromJson(Map<String, dynamic> json) =>
+      _$CareStreakFromJson(json);
 }

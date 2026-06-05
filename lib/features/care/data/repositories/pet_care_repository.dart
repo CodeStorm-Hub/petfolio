@@ -6,7 +6,6 @@ import '../../../../core/errors/app_exception.dart';
 import '../../../../core/platform/platform_notifications.dart';
 import '../models/care_streak.dart';
 import '../models/care_task.dart';
-import '../models/care_task_log.dart';
 
 /// Snapshot of everything the care dashboard needs, fetched in one RPC call.
 class CareDashboardSnapshot {
@@ -109,6 +108,11 @@ class PetCareRepository {
   static DateTime _localDateOnly(DateTime dt) =>
       DateUtils.dateOnly(dt.toLocal());
 
+  /// Public accessor used by callers that need the DB snake_case care_type
+  /// from an enum value (e.g. the dashboard controller pre-resolving it before
+  /// calling [toggleCompletion]).
+  String taskTypeToCareType(CareTaskType t) => _taskTypeToLogCareType(t);
+
   static String _taskTypeToLogCareType(CareTaskType t) {
     switch (t) {
       case CareTaskType.vetVisit:
@@ -202,41 +206,8 @@ class PetCareRepository {
     );
   }
 
-  static bool _appliesOnDay(CareTask task, DateTime dayLocal) {
-    final start = _localDateOnly(task.createdAt);
-
-    switch (task.frequency) {
-      case CareFrequency.daily:
-      case CareFrequency.twiceDaily:
-      case CareFrequency.asNeeded:
-        return true;
-      case CareFrequency.once:
-        if (dayLocal.isBefore(start)) return false;
-        if (task.isCompleted && task.completedAt != null) {
-          return dayLocal == _localDateOnly(task.completedAt!);
-        }
-        return !dayLocal.isBefore(start);
-      case CareFrequency.weekly:
-        if (dayLocal.isBefore(start)) return false;
-        final diff = dayLocal.difference(start).inDays;
-        return diff >= 0 && diff % 7 == 0;
-      case CareFrequency.biweekly:
-        if (dayLocal.isBefore(start)) return false;
-        final diff = dayLocal.difference(start).inDays;
-        return diff >= 0 && diff % 14 == 0;
-      case CareFrequency.monthly:
-        if (dayLocal.isBefore(start)) return false;
-        final lastDayOfMonth =
-            DateTime(dayLocal.year, dayLocal.month + 1, 0).day;
-        final anchorDay =
-            start.day > lastDayOfMonth ? lastDayOfMonth : start.day;
-        if (dayLocal.day != anchorDay) return false;
-        if (dayLocal.year == start.year && dayLocal.month == start.month) {
-          return !dayLocal.isBefore(start);
-        }
-        return true;
-    }
-  }
+  static bool _appliesOnDay(CareTask task, DateTime dayLocal) =>
+      task.appliesToDay(dayLocal);
 
   static bool _doneForDay(
     CareTask task,
@@ -255,8 +226,7 @@ class PetCareRepository {
     return fromLog;
   }
 
-  static bool _usesCareLogsForToggle(CareFrequency f) =>
-      f != CareFrequency.once;
+
 
   Future<CareStreak> getPetStreak(String petId) async {
     try {
@@ -346,9 +316,12 @@ class PetCareRepository {
 
       if (payloads.isEmpty) return [];
 
+      // ON CONFLICT DO NOTHING — the DB unique index (pet_id, task_type,
+      // frequency, lower(btrim(title)), scheduled_time) is the authoritative
+      // dedup; the client-side pre-filter above is a best-effort optimisation.
       final rows = await _client
           .from('care_tasks')
-          .insert(payloads)
+          .upsert(payloads, onConflict: 'pet_id, task_type, frequency, scheduled_time')
           .select();
 
       final savedTasks = rows.map((row) => CareTask.fromJson(row)).toList();
@@ -381,6 +354,8 @@ class PetCareRepository {
           .select()
           .single();
       final saved = CareTask.fromJson(row);
+      // Cancel old notification before scheduling the (possibly new) time.
+      PlatformNotifications.instance.cancelForTask(saved.id).ignore();
       _scheduleNotificationIfNeeded(saved);
       return saved;
     } on AppException {
@@ -436,6 +411,7 @@ class PetCareRepository {
           'p_selected_date': _fmtYmd(dSel),
           'p_week_start': _fmtYmd(minD),
           'p_week_end': _fmtYmd(maxD),
+          'p_client_today': _fmtYmd(dToday),
         },
       );
 
@@ -493,20 +469,29 @@ class PetCareRepository {
     List<Map<String, dynamic>> logs,
     DateTime dayLocal,
   ) {
-    final doneTypes = logs
-        .map((r) => r['care_type'] as String?)
-        .whereType<String>()
-        .toSet();
+    // Build a map from care_type → occurred_at of the matching log row.
+    final logByType = <String, DateTime?>{};
+    for (final row in logs) {
+      final ct = row['care_type'] as String?;
+      if (ct == null) continue;
+      if (!logByType.containsKey(ct)) {
+        final raw = row['occurred_at'];
+        final ts = raw is String ? DateTime.tryParse(raw)?.toLocal() : null;
+        logByType[ct] = ts;
+      }
+    }
 
     final out = <CareTask>[];
     for (final task in definitions) {
       if (!_appliesOnDay(task, dayLocal)) continue;
       final careType = _taskTypeToLogCareType(task.taskType);
-      final fromLog = doneTypes.contains(careType);
+      final fromLog = logByType.containsKey(careType);
       final done = _doneForDay(task, dayLocal, fromLog);
       out.add(task.copyWith(
         isCompleted: done,
-        completedAt: done ? DateTime.now() : null,
+        // Use the real completion timestamp from the log row; fall back to
+        // the task's own completedAt only for 'once'-frequency tasks.
+        completedAt: done ? (logByType[careType] ?? task.completedAt) : null,
       ));
     }
 
@@ -540,6 +525,11 @@ class PetCareRepository {
     List<Map<String, dynamic>> logsWeek,
     List<DateTime> weekDays,
   ) {
+    // Collect expected care types for daily tasks. twiceDaily is tracked as
+    // requiring 2 log entries, but the DB unique constraint (pet_id, care_type,
+    // logged_date) currently prevents two entries of the same type per day.
+    // Until the schema supports a count column, twiceDaily is treated the same
+    // as daily for goal-hit purposes.
     final expected = <String>{};
     for (final task in definitions) {
       if (task.frequency == CareFrequency.daily ||
@@ -547,8 +537,10 @@ class PetCareRepository {
         expected.add(_taskTypeToLogCareType(task.taskType));
       }
     }
+
+    // No daily tasks defined — week goal is trivially met (nothing to fail).
     if (expected.isEmpty) {
-      expected.addAll({'feeding', 'walk', 'medication'});
+      return List.filled(weekDays.length, true);
     }
 
     final byDay = <String, Set<String>>{};
@@ -590,133 +582,57 @@ class PetCareRepository {
     ).ignore();
   }
 
+  /// Toggles task completion via a single `toggle_care_task` RPC call.
+  ///
+  /// [careType] must be the DB snake_case string (e.g. 'vet_visit') and is
+  /// provided by the caller (already known from the local dashboard state),
+  /// avoiding an extra round-trip to fetch the task row.
   Future<ToggleCompletionResult> toggleCompletion(
     String taskId, {
     required bool isCompleted,
     required String petId,
+    required String careType,
     required DateTime forDay,
+    required CareTask localTask,
   }) async {
     try {
       _requireAuth();
-      final dayStr = _fmtYmd(DateUtils.dateOnly(forDay));
-      if (taskId.startsWith('log:')) {
-        final logId = taskId.substring(4);
-        final row = await _client
-            .from('care_logs')
-            .select('id, care_type, occurred_at, pet_id, logged_date')
-            .eq('id', logId)
-            .maybeSingle();
-        if (row == null) throw const NotFoundException();
-        final map = Map<String, dynamic>.from(row);
-        if ((map['pet_id'] as String?) != petId) throw const NotFoundException();
-        if (_loggedDayKey(map['logged_date']) != dayStr) throw const NotFoundException();
-        final dayLocal = DateUtils.dateOnly(forDay);
-        final synthetic = _careTaskFromLogRow(map, petId, dayLocal);
-        if (isCompleted) {
-          return ToggleCompletionResult(task: synthetic, badgeUnlocked: false);
-        }
-        await _client.from('care_logs').delete().eq('id', logId);
-        return ToggleCompletionResult(
-          task: synthetic.copyWith(
-            isCompleted: false,
-            completedAt: null,
-            updatedAt: DateTime.now(),
-          ),
-          badgeUnlocked: false,
-        );
-      }
+      final now = DateTime.now();
+      final occurredAt = isCompleted ? now.toUtc() : now.toUtc();
+      final day = DateUtils.dateOnly(forDay);
 
-      final userId = _client.auth.currentUser!.id;
-      final existing = await _client
-          .from('care_tasks')
-          .select()
-          .eq('id', taskId)
-          .single();
-      final task = CareTask.fromJson(existing);
-      final careType = _taskTypeToLogCareType(task.taskType);
-
-      if (_usesCareLogsForToggle(task.frequency)) {
-        if (isCompleted) {
-          await _client.from('care_logs').upsert(
-            {
-              'pet_id': petId,
-              'logged_by': userId,
-              'care_type': careType,
-              'logged_date': dayStr,
-              'occurred_at': '${dayStr}T00:00:00.000Z',
-            },
-            onConflict: 'pet_id, care_type, logged_date',
-          );
-        } else {
-          await _client
-              .from('care_logs')
-              .delete()
-              .eq('pet_id', petId)
-              .eq('care_type', careType)
-              .eq('logged_date', dayStr);
-        }
-      } else {
-        if (isCompleted) {
-          await _client
-              .from('care_tasks')
-              .update({
-                'is_completed': true,
-                'completed_at': DateTime.now().toUtc().toIso8601String(),
-              })
-              .eq('id', taskId);
-          await _client.from('care_logs').upsert(
-            {
-              'pet_id': petId,
-              'logged_by': userId,
-              'care_type': careType,
-              'logged_date': dayStr,
-              'occurred_at': '${dayStr}T00:00:00.000Z',
-            },
-            onConflict: 'pet_id, care_type, logged_date',
-          );
-        } else {
-          await _client
-              .from('care_tasks')
-              .update({
-                'is_completed': false,
-                'completed_at': null,
-              })
-              .eq('id', taskId);
-          await _client
-              .from('care_logs')
-              .delete()
-              .eq('pet_id', petId)
-              .eq('care_type', careType)
-              .eq('logged_date', dayStr);
-        }
-      }
-
-      var badgeUnlocked   = false;
-      var unlockedBadges  = <String>[];
-
-      if (isCompleted) {
-        final raw = await _client.rpc(
-          'check_daily_completion',
-          params: {
-            'target_pet_id':  petId,
-            'completion_date': dayStr,
-          },
-        );
-        if (raw is Map) {
-          final v = raw['badge_unlocked'];
-          badgeUnlocked = v == true || v == 'true';
-          final arr = raw['unlocked_badges'];
-          if (arr is List) {
-            unlockedBadges = arr.whereType<String>().toList();
-          }
-        }
-      }
-
-      final merged = task.copyWith(
-        isCompleted: isCompleted,
-        completedAt: isCompleted ? DateTime.now() : null,
-        updatedAt: DateTime.now(),
+      final raw = await _client.rpc(
+        'toggle_care_task',
+        params: {
+          'p_task_id':      taskId,
+          'p_pet_id':       petId,
+          'p_care_type':    careType,
+          'p_is_completed': isCompleted,
+          'p_day':          _fmtYmd(day),
+          'p_occurred_at':  occurredAt.toIso8601String(),
+        },
       );
+
+      if (raw == null) throw const NetworkException(message: 'Empty RPC response');
+
+      final result = raw as Map<String, dynamic>;
+      final badgeUnlocked = result['badge_unlocked'] == true;
+      final unlockedBadges = (result['unlocked_badges'] as List?)
+              ?.whereType<String>()
+              .toList() ??
+          [];
+
+      final rawCompletedAt = result['completed_at'];
+      final completedAt = rawCompletedAt is String
+          ? DateTime.tryParse(rawCompletedAt)?.toLocal()
+          : null;
+
+      final merged = localTask.copyWith(
+        isCompleted: isCompleted,
+        completedAt: completedAt,
+        updatedAt: now,
+      );
+
       return ToggleCompletionResult(
         task: merged,
         badgeUnlocked: badgeUnlocked,

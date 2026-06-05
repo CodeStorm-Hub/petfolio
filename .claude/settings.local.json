@@ -126,7 +126,10 @@
       "Bash(git merge *)",
       "Bash(git stash *)",
       "mcp__plugin_playwright_playwright__browser_navigate",
-      "mcp__plugin_playwright_playwright__browser_snapshot"
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "PowerShell(Set-Location \"G:\\\\GitHub\\\\petfolio\"; $py = Get-Content graphify-out/.graphify_python; & $py -m graphify query \"What calls the Supabase client?\" 2>&1 | Select-Object -First 80)",
+      "mcp__292a7621-3089-4236-bd52-07a54bf59881__execute_sql",
+      "mcp__292a7621-3089-4236-bd52-07a54bf59881__apply_migration"
     ]
   }
 }

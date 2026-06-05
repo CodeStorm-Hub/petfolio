@@ -8,7 +8,6 @@ import 'package:petfolio/core/widgets/widgets.dart';
 
 import '../../../../core/models/pet.dart';
 import '../../data/models/care_task.dart' show CareFrequency;
-import '../../data/models/care_task_log.dart';
 import '../../data/models/pet_awards_summary.dart';
 import '../../data/models/pet_level.dart';
 import '../controllers/care_dashboard_controller.dart';

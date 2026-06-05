@@ -41,7 +41,7 @@ final class CareDashboardProvider
   }
 }
 
-String _$careDashboardHash() => r'975a8e9cc30d30525e321ea162cea957639db83e';
+String _$careDashboardHash() => r'ed04cd6621d31e1f71753ac6e8e2f6260b943e16';
 
 abstract class _$CareDashboard extends $Notifier<DailyRoutineState> {
   DailyRoutineState build();

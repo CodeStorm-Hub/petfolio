@@ -13,7 +13,6 @@ import 'package:petfolio/core/errors/app_exception.dart';
 import 'package:petfolio/core/models/pet.dart' show Pet;
 
 import 'package:petfolio/features/care/data/models/care_task.dart' as dbtask;
-import 'package:petfolio/features/care/data/models/care_task_log.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_dashboard_controller.dart';
 import 'package:petfolio/features/care/presentation/utils/care_scheduled_time.dart';
 import 'package:petfolio/features/care/presentation/widgets/routine_recommendation_sheet.dart';
