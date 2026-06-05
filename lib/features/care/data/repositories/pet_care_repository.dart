@@ -316,12 +316,13 @@ class PetCareRepository {
 
       if (payloads.isEmpty) return [];
 
-      // ON CONFLICT DO NOTHING — the DB unique index (pet_id, task_type,
-      // frequency, lower(btrim(title)), scheduled_time) is the authoritative
-      // dedup; the client-side pre-filter above is a best-effort optimisation.
+      // The DB unique index uses an expression (lower(btrim(title))) which
+      // cannot be referenced by column name in onConflict. Use ignoreDuplicates
+      // so Postgres generates ON CONFLICT DO NOTHING against any constraint.
+      // The client-side pre-filter above is a best-effort optimisation only.
       final rows = await _client
           .from('care_tasks')
-          .upsert(payloads, onConflict: 'pet_id, task_type, frequency, scheduled_time')
+          .upsert(payloads, ignoreDuplicates: true)
           .select();
 
       final savedTasks = rows.map((row) => CareTask.fromJson(row)).toList();
@@ -469,36 +470,69 @@ class PetCareRepository {
     List<Map<String, dynamic>> logs,
     DateTime dayLocal,
   ) {
-    // Build a map from care_type → occurred_at of the matching log row.
+    // Primary: task_id-based map (new schema — one log entry per real task per day).
+    // Fallback: care_type-based map for legacy null-task_id entries and
+    // log-derived synthetic tasks.
+    final logByTaskId = <String, DateTime?>{};
     final logByType = <String, DateTime?>{};
+
     for (final row in logs) {
+      final taskId = row['task_id'] as String?;
       final ct = row['care_type'] as String?;
-      if (ct == null) continue;
-      if (!logByType.containsKey(ct)) {
-        final raw = row['occurred_at'];
-        final ts = raw is String ? DateTime.tryParse(raw)?.toLocal() : null;
-        logByType[ct] = ts;
+      final raw = row['occurred_at'];
+      final ts = raw is String ? DateTime.tryParse(raw)?.toLocal() : null;
+      if (taskId != null) {
+        logByTaskId.putIfAbsent(taskId, () => ts);
       }
+      if (ct != null) {
+        logByType.putIfAbsent(ct, () => ts);
+      }
+    }
+
+    // Count how many applicable tasks share each care_type on this day.
+    // Used to guard legacy care_type fallback: if multiple tasks share the
+    // same care_type, one log entry cannot reliably say which task was done.
+    final taskCountByCareType = <String, int>{};
+    for (final task in definitions) {
+      if (!_appliesOnDay(task, dayLocal)) continue;
+      final ct = _taskTypeToLogCareType(task.taskType);
+      taskCountByCareType[ct] = (taskCountByCareType[ct] ?? 0) + 1;
     }
 
     final out = <CareTask>[];
     for (final task in definitions) {
       if (!_appliesOnDay(task, dayLocal)) continue;
       final careType = _taskTypeToLogCareType(task.taskType);
-      final fromLog = logByType.containsKey(careType);
+
+      final bool fromLog;
+      final DateTime? loggedAt;
+
+      if (logByTaskId.containsKey(task.id)) {
+        // New schema: this task has its own log entry — unambiguous.
+        fromLog = true;
+        loggedAt = logByTaskId[task.id];
+      } else {
+        // Legacy fallback (null-task_id logs from before the task_id migration).
+        // Only trust care_type matching when exactly one task of this type
+        // exists today — otherwise it's ambiguous which task was completed.
+        final count = taskCountByCareType[careType] ?? 0;
+        fromLog = count == 1 && logByType.containsKey(careType);
+        loggedAt = fromLog ? logByType[careType] : null;
+      }
+
       final done = _doneForDay(task, dayLocal, fromLog);
       out.add(task.copyWith(
         isCompleted: done,
-        // Use the real completion timestamp from the log row; fall back to
-        // the task's own completedAt only for 'once'-frequency tasks.
-        completedAt: done ? (logByType[careType] ?? task.completedAt) : null,
+        completedAt: done ? (loggedAt ?? task.completedAt) : null,
       ));
     }
 
-    // Synthesise tasks for care types that appear in logs but have no
-    // matching care_task definition (e.g. ad-hoc log entries).
+    // Synthesise tasks for log entries with no matching care_task definition
+    // (ad-hoc entries that have no real task — always null task_id).
     final byCareTypeFirstRow = <String, Map<String, dynamic>>{};
     for (final row in logs) {
+      final taskId = row['task_id'] as String?;
+      if (taskId != null) continue; // skip real-task logs
       final ct = row['care_type'] as String?;
       if (ct == null) continue;
       byCareTypeFirstRow.putIfAbsent(ct, () => row);
@@ -525,39 +559,54 @@ class PetCareRepository {
     List<Map<String, dynamic>> logsWeek,
     List<DateTime> weekDays,
   ) {
-    // Collect expected care types for daily tasks. twiceDaily is tracked as
-    // requiring 2 log entries, but the DB unique constraint (pet_id, care_type,
-    // logged_date) currently prevents two entries of the same type per day.
-    // Until the schema supports a count column, twiceDaily is treated the same
-    // as daily for goal-hit purposes.
-    final expected = <String>{};
-    for (final task in definitions) {
-      if (task.frequency == CareFrequency.daily ||
-          task.frequency == CareFrequency.twiceDaily) {
-        expected.add(_taskTypeToLogCareType(task.taskType));
-      }
-    }
+    // Collect all daily tasks grouped by care_type to detect ambiguity.
+    final dailyTasks = definitions
+        .where((t) =>
+            t.frequency == CareFrequency.daily ||
+            t.frequency == CareFrequency.twiceDaily)
+        .toList();
 
-    // No daily tasks defined — week goal is trivially met (nothing to fail).
-    if (expected.isEmpty) {
+    if (dailyTasks.isEmpty) {
       return List.filled(weekDays.length, true);
     }
 
-    final byDay = <String, Set<String>>{};
+    // Count tasks per care_type to know when legacy care_type fallback is safe.
+    final dailyCountByCareType = <String, int>{};
+    for (final task in dailyTasks) {
+      final ct = _taskTypeToLogCareType(task.taskType);
+      dailyCountByCareType[ct] = (dailyCountByCareType[ct] ?? 0) + 1;
+    }
+
+    // Build per-day lookup maps (both task_id and care_type).
+    final byDayTaskIds = <String, Set<String>>{};
+    final byDayCareTypes = <String, Set<String>>{};
     for (final d in weekDays) {
-      byDay[_fmtYmd(d)] = {};
+      byDayTaskIds[_fmtYmd(d)] = {};
+      byDayCareTypes[_fmtYmd(d)] = {};
     }
     for (final row in logsWeek) {
       final day = _loggedDayKey(row['logged_date']);
+      if (day.isEmpty) continue;
+      final taskId = row['task_id'] as String?;
       final ct = row['care_type'] as String?;
-      if (day.isEmpty || ct == null) continue;
-      byDay.putIfAbsent(day, () => {}).add(ct);
+      if (taskId != null) byDayTaskIds.putIfAbsent(day, () => {}).add(taskId);
+      if (ct != null) byDayCareTypes.putIfAbsent(day, () => {}).add(ct);
     }
 
     return weekDays.map((d) {
       final key = _fmtYmd(DateUtils.dateOnly(d));
-      final done = byDay[key] ?? const {};
-      return expected.every((e) => done.contains(e));
+      final completedIds = byDayTaskIds[key] ?? const <String>{};
+      final completedTypes = byDayCareTypes[key] ?? const <String>{};
+
+      return dailyTasks.every((task) {
+        // Primary: task_id log (new schema — unambiguous).
+        if (completedIds.contains(task.id)) return true;
+
+        // Legacy fallback: care_type log, only when unambiguous (1 task of type).
+        final ct = _taskTypeToLogCareType(task.taskType);
+        final count = dailyCountByCareType[ct] ?? 0;
+        return count == 1 && completedTypes.contains(ct);
+      });
     }).toList();
   }
 
@@ -598,7 +647,7 @@ class PetCareRepository {
     try {
       _requireAuth();
       final now = DateTime.now();
-      final occurredAt = isCompleted ? now.toUtc() : now.toUtc();
+      final occurredAt = now.toUtc();
       final day = DateUtils.dateOnly(forDay);
 
       final raw = await _client.rpc(

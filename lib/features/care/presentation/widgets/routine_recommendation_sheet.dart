@@ -278,7 +278,7 @@ class _RoutineSummaryChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int daily = 0, weekly = 0, monthly = 0;
+    int daily = 0, weekly = 0, monthly = 0, once = 0;
     for (final t in tasks) {
       switch (t.frequency) {
         case CareFrequency.daily:
@@ -291,7 +291,7 @@ class _RoutineSummaryChips extends StatelessWidget {
         case CareFrequency.monthly:
           monthly++;
         case CareFrequency.once:
-          break;
+          once++;
       }
     }
     return Wrap(
@@ -312,6 +312,11 @@ class _RoutineSummaryChips extends StatelessWidget {
               label: '$monthly monthly',
               color: Colors.purple.shade600,
               icon: Icons.calendar_month_rounded),
+        if (once > 0)
+          _SummaryChip(
+              label: '$once one-time',
+              color: Colors.orange.shade600,
+              icon: Icons.looks_one_rounded),
       ],
     );
   }

@@ -123,25 +123,27 @@ class CareDashboard extends _$CareDashboard {
   CareTaskRepository get _repo => ref.read(careTaskRepositoryProvider);
 
   void _applyBadgeDelta(String petId, Set<String> next) {
+    final newBadges = next.difference(_badgeBaseline);
+    _badgeBaseline = Set<String>.from(next);
+
+    if (newBadges.isEmpty) return;
+
     if (!_hydratedBadgePets.contains(petId)) {
+      // First load for this pet in this session: coalesce all new badges into
+      // a single notification to avoid a storm of snackbars on cold start.
       _hydratedBadgePets.add(petId);
-      // On first load we do NOT silently absorb all badges into the baseline.
-      // Instead we notify for any badge that exists but wasn't in the previous
-      // session's baseline (stored in _badgeBaseline, which is empty on cold
-      // start). This ensures a badge unlocked while the app was closed surfaces
-      // as a snackbar on the next session.
-      final newBadges = next.difference(_badgeBaseline);
-      for (final badge in newBadges) {
-        AppSnackBar.showBadgeUnlocked(badge);
+      if (newBadges.length == 1) {
+        AppSnackBar.showBadgeUnlocked(newBadges.first);
+      } else {
+        AppSnackBar.show('${newBadges.length} badges unlocked! 🏆');
       }
-      _badgeBaseline = Set<String>.from(next);
       return;
     }
-    final newBadges = next.difference(_badgeBaseline);
+
+    // Subsequent loads: show each badge individually (incremental unlock).
     for (final badge in newBadges) {
       AppSnackBar.showBadgeUnlocked(badge);
     }
-    _badgeBaseline = Set<String>.from(next);
   }
 
   Future<void> _load(String petId, DateTime date) async {

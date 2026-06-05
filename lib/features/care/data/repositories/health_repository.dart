@@ -134,9 +134,14 @@ class HealthRepository {
   Future<HealthLog> updateLog(HealthLog log) async {
     try {
       _requireUserId();
+      final payload = log.toJson()
+        ..remove('id')
+        ..remove('created_at')
+        ..remove('updated_at')
+        ..remove('recorded_by');
       final row = await _client
           .from('health_logs')
-          .update(log.toJson())
+          .update(payload)
           .eq('id', log.id)
           .select()
           .single();
@@ -192,49 +197,6 @@ class MedicalVaultRepository {
           .from('medical_vault')
           .select()
           .eq('pet_id', petId)
-          .order('created_at', ascending: false);
-      return rows.map(MedicalRecord.fromJson).toList();
-    } on AppException {
-      rethrow;
-    } on PostgrestException catch (e) {
-      throw DatabaseException.fromPostgrest(e);
-    } catch (e) {
-      throw NetworkException(message: e.toString());
-    }
-  }
-
-  // ── Fetch active records only ───────────────────────────────────────────────
-
-  Future<List<MedicalRecord>> fetchActiveRecords(String petId) async {
-    try {
-      _requireAuth();
-      final rows = await _client
-          .from('medical_vault')
-          .select()
-          .eq('pet_id', petId)
-          .eq('is_active', true)
-          .order('next_due_at', ascending: true, nullsFirst: false);
-      return rows.map(MedicalRecord.fromJson).toList();
-    } on AppException {
-      rethrow;
-    } on PostgrestException catch (e) {
-      throw DatabaseException.fromPostgrest(e);
-    } catch (e) {
-      throw NetworkException(message: e.toString());
-    }
-  }
-
-  // ── Fetch records by type ───────────────────────────────────────────────────
-
-  Future<List<MedicalRecord>> fetchRecordsByType(
-      String petId, MedicalRecordType type) async {
-    try {
-      _requireAuth();
-      final rows = await _client
-          .from('medical_vault')
-          .select()
-          .eq('pet_id', petId)
-          .eq('record_type', type.name)
           .order('created_at', ascending: false);
       return rows.map(MedicalRecord.fromJson).toList();
     } on AppException {

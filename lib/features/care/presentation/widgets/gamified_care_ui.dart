@@ -30,13 +30,14 @@ class CareGamifiedHeader extends ConsumerStatefulWidget {
 }
 
 class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController _coinCtrl;
   late final AnimationController _pulseCtrl;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _coinCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 4500),
@@ -48,7 +49,21 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached ||
+        state == AppLifecycleState.hidden) {
+      _coinCtrl.stop();
+      _pulseCtrl.stop();
+    } else if (state == AppLifecycleState.resumed) {
+      if (!_coinCtrl.isAnimating) _coinCtrl.repeat();
+      if (!_pulseCtrl.isAnimating) _pulseCtrl.repeat();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _coinCtrl.dispose();
     _pulseCtrl.dispose();
     super.dispose();
@@ -1094,6 +1109,7 @@ class _TrophyCard extends StatefulWidget {
 class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin {
   late final AnimationController _floatCtrl;
   late final AnimationController _sheenCtrl;
+  late final AnimationStatusListener _sheenListener;
 
   @override
   void initState() {
@@ -1106,13 +1122,15 @@ class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin 
     final sheenDuration = Duration(milliseconds: 3800 + widget.index * 200);
     _sheenCtrl = AnimationController(vsync: this, duration: sheenDuration);
 
+    _sheenListener = (s) {
+      if (s == AnimationStatus.completed && mounted) _sheenCtrl.repeat();
+    };
+
     if (widget.owned) {
       final delayFraction =
           (widget.index * 300 / sheenDuration.inMilliseconds).clamp(0.0, 1.0);
+      _sheenCtrl.addStatusListener(_sheenListener);
       _sheenCtrl.forward(from: delayFraction);
-      _sheenCtrl.addStatusListener((s) {
-        if (s == AnimationStatus.completed && mounted) _sheenCtrl.repeat();
-      });
     }
   }
 
@@ -1122,15 +1140,15 @@ class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin 
     if (!oldWidget.owned && widget.owned && !_sheenCtrl.isAnimating) {
       final delayFraction =
           (widget.index * 300 / _sheenCtrl.duration!.inMilliseconds).clamp(0.0, 1.0);
+      _sheenCtrl.removeStatusListener(_sheenListener);
+      _sheenCtrl.addStatusListener(_sheenListener);
       _sheenCtrl.forward(from: delayFraction);
-      _sheenCtrl.addStatusListener((s) {
-        if (s == AnimationStatus.completed && mounted) _sheenCtrl.repeat();
-      });
     }
   }
 
   @override
   void dispose() {
+    _sheenCtrl.removeStatusListener(_sheenListener);
     _floatCtrl.dispose();
     _sheenCtrl.dispose();
     super.dispose();

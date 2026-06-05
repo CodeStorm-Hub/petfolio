@@ -109,7 +109,8 @@ class CareRecommendationService {
     final tasksFuture = supabase
         .from('care_tasks')
         .select('task_type, title')
-        .eq('pet_id', pet.id);
+        .eq('pet_id', pet.id)
+        .limit(50);
 
     final results = await Future.wait([vaultFuture, healthFuture, tasksFuture]);
 

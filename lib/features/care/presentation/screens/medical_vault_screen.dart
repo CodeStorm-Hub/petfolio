@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/platform/media_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -151,15 +151,7 @@ class _MedicalVaultBody extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 18),
-                    const Row(
-                      children: [
-                        Expanded(child: _HealthPill(icon: '💚', label: 'Vitals', value: 'Strong')),
-                        SizedBox(width: 8),
-                        Expanded(child: _HealthPill(icon: '💉', label: 'Vaccines', value: 'Up to date')),
-                        SizedBox(width: 8),
-                        Expanded(child: _HealthPill(icon: '📅', label: 'Next visit', value: '14 Jun')),
-                      ],
-                    ),
+                    _HealthSummaryPills(asyncRecords: asyncRecords),
                   ],
                 ),
               ),
@@ -192,6 +184,12 @@ class _MedicalVaultBody extends ConsumerWidget {
                         const Text(
                           'Could not load medical records',
                           style: TextStyle(fontSize: 15, color: AppColors.ink500),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          onPressed: () => ref.invalidate(healthVaultControllerProvider),
+                          icon: const Icon(Icons.refresh_rounded, size: 16),
+                          label: const Text('Retry'),
                         ),
                       ],
                     ),
@@ -227,57 +225,145 @@ class _MedicalVaultBody extends ConsumerWidget {
                         records: vet,
                         emptyLabel: 'No vet visit or clinical notes yet.',
                       ),
-                      // Share with vet card
-                      CustomPaint(
-                        painter: DashedRectPainter(
-                          color: AppColors.mint,
-                          strokeWidth: 2,
-                          dashLength: 8,
-                          dashSpace: 6,
-                          borderRadius: 24,
-                        ),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 16),
-                          padding: const EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
-                            gradient: const LinearGradient(
-                              colors: [AppColors.mintSoft, AppColors.surface0],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Text('🩺', style: TextStyle(fontSize: 36)),
-                              const SizedBox(width: 14),
-                              const Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Share with your vet', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.ink950)),
-                                    Text('Generate a temporary QR — expires in 24h', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.ink500)),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: AppColors.mint,
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                                child: const Text('Share', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                      _ShareWithVetCard(petName: petName, records: records),
                     ]),
                   );
                 },
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Computed health summary pills ────────────────────────────────────────────
+
+class _HealthSummaryPills extends StatelessWidget {
+  const _HealthSummaryPills({required this.asyncRecords});
+  final AsyncValue<List<MedicalRecord>> asyncRecords;
+
+  @override
+  Widget build(BuildContext context) {
+    return asyncRecords.when(
+      loading: () => const Row(children: [
+        Expanded(child: _HealthPill(icon: '💚', label: 'Records', value: '—')),
+        SizedBox(width: 8),
+        Expanded(child: _HealthPill(icon: '💉', label: 'Vaccines', value: '—')),
+        SizedBox(width: 8),
+        Expanded(child: _HealthPill(icon: '📅', label: 'Next due', value: '—')),
+      ]),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (records) {
+        final totalActive = records.length;
+        final vaccinesDueSoon = records
+            .where((r) => r._inVaccinesSection && r.isExpiringSoon)
+            .isNotEmpty;
+        final vaccineValue = records.where((r) => r._inVaccinesSection).isEmpty
+            ? 'None logged'
+            : (vaccinesDueSoon ? 'Due soon' : 'Up to date');
+        final nextDue = records
+            .where((r) => r.nextDueAt != null)
+            .map((r) => r.nextDueAt!)
+            .fold<DateTime?>(null, (prev, d) => prev == null || d.isBefore(prev) ? d : prev);
+        final nextDueValue = nextDue == null
+            ? 'None set'
+            : '${_shortMonth(nextDue.month)} ${nextDue.day}';
+        return Row(children: [
+          Expanded(child: _HealthPill(
+            icon: '📋', label: 'Records',
+            value: '$totalActive active',
+          )),
+          const SizedBox(width: 8),
+          Expanded(child: _HealthPill(
+            icon: '💉', label: 'Vaccines',
+            value: vaccineValue,
+          )),
+          const SizedBox(width: 8),
+          Expanded(child: _HealthPill(
+            icon: '📅', label: 'Next due',
+            value: nextDueValue,
+          )),
+        ]);
+      },
+    );
+  }
+
+  static String _shortMonth(int m) => const [
+    'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'
+  ][m - 1];
+}
+
+// ── Share with vet card ───────────────────────────────────────────────────────
+
+class _ShareWithVetCard extends StatelessWidget {
+  const _ShareWithVetCard({required this.petName, required this.records});
+  final String petName;
+  final List<MedicalRecord> records;
+
+  void _share() {
+    final buf = StringBuffer();
+    buf.writeln('$petName — Medical Vault Summary');
+    buf.writeln('Generated by Petfolio\n');
+    for (final r in records) {
+      buf.writeln('• ${r.name} (${r.recordType.name})');
+      if (r.administeredAt != null) {
+        buf.writeln('  Given: ${r.administeredAt!.toLocal().toString().split(' ').first}');
+      }
+      if (r.nextDueAt != null) {
+        buf.writeln('  Next due: ${r.nextDueAt!.toLocal().toString().split(' ').first}');
+      }
+    }
+    SharePlus.instance.share(ShareParams(text: buf.toString()));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _share,
+      child: CustomPaint(
+        painter: DashedRectPainter(
+          color: AppColors.mint,
+          strokeWidth: 2,
+          dashLength: 8,
+          dashSpace: 6,
+          borderRadius: 24,
+        ),
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: const LinearGradient(
+              colors: [AppColors.mintSoft, AppColors.surface0],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Row(
+            children: [
+              const Text('🩺', style: TextStyle(fontSize: 36)),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Share with your vet', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.ink950)),
+                    Text('Share a summary of all active records', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.ink500)),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.mint,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: const Text('Share', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -462,8 +548,8 @@ class _MedicalRecordCard extends ConsumerWidget {
         child: const Icon(Icons.archive_outlined, color: Colors.white),
       ),
       confirmDismiss: (_) async {
-        await ref.read(healthVaultControllerProvider.notifier).deactivateRecord(record.id);
-        return false;
+        ref.read(healthVaultControllerProvider.notifier).deactivateRecord(record.id);
+        return true;
       },
       child: Padding(
         padding: const EdgeInsets.all(14),

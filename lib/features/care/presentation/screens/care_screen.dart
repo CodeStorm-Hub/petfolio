@@ -93,6 +93,15 @@ class _CareScreenState extends ConsumerState<CareScreen> {
       return;
     }
     if (tasks != null) {
+      if (tasks.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not generate suggestions. Try again later.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
       RoutineRecommendationSheet.show(context, activePet, tasks,
           isRefresh: hasTasks);
     }

@@ -77,13 +77,20 @@ abstract class CareTask with _$CareTask {
     return appliesToDay(today);
   }
 
-  /// True when the task was due on a previous day and was not completed.
+  /// True when the task was due on any prior day and was not completed.
   bool get isOverdue {
     if (isCompleted) return false;
     if (frequency == CareFrequency.asNeeded) return false;
+    if (frequency == CareFrequency.once) return false;
     final today = DateUtils.dateOnly(DateTime.now().toLocal());
-    final yesterday = today.subtract(const Duration(days: 1));
-    return appliesToDay(yesterday) && completedAt == null;
+    final start = DateUtils.dateOnly(effectiveAnchor.toLocal());
+    // Walk backwards up to 30 days to find a missed occurrence.
+    for (var i = 1; i <= 30; i++) {
+      final day = today.subtract(Duration(days: i));
+      if (day.isBefore(start)) break;
+      if (appliesToDay(day)) return true;
+    }
+    return false;
   }
 
   bool appliesToDay(DateTime dayLocal) {
@@ -98,7 +105,7 @@ abstract class CareTask with _$CareTask {
         if (isCompleted && completedAt != null) {
           return dayLocal == DateUtils.dateOnly(completedAt!.toLocal());
         }
-        return true;
+        return dayLocal == DateUtils.dateOnly(effectiveAnchor.toLocal());
       case CareFrequency.weekly:
         return dayLocal.difference(start).inDays % 7 == 0;
       case CareFrequency.biweekly:
