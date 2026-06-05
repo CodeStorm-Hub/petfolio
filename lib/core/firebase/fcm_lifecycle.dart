@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,7 +21,9 @@ class _FcmLifecycleState extends ConsumerState<FcmLifecycle> {
     ref.listen(authStateProvider, (previous, next) {
       next.whenData((state) async {
         if (state.session != null) {
-          await FcmService.instance.syncToken();
+          if (!kIsWeb) {
+            await FcmService.instance.syncToken();
+          }
         } else {
           await FcmService.instance.clearTokenForSignOut();
         }

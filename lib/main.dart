@@ -116,15 +116,17 @@ class PetfolioApp extends ConsumerWidget {
     final themeMode = ref.watch(themeProvider);
 
     FcmService.instance.updateRouter(router);
-    ref.listen(authStateProvider, (previous, next) {
-      next.whenData((state) async {
-        if (state.session != null) {
-          await FcmService.instance.syncToken();
-        } else {
-          await FcmService.instance.clearTokenForSignOut();
-        }
+    if (!kIsWeb) {
+      ref.listen(authStateProvider, (previous, next) {
+        next.whenData((state) async {
+          if (state.session != null) {
+            await FcmService.instance.syncToken();
+          } else {
+            await FcmService.instance.clearTokenForSignOut();
+          }
+        });
       });
-    });
+    }
 
     return MaterialApp.router(
       title: 'PetFolio',

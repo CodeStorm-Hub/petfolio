@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/firebase/fcm_service.dart';
 import '../../../../core/firebase/firebase_env.dart';
+import '../../../../core/platform/web_push_environment.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
 
@@ -28,6 +29,10 @@ class _WebPushEnableBannerState extends ConsumerState<WebPushEnableBanner> {
     if (_enabled) return const SizedBox.shrink();
 
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final iosBrowserOnly = isAppleMobileWeb && !isIosStandalonePwa;
+    final message = iosBrowserOnly
+        ? 'Install PetFolio to your Home Screen, then open that app to enable push on iPhone.'
+        : 'Enable push notifications for care, matches, and social updates.';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -42,21 +47,23 @@ class _WebPushEnableBannerState extends ConsumerState<WebPushEnableBanner> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Enable push notifications for care, matches, and social updates.',
+                  message,
                   style: TextStyle(fontSize: 13, color: pt.ink700, height: 1.35),
                 ),
               ),
-              const SizedBox(width: 8),
-              _loading
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : TextButton(
-                      onPressed: _enable,
-                      child: const Text('Enable'),
-                    ),
+              if (!iosBrowserOnly) ...[
+                const SizedBox(width: 8),
+                _loading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : TextButton(
+                        onPressed: _enable,
+                        child: const Text('Enable'),
+                      ),
+              ],
             ],
           ),
         ),
@@ -73,15 +80,15 @@ class _WebPushEnableBannerState extends ConsumerState<WebPushEnableBanner> {
 
     setState(() => _loading = true);
     try {
-      final ok = await FcmService.instance.syncToken();
+      final error = await FcmService.instance.syncTokenWithMessage(
+        requestPermission: true,
+      );
       if (!mounted) return;
-      if (ok) {
+      if (error == null) {
         setState(() => _enabled = true);
         AppSnackBar.showSuccess('Push notifications enabled for this browser.');
       } else {
-        AppSnackBar.showError(
-          'Could not enable notifications. Add FIREBASE_VAPID_KEY to .env and rebuild.',
-        );
+        AppSnackBar.showError(error);
       }
     } catch (e) {
       if (mounted) AppSnackBar.showError(e.toString());

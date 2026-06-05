@@ -98,6 +98,17 @@
   </div>
 
   <script>
+    window.__petfolioIsIosStandalonePwa = function () {
+      var isApple =
+        /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (!isApple) return false;
+      if (window.matchMedia('(display-mode: standalone)').matches) return true;
+      return ('standalone' in navigator) && navigator.standalone;
+    };
+  </script>
+
+  <script>
     (function () {
       var isAppleWebKit =
         /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
@@ -123,6 +134,9 @@
 
   <script>
     (function () {
+      var isAppleWebKit =
+        /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       var splashTimeoutMs = 25000;
       var splashTimeout = setTimeout(function () {
         var el = document.getElementById('pwa-loading');
@@ -146,10 +160,12 @@
 
       window.addEventListener('flutter-first-frame', hideSplash);
 
-      window.addEventListener('flutter-first-frame', function () {
-        var placeholder = document.querySelector('flt-semantics-placeholder');
-        if (placeholder) placeholder.click();
-      }, { once: true });
+      if (!isAppleWebKit) {
+        window.addEventListener('flutter-first-frame', function () {
+          var placeholder = document.querySelector('flt-semantics-placeholder');
+          if (placeholder) placeholder.click();
+        }, { once: true });
+      }
 
       function showBootstrapFailure(message) {
         var el = document.getElementById('pwa-loading');
@@ -184,22 +200,29 @@
     (function () {
       if (!('serviceWorker' in navigator)) return;
       var swPath = '/firebase-messaging-sw.js';
-      navigator.serviceWorker.getRegistrations().then(function (regs) {
-        var fcm = regs.filter(function (r) {
-          var url = (r.active && r.active.scriptURL) ||
-            (r.installing && r.installing.scriptURL) ||
-            (r.waiting && r.waiting.scriptURL) || '';
-          return url.indexOf('firebase-messaging-sw.js') !== -1;
+      window.__petfolioFcmSwReady = navigator.serviceWorker
+        .getRegistrations()
+        .then(function (regs) {
+          var fcm = regs.filter(function (r) {
+            var url =
+              (r.active && r.active.scriptURL) ||
+              (r.installing && r.installing.scriptURL) ||
+              (r.waiting && r.waiting.scriptURL) ||
+              '';
+            return url.indexOf('firebase-messaging-sw.js') !== -1;
+          });
+          if (fcm.length > 1) {
+            return Promise.all(
+              fcm.slice(1).map(function (r) { return r.unregister(); }),
+            ).then(function () { return fcm[0]; });
+          }
+          if (fcm.length === 1) return fcm[0];
+          return navigator.serviceWorker.register(swPath);
+        })
+        .then(function () { return navigator.serviceWorker.ready; })
+        .catch(function (e) {
+          console.warn('[PetFolio] FCM service worker setup failed', e);
         });
-        if (fcm.length > 1) {
-          return Promise.all(fcm.slice(1).map(function (r) { return r.unregister(); }))
-            .then(function () { return fcm[0]; });
-        }
-        if (fcm.length === 1) return fcm[0];
-        return navigator.serviceWorker.register(swPath);
-      }).catch(function (e) {
-        console.warn('[PetFolio] FCM service worker setup failed', e);
-      });
     })();
   </script>
   <script src="https://js.stripe.com/v3/" defer id="stripe-js"></script>

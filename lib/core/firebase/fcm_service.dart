@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'fcm_message_router.dart';
 import 'fcm_push_display.dart';
 import 'fcm_token_repository.dart';
+import '../platform/web_push_environment.dart';
 import '../../firebase_options.dart';
 import 'firebase_env.dart';
 
@@ -34,14 +35,15 @@ class FcmService {
     _router = router;
 
     final messaging = FirebaseMessaging.instance;
-    await messaging.setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-
-    await _requestPermission(messaging);
-    await syncToken();
+    if (!kIsWeb) {
+      await messaging.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      await _requestPermission(messaging);
+      await syncToken();
+    }
 
     _tokenRefreshSub?.cancel();
     _tokenRefreshSub = messaging.onTokenRefresh.listen((token) async {
@@ -71,7 +73,7 @@ class FcmService {
     }
   }
 
-  Future<bool> syncToken() async {
+  Future<bool> syncToken({bool requestPermission = false}) async {
     if (!isAvailable) return false;
     if (!FirebaseEnv.canRequestWebToken) return false;
     final session = Supabase.instance.client.auth.currentSession;
@@ -79,6 +81,32 @@ class FcmService {
 
     try {
       final messaging = FirebaseMessaging.instance;
+
+      if (kIsWeb) {
+        if (isAppleMobileWeb && !isIosStandalonePwa) return false;
+        await waitForFcmServiceWorker();
+        if (requestPermission) {
+          final settings = await messaging.requestPermission(
+            alert: true,
+            badge: true,
+            sound: true,
+            provisional: false,
+          );
+          final status = settings.authorizationStatus;
+          if (status != AuthorizationStatus.authorized &&
+              status != AuthorizationStatus.provisional) {
+            return false;
+          }
+        } else {
+          final settings = await messaging.getNotificationSettings();
+          final status = settings.authorizationStatus;
+          if (status != AuthorizationStatus.authorized &&
+              status != AuthorizationStatus.provisional) {
+            return false;
+          }
+        }
+      }
+
       String? token;
       if (kIsWeb) {
         token = await messaging.getToken(vapidKey: FirebaseEnv.vapidKey);
@@ -99,6 +127,34 @@ class FcmService {
       if (kDebugMode) debugPrint('[FCM] syncToken failed: $e');
       return false;
     }
+  }
+
+  Future<String?> syncTokenWithMessage({bool requestPermission = false}) async {
+    if (!FirebaseEnv.canRequestWebToken) {
+      return 'Push is not configured for this build.';
+    }
+    if (!isAvailable) {
+      return 'Push service is still starting. Wait a moment and try again.';
+    }
+    if (Supabase.instance.client.auth.currentSession == null) {
+      return 'Sign in to enable notifications.';
+    }
+    if (kIsWeb && isAppleMobileWeb && !isIosStandalonePwa) {
+      return 'On iPhone, open PetFolio from your Home Screen app to enable push.';
+    }
+
+    final ok = await syncToken(requestPermission: requestPermission);
+    if (ok) return null;
+
+    if (kIsWeb && requestPermission) {
+      final settings =
+          await FirebaseMessaging.instance.getNotificationSettings();
+      if (settings.authorizationStatus == AuthorizationStatus.denied) {
+        return 'Notifications are blocked. Enable them in iPhone Settings → PetFolio.';
+      }
+    }
+
+    return 'Could not register for push. Check connection and try again.';
   }
 
   Future<void> clearTokenForSignOut() async {

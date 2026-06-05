@@ -1701,6 +1701,18 @@ Phase complete — please run (/remember) to save tokens before proceeding to th
 
 Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
 
+## 2026-06-05 — iOS web push + PWA touch freeze
+
+- **Misleading error:** `syncToken()` failed on iPhone Chrome tab; banner blamed missing `FIREBASE_VAPID_KEY` even when key was baked in. iOS web push only works from **Home Screen PWA** (standalone), not in Safari/Chrome tabs.
+- **`FcmService`:** No auto permission/token on web startup; `syncToken(requestPermission: true)` on explicit Enable; `syncTokenWithMessage()` for accurate errors; wait for FCM service worker before `getToken`.
+- **`WebPushEnableBanner`:** iPhone browser tab shows install-to-Home-Screen guidance (no Enable button); PWA shows Enable with real failure messages.
+- **`main.dart` / `fcm_lifecycle`:** Skip auto `syncToken` on web login (was triggering permission without user gesture → iOS freeze).
+- **`web/index.html`:** `__petfolioFcmSwReady` + `__petfolioIsIosStandalonePwa`; skip semantics placeholder click on Apple WebKit.
+
+**Manual:** Confirm GitHub secret `FIREBASE_VAPID_KEY` matches Firebase Console → Cloud Messaging → Web Push certificates. Test push from **Home Screen icon**, not Chrome tab.
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
 ## 2026-06-05 — iOS mobile web PWA startup fix
 
 - **Root cause:** `flutter-first-frame` never fired on iOS WebKit — CanvasKit from gstatic CDN, Flutter service worker vs FCM SW contention, blocking Firebase/FCM before `runApp`, and `COEP`/`COOP` on `.wasm` responses.
