@@ -16,7 +16,7 @@ import 'package:petfolio/features/care/data/models/care_task.dart' as dbtask;
 import 'package:petfolio/features/care/presentation/controllers/care_dashboard_controller.dart';
 import 'package:petfolio/features/care/presentation/utils/care_scheduled_time.dart';
 import 'package:petfolio/features/care/presentation/widgets/routine_recommendation_sheet.dart';
-import 'package:petfolio/features/care/domain/services/care_recommendation_service.dart';
+import 'package:petfolio/features/care/presentation/controllers/ai_routine_controller.dart';
 import 'package:petfolio/features/care/presentation/widgets/gamified_care_ui.dart';
 import 'package:petfolio/features/care/presentation/widgets/web_push_enable_banner.dart';
 
@@ -33,7 +33,8 @@ class CareScreen extends ConsumerStatefulWidget {
 
 class _CareScreenState extends ConsumerState<CareScreen> {
   bool _onboardingSuccessHandled = false;
-  bool _isGeneratingRoutine = false;
+  // Set after onboarding completes; triggers background AI pre-warm in build().
+  bool _shouldAutoTriggerAi = false;
 
   @override
   void initState() {
@@ -62,6 +63,8 @@ class _CareScreenState extends ConsumerState<CareScreen> {
       );
       if (!mounted) return;
       if (GoRouterState.of(context).uri.queryParameters['onboardingComplete'] == '1') {
+        // Mark that we should pre-warm AI as soon as the pet is available.
+        setState(() => _shouldAutoTriggerAi = true);
         context.go('/care');
       }
     });
@@ -71,40 +74,80 @@ class _CareScreenState extends ConsumerState<CareScreen> {
     // careDashboardProvider auto-loads in its build() via Future.microtask.
   }
 
+  // Called by banner tap and post-onboarding auto-trigger.
+  // Uses cache if valid — no redundant API call.
   Future<void> _generateRoutine(Pet activePet) async {
-    setState(() => _isGeneratingRoutine = true);
-    final hasTasks =
-        ref.read(careDashboardProvider).tasks.value?.isNotEmpty == true;
-    List<dbtask.CareTask>? tasks;
-    Object? caught;
-    try {
-      final service = CareRecommendationService();
-      tasks = await service.generateRecommendations(activePet);
-    } catch (e) {
-      caught = e;
-    } finally {
-      if (mounted) setState(() => _isGeneratingRoutine = false);
+    final current = ref.read(aiRoutineProvider);
+
+    // Already generating (e.g. background pre-warm) — nothing to do;
+    // the banner reflects the loading state via aiState.isLoading.
+    if (current.isLoading) return;
+
+    // Results cached and still valid — open sheet immediately.
+    if (current.hasResults && current.isCacheValid(activePet.id)) {
+      if (mounted) await RoutineRecommendationSheet.show(context, activePet);
+      return;
     }
+
+    // Fresh call — generate then show sheet.
+    final existingTasks =
+        ref.read(careDashboardProvider).tasks.value ?? const [];
+    await ref
+        .read(aiRoutineProvider.notifier)
+        .generate(activePet, existingTasks);
     if (!mounted) return;
-    if (caught != null) {
+    final aiState = ref.read(aiRoutineProvider);
+    if (aiState.isConfigError) return;
+    if (aiState.hasError) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to generate routine: $caught')),
+        SnackBar(
+          content: Text(aiState.error ?? 'Could not generate suggestions.'),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
-    if (tasks != null) {
-      if (tasks.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not generate suggestions. Try again later.'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        return;
-      }
-      RoutineRecommendationSheet.show(context, activePet, tasks,
-          isRefresh: hasTasks);
+    if (aiState.hasResults) {
+      // ignore: use_build_context_synchronously
+      await RoutineRecommendationSheet.show(context, activePet);
     }
+  }
+
+  // Called by the compact refresh icon — always discards cache and regenerates.
+  Future<void> _forceRefreshRoutine(Pet activePet) async {
+    final existingTasks =
+        ref.read(careDashboardProvider).tasks.value ?? const [];
+    await ref
+        .read(aiRoutineProvider.notifier)
+        .forceRefresh(activePet, existingTasks);
+    if (!mounted) return;
+    final aiState = ref.read(aiRoutineProvider);
+    if (aiState.isConfigError) return;
+    if (aiState.hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(aiState.error ?? 'Could not generate suggestions.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    if (aiState.hasResults) {
+      // ignore: use_build_context_synchronously
+      await RoutineRecommendationSheet.show(context, activePet);
+    }
+  }
+
+  // Silently pre-warms AI generation in background (no sheet shown).
+  // Called once after onboarding; clears the flag immediately to prevent
+  // re-triggering on subsequent build() calls.
+  void _autoPrewarmAi(Pet activePet) {
+    _shouldAutoTriggerAi = false;
+    final existingTasks =
+        ref.read(careDashboardProvider).tasks.value ?? const [];
+    ref
+        .read(aiRoutineProvider.notifier)
+        .generate(activePet, existingTasks);
   }
 
   @override
@@ -147,7 +190,17 @@ class _CareScreenState extends ConsumerState<CareScreen> {
     }
 
     final dashboard = ref.watch(careDashboardProvider);
+    final aiState = ref.watch(aiRoutineProvider);
     final species = activePet.speciesEnum;
+
+    // Post-onboarding: silently pre-warm AI as soon as pet is confirmed
+    // available. We do this in a postFrameCallback so it doesn't run during
+    // build, and only when the notifier is fully idle.
+    if (_shouldAutoTriggerAi && !aiState.isLoading && !aiState.hasResults) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) { if (mounted) _autoPrewarmAi(activePet); },
+      );
+    }
 
     void openAddSheet() => showModalBottomSheet<void>(
           context: context,
@@ -213,18 +266,21 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                   _DoneCounter(tasks: dashboard.tasks.value ?? []),
                                   const SizedBox(width: 6),
                                   // AI Routine refresh — 44×44 accessible touch target
-                                  GestureDetector(
-                                    onTap: _isGeneratingRoutine ? null : () => _generateRoutine(activePet),
-                                    child: Tooltip(
-                                      message: 'Refresh AI Routine',
+                                  Tooltip(
+                                    message: aiState.isLoading
+                                        ? 'Generating AI Routine…'
+                                        : 'Refresh AI Routine',
+                                    child: InkWell(
+                                      onTap: aiState.isLoading
+                                          ? null
+                                          : () => _forceRefreshRoutine(activePet),
+                                      borderRadius: BorderRadius.circular(22),
                                       child: AnimatedContainer(
                                         duration: PetfolioThemeExtension.durationSm,
                                         width: 44,
                                         height: 44,
                                         decoration: BoxDecoration(
-                                          color: _isGeneratingRoutine
-                                              ? AppColors.lilacSoft
-                                              : AppColors.lilacSoft,
+                                          color: AppColors.lilacSoft,
                                           shape: BoxShape.circle,
                                           border: Border.all(
                                             color: AppColors.lilac.withAlpha(50),
@@ -232,7 +288,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                           ),
                                         ),
                                         alignment: Alignment.center,
-                                        child: _isGeneratingRoutine
+                                        child: aiState.isLoading
                                             ? const SizedBox(
                                                 width: 18,
                                                 height: 18,
@@ -252,12 +308,17 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                 ],
                               ),
                             ),
+                            // ── Config error — persistent banner ──────────
+                            if (aiState.isConfigError)
+                              _AiConfigErrorBanner(),
                             // ── AI empty-state full banner ─────────────────
-                            if (dashboard.tasks.value?.isEmpty == true)
+                            if (dashboard.tasks.value?.isEmpty == true &&
+                                !aiState.isConfigError)
                               _AiRoutineBanner(
                                 activePetId: activePet.id,
                                 hasNoTasks: true,
-                                isGenerating: _isGeneratingRoutine,
+                                isGenerating: aiState.isLoading,
+                                hasResults: aiState.hasResults,
                                 onTap: () => _generateRoutine(activePet),
                               ),
                             _DailyTasksDashboard(
@@ -316,38 +377,59 @@ class _AiRoutineBanner extends StatelessWidget {
     required this.activePetId,
     required this.hasNoTasks,
     required this.isGenerating,
+    required this.hasResults,
     required this.onTap,
   });
 
   final String activePetId;
   final bool hasNoTasks;
   final bool isGenerating;
+  final bool hasResults;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    // When tasks exist, show only the compact refresh icon (moved to section header).
-    // When there are NO tasks at all, show the full empty-state banner.
     if (!hasNoTasks) return const SizedBox.shrink();
+
+    final String title;
+    final String subtitle;
+    if (isGenerating) {
+      title = 'Preparing your routine…';
+      subtitle = 'Analysing ${activePetId.isNotEmpty ? "your pet's" : "your"} profile, health records & meds';
+    } else if (hasResults) {
+      title = 'Your AI Routine is Ready!';
+      subtitle = 'Tap to review and add personalised care tasks';
+    } else {
+      title = 'Generate AI Routine';
+      subtitle = 'Get daily, weekly & monthly tasks tailored for your pet';
+    }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         onTap: isGenerating ? null : onTap,
         borderRadius: BorderRadius.circular(16),
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.lilacSoft,
+            color: hasResults
+                ? AppColors.lilac.withAlpha(30)
+                : AppColors.lilacSoft,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.lilac.withAlpha(60)),
+            border: Border.all(
+              color: hasResults
+                  ? AppColors.lilac.withAlpha(120)
+                  : AppColors.lilac.withAlpha(60),
+              width: hasResults ? 1.5 : 1,
+            ),
           ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  color: AppColors.lilac,
+                decoration: BoxDecoration(
+                  color: hasResults ? AppColors.lilac : AppColors.lilac,
                   shape: BoxShape.circle,
                 ),
                 child: isGenerating
@@ -357,7 +439,13 @@ class _AiRoutineBanner extends StatelessWidget {
                         child: CircularProgressIndicator(
                             strokeWidth: 2, color: Colors.white),
                       )
-                    : const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                    : Icon(
+                        hasResults
+                            ? Icons.check_circle_outline_rounded
+                            : Icons.auto_awesome,
+                        color: Colors.white,
+                        size: 20,
+                      ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -365,7 +453,7 @@ class _AiRoutineBanner extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isGenerating ? 'Generating...' : 'Generate AI Routine',
+                      title,
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         color: AppColors.lilac700,
@@ -374,9 +462,7 @@ class _AiRoutineBanner extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      isGenerating
-                          ? 'Building personalized care plan...'
-                          : 'Get daily, weekly & monthly tasks tailored for your pet',
+                      subtitle,
                       style: const TextStyle(
                         color: AppColors.lilac700,
                         fontSize: 13,
@@ -389,6 +475,46 @@ class _AiRoutineBanner extends StatelessWidget {
                 const Icon(Icons.chevron_right, color: AppColors.lilac),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI Config Error Banner (missing NVIDIA key)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _AiConfigErrorBanner extends StatelessWidget {
+  const _AiConfigErrorBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+              color: theme.colorScheme.error.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.key_off_rounded,
+                size: 18, color: theme.colorScheme.error),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'AI suggestions require an NVIDIA API key. '
+                'Add NVIDIA_API_KEY to your .env and rebuild.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onErrorContainer),
+              ),
+            ),
+          ],
         ),
       ),
     );

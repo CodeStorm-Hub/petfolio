@@ -1713,6 +1713,60 @@ Phase complete — please run (/remember) to save tokens before proceeding to th
 
 Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
 
+## 2026-06-06 — Care Feature Bug Fixes + AI Routine Overhaul
+
+### Care Task Completion / Undo Fixes
+- Added `task_id UUID` column to `care_logs` with partial unique indexes; dropped old `care_type`-only unique index
+- Updated `toggle_care_task` RPC: writes `task_id` on complete; deletes by `task_id` on undo
+- Added backward-compat DELETE for null-task_id legacy entries (undo now works for rows created before migration)
+- Added lazy migration UPDATE: completing a task backfills `task_id` on any existing null-task_id log
+- Fixed `_buildTasksFromSnapshotData`: matches by `task_id` first, falls back to `care_type` only when unambiguous (exactly 1 task of that type today)
+- Fixed `_computeWeekGoalHitFromSnapshotData` with same ambiguity-safe logic
+- DB cleanup migration: removed duplicate `care_tasks` rows across all pets
+
+### AI Routine Recommendations — Full Overhaul
+
+**New `ai_routine_controller.dart`**
+- `AiSuggestion` model: wraps `CareTask` + `isDuplicate` + `conflictTitle` + `isSelected` (default `false` — opt-in)
+- `AiRoutineState` enum: `idle | loading | success | error`
+- `AiRoutineNotifier`: 24h per-pet cache, concurrent-call guard (`isLoading` early return), `generate()` / `forceRefresh()` / `invalidateCache()`
+- Fuzzy duplicate detection: exact title → 80% similarity → same task-type + frequency bucket
+
+**`care_recommendation_service.dart`**
+- Added `once` to guided JSON schema and `_parseFrequency`
+- Fixed `defaultValue: ''` on `String.fromEnvironment` (was missing)
+- Improved config error message (actionable: add key + rebuild)
+
+**`routine_recommendation_sheet.dart`** (rewritten)
+- Opt-in selection — all cards start deselected
+- "Already in routine" greyed badge on duplicate cards + conflict title footnote
+- Fixed frequency grouping: `asNeeded` → "As Needed" group (was "Daily"); `twiceDaily` → "Twice Daily"; `once` → "One-Time"
+- Fixed summary chips: separate chip per frequency (was conflating `twiceDaily` + `asNeeded` into daily)
+- `PopScope` confirm-on-dismiss dialog when tasks are selected
+- Retry button on save failure via `AppSnackBar.showError(onRetry:)`
+- Cache invalidated after save so next open re-fetches against updated task list
+
+**`care_screen.dart`**
+- Removed direct `CareRecommendationService()` instantiation — notifier owns the service via `careRecommendationServiceProvider`
+- `_generateRoutine`: 3-case handler (cached → instant sheet, already loading → no-op, fresh → generate + sheet)
+- `_forceRefreshRoutine`: properly `await`s `forceRefresh()` before showing sheet (fixed race condition)
+- `_autoPrewarmAi`: silently starts background generation post-onboarding (no sheet shown)
+- `_shouldAutoTriggerAi` flag: set on `onboardingComplete=1`, triggers background pre-warm once pet is available
+- `GestureDetector` → `InkWell` with ripple on AI icon button
+- Config error → permanent `_AiConfigErrorBanner` widget (not transient snackbar)
+- `_AiRoutineBanner` now has 3 states: generating (spinner + "Preparing…") / ready (✓ "Your AI Routine is Ready!") / idle
+
+**`app_snack_bar.dart`**
+- `showError` gains optional `onRetry: VoidCallback?` → shows "Retry" `SnackBarAction`
+
+### Graphify Knowledge Graph Rebuilt
+- Rebuilt on `lib/` (307 Dart files) → 4,126 nodes, 6,305 edges, 208 communities
+- `activePetControllerProvider` identified as highest god node (63 edges); blast radius traced: 14 screens, 9 controllers, 4 widgets
+
+**Next step:** Test AI routine flow end-to-end (onboarding → auto pre-warm → banner ready state → sheet → save).
+
+---
+
 ## 2026-06-05 — iOS mobile web PWA startup fix
 
 - **Root cause:** `flutter-first-frame` never fired on iOS WebKit — CanvasKit from gstatic CDN, Flutter service worker vs FCM SW contention, blocking Firebase/FCM before `runApp`, and `COEP`/`COOP` on `.wasm` responses.

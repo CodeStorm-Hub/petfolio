@@ -82,9 +82,16 @@ abstract class CareTask with _$CareTask {
     if (isCompleted) return false;
     if (frequency == CareFrequency.asNeeded) return false;
     if (frequency == CareFrequency.once) return false;
+    // Weekly and biweekly tasks are visible every day within their period window
+    // (see appliesToDay below). Checking past days would flag them as overdue
+    // every single day — incorrect. Period-level completion tracking is handled
+    // via care_logs; the model cannot know about past-window logs here.
+    if (frequency == CareFrequency.weekly || frequency == CareFrequency.biweekly) {
+      return false;
+    }
     final today = DateUtils.dateOnly(DateTime.now().toLocal());
     final start = DateUtils.dateOnly(effectiveAnchor.toLocal());
-    // Walk backwards up to 30 days to find a missed occurrence.
+    // Walk backwards up to 30 days to find a missed daily/monthly occurrence.
     for (var i = 1; i <= 30; i++) {
       final day = today.subtract(Duration(days: i));
       if (day.isBefore(start)) break;
@@ -107,9 +114,14 @@ abstract class CareTask with _$CareTask {
         }
         return dayLocal == DateUtils.dateOnly(effectiveAnchor.toLocal());
       case CareFrequency.weekly:
-        return dayLocal.difference(start).inDays % 7 == 0;
+        // Show on ANY day within the current 7-day window from the anchor.
+        // Previously this was `% 7 == 0` (anchor day-of-week only), which
+        // made tasks invisible on days other than the exact anchor weekday.
+        // Users should be able to complete weekly tasks on any convenient day.
+        return true;
       case CareFrequency.biweekly:
-        return dayLocal.difference(start).inDays % 14 == 0;
+        // Same rationale as weekly — visible any day in the 14-day window.
+        return true;
       case CareFrequency.monthly:
         final lastDay = DateTime(dayLocal.year, dayLocal.month + 1, 0).day;
         final anchor = start.day > lastDay ? lastDay : start.day;

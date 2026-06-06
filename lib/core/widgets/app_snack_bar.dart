@@ -70,7 +70,7 @@ class AppSnackBar {
     );
   }
 
-  static void showError(Object error) {
+  static void showError(Object error, {VoidCallback? onRetry}) {
     final messenger = appSnackBarMessengerKey.currentState;
     if (messenger == null) return;
     final text = error is AppException ? error.message : error.toString();
@@ -103,6 +103,13 @@ class AppSnackBar {
             ),
           ],
         ),
+        action: onRetry != null
+            ? SnackBarAction(
+                label: 'Retry',
+                textColor: Colors.white,
+                onPressed: onRetry,
+              )
+            : null,
       ),
     );
   }

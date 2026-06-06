@@ -300,6 +300,12 @@ class PetCareRepository {
               '|${(r['title'] as String).toLowerCase().trim()}')
           .toSet();
 
+      // Today's local date — used to anchor new tasks so they always
+      // appear on the correct day of week / month regardless of the UTC
+      // offset between the client and the Supabase server.
+      final todayLocal = DateUtils.dateOnly(DateTime.now().toLocal());
+      final todayStr = _fmtYmd(todayLocal);
+
       final payloads = tasks.where((t) {
         final key =
             '${_taskTypeToLogCareType(t.taskType)}'
@@ -310,6 +316,13 @@ class PetCareRepository {
         final payload = Map<String, dynamic>.from(task.toJson())
           ..remove('id')
           ..remove('category_icon');
+        // Always pin anchor_date to today (local). Without this, the DB
+        // stores NULL and effectiveAnchor falls back to created_at UTC,
+        // which may differ by a day in positive-offset timezones — causing
+        // weekly tasks to only appear on the wrong day of the week.
+        if (payload['anchor_date'] == null) {
+          payload['anchor_date'] = todayStr;
+        }
         if (isAiSuggested) payload['is_ai_suggested'] = true;
         return payload;
       }).toList();

@@ -26,7 +26,7 @@ class CareRecommendationException implements Exception {
 class CareRecommendationService {
   final _uuid = const Uuid();
 
-  static const _apiKey = String.fromEnvironment('NVIDIA_API_KEY');
+  static const _apiKey = String.fromEnvironment('NVIDIA_API_KEY', defaultValue: '');
   static const _url = 'https://integrate.api.nvidia.com/v1/chat/completions';
 
   static const _guidedSchema = {
@@ -67,7 +67,8 @@ class CareRecommendationService {
             'weekly',
             'biweekly',
             'monthly',
-            'asNeeded'
+            'asNeeded',
+            'once',
           ]
         },
         'scheduledTime': {'type': ['string', 'null']},
@@ -80,12 +81,18 @@ class CareRecommendationService {
     'maxItems': 8
   };
 
-  Future<List<CareTask>> generateRecommendations(Pet pet) async {
-    // Guard before any network calls so we don't waste 3 Supabase round-trips
-    // on a build that has no NVIDIA key configured.
+  /// Returns the AI-suggested tasks **and** the set of normalised existing
+  /// task titles fetched from the DB. Callers use the existing-title set for
+  /// duplicate detection against ALL pet tasks (not just today's view).
+  Future<({List<CareTask> suggestions, Set<String> existingNormalised})>
+      generateRecommendations(Pet pet) async {
+    // Guard before any network calls — avoids wasting Supabase round-trips
+    // on builds with no NVIDIA key. Web path uses Edge Function (no key needed
+    // client-side), but mobile requires the key to be compile-time injected.
     if (!kIsWeb && _apiKey.isEmpty) {
       throw const CareRecommendationException(
-        'AI routine suggestions are not configured on this build.',
+        'AI routine suggestions require an NVIDIA API key. '
+        'Set NVIDIA_API_KEY in your .env file and rebuild.',
         isConfigError: true,
       );
     }
@@ -125,6 +132,15 @@ class CareRecommendationService {
     final existingTasks = (results[2] as List)
         .map((r) => {'type': r['task_type'] as String?, 'title': r['title'] as String?})
         .toList();
+
+    // Build a normalised set of ALL existing task titles for the pet.
+    // Used by AiRoutineNotifier to detect duplicates against the full task
+    // list — not just today's filtered view, which misses weekly/monthly tasks
+    // that don't apply today.
+    final existingNormalised = existingTasks
+        .map((t) => _normaliseTitle(t['title'] ?? ''))
+        .where((s) => s.isNotEmpty)
+        .toSet();
 
     final prompt = _buildPrompt(
       pet: pet,
@@ -250,7 +266,7 @@ class CareRecommendationService {
           updatedAt: now,
         ));
       }
-      return tasks;
+      return (suggestions: tasks, existingNormalised: existingNormalised);
     } on CareRecommendationException {
       rethrow;
     } catch (e) {
@@ -260,6 +276,9 @@ class CareRecommendationService {
       );
     }
   }
+
+  static String _normaliseTitle(String s) =>
+      s.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
 
   static String _buildPrompt({
     required Pet pet,
@@ -341,13 +360,13 @@ class CareRecommendationService {
     buf.writeln(
         'title: short descriptive name like "Morning Feeding", "Evening Walk", "Weekly Grooming" — NOT generic');
     buf.writeln(
-        'frequency must be one of: daily, twiceDaily, weekly, biweekly, monthly, asNeeded');
+        'frequency must be one of: daily, twiceDaily, weekly, biweekly, monthly, asNeeded, once');
     buf.writeln('scheduledTime: "HH:MM" string or null');
     buf.writeln('gamificationPoints: integer 5-30');
     buf.writeln(
         'notes: 1-2 sentences specific to this pet\'s breed, age, and activity level');
     buf.writeln();
-    buf.writeln('Generate 4-8 tasks. Mix: 2-3 daily, 1-2 weekly, 1-2 monthly.');
+    buf.writeln('Generate 4-8 tasks. Mix: 2-3 daily, 1-2 weekly, 1-2 monthly. Use "once" for one-off tasks like a vet check-up.');
     buf.writeln('Return ONLY the JSON array. No markdown, no extra text.');
 
     return buf.toString();
@@ -517,6 +536,11 @@ class CareRecommendationService {
       case 'occasionally':
       case 'asrequired':
         return CareFrequency.asNeeded;
+      case 'once':
+      case 'onetime':
+      case 'onetimeonly':
+      case 'single':
+        return CareFrequency.once;
       default:
         return CareFrequency.daily;
     }
