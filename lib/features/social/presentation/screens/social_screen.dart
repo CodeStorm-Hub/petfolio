@@ -1130,6 +1130,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                         ? CachedNetworkImage(
                             imageUrl: widget.post.imageUrls.first,
                             fit: BoxFit.cover,
+                            cacheManager: petfolioWebImageCacheManager(),
                             memCacheWidth: networkImageMemCacheWidth(
                               context,
                               MediaQuery.sizeOf(context).width - 28,

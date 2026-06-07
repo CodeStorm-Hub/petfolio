@@ -61,11 +61,6 @@ final subscribableProductsProvider = Provider<List<Product>>((ref) {
   }).toList();
 });
 
-final marketplaceProductsLoadingMoreProvider = Provider<bool>((ref) {
-  final notifier = ref.watch(productListProvider.notifier);
-  return notifier.isLoadingMore;
-});
-
 class ProductListNotifier extends AsyncNotifier<List<Product>> {
   static const int _pageSize = 20;
 

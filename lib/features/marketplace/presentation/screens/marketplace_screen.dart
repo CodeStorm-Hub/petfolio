@@ -474,7 +474,7 @@ class _CategoryChips extends StatelessWidget {
 // Shop Body
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _ShopBody extends ConsumerWidget {
+class _ShopBody extends ConsumerStatefulWidget {
   const _ShopBody({
     required this.selectedCat,
     required this.onProductTap,
@@ -486,7 +486,41 @@ class _ShopBody extends ConsumerWidget {
   final Function(Product, Rect?) onAdd;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_ShopBody> createState() => _ShopBodyState();
+}
+
+class _ShopBodyState extends ConsumerState<_ShopBody> {
+  late final ScrollController _scrollController;
+  bool _loadingMore = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController()..addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onScroll() async {
+    if (!_scrollController.hasClients || _loadingMore) return;
+    final pos = _scrollController.position;
+    if (pos.maxScrollExtent <= 0) return;
+    if (pos.pixels < pos.maxScrollExtent - 400) return;
+
+    final notifier = ref.read(productListProvider.notifier);
+    if (!notifier.hasMore) return;
+
+    setState(() => _loadingMore = true);
+    await notifier.loadMore();
+    if (mounted) setState(() => _loadingMore = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final productsAsync = ref.watch(productListProvider);
 
     return productsAsync.when(
@@ -501,13 +535,16 @@ class _ShopBody extends ConsumerWidget {
         ),
       ),
       data: (_) {
-        final filtered = ref.watch(filteredProductsProvider(selectedCat));
-        
+        final filtered = ref.watch(filteredProductsProvider(widget.selectedCat));
+
         return CustomScrollView(
+          controller: _scrollController,
           slivers: [
-            if (selectedCat == ProductCategory.all)
-              const SliverToBoxAdapter(child: _HeroBanner()),
-            if (selectedCat == ProductCategory.all)
+            if (widget.selectedCat == ProductCategory.all)
+              const SliverToBoxAdapter(
+                child: RepaintBoundary(child: _HeroBanner()),
+              ),
+            if (widget.selectedCat == ProductCategory.all)
               const _DeliveryStrip(),
 
             SliverToBoxAdapter(
@@ -516,22 +553,43 @@ class _ShopBody extends ConsumerWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(selectedCat == ProductCategory.all ? 'Trending in your pack' : selectedCat.label, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950)),
-                    Text('${filtered.length}+ items', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink500)),
+                    Text(
+                      widget.selectedCat == ProductCategory.all
+                          ? 'Trending in your pack'
+                          : widget.selectedCat.label,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: Theme.of(context)
+                            .extension<PetfolioThemeExtension>()!
+                            .ink950,
+                      ),
+                    ),
+                    Text(
+                      '${filtered.length}+ items',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context)
+                            .extension<PetfolioThemeExtension>()!
+                            .ink500,
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-            
+
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
               sliver: SliverGrid.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: MediaQuery.sizeOf(context).width >= ResponsiveLayout.tabletMax
-                      ? 4
-                      : MediaQuery.sizeOf(context).width >= ResponsiveLayout.mobileMax
-                          ? 3
-                          : 2,
+                  crossAxisCount:
+                      MediaQuery.sizeOf(context).width >= ResponsiveLayout.tabletMax
+                          ? 4
+                          : MediaQuery.sizeOf(context).width >= ResponsiveLayout.mobileMax
+                              ? 3
+                              : 2,
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                   childAspectRatio: 0.64,
@@ -540,12 +598,21 @@ class _ShopBody extends ConsumerWidget {
                 itemBuilder: (_, i) => RepaintBoundary(
                   child: _NewProductTile(
                     product: filtered[i],
-                    onTap: () => onProductTap(filtered[i]),
-                    onAdd: onAdd,
+                    onTap: () => widget.onProductTap(filtered[i]),
+                    onAdd: widget.onAdd,
                   ),
                 ),
               ),
             ),
+            if (_loadingMore)
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(
+                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+                  ),
+                ),
+              ),
           ],
         );
       },
