@@ -51,6 +51,30 @@
 - **Error UI Handling**: For optimistic UI actions (like toggling care tasks or seller onboarding), show errors using `AppSnackBar.showError` (via `appSnackBarMessengerKey` on `MaterialApp.router`). Do not put long-lived state providers in `AsyncValue.error` states for transient/action-level failures.
 - **Web Safe Target**: Marionette execution runs exclusively in debug builds via conditional compiler imports (`marionette_debug_gate_stub.dart` vs `_io.dart`) to keep `main.dart` from importing `dart:io` on web targets.
 
+## 2026-06-06 — Care Screen: CoverFlow 3-D Task Carousel
+
+**Files changed**: `lib/features/care/presentation/screens/care_screen.dart`
+
+- **Removed widgets**: `_DoneCollapseRow`, `_TaskGrid`, `_CareTaskGridTile`, `_CareTaskGridTileState` — the "Done (N) ▾" collapse pill and 4-column Streaks grid are gone entirely.
+- **Removed state**: `_showDone` field from `_DailyTasksDashboardState`; `onSelect` simplified.
+- **New `_CoverFlowCarousel`** (`ConsumerStatefulWidget`):
+  - **Task ordering**: completed left · due-today pending center · remaining pending right. `initialPage` = first pending task.
+  - **3-D CoverFlow**: `Transform.translate` → `Transform.scale` → `Transform(Matrix4..setEntry(3,2,0.0012)..rotateY(rotY))`. No deprecated `Matrix4.translate/scale`.
+  - **Z-order**: stack entries sorted by distance from `_page` so center card always renders on top.
+  - **Smooth animation**: single `AnimationController` + `Animation<double>` with `_onTick` listener drives fractional `_page`. `_goTo(i)` fires a new `Tween` per navigation.
+  - **Swipe + tap**: `onHorizontalDragEnd` (260 px/s threshold); side cards tappable to focus.
+  - **Live sync**: `didUpdateWidget` patches `_ordered` by task ID — order stable during session.
+- **New `_CoverFlowCard`** (198×214 px, radius 28): icon circle 64 px, title, sublabel, XP chip, animated check button, long-press context menu. Done = tinted bg + color border + strikethrough. Due = poppy border + red badge.
+- **New `_XpBurst`**: fly-up "+XP ⭐" with `TweenSequence` opacity envelope, 1.2 s auto-dispose.
+- **New `_NavArrow`**: animated chevron pill buttons, grayed at list ends.
+- **Dot indicators**: active dot expands to 22 px; completed dots mint; capped at 12.
+- **Helpers**: `_cfColor`, `_cfEmoji`, `_cfSublabel` as file-scope private functions.
+- `flutter analyze` — **No issues found.**
+
+**Next step:** Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-06-01 — Care Screen Redesign (from PetFolio Redesign/Care Redesign.html)
 
 **Files changed**: `gamified_care_ui.dart`, `care_screen.dart`

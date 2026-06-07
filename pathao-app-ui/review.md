@@ -51,11 +51,8 @@ Pathao is a leading on-demand service platform in Bangladesh, offering ride-hail
 *   **Description**: A bottom-sheet catalog triggered by tapping "All" on the Home grid, displaying all services in a detailed double-column layout. Tapping "See More" expands the menu to show additional services like Pharma and Top-Up.
 *   **Analysis**: Provides clean separation between ride/logistics categories and digital commerce categories.
 *   **Screenshots**:
-    ```carousel
-    ![All Services Screen](12_all_services_screen.png)
-    <!-- slide -->
-    ![All Services Screen Expanded](12_all_services_screen_expanded.png)
-    ```
+    *   ![All Services Screen](12_all_services_screen.png)
+    *   ![All Services Screen Expanded](12_all_services_screen_expanded.png)
 
 ---
 
@@ -66,44 +63,32 @@ Pathao is a leading on-demand service platform in Bangladesh, offering ride-hail
 *   **Description**: Tabbing into "Offers" opens a promo code and discount card list.
 *   **Analysis**: Uses copyable text fields for promotional codes. Promo cards feature red tags to emphasize discount ratios.
 *   **Screenshots**:
-    ```carousel
-    ![Offers Screen](03_offers_screen.png)
-    <!-- slide -->
-    ![Offers Screen Bottom](03_offers_screen_bottom.png)
-    ```
+    *   ![Offers Screen](03_offers_screen.png)
+    *   ![Offers Screen Bottom](03_offers_screen_bottom.png)
 
 #### 5. Activity Screen (Top & Bottom)
 *   **File Names**: `04_activity_screen.png` & `04_activity_screen_bottom.png`
 *   **Description**: Displays booking histories categorized by service type.
 *   **Analysis**: Clean chronological log with visual icons denoting transaction success or cancellation status.
 *   **Screenshots**:
-    ```carousel
-    ![Activity Screen](04_activity_screen.png)
-    <!-- slide -->
-    ![Activity Screen Bottom](04_activity_screen_bottom.png)
-    ```
+    *   ![Activity Screen](04_activity_screen.png)
+    *   ![Activity Screen Bottom](04_activity_screen_bottom.png)
 
 #### 6. Inbox Screen (Direct & Promotions)
 *   **File Names**: `05_inbox_screen.png` & `05_inbox_promotions.png`
 *   **Description**: Categorized messages panel divided into "Messages" (empty state) and "Promotions" (discount announcements).
 *   **Analysis**: Clean empty states with custom illustrations.
 *   **Screenshots**:
-    ```carousel
-    ![Inbox Screen](05_inbox_screen.png)
-    <!-- slide -->
-    ![Inbox Promotions](05_inbox_promotions.png)
-    ```
+    *   ![Inbox Screen](05_inbox_screen.png)
+    *   ![Inbox Promotions](05_inbox_promotions.png)
 
 #### 7. Profile & Settings Screen (Top & Bottom)
 *   **File Names**: `06_profile_screen.png` & `06_profile_screen_bottom.png`
 *   **Description**: Displays user account profile tier, ratings, active wallet, points balance, and a list of preference settings.
 *   **Analysis**: Profile information is grouped nicely with a progression progress bar for loyalty tiers.
 *   **Screenshots**:
-    ```carousel
-    ![Profile Screen](06_profile_screen.png)
-    <!-- slide -->
-    ![Profile Screen Bottom](06_profile_screen_bottom.png)
-    ```
+    *   ![Profile Screen](06_profile_screen.png)
+    *   ![Profile Screen Bottom](06_profile_screen_bottom.png)
 
 ---
 
@@ -114,13 +99,9 @@ Pathao is a leading on-demand service platform in Bangladesh, offering ride-hail
 *   **Description**: Map interfaces for Ride Booking across different vehicle classes.
 *   **Analysis**: High layout consistency. The map interface, search bar placements, and location pins are virtually identical, easing user cognitive load during ride transitions.
 *   **Screenshots**:
-    ```carousel
-    ![Bike Booking Screen](07_bike_booking_screen.png)
-    <!-- slide -->
-    ![Car Booking Screen](08_car_booking_screen.png)
-    <!-- slide -->
-    ![CNG Booking Screen](11_cng_booking_screen.png)
-    ```
+    *   ![Bike Booking Screen](07_bike_booking_screen.png)
+    *   ![Car Booking Screen](08_car_booking_screen.png)
+    *   ![CNG Booking Screen](11_cng_booking_screen.png)
 
 ---
 
@@ -133,13 +114,9 @@ Pathao is a leading on-demand service platform in Bangladesh, offering ride-hail
     *   **Empty State**: Shows a "No Restaurant Found" illustration. It is a dead-end screen with a "Change location" CTA at the very bottom, but lacks inline address recommendations or search support.
     *   **Populated State**: Tapping the address field at the top and selecting "Home" immediately populates the page. The layout uses a horizontal scrollable category bar (Biryani, Indian, Fast Food, Pizza, Burger) with realistic food icons, followed by promo banners ("Delicious Deals", "Tong") and a vertical list of restaurants ("Dhaba - Mirpur", "Rabbani Hotel & Restaurant") containing tags for food genres, ratings, distance, and discounts.
 *   **Screenshots**:
-    ```carousel
-    ![Food Empty State](09_food_main_screen.png)
-    <!-- slide -->
-    ![Food Populated Home Address](09_food_main_screen_home_address.png)
-    <!-- slide -->
-    ![Food Populated Bottom Scrolled](09_food_main_screen_home_address_bottom.png)
-    ```
+    *   ![Food Empty State](09_food_main_screen.png)
+    *   ![Food Populated Home Address](09_food_main_screen_home_address.png)
+    *   ![Food Populated Bottom Scrolled](09_food_main_screen_home_address_bottom.png)
 
 #### 10. Parcel Onboarding Screen
 *   **File Name**: `10_parcel_screen.png`
@@ -153,11 +130,8 @@ Pathao is a leading on-demand service platform in Bangladesh, offering ride-hail
 *   **Description**: Focuses on hourly and long-term car rentals, complete with vehicle class choices and FAQs.
 *   **Analysis**: Well-designed service landing page that clarifies rental packages (hourly, airport, intercity).
 *   **Screenshots**:
-    ```carousel
-    ![Rentals Screen](14_rentals_screen.png)
-    <!-- slide -->
-    ![Rentals Screen Bottom](14_rentals_screen_bottom.png)
-    ```
+    *   ![Rentals Screen](14_rentals_screen.png)
+    *   ![Rentals Screen Bottom](14_rentals_screen_bottom.png)
 
 #### 12. Courier Screen (Top & Bottom View)
 *   **File Names**: `15_courier_screen.png`
@@ -174,13 +148,9 @@ Pathao is a leading on-demand service platform in Bangladesh, offering ride-hail
 *   **Description**: The newly introduced Pathao Shop e-commerce platform. Walks user through onboarding values, then shows a vibrant grid of category segments (Fashion, Grocery, Electronics) and horizontal scrolls of promotional products.
 *   **Analysis**: The shop interface adopts a modern, clean retail visual hierarchy. Product cards display clear prices, discounts, and high-quality product imagery.
 *   **Screenshots**:
-    ```carousel
-    ![Shop Intro Screen](13_shop_intro_screen.png)
-    <!-- slide -->
-    ![Shop Main Screen](13_shop_screen.png)
-    <!-- slide -->
-    ![Shop Scrolled Catalog](13_shop_screen_bottom.png)
-    ```
+    *   ![Shop Intro Screen](13_shop_intro_screen.png)
+    *   ![Shop Main Screen](13_shop_screen.png)
+    *   ![Shop Scrolled Catalog](13_shop_screen_bottom.png)
 
 #### 14. E-Commerce Checkout Flow (Product Details, Customization, Address Form, Confirmed Checkout)
 *   **File Names**: 
@@ -196,25 +166,15 @@ Pathao is a leading on-demand service platform in Bangladesh, offering ride-hail
     - **Product Details & Customization**: Clean, clear product listing. The variant selection sheet slides up smoothly. The "Buy Now" CTA initiates variant selections.
     - **Checkout Flow**: Initial state displays a disabled "Place Order" button due to missing address info. The address setup flow maps coordinates, street addresses, and city dropdown selections. The receipt calculates subtotal, discounts, and shipping charges clearly.
 *   **Screenshots**:
-    ```carousel
-    ![Product Details](16_product_details_screen.png)
-    <!-- slide -->
-    ![Product Customization](17_product_customization_sheet.png)
-    <!-- slide -->
-    ![Checkout Initial](18_checkout_screen.png)
-    <!-- slide -->
-    ![Checkout Initial Bottom](18_checkout_screen_bottom.png)
-    <!-- slide -->
-    ![Address Entry Form](24_address_sheet_keyboard_hidden.png)
-    <!-- slide -->
-    ![Area Selector](25_area_selector_open.png)
-    <!-- slide -->
-    ![Label Toggled & Validated](33_label_toggled.png)
-    <!-- slide -->
-    ![Checkout With Address](34_checkout_with_address.png)
-    <!-- slide -->
-    ![Receipt Details Scrolled](35_checkout_receipt_details.png)
-    ```
+    *   ![Product Details](16_product_details_screen.png)
+    *   ![Product Customization](17_product_customization_sheet.png)
+    *   ![Checkout Initial](18_checkout_screen.png)
+    *   ![Checkout Initial Bottom](18_checkout_screen_bottom.png)
+    *   ![Address Entry Form](24_address_sheet_keyboard_hidden.png)
+    *   ![Area Selector](25_area_selector_open.png)
+    *   ![Label Toggled & Validated](33_label_toggled.png)
+    *   ![Checkout With Address](34_checkout_with_address.png)
+    *   ![Receipt Details Scrolled](35_checkout_receipt_details.png)
 
 ---
 

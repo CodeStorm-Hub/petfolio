@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Petfolio — Task Card Redesign Options</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: radial-gradient(ellipse at 20% 50%, #1a0a2e 0%, #0d1117 60%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 16px 60px;
+}
+
+/* ── Page header ── */
+.page-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: rgba(255,255,255,0.35); text-transform: uppercase; text-align: center; margin-bottom: 6px; }
+.page-heading { font-size: 26px; font-weight: 900; color: #fff; text-align: center; margin-bottom: 4px; }
+.page-heading span { color: #FF7043; }
+.page-sub { font-size: 13px; color: rgba(255,255,255,0.4); text-align: center; margin-bottom: 24px; }
+
+/* ── Option tabs ── */
+.tabs { display: flex; gap: 6px; background: rgba(255,255,255,0.06); padding: 4px; border-radius: 16px; margin-bottom: 28px; border: 1px solid rgba(255,255,255,0.06); }
+.tab { padding: 9px 18px; border-radius: 12px; border: none; background: transparent; color: rgba(255,255,255,0.45); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.22s; white-space: nowrap; }
+.tab.active { background: #FF7043; color: #fff; box-shadow: 0 4px 14px rgba(255,112,67,0.4); }
+.tab .badge { font-size: 9px; opacity: 0.7; margin-left: 3px; }
+
+/* ── Layout ── */
+.layout { display: flex; gap: 28px; align-items: flex-start; }
+
+/* ── Phone frame ── */
+.phone-outer {
+  background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+  border-radius: 52px;
+  padding: 14px;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.07), inset 0 1px 0 rgba(255,255,255,0.12);
+  position: relative;
+}
+.phone-outer::before {
+  content: '';
+  position: absolute;
+  top: 14px; left: 14px; right: 14px;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+  border-radius: 2px;
+}
+.phone-screen {
+  width: 365px;
+  height: 790px;
+  background: #FFF8F5;
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+/* Dynamic island */
+.dynamic-island {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  width: 118px; height: 34px; background: #000; border-radius: 20px; z-index: 100;
+}
+/* ── App header (orange wave) ── */
+.app-header {
+  background: linear-gradient(155deg, #FF8C5A 0%, #FF5722 55%, #E64A19 100%);
+  padding: 52px 18px 22px;
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+.app-header::after {
+  content: '🐾';
+  position: absolute; right: 16px; bottom: -8px;
+  font-size: 70px; opacity: 0.08; transform: rotate(-15deg);
+}
+.header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.pet-pill {
+  display: flex; align-items: center; gap: 9px;
+  background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);
+  border-radius: 14px; padding: 6px 12px 6px 6px;
+}
+.pet-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.35);
+  background: #ddd; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.pet-pill-text .lbl { font-size: 8px; font-weight: 700; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.5px; }
+.pet-pill-text .name { font-size: 14px; font-weight: 800; color: #fff; }
+.moon-btn { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+.header-xp { display: flex; align-items: center; gap: 12px; }
+.streak-coin {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(145deg, #FFD740, #FF9800);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(255,152,0,0.5); border: 2px solid rgba(255,255,255,0.3);
+  flex-shrink: 0;
+}
+.streak-coin .fire { font-size: 20px; line-height: 1; }
+.streak-coin .num { font-size: 10px; font-weight: 900; color: #fff; }
+.xp-block { flex: 1; }
+.xp-title { font-size: 15px; font-weight: 900; color: #fff; }
+.xp-title em { font-style: normal; opacity: 0.7; font-size: 12px; font-weight: 600; margin-left: 4px; }
+.xp-bar-bg { height: 5px; background: rgba(0,0,0,0.2); border-radius: 3px; margin: 5px 0; overflow: hidden; }
+.xp-bar-fill { height: 100%; background: linear-gradient(90deg, #FFD740, #fff); border-radius: 3px; width: 70%; }
+.xp-nums { font-size: 11px; color: rgba(255,255,255,0.65); }
+.tasks-pill { background: rgba(255,255,255,0.9); border-radius: 20px; padding: 5px 11px; font-size: 11px; font-weight: 800; color: #FF5722; flex-shrink: 0; }
+/* ── Date picker ── */
+.date-row {
+  display: flex; gap: 7px; padding: 14px 14px 0;
+  overflow-x: auto; scrollbar-width: none; flex-shrink: 0;
+}
+.date-row::-webkit-scrollbar { display: none; }
+.date-chip {
+  min-width: 48px; height: 62px; border-radius: 14px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: #fff; flex-shrink: 0; box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+.date-chip.today { background: #FF7043; }
+.date-chip.past { opacity: 0.45; }
+.d-ltr { font-size: 9.5px; font-weight: 700; color: #aaa; text-transform: uppercase; }
+.d-num { font-size: 20px; font-weight: 800; color: #333; margin-top: 1px; }
+.date-chip.today .d-ltr, .date-chip.today .d-num { color: #fff; }
+/* ── Quest header ── */
+.quest-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 10px; flex-shrink: 0; }
+.quest-title { font-size: 16px; font-weight: 900; color: #1a1a2e; }
+.quest-right { display: flex; align-items: center; gap: 6px; }
+.done-pill { background: #FFF8E1; border-radius: 20px; padding: 4px 10px; font-size: 11px; font-weight: 800; color: #F9A825; }
+.ai-circle { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #7C4DFF, #40C4FF); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+/* ── Freq tabs ── */
+.freq-tabs { display: flex; gap: 7px; padding: 0 16px 10px; flex-shrink: 0; }
+.f-tab {
+  flex: 1; padding: 8px 4px; border-radius: 12px; text-align: center; cursor: pointer;
+  background: #F5EDE8; border: 0.5px solid #E5D5CC; transition: all 0.2s;
+}
+.f-tab.active { background: #FF7043; border-color: transparent; }
+.f-tab .f-name { font-size: 11.5px; font-weight: 700; color: #aaa; }
+.f-tab.active .f-name { color: #fff; }
+.f-tab .f-cnt {
+  display: inline-block; margin-top: 2px;
+  font-size: 9px; font-weight: 800; color: #F9A825;
+  background: #FFF3CD; border-radius: 999px; padding: 1px 6px;
+}
+.f-tab.active .f-cnt { background: rgba(255,255,255,0.25); color: #fff; }
+/* ── Bottom nav ── */
+.bottom-nav {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(255,255,255,0.96); backdrop-filter: blur(12px);
+  border-top: 0.5px solid rgba(0,0,0,0.07);
+  display: flex; padding: 9px 0 22px;
+  border-radius: 0 0 40px 40px;
+}
+.nav-it { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.nav-ic { font-size: 20px; }
+.nav-lb { font-size: 9.5px; font-weight: 600; color: #aaa; }
+.nav-it.on .nav-lb { color: #FF7043; }
+
+/* ── Scrollable task area ── */
+.task-scroll {
+  flex: 1; overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
+  padding-bottom: 80px;
+}
+.task-scroll::-webkit-scrollbar { display: none; }
+
+/* =====================================================
+   SHARED CARD ELEMENTS
+===================================================== */
+.icon-circle {
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; position: relative; flex-shrink: 0; transition: all 0.3s;
+}
+.icon-circle .due-dot {
+  position: absolute; bottom: 1px; right: 1px;
+  width: 11px; height: 11px; background: #EF5350; border-radius: 50%;
+  border: 2px solid #fff;
+}
+.xp-chip {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: #FFF8E1; border-radius: 999px; padding: 3px 9px;
+  font-size: 10.5px; font-weight: 800; color: #F9A825;
+  border: 1px solid rgba(249,168,37,0.25);
+}
+.xp-chip.done { background: #E8F8F4; color: #1B8C72; border-color: rgba(38,198,166,0.25); }
+.check-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2.5px solid #ddd; background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; transition: all 0.22s; flex-shrink: 0;
+}
+.check-btn:hover { border-color: #FF7043; transform: scale(1.08); }
+.check-btn.on { background: #26C6A6; border-color: #26C6A6; color: #fff; }
+
+/* ── XP burst ── */
+@keyframes xpFloat { 0% { opacity:0; transform:translateY(0) scale(0.6); } 15% { opacity:1; transform:translateY(-8px) scale(1.15); } 70% { opacity:1; } 100% { opacity:0; transform:translateY(-54px) scale(0.9); } }
+.xp-burst {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  background: #FF7043; color: #fff; border-radius: 999px; padding: 3px 12px;
+  font-size: 12px; font-weight: 900; pointer-events: none; z-index: 200; white-space: nowrap;
+  animation: xpFloat 1s ease-out forwards;
+}
+
+/* ── Done collapse pill ── */
+.done-pill-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #E8F8F4; border-radius: 999px; padding: 7px 14px;
+  margin: 4px 16px 6px; cursor: pointer;
+  font-size: 11.5px; font-weight: 800; color: #1B8C72;
+  border: 1px solid rgba(38,198,166,0.22); transition: all 0.2s;
+}
+.done-pill-btn:hover { background: #D0F2EB; }
+.done-pill-btn .chev { transition: transform 0.3s; }
+.done-pill-btn.open .chev { transform: rotate(180deg); }
+
+/* =====================================================
+   OPTION A — Focus Lane (3D Perspective Carousel)
+===================================================== */
+.oa-wrap { padding: 0 0 8px; }
+.oa-stage {
+  position: relative; height: 195px; overflow: visible;
+  perspective: 900px; perspective-origin: 50% 50%;
+  margin: 0 16px;
+}
+.oa-card {
+  position: absolute; width: 224px; height: 182px;
+  border-radius: 24px; background: #fff;
+  left: 50%; top: 50%;
+  margin-left: -112px; margin-top: -91px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 7px; padding: 14px;
+  border: 1.5px solid #EDE0DA;
+  box-shadow: 0 4px 22px rgba(0,0,0,0.07);
+  cursor: pointer; user-select: none;
+  transition: transform 0.42s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.3s ease, box-shadow 0.3s ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.oa-card.due-card { border-color: rgba(239,83,80,0.45); box-shadow: 0 4px 22px rgba(239,83,80,0.1); }
+.oa-card.done-card { border-color: rgba(38,198,166,0.4); background: #F7FFFE; }
+.oa-card .card-title { font-size: 13.5px; font-weight: 800; color: #1a1a2e; text-align: center; line-height: 1.25; }
+.oa-card.done-card .card-title { text-decoration: line-through; color: #aaa; }
+.oa-card .card-due { font-size: 10.5px; font-weight: 600; color: #EF5350; display: flex; align-items: center; gap: 4px; }
+.oa-card .card-due::before { content: ''; display: block; width: 5px; height: 5px; background: #EF5350; border-radius: 50%; }
+.oa-card .card-row { display: flex; align-items: center; gap: 8px; }
+
+.oa-nav { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 8px 0 4px; }
+.oa-arrow {
+  width: 28px; height: 28px; border-radius: 50%; background: rgba(255,112,67,0.1);
+  border: none; color: #FF7043; font-size: 12px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+}
+.oa-arrow:hover { background: rgba(255,112,67,0.22); }
+.oa-dots { display: flex; gap: 5px; }
+.oa-dot { width: 6px; height: 6px; border-radius: 50%; background: #DDD; transition: all 0.28s; }
+.oa-dot.on { width: 20px; border-radius: 3px; background: #FF7043; }
+
+/* =====================================================
+   OPTION B — CoverFlow 3D
+===================================================== */
+.ob-wrap { padding: 0 0 8px; }
+.ob-stage {
+  position: relative; height: 210px; overflow: visible;
+  perspective: 650px; perspective-origin: 50% 45%;
+  margin: 0 16px;
+}
+.ob-card {
+  position: absolute; width: 195px; height: 188px;
+  border-radius: 22px; background: #fff;
+  left: 50%; top: 50%;
+  margin-left: -97px; margin-top: -94px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 7px; padding: 14px;
+  border: 1.5px solid #EDE0DA;
+  box-shadow: 0 8px 36px rgba(0,0,0,0.12);
+  cursor: pointer; user-select: none;
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease;
+  transform-style: preserve-3d; will-change: transform; backface-visibility: hidden;
+}
+.ob-card.due-card { border-color: rgba(239,83,80,0.45); }
+.ob-card.done-card { border-color: rgba(38,198,166,0.4); background: #F7FFFE; }
+.ob-card .card-title { font-size: 13px; font-weight: 800; color: #1a1a2e; text-align: center; line-height: 1.25; }
+.ob-card.done-card .card-title { text-decoration: line-through; color: #aaa; }
+.ob-card .card-due { font-size: 10px; font-weight: 600; color: #EF5350; display: flex; align-items: center; gap: 4px; }
+.ob-card .card-due::before { content: ''; display: block; width: 5px; height: 5px; background: #EF5350; border-radius: 50%; }
+.ob-card .card-row { display: flex; align-items: center; gap: 8px; }
+.ob-card .card-sub { font-size: 10px; color: #bbb; font-weight: 600; }
+
+.ob-nav { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 8px 0 4px; }
+.ob-arrow { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,112,67,0.1); border: none; color: #FF7043; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.ob-arrow:hover { background: rgba(255,112,67,0.22); }
+.ob-dots { display: flex; gap: 5px; }
+.ob-dot { width: 6px; height: 6px; border-radius: 50%; background: #DDD; transition: all 0.28s; }
+.ob-dot.on { width: 20px; border-radius: 3px; background: #FF7043; }
+
+/* =====================================================
+   OPTION C — Priority Lane Wide Card
+===================================================== */
+.oc-wrap { padding: 0 0 8px; }
+.oc-stage {
+  display: flex; align-items: stretch; gap: 0;
+  height: 200px; overflow: hidden; margin: 0 16px;
+}
+.oc-peek {
+  width: 56px; min-width: 56px; flex-shrink: 0;
+  border-radius: 18px; background: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; padding: 8px 4px;
+  border: 1px solid #EDE0DA; opacity: 0.55;
+  cursor: pointer; transition: all 0.35s; overflow: hidden;
+}
+.oc-peek:hover { opacity: 0.75; }
+.oc-peek .peek-em { font-size: 20px; }
+.oc-center {
+  flex: 1; margin: 0 8px;
+  border-radius: 22px; background: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 9px; padding: 16px;
+  border: 2px solid #FF7043;
+  box-shadow: 0 8px 32px rgba(255,112,67,0.18);
+  transition: all 0.4s cubic-bezier(0.34, 1.3, 0.64, 1);
+  position: relative;
+}
+.oc-center.due-card { border-color: #EF5350; box-shadow: 0 8px 32px rgba(239,83,80,0.18); }
+.oc-center.done-card { border-color: #26C6A6; box-shadow: 0 8px 32px rgba(38,198,166,0.15); }
+.oc-center .card-title { font-size: 14.5px; font-weight: 800; color: #1a1a2e; text-align: center; line-height: 1.25; }
+.oc-center.done-card .card-title { text-decoration: line-through; color: #aaa; }
+.oc-center .card-due { font-size: 11px; font-weight: 600; color: #EF5350; display: flex; align-items: center; gap: 4px; }
+.oc-center .card-due::before { content: ''; display: block; width: 5px; height: 5px; background: #EF5350; border-radius: 50%; }
+.oc-center .card-sub { font-size: 10.5px; color: #bbb; font-weight: 600; }
+.oc-center .card-row { display: flex; align-items: center; gap: 8px; }
+
+.oc-nav { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 8px 0 4px; }
+.oc-dot { width: 7px; height: 7px; border-radius: 50%; background: #DDD; transition: all 0.28s; }
+.oc-dot.on { width: 22px; border-radius: 4px; background: #FF7043; }
+
+/* =====================================================
+   HYBRID — Grid + Tap to Focus
+===================================================== */
+.hybrid-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; padding: 0 16px 8px; }
+.hg-card {
+  border-radius: 20px; background: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 8px 6px; gap: 6px; cursor: pointer; height: 100px;
+  border: 1px solid #EDE0DA; box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  transition: transform 0.15s;
+}
+.hg-card:hover { transform: scale(0.95); }
+.hg-card.due-card { border: 2px solid rgba(239,83,80,0.5); }
+.hg-card.done-card { background: rgba(38,198,166,0.06); border: 2px solid rgba(38,198,166,0.35); }
+.hg-card .hg-icon { width: 46px; height: 46px; }
+.hg-card .hg-name { font-size: 10px; font-weight: 700; color: #333; text-align: center; line-height: 1.2; }
+.hg-card.done-card .hg-name { color: #aaa; text-decoration: line-through; }
+
+/* Focus overlay */
+.focus-overlay {
+  position: absolute; inset: 0; border-radius: 40px;
+  background: rgba(10,8,20,0); z-index: 60;
+  display: flex; align-items: flex-end;
+  pointer-events: none; transition: background 0.3s;
+}
+.focus-overlay.open { background: rgba(10,8,20,0.72); pointer-events: all; }
+.focus-sheet {
+  width: 100%; background: #FFF8F5;
+  border-radius: 30px 30px 0 0;
+  padding: 16px 16px 40px;
+  transform: translateY(100%);
+  transition: transform 0.42s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+.focus-overlay.open .focus-sheet { transform: translateY(0); }
+.sheet-handle { width: 34px; height: 4px; background: #DDD; border-radius: 2px; margin: 0 auto 14px; }
+.sheet-title { font-size: 12px; font-weight: 700; color: #aaa; text-align: center; margin-bottom: 12px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+/* Sheet mini carousel */
+.sheet-stage {
+  position: relative; height: 178px; overflow: visible;
+  perspective: 900px; perspective-origin: 50% 50%;
+  margin: 0 8px;
+}
+.sc-card {
+  position: absolute; width: 210px; height: 165px;
+  border-radius: 22px; background: #fff;
+  left: 50%; top: 50%;
+  margin-left: -105px; margin-top: -82px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 7px; padding: 12px;
+  border: 1.5px solid #EDE0DA;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  cursor: pointer; user-select: none;
+  transition: transform 0.42s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.3s ease;
+  transform-style: preserve-3d; will-change: transform;
+}
+.sc-card.due-card { border-color: rgba(239,83,80,0.45); }
+.sc-card.done-card { border-color: rgba(38,198,166,0.4); background: #F7FFFE; }
+.sc-card .card-title { font-size: 12.5px; font-weight: 800; color: #1a1a2e; text-align: center; line-height: 1.25; }
+.sc-card.done-card .card-title { text-decoration: line-through; color: #aaa; }
+.sc-card .card-due { font-size: 10px; font-weight: 600; color: #EF5350; display: flex; align-items: center; gap: 3px; }
+.sc-card .card-due::before { content: ''; display: block; width: 4px; height: 4px; background: #EF5350; border-radius: 50%; }
+.sc-card .card-row { display: flex; align-items: center; gap: 7px; }
+
+.sheet-nav { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 8px 0 0; }
+.sc-arrow { width: 26px; height: 26px; border-radius: 50%; background: rgba(255,112,67,0.1); border: none; color: #FF7043; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.sc-dots { display: flex; gap: 5px; }
+.sc-dot { width: 6px; height: 6px; border-radius: 50%; background: #DDD; transition: all 0.28s; }
+.sc-dot.on { width: 18px; border-radius: 3px; background: #FF7043; }
+
+/* ── Info panel (right side) ── */
+.info-panel { width: 280px; padding-top: 4px; }
+.info-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,112,67,0.12); border: 1px solid rgba(255,112,67,0.25);
+  border-radius: 999px; padding: 4px 12px; font-size: 11px; font-weight: 700; color: #FF7043;
+  margin-bottom: 12px;
+}
+.info-panel h2 { font-size: 21px; font-weight: 900; color: #fff; line-height: 1.2; margin-bottom: 8px; }
+.info-panel p { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; margin-bottom: 16px; }
+.info-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 14px 0; }
+.info-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.info-list li {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 12.5px; color: rgba(255,255,255,0.6); line-height: 1.4;
+}
+.info-list li .icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.info-hint {
+  margin-top: 16px; background: rgba(255,255,255,0.04); border-radius: 12px;
+  padding: 10px 14px; font-size: 11.5px; color: rgba(255,255,255,0.3); line-height: 1.5;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.kbd { background: rgba(255,255,255,0.1); border-radius: 5px; padding: 1px 7px; font-family: monospace; font-size: 11px; color: rgba(255,255,255,0.5); }
+</style>
+</head>
+<body>
+
+<div class="page-title">Petfolio Design Preview</div>
+<h1 class="page-heading">Task Card <span>Redesign</span></h1>
+<p class="page-sub">Interactive mockups — click cards, use arrow keys, tap check ✓</p>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('a')">Option A <span class="badge">3D Focus</span></button>
+  <button class="tab" onclick="switchTab('b')">Option B <span class="badge">CoverFlow</span></button>
+  <button class="tab" onclick="switchTab('c')">Option C <span class="badge">Priority Lane</span></button>
+  <button class="tab" onclick="switchTab('h')">Hybrid <span class="badge">⭐ Best</span></button>
+</div>
+
+<div class="layout">
+  <!-- ══════════════════ PHONE ══════════════════ -->
+  <div class="phone-outer">
+    <div class="dynamic-island"></div>
+    <div class="phone-screen" id="phone">
+
+      <!-- App header -->
+      <div class="app-header">
+        <div class="header-top">
+          <div class="pet-pill">
+            <div class="pet-avatar">🐱</div>
+            <div class="pet-pill-text">
+              <div class="lbl">Care</div>
+              <div class="name">Montu ▾</div>
+            </div>
+          </div>
+          <div class="tasks-pill" id="tasks-pill">2/15 tasks</div>
+          <div class="moon-btn">🌙</div>
+        </div>
+        <div class="header-xp">
+          <div class="streak-coin"><div class="fire">🔥</div><div class="num">1 DAY</div></div>
+          <div class="xp-block">
+            <div class="xp-title">Lv 5 <em>· Responsible G…</em></div>
+            <div class="xp-bar-bg"><div class="xp-bar-fill"></div></div>
+            <div class="xp-nums">939 / 1400 XP · 461 XP to Lv 6</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date picker -->
+      <div class="date-row">
+        <div class="date-chip past"><div class="d-ltr">W</div><div class="d-num">3</div></div>
+        <div class="date-chip past"><div class="d-ltr">T</div><div class="d-num">4</div></div>
+        <div class="date-chip past"><div class="d-ltr">F</div><div class="d-num">5</div></div>
+        <div class="date-chip today"><div class="d-ltr">S</div><div class="d-num">6</div></div>
+        <div class="date-chip"><div class="d-ltr">S</div><div class="d-num">7</div></div>
+        <div class="date-chip"><div class="d-ltr">M</div><div class="d-num">8</div></div>
+        <div class="date-chip"><div class="d-ltr">T</div><div class="d-num">9</div></div>
+      </div>
+
+      <!-- Quest header -->
+      <div class="quest-header">
+        <div class="quest-title">Today's Quests</div>
+        <div class="quest-right">
+          <div class="done-pill" id="global-done-pill">2/15 done</div>
+          <div class="ai-circle">✨</div>
+        </div>
+      </div>
+
+      <!-- Freq tabs -->
+      <div class="freq-tabs">
+        <div class="f-tab active"><div class="f-name">Daily</div><div class="f-cnt">0/9</div></div>
+        <div class="f-tab"><div class="f-name">Weekly</div><div class="f-cnt">1/4</div></div>
+        <div class="f-tab"><div class="f-name">Less Often</div><div class="f-cnt">0/2</div></div>
+      </div>
+
+      <!-- ── Task areas (one shown at a time) ── -->
+      <div class="task-scroll" id="task-scroll">
+
+        <!-- OPTION A -->
+        <div id="area-a" class="oa-wrap" style="display:block">
+          <div class="oa-stage" id="oa-stage"></div>
+          <div class="oa-nav">
+            <button class="oa-arrow" onclick="oaNav(-1)">‹</button>
+            <div class="oa-dots" id="oa-dots"></div>
+            <button class="oa-arrow" onclick="oaNav(1)">›</button>
+          </div>
+          <div id="oa-done-section"></div>
+        </div>
+
+        <!-- OPTION B -->
+        <div id="area-b" class="ob-wrap" style="display:none">
+          <div class="ob-stage" id="ob-stage"></div>
+          <div class="ob-nav">
+            <button class="ob-arrow" onclick="obNav(-1)">‹</button>
+            <div class="ob-dots" id="ob-dots"></div>
+            <button class="ob-arrow" onclick="obNav(1)">›</button>
+          </div>
+          <div id="ob-done-section"></div>
+        </div>
+
+        <!-- OPTION C -->
+        <div id="area-c" class="oc-wrap" style="display:none">
+          <div class="oc-stage" id="oc-stage"></div>
+          <div class="oc-nav" id="oc-dots"></div>
+          <div id="oc-done-section"></div>
+        </div>
+
+        <!-- HYBRID -->
+        <div id="area-h" style="display:none">
+          <div class="hybrid-grid" id="hg-grid"></div>
+          <div id="hg-done-section"></div>
+        </div>
+
+      </div><!-- end task-scroll -->
+
+      <!-- Hybrid focus overlay -->
+      <div class="focus-overlay" id="focus-overlay" onclick="closeFocus(event)">
+        <div class="focus-sheet">
+          <div class="sheet-handle"></div>
+          <div class="sheet-title">Focus Mode</div>
+          <div class="sheet-stage" id="sc-stage"></div>
+          <div class="sheet-nav">
+            <button class="sc-arrow" onclick="scNav(-1);event.stopPropagation()">‹</button>
+            <div class="sc-dots" id="sc-dots"></div>
+            <button class="sc-arrow" onclick="scNav(1);event.stopPropagation()">›</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom nav -->
+      <div class="bottom-nav">
+        <div class="nav-it"><div class="nav-ic">🐾</div><div class="nav-lb">Pets</div></div>
+        <div class="nav-it on"><div class="nav-ic">🔥</div><div class="nav-lb">Care</div></div>
+        <div class="nav-it"><div class="nav-ic">🤍</div><div class="nav-lb">Social</div></div>
+        <div class="nav-it"><div class="nav-ic">✨</div><div class="nav-lb">Match</div></div>
+        <div class="nav-it"><div class="nav-ic">🏪</div><div class="nav-lb">Market</div></div>
+      </div>
+
+    </div><!-- phone-screen -->
+  </div><!-- phone-outer -->
+
+  <!-- ══════════════════ INFO PANEL ══════════════════ -->
+  <div class="info-panel" id="info-panel"></div>
+</div><!-- layout -->
+
+<script>
+// ═══════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════
+const TASKS = [
+  { id:0, em:'🥩', title:'Morning Feeding',      color:'#FF7043', bg:'rgba(255,112,67,0.14)', due:'8:00 AM',  xp:12, done:false, dueToday:true  },
+  { id:1, em:'🎾', title:'Feather Wand Play',     color:'#FFB300', bg:'rgba(255,179,0,0.14)',  due:'10:00 AM', xp:15, done:false, dueToday:true  },
+  { id:2, em:'🎾', title:'Interactive Playtime',  color:'#FFB300', bg:'rgba(255,179,0,0.14)',  due:'7:00 PM',  xp:25, done:false, dueToday:true  },
+  { id:3, em:'✂️', title:'Brush Coat',            color:'#9C27B0', bg:'rgba(156,39,176,0.14)', due:null,       xp:15, done:false, dueToday:false },
+  { id:4, em:'🥩', title:'Feeding time',          color:'#FF7043', bg:'rgba(255,112,67,0.14)', due:null,       xp:10, done:false, dueToday:false },
+  { id:5, em:'🎾', title:'Playtime',              color:'#FFB300', bg:'rgba(255,179,0,0.14)',  due:null,       xp:10, done:false, dueToday:false },
+  { id:6, em:'🎓', title:'Training',              color:'#FF5722', bg:'rgba(255,87,34,0.14)',  due:null,       xp:10, done:false, dueToday:false },
+  { id:7, em:'🦮', title:'Walk',                  color:'#26A69A', bg:'rgba(38,166,154,0.14)', due:null,       xp:10, done:false, dueToday:false },
+  { id:8, em:'🥩', title:'Evening Feeding',       color:'#FF7043', bg:'rgba(255,112,67,0.14)', due:'6:00 PM',  xp:12, done:true,  dueToday:true  },
+];
+
+// Sort: due-pending first → pending → done (done to the far left/back)
+function sortedPending() { return TASKS.filter(t => !t.done); }
+function sortedDone()    { return TASKS.filter(t => t.done);  }
+function sortedAll() {
+  const duePending = TASKS.filter(t => !t.done && t.dueToday);
+  const pending    = TASKS.filter(t => !t.done && !t.dueToday);
+  const done       = TASKS.filter(t => t.done);
+  return [...duePending, ...pending, ...done];
+}
+
+let currentTab = 'a';
+let oaIndex = 0, obIndex = 0, ocIndex = 0, scIndex = 0;
+let doneSectionOpen = { a: false, b: false, c: false, h: false };
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+function makeIconCircle(task, size=52, fontSize=26) {
+  const el = document.createElement('div');
+  el.className = 'icon-circle';
+  el.style.cssText = `width:${size}px;height:${size}px;font-size:${fontSize}px;background:${task.done ? task.color : task.bg};`;
+  if (task.done) el.style.boxShadow = `0 3px 12px ${task.color}60`;
+  if (task.done) el.innerHTML = `<span style="font-size:${fontSize}px">✅</span>`;
+  else {
+    el.textContent = task.em;
+    if (task.dueToday && !task.done) {
+      const dot = document.createElement('div');
+      dot.className = 'due-dot';
+      el.appendChild(dot);
+    }
+  }
+  return el;
+}
+
+function makeCheckBtn(task, onToggle, size=32) {
+  const btn = document.createElement('div');
+  btn.className = 'check-btn' + (task.done ? ' on' : '');
+  btn.style.width = btn.style.height = size + 'px';
+  btn.textContent = task.done ? '✓' : '';
+  btn.onclick = (e) => { e.stopPropagation(); onToggle(task, btn); };
+  return btn;
+}
+
+function xpBurst(container, xp) {
+  const b = document.createElement('div');
+  b.className = 'xp-burst';
+  b.textContent = `+${xp} XP ⭐`;
+  container.style.position = 'relative';
+  container.appendChild(b);
+  setTimeout(() => b.remove(), 1100);
+}
+
+function updateGlobalDone() {
+  const done = TASKS.filter(t => t.done).length;
+  const total = TASKS.length;
+  document.getElementById('global-done-pill').textContent = `${done}/${total} done`;
+  document.getElementById('tasks-pill').textContent = `${done}/${total} tasks`;
+}
+
+// ═══════════════════════════════════════════
+// OPTION A — Focus Lane
+// ═══════════════════════════════════════════
+function initOA() {
+  const stage = document.getElementById('oa-stage');
+  stage.innerHTML = '';
+  const tasks = sortedAll();
+  // Start at first pending
+  oaIndex = tasks.findIndex(t => !t.done);
+  if (oaIndex < 0) oaIndex = 0;
+
+  tasks.forEach((task, i) => {
+    const card = document.createElement('div');
+    card.className = `oa-card${task.due && !task.done ? ' due-card' : ''}${task.done ? ' done-card' : ''}`;
+    card.dataset.index = i;
+
+    const icon = makeIconCircle(task, 52, 26);
+
+    const title = document.createElement('div');
+    title.className = 'card-title';
+    title.textContent = task.title;
+
+    const dueRow = document.createElement('div');
+    if (task.due && !task.done) {
+      dueRow.className = 'card-due';
+      dueRow.textContent = `Due ${task.due}`;
+    }
+
+    const row = document.createElement('div');
+    row.className = 'card-row';
+    const xp = document.createElement('div');
+    xp.className = 'xp-chip' + (task.done ? ' done' : '');
+    xp.innerHTML = `+${task.xp} ⭐`;
+    const cb = makeCheckBtn(task, (t, btn) => oaToggle(i, t, btn, card, icon, xp, dueRow, title), 32);
+    row.appendChild(xp);
+    row.appendChild(cb);
+
+    card.appendChild(icon);
+    card.appendChild(title);
+    if (task.due && !task.done) card.appendChild(dueRow);
+    card.appendChild(row);
+
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.check-btn')) return;
+      if (i !== oaIndex) { oaIndex = i; updateOA(); }
+    });
+
+    stage.appendChild(card);
+  });
+
+  buildDots('oa-dots', tasks.length, oaIndex, 'oa-dot');
+  updateOA();
+  buildDoneSection('a');
+}
+
+function oaToggle(i, task, btn, card, icon, xpEl, dueRow, titleEl) {
+  task.done = !task.done;
+  btn.className = 'check-btn' + (task.done ? ' on' : '');
+  btn.textContent = task.done ? '✓' : '';
+  card.className = `oa-card${task.done ? ' done-card' : (task.due ? ' due-card' : '')}`;
+
+  // Update icon
+  const newIcon = makeIconCircle(task, 52, 26);
+  icon.parentNode.replaceChild(newIcon, icon);
+
+  if (task.done) {
+    xpBurst(card, task.xp);
+    xpEl.className = 'xp-chip done';
+    if (dueRow.parentNode) dueRow.remove();
+    titleEl.style.textDecoration = 'lineThrough';
+    titleEl.style.color = '#aaa';
+    // Move done card toward left with animation
+    setTimeout(() => {
+      // Re-sort and rebuild
+      initOA(); buildDoneSection('a');
+    }, 600);
+  }
+  updateGlobalDone();
+}
+
+function updateOA() {
+  const cards = document.querySelectorAll('.oa-card');
+  const tasks = sortedAll();
+  const total = tasks.length;
+
+  cards.forEach((card, i) => {
+    const offset = i - oaIndex;
+    const abs = Math.abs(offset);
+    const visible = abs <= 3;
+
+    if (!visible) {
+      card.style.opacity = '0';
+      card.style.pointerEvents = 'none';
+      card.style.zIndex = '0';
+      return;
+    }
+
+    const scale    = Math.max(0.7,  1 - abs * 0.13);
+    const opacity  = abs === 0 ? 1 : Math.max(0.32, 1 - abs * 0.4);
+    const tx       = offset * 230;
+    const tz       = -abs * 55;
+    const ry       = offset * -12;
+
+    card.style.transform  = `translateX(${tx}px) translateZ(${tz}px) rotateY(${ry}deg) scale(${scale})`;
+    card.style.opacity    = opacity;
+    card.style.zIndex     = 20 - abs;
+    card.style.pointerEvents = 'all';
+
+    // Dim done cards more
+    if (tasks[i] && tasks[i].done) card.style.opacity = Math.min(opacity, abs === 0 ? 0.7 : 0.3);
+  });
+
+  updateDots('oa-dots', total, oaIndex, 'oa-dot');
+}
+
+function oaNav(dir) {
+  const total = sortedAll().length;
+  oaIndex = Math.max(0, Math.min(total - 1, oaIndex + dir));
+  updateOA();
+}
+
+// ═══════════════════════════════════════════
+// OPTION B — CoverFlow
+// ═══════════════════════════════════════════
+function initOB() {
+  const stage = document.getElementById('ob-stage');
+  stage.innerHTML = '';
+  const tasks = sortedAll();
+  obIndex = tasks.findIndex(t => !t.done);
+  if (obIndex < 0) obIndex = 0;
+
+  tasks.forEach((task, i) => {
+    const card = document.createElement('div');
+    card.className = `ob-card${task.due && !task.done ? ' due-card' : ''}${task.done ? ' done-card' : ''}`;
+
+    const icon = makeIconCircle(task, 48, 24);
+
+    const title = document.createElement('div');
+    title.className = 'card-title';
+    title.textContent = task.title;
+
+    const sub = document.createElement('div');
+    sub.className = 'card-sub';
+    sub.textContent = task.due && !task.done ? `Due ${task.due}` : task.done ? 'Completed ✓' : 'Daily';
+    if (task.due && !task.done) sub.className = 'card-due';
+
+    const row = document.createElement('div');
+    row.className = 'card-row';
+    const xp = document.createElement('div');
+    xp.className = 'xp-chip' + (task.done ? ' done' : '');
+    xp.innerHTML = `+${task.xp} ⭐`;
+    const cb = makeCheckBtn(task, (t) => {
+      t.done = !t.done;
+      xpBurst(card, t.xp);
+      updateGlobalDone();
+      setTimeout(() => { initOB(); buildDoneSection('b'); }, 550);
+    }, 30);
+    row.appendChild(xp);
+    row.appendChild(cb);
+
+    card.appendChild(icon);
+    card.appendChild(title);
+    card.appendChild(sub);
+    card.appendChild(row);
+
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.check-btn')) return;
+      if (i !== obIndex) { obIndex = i; updateOB(); }
+    });
+
+    stage.appendChild(card);
+  });
+
+  buildDots('ob-dots', tasks.length, obIndex, 'ob-dot');
+  updateOB();
+  buildDoneSection('b');
+}
+
+function updateOB() {
+  const cards = document.querySelectorAll('.ob-card');
+  const total = sortedAll().length;
+
+  cards.forEach((card, i) => {
+    const offset = i - obIndex;
+    const abs    = Math.abs(offset);
+    const sign   = Math.sign(offset);
+    const visible = abs <= 4;
+
+    if (!visible) { card.style.opacity = '0'; card.style.pointerEvents = 'none'; return; }
+
+    let ry, tx, tz, scale, opacity;
+    if (abs === 0) {
+      ry = 0; tx = 0; tz = 0; scale = 1; opacity = 1;
+    } else {
+      ry      = sign * Math.min(abs * 48, 62);
+      tx      = sign * (75 + (abs - 1) * 48);
+      tz      = -(abs * 28);
+      scale   = Math.max(0.66, 0.84 - (abs - 1) * 0.09);
+      opacity = Math.max(0.28, 0.72 - (abs - 1) * 0.28);
+    }
+
+    card.style.transform = `translateX(${tx}px) translateZ(${tz}px) rotateY(${ry}deg) scale(${scale})`;
+    card.style.opacity   = opacity;
+    card.style.zIndex    = 20 - abs;
+    card.style.pointerEvents = 'all';
+  });
+
+  updateDots('ob-dots', total, obIndex, 'ob-dot');
+}
+
+function obNav(dir) {
+  const total = sortedAll().length;
+  obIndex = Math.max(0, Math.min(total - 1, obIndex + dir));
+  updateOB();
+}
+
+// ═══════════════════════════════════════════
+// OPTION C — Priority Lane
+// ═══════════════════════════════════════════
+function initOC() {
+  const stage  = document.getElementById('oc-stage');
+  const dotsEl = document.getElementById('oc-dots');
+  stage.innerHTML = '';
+  dotsEl.innerHTML = '';
+  const tasks = sortedAll().filter(t => !t.done);
+  ocIndex = 0;
+
+  const leftPeek = document.createElement('div');
+  leftPeek.className = 'oc-peek'; leftPeek.id = 'oc-left';
+  leftPeek.onclick = () => { if (ocIndex > 0) { ocIndex--; updateOC(); } };
+  stage.appendChild(leftPeek);
+
+  const center = document.createElement('div');
+  center.className = 'oc-center'; center.id = 'oc-center';
+  stage.appendChild(center);
+
+  const rightPeek = document.createElement('div');
+  rightPeek.className = 'oc-peek'; rightPeek.id = 'oc-right';
+  rightPeek.onclick = () => { if (ocIndex < tasks.length - 1) { ocIndex++; updateOC(); } };
+  stage.appendChild(rightPeek);
+
+  tasks.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'oc-dot' + (i === ocIndex ? ' on' : '');
+    dotsEl.appendChild(d);
+  });
+
+  updateOC();
+  buildDoneSection('c');
+}
+
+function updateOC() {
+  const tasks   = sortedAll().filter(t => !t.done);
+  const task    = tasks[ocIndex];
+  const prevT   = tasks[ocIndex - 1];
+  const nextT   = tasks[ocIndex + 1];
+  const center  = document.getElementById('oc-center');
+  const leftP   = document.getElementById('oc-left');
+  const rightP  = document.getElementById('oc-right');
+  if (!task) return;
+
+  // Center card
+  center.innerHTML = '';
+  center.className = `oc-center${task.due && !task.done ? ' due-card' : ''}`;
+  const icon = makeIconCircle(task, 54, 27);
+  const titleEl = document.createElement('div');
+  titleEl.className = 'card-title';
+  titleEl.textContent = task.title;
+  const sub = document.createElement('div');
+  if (task.due) { sub.className = 'card-due'; sub.textContent = `Due ${task.due}`; }
+  else { sub.className = 'card-sub'; sub.textContent = 'Daily'; }
+  const row = document.createElement('div');
+  row.className = 'card-row';
+  const xp = document.createElement('div');
+  xp.className = 'xp-chip';
+  xp.innerHTML = `+${task.xp} ⭐`;
+  const cb = makeCheckBtn(task, (t) => {
+    t.done = true;
+    xpBurst(center, t.xp);
+    updateGlobalDone();
+    setTimeout(() => { initOC(); buildDoneSection('c'); }, 560);
+  }, 32);
+  row.appendChild(xp); row.appendChild(cb);
+  center.appendChild(icon); center.appendChild(titleEl);
+  center.appendChild(sub); center.appendChild(row);
+
+  // Left peek
+  leftP.innerHTML = '';
+  leftP.style.visibility = prevT ? 'visible' : 'hidden';
+  if (prevT) {
+    const pe = document.createElement('div');
+    pe.style.cssText = `width:38px;height:38px;border-radius:50%;background:${prevT.bg};display:flex;align-items:center;justify-content:center;font-size:20px;`;
+    pe.textContent = prevT.em;
+    leftP.appendChild(pe);
+  }
+
+  // Right peek
+  rightP.innerHTML = '';
+  rightP.style.visibility = nextT ? 'visible' : 'hidden';
+  if (nextT) {
+    const pe = document.createElement('div');
+    pe.style.cssText = `width:38px;height:38px;border-radius:50%;background:${nextT.bg};display:flex;align-items:center;justify-content:center;font-size:20px;`;
+    pe.textContent = nextT.em;
+    rightP.appendChild(pe);
+  }
+
+  // Dots
+  const dots = document.querySelectorAll('.oc-dot');
+  dots.forEach((d, i) => d.className = 'oc-dot' + (i === ocIndex ? ' on' : ''));
+}
+
+// ═══════════════════════════════════════════
+// HYBRID
+// ═══════════════════════════════════════════
+function initHybrid() {
+  const grid = document.getElementById('hg-grid');
+  grid.innerHTML = '';
+  const tasks = sortedAll();
+
+  tasks.forEach((task, i) => {
+    const card = document.createElement('div');
+    card.className = `hg-card${task.due && !task.done ? ' due-card' : ''}${task.done ? ' done-card' : ''}`;
+
+    const iconEl = document.createElement('div');
+    iconEl.className = 'hg-icon icon-circle';
+    iconEl.style.cssText = `width:46px;height:46px;font-size:22px;background:${task.done ? task.color : task.bg};`;
+    if (task.done) iconEl.style.boxShadow = `0 2px 8px ${task.color}60`;
+    iconEl.textContent = task.done ? '✅' : task.em;
+    if (task.dueToday && !task.done) {
+      const dot = document.createElement('div');
+      dot.className = 'due-dot';
+      iconEl.appendChild(dot);
+    }
+
+    const nm = document.createElement('div');
+    nm.className = 'hg-name';
+    nm.textContent = task.title;
+
+    card.appendChild(iconEl);
+    card.appendChild(nm);
+    card.onclick = () => openFocus(i);
+    grid.appendChild(card);
+  });
+
+  buildDoneSection('h');
+}
+
+function openFocus(startIndex) {
+  scIndex = startIndex;
+  initSheetCarousel();
+  document.getElementById('focus-overlay').classList.add('open');
+}
+
+function closeFocus(e) {
+  if (e.target === document.getElementById('focus-overlay')) {
+    document.getElementById('focus-overlay').classList.remove('open');
+  }
+}
+
+function initSheetCarousel() {
+  const stage = document.getElementById('sc-stage');
+  stage.innerHTML = '';
+  const tasks = sortedAll();
+
+  tasks.forEach((task, i) => {
+    const card = document.createElement('div');
+    card.className = `sc-card${task.due && !task.done ? ' due-card' : ''}${task.done ? ' done-card' : ''}`;
+
+    const icon = makeIconCircle(task, 46, 23);
+    const title = document.createElement('div');
+    title.className = 'card-title';
+    title.textContent = task.title;
+    const sub = document.createElement('div');
+    if (task.due && !task.done) { sub.className = 'card-due'; sub.textContent = `Due ${task.due}`; }
+    const row = document.createElement('div');
+    row.className = 'card-row';
+    const xp = document.createElement('div');
+    xp.className = 'xp-chip' + (task.done ? ' done' : '');
+    xp.innerHTML = `+${task.xp} ⭐`;
+    const cb = makeCheckBtn(task, (t) => {
+      t.done = true;
+      xpBurst(card, t.xp);
+      updateGlobalDone();
+      setTimeout(() => { initHybrid(); initSheetCarousel(); buildDoneSection('h'); }, 550);
+    }, 28);
+    row.appendChild(xp); row.appendChild(cb);
+    card.appendChild(icon); card.appendChild(title);
+    if (task.due && !task.done) card.appendChild(sub);
+    card.appendChild(row);
+    card.onclick = (e) => { if (!e.target.closest('.check-btn') && i !== scIndex) { scIndex = i; updateSC(); } };
+    stage.appendChild(card);
+  });
+
+  buildDots('sc-dots', tasks.length, scIndex, 'sc-dot');
+  updateSC();
+}
+
+function updateSC() {
+  const cards = document.querySelectorAll('.sc-card');
+  const total = sortedAll().length;
+  cards.forEach((card, i) => {
+    const offset = i - scIndex;
+    const abs    = Math.abs(offset);
+    if (abs > 3) { card.style.opacity = '0'; card.style.pointerEvents = 'none'; return; }
+    const scale   = Math.max(0.72, 1 - abs * 0.13);
+    const opacity = abs === 0 ? 1 : Math.max(0.3, 1 - abs * 0.42);
+    const tx      = offset * 215;
+    const tz      = -abs * 50;
+    const ry      = offset * -11;
+    card.style.transform = `translateX(${tx}px) translateZ(${tz}px) rotateY(${ry}deg) scale(${scale})`;
+    card.style.opacity   = opacity;
+    card.style.zIndex    = 20 - abs;
+    card.style.pointerEvents = 'all';
+  });
+  updateDots('sc-dots', total, scIndex, 'sc-dot');
+}
+
+function scNav(dir) {
+  const total = sortedAll().length;
+  scIndex = Math.max(0, Math.min(total - 1, scIndex + dir));
+  updateSC();
+}
+
+// ═══════════════════════════════════════════
+// DONE SECTIONS (shared)
+// ═══════════════════════════════════════════
+function buildDoneSection(tab) {
+  const el = document.getElementById(`${tab === 'h' ? 'hg' : tab === 'a' ? 'oa' : tab === 'b' ? 'ob' : 'oc'}-done-section`);
+  el.innerHTML = '';
+  const done = sortedDone();
+  if (!done.length) return;
+
+  const pill = document.createElement('div');
+  pill.className = 'done-pill-btn' + (doneSectionOpen[tab] ? ' open' : '');
+  pill.innerHTML = `<span>✅</span> Done (${done.length}) <span class="chev">▾</span>`;
+
+  const body = document.createElement('div');
+  body.style.cssText = `display:${doneSectionOpen[tab] ? 'block' : 'none'};padding:0 16px;`;
+
+  if (tab === 'h') {
+    // Grid for hybrid done
+    body.style.cssText = `display:${doneSectionOpen[tab] ? 'grid' : 'none'};grid-template-columns:repeat(4,1fr);gap:8px;padding:0 16px 8px;`;
+    done.forEach(task => {
+      const card = document.createElement('div');
+      card.className = 'hg-card done-card';
+      const ic = document.createElement('div');
+      ic.style.cssText = `width:46px;height:46px;border-radius:50%;background:${task.color};display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 8px ${task.color}60;`;
+      ic.textContent = '✅';
+      const nm = document.createElement('div');
+      nm.className = 'hg-name';
+      nm.textContent = task.title;
+      card.appendChild(ic); card.appendChild(nm);
+      body.appendChild(card);
+    });
+  } else {
+    // Compact list for other options
+    done.forEach(task => {
+      const row = document.createElement('div');
+      row.style.cssText = `display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:10px 12px;margin-bottom:7px;border:1.5px solid rgba(38,198,166,0.3);`;
+      const ic = document.createElement('div');
+      ic.style.cssText = `width:32px;height:32px;border-radius:50%;background:${task.color};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;`;
+      ic.textContent = '✅';
+      const info = document.createElement('div');
+      info.style.cssText = `flex:1;`;
+      info.innerHTML = `<div style="font-size:12px;font-weight:700;color:#aaa;text-decoration:line-through">${task.title}</div>`;
+      const xp = document.createElement('div');
+      xp.className = 'xp-chip done';
+      xp.innerHTML = `+${task.xp} ⭐`;
+      row.appendChild(ic); row.appendChild(info); row.appendChild(xp);
+      body.appendChild(row);
+    });
+  }
+
+  pill.onclick = () => {
+    doneSectionOpen[tab] = !doneSectionOpen[tab];
+    pill.className = 'done-pill-btn' + (doneSectionOpen[tab] ? ' open' : '');
+    if (tab === 'h') body.style.display = doneSectionOpen[tab] ? 'grid' : 'none';
+    else body.style.display = doneSectionOpen[tab] ? 'block' : 'none';
+  };
+
+  el.appendChild(pill);
+  el.appendChild(body);
+}
+
+// ═══════════════════════════════════════════
+// DOT HELPERS
+// ═══════════════════════════════════════════
+function buildDots(containerId, total, active, cls) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  const show = Math.min(total, 9);
+  for (let i = 0; i < show; i++) {
+    const d = document.createElement('div');
+    d.className = cls + (i === active ? ' on' : '');
+    el.appendChild(d);
+  }
+}
+
+function updateDots(containerId, total, active, cls) {
+  const dots = document.querySelectorAll(`#${containerId} .${cls}`);
+  dots.forEach((d, i) => d.className = cls + (i === active ? ' on' : ''));
+}
+
+// ═══════════════════════════════════════════
+// INFO PANEL CONTENT
+// ═══════════════════════════════════════════
+const INFO = {
+  a: {
+    tag: '⭐ Recommended',
+    title: 'Focus Lane\n3D Carousel',
+    desc: 'Tasks flow in a horizontal 3D river. The current task pops forward — side cards tilt and fade. Due tasks load first at center.',
+    points: [
+      { ic:'🎯', t:'Due tasks auto-center on load' },
+      { ic:'↔️', t:'Swipe or tap side cards to navigate' },
+      { ic:'✅', t:'Complete → card shrinks left, next snaps in' },
+      { ic:'👁', t:'See 3 tasks in one view (center + 2 sides)' },
+      { ic:'🎮', t:'XP burst floats above card on completion' },
+    ],
+    hint: 'Use ← → arrow keys or click the nav arrows to navigate',
+  },
+  b: {
+    tag: '🎨 Most Visual',
+    title: 'CoverFlow\n3D Fold',
+    desc: 'Inspired by classic iTunes CoverFlow. Side cards rotate dramatically on the Y-axis, folding away like pages in a book.',
+    points: [
+      { ic:'📖', t:'Deep 48° Y-axis rotation — cards "fold" away' },
+      { ic:'🌟', t:'Very dramatic, premium feel' },
+      { ic:'📏', t:'Best with ≤6 tasks per tab for clarity' },
+      { ic:'🎯', t:'Center card is always full-detail, others abstract' },
+      { ic:'⚡', t:'Snappy spring animation on navigation' },
+    ],
+    hint: 'Try clicking cards at the edge — they rotate to front',
+  },
+  c: {
+    tag: '🎯 Clean & Focused',
+    title: 'Priority Lane\nWide Card',
+    desc: 'One task owns the screen. 60% center card shows full info. Tiny peek cards on each side hint at what\'s next.',
+    points: [
+      { ic:'📐', t:'60% center / 20% peek on each side' },
+      { ic:'🔴', t:'Due tasks highlighted with colored border' },
+      { ic:'👆', t:'Tap left/right peek to advance' },
+      { ic:'⚫', t:'Progress dots show position in queue' },
+      { ic:'🧘', t:'Least cognitive load — one task at a time' },
+    ],
+    hint: 'Tap the peek cards on left/right to navigate',
+  },
+  h: {
+    tag: '🏆 Best of Both',
+    title: 'Hybrid:\nGrid + Focus',
+    desc: 'Grid stays for overview — all 9 tasks visible at once. Tap any tile to open a full-screen focus carousel with 3D effect.',
+    points: [
+      { ic:'📊', t:'Grid shows all tasks instantly — no scrolling' },
+      { ic:'🔍', t:'Tap any card → bottom sheet carousel opens' },
+      { ic:'🎠', t:'Sheet uses Option A\'s 3D focus carousel' },
+      { ic:'👈', t:'Tap outside sheet to dismiss and return to grid' },
+      { ic:'💪', t:'Best for power users AND visual delight' },
+    ],
+    hint: 'Tap any task tile to open the 3D focus carousel',
+  },
+};
+
+function renderInfo(tab) {
+  const info = INFO[tab];
+  const panel = document.getElementById('info-panel');
+  panel.innerHTML = `
+    <div class="info-tag">${info.tag}</div>
+    <h2>${info.title.replace('\n','<br>')}</h2>
+    <p>${info.desc}</p>
+    <div class="info-divider"></div>
+    <ul class="info-list">
+      ${info.points.map(p => `<li><span class="icon">${p.ic}</span><span>${p.t}</span></li>`).join('')}
+    </ul>
+    <div class="info-hint">${info.hint}<br><br><span class="kbd">←</span><span class="kbd">→</span> Arrow keys navigate • <span class="kbd">Space</span> completes center task</div>
+  `;
+}
+
+// ═══════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════
+function switchTab(tab) {
+  currentTab = tab;
+  ['a','b','c','h'].forEach(t => {
+    document.getElementById(`area-${t}`).style.display = t === tab ? 'block' : 'none';
+    const btn = document.querySelectorAll('.tab')[['a','b','c','h'].indexOf(t)];
+    btn.classList.toggle('active', t === tab);
+  });
+  renderInfo(tab);
+  // Scroll back to top
+  document.getElementById('task-scroll').scrollTop = 0;
+}
+
+// ═══════════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════════
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft')  { if(currentTab==='a')oaNav(-1); if(currentTab==='b')obNav(-1); if(currentTab==='c'){if(ocIndex>0){ocIndex--;updateOC();}} }
+  if (e.key === 'ArrowRight') { if(currentTab==='a')oaNav(1);  if(currentTab==='b')obNav(1);  if(currentTab==='c'){const t=sortedAll().filter(t=>!t.done);if(ocIndex<t.length-1){ocIndex++;updateOC();}} }
+  if (e.key === ' ') { e.preventDefault(); /* TODO: complete center task */ }
+});
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+initOA();
+initOB();
+initOC();
+initHybrid();
+renderInfo('a');
+updateGlobalDone();
+</script>
+</body>
+</html>

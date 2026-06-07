@@ -675,10 +675,10 @@ class _HorizontalDatePickerState extends State<_HorizontalDatePicker> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Daily Tasks Dashboard
+// Daily Tasks Dashboard — tabbed + collapsible done
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _DailyTasksDashboard extends ConsumerWidget {
+class _DailyTasksDashboard extends ConsumerStatefulWidget {
   const _DailyTasksDashboard({
     required this.state,
     required this.petId,
@@ -694,127 +694,1005 @@ class _DailyTasksDashboard extends ConsumerWidget {
   final VoidCallback? onAddTask;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return state.tasks.when(
+  ConsumerState<_DailyTasksDashboard> createState() => _DailyTasksDashboardState();
+}
+
+class _DailyTasksDashboardState extends ConsumerState<_DailyTasksDashboard> {
+  int _tab = 0;
+
+  static const _tabLabels = ['Daily', 'Weekly', 'Less Often'];
+
+  List<List<dbtask.CareTask>> _groupTasks(List<dbtask.CareTask> tasks) => [
+    tasks.where((t) =>
+      t.frequency == dbtask.CareFrequency.daily ||
+      t.frequency == dbtask.CareFrequency.twiceDaily ||
+      t.frequency == dbtask.CareFrequency.once ||
+      t.isLogDerived).toList(),
+    tasks.where((t) => t.frequency == dbtask.CareFrequency.weekly).toList(),
+    tasks.where((t) =>
+      t.frequency == dbtask.CareFrequency.biweekly ||
+      t.frequency == dbtask.CareFrequency.monthly ||
+      t.frequency == dbtask.CareFrequency.asNeeded).toList(),
+  ];
+
+  List<dbtask.CareTask> _sortGroup(List<dbtask.CareTask> tasks) =>
+      [...tasks]..sort((a, b) {
+          final aTime = parseCareScheduledTimeOfDay(a.scheduledTime);
+          final bTime = parseCareScheduledTimeOfDay(b.scheduledTime);
+          if (aTime != null && bTime != null) {
+            return (aTime.hour * 60 + aTime.minute)
+                .compareTo(bTime.hour * 60 + bTime.minute);
+          }
+          if (aTime != null) return -1;
+          if (bTime != null) return 1;
+          return a.title.compareTo(b.title);
+        });
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.state.tasks.when(
       loading: () => const Column(
-        children: [
-          _TaskCardSkeleton(),
-          _TaskCardSkeleton(),
-          _TaskCardSkeleton(),
-        ],
+        children: [_TaskCardSkeleton(), _TaskCardSkeleton(), _TaskCardSkeleton()],
       ),
-      error: (err, st) => _CareErrorCard(
+      error: (err, _) => _CareErrorCard(
         error: err,
         onRetry: () => ref.read(careDashboardProvider.notifier).refresh(),
       ),
       data: (tasks) {
         if (tasks.isEmpty) {
           return _EmptyRoutineState(
-            petName: petName,
-            date: state.selectedDate,
-            onAddTask: onAddTask,
+            petName: widget.petName,
+            date: widget.state.selectedDate,
+            onAddTask: widget.onAddTask,
           );
         }
 
-        // Check if all scheduled/repeating tasks are done (exclude asNeeded)
-        final planned = tasks
-            .where((t) => !t.isLogDerived && t.frequency != dbtask.CareFrequency.asNeeded)
-            .toList();
-        final allDone = planned.isNotEmpty &&
-            planned.every((t) => t.isCompleted);
+        final groups  = _groupTasks(tasks);
+        final tab     = _tab.clamp(0, 2);
+        final sorted  = _sortGroup(groups[tab]);
 
-        // Group tasks by frequency bucket
-        final daily = tasks
-            .where((t) =>
-                t.frequency == dbtask.CareFrequency.daily ||
-                t.frequency == dbtask.CareFrequency.twiceDaily ||
-                t.frequency == dbtask.CareFrequency.once ||
-                t.isLogDerived)
-            .toList();
-        final weekly = tasks
-            .where((t) => t.frequency == dbtask.CareFrequency.weekly)
-            .toList();
-        final lessOften = tasks
-            .where((t) =>
-                t.frequency == dbtask.CareFrequency.biweekly ||
-                t.frequency == dbtask.CareFrequency.monthly ||
-                t.frequency == dbtask.CareFrequency.asNeeded)
-            .toList();
-
-        final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+        final planned = tasks.where((t) =>
+            !t.isLogDerived && t.frequency != dbtask.CareFrequency.asNeeded).toList();
+        final allDone = planned.isNotEmpty && planned.every((t) => t.isCompleted);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // All-done celebration banner
-            if (allDone)
-              _AllDoneBanner(tasks: planned),
-            // Daily tasks
-            if (daily.isNotEmpty) ..._frequencyGroup(
-              context, pt, 'DAILY', daily, petId, petName, species,
+            // ── Frequency tab bar ─────────────────────────────────────────
+            _FreqTabBar(
+              selected: tab,
+              labels: _tabLabels,
+              counts: groups.map((g) => g.length).toList(),
+              doneCounts: groups.map((g) => g.where((t) => t.isCompleted).length).toList(),
+              onSelect: (i) => setState(() => _tab = i),
             ),
-            // Weekly tasks
-            if (weekly.isNotEmpty) ..._frequencyGroup(
-              context, pt, 'WEEKLY', weekly, petId, petName, species,
-            ),
-            // Bi-weekly / Monthly / As-needed
-            if (lessOften.isNotEmpty) ..._frequencyGroup(
-              context, pt, 'LESS OFTEN', lessOften, petId, petName, species,
-            ),
+            const SizedBox(height: 8),
+            // ── All-done celebration ──────────────────────────────────────
+            if (allDone) _AllDoneBanner(tasks: planned),
+            // ── CoverFlow carousel (done left · due center · pending right)
+            // Key encodes petId + tab so state fully reinitialises on tab switch
+            if (sorted.isNotEmpty)
+              _CoverFlowCarousel(
+                key: ValueKey('cf_${widget.petId}_$tab'),
+                tasks: sorted,
+                petId: widget.petId,
+                petName: widget.petName,
+                species: widget.species,
+              ),
+            // ── Empty tab ─────────────────────────────────────────────────
+            if (sorted.isEmpty)
+              _EmptyTabState(
+                tabLabel: _tabLabels[tab],
+                onAddTask: widget.onAddTask,
+              ),
           ],
         );
       },
     );
   }
+}
 
-  List<Widget> _frequencyGroup(
-    BuildContext context,
-    PetfolioThemeExtension pt,
-    String label,
-    List<dbtask.CareTask> tasks,
-    String petId,
-    String petName,
-    PetSpecies species,
-  ) {
-    // Sort: scheduled-time tasks ascending, then no-time tasks alphabetically
-    final sorted = [...tasks]..sort((a, b) {
-        final aTime = parseCareScheduledTimeOfDay(a.scheduledTime);
-        final bTime = parseCareScheduledTimeOfDay(b.scheduledTime);
-        if (aTime != null && bTime != null) {
-          return (aTime.hour * 60 + aTime.minute)
-              .compareTo(bTime.hour * 60 + bTime.minute);
-        }
-        if (aTime != null) return -1;
-        if (bTime != null) return 1;
-        return a.title.compareTo(b.title);
-      });
+// ─────────────────────────────────────────────────────────────────────────────
+// Frequency Tab Bar
+// ─────────────────────────────────────────────────────────────────────────────
 
-    return [
-      Padding(
-        padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
-        child: Row(
-          children: [
-            Expanded(child: Divider(color: pt.line, thickness: 1, endIndent: 10)),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.08 * 10,
-                color: pt.ink300,
+class _FreqTabBar extends StatelessWidget {
+  const _FreqTabBar({
+    required this.selected,
+    required this.labels,
+    required this.counts,
+    required this.doneCounts,
+    required this.onSelect,
+  });
+
+  final int selected;
+  final List<String> labels;
+  final List<int> counts;
+  final List<int> doneCounts;
+  final ValueChanged<int> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
+
+    return Row(
+      children: List.generate(labels.length, (i) {
+        final active   = i == selected;
+        final count    = counts[i];
+        final done     = doneCounts[i];
+        final allDone  = count > 0 && done == count;
+        final hasCount = count > 0;
+
+        return Expanded(
+          child: GestureDetector(
+            onTap: () => onSelect(i),
+            child: AnimatedContainer(
+              duration: PetfolioThemeExtension.durationSm,
+              margin: EdgeInsets.only(right: i < labels.length - 1 ? 8 : 0),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+              decoration: BoxDecoration(
+                color: active ? cs.primary : pt.surface2,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: active ? Colors.transparent : pt.line,
+                  width: 0.5,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    labels[i],
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: active ? Colors.white : pt.ink500,
+                      height: 1.2,
+                    ),
+                  ),
+                  if (hasCount) ...[
+                    const SizedBox(height: 3),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: active
+                            ? Colors.white.withAlpha(40)
+                            : (allDone ? AppColors.mintSoft : AppColors.sunnySoft),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        allDone ? '$done/$count ✓' : '$done/$count',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          color: active
+                              ? Colors.white
+                              : (allDone ? AppColors.mint700 : AppColors.sunny700),
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-            Expanded(child: Divider(color: pt.line, thickness: 1, indent: 10)),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Empty Tab State
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _EmptyTabState extends StatelessWidget {
+  const _EmptyTabState({required this.tabLabel, this.onAddTask});
+
+  final String tabLabel;
+  final VoidCallback? onAddTask;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Column(
+        children: [
+          Icon(Icons.task_alt_rounded, size: 28, color: pt.ink300),
+          const SizedBox(height: 8),
+          Text(
+            'No $tabLabel tasks',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: pt.ink500,
+            ),
+          ),
+          if (onAddTask != null) ...[
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: onAddTask,
+              icon: const Icon(Icons.add_rounded, size: 14),
+              label: const Text('Add task'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CoverFlow 3-D Carousel
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Shared helpers ────────────────────────────────────────────────────────────
+
+Color _cfColor(dbtask.CareTaskType t) {
+  switch (t) {
+    case dbtask.CareTaskType.feeding:
+    case dbtask.CareTaskType.training:
+      return AppColors.tangerine;
+    case dbtask.CareTaskType.medication:
+      return AppColors.poppy;
+    case dbtask.CareTaskType.walk:
+      return AppColors.mint;
+    case dbtask.CareTaskType.playtime:
+      return AppColors.sunny;
+    case dbtask.CareTaskType.dental:
+    case dbtask.CareTaskType.grooming:
+    case dbtask.CareTaskType.nailTrim:
+      return AppColors.lilac;
+    case dbtask.CareTaskType.vetVisit:
+    case dbtask.CareTaskType.bath:
+      return AppColors.sky;
+    case dbtask.CareTaskType.other:
+      return AppColors.sunny;
+  }
+}
+
+String _cfEmoji(dbtask.CareTaskType t) {
+  switch (t) {
+    case dbtask.CareTaskType.feeding:    return '🥩';
+    case dbtask.CareTaskType.walk:       return '🦮';
+    case dbtask.CareTaskType.grooming:   return '✂️';
+    case dbtask.CareTaskType.medication: return '💊';
+    case dbtask.CareTaskType.vetVisit:   return '🏥';
+    case dbtask.CareTaskType.training:   return '🎓';
+    case dbtask.CareTaskType.playtime:   return '🎾';
+    case dbtask.CareTaskType.dental:     return '🦷';
+    case dbtask.CareTaskType.nailTrim:   return '💅';
+    case dbtask.CareTaskType.bath:       return '🛁';
+    case dbtask.CareTaskType.other:      return '⭐';
+  }
+}
+
+String _cfSublabel(dbtask.CareTask task) {
+  if (task.isLogDerived) return 'Activity log';
+  if (task.scheduledTime != null) {
+    final tod = parseCareScheduledTimeOfDay(task.scheduledTime);
+    if (tod != null) {
+      final h      = tod.hourOfPeriod == 0 ? 12 : tod.hourOfPeriod;
+      final m      = tod.minute.toString().padLeft(2, '0');
+      final period = tod.period == DayPeriod.am ? 'AM' : 'PM';
+      final label  = '$h:$m $period';
+      return (!task.isCompleted && task.isDueToday) ? '● Due $label' : label;
+    }
+  }
+  switch (task.frequency) {
+    case dbtask.CareFrequency.once:       return 'Once';
+    case dbtask.CareFrequency.daily:      return 'Daily';
+    case dbtask.CareFrequency.twiceDaily: return 'Twice daily';
+    case dbtask.CareFrequency.weekly:     return 'Weekly';
+    case dbtask.CareFrequency.biweekly:   return 'Every 2 wks';
+    case dbtask.CareFrequency.monthly:    return 'Monthly';
+    case dbtask.CareFrequency.asNeeded:   return 'As needed';
+  }
+}
+
+// ── Carousel widget ───────────────────────────────────────────────────────────
+
+class _CoverFlowCarousel extends ConsumerStatefulWidget {
+  const _CoverFlowCarousel({
+    super.key,
+    required this.tasks,
+    required this.petId,
+    required this.petName,
+    required this.species,
+  });
+
+  final List<dbtask.CareTask> tasks;
+  final String petId;
+  final String petName;
+  final PetSpecies species;
+
+  @override
+  ConsumerState<_CoverFlowCarousel> createState() => _CoverFlowCarouselState();
+}
+
+class _CoverFlowCarouselState extends ConsumerState<_CoverFlowCarousel>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+  late List<dbtask.CareTask> _ordered;
+  double _page = 0;
+  String? _xpBurstId;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 440),
+    )..addListener(_onTick);
+    _buildOrdered();
+    final firstPending = _ordered.indexWhere((t) => !t.isCompleted);
+    _page = (firstPending < 0 ? 0 : firstPending).toDouble();
+    _anim = AlwaysStoppedAnimation(_page);
+  }
+
+  void _onTick() {
+    if (mounted) setState(() => _page = _anim.value);
+  }
+
+  @override
+  void didUpdateWidget(_CoverFlowCarousel old) {
+    super.didUpdateWidget(old);
+    // Tab switches cause a new widget instance (key changes), so this handler
+    // only fires for same-tab updates (e.g. a task being completed).
+    if (old.tasks != widget.tasks) {
+      final byId = {for (final t in widget.tasks) t.id: t};
+      for (int i = 0; i < _ordered.length; i++) {
+        final updated = byId[_ordered[i].id];
+        if (updated != null) _ordered[i] = updated;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl
+      ..removeListener(_onTick)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _buildOrdered() {
+    final done     = widget.tasks.where((t) => t.isCompleted).toList();
+    final duePend  = widget.tasks
+        .where((t) => !t.isCompleted && t.isDueToday && t.scheduledTime != null)
+        .toList()
+      ..sort(_timeSort);
+    final pend     = widget.tasks
+        .where((t) => !t.isCompleted && !(t.isDueToday && t.scheduledTime != null))
+        .toList()
+      ..sort(_timeSort);
+    _ordered = [...done, ...duePend, ...pend];
+  }
+
+  int _timeSort(dbtask.CareTask a, dbtask.CareTask b) {
+    final at = parseCareScheduledTimeOfDay(a.scheduledTime);
+    final bt = parseCareScheduledTimeOfDay(b.scheduledTime);
+    if (at != null && bt != null) {
+      return (at.hour * 60 + at.minute).compareTo(bt.hour * 60 + bt.minute);
+    }
+    if (at != null) return -1;
+    if (bt != null) return 1;
+    return a.title.compareTo(b.title);
+  }
+
+  void _goTo(int index) {
+    _ctrl.stop();
+    final from = _page;
+    final to   = index.clamp(0, _ordered.length - 1).toDouble();
+    _anim = Tween<double>(begin: from, end: to).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic),
+    );
+    _ctrl.forward(from: 0);
+  }
+
+  int get _currentIdx => _page.round().clamp(0, _ordered.length - 1);
+
+  void _onToggle(int index) {
+    final task    = _ordered[index];
+    final nowDone = !task.isCompleted;
+    ref.read(careDashboardProvider.notifier)
+        .toggleTaskCompletion(task.id, isCompleted: nowDone);
+    if (nowDone && task.gamificationPoints > 0) {
+      setState(() => _xpBurstId = task.id);
+      Future.delayed(const Duration(milliseconds: 1250), () {
+        if (mounted) setState(() => _xpBurstId = null);
+      });
+    }
+  }
+
+  void _showContextMenu(BuildContext ctx, dbtask.CareTask task) {
+    final logOnly = task.isLogDerived;
+    showModalBottomSheet<void>(
+      context: ctx,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _TaskContextMenu(
+        taskTitle: task.title,
+        logOnly: logOnly,
+        onAddPlan: logOnly
+            ? () {
+                Navigator.pop(ctx);
+                showModalBottomSheet<void>(
+                  context: ctx,
+                  isScrollControlled: true,
+                  useSafeArea: true,
+                  useRootNavigator: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (_) => _CareTaskFormSheet(
+                    petId: widget.petId,
+                    petName: widget.petName,
+                    createSeed: task,
+                  ),
+                );
+              }
+            : null,
+        onRemoveDay: logOnly
+            ? () async {
+                Navigator.pop(ctx);
+                await _cfConfirmDialog(
+                  ctx,
+                  title: 'Remove from this day',
+                  body: 'Clear this completion for "${task.title}"?',
+                  confirmLabel: 'Remove',
+                  onConfirmed: () => ref
+                      .read(careDashboardProvider.notifier)
+                      .deleteTask(task.id),
+                );
+              }
+            : null,
+        onEdit: !logOnly
+            ? () {
+                Navigator.pop(ctx);
+                showModalBottomSheet<void>(
+                  context: ctx,
+                  isScrollControlled: true,
+                  useSafeArea: true,
+                  useRootNavigator: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (_) => _CareTaskFormSheet(
+                    petId: widget.petId,
+                    petName: widget.petName,
+                    existing: task,
+                  ),
+                );
+              }
+            : null,
+        onDelete: !logOnly
+            ? () async {
+                Navigator.pop(ctx);
+                await _cfConfirmDialog(
+                  ctx,
+                  title: 'Delete task',
+                  body:
+                      'Remove "${task.title}" from ${widget.petName}\'s care plan?',
+                  confirmLabel: 'Delete',
+                  onConfirmed: () => ref
+                      .read(careDashboardProvider.notifier)
+                      .deleteTask(task.id),
+                );
+              }
+            : null,
+      ),
+    );
+  }
+
+  Future<void> _cfConfirmDialog(
+    BuildContext ctx, {
+    required String title,
+    required String body,
+    required String confirmLabel,
+    required Future<void> Function() onConfirmed,
+  }) async {
+    final ok = await showDialog<bool>(
+      context: ctx,
+      builder: (d) => AlertDialog(
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(d, false),
+              child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Navigator.pop(d, true),
+            style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(d).colorScheme.error),
+            child: Text(confirmLabel),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !ctx.mounted) return;
+    try {
+      await onConfirmed();
+    } catch (e) {
+      AppSnackBar.showError(e);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final total = _ordered.length;
+    if (total == 0) return const SizedBox.shrink();
+
+    // Sort entries: farther cards rendered first (lower z-order)
+    final entries = _ordered.asMap().entries.toList()
+      ..sort((a, b) {
+        final ad = (a.key.toDouble() - _page).abs();
+        final bd = (b.key.toDouble() - _page).abs();
+        return bd.compareTo(ad);
+      });
+
+    return Column(
+      children: [
+        // ── 3-D stage ───────────────────────────────────────────────────
+        SizedBox(
+          height: 236,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onHorizontalDragEnd: (d) {
+              final v = d.primaryVelocity ?? 0;
+              if (v < -260) _goTo(_currentIdx + 1);
+              if (v > 260)  _goTo(_currentIdx - 1);
+            },
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: entries.map((e) {
+                final i    = e.key;
+                final task = e.value;
+                final offset = i.toDouble() - _page;
+                final abs    = offset.abs();
+                if (abs > 3.4) return const SizedBox.shrink();
+
+                final sign    = offset > 0 ? 1.0 : (offset < 0 ? -1.0 : 0.0);
+                final scale   = (1.0 - abs * 0.15).clamp(0.60, 1.0);
+                final opacity = (1.0 - abs * 0.36).clamp(0.20, 1.0);
+                final rotY    = sign * (abs * 0.88).clamp(0.0, 1.12);
+                final tx      = abs < 0.02
+                    ? 0.0
+                    : sign * (abs * 78.0).clamp(0.0, 220.0);
+
+                return Opacity(
+                  opacity: opacity,
+                  child: Transform.translate(
+                    offset: Offset(tx, 0),
+                    child: Transform.scale(
+                      scale: scale,
+                      child: Transform(
+                        alignment: Alignment.center,
+                        transform: Matrix4.identity()
+                          ..setEntry(3, 2, 0.0012)
+                          ..rotateY(rotY),
+                        child: GestureDetector(
+                          onTap: abs > 0.35 ? () => _goTo(i) : null,
+                          child: _CoverFlowCard(
+                            task: task,
+                            isCenter: abs < 0.35,
+                            xpBurstId: _xpBurstId,
+                            onToggle: () => _onToggle(i),
+                            onLongPress: () => _showContextMenu(context, task),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+
+        // ── Navigation row ──────────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.only(top: 10, bottom: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _NavArrow(
+                icon: Icons.chevron_left_rounded,
+                onTap: _currentIdx > 0 ? () => _goTo(_currentIdx - 1) : null,
+              ),
+              Expanded(
+                child: Center(
+                  child: Wrap(
+                    spacing: 5,
+                    children: List.generate(
+                      math.min(total, 12),
+                      (i) {
+                        final sel = i == _currentIdx;
+                        final t   = _ordered[i];
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 260),
+                          width: sel ? 22 : 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                            color: sel
+                                ? Theme.of(context).colorScheme.primary
+                                : t.isCompleted
+                                    ? AppColors.mint.withAlpha(140)
+                                    : Theme.of(context)
+                                        .extension<PetfolioThemeExtension>()!
+                                        .line,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              _NavArrow(
+                icon: Icons.chevron_right_rounded,
+                onTap: _currentIdx < total - 1
+                    ? () => _goTo(_currentIdx + 1)
+                    : null,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Card ──────────────────────────────────────────────────────────────────────
+
+class _CoverFlowCard extends StatelessWidget {
+  const _CoverFlowCard({
+    required this.task,
+    required this.isCenter,
+    required this.xpBurstId,
+    required this.onToggle,
+    required this.onLongPress,
+  });
+
+  final dbtask.CareTask task;
+  final bool isCenter;
+  final String? xpBurstId;
+  final VoidCallback onToggle;
+  final VoidCallback onLongPress;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt    = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs    = Theme.of(context).colorScheme;
+    final done  = task.isCompleted;
+    final due   = !done && task.isDueToday && task.scheduledTime != null;
+    final color = _cfColor(task.taskType);
+
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.topCenter,
+      children: [
+        GestureDetector(
+          onLongPress: onLongPress,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 260),
+            width: 198,
+            height: 214,
+            decoration: BoxDecoration(
+              color: done
+                  ? Color.alphaBlend(color.withAlpha(22), cs.surface)
+                  : cs.surface,
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: done
+                    ? color.withAlpha(190)
+                    : due
+                        ? AppColors.poppy.withAlpha(200)
+                        : pt.line,
+                width: done || due ? 2.0 : 1.0,
+                strokeAlign: BorderSide.strokeAlignInside,
+              ),
+              boxShadow: isCenter
+                  ? [
+                      BoxShadow(
+                        color: color.withAlpha(done ? 50 : 26),
+                        blurRadius: 32,
+                        offset: const Offset(0, 12),
+                        spreadRadius: -8,
+                      ),
+                      ...pt.shadowE1,
+                    ]
+                  : pt.shadowE2,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // ── Icon circle ────────────────────────────────────────
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 260),
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: done ? color : color.withAlpha(40),
+                        boxShadow: done
+                            ? [
+                                BoxShadow(
+                                  color: color.withAlpha(115),
+                                  blurRadius: 18,
+                                  offset: const Offset(0, 6),
+                                  spreadRadius: -4,
+                                ),
+                              ]
+                            : null,
+                      ),
+                      alignment: Alignment.center,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 230),
+                        transitionBuilder: (child, anim) =>
+                            ScaleTransition(scale: anim, child: child),
+                        child: done
+                            ? const Icon(Icons.check_rounded,
+                                color: Colors.white,
+                                size: 30,
+                                key: ValueKey('c'))
+                            : Text(
+                                _cfEmoji(task.taskType),
+                                key: const ValueKey('e'),
+                                style: const TextStyle(
+                                    fontSize: 30, height: 1.0),
+                              ),
+                      ),
+                    ),
+                    if (due)
+                      Positioned(
+                        bottom: 2,
+                        right: 2,
+                        child: Container(
+                          width: 14,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            color: AppColors.poppy,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: cs.surface, width: 2),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // ── Title ──────────────────────────────────────────────
+                AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 200),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: done ? pt.ink500 : cs.onSurface,
+                    decoration: done
+                        ? TextDecoration.lineThrough
+                        : TextDecoration.none,
+                    decorationColor: pt.ink300,
+                    height: 1.25,
+                    letterSpacing: -0.2,
+                  ),
+                  child: Text(
+                    task.title,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                // ── Sublabel ───────────────────────────────────────────
+                Text(
+                  _cfSublabel(task),
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: due ? AppColors.poppy700 : pt.ink500,
+                    height: 1.2,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 12),
+                // ── XP chip + check button ─────────────────────────────
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // XP chip
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: done ? AppColors.mintSoft : AppColors.sunnySoft,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: done
+                              ? AppColors.mint.withAlpha(80)
+                              : AppColors.sunny.withAlpha(80),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '+${task.gamificationPoints}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                              color: done
+                                  ? AppColors.mint700
+                                  : AppColors.sunny700,
+                              height: 1,
+                            ),
+                          ),
+                          const SizedBox(width: 3),
+                          const Text('⭐',
+                              style: TextStyle(fontSize: 10, height: 1)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    // Check button
+                    GestureDetector(
+                      onTap: onToggle,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 230),
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: done ? color : cs.surface,
+                          border: Border.all(
+                            color: done ? color : pt.line,
+                            width: done ? 0 : 2,
+                          ),
+                          boxShadow: done
+                              ? [
+                                  BoxShadow(
+                                    color: color.withAlpha(90),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                    spreadRadius: -3,
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        alignment: Alignment.center,
+                        child: done
+                            ? const Icon(Icons.check_rounded,
+                                color: Colors.white, size: 18)
+                            : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        // ── XP burst ──────────────────────────────────────────────────
+        if (xpBurstId == task.id)
+          const Positioned(
+            top: -22,
+            child: _XpBurst(),
+          ),
+      ],
+    );
+  }
+}
+
+// ── XP burst animation ────────────────────────────────────────────────────────
+
+class _XpBurst extends StatefulWidget {
+  const _XpBurst();
+
+  @override
+  State<_XpBurst> createState() => _XpBurstState();
+}
+
+class _XpBurstState extends State<_XpBurst>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _y, _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1200));
+    _y = Tween<double>(begin: 0, end: -62).animate(
+      CurvedAnimation(parent: _ctrl, curve: const Cubic(0.2, 0.8, 0.2, 1.0)),
+    );
+    _opacity = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 12),
+      TweenSequenceItem(tween: ConstantTween(1.0), weight: 56),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 32),
+    ]).animate(_ctrl);
+    _ctrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (_, _) => Opacity(
+        opacity: _opacity.value.clamp(0.0, 1.0),
+        child: Transform.translate(
+          offset: Offset(0, _y.value),
+          child: const Text(
+            '+XP ⭐',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w900,
+              color: AppColors.sunny700,
+              shadows: [
+                Shadow(
+                    color: AppColors.sunny,
+                    blurRadius: 10,
+                    offset: Offset(0, 2)),
+              ],
+            ),
+          ),
         ),
       ),
-      ...sorted.map((t) => _CareTaskCard(
-            task: t,
-            petId: petId,
-            petName: petName,
-            species: species,
-          )),
-    ];
+    );
+  }
+}
+
+// ── Nav arrow button ──────────────────────────────────────────────────────────
+
+class _NavArrow extends StatelessWidget {
+  const _NavArrow({required this.icon, this.onTap});
+
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs     = Theme.of(context).colorScheme;
+    final pt     = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final active = onTap != null;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: active ? cs.primary.withAlpha(22) : Colors.transparent,
+          border: Border.all(
+            color: active ? cs.primary.withAlpha(65) : pt.line.withAlpha(90),
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Icon(
+          icon,
+          size: 22,
+          color: active ? cs.primary : pt.ink300,
+        ),
+      ),
+    );
   }
 }
 
@@ -1148,12 +2026,11 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
 
   @override
   Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final cs = Theme.of(context).colorScheme;
+    final pt   = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs   = Theme.of(context).colorScheme;
     final task = widget.task;
     final done = task.isCompleted;
-    // Only flag as urgently due when a specific scheduled time exists
-    final due = !done && task.isDueToday && task.scheduledTime != null;
+    final due  = !done && task.isDueToday && task.scheduledTime != null;
     final color = _color;
 
     final yAnim = Tween<double>(begin: 0.0, end: -72.0).animate(
@@ -1173,229 +2050,238 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
       button: true,
       label: taskLabel,
       child: GestureDetector(
-      onTap: _toggle,
-      onLongPress: () => _showContextMenu(context),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 240),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        decoration: BoxDecoration(
-          color: done
-              ? Color.alphaBlend(color.withAlpha(28), cs.surface)
-              : cs.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
+        onTap: _toggle,
+        onLongPress: () => _showContextMenu(context),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 240),
+          // ── Compact vertical padding (10 instead of 14) ──────────────
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
             color: done
-                ? color.withAlpha(180)
-                : (due ? AppColors.poppy.withAlpha(160) : pt.line),
-            width: done ? 1.5 : (due ? 1.5 : 1),
-          ),
-          boxShadow: due
-              ? [
-                  BoxShadow(
-                    color: AppColors.poppy.withAlpha(40),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                    spreadRadius: -4,
-                  ),
-                  ...pt.shadowE1,
-                ]
-              : pt.shadowE2,
-        ),
-        child: Row(
-          children: [
-            // ── Icon box ──────────────────────────────────────────────────
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 240),
-              width: 54,
-              height: 54,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: done
-                      ? [color, Color.lerp(color, Colors.white, 0.28)!]
-                      : [color.withAlpha(55), color.withAlpha(22)],
-                ),
-                boxShadow: done
-                    ? [
-                        BoxShadow(
-                          color: color.withAlpha(90),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                          spreadRadius: -3,
-                        ),
-                      ]
-                    : null,
-              ),
-              alignment: Alignment.center,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                transitionBuilder: (child, anim) => ScaleTransition(
-                  scale: anim,
-                  child: child,
-                ),
-                child: Text(
-                  key: ValueKey(done),
-                  done ? '✅' : _emoji,
-                  style: const TextStyle(fontSize: 26, height: 1.0),
-                ),
-              ),
+                ? Color.alphaBlend(color.withAlpha(28), cs.surface)
+                : cs.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: done
+                  ? color.withAlpha(180)
+                  : (due ? AppColors.poppy.withAlpha(160) : pt.line),
+              width: done ? 1.5 : (due ? 1.5 : 1),
             ),
-            const SizedBox(width: 12),
-            // ── Content ───────────────────────────────────────────────────
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: AnimatedDefaultTextStyle(
-                          duration: const Duration(milliseconds: 200),
-                          style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: done ? pt.ink500 : cs.onSurface,
-                            decoration: done ? TextDecoration.lineThrough : null,
-                            decorationColor: pt.ink300,
-                            height: 1.2,
+            boxShadow: due
+                ? [
+                    BoxShadow(
+                      color: AppColors.poppy.withAlpha(40),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                      spreadRadius: -4,
+                    ),
+                    ...pt.shadowE1,
+                  ]
+                : pt.shadowE2,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // ── Icon box (36×36 compact) ──────────────────────────────
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 240),
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: done
+                        ? [color, Color.lerp(color, Colors.white, 0.28)!]
+                        : [color.withAlpha(55), color.withAlpha(22)],
+                  ),
+                  boxShadow: done
+                      ? [
+                          BoxShadow(
+                            color: color.withAlpha(90),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                            spreadRadius: -3,
                           ),
+                        ]
+                      : null,
+                ),
+                alignment: Alignment.center,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  transitionBuilder: (child, anim) =>
+                      ScaleTransition(scale: anim, child: child),
+                  child: Text(
+                    key: ValueKey(done),
+                    done ? '✅' : _emoji,
+                    style: const TextStyle(fontSize: 18, height: 1.0),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              // ── Content ───────────────────────────────────────────────
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 200),
+                            style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: done ? pt.ink500 : cs.onSurface,
+                              decoration: done ? TextDecoration.lineThrough : null,
+                              decorationColor: pt.ink300,
+                              height: 1.2,
+                            ),
+                            child: Text(
+                              task.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        if (_isWeeklyish) ...[
+                          const SizedBox(width: 5),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.lilacSoft,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              _frequencyPill(task.frequency),
+                              style: const TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.3,
+                                color: AppColors.lilac700,
+                                height: 1.2,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        if (due)
+                          Container(
+                            width: 5,
+                            height: 5,
+                            margin: const EdgeInsets.only(right: 4),
+                            decoration: const BoxDecoration(
+                              color: AppColors.poppy,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        Flexible(
                           child: Text(
-                            task.title,
+                            _sublabel,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: due ? AppColors.poppy700 : pt.ink500,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              // ── XP chip + check circle side-by-side ───────────────────
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: done ? AppColors.mintSoft : AppColors.sunnySoft,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: done
+                            ? AppColors.mint.withAlpha(80)
+                            : AppColors.sunny.withAlpha(80),
+                        width: 1,
                       ),
-                      if (_isWeeklyish) ...[
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: AppColors.lilacSoft,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            _frequencyPill(task.frequency),
-                            style: const TextStyle(
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.3,
-                              color: AppColors.lilac700,
-                              height: 1.2,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      if (due) ...[
-                        Container(
-                          width: 6,
-                          height: 6,
-                          margin: const EdgeInsets.only(right: 5),
-                          decoration: const BoxDecoration(
-                            color: AppColors.poppy,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ],
-                      Flexible(
-                        child: Text(
-                          _sublabel,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '+${task.gamificationPoints}',
                           style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: due ? AppColors.poppy700 : pt.ink500,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.2,
+                            color: done ? AppColors.mint700 : AppColors.sunny700,
+                            height: 1,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(width: 2),
+                        const Text('⭐', style: TextStyle(fontSize: 10, height: 1)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    key: ValueKey('care_task_check_${task.id}'),
+                    onTap: _toggle,
+                    behavior: HitTestBehavior.opaque,
+                    child: SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: Center(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: done ? color : cs.surface,
+                            border: Border.all(
+                              color: done ? color : pt.line,
+                              width: done ? 0 : 2,
+                            ),
+                            boxShadow: done
+                                ? [
+                                    BoxShadow(
+                                      color: color.withAlpha(80),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                      spreadRadius: -2,
+                                    )
+                                  ]
+                                : null,
+                          ),
+                          alignment: Alignment.center,
+                          child: done
+                              ? const Icon(Icons.check_rounded,
+                                  color: Colors.white, size: 16)
+                              : null,
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(width: 8),
-            // ── XP chip + check button ────────────────────────────────────
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: done
-                          ? [AppColors.mintSoft, AppColors.mintSoft]
-                          : [AppColors.sunnySoft, AppColors.sunnySoft],
-                    ),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: done
-                          ? AppColors.mint.withAlpha(80)
-                          : AppColors.sunny.withAlpha(80),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '+${task.gamificationPoints}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.2,
-                          color: done ? AppColors.mint700 : AppColors.sunny700,
-                          height: 1,
-                        ),
-                      ),
-                      const SizedBox(width: 3),
-                      const Text('⭐', style: TextStyle(fontSize: 10, height: 1)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  key: ValueKey('care_task_check_${task.id}'),
-                  onTap: _toggle,
-                  behavior: HitTestBehavior.opaque,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: done ? color : cs.surface,
-                      border: Border.all(
-                        color: done ? color : pt.line,
-                        width: done ? 0 : 2,
-                      ),
-                      boxShadow: done
-                          ? [BoxShadow(color: color.withAlpha(80), blurRadius: 8, offset: const Offset(0, 3), spreadRadius: -2)]
-                          : null,
-                    ),
-                    alignment: Alignment.center,
-                    child: done
-                        ? const Icon(Icons.check_rounded, color: Colors.white, size: 20)
-                        : null,
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
     );
 
     // ── XP burst overlay ─────────────────────────────────────────────────
@@ -1406,7 +2292,7 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
         if (_showBurst)
           Positioned(
             right: 14,
-            bottom: 52,
+            bottom: 38,
             child: AnimatedBuilder(
               animation: _xpCtrl,
               builder: (_, child) => Transform.translate(
@@ -1438,21 +2324,21 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
     // ── Swipe-to-toggle (Dismissible) for non-log tasks ──────────────────
     if (!task.isLogDerived) {
       return Padding(
-        padding: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.only(bottom: 8),
         child: Dismissible(
           key: ValueKey('d_${task.id}'),
           direction: DismissDirection.startToEnd,
           background: Container(
             decoration: BoxDecoration(
               color: done ? pt.surface2 : AppColors.success,
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(18),
             ),
             alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.only(left: 22),
+            padding: const EdgeInsets.only(left: 18),
             child: Icon(
               done ? Icons.replay_rounded : Icons.check_circle_outline_rounded,
               color: done ? pt.ink300 : Colors.white,
-              size: 28,
+              size: 24,
             ),
           ),
           confirmDismiss: (_) async {
@@ -1464,7 +2350,7 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
       );
     }
 
-    return Padding(padding: const EdgeInsets.only(bottom: 10), child: card);
+    return Padding(padding: const EdgeInsets.only(bottom: 8), child: card);
   }
 }
 
