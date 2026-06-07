@@ -98,11 +98,30 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
   static const double radius3xl  = 32.0;
   static const double radiusPill = 999.0;
 
+  // ── M3 Expressive shape tokens ────────────────────────────────────────────
+  // ContinuousRectangleBorder (squircle) uses ~2× the visual radius value.
+  static const double squircleCard       = 48.0;  // visual ≈ 24 dp
+  static const double squircleContainer  = 56.0;  // visual ≈ 28 dp
+  static const double squircleDialog     = 56.0;  // visual ≈ 28 dp
+
   static const durationXs = Duration(milliseconds: 80);
   static const durationSm = Duration(milliseconds: 140);
   static const durationMd = Duration(milliseconds: 220);
   static const durationLg = Duration(milliseconds: 320);
   static const durationXl = Duration(milliseconds: 500);
+
+  // ── M3 Expressive motion curves ───────────────────────────────────────────
+  /// Standard M3 emphasized curve — in-place transitions, hero shifts.
+  static const Curve curveEmphasis = Curves.easeInOutCubicEmphasized;
+  /// Entering elements (decelerate into resting position).
+  static const Curve curveEnter = Curves.easeOutCubic;
+  /// Exiting elements (accelerate out of view).
+  static const Curve curveExit = Curves.easeInCubic;
+  /// Spring-like overshoot for interactive components (nav tabs, FABs).
+  static const Curve curveSpring = Curves.easeOutBack;
+
+  static const durationEnter = Duration(milliseconds: 300);
+  static const durationExit  = Duration(milliseconds: 200);
 
   static const double btnHeightSm   = 36.0;
   static const double btnHeightMd   = 44.0;
@@ -376,12 +395,14 @@ abstract final class AppTheme {
         ),
       ),
 
+      // M3 Expressive squircle card shape
       cardTheme: CardThemeData(
         color: isDark ? AppColors.surface0D : AppColors.surface0,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius2xl),
+        shape: ContinuousRectangleBorder(
+          borderRadius: BorderRadius.circular(PetfolioThemeExtension.squircleCard),
           side: BorderSide(color: isDark ? AppColors.lineD : AppColors.line),
         ),
       ),
@@ -471,6 +492,151 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
         ),
         behavior: SnackBarBehavior.floating,
+      ),
+
+      // ── M3 Expressive additions ─────────────────────────────────────────────
+
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: isDark ? AppColors.surface1D : AppColors.surface1,
+        surfaceTintColor: Colors.transparent,
+        showDragHandle: true,
+        dragHandleColor: isDark ? AppColors.ink300D : AppColors.ink300,
+        dragHandleSize: const Size(32, 4),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(PetfolioThemeExtension.radius3xl),
+          ),
+        ),
+      ),
+
+      dialogTheme: DialogThemeData(
+        backgroundColor: isDark ? AppColors.surface0D : AppColors.surface0,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius2xl),
+        ),
+        titleTextStyle: GoogleFonts.sora(
+          fontSize: 20, fontWeight: FontWeight.w700,
+          color: isDark ? AppColors.ink950D : AppColors.ink950,
+        ),
+        contentTextStyle: GoogleFonts.inter(
+          fontSize: 15, fontWeight: FontWeight.w400,
+          color: isDark ? AppColors.ink700D : AppColors.ink700,
+        ),
+      ),
+
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: isDark ? AppColors.tangerineD : AppColors.tangerine,
+        linearTrackColor: isDark ? AppColors.tangerineSoftD : AppColors.tangerineSoft,
+        circularTrackColor: isDark ? AppColors.tangerineSoftD : AppColors.tangerineSoft,
+        strokeWidth: 3.0,
+        linearMinHeight: 6.0,
+      ),
+
+      badgeTheme: BadgeThemeData(
+        backgroundColor: isDark ? AppColors.poppyD : AppColors.poppy,
+        textColor: Colors.white,
+        smallSize: 8,
+        largeSize: 20,
+        textStyle: GoogleFonts.inter(
+          fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+      ),
+
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.all(
+            isDark ? AppColors.tangerineD : AppColors.tangerine700,
+          ),
+          textStyle: WidgetStatePropertyAll(
+            GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w600),
+          ),
+          shape: const WidgetStatePropertyAll(StadiumBorder()),
+          minimumSize: const WidgetStatePropertyAll(Size(64, 44)),
+          overlayColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.pressed)) {
+              return (isDark ? AppColors.tangerineD : AppColors.tangerine).withAlpha(24);
+            }
+            return null;
+          }),
+        ),
+      ),
+
+      iconButtonTheme: IconButtonThemeData(
+        style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.all(
+            isDark ? AppColors.ink700D : AppColors.ink700,
+          ),
+          overlayColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.pressed)) {
+              return (isDark ? AppColors.tangerineD : AppColors.tangerine).withAlpha(24);
+            }
+            return null;
+          }),
+          shape: const WidgetStatePropertyAll(CircleBorder()),
+          minimumSize: const WidgetStatePropertyAll(Size(44, 44)),
+        ),
+      ),
+
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: isDark ? AppColors.tangerineD : AppColors.tangerine,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        highlightElevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius2xl),
+        ),
+        extendedTextStyle: GoogleFonts.sora(
+          fontSize: 15, fontWeight: FontWeight.w700,
+        ),
+        extendedPadding: const EdgeInsets.symmetric(horizontal: 20),
+      ),
+
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return Colors.white;
+          return isDark ? AppColors.ink500D : AppColors.ink300;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return isDark ? AppColors.tangerineD : AppColors.tangerine;
+          }
+          return isDark ? AppColors.lineD : AppColors.line2;
+        }),
+        trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+      ),
+
+      listTileTheme: ListTileThemeData(
+        tileColor: Colors.transparent,
+        iconColor: isDark ? AppColors.ink700D : AppColors.ink700,
+        titleTextStyle: GoogleFonts.sora(
+          fontSize: 15, fontWeight: FontWeight.w600,
+          color: isDark ? AppColors.ink950D : AppColors.ink950,
+        ),
+        subtitleTextStyle: GoogleFonts.inter(
+          fontSize: 13, fontWeight: FontWeight.w400,
+          color: isDark ? AppColors.ink500D : AppColors.ink500,
+        ),
+        minLeadingWidth: 24,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusLg),
+        ),
+      ),
+
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.ink700D.withAlpha(230) : AppColors.ink950.withAlpha(230),
+          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusSm),
+        ),
+        textStyle: GoogleFonts.inter(
+          fontSize: 12, fontWeight: FontWeight.w500,
+          color: isDark ? AppColors.ink950 : AppColors.surface0,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        waitDuration: const Duration(milliseconds: 600),
       ),
     );
   }

@@ -132,7 +132,8 @@
       "mcp__292a7621-3089-4236-bd52-07a54bf59881__apply_migration",
       "Bash(Remove-Item \"G:\\\\GitHub\\\\petfolio\\\\lib\\\\features\\\\care\\\\data\\\\models\\\\care_task_log.dart\")",
       "PowerShell(graphify query \"AiRoutineNotifier dependencies and callers\" --budget 2000 2>&1)",
-      "PowerShell(head -60)"
+      "PowerShell(head -60)",
+      "Bash(graphify query *)"
     ]
   }
 }

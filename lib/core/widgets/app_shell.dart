@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -381,9 +383,9 @@ class _FloatingNav extends StatelessWidget {
   }
 }
 
-// ── Nav tab item ──────────────────────────────────────────────────────────────
+// ── Nav tab item — M3 Expressive spring animation ─────────────────────────────
 
-class _NavTab extends StatelessWidget {
+class _NavTab extends StatefulWidget {
   const _NavTab({
     required this.destination,
     required this.isSelected,
@@ -399,41 +401,91 @@ class _NavTab extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_NavTab> createState() => _NavTabState();
+}
+
+class _NavTabState extends State<_NavTab> with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  static const _spring = SpringDescription(mass: 1.0, stiffness: 550, damping: 32);
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, value: widget.isSelected ? 1.0 : 0.0);
+  }
+
+  @override
+  void didUpdateWidget(_NavTab old) {
+    super.didUpdateWidget(old);
+    if (widget.isSelected == old.isSelected) return;
+    if (widget.isSelected) {
+      _ctrl.animateWith(SpringSimulation(_spring, _ctrl.value, 1.0, 0.0));
+    } else {
+      _ctrl.animateTo(0.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final unselectedColor = isDark ? AppColors.ink500D : AppColors.ink500;
-    final iconColor = isSelected ? accentColor : unselectedColor;
-    final softColor = Color.alphaBlend(accentColor.withAlpha(36), Colors.transparent);
+    final unselected = widget.isDark ? AppColors.ink500D : AppColors.ink500;
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        HapticFeedback.selectionClick();
+        widget.onTap();
+      },
       behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            decoration: BoxDecoration(
-              color: isSelected ? softColor : Colors.transparent,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Icon(
-              isSelected ? destination.activeIcon : destination.icon,
-              color: iconColor,
-              size: 22,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            destination.label,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              color: iconColor,
-              height: 1.0,
-            ),
-          ),
-        ],
+      child: AnimatedBuilder(
+        animation: _ctrl,
+        builder: (context, _) {
+          // Clamp to [0, 1.3] — allow slight overshoot without color math overflow.
+          final t = _ctrl.value.clamp(0.0, 1.3);
+          final tC = t.clamp(0.0, 1.0); // clamped for color lerp
+
+          final iconColor = Color.lerp(unselected, widget.accentColor, tC)!;
+          final bgAlpha = (36 * tC).round();
+          final hPad = 8.0 + 6.0 * t; // 8 → 14 dp
+
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Transform.scale(
+                scale: 1.0 + 0.08 * t,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: widget.accentColor.withAlpha(bgAlpha),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Icon(
+                    tC > 0.5
+                        ? widget.destination.activeIcon
+                        : widget.destination.icon,
+                    color: iconColor,
+                    size: 22,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                widget.destination.label,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: tC > 0.5 ? FontWeight.w700 : FontWeight.w500,
+                  color: iconColor,
+                  height: 1.0,
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
