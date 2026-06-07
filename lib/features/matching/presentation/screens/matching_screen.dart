@@ -264,9 +264,7 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
 
       return bufferAsync.when(
         skipLoadingOnReload: true,
-        loading: () => const Center(
-          child: CircularProgressIndicator.adaptive(),
-        ),
+        loading: () => const Center(child: TailWagLoader()),
         error: (error, stackTrace) => Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -355,9 +353,7 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
               ignoring: overlayActive,
               child: locationAccessAsync.when(
                 skipLoadingOnReload: true,
-                loading: () => const Center(
-                  child: CircularProgressIndicator.adaptive(),
-                ),
+                loading: () => const Center(child: TailWagLoader()),
                 error: (_, _) => buildDiscoveryContent(),
                 data: (_) => buildDiscoveryContent(),
               ),

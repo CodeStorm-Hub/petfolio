@@ -546,7 +546,7 @@ class _HeroLevelContent extends StatelessWidget {
         Text(
           lv.isMaxLevel
               ? '${lv.currentXp} XP — Max level! 👑'
-              : '${lv.currentXp} / ${lv.levelEndXp} XP · ${lv.xpToNext} XP to Lv ${lv.level + 1}',
+              : '${lv.currentXp} / ${lv.levelEndXp} XP · ${lv.xpToNext} XP to "${lv.nextTitle}"',
           style: const TextStyle(
             fontSize: 10.5,
             fontWeight: FontWeight.w700,

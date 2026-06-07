@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/app_snack_bar.dart';
 import '../../data/models/product.dart';
 import '../controllers/cart_controller.dart';
 import 'product_glyph.dart';
@@ -203,7 +204,7 @@ class _ProductTile extends StatelessWidget {
               top: 8,
               right: 8,
               child: GestureDetector(
-                onTap: () {},
+                onTap: () => AppSnackBar.show('Wishlist coming soon 💛'),
                 behavior: HitTestBehavior.opaque,
                 child: Container(
                   width: 30,

@@ -898,6 +898,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
 
     return PfCard(
       padding: EdgeInsets.zero,
+      squircle: true,
       child: Stack(
         children: [
           Column(
@@ -911,11 +912,43 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () => context.push('/social/profile/${widget.post.petId}'),
-                      child: CircleAvatar(
-                        radius: 22,
-                        backgroundColor: widget.post.accentColor,
-                        backgroundImage: widget.post.petAvatarUrl != null ? CachedNetworkImageProvider(widget.post.petAvatarUrl!) : null,
-                        child: widget.post.petAvatarUrl == null ? Text(widget.post.petName.isNotEmpty ? widget.post.petName[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)) : null,
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: ShapeDecoration(
+                          shape: const CircleBorder(),
+                          gradient: SweepGradient(
+                            startAngle: 3.84,
+                            endAngle: 3.84 + pi * 2,
+                            colors: const [
+                              AppColors.tangerine,
+                              AppColors.poppy,
+                              AppColors.sunny,
+                              AppColors.mint,
+                              AppColors.tangerine,
+                            ],
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(2.5),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Theme.of(context).colorScheme.surface,
+                          ),
+                          padding: const EdgeInsets.all(1.5),
+                          child: CircleAvatar(
+                            backgroundColor: widget.post.accentColor,
+                            backgroundImage: widget.post.petAvatarUrl != null
+                                ? CachedNetworkImageProvider(widget.post.petAvatarUrl!)
+                                : null,
+                            child: widget.post.petAvatarUrl == null
+                                ? Text(
+                                    widget.post.petName.isNotEmpty ? widget.post.petName[0].toUpperCase() : '?',
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                                  )
+                                : null,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -99,10 +100,11 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
   static const double radiusPill = 999.0;
 
   // ── M3 Expressive shape tokens ────────────────────────────────────────────
-  // ContinuousRectangleBorder (squircle) uses ~2× the visual radius value.
-  static const double squircleCard       = 48.0;  // visual ≈ 24 dp
-  static const double squircleContainer  = 56.0;  // visual ≈ 28 dp
-  static const double squircleDialog     = 56.0;  // visual ≈ 28 dp
+  // RoundedSuperellipseBorder (true iOS superellipse, Flutter 3.32+).
+  // Values are direct dp — no multiplier needed.
+  static const double squircleCard       = 24.0;
+  static const double squircleContainer  = 28.0;
+  static const double squircleDialog     = 28.0;
 
   static const durationXs = Duration(milliseconds: 80);
   static const durationSm = Duration(milliseconds: 140);
@@ -337,6 +339,17 @@ abstract final class AppTheme {
       fontFamily: GoogleFonts.inter().fontFamily,
       extensions: [ext],
 
+      // M3 Expressive zoom-based page transitions (vs default slide)
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: ZoomPageTransitionsBuilder(
+            allowEnterRouteSnapshotting: true,
+          ),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+        },
+      ),
+
       scaffoldBackgroundColor: isDark ? AppColors.creamD : AppColors.cream,
 
       appBarTheme: AppBarTheme(
@@ -395,13 +408,29 @@ abstract final class AppTheme {
         ),
       ),
 
-      // M3 Expressive squircle card shape
+      // M3 Expressive pill indicator — replaces the default underline
+      tabBarTheme: TabBarThemeData(
+        labelStyle: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500),
+        labelColor: isDark ? AppColors.tangerineD : AppColors.tangerine,
+        unselectedLabelColor: isDark ? AppColors.ink500D : AppColors.ink500,
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        indicator: BoxDecoration(
+          color: isDark ? AppColors.tangerineSoftD : AppColors.tangerineSoft,
+          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusPill),
+        ),
+      ),
+
+      // M3 Expressive squircle card shape — RoundedSuperellipseBorder is the
+      // true iOS-style superellipse (Flutter 3.32+). Uses direct dp values,
+      // unlike ContinuousRectangleBorder which needs 2× the visual radius.
       cardTheme: CardThemeData(
         color: isDark ? AppColors.surface0D : AppColors.surface0,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         margin: EdgeInsets.zero,
-        shape: ContinuousRectangleBorder(
+        shape: RoundedSuperellipseBorder(
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.squircleCard),
           side: BorderSide(color: isDark ? AppColors.lineD : AppColors.line),
         ),
@@ -645,6 +674,7 @@ abstract final class AppTheme {
     final base = ColorScheme.fromSeed(
       seedColor: isDark ? AppColors.tangerineD : AppColors.tangerine,
       brightness: isDark ? Brightness.dark : Brightness.light,
+      dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
     );
     return base.copyWith(
       primary: isDark ? AppColors.tangerineD : AppColors.tangerine,

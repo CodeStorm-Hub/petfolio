@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -1104,6 +1105,7 @@ class _CoverFlowCarouselState extends ConsumerState<_CoverFlowCarousel>
   void _onToggle(int index) {
     final task    = _ordered[index];
     final nowDone = !task.isCompleted;
+    HapticFeedback.mediumImpact();
     ref.read(careDashboardProvider.notifier)
         .toggleTaskCompletion(task.id, isCompleted: nowDone);
     if (nowDone && task.gamificationPoints > 0) {
@@ -1547,36 +1549,12 @@ class _CoverFlowCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     // Check button
-                    GestureDetector(
+                    _SpringCheckButton(
+                      done: done,
+                      color: color,
+                      line: pt.line,
+                      surface: cs.surface,
                       onTap: onToggle,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 230),
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: done ? color : cs.surface,
-                          border: Border.all(
-                            color: done ? color : pt.line,
-                            width: done ? 0 : 2,
-                          ),
-                          boxShadow: done
-                              ? [
-                                  BoxShadow(
-                                    color: color.withAlpha(90),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                    spreadRadius: -3,
-                                  ),
-                                ]
-                              : null,
-                        ),
-                        alignment: Alignment.center,
-                        child: done
-                            ? const Icon(Icons.check_rounded,
-                                color: Colors.white, size: 18)
-                            : null,
-                      ),
                     ),
                   ],
                 ),
@@ -1690,6 +1668,98 @@ class _NavArrow extends StatelessWidget {
           icon,
           size: 22,
           color: active ? cs.primary : pt.ink300,
+        ),
+      ),
+    );
+  }
+}
+
+// ── Spring check button ───────────────────────────────────────────────────────
+
+class _SpringCheckButton extends StatefulWidget {
+  const _SpringCheckButton({
+    required this.done,
+    required this.color,
+    required this.line,
+    required this.surface,
+    required this.onTap,
+  });
+
+  final bool done;
+  final Color color;
+  final Color line;
+  final Color surface;
+  final VoidCallback onTap;
+
+  @override
+  State<_SpringCheckButton> createState() => _SpringCheckButtonState();
+}
+
+class _SpringCheckButtonState extends State<_SpringCheckButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 80),
+      reverseDuration: const Duration(milliseconds: 500),
+    );
+    _scale = Tween<double>(begin: 1.0, end: 0.82).animate(
+      CurvedAnimation(
+        parent: _ctrl,
+        curve: Curves.easeOut,
+        reverseCurve: Curves.elasticOut,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => _ctrl.forward(),
+      onTapUp: (_) {
+        _ctrl.reverse();
+        widget.onTap();
+      },
+      onTapCancel: () => _ctrl.reverse(),
+      child: ScaleTransition(
+        scale: _scale,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 230),
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: widget.done ? widget.color : widget.surface,
+            border: Border.all(
+              color: widget.done ? widget.color : widget.line,
+              width: widget.done ? 0 : 2,
+            ),
+            boxShadow: widget.done
+                ? [
+                    BoxShadow(
+                      color: widget.color.withAlpha(90),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                      spreadRadius: -3,
+                    ),
+                  ]
+                : null,
+          ),
+          alignment: Alignment.center,
+          child: widget.done
+              ? const Icon(Icons.check_rounded, color: Colors.white, size: 18)
+              : null,
         ),
       ),
     );
@@ -1843,6 +1913,7 @@ class _CareTaskCardState extends ConsumerState<_CareTaskCard>
 
   void _toggle() {
     final nowDone = !widget.task.isCompleted;
+    HapticFeedback.mediumImpact();
     ref.read(careDashboardProvider.notifier)
         .toggleTaskCompletion(widget.task.id, isCompleted: nowDone);
     if (nowDone && widget.task.gamificationPoints > 0) {

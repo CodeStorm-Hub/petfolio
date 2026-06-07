@@ -200,7 +200,7 @@ class _FlyToCartAnimState extends State<_FlyToCartAnim> with SingleTickerProvide
           : screenWidth - 40;
 
       _xAnim = Tween<double>(begin: widget.item.rect.center.dx - 24, end: endX).animate(
-        CurvedAnimation(parent: _ctrl, curve: Curves.easeIn),
+        CurvedAnimation(parent: _ctrl, curve: Curves.easeInOutCubicEmphasized),
       );
       _yAnim = Tween<double>(begin: widget.item.rect.center.dy - 24, end: 50).animate(
         CurvedAnimation(parent: _ctrl, curve: const Cubic(0.5, -0.2, 0.8, 0.3)),
@@ -395,8 +395,8 @@ const _cats = [
   _CategoryModel(ProductCategory.food, 'Food', '🍖', AppColors.tangerine),
   _CategoryModel(ProductCategory.treats, 'Treats', '🦴', AppColors.sunny),
   _CategoryModel(ProductCategory.toys, 'Toys', '🎾', AppColors.mint),
-  _CategoryModel(ProductCategory.gear, 'Beds', '🛏️', AppColors.poppy),
-  _CategoryModel(ProductCategory.all, 'Apparel', '🧶', AppColors.lilac), // Reuse 'all' for Apparel demo
+  _CategoryModel(ProductCategory.beds,    'Beds',    '🛏️', AppColors.poppy),
+  _CategoryModel(ProductCategory.apparel, 'Apparel', '🧶', AppColors.lilac),
   _CategoryModel(ProductCategory.grooming, 'Grooming', '🛁', AppColors.sky),
 ];
 
@@ -422,24 +422,46 @@ class _CategoryChips extends StatelessWidget {
           final isActive = cat.id == selected;
           return GestureDetector(
             onTap: () => onSelected(isActive ? ProductCategory.all : cat.id),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(22),
-                    color: Color.lerp(cat.color, Theme.of(context).colorScheme.surface, 0.82),
-                    border: Border.all(color: isActive ? cat.color : pt.line, width: 1.5),
-                    boxShadow: const [BoxShadow(color: Color(0x0C000000), blurRadius: 8, offset: Offset(0, 2))],
+            child: AnimatedScale(
+              scale: isActive ? 1.07 : 1.0,
+              duration: const Duration(milliseconds: 340),
+              curve: Curves.easeOutBack,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 240),
+                    curve: Curves.easeOutCubic,
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(22),
+                      color: isActive
+                          ? Color.lerp(cat.color, Theme.of(context).colorScheme.surface, 0.62)
+                          : Color.lerp(cat.color, Theme.of(context).colorScheme.surface, 0.82),
+                      border: Border.all(
+                        color: isActive ? cat.color : pt.line,
+                        width: isActive ? 2.0 : 1.5,
+                      ),
+                      boxShadow: isActive
+                          ? [BoxShadow(color: cat.color.withAlpha(55), blurRadius: 14, offset: const Offset(0, 5), spreadRadius: -3)]
+                          : const [BoxShadow(color: Color(0x0C000000), blurRadius: 8, offset: Offset(0, 2))],
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(cat.emoji, style: const TextStyle(fontSize: 30)),
                   ),
-                  alignment: Alignment.center,
-                  child: Text(cat.emoji, style: const TextStyle(fontSize: 30)),
-                ),
-                const SizedBox(height: 6),
-                Text(cat.label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: pt.ink950)),
-              ],
+                  const SizedBox(height: 6),
+                  AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 200),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: isActive ? cat.color : pt.ink950,
+                    ),
+                    child: Text(cat.label),
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -485,7 +507,9 @@ class _ShopBody extends ConsumerWidget {
           slivers: [
             if (selectedCat == ProductCategory.all)
               const SliverToBoxAdapter(child: _HeroBanner()),
-              
+            if (selectedCat == ProductCategory.all)
+              const _DeliveryStrip(),
+
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -686,7 +710,7 @@ class _NewProductTileState extends State<_NewProductTile> {
                         children: [
                           const Icon(Icons.star_rounded, size: 12, color: AppColors.sunny),
                           const SizedBox(width: 3),
-                          Text('4.9', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: pt.ink950)),
+                          Text(widget.product.rating != null ? widget.product.rating!.toStringAsFixed(1) : '—', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: pt.ink950)),
                         ],
                       ),
                     ),
@@ -1056,6 +1080,52 @@ class _CartItemRow extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Delivery strip
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _DeliveryStrip extends ConsumerWidget {
+  const _DeliveryStrip();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pt   = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final pet  = ref.watch(activePetControllerProvider);
+    final name = pet?.name ?? 'your pet';
+
+    return SliverToBoxAdapter(
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: pt.surface2,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: pt.line),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.local_shipping_rounded, size: 18, color: pt.ink500),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'SHIP TO ${name.toUpperCase()}\'S ADDRESS',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: pt.ink950, letterSpacing: 0.3),
+              ),
+            ),
+            GestureDetector(
+              onTap: () {},
+              child: Text(
+                'Set address',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.tangerine),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

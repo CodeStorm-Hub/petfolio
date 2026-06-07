@@ -24,7 +24,7 @@ class NutritionScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pet = ref.watch(activePetControllerProvider);
     if (pet == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: TailWagLoader()));
     }
     return _NutritionBody(pet: pet);
   }

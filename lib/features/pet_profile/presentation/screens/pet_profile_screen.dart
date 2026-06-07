@@ -5,6 +5,7 @@ import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 
 import 'package:petfolio/features/care/data/models/care_task.dart';
+import 'package:petfolio/features/care/data/models/pet_level.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_dashboard_controller.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_streak_stream_provider.dart';
 import 'package:petfolio/features/care/presentation/controllers/pet_awards_provider.dart';
@@ -98,7 +99,7 @@ class PetProfileScreen extends ConsumerWidget {
                   title: "Recent moments",
                   accent: AppColors.poppy,
                   trailing: TextButton(
-                    onPressed: () {},
+                    onPressed: () => AppSnackBar.show('Photo gallery coming soon 📸'),
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.poppy700,
                       textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
@@ -126,7 +127,7 @@ class PetProfileScreen extends ConsumerWidget {
                   title: "Recent achievements",
                   accent: AppColors.lilac,
                 ),
-                _RecentAchievementsRow(),
+                _RecentAchievementsRow(petId: activePet.id),
                 
                 const SizedBox(height: 100),
               ],
@@ -138,6 +139,8 @@ class PetProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: pt.surface1,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: _FloatingToolbar(pet: activePet),
       body: isWide
           ? Align(
               alignment: Alignment.topCenter,
@@ -518,37 +521,163 @@ class _MomentPlaceholder extends StatelessWidget {
   }
 }
 
-class _RecentAchievementsRow extends StatelessWidget {
-  static const _badges = [
-    (AppColors.sunny, '🔥', '7-Day Hero'),
-    (AppColors.mint, '🏥', 'Vet Visit'),
-    (AppColors.poppy, '💖', '100 Likes'),
-    (AppColors.lilac, '🎓', 'Trained'),
-    (AppColors.tangerine, '🦴', 'Treat Master'),
-  ];
+class _RecentAchievementsRow extends ConsumerWidget {
+  const _RecentAchievementsRow({required this.petId});
+  final String petId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final awardsAsync = ref.watch(petAwardsSummaryProvider(petId));
+    final unlockedTypes = awardsAsync.maybeWhen(
+      data: (a) => a.unlockedTypes,
+      orElse: () => const <String>{},
+    );
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       clipBehavior: Clip.none,
       child: Row(
         children: [
-          for (int i = 0; i < _badges.length; i++)
+          for (int i = 0; i < kBadgeCatalog.length; i++)
             Padding(
               padding: const EdgeInsets.only(right: 10),
               child: SizedBox(
                 width: 86,
                 child: PfAchievementTile(
-                  color: _badges[i].$1,
-                  emoji: _badges[i].$2,
-                  label: _badges[i].$3,
+                  color: kBadgeCatalog[i].color,
+                  emoji: kBadgeCatalog[i].emoji,
+                  label: kBadgeCatalog[i].label,
+                  owned: unlockedTypes.contains(kBadgeCatalog[i].type),
                   index: i,
                   boxSize: 76,
                 ),
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Floating toolbar
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _FloatingToolbar extends StatefulWidget {
+  const _FloatingToolbar({required this.pet});
+  final Pet pet;
+
+  @override
+  State<_FloatingToolbar> createState() => _FloatingToolbarState();
+}
+
+class _FloatingToolbarState extends State<_FloatingToolbar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 620),
+    );
+    _scale = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.elasticOut),
+    );
+    _ctrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return ScaleTransition(
+      scale: _scale,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(999),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x28000000),
+              blurRadius: 28,
+              offset: Offset(0, 8),
+              spreadRadius: -4,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _ToolbarBtn(
+              icon: Icons.edit_rounded,
+              label: 'Edit',
+              color: AppColors.tangerine,
+              onTap: () => context.push('/pet/${widget.pet.id}/edit'),
+            ),
+            const SizedBox(width: 4),
+            _ToolbarBtn(
+              icon: Icons.favorite_rounded,
+              label: 'Care',
+              color: AppColors.poppy,
+              onTap: () => context.push('/care'),
+            ),
+            const SizedBox(width: 4),
+            _ToolbarBtn(
+              icon: Icons.camera_alt_rounded,
+              label: 'Post',
+              color: AppColors.sky,
+              onTap: () => context.push('/social/create-post'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ToolbarBtn extends StatelessWidget {
+  const _ToolbarBtn({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: color.withAlpha(24),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: color),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: color),
+            ),
+          ],
+        ),
       ),
     );
   }

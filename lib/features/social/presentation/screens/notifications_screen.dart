@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/widgets.dart';
 import '../../data/models/app_notification.dart';
 import '../controllers/notification_controller.dart';
 
@@ -60,8 +61,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         centerTitle: true,
       ),
       body: notificationsAsync.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator.adaptive()),
+        loading: () => const Center(child: TailWagLoader()),
         error: (e, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(32),

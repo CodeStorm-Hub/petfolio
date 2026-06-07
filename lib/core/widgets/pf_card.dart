@@ -20,8 +20,6 @@ class PfCard extends StatelessWidget {
   final double borderRadius;
   final List<BoxShadow>? boxShadow;
   final BoxBorder? border;
-  /// Uses M3 Expressive [ContinuousRectangleBorder] (squircle) instead of
-  /// the standard [RoundedRectangleBorder].
   final bool squircle;
 
   @override
@@ -46,8 +44,8 @@ class PfCard extends StatelessWidget {
         decoration: ShapeDecoration(
           color: bg,
           shadows: shadows,
-          shape: ContinuousRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadius * 2),
+          shape: RoundedSuperellipseBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
             side: borderSide,
           ),
         ),

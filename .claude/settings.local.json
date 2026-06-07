@@ -133,7 +133,8 @@
       "Bash(Remove-Item \"G:\\\\GitHub\\\\petfolio\\\\lib\\\\features\\\\care\\\\data\\\\models\\\\care_task_log.dart\")",
       "PowerShell(graphify query \"AiRoutineNotifier dependencies and callers\" --budget 2000 2>&1)",
       "PowerShell(head -60)",
-      "Bash(graphify query *)"
+      "Bash(graphify query *)",
+      "PowerShell(\\(Get-Content \"G:\\\\GitHub\\\\petfolio\\\\lib\\\\features\\\\marketplace\\\\presentation\\\\screens\\\\marketplace_screen.dart\" | Measure-Object -Line\\).Lines)"
     ]
   }
 }

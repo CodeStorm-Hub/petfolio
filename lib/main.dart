@@ -21,6 +21,7 @@ import 'core/router.dart';
 import 'features/auth/presentation/controllers/auth_controller.dart';
 import 'core/platform/platform_notifications.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/prefs_schema.dart';
 import 'core/services/stripe_init_service.dart';
 import 'core/theme/theme.dart';
 import 'core/widgets/app_snack_bar.dart';
@@ -69,6 +70,7 @@ Future<void> main() async {
   };
 
   _assertEnvVars();
+  await PrefsSchema.migrate();
 
   GoogleFonts.config.allowRuntimeFetching = kIsWeb;
 
