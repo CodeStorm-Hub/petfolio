@@ -757,6 +757,7 @@ class _NewProductTileState extends State<_NewProductTile> {
                             imageUrl: widget.product.imageUrls.first,
                             height: 100,
                             fit: BoxFit.contain,
+                            cacheManager: petfolioWebImageCacheManager(),
                             memCacheWidth: networkImageMemCacheWidth(
                               context,
                               100,
