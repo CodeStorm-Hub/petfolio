@@ -21,27 +21,36 @@ class Appointment {
   final String? clinicName;
   final String? notes;
 
-  factory Appointment.fromJson(Map<String, dynamic> json) => Appointment(
-        id: json['id'] as String,
-        petId: json['pet_id'] as String,
-        title: json['title'] as String,
-        scheduledAt: DateTime.parse(json['scheduled_at'] as String),
-        isCompleted: (json['is_completed'] as bool?) ?? false,
-        createdAt: DateTime.parse(json['created_at'] as String),
-        vetName: json['vet_name'] as String?,
-        clinicName: json['clinic_name'] as String?,
-        notes: json['notes'] as String?,
-      );
+  factory Appointment.fromJson(Map<String, dynamic> json) {
+    final status = json['status'] as String?;
+    final legacyCompleted = json['is_completed'] as bool?;
+    return Appointment(
+      id: json['id'] as String,
+      petId: json['pet_id'] as String,
+      title: json['title'] as String,
+      scheduledAt: DateTime.parse(json['scheduled_at'] as String),
+      isCompleted: status != null
+          ? status == 'completed'
+          : (legacyCompleted ?? false),
+      createdAt: DateTime.parse(json['created_at'] as String),
+      vetName: json['vet_name'] as String?,
+      clinicName: (json['location'] ?? json['clinic_name']) as String?,
+      notes: json['notes'] as String?,
+    );
+  }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toInsertJson({required String ownerId}) => {
         'pet_id': petId,
+        'owner_id': ownerId,
         'title': title,
         'scheduled_at': scheduledAt.toUtc().toIso8601String(),
-        'is_completed': isCompleted,
+        'status': isCompleted ? 'completed' : 'upcoming',
         if (vetName != null) 'vet_name': vetName,
-        if (clinicName != null) 'clinic_name': clinicName,
+        if (clinicName != null) 'location': clinicName,
         if (notes != null) 'notes': notes,
       };
+
+  Map<String, dynamic> toJson() => toInsertJson(ownerId: 'test-owner');
 
   Appointment copyWith({
     bool? isCompleted,

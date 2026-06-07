@@ -819,7 +819,7 @@ class _SwipeCardState extends State<_SwipeCard> {
   ) {
     final (exitOffset, exitAngle) = _exitParams(action, size, layoutWidth);
     // Spring-physics exit: accelerates quickly off-screen like a card throw
-    const curve = Curves.easeInCubic;
+    final curve = PetfolioThemeExtension.curveSpring;
     final fast = MediaQuery.disableAnimationsOf(context);
 
     if (fast) {

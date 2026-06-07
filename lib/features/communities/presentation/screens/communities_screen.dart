@@ -2,13 +2,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:go_router/go_router.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/petfolio_empty_state.dart';
+import '../../../../core/widgets/primary_pill_button.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
+import '../widgets/create_community_sheet.dart';
 import '../../data/models/community.dart';
 import '../controllers/communities_controller.dart';
-import 'community_detail_screen.dart';
 
 class CommunitiesScreen extends ConsumerWidget {
   const CommunitiesScreen({super.key});
@@ -24,6 +27,16 @@ class CommunitiesScreen extends ConsumerWidget {
         backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
       ),
+      floatingActionButton: state.maybeWhen(
+        data: (communities) => communities.isEmpty
+            ? null
+            : FloatingActionButton.extended(
+                onPressed: () => showCreateCommunitySheet(context, ref),
+                icon: const Icon(Icons.add_rounded),
+                label: const Text('Create community'),
+              ),
+        orElse: () => null,
+      ),
       body: state.when(
         loading: () => ListView.separated(
           padding: const EdgeInsets.all(16),
@@ -32,13 +45,27 @@ class CommunitiesScreen extends ConsumerWidget {
           itemBuilder: (_, _) =>
               const SkeletonLoader(width: double.infinity, height: 88),
         ),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => PetfolioEmptyState(
+          icon: Icons.error_outline_rounded,
+          title: 'Could not load communities',
+          subtitle: 'Check your connection and try again.',
+          action: PrimaryPillButton(
+            label: 'Retry',
+            onPressed: () =>
+                ref.invalidate(communitiesControllerProvider),
+          ),
+        ),
         data: (communities) {
           if (communities.isEmpty) {
-            return const PetfolioEmptyState(
+            return PetfolioEmptyState(
               icon: Icons.pets_rounded,
               title: 'No communities yet',
               subtitle: 'Be the first to create one!',
+              action: PrimaryPillButton(
+                label: 'Create community',
+                leadingIcon: const Icon(Icons.add_rounded, color: Colors.white),
+                onPressed: () => showCreateCommunitySheet(context, ref),
+              ),
             );
           }
           return ListView.separated(
@@ -64,16 +91,18 @@ class _CommunityCard extends ConsumerWidget {
     final tt = Theme.of(context).textTheme;
 
     return InkWell(
-      onTap: () => Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => CommunityDetailScreen(community: community),
-      )),
+      onTap: () => context.push(
+        '/social/communities/${community.id}',
+        extra: community,
+      ),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: pt.surface1,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: pt.line, width: 1),
+          boxShadow: pt.shadowE1,
         ),
         child: Row(
           children: [
@@ -98,19 +127,25 @@ class _CommunityCard extends ConsumerWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Icon(Icons.group_rounded,
-                          size: 12, color: pt.ink300),
+                      Icon(Icons.group_rounded, size: 14, color: pt.ink500),
                       const SizedBox(width: 4),
-                      Text('${community.memberCount}',
-                          style: tt.labelSmall
-                              ?.copyWith(color: pt.ink300)),
-                      const SizedBox(width: 10),
-                      Icon(Icons.article_rounded,
-                          size: 12, color: pt.ink300),
+                      Text(
+                        '${community.memberCount}',
+                        style: tt.labelSmall?.copyWith(
+                          color: pt.ink500,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Icon(Icons.article_rounded, size: 14, color: pt.ink500),
                       const SizedBox(width: 4),
-                      Text('${community.postCount}',
-                          style: tt.labelSmall
-                              ?.copyWith(color: pt.ink300)),
+                      Text(
+                        '${community.postCount}',
+                        style: tt.labelSmall?.copyWith(
+                          color: pt.ink500,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -162,21 +197,53 @@ class _JoinButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isMember = community.isMember;
-    return FilledButton(
-      onPressed: () => ref
-          .read(communitiesControllerProvider.notifier)
-          .toggleMembership(community),
-      style: FilledButton.styleFrom(
-        backgroundColor:
-            isMember ? AppColors.lilac.withValues(alpha: 0.15) : AppColors.lilac,
-        foregroundColor: isMember ? AppColors.lilac : Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        minimumSize: Size.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (isMember) {
+      return Semantics(
+        button: true,
+        label: 'Leave ${community.name}',
+        child: OutlinedButton(
+          onPressed: () => ref
+              .read(communitiesControllerProvider.notifier)
+              .toggleMembership(community),
+          style: OutlinedButton.styleFrom(
+            foregroundColor:
+                isDark ? AppColors.lilac700D : AppColors.lilac700,
+            side: BorderSide(color: AppColors.lilac.withValues(alpha: 0.55)),
+            backgroundColor:
+                isDark ? AppColors.lilacSoftD : AppColors.lilacSoft,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+          child: const Text('Joined',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+        ),
+      );
+    }
+
+    return Semantics(
+      button: true,
+      label: 'Join ${community.name}',
+      child: FilledButton(
+        onPressed: () => ref
+            .read(communitiesControllerProvider.notifier)
+            .toggleMembership(community),
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.lilac,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        ),
+        child: const Text('Join',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
       ),
-      child: Text(isMember ? 'Joined' : 'Join',
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
     );
   }
 }

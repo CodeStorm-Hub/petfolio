@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/services/prefs_schema.dart';
+import '../../../../core/services/secure_storage_service.dart';
 import '../../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../data/models/cart_item.dart';
 import '../../data/models/product.dart';
@@ -19,9 +21,19 @@ final cartProvider = NotifierProvider<CartNotifier, CartState>(CartNotifier.new)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class CartNotifier extends Notifier<CartState> {
-  String get _key {
+  SecureStorageService get _secureStorage =>
+      ref.read(secureStorageServiceProvider);
+
+  String get _secureKey {
     final uid = Supabase.instance.client.auth.currentUser?.id;
-    return uid != null ? 'cart_$uid' : 'cart';
+    return uid != null
+        ? '${PrefsSchema.secureCartPrefix}$uid'
+        : PrefsSchema.secureCartPrefix;
+  }
+
+  String get _legacyKey {
+    final uid = Supabase.instance.client.auth.currentUser?.id;
+    return uid != null ? '${PrefsSchema.cartPrefix}$uid' : 'cart';
   }
 
   @override
@@ -38,21 +50,27 @@ class CartNotifier extends Notifier<CartState> {
 
   Future<void> _loadFromPrefs() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_key);
+      var raw = await _secureStorage.read(_secureKey);
+      if (raw == null) {
+        final prefs = await SharedPreferences.getInstance();
+        raw = prefs.getString(_legacyKey);
+        if (raw != null) {
+          await _secureStorage.write(_secureKey, raw);
+          await prefs.remove(_legacyKey);
+        }
+      }
       if (raw == null) return;
       state = CartState.fromStorageJson(
         jsonDecode(raw) as Map<String, dynamic>,
       );
-    } catch (_) {
-      // Corrupt data — stay with empty cart.
-    }
+    } catch (_) {}
   }
 
   void _persist() {
     final snapshot = state;
-    SharedPreferences.getInstance().then(
-      (p) => p.setString(_key, jsonEncode(snapshot.toStorageJson())),
+    _secureStorage.write(
+      _secureKey,
+      jsonEncode(snapshot.toStorageJson()),
     );
   }
 
@@ -151,6 +169,7 @@ class CartNotifier extends Notifier<CartState> {
   /// Empty the entire cart and remove its persisted snapshot.
   void clear() {
     state = CartState.empty;
-    SharedPreferences.getInstance().then((p) => p.remove(_key));
+    _secureStorage.delete(_secureKey);
+    SharedPreferences.getInstance().then((p) => p.remove(_legacyKey));
   }
 }

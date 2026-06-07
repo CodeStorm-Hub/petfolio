@@ -36,8 +36,34 @@ class CommunitiesController extends AsyncNotifier<List<Community>> {
 
     state = AsyncData([
       for (final c in current)
-        c.id == community.id ? c.copyWith(isMember: !community.isMember) : c,
+        if (c.id == community.id)
+          c.copyWith(
+            isMember: !community.isMember,
+            memberCount: (community.memberCount +
+                    (community.isMember ? -1 : 1))
+                .clamp(0, 999999),
+          )
+        else
+          c,
     ]);
+  }
+
+  Future<Community?> createCommunity({
+    required String name,
+    String? description,
+  }) async {
+    final petId = ref.read(activePetIdProvider);
+    if (petId == null) return null;
+
+    final community = await ref.read(communityRepositoryProvider).createCommunity(
+          name: name,
+          description: description,
+          creatorPetId: petId,
+        );
+
+    final current = state.value ?? [];
+    state = AsyncData([community, ...current]);
+    return community;
   }
 }
 
@@ -92,6 +118,13 @@ class CommunityPostsNotifier extends Notifier<PostsState> {
     }
   }
 
+  Future<void> reload() async {
+    final communityId = _communityId;
+    if (communityId == null) return;
+    state = const PostsState(isLoading: true);
+    await _load(communityId);
+  }
+
   void _subscribeRealtime(String communityId) {
     unawaited(_channel?.unsubscribe());
     final client = Supabase.instance.client;
@@ -122,13 +155,18 @@ class CommunityPostsNotifier extends Notifier<PostsState> {
     final petId = ref.read(activePetIdProvider);
     if (communityId == null || petId == null) return;
 
-    final post = await ref.read(communityRepositoryProvider).createPost(
-          communityId: communityId,
-          authorPetId: petId,
-          content: content,
-        );
-    if (!state.posts.any((p) => p.id == post.id)) {
-      state = state.copyWith(posts: [post, ...state.posts]);
+    try {
+      final post = await ref.read(communityRepositoryProvider).createPost(
+            communityId: communityId,
+            authorPetId: petId,
+            content: content,
+          );
+      if (!state.posts.any((p) => p.id == post.id)) {
+        state = state.copyWith(posts: [post, ...state.posts], error: null);
+      }
+    } catch (e) {
+      state = state.copyWith(error: e);
+      rethrow;
     }
   }
 

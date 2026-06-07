@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/platform/media_picker.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/services/breed_identification_service.dart';
@@ -32,8 +33,7 @@ class _BreedIdentifierWidgetState
   String? _description;
 
   Future<void> _pickAndIdentify(ImageSource source) async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: source, imageQuality: 80);
+    final picked = await pickImage(source: source, imageQuality: 80);
     if (picked == null) return;
 
     setState(() {

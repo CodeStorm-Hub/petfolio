@@ -39,12 +39,12 @@ class ProductRepository {
     if (afterCreatedAt != null && afterId != null) {
       final ts = afterCreatedAt.toUtc().toIso8601String();
       filterQuery = filterQuery
-          .or('created_at.gt.$ts,and(created_at.eq.$ts,id.gt.$afterId)');
+          .or('created_at.lt.$ts,and(created_at.eq.$ts,id.lt.$afterId)');
     }
 
     final rows = await filterQuery
-        .order('created_at', ascending: true)
-        .order('id', ascending: true)
+        .order('created_at', ascending: false)
+        .order('id', ascending: false)
         .limit(pageSize);
 
     return (rows as List)

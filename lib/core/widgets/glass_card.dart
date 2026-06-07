@@ -28,29 +28,23 @@ class GlassCard extends StatelessWidget {
     this.forceOpaque = false,
     this.width,
     this.height,
+    this.semanticLabel,
   });
 
   final Widget child;
-
-  /// Corner radius. Use [PetfolioThemeExtension.radiusXl] (20) for floating
-  /// cards; [PetfolioThemeExtension.radius2xl] (28) for bottom-sheet glass.
   final double borderRadius;
-
-  /// Inner padding around [child].
   final EdgeInsetsGeometry padding;
-
-  /// Force the solid fallback regardless of accessibility settings.
   final bool forceOpaque;
-
   final double? width;
   final double? height;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
     final useGlass = !forceOpaque && !mq.disableAnimations && !mq.highContrast;
 
-    return useGlass
+    final card = useGlass
         ? _GlassBody(
             borderRadius: borderRadius,
             padding: padding,
@@ -65,6 +59,9 @@ class GlassCard extends StatelessWidget {
             height: height,
             child: child,
           );
+
+    if (semanticLabel == null) return card;
+    return Semantics(label: semanticLabel, container: true, child: card);
   }
 }
 

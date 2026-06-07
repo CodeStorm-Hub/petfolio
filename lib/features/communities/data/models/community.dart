@@ -34,14 +34,15 @@ class Community {
         isMember: isMember,
       );
 
-  Community copyWith({bool? isMember}) => Community(
+  Community copyWith({bool? isMember, int? memberCount, int? postCount}) =>
+      Community(
         id: id,
         name: name,
         description: description,
         speciesFilter: speciesFilter,
         avatarUrl: avatarUrl,
-        memberCount: memberCount,
-        postCount: postCount,
+        memberCount: memberCount ?? this.memberCount,
+        postCount: postCount ?? this.postCount,
         createdAt: createdAt,
         isMember: isMember ?? this.isMember,
       );

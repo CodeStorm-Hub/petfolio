@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -54,7 +53,13 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
         ),
       ),
       body: appointmentsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator.adaptive()),
+        loading: () => ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: 4,
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
+          itemBuilder: (_, _) =>
+              const SkeletonLoader(width: double.infinity, height: 72),
+        ),
         error: (_, e) => const Center(child: Text('Could not load appointments')),
         data: (appointments) => _Body(
           appointments: appointments,
@@ -382,20 +387,23 @@ class _AddAppointmentSheetState extends ConsumerState<_AddAppointmentSheet> {
         _selectedTime.minute,
       );
       final appt = Appointment(
-        id: const Uuid().v4(),
+        id: '',
         petId: widget.petId,
         title: _titleCtrl.text.trim(),
         scheduledAt: scheduled,
         isCompleted: false,
         createdAt: DateTime.now(),
         vetName: _vetCtrl.text.trim().isEmpty ? null : _vetCtrl.text.trim(),
-        clinicName: _clinicCtrl.text.trim().isEmpty ? null : _clinicCtrl.text.trim(),
+        clinicName:
+            _clinicCtrl.text.trim().isEmpty ? null : _clinicCtrl.text.trim(),
         notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
       );
-      await ref
-          .read(appointmentControllerProvider.notifier)
-          .add(appt);
+      await ref.read(appointmentControllerProvider.notifier).add(appt);
       if (mounted) Navigator.of(context).pop();
+    } catch (e) {
+      if (mounted) {
+        AppSnackBar.showError('Could not save appointment: $e');
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }

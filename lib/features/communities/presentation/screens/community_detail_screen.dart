@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/time_ago.dart' show formatTimeAgo;
+import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../../core/widgets/petfolio_empty_state.dart';
+import '../../../../core/widgets/primary_pill_button.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
 import '../../data/models/community.dart';
 import '../../data/models/community_post.dart';
@@ -47,7 +49,11 @@ class _CommunityDetailScreenState
     if (text.isEmpty) return;
     _postCtrl.clear();
     setState(() => _composerVisible = false);
-    await ref.read(communityPostsProvider.notifier).createPost(text);
+    try {
+      await ref.read(communityPostsProvider.notifier).createPost(text);
+    } catch (e) {
+      if (mounted) AppSnackBar.showError('Could not post. Please try again.');
+    }
   }
 
   @override
@@ -96,7 +102,16 @@ class _CommunityDetailScreenState
       );
     }
     if (postsState.error != null) {
-      return Center(child: Text('${postsState.error}'));
+      return PetfolioEmptyState(
+        icon: Icons.cloud_off_rounded,
+        title: 'Could not load posts',
+        subtitle: 'Pull to refresh or tap retry.',
+        action: PrimaryPillButton(
+          label: 'Retry',
+          onPressed: () =>
+              ref.read(communityPostsProvider.notifier).reload(),
+        ),
+      );
     }
     final posts = postsState.posts;
     if (posts.isEmpty) {
@@ -186,9 +201,10 @@ class _PostCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: pt.surface1,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: pt.line, width: 1),
+        boxShadow: pt.shadowE1,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

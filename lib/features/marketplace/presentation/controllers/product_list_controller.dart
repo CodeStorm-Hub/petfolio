@@ -61,9 +61,10 @@ final subscribableProductsProvider = Provider<List<Product>>((ref) {
   }).toList();
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Notifier
-// ─────────────────────────────────────────────────────────────────────────────
+final marketplaceProductsLoadingMoreProvider = Provider<bool>((ref) {
+  final notifier = ref.watch(productListProvider.notifier);
+  return notifier.isLoadingMore;
+});
 
 class ProductListNotifier extends AsyncNotifier<List<Product>> {
   static const int _pageSize = 20;
@@ -74,6 +75,7 @@ class ProductListNotifier extends AsyncNotifier<List<Product>> {
   bool      _loadingMore = false;
 
   bool get hasMore => _hasMore;
+  bool get isLoadingMore => _loadingMore;
 
   @override
   Future<List<Product>> build() async {

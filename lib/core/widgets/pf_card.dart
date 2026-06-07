@@ -12,6 +12,7 @@ class PfCard extends StatelessWidget {
     this.boxShadow,
     this.border,
     this.squircle = false,
+    this.semanticLabel,
   });
 
   final Widget child;
@@ -21,6 +22,7 @@ class PfCard extends StatelessWidget {
   final List<BoxShadow>? boxShadow;
   final BoxBorder? border;
   final bool squircle;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +37,12 @@ class PfCard extends StatelessWidget {
       ),
     ];
 
+    Widget card;
     if (squircle) {
       final borderSide = border is Border
           ? (border! as Border).top
           : BorderSide(color: isDark ? AppColors.lineD : AppColors.line);
-      return Container(
+      card = Container(
         padding: padding,
         decoration: ShapeDecoration(
           color: bg,
@@ -51,17 +54,20 @@ class PfCard extends StatelessWidget {
         ),
         child: child,
       );
+    } else {
+      card = Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(borderRadius),
+          border: border,
+          boxShadow: shadows,
+        ),
+        child: child,
+      );
     }
 
-    return Container(
-      padding: padding,
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: border,
-        boxShadow: shadows,
-      ),
-      child: child,
-    );
+    if (semanticLabel == null) return card;
+    return Semantics(label: semanticLabel, container: true, child: card);
   }
 }

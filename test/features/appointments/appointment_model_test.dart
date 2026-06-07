@@ -15,16 +15,16 @@ void main() {
   );
 
   group('Appointment.fromJson', () {
-    test('deserializes all fields', () {
+    test('deserializes all fields from current schema', () {
       final json = {
         'id': 'appt-1',
         'pet_id': 'pet-1',
         'title': 'Annual check-up',
         'scheduled_at': '2026-07-15T10:30:00.000Z',
-        'is_completed': false,
+        'status': 'upcoming',
         'created_at': '2026-06-01T00:00:00.000Z',
         'vet_name': 'Dr. Shah',
-        'clinic_name': 'City Vet',
+        'location': 'City Vet',
         'notes': 'Bring vaccination card',
       };
       final appt = Appointment.fromJson(json);
@@ -38,7 +38,19 @@ void main() {
       expect(appt.notes, 'Bring vaccination card');
     });
 
-    test('handles null optional fields', () {
+    test('maps completed status', () {
+      final json = {
+        'id': 'appt-3',
+        'pet_id': 'pet-1',
+        'title': 'Follow-up',
+        'scheduled_at': '2026-07-20T09:00:00.000Z',
+        'status': 'completed',
+        'created_at': '2026-06-01T00:00:00.000Z',
+      };
+      expect(Appointment.fromJson(json).isCompleted, true);
+    });
+
+    test('handles legacy is_completed and clinic_name', () {
       final json = {
         'id': 'appt-2',
         'pet_id': 'pet-1',
@@ -46,26 +58,25 @@ void main() {
         'scheduled_at': '2026-07-20T09:00:00.000Z',
         'is_completed': null,
         'created_at': '2026-06-01T00:00:00.000Z',
+        'clinic_name': 'Old Clinic',
       };
       final appt = Appointment.fromJson(json);
       expect(appt.isCompleted, false);
+      expect(appt.clinicName, 'Old Clinic');
       expect(appt.vetName, isNull);
-      expect(appt.clinicName, isNull);
       expect(appt.notes, isNull);
     });
   });
 
-  group('Appointment.toJson', () {
-    test('omits id — server assigns it on insert', () {
-      final json = base.toJson();
+  group('Appointment.toInsertJson', () {
+    test('includes owner_id and maps clinic to location', () {
+      final json = base.toInsertJson(ownerId: 'owner-1');
       expect(json.containsKey('id'), false);
-    });
-
-    test('includes required fields', () {
-      final json = base.toJson();
+      expect(json['owner_id'], 'owner-1');
       expect(json['pet_id'], 'pet-1');
       expect(json['title'], 'Annual check-up');
-      expect(json['is_completed'], false);
+      expect(json['status'], 'upcoming');
+      expect(json['location'], 'City Vet');
     });
 
     test('omits null optional fields', () {
@@ -77,14 +88,14 @@ void main() {
         isCompleted: false,
         createdAt: DateTime.utc(2026),
       );
-      final json = bare.toJson();
+      final json = bare.toInsertJson(ownerId: 'owner-1');
       expect(json.containsKey('vet_name'), false);
-      expect(json.containsKey('clinic_name'), false);
+      expect(json.containsKey('location'), false);
       expect(json.containsKey('notes'), false);
     });
 
     test('serializes scheduledAt as UTC ISO 8601', () {
-      final json = base.toJson();
+      final json = base.toInsertJson(ownerId: 'owner-1');
       expect(json['scheduled_at'], '2026-07-15T10:30:00.000Z');
     });
   });

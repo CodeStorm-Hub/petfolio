@@ -372,23 +372,63 @@ abstract final class AppTheme {
 
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: Colors.transparent,
-        indicatorColor: Colors.transparent,
+        indicatorColor: isDark ? AppColors.tangerineSoftD : AppColors.tangerineSoft,
+        indicatorShape: RoundedSuperellipseBorder(
+          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusPill),
+        ),
         surfaceTintColor: Colors.transparent,
         overlayColor: WidgetStateProperty.all(Colors.transparent),
         elevation: 0,
         height: 72,
-        labelTextStyle: WidgetStateProperty.all(
-          GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600),
-        ),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return GoogleFonts.inter(
+            fontSize: 11,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          );
+        }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(size: 24);
+            return IconThemeData(
+              color: isDark ? AppColors.tangerineD : AppColors.tangerine,
+              size: 24,
+            );
           }
           return IconThemeData(
             color: isDark ? AppColors.ink500D : AppColors.ink500,
             size: 24,
           );
         }),
+      ),
+
+      searchBarTheme: SearchBarThemeData(
+        elevation: WidgetStateProperty.all(0),
+        backgroundColor: WidgetStateProperty.all(
+          isDark ? AppColors.surface0D : AppColors.surface0,
+        ),
+        hintStyle: WidgetStateProperty.all(
+          GoogleFonts.inter(
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
+            color: isDark ? AppColors.ink300D : AppColors.ink300,
+          ),
+        ),
+        textStyle: WidgetStateProperty.all(
+          GoogleFonts.inter(
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            color: isDark ? AppColors.ink950D : AppColors.ink950,
+          ),
+        ),
+        padding: WidgetStateProperty.all(
+          const EdgeInsets.symmetric(horizontal: 16),
+        ),
+        shape: WidgetStateProperty.all(
+          RoundedSuperellipseBorder(
+            borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusPill),
+            side: BorderSide(color: isDark ? AppColors.line2D : AppColors.line2),
+          ),
+        ),
       ),
 
       navigationRailTheme: NavigationRailThemeData(

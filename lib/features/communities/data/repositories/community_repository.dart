@@ -12,6 +12,11 @@ class CommunityRepository {
   CommunityRepository(this._client);
   final SupabaseClient _client;
 
+  static const _postAuthorEmbed =
+      'pets!community_posts_author_pet_id_fkey(name, avatar_url)';
+
+  static const _postSelect = '*, $_postAuthorEmbed';
+
   Future<List<Community>> fetchAll({String? petId}) async {
     final rows = await _client
         .from('communities')
@@ -39,7 +44,7 @@ class CommunityRepository {
       {String? petId}) async {
     final rows = await _client
         .from('community_posts')
-        .select('*, pets(name, avatar_url)')
+        .select(_postSelect)
         .eq('community_id', communityId)
         .order('created_at', ascending: false)
         .limit(30);
@@ -75,6 +80,45 @@ class CommunityRepository {
         .eq('pet_id', petId);
   }
 
+  Future<Community> createCommunity({
+    required String name,
+    required String creatorPetId,
+    String? description,
+    String? speciesFilter,
+  }) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) {
+      throw StateError('Sign in to create a community');
+    }
+
+    final row = await _client
+        .from('communities')
+        .insert({
+          'name': name.trim(),
+          'created_by': userId,
+          if (description != null && description.trim().isNotEmpty)
+            'description': description.trim(),
+          if (speciesFilter != null && speciesFilter.isNotEmpty)
+            'species_filter': speciesFilter,
+        })
+        .select()
+        .single();
+
+    final communityId = row['id'] as String;
+    await join(communityId, creatorPetId);
+
+    final updated = await _client
+        .from('communities')
+        .select()
+        .eq('id', communityId)
+        .single();
+
+    return Community.fromJson(
+      Map<String, dynamic>.from(updated),
+      isMember: true,
+    );
+  }
+
   Future<CommunityPost> createPost({
     required String communityId,
     required String authorPetId,
@@ -89,7 +133,7 @@ class CommunityRepository {
           'content': content,
           if (imageUrl != null) 'image_url': imageUrl, // ignore: use_null_aware_elements
         })
-        .select('*, pets(name, avatar_url)')
+        .select(_postSelect)
         .single();
     return CommunityPost.fromJson(Map<String, dynamic>.from(row));
   }

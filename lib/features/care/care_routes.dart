@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'presentation/screens/medical_vault_screen.dart';
 import 'presentation/screens/nutrition_screen.dart';
+import 'presentation/screens/walk_tracking_screen.dart';
 
 List<RouteBase> careRoutes(GlobalKey<NavigatorState> rootKey) => [
   GoRoute(
@@ -14,5 +15,10 @@ List<RouteBase> careRoutes(GlobalKey<NavigatorState> rootKey) => [
     parentNavigatorKey: rootKey,
     path: '/care/medical-vault',
     builder: (context, state) => const MedicalVaultScreen(),
+  ),
+  GoRoute(
+    parentNavigatorKey: rootKey,
+    path: '/care/walk',
+    builder: (context, state) => const WalkTrackingScreen(),
   ),
 ];

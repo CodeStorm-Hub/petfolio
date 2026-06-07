@@ -62,45 +62,53 @@ class _PetfolioEmptyStateState extends State<PetfolioEmptyState>
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
-    return FadeTransition(
-      opacity: _opacity,
-      child: SlideTransition(
-        position: _slide,
-        child: ScaleTransition(
-          scale: _scale,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(widget.icon, size: 48, color: pt.ink300),
-                const SizedBox(height: 12),
-                Text(
-                  widget.title,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
-                  ),
-                ),
-                if (widget.subtitle != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.subtitle!,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      height: 1.45,
-                      color: pt.ink500,
+    return Semantics(
+      label: widget.subtitle != null
+          ? '${widget.title}. ${widget.subtitle}'
+          : widget.title,
+      child: Center(
+        child: FadeTransition(
+          opacity: _opacity,
+          child: SlideTransition(
+            position: _slide,
+            child: ScaleTransition(
+              scale: _scale,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(widget.icon, size: 48, color: pt.ink300),
+                    const SizedBox(height: 12),
+                    Text(
+                      widget.title,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurface,
+                      ),
                     ),
-                  ),
-                ],
-                if (widget.action != null) ...[
-                  const SizedBox(height: 20),
-                  widget.action!,
-                ],
-              ],
+                    if (widget.subtitle != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        widget.subtitle!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.45,
+                          color: pt.ink700,
+                        ),
+                      ),
+                    ],
+                    if (widget.action != null) ...[
+                      const SizedBox(height: 20),
+                      widget.action!,
+                    ],
+                  ],
+                ),
+              ),
             ),
           ),
         ),

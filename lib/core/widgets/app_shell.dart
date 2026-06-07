@@ -172,16 +172,30 @@ class AppShellHeader extends ConsumerWidget {
           _HeaderIconBtn(icon: Icons.settings_rounded, onTap: () => context.push('/pets/manage')),
         ]);
       case 1:
-        trailingActions = Consumer(builder: (context, ref, _) {
-          final isDark = Theme.of(context).brightness == Brightness.dark;
-          return _HeaderIconBtn(
-            icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-            tooltip: isDark ? 'Switch to light mode' : 'Switch to dark mode',
-            onTap: () => ref.read(themeProvider.notifier).toggleTheme(),
-          );
-        });
+        trailingActions = Row(children: [
+          _HeaderIconBtn(
+            icon: Icons.directions_walk_rounded,
+            tooltip: 'Walk tracking',
+            onTap: () => context.push('/care/walk'),
+          ),
+          const SizedBox(width: 8),
+          Consumer(builder: (context, ref, _) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return _HeaderIconBtn(
+              icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+              tooltip: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+              onTap: () => ref.read(themeProvider.notifier).toggleTheme(),
+            );
+          }),
+        ]);
       case 2:
         trailingActions = Row(children: [
+          _HeaderIconBtn(
+            icon: Icons.groups_rounded,
+            tooltip: 'Communities',
+            onTap: () => context.push('/social/communities'),
+          ),
+          const SizedBox(width: 8),
           _HeaderIconBtn(icon: Icons.search, onTap: () {}),
           const SizedBox(width: 8),
           _HeaderIconBtn(icon: Icons.send_rounded, onTap: () => context.push('/matching/inbox')),

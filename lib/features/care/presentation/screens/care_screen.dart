@@ -351,6 +351,8 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                             const SizedBox(height: 28),
                             _UtilityBanner(pt: pt),
                             const SizedBox(height: 12),
+                            _CareExploreRow(pt: pt),
+                            const SizedBox(height: 12),
                             _AppointmentsBanner(pt: pt),
                           ],
                         ),
@@ -2745,6 +2747,115 @@ String _defaultTitle(dbtask.CareTaskType type) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Medical vault & nutrition entry banners
 // ─────────────────────────────────────────────────────────────────────────────
+
+// ── Walk tracking & communities quick links ─────────────────────────────────
+
+class _CareExploreRow extends StatelessWidget {
+  const _CareExploreRow({required this.pt});
+
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _ExploreTile(
+            icon: Icons.map_rounded,
+            iconBg: AppColors.skySoft,
+            iconColor: AppColors.sky700,
+            title: 'Walk Tracker',
+            subtitle: 'Live GPS route map',
+            onTap: () => context.push('/care/walk'),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _ExploreTile(
+            icon: Icons.groups_rounded,
+            iconBg: AppColors.poppySoft,
+            iconColor: AppColors.poppy700,
+            title: 'Communities',
+            subtitle: 'Pet parent groups',
+            onTap: () => context.push('/social/communities'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ExploreTile extends StatelessWidget {
+  const _ExploreTile({
+    required this.icon,
+    required this.iconBg,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color iconBg;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
+    return Semantics(
+      button: true,
+      label: '$title. $subtitle',
+      child: Material(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: pt.line),
+              boxShadow: pt.shadowE1,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: iconBg,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: iconColor, size: 20),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: pt.ink950,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(fontSize: 11, color: pt.ink500),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 // ── Merged utility banner (Nutrition | Medical Vault side-by-side) ────────────
 

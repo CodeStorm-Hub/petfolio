@@ -5,7 +5,8 @@ class PrefsSchema {
 
   static const String themeMode       = 'theme_mode';
   static const String activePetPrefix = 'active_pet_id_';
-  static const String cartPrefix      = 'cart_';
+  static const String cartPrefix           = 'cart_';
+  static const String secureCartPrefix     = 'secure_cart_';
   static const String matchSpecies    = 'match_pref_species';
   static const String matchDistance   = 'match_pref_distance_meters';
   static const String matchAgeMin     = 'match_pref_age_min';

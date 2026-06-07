@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -173,7 +173,9 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                     child: SizedBox(height: headerHeight),
                   ),
                   const SliverToBoxAdapter(
-                    child: _StoriesRow(),
+                    child: RepaintBoundary(
+                      child: _StoriesRow(),
+                    ),
                   ),
                   if (feedState.posts.isEmpty)
                     SliverFillRemaining(
@@ -442,6 +444,7 @@ class _StoriesRow extends ConsumerWidget {
                   ringColors: activePetStack.hasUnviewed(userId)
                       ? const [AppColors.sunset500, AppColors.coral500]
                       : [pt.ink300, pt.ink300],
+                  animateRing: activePetStack.hasUnviewed(userId),
                   onTap: () => context.push('/social/stories?petId=${pet.id}'),
                   onLongPress: () => _showOwnStoryOptions(context, ref, pet),
                 )
@@ -470,6 +473,7 @@ class _StoriesRow extends ConsumerWidget {
                     ringColors: stack.hasUnviewed(userId)
                         ? const [AppColors.sunset500, AppColors.coral500]
                         : [pt.ink300, pt.ink300],
+                    animateRing: stack.hasUnviewed(userId),
                     onTap: () => context.push('/social/stories?petId=${stack.petId}'),
                   ),
                 );
@@ -543,13 +547,14 @@ class _OwnStoryOptionsSheet extends ConsumerWidget {
   }
 }
 
-class _StoryItem extends StatelessWidget {
+class _StoryItem extends StatefulWidget {
   const _StoryItem({
     required this.initial,
     required this.label,
     required this.ringColors,
     this.avatarUrl,
     this.isAdd = false,
+    this.animateRing = false,
     this.onTap,
     this.onLongPress,
   });
@@ -559,17 +564,57 @@ class _StoryItem extends StatelessWidget {
   final List<Color> ringColors;
   final String? avatarUrl;
   final bool isAdd;
+  final bool animateRing;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
+
+  @override
+  State<_StoryItem> createState() => _StoryItemState();
+}
+
+class _StoryItemState extends State<_StoryItem>
+    with SingleTickerProviderStateMixin {
+  AnimationController? _ringCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.animateRing && !widget.isAdd) {
+      _ringCtrl = AnimationController(
+        vsync: this,
+        duration: const Duration(seconds: 3),
+      )..repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _StoryItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.animateRing && !widget.isAdd) {
+      _ringCtrl ??= AnimationController(
+        vsync: this,
+        duration: const Duration(seconds: 3),
+      )..repeat();
+    } else {
+      _ringCtrl?.dispose();
+      _ringCtrl = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    _ringCtrl?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final surface = Theme.of(context).colorScheme.surface;
     final ink950 = Theme.of(context).extension<PetfolioThemeExtension>()!.ink950;
 
-    if (isAdd) {
+    if (widget.isAdd) {
       return GestureDetector(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -610,39 +655,69 @@ class _StoryItem extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ink950)),
+            Text(widget.label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ink950)),
           ],
         ),
       );
     }
 
+    final ring = widget.ringColors;
+    final gradientColors = ring.length >= 2
+        ? [...ring, ring.first]
+        : [ring.first, ring.first, ring.first];
+
+    Widget ringContainer({required Widget child}) {
+      final body = Container(
+        width: 62,
+        height: 62,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: widget.animateRing && _ringCtrl != null
+              ? SweepGradient(colors: gradientColors)
+              : LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: ring.length >= 2 ? ring : [ring.first, ring.first],
+                ),
+        ),
+        padding: const EdgeInsets.all(2.5),
+        child: child,
+      );
+
+      if (widget.animateRing && _ringCtrl != null) {
+        return AnimatedBuilder(
+          animation: _ringCtrl!,
+          builder: (_, child) => Transform.rotate(
+            angle: _ringCtrl!.value * 2 * math.pi,
+            child: child,
+          ),
+          child: body,
+        );
+      }
+      return body;
+    }
+
     return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
+      onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 62,
-            height: 62,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: ringColors.length >= 2 ? ringColors : [ringColors.first, ringColors.first],
-              ),
-            ),
-            padding: const EdgeInsets.all(2.5),
+          ringContainer(
             child: Container(
               decoration: BoxDecoration(shape: BoxShape.circle, color: surface),
               padding: const EdgeInsets.all(2),
               child: CircleAvatar(
-                backgroundColor: ringColors.first.withAlpha(180),
-                backgroundImage: avatarUrl != null ? CachedNetworkImageProvider(avatarUrl!) : null,
-                child: avatarUrl == null
-                    ? Text(initial,
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white))
+                backgroundColor: ring.first.withAlpha(180),
+                backgroundImage: widget.avatarUrl != null
+                    ? CachedNetworkImageProvider(widget.avatarUrl!)
+                    : null,
+                child: widget.avatarUrl == null
+                    ? Text(widget.initial,
+                        style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white))
                     : null,
               ),
             ),
@@ -651,7 +726,7 @@ class _StoryItem extends StatelessWidget {
           SizedBox(
             width: 62,
             child: Text(
-              label,
+              widget.label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ink950),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -699,12 +774,12 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
   late Animation<double> _pickerFadeAnimation;
 
   void _fireBurst(String kind, double x, double y) {
-    final count = 8 + Random().nextInt(4);
+    final count = 8 + math.Random().nextInt(4);
     final newItems = List.generate(count, (i) {
       return ReactionBurstItem(
         id: '${DateTime.now().millisecondsSinceEpoch}_$i',
         emoji: _emojiForKind(kind),
-        dx: x + (Random().nextDouble() - 0.5) * 40,
+        dx: x + (math.Random().nextDouble() - 0.5) * 40,
         dy: y,
       );
     });
@@ -947,7 +1022,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                           shape: const CircleBorder(),
                           gradient: SweepGradient(
                             startAngle: 3.84,
-                            endAngle: 3.84 + pi * 2,
+                            endAngle: 3.84 + math.pi * 2,
                             colors: const [
                               AppColors.tangerine,
                               AppColors.poppy,

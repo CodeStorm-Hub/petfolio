@@ -1,6 +1,54 @@
 # Petfolio — Progress Log
 
 
+## 2026-06-08 — Phase 2: UI/UX Polish + plan feature wiring
+
+**`flutter analyze` — No issues found. `flutter test` — 50/50 pass.**
+
+### Phase 2 polish
+- **AppTheme M3E:** `SearchBarTheme` + expressive `NavigationBarTheme` (pill indicator, selected icon/label styles)
+- **SkeletonLoader:** appointments list loading state
+- **Semantics:** `GlassCard`, `PfCard` (`semanticLabel`), `PetfolioEmptyState` (title/subtitle)
+- **Story ring:** rotating sweep-gradient ring on unviewed stories (`_StoryItem.animateRing`)
+- **Matching:** swipe exit uses `PetfolioThemeExtension.curveSpring` (haptics already present)
+- **Gamified care:** confetti + animated XP bar verified in `gamified_care_ui.dart`
+
+### Plan feature wiring
+- **Appointments schema fix:** model maps `location`/`status`; `toInsertJson(ownerId:)`; repo injects `owner_id`; toggle uses `status`
+- **Walk tracking:** route `/care/walk` + Care tab explore tile + shell header shortcut
+- **Communities:** `communities_routes.dart` (`/social/communities`, detail with `extra`); Social header button; GoRouter navigation from list
+- **Breed ID:** `BreedIdentifierWidget` in `EditProfileScreen` + onboarding name step (mobile only, `!kIsWeb`)
+- **Vitals:** already wired via `VitalsChartCard` in medical vault
+
+**Next step:** Phase 3 — Performance (image compress, const audit, RepaintBoundary, cursor pagination). Phase complete — please run (/remember) before Phase 3.
+
+---
+
+## 2026-06-08 — Phase 1: Architecture Cleanup (plan sequential implementation)
+
+**`flutter analyze` — No issues found. `flutter test` — 50/50 pass.**
+
+### A1 — Router decomposition
+- Extracted `app_shell_routes.dart`, `router_notifier.dart`, `router_error_screen.dart` under `lib/core/navigation/`
+- `router.dart` now composes feature routes only (~40 lines)
+
+### A2 — StateNotifier migration
+- Verified: no legacy `StateNotifier` controllers remain (Riverpod 3 `Notifier`/`AsyncNotifier` only)
+
+### A6 — DCM linting
+- Added `dev:dcm` + root `dcm.yaml` with metrics/rules (excludes `*.g.dart`, `*.freezed.dart`, `test/`)
+
+### D1 — Secure storage
+- Added `SecureStorageService` (`lib/core/services/secure_storage_service.dart`)
+- Marketplace cart persistence migrated from `SharedPreferences` → `flutter_secure_storage` with one-time legacy migration
+
+### A5 — Barrel exports
+- Added `lib/features/admin/index.dart`, `lib/features/communities/index.dart`
+
+**Next step:** Phase 2 — UI/UX Polish (AppTheme M3E tokens audit, SkeletonLoader standardisation, Semantics, story ring, haptics, confetti). Phase complete — please run (/remember) before Phase 2.
+
+---
+
 ## 2026-06-08 — Plan completion: E3/E6/E7/F3/F4 + analyze clean
 
 **`flutter analyze` — No issues found. `flutter test` — 50/50 pass. App verified on emulator-5554 (Pixel 10, Android 17).**

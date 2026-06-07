@@ -24,19 +24,22 @@ class AppointmentRepository {
   }
 
   Future<Appointment> create(Appointment appointment) async {
+    final ownerId = _client.auth.currentUser?.id;
+    if (ownerId == null) {
+      throw StateError('Must be signed in to create an appointment');
+    }
     final row = await _client
         .from('appointments')
-        .insert(appointment.toJson())
+        .insert(appointment.toInsertJson(ownerId: ownerId))
         .select()
         .single();
     return Appointment.fromJson(Map<String, dynamic>.from(row as Map));
   }
 
   Future<void> toggleComplete(String id, {required bool completed}) async {
-    await _client
-        .from('appointments')
-        .update({'is_completed': completed})
-        .eq('id', id);
+    await _client.from('appointments').update({
+      'status': completed ? 'completed' : 'upcoming',
+    }).eq('id', id);
   }
 
   Future<void> delete(String id) async {

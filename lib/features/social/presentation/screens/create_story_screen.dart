@@ -29,7 +29,6 @@ class CreateStoryScreen extends ConsumerStatefulWidget {
 }
 
 class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
-  final _picker = ImagePicker();
   bool _isDownloadingMock = false;
   Uint8List? _previewBytes;
 
@@ -61,7 +60,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
   }
 
   Future<void> _pickFromCamera() async {
-    final pickedFile = await _picker.pickImage(
+    final pickedFile = await pickImage(
       source: ImageSource.camera,
       maxWidth: 1920,
       imageQuality: 85,
@@ -73,13 +72,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
   }
 
   Future<void> _pickFromGallery() async {
-    final pickedFile = kIsWeb
-        ? await pickGalleryImage(maxWidth: 1920, imageQuality: 85)
-        : await _picker.pickImage(
-            source: ImageSource.gallery,
-            maxWidth: 1920,
-            imageQuality: 85,
-          );
+    final pickedFile = await pickGalleryImage(maxWidth: 1920, imageQuality: 85);
     if (pickedFile != null && mounted) {
       ref.read(createPostControllerProvider.notifier).setImage(pickedFile);
       await _loadPreviewBytes(pickedFile);
