@@ -12,6 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/petfolio_network_image.dart';
 import '../../../../core/widgets/dashed_circle_painter.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/data/models/pet.dart';
@@ -134,11 +135,25 @@ class _SocialViewState extends ConsumerState<_SocialView> {
         // Feed scrolls from y=0; top padding reserves space below the wave header.
         feedAsync.when(
           skipLoadingOnReload: true,
-          loading: () => Center(
-            child: Padding(
-              padding: EdgeInsets.only(top: headerHeight),
-              child: const TailWagLoader(label: 'Loading feed…'),
-            ),
+          loading: () => CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: SizedBox(height: headerHeight)),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (_, i) => Padding(
+                      padding: EdgeInsets.only(bottom: i == 1 ? 0 : 18),
+                      child: SkeletonLoader.feedCard(
+                        key: ValueKey('feed-skel-$i'),
+                      ),
+                    ),
+                    childCount: 2,
+                  ),
+                ),
+              ),
+            ],
           ),
           error: (_, _) => Center(
             child: Padding(
@@ -198,24 +213,10 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                       ),
                     )
                   else
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      sliver: SliverList.builder(
-                        itemCount: feedState.posts.length,
-                        itemBuilder: (ctx, i) {
-                          final post = feedState.posts[i];
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: i == feedState.posts.length - 1 ? 0 : 18),
-                            child: RepaintBoundary(
-                              child: PostCard(
-                                post: post,
-                                onLike: () => notifier.toggleLike(post.id),
-                                onTapPost: () => context.push('/social/post/${post.id}', extra: post),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                    _SocialPostListSliver(
+                      petId: widget.petId,
+                      headerHeight: headerHeight,
+                      onLike: notifier.toggleLike,
                     ),
                   _LoadMoreSliver(petId: widget.petId),
                   SliverToBoxAdapter(
@@ -301,6 +302,49 @@ class _IconBtn extends StatelessWidget {
         decoration: BoxDecoration(color: defaultBg, shape: BoxShape.circle),
         alignment: Alignment.center,
         child: Icon(icon, size: 20, color: defaultColor),
+      ),
+    );
+  }
+}
+
+// ─── C3: select()-optimised post list ────────────────────────────────────────
+
+class _SocialPostListSliver extends ConsumerWidget {
+  const _SocialPostListSliver({
+    required this.petId,
+    required this.headerHeight,
+    required this.onLike,
+  });
+
+  final String petId;
+  final double headerHeight;
+  final Future<void> Function(String postId) onLike;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final posts = ref.watch(
+      socialControllerProvider(petId).select(
+        (v) => v.asData?.value.posts ?? const <FeedPost>[],
+      ),
+    );
+
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      sliver: SliverList.builder(
+        itemCount: posts.length,
+        itemBuilder: (ctx, i) {
+          final post = posts[i];
+          return Padding(
+            padding: EdgeInsets.only(bottom: i == posts.length - 1 ? 0 : 18),
+            child: RepaintBoundary(
+              child: PostCard(
+                post: post,
+                onLike: () => onLike(post.id),
+                onTapPost: () => context.push('/social/post/${post.id}', extra: post),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -1127,7 +1171,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                       child: widget.post.videoUrl != null
                         ? _VideoPostPlayer(url: widget.post.videoUrl!)
                         : widget.post.imageUrls.isNotEmpty
-                        ? CachedNetworkImage(
+                        ? PetfolioNetworkImage(
                             imageUrl: widget.post.imageUrls.first,
                             fit: BoxFit.cover,
                             cacheManager: petfolioWebImageCacheManager(),
@@ -1140,6 +1184,33 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                               context,
                               MediaQuery.sizeOf(context).width - 28,
                               maxPixels: webNetworkImageMemCacheFeed,
+                            ),
+                            placeholder: ColoredBox(
+                              color: widget.post.subjectColor.withAlpha(50),
+                              child: LayoutBuilder(
+                                builder: (context, constraints) => SkeletonLoader(
+                                  width: constraints.maxWidth,
+                                  height: constraints.maxHeight,
+                                  borderRadius: 22,
+                                ),
+                              ),
+                            ),
+                            errorFallback: Center(
+                              child: Container(
+                                width: 150,
+                                height: 160,
+                                decoration: BoxDecoration(
+                                  color: widget.post.subjectColor.withAlpha(160),
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(90),
+                                    topRight: Radius.circular(75),
+                                    bottomLeft: Radius.circular(60),
+                                    bottomRight: Radius.circular(100),
+                                  ),
+                                ),
+                                alignment: Alignment.center,
+                                child: const Text('🐾', style: TextStyle(fontSize: 64)),
+                              ),
                             ),
                           )
                         : Center(

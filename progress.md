@@ -1,6 +1,108 @@
 # Petfolio — Progress Log
 
 
+## 2026-06-08 — Plan remainder: B7/B8/B10/E10 + polish
+
+**`flutter analyze` — No issues found. `flutter test` — 108/108 pass. Supabase migration applied.**
+
+### UI / UX (remaining B-items)
+- **B2:** `SkeletonLoader` on marketplace grid, social feed initial load, pet profile header
+- **B8:** Star rating + review count on `ProductCard` tiles and meta row
+- **B10:** First-launch `AppTutorialOverlay` (5-tab walkthrough, `SharedPreferences` flag)
+- **B12:** `_PetProfileHeaderSkeleton` while pets load
+
+### Features
+- **B7:** Chat read receipts — UPDATE RLS policy, `markMessagesAsRead`, realtime `is_read` sync, double-check icon on sent messages (typing was already wired)
+- **E10:** Story reactions persisted to `story_reactions` table + `StoryRepository.sendReaction`
+
+### Performance
+- **C3:** `_SocialPostListSliver` watches posts via Riverpod `select()` to limit rebuild scope
+
+### Backend
+- Migration `20260608140000_chat_read_receipts_story_reactions.sql` applied to hosted Supabase
+
+### Tests
+- `auth_repository_test`, `vitals_repository_test`, `app_shell_widget_test`
+- RLS contract extended for `story_reactions`
+
+**Deferred (documented in `STRIPE_SECURITY_AUDIT.md`):** F5 live Stripe E2E, D4 certificate pinning, A4 use-case layer refactor.
+
+**Plan complete — please run (/remember) to save tokens.**
+
+---
+
+## 2026-06-08 — Phase 5: Security & Testing
+
+**`flutter analyze` — No issues found. `flutter test` — 103/103 pass.**
+
+### Stripe security audit
+- `STRIPE_SECURITY_AUDIT.md` — documents server-side PI creation, webhook HMAC, publishable-key-only client, CoD path, redirect URL validation
+- Extracted `mapAndThrowCheckoutRpcException` in `order_repository.dart` for testable checkout RPC error mapping
+
+### Security contract tests
+- `test/security/stripe_client_contract_test.dart` — no `sk_*` / `STRIPE_SECRET_KEY` in `lib/`; Edge Function holds secret
+- `test/security/rls_migration_contract_test.dart` — 14 critical tables have RLS + policies in SQL migrations
+
+### Repository unit tests
+- `order_repository_exceptions_test.dart` — SHOP_INACTIVE, SHOP_NOT_VERIFIED, INSUFFICIENT_STOCK mapping
+- `matching_repository_cache_test.dart` — location cache, demo swipe skip, action mapping
+- `appointment_repository_test.dart` — unauthenticated create guard
+- `product_review_repository_test.dart` — unauthenticated upsert guard
+
+### Widget tests
+- `skeleton_loader_widget_test.dart` — block, circle, listTile, reduced-motion
+- `star_rating_widget_test.dart` — full/half stars, tap callback, semantics
+- `petfolio_empty_state_widget_test.dart` — title/action, combined semantics label
+
+**Next step:** Plan complete — please run (/remember) to save tokens.
+
+---
+
+## 2026-06-08 — Phase 4: Feature Additions
+
+**`flutter analyze` — No issues found. `flutter test` — 51/51 pass. Supabase migration applied.**
+
+### Verified already complete (prior phases)
+- **Pet vitals chart** — `VitalsChartCard` in medical vault (`fl_chart`)
+- **Apple Pay / Google Pay** — `PaymentSheetGooglePay` + `PaymentSheetApplePay` in `checkout_controller.dart`
+- **Vet appointments** — `features/appointments/` with schema-aligned model + routes
+- **Walk tracking** — `/care/walk` + `WalkTrackingScreen`
+
+### New: Product reviews (E4)
+- Migration `20260608120000_product_reviews.sql` — `product_reviews` table, RLS, aggregate trigger updating `products.rating` + `review_count`
+- `ProductReview` model, `ProductReviewRepository`, `ProductReviewsNotifier`
+- `StarRatingWidget` + `ProductReviewsSection` on `product_detail_screen` (list + write-review sheet)
+- Unit test: `test/features/marketplace/product_review_model_test.dart`
+
+**Next step:** Phase 5 — Security & Testing (Stripe audit, RLS tests, repository unit tests). Phase complete — please run (/remember) before Phase 5.
+
+---
+
+## 2026-06-08 — Phase 3: Performance
+
+**`flutter analyze` — No issues found. `flutter test` — 50/50 pass.**
+
+### Image compression pipeline
+- Unified `pickImage` / `prepareImageForUpload` in `media_picker_io.dart` + web stub
+- Camera + gallery picks in `create_post_screen`, `create_story_screen`, and `breed_identifier_widget` now compress on mobile before upload
+
+### Marketplace pagination
+- Fixed keyset cursor to **newest-first** (`created_at desc`, `lt` cursor) in `product_repository.dart`
+- Wired infinite scroll in `marketplace_screen.dart` `_ShopBody` with scroll listener + load-more spinner
+
+### RepaintBoundary isolation
+- Stories row wrapped in `RepaintBoundary` (`social_screen.dart`)
+- Marketplace hero banner wrapped in `RepaintBoundary`; product grid tiles already isolated
+
+### Web image cache
+- Added `petfolioWebImageCacheManager()` with 200-object LRU disk cap (`web_image_cache.dart`)
+- Applied to feed post images + marketplace product tiles on web
+- Explicit `flutter_cache_manager` dependency in `pubspec.yaml`
+
+**Next step:** Phase 4 — Feature additions (product ratings, Apple/Google Pay, etc.). Phase complete — please run (/remember) before Phase 4.
+
+---
+
 ## 2026-06-08 — Phase 2: UI/UX Polish + plan feature wiring
 
 **`flutter analyze` — No issues found. `flutter test` — 50/50 pass.**

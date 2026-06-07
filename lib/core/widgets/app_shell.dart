@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/pet_avatar.dart';
+import 'package:petfolio/core/widgets/app_tutorial_overlay.dart';
 import 'package:petfolio/features/marketplace/presentation/controllers/cart_controller.dart';
 import 'package:petfolio/features/marketplace/presentation/screens/marketplace_screen.dart';
 import 'package:petfolio/features/matching/presentation/matching_navigation.dart';
@@ -50,10 +51,34 @@ const appShellDestinations = [
 
 // ── App shell ─────────────────────────────────────────────────────────────────
 
-class AppShell extends ConsumerWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key, required this.child});
 
   final Widget child;
+
+  @override
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell> {
+  bool _showTutorial = false;
+  bool _tutorialChecked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTutorialFlag();
+  }
+
+  Future<void> _loadTutorialFlag() async {
+    final show = await shouldShowAppTutorial();
+    if (mounted) {
+      setState(() {
+        _showTutorial = show;
+        _tutorialChecked = true;
+      });
+    }
+  }
 
   int _selectedIndex(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
@@ -63,82 +88,102 @@ class AppShell extends ConsumerWidget {
     return 0;
   }
 
+  Widget _wrapWithTutorial(Widget shell) {
+    if (!_tutorialChecked || !_showTutorial) return shell;
+    return Stack(
+      children: [
+        shell,
+        Positioned.fill(
+          child: AppTutorialOverlay(
+            onDismiss: () => setState(() => _showTutorial = false),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final selectedIndex = _selectedIndex(context);
     final isWide = MediaQuery.sizeOf(context).width >= 600;
 
     if (isWide) {
-      return Scaffold(
-        body: Row(
-          children: [
-            _WideNavRail(
-              selectedIndex: selectedIndex,
-              onSelect: (i) => context.go(appShellDestinations[i].path),
-            ),
-            const VerticalDivider(thickness: 1, width: 1),
-            Expanded(
-              child: Stack(
-                children: [
-                  Positioned.fill(child: child),
-                  Positioned(
-                    top: 0, left: 0, right: 0,
-                    child: AppShellHeader(selectedIndex: selectedIndex),
-                  ),
-                ],
+      return _wrapWithTutorial(
+        Scaffold(
+          body: Row(
+            children: [
+              _WideNavRail(
+                selectedIndex: selectedIndex,
+                onSelect: (i) => context.go(appShellDestinations[i].path),
               ),
-            ),
-          ],
+              const VerticalDivider(thickness: 1, width: 1),
+              Expanded(
+                child: Stack(
+                  children: [
+                    Positioned.fill(child: widget.child),
+                    Positioned(
+                      top: 0, left: 0, right: 0,
+                      child: AppShellHeader(selectedIndex: selectedIndex),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     if (kIsWeb) {
-      return Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Stack(
-          children: [
-            Positioned.fill(child: child),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: AppShellHeader(selectedIndex: selectedIndex),
-            ),
-          ],
-        ),
-        bottomNavigationBar: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: _FloatingNav(
-              selectedIndex: selectedIndex,
-              onSelect: (i) => context.go(appShellDestinations[i].path),
+      return _wrapWithTutorial(
+        Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: Stack(
+            children: [
+              Positioned.fill(child: widget.child),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: AppShellHeader(selectedIndex: selectedIndex),
+              ),
+            ],
+          ),
+          bottomNavigationBar: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: _FloatingNav(
+                selectedIndex: selectedIndex,
+                onSelect: (i) => context.go(appShellDestinations[i].path),
+              ),
             ),
           ),
         ),
       );
     }
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Stack(
-        children: [
-          Positioned.fill(child: child),
-          Positioned(
-            top: 0, left: 0, right: 0,
-            child: AppShellHeader(selectedIndex: selectedIndex),
-          ),
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 12 + MediaQuery.paddingOf(context).bottom,
-            child: _FloatingNav(
-              selectedIndex: selectedIndex,
-              onSelect: (i) => context.go(appShellDestinations[i].path),
+    return _wrapWithTutorial(
+      Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: Stack(
+          children: [
+            Positioned.fill(child: widget.child),
+            Positioned(
+              top: 0, left: 0, right: 0,
+              child: AppShellHeader(selectedIndex: selectedIndex),
             ),
-          ),
-        ],
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 12 + MediaQuery.paddingOf(context).bottom,
+              child: _FloatingNav(
+                selectedIndex: selectedIndex,
+                onSelect: (i) => context.go(appShellDestinations[i].path),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

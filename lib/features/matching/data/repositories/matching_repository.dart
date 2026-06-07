@@ -183,4 +183,7 @@ class MatchingRepository {
     required String content,
   }) =>
       _dataSource.sendMessage(threadId: threadId, content: content);
+
+  Future<void> markMessagesAsRead(String threadId) =>
+      _dataSource.markMessagesAsRead(threadId);
 }

@@ -84,6 +84,8 @@ class ChatConversationController extends AsyncNotifier<List<ChatMessage>> {
     );
     if (initialMessages.length < 50) _hasMore = false;
 
+    unawaited(_markInboundRead(initialMessages));
+
     final client = Supabase.instance.client;
     final channel = client
         .channel('public:chat_messages:thread:$_resolvedThreadId')
@@ -102,7 +104,28 @@ class ChatConversationController extends AsyncNotifier<List<ChatMessage>> {
             final current = state.value;
             if (current != null && !current.any((m) => m.id == msg.id)) {
               state = AsyncValue.data([...current, msg]);
+              unawaited(_markInboundRead([msg]));
             }
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'chat_messages',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'thread_id',
+            value: _resolvedThreadId!,
+          ),
+          callback: (payload) {
+            final row = Map<String, dynamic>.from(payload.newRecord);
+            final updated = ChatMessage.fromJson(row);
+            final current = state.value;
+            if (current == null) return;
+            state = AsyncValue.data([
+              for (final m in current)
+                m.id == updated.id ? updated : m,
+            ]);
           },
         )
         .subscribe();
@@ -193,5 +216,24 @@ class ChatConversationController extends AsyncNotifier<List<ChatMessage>> {
     final sent = await repo.sendMessage(threadId: threadId, content: trimmed);
     state = AsyncData([...previous, sent]);
     ref.invalidate(matchesInboxControllerProvider(arg.actorPetId));
+  }
+
+  Future<void> _markInboundRead(List<ChatMessage> messages) async {
+    final myId = Supabase.instance.client.auth.currentUser?.id;
+    if (myId == null || _resolvedThreadId == null) return;
+    final hasUnreadInbound = messages.any(
+      (m) => m.senderId != myId && !m.isRead,
+    );
+    if (!hasUnreadInbound) return;
+
+    final repo = ref.read(matchingRepositoryProvider);
+    await repo.markMessagesAsRead(_resolvedThreadId!);
+
+    final current = state.value;
+    if (current == null) return;
+    state = AsyncValue.data([
+      for (final m in current)
+        m.senderId != myId ? m.copyWith(isRead: true) : m,
+    ]);
   }
 }

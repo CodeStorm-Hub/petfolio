@@ -82,6 +82,24 @@ class StoryRepository {
     }
   }
 
+  Future<void> sendReaction({
+    required String storyId,
+    required String emoji,
+  }) async {
+    try {
+      await _client.from('story_reactions').upsert(
+        {
+          'story_id': storyId,
+          'user_id': _uid,
+          'emoji': emoji,
+        },
+        onConflict: 'story_id,user_id',
+      );
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
+    }
+  }
+
   // ── Image Upload ──────────────────────────────────────────────────────────
   static const _allowedExtensions = {'jpg', 'jpeg', 'png', 'webp', 'gif', 'heic'};
   static const _maxImageBytes = 10 * 1024 * 1024; // 10 MB

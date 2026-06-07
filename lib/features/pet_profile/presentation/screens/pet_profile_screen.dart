@@ -30,7 +30,7 @@ class PetProfileScreen extends ConsumerWidget {
         body: Center(
           child: petsAsync.when(
             skipLoadingOnReload: true,
-            loading: () => const TailWagLoader(),
+            loading: () => const _PetProfileHeaderSkeleton(),
             error: (e, _) => Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -679,6 +679,59 @@ class _ToolbarBtn extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PetProfileHeaderSkeleton extends StatelessWidget {
+  const _PetProfileHeaderSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SkeletonLoader(
+                width: double.infinity,
+                height: MediaQuery.paddingOf(context).top + 220,
+                borderRadius: 0,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 48, 16, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        for (var i = 0; i < 3; i++)
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(left: i == 0 ? 0 : 8),
+                              child: SkeletonLoader(
+                                width: double.infinity,
+                                height: 72,
+                                borderRadius: PetfolioThemeExtension.radiusMd,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    const SkeletonLoader(width: 140, height: 16),
+                    const SizedBox(height: 12),
+                    SkeletonLoader.listTile(),
+                    const SizedBox(height: 8),
+                    SkeletonLoader.listTile(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

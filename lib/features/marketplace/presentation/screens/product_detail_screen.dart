@@ -9,6 +9,7 @@ import '../../data/models/product.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/product_list_controller.dart';
 import '../widgets/product_glyph.dart';
+import '../widgets/product_reviews_section.dart';
 import '../widgets/subscription_toggle.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -98,6 +99,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> with 
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
                   child: _ProductInfo(product: product),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+                  child: ProductReviewsSection(product: product),
                 ),
               ),
               if (product.subscribable)

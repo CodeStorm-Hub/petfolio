@@ -202,6 +202,14 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
 
   void _sendReaction(String emoji) {
     HapticFeedback.lightImpact();
+    final stack = _petStacks.isEmpty ? null : _petStacks[_currentPetIndex];
+    final story = stack?.stories.elementAtOrNull(_currentStoryIndex);
+    if (story != null) {
+      ref.read(storiesProvider.notifier).sendReaction(
+            storyId: story.id,
+            emoji: emoji,
+          );
+    }
     setState(() {
       _showReactions = false;
       _floatingEmojis.add(_FloatingEmojiData(key: _emojiKeyCounter++, emoji: emoji));

@@ -524,7 +524,25 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
     final productsAsync = ref.watch(productListProvider);
 
     return productsAsync.when(
-      loading: () => const Center(child: TailWagLoader(label: 'Loading shop…')),
+      loading: () => CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.72,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (_, i) => SkeletonLoader.productCard(key: ValueKey('shop-skel-$i')),
+                childCount: 4,
+              ),
+            ),
+          ),
+        ],
+      ),
       error: (_, _) => Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

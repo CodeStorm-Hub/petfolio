@@ -421,9 +421,18 @@ class _MessageBubble extends StatelessWidget {
             const SizedBox(height: 3),
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                _formatTime(message.createdAt),
-                style: TextStyle(fontSize: 11, color: pt.ink300),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _formatTime(message.createdAt),
+                    style: TextStyle(fontSize: 11, color: pt.ink300),
+                  ),
+                  if (isMine && message.isRead) ...[
+                    const SizedBox(width: 4),
+                    Icon(Icons.done_all_rounded, size: 13, color: pt.ink300),
+                  ],
+                ],
               ),
             ),
           ] else

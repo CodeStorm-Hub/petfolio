@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -32,18 +33,7 @@ class OrderRepository {
       });
       return result as String;
     } on PostgrestException catch (e) {
-      final msg = e.message;
-      if (msg.contains('SHOP_INACTIVE')) throw const ShopInactiveException();
-      if (msg.contains('SHOP_NOT_VERIFIED')) throw const ShopNotVerifiedException();
-      if (msg.contains('INSUFFICIENT_STOCK:')) {
-        final parts = msg.split(':');
-        throw InsufficientStockException(
-          productName: parts.length > 1 ? parts[1] : 'A product',
-          available:   parts.length > 2 ? int.tryParse(parts[2]) ?? 0 : 0,
-          requested:   parts.length > 3 ? int.tryParse(parts[3]) ?? 0 : 0,
-        );
-      }
-      rethrow;
+      mapAndThrowCheckoutRpcException(e);
     }
   }
 
@@ -261,6 +251,22 @@ class ShopNotVerifiedException implements Exception {
   @override
   String toString() =>
       'This seller has not completed their payment setup yet.';
+}
+
+@visibleForTesting
+Never mapAndThrowCheckoutRpcException(PostgrestException e) {
+  final msg = e.message;
+  if (msg.contains('SHOP_INACTIVE')) throw const ShopInactiveException();
+  if (msg.contains('SHOP_NOT_VERIFIED')) throw const ShopNotVerifiedException();
+  if (msg.contains('INSUFFICIENT_STOCK:')) {
+    final parts = msg.split(':');
+    throw InsufficientStockException(
+      productName: parts.length > 1 ? parts[1] : 'A product',
+      available: parts.length > 2 ? int.tryParse(parts[2]) ?? 0 : 0,
+      requested: parts.length > 3 ? int.tryParse(parts[3]) ?? 0 : 0,
+    );
+  }
+  throw e;
 }
 
 class ShopInactiveException implements Exception {
