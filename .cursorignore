@@ -138,4 +138,4 @@ skills-lock.json
 
 *.iml
 .metadata
-!pathao-app-ui/*.png
+!pathao-app-ui/*

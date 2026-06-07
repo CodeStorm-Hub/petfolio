@@ -247,7 +247,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 },
               ),
             ),
+            _TypingIndicator(
+              args: _args,
+              otherPetName: widget.otherPetName,
+            ),
             _Composer(
+              args: _args,
               controller: _textController,
               sending: _sending,
               onSend: _send,
@@ -433,19 +438,21 @@ class _MessageBubble extends StatelessWidget {
 // Composer
 // ---------------------------------------------------------------------------
 
-class _Composer extends StatelessWidget {
+class _Composer extends ConsumerWidget {
   const _Composer({
+    required this.args,
     required this.controller,
     required this.sending,
     required this.onSend,
   });
 
+  final ChatConversationArgs args;
   final TextEditingController controller;
   final bool sending;
   final VoidCallback onSend;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Material(
       elevation: 8,
@@ -477,6 +484,11 @@ class _Composer extends StatelessWidget {
                       vertical: 12,
                     ),
                   ),
+                  onChanged: (_) {
+                    ref
+                        .read(chatConversationControllerProvider(args).notifier)
+                        .broadcastTyping();
+                  },
                   onSubmitted: (_) => onSend(),
                 ),
               ),
@@ -503,6 +515,105 @@ class _Composer extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Typing indicator — shown when the other participant is composing
+// ---------------------------------------------------------------------------
+
+class _TypingIndicator extends ConsumerWidget {
+  const _TypingIndicator({
+    required this.args,
+    required this.otherPetName,
+  });
+
+  final ChatConversationArgs args;
+  final String otherPetName;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final threadId = args.threadId;
+    final isTyping = ref.watch(
+      chatTypingStateProvider.select((m) => m[threadId] ?? false),
+    );
+    if (!isTyping) return const SizedBox.shrink();
+
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+      child: Row(
+        children: [
+          _DotDotDot(color: pt.ink300),
+          const SizedBox(width: 8),
+          Text(
+            '$otherPetName is typing…',
+            style: TextStyle(fontSize: 12, color: pt.ink300),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DotDotDot extends StatefulWidget {
+  const _DotDotDot({required this.color});
+  final Color color;
+
+  @override
+  State<_DotDotDot> createState() => _DotDotDotState();
+}
+
+class _DotDotDotState extends State<_DotDotDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (context2, child2) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (i) {
+            final phase = (((_ctrl.value * 3) - i) % 3 + 3) % 3;
+            final opacity = phase < 1
+                ? phase
+                : phase < 2
+                    ? 1.0
+                    : 3 - phase;
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 1.5),
+              child: Container(
+                width: 5,
+                height: 5,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: widget.color.withValues(
+                    alpha: opacity.clamp(0.2, 1.0),
+                  ),
+                ),
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 }

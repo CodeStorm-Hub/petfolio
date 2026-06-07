@@ -27,6 +27,7 @@ class FeedPost {
     this.breed,
     this.imageUrls = const [],
     this.petAvatarUrl,
+    this.videoUrl,
   });
 
   final String id;
@@ -62,6 +63,9 @@ class FeedPost {
 
   final List<String> imageUrls;
   final String? petAvatarUrl;
+
+  /// Remote URL of a video attachment. Null for image-only or text posts.
+  final String? videoUrl;
 
   // ── Optimistic copy helpers ───────────────────────────────────────────────
 
@@ -113,5 +117,6 @@ class FeedPost {
     breed: breed,
     imageUrls: imageUrls,
     petAvatarUrl: petAvatarUrl,
+    videoUrl: videoUrl,
   );
 }

@@ -537,10 +537,12 @@ class _ShopBody extends ConsumerWidget {
                   childAspectRatio: 0.64,
                 ),
                 itemCount: filtered.length,
-                itemBuilder: (_, i) => _NewProductTile(
-                  product: filtered[i],
-                  onTap: () => onProductTap(filtered[i]),
-                  onAdd: onAdd,
+                itemBuilder: (_, i) => RepaintBoundary(
+                  child: _NewProductTile(
+                    product: filtered[i],
+                    onTap: () => onProductTap(filtered[i]),
+                    onAdd: onAdd,
+                  ),
                 ),
               ),
             ),

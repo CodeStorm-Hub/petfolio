@@ -1,0 +1,65 @@
+class Appointment {
+  const Appointment({
+    required this.id,
+    required this.petId,
+    required this.title,
+    required this.scheduledAt,
+    required this.isCompleted,
+    required this.createdAt,
+    this.vetName,
+    this.clinicName,
+    this.notes,
+  });
+
+  final String id;
+  final String petId;
+  final String title;
+  final DateTime scheduledAt;
+  final bool isCompleted;
+  final DateTime createdAt;
+  final String? vetName;
+  final String? clinicName;
+  final String? notes;
+
+  factory Appointment.fromJson(Map<String, dynamic> json) => Appointment(
+        id: json['id'] as String,
+        petId: json['pet_id'] as String,
+        title: json['title'] as String,
+        scheduledAt: DateTime.parse(json['scheduled_at'] as String),
+        isCompleted: (json['is_completed'] as bool?) ?? false,
+        createdAt: DateTime.parse(json['created_at'] as String),
+        vetName: json['vet_name'] as String?,
+        clinicName: json['clinic_name'] as String?,
+        notes: json['notes'] as String?,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'pet_id': petId,
+        'title': title,
+        'scheduled_at': scheduledAt.toUtc().toIso8601String(),
+        'is_completed': isCompleted,
+        if (vetName != null) 'vet_name': vetName,
+        if (clinicName != null) 'clinic_name': clinicName,
+        if (notes != null) 'notes': notes,
+      };
+
+  Appointment copyWith({
+    bool? isCompleted,
+    String? title,
+    String? vetName,
+    String? clinicName,
+    String? notes,
+    DateTime? scheduledAt,
+  }) =>
+      Appointment(
+        id: id,
+        petId: petId,
+        title: title ?? this.title,
+        scheduledAt: scheduledAt ?? this.scheduledAt,
+        isCompleted: isCompleted ?? this.isCompleted,
+        createdAt: createdAt,
+        vetName: vetName ?? this.vetName,
+        clinicName: clinicName ?? this.clinicName,
+        notes: notes ?? this.notes,
+      );
+}

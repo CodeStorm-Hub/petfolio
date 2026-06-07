@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -178,9 +179,19 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                     SliverFillRemaining(
                       hasScrollBody: false,
                       child: Center(
-                        child: Text(
-                          'No posts yet — be the first to share!',
-                          style: TextStyle(color: pt.ink500),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: PetfolioEmptyState(
+                            icon: Icons.camera_alt_rounded,
+                            title: 'No posts yet',
+                            subtitle: 'Be the first to share a moment with the pack!',
+                            action: FilledButton.icon(
+                              style: FilledButton.styleFrom(backgroundColor: AppColors.poppy),
+                              onPressed: () => context.push('/social/create-post'),
+                              icon: const Icon(Icons.add_rounded, size: 18),
+                              label: const Text('Share a Post'),
+                            ),
+                          ),
                         ),
                       ),
                     )
@@ -204,15 +215,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                         },
                       ),
                     ),
-                  if (feedState.isLoadingMore)
-                    const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Center(
-                          child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                        ),
-                      ),
-                    ),
+                  _LoadMoreSliver(petId: widget.petId),
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
@@ -297,6 +300,31 @@ class _IconBtn extends StatelessWidget {
         alignment: Alignment.center,
         child: Icon(icon, size: 20, color: defaultColor),
       ),
+    );
+  }
+}
+
+// ─── C3: select()-optimised load-more spinner ────────────────────────────────
+// Watches only isLoadingMore so the full feed list doesn't rebuild on pagination.
+
+class _LoadMoreSliver extends ConsumerWidget {
+  const _LoadMoreSliver({required this.petId});
+  final String petId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isLoading = ref.watch(
+      socialControllerProvider(petId).select(
+        (v) => v.asData?.value.isLoadingMore ?? false,
+      ),
+    );
+    return SliverToBoxAdapter(
+      child: isLoading
+          ? const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Center(child: CircularProgressIndicator.adaptive(strokeWidth: 2)),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }
@@ -1021,7 +1049,9 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                         borderRadius: BorderRadius.circular(22),
                       ),
                       clipBehavior: Clip.hardEdge,
-                      child: widget.post.imageUrls.isNotEmpty 
+                      child: widget.post.videoUrl != null
+                        ? _VideoPostPlayer(url: widget.post.videoUrl!)
+                        : widget.post.imageUrls.isNotEmpty
                         ? CachedNetworkImage(
                             imageUrl: widget.post.imageUrls.first,
                             fit: BoxFit.cover,
@@ -1058,15 +1088,17 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 ),
               ),
               
-              // Text
+              // Caption with hashtag highlighting
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: Text(widget.post.caption,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: ink950,
-                          fontWeight: FontWeight.w500,
-                          height: 1.5,
-                        )),
+                child: _RichCaption(
+                  text: widget.post.caption,
+                  baseStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: ink950,
+                    fontWeight: FontWeight.w500,
+                    height: 1.5,
+                  ),
+                ),
               ),
               
               // Reaction stack visualizer
@@ -1312,4 +1344,110 @@ class _ReactPickerBtn extends StatelessWidget {
 
 extension on BorderSide {
   BoxShadow toBoxShadow() => BoxShadow(color: color, blurRadius: 0, spreadRadius: width);
+}
+
+// ─── B4: Hashtag-highlighting caption ────────────────────────────────────────
+
+class _RichCaption extends StatelessWidget {
+  const _RichCaption({required this.text, this.baseStyle});
+
+  final String text;
+  final TextStyle? baseStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    final hashStyle = baseStyle?.copyWith(
+      color: AppColors.lilac700,
+      fontWeight: FontWeight.w700,
+    );
+    final regex = RegExp(r'#\w+');
+    final spans = <TextSpan>[];
+    var cursor = 0;
+    for (final m in regex.allMatches(text)) {
+      if (m.start > cursor) {
+        spans.add(TextSpan(text: text.substring(cursor, m.start), style: baseStyle));
+      }
+      spans.add(TextSpan(text: m.group(0), style: hashStyle));
+      cursor = m.end;
+    }
+    if (cursor < text.length) {
+      spans.add(TextSpan(text: text.substring(cursor), style: baseStyle));
+    }
+    return Text.rich(TextSpan(children: spans));
+  }
+}
+
+// ─── B3: Muted auto-play video player ────────────────────────────────────────
+
+class _VideoPostPlayer extends StatefulWidget {
+  const _VideoPostPlayer({required this.url});
+  final String url;
+
+  @override
+  State<_VideoPostPlayer> createState() => _VideoPostPlayerState();
+}
+
+class _VideoPostPlayerState extends State<_VideoPostPlayer> {
+  late final VideoPlayerController _ctrl;
+  bool _initialized = false;
+  bool _muted = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = VideoPlayerController.networkUrl(Uri.parse(widget.url))
+      ..setLooping(true)
+      ..setVolume(0)
+      ..initialize().then((_) {
+        if (mounted) {
+          setState(() => _initialized = true);
+          _ctrl.play();
+        }
+      });
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _toggleMute() {
+    setState(() => _muted = !_muted);
+    _ctrl.setVolume(_muted ? 0 : 1);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_initialized) {
+      return const Center(child: CircularProgressIndicator.adaptive(strokeWidth: 2));
+    }
+    return Stack(
+      alignment: Alignment.bottomRight,
+      children: [
+        AspectRatio(
+          aspectRatio: _ctrl.value.aspectRatio,
+          child: VideoPlayer(_ctrl),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: GestureDetector(
+            onTap: _toggleMute,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Icon(
+                _muted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                color: Colors.white,
+                size: 16,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

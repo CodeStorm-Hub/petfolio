@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -33,6 +34,8 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
     with TickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController _coinCtrl;
   late final AnimationController _pulseCtrl;
+  late final ConfettiController _confettiCtrl;
+  int? _lastLevel;
 
   @override
   void initState() {
@@ -46,6 +49,9 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
       vsync: this,
       duration: const Duration(milliseconds: 2200),
     )..repeat();
+    _confettiCtrl = ConfettiController(
+      duration: const Duration(seconds: 2),
+    );
   }
 
   @override
@@ -66,7 +72,15 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
     WidgetsBinding.instance.removeObserver(this);
     _coinCtrl.dispose();
     _pulseCtrl.dispose();
+    _confettiCtrl.dispose();
     super.dispose();
+  }
+
+  void _checkLevelUp(int currentLevel) {
+    if (_lastLevel != null && currentLevel > _lastLevel!) {
+      _confettiCtrl.play();
+    }
+    _lastLevel = currentLevel;
   }
 
   @override
@@ -82,6 +96,10 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
       data: (a) => PetLevel.fromXp(a.totalXp),
       orElse: () => PetLevel.fromXp(0),
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _checkLevelUp(lv.level);
+    });
 
     final tasks = widget.dashboard.tasks.value ?? [];
     final planned = tasks
@@ -149,6 +167,30 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
               // SizedBox = 120 → gap ≈ 33px on all device topPad values
               const SizedBox(height: 120),
             ],
+          ),
+        ),
+
+        // Level-up confetti burst
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiCtrl,
+              blastDirectionality: BlastDirectionality.explosive,
+              numberOfParticles: 30,
+              gravity: 0.3,
+              colors: const [
+                AppColors.tangerine,
+                AppColors.sunny,
+                AppColors.poppy,
+                AppColors.mint,
+                AppColors.lilac,
+              ],
+              shouldLoop: false,
+            ),
           ),
         ),
 

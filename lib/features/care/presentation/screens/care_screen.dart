@@ -350,6 +350,8 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                             ),
                             const SizedBox(height: 28),
                             _UtilityBanner(pt: pt),
+                            const SizedBox(height: 12),
+                            _AppointmentsBanner(pt: pt),
                           ],
                         ),
                       ),
@@ -3287,5 +3289,62 @@ IconData _taskTypeIcon(dbtask.CareTaskType type) {
     case dbtask.CareTaskType.nailTrim:   return Icons.cut_rounded;
     case dbtask.CareTaskType.bath:       return Icons.water_drop_rounded;
     case dbtask.CareTaskType.other:      return Icons.star_outline_rounded;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Appointments entry banner
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _AppointmentsBanner extends StatelessWidget {
+  const _AppointmentsBanner({required this.pt});
+
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: () => context.push('/care/appointments'),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: pt.line),
+          boxShadow: pt.shadowE1,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.lilacSoft,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.event_rounded, color: AppColors.lilac700, size: 20),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Appointments',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: pt.ink950),
+                  ),
+                  Text(
+                    'Schedule & track vet visits',
+                    style: TextStyle(fontSize: 12, color: pt.ink500),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: pt.ink300),
+          ],
+        ),
+      ),
+    );
   }
 }

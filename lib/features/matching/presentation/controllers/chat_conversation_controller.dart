@@ -7,6 +7,21 @@ import '../../data/models/chat_message.dart';
 import '../../data/repositories/matching_repository.dart';
 import 'matches_inbox_controller.dart';
 
+/// Tracks which thread IDs have an actively-typing remote participant.
+final chatTypingStateProvider =
+    NotifierProvider<_ChatTypingStateNotifier, Map<String, bool>>(
+  _ChatTypingStateNotifier.new,
+);
+
+class _ChatTypingStateNotifier extends Notifier<Map<String, bool>> {
+  @override
+  Map<String, bool> build() => {};
+
+  void set(String threadId, {required bool typing}) {
+    state = {...state, threadId: typing};
+  }
+}
+
 typedef ChatConversationArgs = ({
   String threadId,
   String? matchId,
@@ -28,6 +43,9 @@ class ChatConversationController extends AsyncNotifier<List<ChatMessage>> {
   String? _resolvedThreadId;
   bool _hasMore = true;
   bool _loadingOlder = false;
+
+  RealtimeChannel? _typingChannel;
+  Timer? _typingClearTimer;
 
   String get effectiveThreadId => _resolvedThreadId ?? arg.threadId;
   bool get hasMore => _hasMore;
@@ -89,11 +107,43 @@ class ChatConversationController extends AsyncNotifier<List<ChatMessage>> {
         )
         .subscribe();
 
+    final myUserId = client.auth.currentUser?.id;
+    _typingChannel = client
+        .channel('typing:$_resolvedThreadId')
+        .onBroadcast(
+          event: 'typing',
+          callback: (payload) {
+            final senderId = payload['user_id'] as String?;
+            if (senderId == null || senderId == myUserId) return;
+            ref
+                .read(chatTypingStateProvider.notifier)
+                .set(_resolvedThreadId!, typing: true);
+            _typingClearTimer?.cancel();
+            _typingClearTimer = Timer(const Duration(seconds: 3), () {
+              ref
+                  .read(chatTypingStateProvider.notifier)
+                  .set(_resolvedThreadId!, typing: false);
+            });
+          },
+        )
+        .subscribe();
+
     ref.onDispose(() {
       unawaited(channel.unsubscribe());
+      unawaited(_typingChannel?.unsubscribe());
+      _typingClearTimer?.cancel();
     });
 
     return initialMessages;
+  }
+
+  void broadcastTyping() {
+    final myId = Supabase.instance.client.auth.currentUser?.id;
+    if (myId == null || _resolvedThreadId == null) return;
+    _typingChannel?.sendBroadcastMessage(
+      event: 'typing',
+      payload: {'user_id': myId},
+    );
   }
 
   /// Loads the next page of older messages, prepending them to the current list.

@@ -59,6 +59,9 @@ Future<void> main() async {
 
   if (kIsWeb) {
     usePathUrlStrategy();
+    // C6: Cap Flutter's in-memory image cache to 64 MB on web to prevent
+    // unbounded growth in long-running sessions.
+    PaintingBinding.instance.imageCache.maximumSizeBytes = 64 * 1024 * 1024;
   }
 
   FlutterError.onError = (details) {

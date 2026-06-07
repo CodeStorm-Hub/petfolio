@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
@@ -45,6 +47,10 @@ class DailyRoutineState {
         badgeTypes: badgeTypes ?? this.badgeTypes,
       );
 }
+
+const _kCompletionCountKey = 'care_completion_count';
+const _kReviewRequestedKey = 'care_review_requested';
+const _kReviewThreshold = 3;
 
 @Riverpod(keepAlive: true)
 class CareDashboard extends _$CareDashboard {
@@ -300,7 +306,10 @@ class CareDashboard extends _$CareDashboard {
         badgeTypes: _badgeBaseline,
       );
       state = _routine;
-      if (isCompleted) ref.invalidate(petAwardsSummaryProvider(petId));
+      if (isCompleted) {
+        ref.invalidate(petAwardsSummaryProvider(petId));
+        _maybeRequestReview();
+      }
       if (outcome.badgeUnlocked && outcome.unlockedBadges.isNotEmpty) {
         for (final badge in outcome.unlockedBadges) {
           AppSnackBar.showBadgeUnlocked(badge);
@@ -314,7 +323,7 @@ class CareDashboard extends _$CareDashboard {
         _routine = _routine.copyWith(badgeTypes: _badgeBaseline);
         state = _routine;
       }
-      // State is already correctly synced from outcome.task above.
+          // State is already correctly synced from outcome.task above.
       // Streak updates arrive via careStreakRealtimeProvider.
       // A full _load() reload is intentionally skipped here to avoid
       // wiping and re-fetching the entire dashboard on every tap.
@@ -328,6 +337,23 @@ class CareDashboard extends _$CareDashboard {
         );
         state = _routine;
         AppSnackBar.showError(e);
+      }
+    }
+  }
+
+  Future<void> _maybeRequestReview() async {
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyRequested = prefs.getBool(_kReviewRequestedKey) ?? false;
+    if (alreadyRequested) return;
+
+    final count = (prefs.getInt(_kCompletionCountKey) ?? 0) + 1;
+    await prefs.setInt(_kCompletionCountKey, count);
+
+    if (count >= _kReviewThreshold) {
+      final review = InAppReview.instance;
+      if (await review.isAvailable()) {
+        await review.requestReview();
+        await prefs.setBool(_kReviewRequestedKey, true);
       }
     }
   }

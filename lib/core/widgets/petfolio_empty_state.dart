@@ -8,11 +8,13 @@ class PetfolioEmptyState extends StatefulWidget {
     required this.icon,
     required this.title,
     this.subtitle,
+    this.action,
   });
 
   final IconData icon;
   final String title;
   final String? subtitle;
+  final Widget? action;
 
   @override
   State<PetfolioEmptyState> createState() => _PetfolioEmptyStateState();
@@ -93,6 +95,10 @@ class _PetfolioEmptyStateState extends State<PetfolioEmptyState>
                       color: pt.ink500,
                     ),
                   ),
+                ],
+                if (widget.action != null) ...[
+                  const SizedBox(height: 20),
+                  widget.action!,
                 ],
               ],
             ),

@@ -372,22 +372,25 @@ class _ProductInfo extends StatelessWidget {
                 children: [
                   const Icon(Icons.star_rounded, color: AppColors.sunny700, size: 12),
                   const SizedBox(width: 4),
-                  const Text(
-                    '4.8',
-                    style: TextStyle(
+                  Text(
+                    product.rating != null
+                        ? product.rating!.toStringAsFixed(1)
+                        : '—',
+                    style: const TextStyle(
                       color: AppColors.sunny700,
                       fontWeight: FontWeight.w800,
                       fontSize: 11,
                     ),
                   ),
-                  const Text(
-                    ' · 421 reviews',
-                    style: TextStyle(
-                      color: AppColors.sunny700,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 11,
+                  if (product.reviewCount != null && product.reviewCount! > 0)
+                    Text(
+                      ' · ${product.reviewCount} review${product.reviewCount == 1 ? '' : 's'}',
+                      style: const TextStyle(
+                        color: AppColors.sunny700,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 11,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),

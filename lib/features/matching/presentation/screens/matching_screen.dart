@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -665,7 +665,7 @@ class _StackCard extends StatelessWidget {
 // Swipe card — top of stack, handles gestures and exit animation
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _SwipeCard extends StatelessWidget {
+class _SwipeCard extends StatefulWidget {
   const _SwipeCard({
     required this.state,
     required this.notifier,
@@ -676,20 +676,49 @@ class _SwipeCard extends StatelessWidget {
   final DiscoveryCandidate? interactiveTop;
 
   @override
+  State<_SwipeCard> createState() => _SwipeCardState();
+}
+
+class _SwipeCardState extends State<_SwipeCard> {
+  // 0 = neutral, 1 = right (match), -1 = left (pass), 2 = up (greet)
+  int _lastHapticZone = 0;
+
+  static const double _hapticThreshold = 80.0;
+
+  void _checkHaptic(Offset dragOffset) {
+    final dx = dragOffset.dx;
+    final dy = dragOffset.dy;
+    final int zone;
+    if (dx > _hapticThreshold) {
+      zone = 1;
+    } else if (dx < -_hapticThreshold) {
+      zone = -1;
+    } else if (dy < -_hapticThreshold) {
+      zone = 2;
+    } else {
+      zone = 0;
+    }
+    if (zone != _lastHapticZone) {
+      _lastHapticZone = zone;
+      if (zone != 0) HapticFeedback.lightImpact();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     final layoutWidth = math.min(size.width, 480.0);
-    if (state.isExiting && state.exitingCard != null) {
+    if (widget.state.isExiting && widget.state.exitingCard != null) {
       return _buildExitAnimation(
         context,
-        state.exitingCard!,
+        widget.state.exitingCard!,
         size,
         layoutWidth,
-        state.exitAction!,
-        state.exitDurationMs,
+        widget.state.exitAction!,
+        widget.state.exitDurationMs,
       );
     }
-    final top = interactiveTop!;
+    final top = widget.interactiveTop!;
     return _buildDraggable(context, top, size, layoutWidth);
   }
 
@@ -699,29 +728,40 @@ class _SwipeCard extends StatelessWidget {
     Size size,
     double layoutWidth,
   ) {
-    final dxNorm = state.dragOffset.dx / (layoutWidth * 0.75);
-    final dyTilt = state.dragOffset.dy / (size.height * 1.2);
+    final dxNorm = widget.state.dragOffset.dx / (layoutWidth * 0.75);
+    final dyTilt = widget.state.dragOffset.dy / (size.height * 1.2);
     final angle = (dxNorm + dyTilt * 0.12).clamp(-0.44, 0.44);
 
-    final matchOpacity = (state.dragOffset.dx / 80).clamp(0.0, 1.0);
-    final passOpacity = (-state.dragOffset.dx / 80).clamp(0.0, 1.0);
-    final greetOpacity = (-state.dragOffset.dy / 80).clamp(0.0, 1.0);
+    final matchOpacity = (widget.state.dragOffset.dx / 80).clamp(0.0, 1.0);
+    final passOpacity = (-widget.state.dragOffset.dx / 80).clamp(0.0, 1.0);
+    final greetOpacity = (-widget.state.dragOffset.dy / 80).clamp(0.0, 1.0);
 
     return Transform.translate(
-      offset: state.dragOffset,
+      offset: widget.state.dragOffset,
       child: Transform.rotate(
         angle: angle,
         alignment: Alignment.bottomCenter,
         child: GestureDetector(
-          onPanUpdate: (d) => notifier.onDragUpdate(d.delta),
-          onPanEnd: (_) => notifier.onDragEnd(),
-          onPanCancel: notifier.onDragCancel,
+          onPanUpdate: (d) {
+            widget.notifier.onDragUpdate(d.delta);
+            _checkHaptic(widget.state.dragOffset + d.delta);
+          },
+          onPanEnd: (_) {
+            final zone = _lastHapticZone;
+            _lastHapticZone = 0;
+            if (zone != 0) HapticFeedback.mediumImpact();
+            widget.notifier.onDragEnd();
+          },
+          onPanCancel: () {
+            _lastHapticZone = 0;
+            widget.notifier.onDragCancel();
+          },
           child: Stack(
             children: [
               _CardSurface(
                 candidate: top,
-                isExpanded: state.isExpanded,
-                onToggleExpand: notifier.toggleExpand,
+                isExpanded: widget.state.isExpanded,
+                onToggleExpand: widget.notifier.toggleExpand,
               ),
               if (matchOpacity > 0.05)
                 Positioned(
@@ -778,7 +818,8 @@ class _SwipeCard extends StatelessWidget {
     int durationMs,
   ) {
     final (exitOffset, exitAngle) = _exitParams(action, size, layoutWidth);
-    final curve = const Cubic(0.4, 0, 1, 1);
+    // Spring-physics exit: accelerates quickly off-screen like a card throw
+    const curve = Curves.easeInCubic;
     final fast = MediaQuery.disableAnimationsOf(context);
 
     if (fast) {

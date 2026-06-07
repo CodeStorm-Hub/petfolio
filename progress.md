@@ -1,6 +1,136 @@
 # Petfolio — Progress Log
 
 
+## 2026-06-08 — Plan completion: E3/E6/E7/F3/F4 + analyze clean
+
+**`flutter analyze` — No issues found. `flutter test` — 50/50 pass. App verified on emulator-5554 (Pixel 10, Android 17).**
+
+### New implementations
+
+**E3 — Pet communities (full stack)**
+- `supabase/migrations/20260608000000_communities.sql` — 4 tables with RLS, auto-increment triggers, realtime publication
+- `lib/features/communities/` — models, repository, `CommunitiesController`, `CommunityPostsNotifier` (Supabase realtime), screens
+
+**E6 — AI breed identification**
+- `lib/features/pet_profile/domain/services/breed_identification_service.dart` — NVIDIA Vision API, base64 image, structured JSON response
+- `lib/features/pet_profile/presentation/widgets/breed_identifier_widget.dart` — camera/gallery picker, result card with confidence %
+
+**E7 — Walk tracking**
+- `lib/features/care/presentation/screens/walk_tracking_screen.dart` — FlutterMap (OSM tiles), GPS stream, PolylineLayer, MarkerLayer, distance via latlong2, elapsed timer
+
+**F3 — Integration test**
+- `integration_test/auth_care_flow_test.dart` — 5 auth flow tests; optional 6th with real credentials via `--dart-define=TEST_EMAIL/PASSWORD`
+
+**F4 — AppTheme golden tests**
+- `test/core/theme/app_theme_golden_test.dart` — 4 tests; baselines in `test/core/theme/goldens/`
+
+### Lint fixes (this session)
+- `PostsState` renamed from `_PostsState` (private type in public API)
+- `__` → `_` in lambda params across communities screens
+- Unnecessary cast removed in `community_detail_screen.dart`
+- `use_null_aware_elements` suppressed on `community_repository.dart:90` (conflicting lint — `?key` applies to key nullability, not value)
+
+### Pending (deferred)
+- Wire `CommunitiesScreen` + `WalkTrackingScreen` into GoRouter (currently via `Navigator.push`)
+- Wire `BreedIdentifierWidget` into pet profile onboarding
+- **F5**: Stripe integration test — requires live Stripe test mode
+
+**Next step:** Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-06-08 — F4: Golden tests for AppTheme light/dark variants
+
+**`flutter analyze` — No issues found. `flutter test` — 50/50 pass.**
+
+### New implementations
+
+**F4 — AppTheme golden tests**
+- `test/core/theme/app_theme_golden_test.dart` — 4 tests:
+  - `light theme panel`: renders color rows, brand swatches, GlassCard pet row, PetAvatar species row, pillar accent pills; baseline captured at 390×700 in `goldens/app_theme_light.png`.
+  - `dark theme panel`: same panel under `AppTheme.dark()`; captured at `goldens/app_theme_dark.png`.
+  - `color tokens differ between light and dark`: asserts `surface1`, `ink950`, `cream` diverge across themes.
+  - `pillar accent colors are fully opaque in both themes`: asserts all 5 pillar colors have `a == 1.0` in both themes. (Pillar accents are tone-shifted per theme, not identical.)
+- Baselines generated with `flutter test --update-goldens`; committed under `test/core/theme/goldens/`.
+- `GoogleFonts.config.allowRuntimeFetching = false` set in `setUpAll` for offline/CI safety.
+
+**Next step:** Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-06-08 — Phase 5: Security & Testing (plan completion)
+
+**`flutter analyze` — No issues found. `flutter test` — 46/46 pass.**
+
+### Scoping decisions
+- **D1 (flutter_secure_storage)**: SharedPreferences stores only non-sensitive data — theme index, match filter prefs, active pet ID, care completion counter, cart JSON. Supabase manages its own auth tokens via its internal secure mechanism. No migration required.
+- **E8 (dark mode covers)**: Already complete — `WaveHeader` uses `species.resolvedAccent(isDark)` and the card overlay adapts border alpha by brightness.
+- **E9 (in_app_review)**: Already wired in `care_dashboard_controller.dart` lines 345–356 (triggers after 3rd care completion).
+
+### New implementations
+
+**D5 — Comment input validation**
+- `post_detail_screen.dart`: Added `maxLength: 500` + `maxLengthEnforcement: MaxLengthEnforcement.enforced` to `_CommentInputBar` TextField. Custom `buildCounter` shows remaining char count only when ≤ 50 left; turns `AppColors.poppy` when < 20 remain. Existing `_sendComment()` already trims + guards empty.
+
+**F2 — Widget tests for core shared widgets**
+- `test/core/widgets/pet_avatar_widget_test.dart` — 7 tests: species emoji (dog, cat), initials rendering, xl size applied, `onTap` fires, status dot visible when `isOnline: true`, Semantics label set.
+- `test/core/widgets/glass_card_widget_test.dart` — 7 tests: renders child, solid fallback on `forceOpaque: true`, solid fallback on `disableAnimations: true`, BackdropFilter present in glass mode, custom width/height, custom borderRadius, dark theme renders without error.
+
+### Remaining from plan (deferred — large scope or blocked)
+- **E3**: Group chat / pet communities (new DB schema + full feature build)
+- **E6**: AI breed identification (camera integration + NVIDIA API)
+- **E7**: Walk tracking (`flutter_map` not yet added; requires GPS foreground service)
+- **F3**: Integration test — auth → onboarding → care flow (needs emulator)
+- **F4**: Golden tests for AppTheme light/dark variants
+- **F5**: Stripe test-mode checkout integration test
+
+**Next step:** Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-06-08 — Plan completion: remaining tasks from review-the-lib-directory
+
+**`flutter analyze` — No issues found. `flutter test` — 32/32 pass.**
+
+### Fixes from this session
+
+**Appointments module (new files from prior session — all errors resolved)**
+- `appointment_controller.dart`: Replaced invalid `FamilyAsyncNotifier` (not exported in Riverpod 3.3.1) with plain `AsyncNotifier` that watches `activePetIdProvider` directly in `build()`. Provider changed from `.family` to plain `AsyncNotifierProvider`.
+- `appointments_screen.dart`: Replaced broken `AppHeader(title:, onOpenSwitcher:)` with a native `Scaffold.appBar`; removed all `(petId)` family calls; fixed `unnecessary_underscores`, `unused_local_variable isDark`, removed unused `_daysWithEvents`.
+- `appointment_repository.dart`: Removed `unnecessary_cast` on `.single()` result.
+
+### New implementations
+
+**B10 — Social feed empty-state CTA**
+- `petfolio_empty_state.dart`: Added optional `action` Widget parameter; renders below subtitle with 20px gap.
+- `social_screen.dart`: Replaced plain `Text('No posts yet')` with `PetfolioEmptyState(icon, title, subtitle, action: FilledButton → /social/create-post)`.
+
+**B12 — Pet profile header shimmer** ✅ Already complete (`PetAvatar._NetworkAvatar` uses `SkeletonLoader` as `CachedNetworkImage` placeholder).
+
+**C3 — Social feed `select()` optimisation**
+- Extracted `_LoadMoreSliver` (`ConsumerWidget`) that watches only `socialControllerProvider(petId).select((v) => v.asData?.value.isLoadingMore ?? false)`. The full `SocialView` no longer rebuilds on pagination ticks — only the spinner widget does.
+
+**C6 — Web image cache LRU cap**
+- `main.dart`: Added `PaintingBinding.instance.imageCache.maximumSizeBytes = 64 * 1024 * 1024` inside `if (kIsWeb)` block. Prevents unbounded memory growth in long-running web sessions.
+
+**E10 — Story reactions**
+- `story_viewer_screen.dart`: Added `_showReactions` / `_floatingEmojis` state; `_sendReaction(emoji)` triggers haptic + fly-up burst; "React" pill at bottom toggles a 5-emoji tray (🐾 ❤️ 😂 😮 🔥); story pauses while tray is open. `_FloatingEmoji` StatefulWidget with `TweenSequence` scale/opacity/slide animation.
+
+**F1 — Unit tests**
+- `test/features/appointments/appointment_model_test.dart` — 9 tests: `fromJson` (all fields, null optionals), `toJson` (omits id, UTC ISO 8601, null fields), `copyWith` (preserves, updates, toggles).
+- `test/features/care/weight_log_model_test.dart` — 4 tests: `fromJson` (full, int weight coercion), `copyWith` (update, preserve).
+
+### Remaining from plan (not implemented — scope/complexity)
+- **E3**: Group chat / pet communities (requires new DB tables + full feature)
+- **E6**: AI breed identification (camera + NVIDIA API integration)
+- **E7**: Walk tracking with `flutter_map`
+- **E8**: Dark mode pet profile covers (theme-adaptive banner images)
+- **F3–F5**: Integration, golden, Stripe payment tests
+
+**Next step:** Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## AI AGENT HANDOVER & ARCHITECTURE GUIDE
 
 > [!IMPORTANT]

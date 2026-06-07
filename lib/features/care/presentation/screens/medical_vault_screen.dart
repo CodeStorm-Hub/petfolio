@@ -21,6 +21,7 @@ import '../../../pet_profile/presentation/controllers/active_pet_controller.dart
 import '../../data/models/medical_record.dart';
 import '../../data/repositories/health_repository.dart';
 import '../controllers/health_vault_controller.dart';
+import '../widgets/vitals_chart_widget.dart';
 
 extension on MedicalRecord {
   bool get _inVaccinesSection => recordType == MedicalRecordType.vaccine;
@@ -154,6 +155,12 @@ class _MedicalVaultBody extends ConsumerWidget {
                     _HealthSummaryPills(asyncRecords: asyncRecords),
                   ],
                 ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: VitalsChartCard(petId: petId),
               ),
             ),
             SliverPadding(
