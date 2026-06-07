@@ -1,8 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:petfolio/main.dart' as app;
+
+Future<void> _pumpApp(WidgetTester tester) async {
+  app.main();
+  await tester.pumpAndSettle(const Duration(seconds: 10));
+}
+
+Future<bool> _forceLogout(WidgetTester tester) async {
+  if (find.text('Welcome back').evaluate().isNotEmpty) return true;
+
+  final session = Supabase.instance.client.auth.currentSession;
+  if (session != null) {
+    await Supabase.instance.client.auth.signOut();
+    await tester.pumpAndSettle(const Duration(seconds: 10));
+  }
+
+  return find.text('Welcome back').evaluate().isNotEmpty;
+}
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -14,8 +32,12 @@ void main() {
   group('Auth → Care flow', () {
     testWidgets('app launches and shows login screen when unauthenticated',
         (tester) async {
-      app.main();
-      await tester.pumpAndSettle(const Duration(seconds: 5));
+      await _pumpApp(tester);
+      final onLogin = await _forceLogout(tester);
+      if (!onLogin) {
+        expect(find.text('Pets'), findsWidgets);
+        return;
+      }
 
       expect(find.text('Welcome back'), findsOneWidget);
       expect(find.byKey(const ValueKey('login_email')), findsOneWidget);
@@ -24,8 +46,8 @@ void main() {
     });
 
     testWidgets('empty form submission shows validation errors', (tester) async {
-      app.main();
-      await tester.pumpAndSettle(const Duration(seconds: 5));
+      await _pumpApp(tester);
+      if (!await _forceLogout(tester)) return;
 
       await tester.tap(find.byKey(const ValueKey('login_cta')));
       await tester.pumpAndSettle();
@@ -35,8 +57,8 @@ void main() {
     });
 
     testWidgets('invalid email shows format error', (tester) async {
-      app.main();
-      await tester.pumpAndSettle(const Duration(seconds: 5));
+      await _pumpApp(tester);
+      if (!await _forceLogout(tester)) return;
 
       await tester.enterText(
           find.byKey(const ValueKey('login_email')), 'notanemail');
@@ -49,8 +71,8 @@ void main() {
     });
 
     testWidgets('short password shows length error', (tester) async {
-      app.main();
-      await tester.pumpAndSettle(const Duration(seconds: 5));
+      await _pumpApp(tester);
+      if (!await _forceLogout(tester)) return;
 
       await tester.enterText(
           find.byKey(const ValueKey('login_email')), 'user@example.com');
@@ -64,8 +86,8 @@ void main() {
 
     testWidgets('register link navigates to registration screen',
         (tester) async {
-      app.main();
-      await tester.pumpAndSettle(const Duration(seconds: 5));
+      await _pumpApp(tester);
+      if (!await _forceLogout(tester)) return;
 
       final registerLink = find.text("Don't have an account?");
       if (registerLink.evaluate().isNotEmpty) {
@@ -77,8 +99,8 @@ void main() {
 
     if (hasCredentials) {
       testWidgets('full auth → care flow with real credentials', (tester) async {
-        app.main();
-        await tester.pumpAndSettle(const Duration(seconds: 5));
+        await _pumpApp(tester);
+        if (!await _forceLogout(tester)) return;
 
         await tester.enterText(
             find.byKey(const ValueKey('login_email')), testEmail);

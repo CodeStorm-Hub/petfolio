@@ -1943,7 +1943,7 @@
       "source_file": null,
       "source_location": null,
       "id": "exception",
-      "community": 22,
+      "community": 288,
       "norm_label": "exception"
     },
     {
@@ -2024,7 +2024,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_supabase_flutter_supabase_flutter_dart",
-      "community": 69,
+      "community": 117,
       "norm_label": "package:supabase_flutter/supabase_flutter.dart"
     },
     {
@@ -2132,7 +2132,7 @@
       "source_file": "lib/core/firebase/fcm_lifecycle.dart",
       "source_location": null,
       "id": "firebase_fcm_lifecycle",
-      "community": 76,
+      "community": 99,
       "norm_label": "fcm_lifecycle.dart"
     },
     {
@@ -2141,7 +2141,7 @@
       "source_file": "lib/core/firebase/fcm_lifecycle.dart",
       "source_location": null,
       "id": "firebase_fcm_lifecycle_fcmlifecycle",
-      "community": 76,
+      "community": 99,
       "norm_label": "fcmlifecycle"
     },
     {
@@ -2159,7 +2159,7 @@
       "source_file": "lib/core/firebase/fcm_lifecycle.dart",
       "source_location": null,
       "id": "firebase_fcm_lifecycle_fcmlifecyclestate",
-      "community": 76,
+      "community": 99,
       "norm_label": "_fcmlifecyclestate"
     },
     {
@@ -2177,7 +2177,7 @@
       "source_file": "lib/core/firebase/fcm_lifecycle.dart",
       "source_location": null,
       "id": "firebase_fcm_lifecycle_child",
-      "community": 76,
+      "community": 99,
       "norm_label": "child"
     },
     {
@@ -2186,7 +2186,7 @@
       "source_file": null,
       "source_location": null,
       "id": "widget",
-      "community": 76,
+      "community": 99,
       "norm_label": "widget"
     },
     {
@@ -2195,7 +2195,7 @@
       "source_file": "lib/core/firebase/fcm_lifecycle.dart",
       "source_location": null,
       "id": "firebase_fcm_lifecycle_createstate",
-      "community": 76,
+      "community": 99,
       "norm_label": "createstate"
     },
     {
@@ -2213,7 +2213,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_flutter_riverpod_flutter_riverpod_dart",
-      "community": 69,
+      "community": 117,
       "norm_label": "package:flutter_riverpod/flutter_riverpod.dart"
     },
     {
@@ -2240,7 +2240,7 @@
       "source_file": null,
       "source_location": null,
       "id": "fcm_service_dart",
-      "community": 76,
+      "community": 99,
       "norm_label": "fcm_service.dart"
     },
     {
@@ -2717,7 +2717,7 @@
       "source_file": null,
       "source_location": null,
       "id": "annotation_freezed",
-      "community": 140,
+      "community": 174,
       "norm_label": "@freezed"
     },
     {
@@ -3032,7 +3032,7 @@
       "source_file": null,
       "source_location": null,
       "id": "string",
-      "community": 112,
+      "community": 404,
       "norm_label": "string?"
     },
     {
@@ -3284,7 +3284,7 @@
       "source_file": null,
       "source_location": null,
       "id": "dart_io",
-      "community": 288,
+      "community": 244,
       "norm_label": "dart:io"
     },
     {
@@ -3302,7 +3302,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_image_picker_image_picker_dart",
-      "community": 113,
+      "community": 406,
       "norm_label": "package:image_picker/image_picker.dart"
     },
     {
@@ -3311,7 +3311,7 @@
       "source_file": "lib/core/platform/media_picker_web.dart",
       "source_location": null,
       "id": "platform_media_picker_web",
-      "community": 113,
+      "community": 406,
       "norm_label": "media_picker_web.dart"
     },
     {
@@ -3320,7 +3320,7 @@
       "source_file": "lib/core/platform/media_picker_web.dart",
       "source_location": null,
       "id": "platform_media_picker_web_pickgalleryimage",
-      "community": 113,
+      "community": 406,
       "norm_label": "pickgalleryimage"
     },
     {
@@ -3329,7 +3329,7 @@
       "source_file": "lib/core/platform/media_picker_web.dart",
       "source_location": null,
       "id": "platform_media_picker_web_pickimage",
-      "community": 113,
+      "community": 406,
       "norm_label": "pickimage"
     },
     {
@@ -3338,7 +3338,7 @@
       "source_file": "lib/core/platform/media_picker_web.dart",
       "source_location": null,
       "id": "platform_media_picker_web_prepareimageforupload",
-      "community": 113,
+      "community": 406,
       "norm_label": "prepareimageforupload"
     },
     {
@@ -3554,7 +3554,7 @@
       "source_file": null,
       "source_location": null,
       "id": "platform_notifications_dart",
-      "community": 313,
+      "community": 83,
       "norm_label": "platform_notifications.dart"
     },
     {
@@ -3644,7 +3644,7 @@
       "source_file": "lib/core/platform/platform_payments.dart",
       "source_location": null,
       "id": "platform_platform_payments",
-      "community": 142,
+      "community": 167,
       "norm_label": "platform_payments.dart"
     },
     {
@@ -3653,7 +3653,7 @@
       "source_file": "lib/core/platform/platform_payments.dart",
       "source_location": null,
       "id": "platform_platform_payments_usestripehostedcheckout",
-      "community": 142,
+      "community": 167,
       "norm_label": "usestripehostedcheckout"
     },
     {
@@ -3662,7 +3662,7 @@
       "source_file": "lib/core/platform/platform_services.dart",
       "source_location": null,
       "id": "platform_platform_services",
-      "community": 313,
+      "community": 83,
       "norm_label": "platform_services.dart"
     },
     {
@@ -3671,7 +3671,7 @@
       "source_file": null,
       "source_location": null,
       "id": "media_picker_dart",
-      "community": 313,
+      "community": 83,
       "norm_label": "media_picker.dart"
     },
     {
@@ -3680,7 +3680,7 @@
       "source_file": null,
       "source_location": null,
       "id": "platform_location_dart",
-      "community": 313,
+      "community": 83,
       "norm_label": "platform_location.dart"
     },
     {
@@ -3689,7 +3689,7 @@
       "source_file": null,
       "source_location": null,
       "id": "platform_payments_dart",
-      "community": 313,
+      "community": 83,
       "norm_label": "platform_payments.dart"
     },
     {
@@ -3698,7 +3698,7 @@
       "source_file": null,
       "source_location": null,
       "id": "web_image_cache_dart",
-      "community": 313,
+      "community": 83,
       "norm_label": "web_image_cache.dart"
     },
     {
@@ -3707,7 +3707,7 @@
       "source_file": null,
       "source_location": null,
       "id": "web_push_registration_dart",
-      "community": 313,
+      "community": 83,
       "norm_label": "web_push_registration.dart"
     },
     {
@@ -3896,7 +3896,7 @@
       "source_file": "lib/core/platform/web_image_cache.dart",
       "source_location": null,
       "id": "platform_web_image_cache",
-      "community": 17,
+      "community": 65,
       "norm_label": "web_image_cache.dart"
     },
     {
@@ -3905,7 +3905,7 @@
       "source_file": "lib/core/platform/web_image_cache.dart",
       "source_location": null,
       "id": "platform_web_image_cache_webnetworkimagememcachemax",
-      "community": 17,
+      "community": 65,
       "norm_label": "webnetworkimagememcachemax"
     },
     {
@@ -3914,7 +3914,7 @@
       "source_file": "lib/core/platform/web_image_cache.dart",
       "source_location": null,
       "id": "platform_web_image_cache_webnetworkimagememcachefeed",
-      "community": 17,
+      "community": 65,
       "norm_label": "webnetworkimagememcachefeed"
     },
     {
@@ -3923,7 +3923,7 @@
       "source_file": "lib/core/platform/web_image_cache.dart",
       "source_location": null,
       "id": "platform_web_image_cache_webnetworkimagememcachethumb",
-      "community": 17,
+      "community": 65,
       "norm_label": "webnetworkimagememcachethumb"
     },
     {
@@ -3932,7 +3932,7 @@
       "source_file": "lib/core/platform/web_image_cache.dart",
       "source_location": null,
       "id": "platform_web_image_cache_webnetworkimagememcacheavatar",
-      "community": 17,
+      "community": 65,
       "norm_label": "webnetworkimagememcacheavatar"
     },
     {
@@ -3941,7 +3941,7 @@
       "source_file": "lib/core/platform/web_image_cache.dart",
       "source_location": null,
       "id": "platform_web_image_cache_webimagediskcachemaxobjects",
-      "community": 17,
+      "community": 65,
       "norm_label": "webimagediskcachemaxobjects"
     },
     {
@@ -3950,17 +3950,8 @@
       "source_file": "lib/core/platform/web_image_cache.dart",
       "source_location": null,
       "id": "platform_web_image_cache_webdiskcache",
-      "community": 17,
+      "community": 65,
       "norm_label": "_webdiskcache"
-    },
-    {
-      "label": "CacheManager?",
-      "file_type": "code",
-      "source_file": null,
-      "source_location": null,
-      "id": "cachemanager",
-      "community": 17,
-      "norm_label": "cachemanager?"
     },
     {
       "label": "dpr",
@@ -3968,7 +3959,7 @@
       "source_file": "lib/core/platform/web_image_cache.dart",
       "source_location": null,
       "id": "platform_web_image_cache_dpr",
-      "community": 17,
+      "community": 65,
       "norm_label": "dpr"
     },
     {
@@ -3977,7 +3968,7 @@
       "source_file": "lib/core/platform/web_image_cache.dart",
       "source_location": null,
       "id": "platform_web_image_cache_pixels",
-      "community": 17,
+      "community": 65,
       "norm_label": "pixels"
     },
     {
@@ -3986,7 +3977,7 @@
       "source_file": "lib/core/platform/web_image_cache.dart",
       "source_location": null,
       "id": "platform_web_image_cache_mem",
-      "community": 17,
+      "community": 65,
       "norm_label": "mem"
     },
     {
@@ -3995,7 +3986,7 @@
       "source_file": "lib/core/platform/web_image_cache.dart",
       "source_location": null,
       "id": "platform_web_image_cache_petfoliowebimagecachemanager",
-      "community": 17,
+      "community": 65,
       "norm_label": "petfoliowebimagecachemanager"
     },
     {
@@ -4004,7 +3995,7 @@
       "source_file": "lib/core/platform/web_image_cache.dart",
       "source_location": null,
       "id": "platform_web_image_cache_networkimagememcachewidth",
-      "community": 17,
+      "community": 65,
       "norm_label": "networkimagememcachewidth"
     },
     {
@@ -4013,7 +4004,7 @@
       "source_file": "lib/core/platform/web_image_cache.dart",
       "source_location": null,
       "id": "platform_web_image_cache_networkimagemaxdiskcachewidth",
-      "community": 17,
+      "community": 65,
       "norm_label": "networkimagemaxdiskcachewidth"
     },
     {
@@ -4022,7 +4013,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_flutter_widgets_dart",
-      "community": 17,
+      "community": 65,
       "norm_label": "package:flutter/widgets.dart"
     },
     {
@@ -4031,7 +4022,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_flutter_cache_manager_flutter_cache_manager_dart",
-      "community": 17,
+      "community": 144,
       "norm_label": "package:flutter_cache_manager/flutter_cache_manager.dart"
     },
     {
@@ -4544,7 +4535,7 @@
       "source_file": "lib/core/services/location_providers.dart",
       "source_location": null,
       "id": "services_location_providers_devicelatlngprovider",
-      "community": 91,
+      "community": 55,
       "norm_label": "devicelatlngprovider"
     },
     {
@@ -4553,7 +4544,7 @@
       "source_file": "lib/core/services/location_providers.dart",
       "source_location": null,
       "id": "services_location_providers_locationaccessprovider",
-      "community": 91,
+      "community": 55,
       "norm_label": "locationaccessprovider"
     },
     {
@@ -5111,7 +5102,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_shared_preferences_shared_preferences_dart",
-      "community": 250,
+      "community": 401,
       "norm_label": "package:shared_preferences/shared_preferences.dart"
     },
     {
@@ -5201,7 +5192,7 @@
       "source_file": "lib/core/services/stripe_init_service.dart",
       "source_location": null,
       "id": "services_stripe_init_service",
-      "community": 348,
+      "community": 60,
       "norm_label": "stripe_init_service.dart"
     },
     {
@@ -5210,7 +5201,7 @@
       "source_file": "lib/core/services/stripe_init_service.dart",
       "source_location": null,
       "id": "services_stripe_init_service_stripesettingsapplied",
-      "community": 348,
+      "community": 60,
       "norm_label": "_stripesettingsapplied"
     },
     {
@@ -5219,7 +5210,7 @@
       "source_file": "lib/core/services/stripe_init_service.dart",
       "source_location": null,
       "id": "services_stripe_init_service_ensurestripeready",
-      "community": 348,
+      "community": 60,
       "norm_label": "ensurestripeready"
     },
     {
@@ -5228,7 +5219,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_flutter_stripe_flutter_stripe_dart",
-      "community": 348,
+      "community": 60,
       "norm_label": "package:flutter_stripe/flutter_stripe.dart"
     },
     {
@@ -7154,7 +7145,7 @@
       "source_file": "lib/core/theme/theme_notifier.dart",
       "source_location": null,
       "id": "theme_theme_notifier",
-      "community": 250,
+      "community": 401,
       "norm_label": "theme_notifier.dart"
     },
     {
@@ -7199,7 +7190,7 @@
       "source_file": "lib/core/theme/theme_notifier.dart",
       "source_location": null,
       "id": "theme_theme_notifier_themekey",
-      "community": 250,
+      "community": 401,
       "norm_label": "_themekey"
     },
     {
@@ -7208,7 +7199,7 @@
       "source_file": "lib/core/theme/theme_notifier.dart",
       "source_location": null,
       "id": "theme_theme_notifier_build",
-      "community": 250,
+      "community": 401,
       "norm_label": "build"
     },
     {
@@ -7217,7 +7208,7 @@
       "source_file": "lib/core/theme/theme_notifier.dart",
       "source_location": null,
       "id": "theme_theme_notifier_loadtheme",
-      "community": 250,
+      "community": 401,
       "norm_label": "_loadtheme"
     },
     {
@@ -7226,7 +7217,7 @@
       "source_file": "lib/core/theme/theme_notifier.dart",
       "source_location": null,
       "id": "theme_theme_notifier_toggletheme",
-      "community": 250,
+      "community": 401,
       "norm_label": "toggletheme"
     },
     {
@@ -7235,7 +7226,7 @@
       "source_file": "lib/core/theme/theme_notifier.dart",
       "source_location": null,
       "id": "theme_theme_notifier_setthememode",
-      "community": 250,
+      "community": 401,
       "norm_label": "setthememode"
     },
     {
@@ -7469,7 +7460,7 @@
       "source_file": null,
       "source_location": null,
       "id": "icondata",
-      "community": 30,
+      "community": 332,
       "norm_label": "icondata"
     },
     {
@@ -7505,7 +7496,7 @@
       "source_file": null,
       "source_location": null,
       "id": "object",
-      "community": 271,
+      "community": 313,
       "norm_label": "object?"
     },
     {
@@ -7595,7 +7586,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_petfolio_core_widgets_pet_avatar_dart",
-      "community": 179,
+      "community": 217,
       "norm_label": "package:petfolio/core/widgets/pet_avatar.dart"
     },
     {
@@ -7739,7 +7730,7 @@
       "source_file": null,
       "source_location": null,
       "id": "singletickerproviderstatemixin",
-      "community": 1,
+      "community": 47,
       "norm_label": "singletickerproviderstatemixin"
     },
     {
@@ -7793,7 +7784,7 @@
       "source_file": "lib/core/widgets/app_shell.dart",
       "source_location": null,
       "id": "widgets_app_shell_path",
-      "community": 53,
+      "community": 407,
       "norm_label": "path"
     },
     {
@@ -8027,7 +8018,7 @@
       "source_file": null,
       "source_location": null,
       "id": "route_matching_inbox",
-      "community": 170,
+      "community": 34,
       "norm_label": "route /matching/inbox"
     },
     {
@@ -8558,7 +8549,7 @@
       "source_file": "lib/core/widgets/dashed_circle_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_circle_painter",
-      "community": 291,
+      "community": 146,
       "norm_label": "dashed_circle_painter.dart"
     },
     {
@@ -8567,7 +8558,7 @@
       "source_file": "lib/core/widgets/dashed_circle_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_circle_painter_dashedcirclepainter",
-      "community": 291,
+      "community": 146,
       "norm_label": "dashedcirclepainter"
     },
     {
@@ -8576,7 +8567,7 @@
       "source_file": "lib/core/widgets/dashed_circle_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_circle_painter_color",
-      "community": 291,
+      "community": 146,
       "norm_label": "color"
     },
     {
@@ -8585,7 +8576,7 @@
       "source_file": "lib/core/widgets/dashed_circle_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_circle_painter_strokewidth",
-      "community": 291,
+      "community": 146,
       "norm_label": "strokewidth"
     },
     {
@@ -8594,7 +8585,7 @@
       "source_file": "lib/core/widgets/dashed_circle_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_circle_painter_dashlength",
-      "community": 291,
+      "community": 146,
       "norm_label": "dashlength"
     },
     {
@@ -8603,7 +8594,7 @@
       "source_file": "lib/core/widgets/dashed_circle_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_circle_painter_dashspace",
-      "community": 291,
+      "community": 146,
       "norm_label": "dashspace"
     },
     {
@@ -8612,7 +8603,7 @@
       "source_file": "lib/core/widgets/dashed_circle_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_circle_painter_paint",
-      "community": 291,
+      "community": 146,
       "norm_label": "paint"
     },
     {
@@ -8621,7 +8612,7 @@
       "source_file": "lib/core/widgets/dashed_circle_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_circle_painter_shouldrepaint",
-      "community": 291,
+      "community": 146,
       "norm_label": "shouldrepaint"
     },
     {
@@ -8630,7 +8621,7 @@
       "source_file": null,
       "source_location": null,
       "id": "dart_math",
-      "community": 291,
+      "community": 146,
       "norm_label": "dart:math"
     },
     {
@@ -8639,7 +8630,7 @@
       "source_file": "lib/core/widgets/dashed_rect_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_rect_painter",
-      "community": 146,
+      "community": 120,
       "norm_label": "dashed_rect_painter.dart"
     },
     {
@@ -8648,7 +8639,7 @@
       "source_file": "lib/core/widgets/dashed_rect_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_rect_painter_dashedrectpainter",
-      "community": 146,
+      "community": 120,
       "norm_label": "dashedrectpainter"
     },
     {
@@ -8657,7 +8648,7 @@
       "source_file": "lib/core/widgets/dashed_rect_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_rect_painter_color",
-      "community": 146,
+      "community": 120,
       "norm_label": "color"
     },
     {
@@ -8666,7 +8657,7 @@
       "source_file": "lib/core/widgets/dashed_rect_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_rect_painter_strokewidth",
-      "community": 146,
+      "community": 120,
       "norm_label": "strokewidth"
     },
     {
@@ -8675,7 +8666,7 @@
       "source_file": "lib/core/widgets/dashed_rect_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_rect_painter_dashlength",
-      "community": 146,
+      "community": 120,
       "norm_label": "dashlength"
     },
     {
@@ -8684,7 +8675,7 @@
       "source_file": "lib/core/widgets/dashed_rect_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_rect_painter_dashspace",
-      "community": 146,
+      "community": 120,
       "norm_label": "dashspace"
     },
     {
@@ -8693,7 +8684,7 @@
       "source_file": "lib/core/widgets/dashed_rect_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_rect_painter_borderradius",
-      "community": 146,
+      "community": 120,
       "norm_label": "borderradius"
     },
     {
@@ -8702,7 +8693,7 @@
       "source_file": "lib/core/widgets/dashed_rect_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_rect_painter_paint",
-      "community": 146,
+      "community": 120,
       "norm_label": "paint"
     },
     {
@@ -8711,7 +8702,7 @@
       "source_file": "lib/core/widgets/dashed_rect_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_rect_painter_dashpath",
-      "community": 146,
+      "community": 120,
       "norm_label": "_dashpath"
     },
     {
@@ -8720,7 +8711,7 @@
       "source_file": "lib/core/widgets/dashed_rect_painter.dart",
       "source_location": null,
       "id": "widgets_dashed_rect_painter_shouldrepaint",
-      "community": 146,
+      "community": 120,
       "norm_label": "shouldrepaint"
     },
     {
@@ -9305,7 +9296,7 @@
       "source_file": null,
       "source_location": null,
       "id": "int",
-      "community": 41,
+      "community": 144,
       "norm_label": "int?"
     },
     {
@@ -9332,7 +9323,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_cached_network_image_cached_network_image_dart",
-      "community": 251,
+      "community": 111,
       "norm_label": "package:cached_network_image/cached_network_image.dart"
     },
     {
@@ -9496,6 +9487,114 @@
       "id": "offset",
       "community": 220,
       "norm_label": "offset"
+    },
+    {
+      "label": "petfolio_network_image.dart",
+      "file_type": "code",
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "id": "widgets_petfolio_network_image",
+      "community": 144,
+      "norm_label": "petfolio_network_image.dart"
+    },
+    {
+      "label": "PetfolioNetworkImage",
+      "file_type": "code",
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "id": "widgets_petfolio_network_image_petfolionetworkimage",
+      "community": 144,
+      "norm_label": "petfolionetworkimage"
+    },
+    {
+      "label": "imageUrl",
+      "file_type": "code",
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "id": "widgets_petfolio_network_image_imageurl",
+      "community": 144,
+      "norm_label": "imageurl"
+    },
+    {
+      "label": "fit",
+      "file_type": "code",
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "id": "widgets_petfolio_network_image_fit",
+      "community": 144,
+      "norm_label": "fit"
+    },
+    {
+      "label": "BoxFit",
+      "file_type": "code",
+      "source_file": null,
+      "source_location": null,
+      "id": "boxfit",
+      "community": 144,
+      "norm_label": "boxfit"
+    },
+    {
+      "label": "errorFallback",
+      "file_type": "code",
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "id": "widgets_petfolio_network_image_errorfallback",
+      "community": 144,
+      "norm_label": "errorfallback"
+    },
+    {
+      "label": "memCacheWidth",
+      "file_type": "code",
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "id": "widgets_petfolio_network_image_memcachewidth",
+      "community": 144,
+      "norm_label": "memcachewidth"
+    },
+    {
+      "label": "maxWidthDiskCache",
+      "file_type": "code",
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "id": "widgets_petfolio_network_image_maxwidthdiskcache",
+      "community": 144,
+      "norm_label": "maxwidthdiskcache"
+    },
+    {
+      "label": "cacheManager",
+      "file_type": "code",
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "id": "widgets_petfolio_network_image_cachemanager",
+      "community": 144,
+      "norm_label": "cachemanager"
+    },
+    {
+      "label": "placeholder",
+      "file_type": "code",
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "id": "widgets_petfolio_network_image_placeholder",
+      "community": 144,
+      "norm_label": "placeholder"
+    },
+    {
+      "label": "build",
+      "file_type": "code",
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "id": "widgets_petfolio_network_image_build",
+      "community": 144,
+      "norm_label": "build"
+    },
+    {
+      "label": "_evictStaleCache",
+      "file_type": "code",
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "id": "widgets_petfolio_network_image_evictstalecache",
+      "community": 144,
+      "norm_label": "_evictstalecache"
     },
     {
       "label": "pf_achievement_tile.dart",
@@ -10727,7 +10826,7 @@
       "source_file": "lib/core/widgets/wave_header.dart",
       "source_location": null,
       "id": "widgets_wave_header_waveclipper",
-      "community": 53,
+      "community": 407,
       "norm_label": "_waveclipper"
     },
     {
@@ -10736,7 +10835,7 @@
       "source_file": null,
       "source_location": null,
       "id": "customclipper",
-      "community": 53,
+      "community": 407,
       "norm_label": "customclipper"
     },
     {
@@ -11420,7 +11519,7 @@
       "source_file": "lib/features/admin/data/repositories/admin_repository.dart",
       "source_location": null,
       "id": "repositories_admin_repository_notadminexception",
-      "community": 22,
+      "community": 288,
       "norm_label": "notadminexception"
     },
     {
@@ -11447,7 +11546,7 @@
       "source_file": null,
       "source_location": null,
       "id": "supabaseclient",
-      "community": 117,
+      "community": 69,
       "norm_label": "supabaseclient"
     },
     {
@@ -11816,7 +11915,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_auth_controller.dart",
       "source_location": null,
       "id": "controllers_admin_auth_controller",
-      "community": 190,
+      "community": 117,
       "norm_label": "admin_auth_controller.dart"
     },
     {
@@ -11834,7 +11933,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_auth_controller.dart",
       "source_location": null,
       "id": "controllers_admin_auth_controller_asyncstate",
-      "community": 190,
+      "community": 117,
       "norm_label": "asyncstate"
     },
     {
@@ -11843,7 +11942,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_auth_controller.dart",
       "source_location": null,
       "id": "controllers_admin_auth_controller_when",
-      "community": 190,
+      "community": 117,
       "norm_label": "when"
     },
     {
@@ -11852,7 +11951,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller",
-      "community": 65,
+      "community": 85,
       "norm_label": "admin_dashboard_controller.dart"
     },
     {
@@ -11861,7 +11960,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_activitytype",
-      "community": 65,
+      "community": 85,
       "norm_label": "activitytype"
     },
     {
@@ -11870,7 +11969,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_recentactivityitem",
-      "community": 65,
+      "community": 85,
       "norm_label": "recentactivityitem"
     },
     {
@@ -11879,7 +11978,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_admindashboarddata",
-      "community": 65,
+      "community": 85,
       "norm_label": "admindashboarddata"
     },
     {
@@ -11888,7 +11987,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_admindashboardnotifier",
-      "community": 65,
+      "community": 106,
       "norm_label": "admindashboardnotifier"
     },
     {
@@ -11897,7 +11996,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_type",
-      "community": 65,
+      "community": 85,
       "norm_label": "type"
     },
     {
@@ -11906,7 +12005,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_title",
-      "community": 65,
+      "community": 85,
       "norm_label": "title"
     },
     {
@@ -11915,7 +12014,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_subtitle",
-      "community": 65,
+      "community": 85,
       "norm_label": "subtitle"
     },
     {
@@ -11924,7 +12023,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_timestamp",
-      "community": 65,
+      "community": 85,
       "norm_label": "timestamp"
     },
     {
@@ -11933,7 +12032,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_activeshopcount",
-      "community": 65,
+      "community": 85,
       "norm_label": "activeshopcount"
     },
     {
@@ -11942,7 +12041,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_pendingkyccount",
-      "community": 65,
+      "community": 85,
       "norm_label": "pendingkyccount"
     },
     {
@@ -11951,7 +12050,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_platformrevenuecents",
-      "community": 65,
+      "community": 85,
       "norm_label": "platformrevenuecents"
     },
     {
@@ -11960,7 +12059,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_recentactivity",
-      "community": 65,
+      "community": 85,
       "norm_label": "recentactivity"
     },
     {
@@ -11969,7 +12068,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_revenueformatted",
-      "community": 65,
+      "community": 85,
       "norm_label": "revenueformatted"
     },
     {
@@ -11996,7 +12095,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_repo",
-      "community": 65,
+      "community": 85,
       "norm_label": "_repo"
     },
     {
@@ -12014,7 +12113,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_build",
-      "community": 65,
+      "community": 85,
       "norm_label": "build"
     },
     {
@@ -12023,7 +12122,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_fetch",
-      "community": 65,
+      "community": 85,
       "norm_label": "_fetch"
     },
     {
@@ -12032,7 +12131,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_buildactivity",
-      "community": 65,
+      "community": 85,
       "norm_label": "_buildactivity"
     },
     {
@@ -12041,7 +12140,7 @@
       "source_file": "lib/features/admin/presentation/controllers/admin_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_admin_dashboard_controller_refresh",
-      "community": 65,
+      "community": 85,
       "norm_label": "refresh"
     },
     {
@@ -12230,7 +12329,7 @@
       "source_file": null,
       "source_location": null,
       "id": "shop",
-      "community": 34,
+      "community": 130,
       "norm_label": "shop"
     },
     {
@@ -12428,7 +12527,7 @@
       "source_file": "lib/features/admin/presentation/controllers/shop_deletion_controller.dart",
       "source_location": null,
       "id": "controllers_shop_deletion_controller_shopdeletionrequestsprovider",
-      "community": 111,
+      "community": 97,
       "norm_label": "shopdeletionrequestsprovider"
     },
     {
@@ -12590,7 +12689,7 @@
       "source_file": "lib/features/admin/presentation/screens/admin_layout.dart",
       "source_location": null,
       "id": "screens_admin_layout_destinationicon",
-      "community": 111,
+      "community": 97,
       "norm_label": "_destinationicon"
     },
     {
@@ -12680,7 +12779,7 @@
       "source_file": null,
       "source_location": null,
       "id": "controllers_shop_deletion_controller_dart",
-      "community": 111,
+      "community": 97,
       "norm_label": "../controllers/shop_deletion_controller.dart"
     },
     {
@@ -13409,7 +13508,7 @@
       "source_file": null,
       "source_location": null,
       "id": "core_widgets_app_snack_bar_dart",
-      "community": 134,
+      "community": 34,
       "norm_label": "core/widgets/app_snack_bar.dart"
     },
     {
@@ -13643,7 +13742,7 @@
       "source_file": "lib/features/admin/presentation/widgets/shops_tab.dart",
       "source_location": null,
       "id": "widgets_shops_tab",
-      "community": 111,
+      "community": 97,
       "norm_label": "shops_tab.dart"
     },
     {
@@ -13652,7 +13751,7 @@
       "source_file": "lib/features/admin/presentation/widgets/shops_tab.dart",
       "source_location": null,
       "id": "widgets_shops_tab_shopstab",
-      "community": 111,
+      "community": 97,
       "norm_label": "shopstab"
     },
     {
@@ -13661,7 +13760,7 @@
       "source_file": "lib/features/admin/presentation/widgets/shops_tab.dart",
       "source_location": null,
       "id": "widgets_shops_tab_deletionrequestcard",
-      "community": 111,
+      "community": 97,
       "norm_label": "_deletionrequestcard"
     },
     {
@@ -13670,7 +13769,7 @@
       "source_file": "lib/features/admin/presentation/widgets/shops_tab.dart",
       "source_location": null,
       "id": "widgets_shops_tab_deletionrequestcardstate",
-      "community": 111,
+      "community": 97,
       "norm_label": "_deletionrequestcardstate"
     },
     {
@@ -13679,7 +13778,7 @@
       "source_file": "lib/features/admin/presentation/widgets/shops_tab.dart",
       "source_location": null,
       "id": "widgets_shops_tab_request",
-      "community": 111,
+      "community": 97,
       "norm_label": "request"
     },
     {
@@ -13688,7 +13787,7 @@
       "source_file": "lib/features/admin/presentation/widgets/shops_tab.dart",
       "source_location": null,
       "id": "widgets_shops_tab_loading",
-      "community": 111,
+      "community": 97,
       "norm_label": "_loading"
     },
     {
@@ -13697,7 +13796,7 @@
       "source_file": "lib/features/admin/presentation/widgets/shops_tab.dart",
       "source_location": null,
       "id": "widgets_shops_tab_build",
-      "community": 111,
+      "community": 97,
       "norm_label": "build"
     },
     {
@@ -13706,7 +13805,7 @@
       "source_file": "lib/features/admin/presentation/widgets/shops_tab.dart",
       "source_location": null,
       "id": "widgets_shops_tab_createstate",
-      "community": 111,
+      "community": 97,
       "norm_label": "createstate"
     },
     {
@@ -13715,7 +13814,7 @@
       "source_file": "lib/features/admin/presentation/widgets/shops_tab.dart",
       "source_location": null,
       "id": "widgets_shops_tab_resolve",
-      "community": 111,
+      "community": 97,
       "norm_label": "_resolve"
     },
     {
@@ -13724,7 +13823,7 @@
       "source_file": "lib/features/admin/presentation/widgets/shops_tab.dart",
       "source_location": null,
       "id": "widgets_shops_tab_showapprovedialog",
-      "community": 111,
+      "community": 97,
       "norm_label": "_showapprovedialog"
     },
     {
@@ -13733,7 +13832,7 @@
       "source_file": "lib/features/admin/presentation/widgets/shops_tab.dart",
       "source_location": null,
       "id": "widgets_shops_tab_showrejectdialog",
-      "community": 111,
+      "community": 97,
       "norm_label": "_showrejectdialog"
     },
     {
@@ -13742,7 +13841,7 @@
       "source_file": "lib/features/admin/presentation/widgets/shops_tab.dart",
       "source_location": null,
       "id": "widgets_shops_tab_formatdate",
-      "community": 111,
+      "community": 97,
       "norm_label": "_formatdate"
     },
     {
@@ -13751,7 +13850,7 @@
       "source_file": null,
       "source_location": null,
       "id": "formstate",
-      "community": 111,
+      "community": 97,
       "norm_label": "formstate"
     },
     {
@@ -13760,7 +13859,7 @@
       "source_file": "lib/features/appointments/appointment_routes.dart",
       "source_location": null,
       "id": "appointments_appointment_routes",
-      "community": 245,
+      "community": 179,
       "norm_label": "appointment_routes.dart"
     },
     {
@@ -13769,7 +13868,7 @@
       "source_file": "lib/features/appointments/appointment_routes.dart",
       "source_location": null,
       "id": "appointments_appointment_routes_appointmentroutes",
-      "community": 245,
+      "community": 179,
       "norm_label": "appointmentroutes"
     },
     {
@@ -14732,7 +14831,7 @@
       "source_file": null,
       "source_location": null,
       "id": "notifier",
-      "community": 112,
+      "community": 404,
       "norm_label": "notifier"
     },
     {
@@ -14759,7 +14858,7 @@
       "source_file": "lib/features/auth/presentation/controllers/auth_controller.dart",
       "source_location": null,
       "id": "controllers_auth_controller_isloggedinprovider",
-      "community": 91,
+      "community": 55,
       "norm_label": "isloggedinprovider"
     },
     {
@@ -14921,7 +15020,7 @@
       "source_file": "lib/features/auth/presentation/screens/login_screen.dart",
       "source_location": null,
       "id": "screens_login_screen_loginscreen",
-      "community": 67,
+      "community": 47,
       "norm_label": "loginscreen"
     },
     {
@@ -14930,7 +15029,7 @@
       "source_file": "lib/features/auth/presentation/screens/login_screen.dart",
       "source_location": null,
       "id": "screens_login_screen_loginscreenstate",
-      "community": 67,
+      "community": 47,
       "norm_label": "_loginscreenstate"
     },
     {
@@ -15101,7 +15200,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_petfolio_core_widgets_widgets_dart",
-      "community": 86,
+      "community": 67,
       "norm_label": "package:petfolio/core/widgets/widgets.dart"
     },
     {
@@ -15119,7 +15218,7 @@
       "source_file": null,
       "source_location": null,
       "id": "widgets_auth_widgets_dart",
-      "community": 67,
+      "community": 86,
       "norm_label": "../widgets/auth_widgets.dart"
     },
     {
@@ -15659,7 +15758,7 @@
       "source_file": "lib/features/care/data/models/care_streak.dart",
       "source_location": null,
       "id": "models_care_streak",
-      "community": 174,
+      "community": 400,
       "norm_label": "care_streak.dart"
     },
     {
@@ -15668,7 +15767,7 @@
       "source_file": "lib/features/care/data/models/care_streak.dart",
       "source_location": null,
       "id": "models_care_streak_carestreak",
-      "community": 174,
+      "community": 400,
       "norm_label": "carestreak"
     },
     {
@@ -15677,7 +15776,7 @@
       "source_file": "lib/features/care/data/models/care_streak.dart",
       "source_location": null,
       "id": "models_care_streak_s",
-      "community": 174,
+      "community": 400,
       "norm_label": "s"
     },
     {
@@ -15686,7 +15785,7 @@
       "source_file": "lib/features/care/data/models/care_streak.dart",
       "source_location": null,
       "id": "models_care_streak_lastcompletionfromjson",
-      "community": 174,
+      "community": 400,
       "norm_label": "_lastcompletionfromjson"
     },
     {
@@ -15695,7 +15794,7 @@
       "source_file": "lib/features/care/data/models/care_streak.dart",
       "source_location": null,
       "id": "models_care_streak_tryparse",
-      "community": 174,
+      "community": 400,
       "norm_label": "tryparse"
     },
     {
@@ -15704,7 +15803,7 @@
       "source_file": "lib/features/care/data/models/care_streak.dart",
       "source_location": null,
       "id": "models_care_streak_lastcompletiontojson",
-      "community": 174,
+      "community": 400,
       "norm_label": "_lastcompletiontojson"
     },
     {
@@ -15713,7 +15812,7 @@
       "source_file": "lib/features/care/data/models/care_streak.dart",
       "source_location": null,
       "id": "models_care_streak_fromjson",
-      "community": 174,
+      "community": 400,
       "norm_label": "fromjson"
     },
     {
@@ -15749,7 +15848,7 @@
       "source_file": "lib/features/care/data/models/care_task.dart",
       "source_location": null,
       "id": "models_care_task_caretask",
-      "community": 140,
+      "community": 174,
       "norm_label": "caretask"
     },
     {
@@ -16388,7 +16487,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_petfolio_core_theme_app_colors_dart",
-      "community": 87,
+      "community": 217,
       "norm_label": "package:petfolio/core/theme/app_colors.dart"
     },
     {
@@ -16532,7 +16631,7 @@
       "source_file": "lib/features/care/data/repositories/health_repository.dart",
       "source_location": null,
       "id": "repositories_health_repository_medicalvaultrepositoryprovider",
-      "community": 134,
+      "community": 403,
       "norm_label": "medicalvaultrepositoryprovider"
     },
     {
@@ -16685,7 +16784,7 @@
       "source_file": null,
       "source_location": null,
       "id": "dart_typed_data",
-      "community": 117,
+      "community": 94,
       "norm_label": "dart:typed_data"
     },
     {
@@ -16694,7 +16793,7 @@
       "source_file": null,
       "source_location": null,
       "id": "core_errors_app_exception_dart",
-      "community": 144,
+      "community": 113,
       "norm_label": "../../../../core/errors/app_exception.dart"
     },
     {
@@ -16838,7 +16937,7 @@
       "source_file": "lib/features/care/data/repositories/pet_care_repository.dart",
       "source_location": null,
       "id": "repositories_pet_care_repository_caretaskrepositoryprovider",
-      "community": 102,
+      "community": 402,
       "norm_label": "caretaskrepositoryprovider"
     },
     {
@@ -17099,7 +17198,7 @@
       "source_file": "lib/features/care/data/repositories/vitals_repository.dart",
       "source_location": null,
       "id": "repositories_vitals_repository",
-      "community": 69,
+      "community": 117,
       "norm_label": "vitals_repository.dart"
     },
     {
@@ -17126,7 +17225,7 @@
       "source_file": "lib/features/care/data/repositories/vitals_repository.dart",
       "source_location": null,
       "id": "repositories_vitals_repository_client",
-      "community": 69,
+      "community": 117,
       "norm_label": "_client"
     },
     {
@@ -17135,7 +17234,7 @@
       "source_file": "lib/features/care/data/repositories/vitals_repository.dart",
       "source_location": null,
       "id": "repositories_vitals_repository_fetchweightlogs",
-      "community": 69,
+      "community": 117,
       "norm_label": "fetchweightlogs"
     },
     {
@@ -17144,7 +17243,7 @@
       "source_file": "lib/features/care/data/repositories/vitals_repository.dart",
       "source_location": null,
       "id": "repositories_vitals_repository_addweightlog",
-      "community": 69,
+      "community": 117,
       "norm_label": "addweightlog"
     },
     {
@@ -17153,7 +17252,7 @@
       "source_file": "lib/features/care/data/repositories/vitals_repository.dart",
       "source_location": null,
       "id": "repositories_vitals_repository_deleteweightlog",
-      "community": 69,
+      "community": 117,
       "norm_label": "deleteweightlog"
     },
     {
@@ -17162,7 +17261,7 @@
       "source_file": null,
       "source_location": null,
       "id": "models_weight_log_dart",
-      "community": 69,
+      "community": 117,
       "norm_label": "../models/weight_log.dart"
     },
     {
@@ -17180,7 +17279,7 @@
       "source_file": "lib/features/care/domain/services/care_recommendation_service.dart",
       "source_location": null,
       "id": "services_care_recommendation_service_carerecommendationexception",
-      "community": 22,
+      "community": 288,
       "norm_label": "carerecommendationexception"
     },
     {
@@ -17198,7 +17297,7 @@
       "source_file": "lib/features/care/domain/services/care_recommendation_service.dart",
       "source_location": null,
       "id": "services_care_recommendation_service_carerecommendationserviceprovider",
-      "community": 42,
+      "community": 402,
       "norm_label": "carerecommendationserviceprovider"
     },
     {
@@ -17378,7 +17477,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_petfolio_core_models_pet_dart",
-      "community": 58,
+      "community": 399,
       "norm_label": "package:petfolio/core/models/pet.dart"
     },
     {
@@ -17675,7 +17774,7 @@
       "source_file": "lib/features/care/presentation/controllers/ai_routine_controller.dart",
       "source_location": null,
       "id": "controllers_ai_routine_controller_generate",
-      "community": 42,
+      "community": 402,
       "norm_label": "generate"
     },
     {
@@ -17783,7 +17882,7 @@
       "source_file": "lib/features/care/presentation/controllers/care_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_care_dashboard_controller_caredashboard",
-      "community": 32,
+      "community": 243,
       "norm_label": "caredashboard"
     },
     {
@@ -17792,7 +17891,7 @@
       "source_file": "lib/features/care/presentation/controllers/care_dashboard_controller.dart",
       "source_location": null,
       "id": "lib_features_care_presentation_controllers_care_dashboard_controller_dart_caredashboardprovider",
-      "community": 32,
+      "community": 243,
       "norm_label": "caredashboardprovider"
     },
     {
@@ -17981,7 +18080,7 @@
       "source_file": "lib/features/care/presentation/controllers/care_dashboard_controller.dart",
       "source_location": null,
       "id": "controllers_care_dashboard_controller_build",
-      "community": 64,
+      "community": 169,
       "norm_label": "build"
     },
     {
@@ -18089,7 +18188,7 @@
       "source_file": null,
       "source_location": null,
       "id": "data_models_care_streak_dart",
-      "community": 64,
+      "community": 117,
       "norm_label": "../../data/models/care_streak.dart"
     },
     {
@@ -18134,7 +18233,7 @@
       "source_file": "lib/features/care/presentation/controllers/care_streak_stream_provider.dart",
       "source_location": null,
       "id": "controllers_care_streak_stream_provider",
-      "community": 64,
+      "community": 117,
       "norm_label": "care_streak_stream_provider.dart"
     },
     {
@@ -18143,7 +18242,7 @@
       "source_file": "lib/features/care/presentation/controllers/care_streak_stream_provider.dart",
       "source_location": null,
       "id": "controllers_care_streak_stream_provider_carestreakrealtimeprovider",
-      "community": 64,
+      "community": 169,
       "norm_label": "carestreakrealtimeprovider"
     },
     {
@@ -18161,7 +18260,7 @@
       "source_file": "lib/features/care/presentation/controllers/health_vault_controller.dart",
       "source_location": null,
       "id": "controllers_health_vault_controller_healthvaultcontroller",
-      "community": 134,
+      "community": 403,
       "norm_label": "healthvaultcontroller"
     },
     {
@@ -18170,7 +18269,7 @@
       "source_file": null,
       "source_location": null,
       "id": "streamnotifier",
-      "community": 134,
+      "community": 403,
       "norm_label": "streamnotifier"
     },
     {
@@ -18179,7 +18278,7 @@
       "source_file": "lib/features/care/presentation/controllers/health_vault_controller.dart",
       "source_location": null,
       "id": "controllers_health_vault_controller_healthvaultcontrollerprovider",
-      "community": 382,
+      "community": 134,
       "norm_label": "healthvaultcontrollerprovider"
     },
     {
@@ -18386,7 +18485,7 @@
       "source_file": "lib/features/care/presentation/controllers/pet_awards_provider.dart",
       "source_location": null,
       "id": "controllers_pet_awards_provider",
-      "community": 69,
+      "community": 117,
       "norm_label": "pet_awards_provider.dart"
     },
     {
@@ -18404,7 +18503,7 @@
       "source_file": "lib/features/care/presentation/controllers/pet_awards_provider.dart",
       "source_location": null,
       "id": "controllers_pet_awards_provider_client",
-      "community": 69,
+      "community": 117,
       "norm_label": "client"
     },
     {
@@ -18413,7 +18512,7 @@
       "source_file": "lib/features/care/presentation/controllers/pet_awards_provider.dart",
       "source_location": null,
       "id": "controllers_pet_awards_provider_raw",
-      "community": 69,
+      "community": 117,
       "norm_label": "raw"
     },
     {
@@ -18422,7 +18521,7 @@
       "source_file": "lib/features/care/presentation/controllers/pet_awards_provider.dart",
       "source_location": null,
       "id": "controllers_pet_awards_provider_fromjson",
-      "community": 69,
+      "community": 117,
       "norm_label": "fromjson"
     },
     {
@@ -18431,7 +18530,7 @@
       "source_file": null,
       "source_location": null,
       "id": "data_models_pet_awards_summary_dart",
-      "community": 69,
+      "community": 117,
       "norm_label": "../../data/models/pet_awards_summary.dart"
     },
     {
@@ -18620,7 +18719,7 @@
       "source_file": "lib/features/care/presentation/screens/care_screen.dart",
       "source_location": null,
       "id": "screens_care_screen_coverflowcarousel",
-      "community": 1,
+      "community": 47,
       "norm_label": "_coverflowcarousel"
     },
     {
@@ -18629,7 +18728,7 @@
       "source_file": "lib/features/care/presentation/screens/care_screen.dart",
       "source_location": null,
       "id": "screens_care_screen_coverflowcarouselstate",
-      "community": 1,
+      "community": 47,
       "norm_label": "_coverflowcarouselstate"
     },
     {
@@ -18710,7 +18809,7 @@
       "source_file": "lib/features/care/presentation/screens/care_screen.dart",
       "source_location": null,
       "id": "screens_care_screen_caretaskcard",
-      "community": 1,
+      "community": 47,
       "norm_label": "_caretaskcard"
     },
     {
@@ -18719,7 +18818,7 @@
       "source_file": "lib/features/care/presentation/screens/care_screen.dart",
       "source_location": null,
       "id": "screens_care_screen_caretaskcardstate",
-      "community": 1,
+      "community": 47,
       "norm_label": "_caretaskcardstate"
     },
     {
@@ -19880,7 +19979,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_petfolio_features_pet_profile_presentation_controllers_pet_list_controller_dart",
-      "community": 290,
+      "community": 399,
       "norm_label": "package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart"
     },
     {
@@ -19961,7 +20060,7 @@
       "source_file": "lib/features/care/presentation/screens/medical_vault_screen.dart",
       "source_location": null,
       "id": "screens_medical_vault_screen_medicalvaultbody",
-      "community": 382,
+      "community": 134,
       "norm_label": "_medicalvaultbody"
     },
     {
@@ -20006,7 +20105,7 @@
       "source_file": "lib/features/care/presentation/screens/medical_vault_screen.dart",
       "source_location": null,
       "id": "screens_medical_vault_screen_medicalrecordcard",
-      "community": 382,
+      "community": 134,
       "norm_label": "_medicalrecordcard"
     },
     {
@@ -20015,7 +20114,7 @@
       "source_file": "lib/features/care/presentation/screens/medical_vault_screen.dart",
       "source_location": null,
       "id": "screens_medical_vault_screen_addmedicalrecordsheet",
-      "community": 8,
+      "community": 403,
       "norm_label": "addmedicalrecordsheet"
     },
     {
@@ -20024,7 +20123,7 @@
       "source_file": "lib/features/care/presentation/screens/medical_vault_screen.dart",
       "source_location": null,
       "id": "screens_medical_vault_screen_addmedicalrecordsheetstate",
-      "community": 8,
+      "community": 403,
       "norm_label": "_addmedicalrecordsheetstate"
     },
     {
@@ -20321,7 +20420,7 @@
       "source_file": "lib/features/care/presentation/screens/medical_vault_screen.dart",
       "source_location": null,
       "id": "screens_medical_vault_screen_build",
-      "community": 382,
+      "community": 134,
       "norm_label": "build"
     },
     {
@@ -20420,7 +20519,7 @@
       "source_file": "lib/features/care/presentation/screens/medical_vault_screen.dart",
       "source_location": null,
       "id": "screens_medical_vault_screen_save",
-      "community": 134,
+      "community": 403,
       "norm_label": "_save"
     },
     {
@@ -20483,7 +20582,7 @@
       "source_file": null,
       "source_location": null,
       "id": "core_widgets_skeleton_loader_dart",
-      "community": 226,
+      "community": 251,
       "norm_label": "../../../../core/widgets/skeleton_loader.dart"
     },
     {
@@ -22985,7 +23084,7 @@
       "source_file": "lib/features/communities/presentation/controllers/communities_controller.dart",
       "source_location": null,
       "id": "controllers_communities_controller_activecommunitynotifier",
-      "community": 112,
+      "community": 404,
       "norm_label": "_activecommunitynotifier"
     },
     {
@@ -23039,7 +23138,7 @@
       "source_file": null,
       "source_location": null,
       "id": "realtimechannel",
-      "community": 139,
+      "community": 243,
       "norm_label": "realtimechannel"
     },
     {
@@ -23255,7 +23354,7 @@
       "source_file": null,
       "source_location": null,
       "id": "controllers_communities_controller_dart",
-      "community": 55,
+      "community": 251,
       "norm_label": "../controllers/communities_controller.dart"
     },
     {
@@ -23453,7 +23552,7 @@
       "source_file": "lib/features/communities/presentation/widgets/create_community_sheet.dart",
       "source_location": null,
       "id": "widgets_create_community_sheet",
-      "community": 55,
+      "community": 251,
       "norm_label": "create_community_sheet.dart"
     },
     {
@@ -23462,7 +23561,7 @@
       "source_file": "lib/features/communities/presentation/widgets/create_community_sheet.dart",
       "source_location": null,
       "id": "widgets_create_community_sheet_createcommunitysheet",
-      "community": 55,
+      "community": 251,
       "norm_label": "_createcommunitysheet"
     },
     {
@@ -23471,7 +23570,7 @@
       "source_file": "lib/features/communities/presentation/widgets/create_community_sheet.dart",
       "source_location": null,
       "id": "widgets_create_community_sheet_createcommunitysheetstate",
-      "community": 55,
+      "community": 251,
       "norm_label": "_createcommunitysheetstate"
     },
     {
@@ -23480,7 +23579,7 @@
       "source_file": "lib/features/communities/presentation/widgets/create_community_sheet.dart",
       "source_location": null,
       "id": "widgets_create_community_sheet_petid",
-      "community": 55,
+      "community": 251,
       "norm_label": "petid"
     },
     {
@@ -23489,7 +23588,7 @@
       "source_file": "lib/features/communities/presentation/widgets/create_community_sheet.dart",
       "source_location": null,
       "id": "widgets_create_community_sheet_namectrl",
-      "community": 55,
+      "community": 251,
       "norm_label": "_namectrl"
     },
     {
@@ -23498,7 +23597,7 @@
       "source_file": "lib/features/communities/presentation/widgets/create_community_sheet.dart",
       "source_location": null,
       "id": "widgets_create_community_sheet_descctrl",
-      "community": 55,
+      "community": 251,
       "norm_label": "_descctrl"
     },
     {
@@ -23507,7 +23606,7 @@
       "source_file": "lib/features/communities/presentation/widgets/create_community_sheet.dart",
       "source_location": null,
       "id": "widgets_create_community_sheet_saving",
-      "community": 55,
+      "community": 251,
       "norm_label": "_saving"
     },
     {
@@ -23516,7 +23615,7 @@
       "source_file": "lib/features/communities/presentation/widgets/create_community_sheet.dart",
       "source_location": null,
       "id": "widgets_create_community_sheet_showcreatecommunitysheet",
-      "community": 55,
+      "community": 251,
       "norm_label": "showcreatecommunitysheet"
     },
     {
@@ -23525,7 +23624,7 @@
       "source_file": "lib/features/communities/presentation/widgets/create_community_sheet.dart",
       "source_location": null,
       "id": "widgets_create_community_sheet_createstate",
-      "community": 55,
+      "community": 251,
       "norm_label": "createstate"
     },
     {
@@ -23534,7 +23633,7 @@
       "source_file": "lib/features/communities/presentation/widgets/create_community_sheet.dart",
       "source_location": null,
       "id": "widgets_create_community_sheet_dispose",
-      "community": 55,
+      "community": 251,
       "norm_label": "dispose"
     },
     {
@@ -23552,7 +23651,7 @@
       "source_file": "lib/features/communities/presentation/widgets/create_community_sheet.dart",
       "source_location": null,
       "id": "widgets_create_community_sheet_build",
-      "community": 55,
+      "community": 251,
       "norm_label": "build"
     },
     {
@@ -23570,7 +23669,7 @@
       "source_file": "lib/features/marketplace/data/models/cart_item.dart",
       "source_location": null,
       "id": "models_cart_item_cartitem",
-      "community": 62,
+      "community": 56,
       "norm_label": "cartitem"
     },
     {
@@ -23597,7 +23696,7 @@
       "source_file": null,
       "source_location": null,
       "id": "product",
-      "community": 36,
+      "community": 129,
       "norm_label": "product"
     },
     {
@@ -23858,7 +23957,7 @@
       "source_file": "lib/features/marketplace/data/models/marketplace_order.dart",
       "source_location": null,
       "id": "models_marketplace_order_lineitem",
-      "community": 140,
+      "community": 174,
       "norm_label": "lineitem"
     },
     {
@@ -23867,7 +23966,7 @@
       "source_file": "lib/features/marketplace/data/models/marketplace_order.dart",
       "source_location": null,
       "id": "models_marketplace_order_marketplaceorder",
-      "community": 140,
+      "community": 174,
       "norm_label": "marketplaceorder"
     },
     {
@@ -24407,7 +24506,7 @@
       "source_file": "lib/features/marketplace/data/models/shop.dart",
       "source_location": null,
       "id": "models_shop_shop",
-      "community": 34,
+      "community": 130,
       "norm_label": "shop"
     },
     {
@@ -24488,7 +24587,7 @@
       "source_file": "lib/features/marketplace/data/repositories/kyc_repository.dart",
       "source_location": null,
       "id": "repositories_kyc_repository",
-      "community": 117,
+      "community": 94,
       "norm_label": "kyc_repository.dart"
     },
     {
@@ -24497,7 +24596,7 @@
       "source_file": "lib/features/marketplace/data/repositories/kyc_repository.dart",
       "source_location": null,
       "id": "repositories_kyc_repository_kycrepository",
-      "community": 117,
+      "community": 94,
       "norm_label": "kycrepository"
     },
     {
@@ -24515,7 +24614,7 @@
       "source_file": "lib/features/marketplace/data/repositories/kyc_repository.dart",
       "source_location": null,
       "id": "repositories_kyc_repository_client",
-      "community": 117,
+      "community": 94,
       "norm_label": "_client"
     },
     {
@@ -24524,7 +24623,7 @@
       "source_file": "lib/features/marketplace/data/repositories/kyc_repository.dart",
       "source_location": null,
       "id": "repositories_kyc_repository_submitkyc",
-      "community": 117,
+      "community": 94,
       "norm_label": "submitkyc"
     },
     {
@@ -24533,7 +24632,7 @@
       "source_file": "lib/features/marketplace/data/repositories/kyc_repository.dart",
       "source_location": null,
       "id": "repositories_kyc_repository_uploadkycdoc",
-      "community": 117,
+      "community": 94,
       "norm_label": "_uploadkycdoc"
     },
     {
@@ -24542,7 +24641,7 @@
       "source_file": null,
       "source_location": null,
       "id": "models_shop_dart",
-      "community": 117,
+      "community": 94,
       "norm_label": "../models/shop.dart"
     },
     {
@@ -24569,7 +24668,7 @@
       "source_file": "lib/features/marketplace/data/repositories/order_repository.dart",
       "source_location": null,
       "id": "repositories_order_repository_paymenttimeoutexception",
-      "community": 22,
+      "community": 288,
       "norm_label": "paymenttimeoutexception"
     },
     {
@@ -24578,7 +24677,7 @@
       "source_file": "lib/features/marketplace/data/repositories/order_repository.dart",
       "source_location": null,
       "id": "repositories_order_repository_shopnotverifiedexception",
-      "community": 22,
+      "community": 288,
       "norm_label": "shopnotverifiedexception"
     },
     {
@@ -24587,7 +24686,7 @@
       "source_file": "lib/features/marketplace/data/repositories/order_repository.dart",
       "source_location": null,
       "id": "repositories_order_repository_shopinactiveexception",
-      "community": 22,
+      "community": 288,
       "norm_label": "shopinactiveexception"
     },
     {
@@ -24596,7 +24695,7 @@
       "source_file": "lib/features/marketplace/data/repositories/order_repository.dart",
       "source_location": null,
       "id": "repositories_order_repository_insufficientstockexception",
-      "community": 22,
+      "community": 288,
       "norm_label": "insufficientstockexception"
     },
     {
@@ -24848,7 +24947,7 @@
       "source_file": "lib/features/marketplace/data/repositories/product_repository.dart",
       "source_location": null,
       "id": "repositories_product_repository_productrepositoryprovider",
-      "community": 71,
+      "community": 106,
       "norm_label": "productrepositoryprovider"
     },
     {
@@ -25001,7 +25100,7 @@
       "source_file": "lib/features/marketplace/data/repositories/shop_repository.dart",
       "source_location": null,
       "id": "repositories_shop_repository_stripeonboardingexception",
-      "community": 22,
+      "community": 288,
       "norm_label": "stripeonboardingexception"
     },
     {
@@ -25010,7 +25109,7 @@
       "source_file": "lib/features/marketplace/data/repositories/shop_repository.dart",
       "source_location": null,
       "id": "repositories_shop_repository_shoprepositoryprovider",
-      "community": 34,
+      "community": 130,
       "norm_label": "shoprepositoryprovider"
     },
     {
@@ -25406,7 +25505,7 @@
       "source_file": null,
       "source_location": null,
       "id": "data_models_marketplace_order_dart",
-      "community": 19,
+      "community": 30,
       "norm_label": "../../../data/models/marketplace_order.dart"
     },
     {
@@ -25415,7 +25514,7 @@
       "source_file": null,
       "source_location": null,
       "id": "data_models_product_dart",
-      "community": 71,
+      "community": 176,
       "norm_label": "../../data/models/product.dart"
     },
     {
@@ -25424,7 +25523,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/buyer_orders_controller.dart",
       "source_location": null,
       "id": "controllers_buyer_orders_controller",
-      "community": 66,
+      "community": 30,
       "norm_label": "buyer_orders_controller.dart"
     },
     {
@@ -25451,7 +25550,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/buyer_orders_controller.dart",
       "source_location": null,
       "id": "controllers_buyer_orders_controller_build",
-      "community": 66,
+      "community": 30,
       "norm_label": "build"
     },
     {
@@ -25469,7 +25568,7 @@
       "source_file": null,
       "source_location": null,
       "id": "data_repositories_order_repository_dart",
-      "community": 66,
+      "community": 30,
       "norm_label": "../../data/repositories/order_repository.dart"
     },
     {
@@ -25631,7 +25730,7 @@
       "source_file": null,
       "source_location": null,
       "id": "data_models_cart_item_dart",
-      "community": 62,
+      "community": 133,
       "norm_label": "../../data/models/cart_item.dart"
     },
     {
@@ -25748,7 +25847,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/checkout_controller.dart",
       "source_location": null,
       "id": "controllers_checkout_controller_checkoutprovider",
-      "community": 168,
+      "community": 62,
       "norm_label": "checkoutprovider"
     },
     {
@@ -25766,7 +25865,7 @@
       "source_file": null,
       "source_location": null,
       "id": "orderrepository_get",
-      "community": 19,
+      "community": 30,
       "norm_label": "orderrepository get"
     },
     {
@@ -25802,7 +25901,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/checkout_controller.dart",
       "source_location": null,
       "id": "controllers_checkout_controller_startcheckoutforshop",
-      "community": 60,
+      "community": 62,
       "norm_label": "startcheckoutforshop"
     },
     {
@@ -25811,7 +25910,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/checkout_controller.dart",
       "source_location": null,
       "id": "controllers_checkout_controller_startcodcheckoutforshop",
-      "community": 60,
+      "community": 62,
       "norm_label": "startcodcheckoutforshop"
     },
     {
@@ -25901,7 +26000,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/deletion_request_controller.dart",
       "source_location": null,
       "id": "controllers_deletion_request_controller",
-      "community": 34,
+      "community": 94,
       "norm_label": "deletion_request_controller.dart"
     },
     {
@@ -25910,7 +26009,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/deletion_request_controller.dart",
       "source_location": null,
       "id": "controllers_deletion_request_controller_deletionrequestnotifier",
-      "community": 34,
+      "community": 130,
       "norm_label": "deletionrequestnotifier"
     },
     {
@@ -25919,7 +26018,7 @@
       "source_file": null,
       "source_location": null,
       "id": "map",
-      "community": 34,
+      "community": 130,
       "norm_label": "map"
     },
     {
@@ -25946,7 +26045,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/deletion_request_controller.dart",
       "source_location": null,
       "id": "controllers_deletion_request_controller_msg",
-      "community": 34,
+      "community": 94,
       "norm_label": "msg"
     },
     {
@@ -25955,7 +26054,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/deletion_request_controller.dart",
       "source_location": null,
       "id": "controllers_deletion_request_controller_build",
-      "community": 34,
+      "community": 130,
       "norm_label": "build"
     },
     {
@@ -25964,7 +26063,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/deletion_request_controller.dart",
       "source_location": null,
       "id": "controllers_deletion_request_controller_submitrequest",
-      "community": 34,
+      "community": 94,
       "norm_label": "submitrequest"
     },
     {
@@ -25973,7 +26072,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/deletion_request_controller.dart",
       "source_location": null,
       "id": "controllers_deletion_request_controller_parsedeletionerror",
-      "community": 34,
+      "community": 94,
       "norm_label": "parsedeletionerror"
     },
     {
@@ -25991,7 +26090,7 @@
       "source_file": null,
       "source_location": null,
       "id": "my_shop_controller_dart",
-      "community": 34,
+      "community": 94,
       "norm_label": "my_shop_controller.dart"
     },
     {
@@ -26009,7 +26108,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/edit_shop_controller.dart",
       "source_location": null,
       "id": "controllers_edit_shop_controller_editshopnotifier",
-      "community": 34,
+      "community": 130,
       "norm_label": "editshopnotifier"
     },
     {
@@ -26018,7 +26117,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/edit_shop_controller.dart",
       "source_location": null,
       "id": "controllers_edit_shop_controller_editshopcontrollerprovider",
-      "community": 10,
+      "community": 405,
       "norm_label": "editshopcontrollerprovider"
     },
     {
@@ -26459,7 +26558,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/product_list_controller.dart",
       "source_location": null,
       "id": "controllers_product_list_controller_marketplacesearchnotifier",
-      "community": 71,
+      "community": 404,
       "norm_label": "marketplacesearchnotifier"
     },
     {
@@ -26486,7 +26585,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/product_list_controller.dart",
       "source_location": null,
       "id": "controllers_product_list_controller_marketplacesearchqueryprovider",
-      "community": 47,
+      "community": 168,
       "norm_label": "marketplacesearchqueryprovider"
     },
     {
@@ -26630,7 +26729,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/product_list_controller.dart",
       "source_location": null,
       "id": "controllers_product_list_controller_loadmore",
-      "community": 71,
+      "community": 106,
       "norm_label": "loadmore"
     },
     {
@@ -26648,7 +26747,7 @@
       "source_file": null,
       "source_location": null,
       "id": "data_repositories_product_repository_dart",
-      "community": 71,
+      "community": 176,
       "norm_label": "../../data/repositories/product_repository.dart"
     },
     {
@@ -26657,7 +26756,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/product_reviews_controller.dart",
       "source_location": null,
       "id": "controllers_product_reviews_controller",
-      "community": 9,
+      "community": 382,
       "norm_label": "product_reviews_controller.dart"
     },
     {
@@ -26693,7 +26792,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/product_reviews_controller.dart",
       "source_location": null,
       "id": "controllers_product_reviews_controller_productid",
-      "community": 9,
+      "community": 382,
       "norm_label": "productid"
     },
     {
@@ -26702,7 +26801,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/product_reviews_controller.dart",
       "source_location": null,
       "id": "controllers_product_reviews_controller_build",
-      "community": 9,
+      "community": 382,
       "norm_label": "build"
     },
     {
@@ -26711,7 +26810,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/product_reviews_controller.dart",
       "source_location": null,
       "id": "controllers_product_reviews_controller_submitreview",
-      "community": 9,
+      "community": 382,
       "norm_label": "submitreview"
     },
     {
@@ -26720,7 +26819,7 @@
       "source_file": null,
       "source_location": null,
       "id": "data_models_product_review_dart",
-      "community": 9,
+      "community": 382,
       "norm_label": "../../data/models/product_review.dart"
     },
     {
@@ -26729,7 +26828,7 @@
       "source_file": null,
       "source_location": null,
       "id": "data_repositories_product_review_repository_dart",
-      "community": 9,
+      "community": 382,
       "norm_label": "../../data/repositories/product_review_repository.dart"
     },
     {
@@ -26738,7 +26837,7 @@
       "source_file": null,
       "source_location": null,
       "id": "product_list_controller_dart",
-      "community": 9,
+      "community": 382,
       "norm_label": "product_list_controller.dart"
     },
     {
@@ -26765,7 +26864,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/shop_list_controller.dart",
       "source_location": null,
       "id": "controllers_shop_list_controller_shoplistprovider",
-      "community": 168,
+      "community": 62,
       "norm_label": "shoplistprovider"
     },
     {
@@ -26801,7 +26900,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/shop_list_controller.dart",
       "source_location": null,
       "id": "controllers_shop_list_controller_refresh",
-      "community": 34,
+      "community": 130,
       "norm_label": "refresh"
     },
     {
@@ -26810,7 +26909,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/shop_products_controller.dart",
       "source_location": null,
       "id": "controllers_shop_products_controller",
-      "community": 71,
+      "community": 176,
       "norm_label": "shop_products_controller.dart"
     },
     {
@@ -26837,7 +26936,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/shop_products_controller.dart",
       "source_location": null,
       "id": "controllers_shop_products_controller_shopid",
-      "community": 71,
+      "community": 176,
       "norm_label": "shopid"
     },
     {
@@ -26846,7 +26945,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/shop_products_controller.dart",
       "source_location": null,
       "id": "controllers_shop_products_controller_build",
-      "community": 71,
+      "community": 176,
       "norm_label": "build"
     },
     {
@@ -26855,7 +26954,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/shop_products_controller.dart",
       "source_location": null,
       "id": "controllers_shop_products_controller_refresh",
-      "community": 71,
+      "community": 106,
       "norm_label": "refresh"
     },
     {
@@ -26864,7 +26963,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/vendor_orders_controller.dart",
       "source_location": null,
       "id": "controllers_vendor_orders_controller",
-      "community": 19,
+      "community": 30,
       "norm_label": "vendor_orders_controller.dart"
     },
     {
@@ -26891,7 +26990,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/vendor_orders_controller.dart",
       "source_location": null,
       "id": "controllers_vendor_orders_controller_repo",
-      "community": 19,
+      "community": 30,
       "norm_label": "_repo"
     },
     {
@@ -26900,7 +26999,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/vendor_orders_controller.dart",
       "source_location": null,
       "id": "controllers_vendor_orders_controller_build",
-      "community": 19,
+      "community": 30,
       "norm_label": "build"
     },
     {
@@ -26909,7 +27008,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/vendor_orders_controller.dart",
       "source_location": null,
       "id": "controllers_vendor_orders_controller_refresh",
-      "community": 19,
+      "community": 30,
       "norm_label": "refresh"
     },
     {
@@ -26918,7 +27017,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/vendor_orders_controller.dart",
       "source_location": null,
       "id": "controllers_vendor_orders_controller_updatestatus",
-      "community": 19,
+      "community": 30,
       "norm_label": "updatestatus"
     },
     {
@@ -26927,7 +27026,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/vendor_orders_controller.dart",
       "source_location": null,
       "id": "controllers_vendor_orders_controller_updatetracking",
-      "community": 19,
+      "community": 30,
       "norm_label": "updatetracking"
     },
     {
@@ -26954,7 +27053,7 @@
       "source_file": "lib/features/marketplace/presentation/controllers/vendor_products_controller.dart",
       "source_location": null,
       "id": "controllers_vendor_products_controller_vendorproductsprovider",
-      "community": 36,
+      "community": 176,
       "norm_label": "vendorproductsprovider"
     },
     {
@@ -27035,7 +27134,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/cart_screen.dart",
       "source_location": null,
       "id": "screens_cart_screen_cartscreen",
-      "community": 168,
+      "community": 62,
       "norm_label": "cartscreen"
     },
     {
@@ -27044,7 +27143,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/cart_screen.dart",
       "source_location": null,
       "id": "screens_cart_screen_vendorgroup",
-      "community": 57,
+      "community": 62,
       "norm_label": "_vendorgroup"
     },
     {
@@ -27053,7 +27152,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/cart_screen.dart",
       "source_location": null,
       "id": "screens_cart_screen_vendorgroupstate",
-      "community": 57,
+      "community": 62,
       "norm_label": "_vendorgroupstate"
     },
     {
@@ -27215,7 +27314,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/cart_screen.dart",
       "source_location": null,
       "id": "screens_cart_screen_build",
-      "community": 168,
+      "community": 62,
       "norm_label": "build"
     },
     {
@@ -27242,7 +27341,7 @@
       "source_file": null,
       "source_location": null,
       "id": "controllers_cart_controller_dart",
-      "community": 62,
+      "community": 129,
       "norm_label": "../controllers/cart_controller.dart"
     },
     {
@@ -27251,7 +27350,7 @@
       "source_file": null,
       "source_location": null,
       "id": "controllers_checkout_controller_dart",
-      "community": 66,
+      "community": 348,
       "norm_label": "../controllers/checkout_controller.dart"
     },
     {
@@ -27764,7 +27863,7 @@
       "source_file": null,
       "source_location": null,
       "id": "route_marketplace_cart",
-      "community": 50,
+      "community": 168,
       "norm_label": "route /marketplace/cart"
     },
     {
@@ -27809,7 +27908,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/marketplace_screen.dart",
       "source_location": null,
       "id": "screens_marketplace_screen_marketplacescreen",
-      "community": 47,
+      "community": 62,
       "norm_label": "marketplacescreen"
     },
     {
@@ -27818,7 +27917,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/marketplace_screen.dart",
       "source_location": null,
       "id": "screens_marketplace_screen_marketplacescreenstate",
-      "community": 47,
+      "community": 62,
       "norm_label": "_marketplacescreenstate"
     },
     {
@@ -27854,7 +27953,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/marketplace_screen.dart",
       "source_location": null,
       "id": "screens_marketplace_screen_searchbar",
-      "community": 47,
+      "community": 168,
       "norm_label": "_searchbar"
     },
     {
@@ -27863,7 +27962,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/marketplace_screen.dart",
       "source_location": null,
       "id": "screens_marketplace_screen_searchbarstate",
-      "community": 47,
+      "community": 168,
       "norm_label": "_searchbarstate"
     },
     {
@@ -27944,7 +28043,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/marketplace_screen.dart",
       "source_location": null,
       "id": "screens_marketplace_screen_cartdrawerstate",
-      "community": 168,
+      "community": 62,
       "norm_label": "_cartdrawerstate"
     },
     {
@@ -28349,7 +28448,7 @@
       "source_file": null,
       "source_location": null,
       "id": "core_platform_web_image_cache_dart",
-      "community": 129,
+      "community": 111,
       "norm_label": "../../../../core/platform/web_image_cache.dart"
     },
     {
@@ -28493,7 +28592,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/product_detail_screen.dart",
       "source_location": null,
       "id": "screens_product_detail_screen_productdetailscreen",
-      "community": 21,
+      "community": 47,
       "norm_label": "productdetailscreen"
     },
     {
@@ -28502,7 +28601,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/product_detail_screen.dart",
       "source_location": null,
       "id": "screens_product_detail_screen_productdetailscreenstate",
-      "community": 21,
+      "community": 47,
       "norm_label": "_productdetailscreenstate"
     },
     {
@@ -28835,7 +28934,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/product_detail_screen.dart",
       "source_location": null,
       "id": "screens_product_detail_screen_build",
-      "community": 50,
+      "community": 168,
       "norm_label": "build"
     },
     {
@@ -28862,7 +28961,7 @@
       "source_file": null,
       "source_location": null,
       "id": "widgets_product_glyph_dart",
-      "community": 36,
+      "community": 176,
       "norm_label": "../../widgets/product_glyph.dart"
     },
     {
@@ -29141,7 +29240,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/add_edit_product_screen.dart",
       "source_location": null,
       "id": "vendor_add_edit_product_screen_save",
-      "community": 36,
+      "community": 176,
       "norm_label": "_save"
     },
     {
@@ -29168,7 +29267,7 @@
       "source_file": null,
       "source_location": null,
       "id": "controllers_vendor_products_controller_dart",
-      "community": 36,
+      "community": 176,
       "norm_label": "../../controllers/vendor_products_controller.dart"
     },
     {
@@ -29186,7 +29285,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/edit_shop_screen.dart",
       "source_location": null,
       "id": "vendor_edit_shop_screen_editshopscreen",
-      "community": 10,
+      "community": 405,
       "norm_label": "editshopscreen"
     },
     {
@@ -29195,7 +29294,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/edit_shop_screen.dart",
       "source_location": null,
       "id": "vendor_edit_shop_screen_editshopscreenstate",
-      "community": 10,
+      "community": 405,
       "norm_label": "_editshopscreenstate"
     },
     {
@@ -29636,7 +29735,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/edit_shop_screen.dart",
       "source_location": null,
       "id": "vendor_edit_shop_screen_save",
-      "community": 10,
+      "community": 405,
       "norm_label": "_save"
     },
     {
@@ -29645,7 +29744,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/edit_shop_screen.dart",
       "source_location": null,
       "id": "vendor_edit_shop_screen_build",
-      "community": 10,
+      "community": 405,
       "norm_label": "build"
     },
     {
@@ -30086,7 +30185,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/seller_dashboard_screen.dart",
       "source_location": null,
       "id": "vendor_seller_dashboard_screen_dashboardbody",
-      "community": 36,
+      "community": 176,
       "norm_label": "_dashboardbody"
     },
     {
@@ -30536,7 +30635,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/shop_setup_screen.dart",
       "source_location": null,
       "id": "vendor_shop_setup_screen_shopsetupscreen",
-      "community": 44,
+      "community": 47,
       "norm_label": "shopsetupscreen"
     },
     {
@@ -30545,7 +30644,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/shop_setup_screen.dart",
       "source_location": null,
       "id": "vendor_shop_setup_screen_shopsetupscreenstate",
-      "community": 44,
+      "community": 47,
       "norm_label": "_shopsetupscreenstate"
     },
     {
@@ -31211,7 +31310,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/vendor_product_list_screen.dart",
       "source_location": null,
       "id": "vendor_vendor_product_list_screen",
-      "community": 36,
+      "community": 176,
       "norm_label": "vendor_product_list_screen.dart"
     },
     {
@@ -31220,7 +31319,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/vendor_product_list_screen.dart",
       "source_location": null,
       "id": "vendor_vendor_product_list_screen_vendorproductlistscreen",
-      "community": 36,
+      "community": 176,
       "norm_label": "vendorproductlistscreen"
     },
     {
@@ -31229,7 +31328,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/vendor_product_list_screen.dart",
       "source_location": null,
       "id": "vendor_vendor_product_list_screen_producttile",
-      "community": 36,
+      "community": 176,
       "norm_label": "_producttile"
     },
     {
@@ -31238,7 +31337,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/vendor_product_list_screen.dart",
       "source_location": null,
       "id": "vendor_vendor_product_list_screen_emptyproducts",
-      "community": 36,
+      "community": 176,
       "norm_label": "_emptyproducts"
     },
     {
@@ -31247,7 +31346,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/vendor_product_list_screen.dart",
       "source_location": null,
       "id": "vendor_vendor_product_list_screen_iconbtn",
-      "community": 36,
+      "community": 176,
       "norm_label": "_iconbtn"
     },
     {
@@ -31256,7 +31355,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/vendor_product_list_screen.dart",
       "source_location": null,
       "id": "vendor_vendor_product_list_screen_product",
-      "community": 36,
+      "community": 176,
       "norm_label": "product"
     },
     {
@@ -31265,7 +31364,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/vendor_product_list_screen.dart",
       "source_location": null,
       "id": "vendor_vendor_product_list_screen_onedit",
-      "community": 36,
+      "community": 176,
       "norm_label": "onedit"
     },
     {
@@ -31274,7 +31373,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/vendor_product_list_screen.dart",
       "source_location": null,
       "id": "vendor_vendor_product_list_screen_ondelete",
-      "community": 36,
+      "community": 176,
       "norm_label": "ondelete"
     },
     {
@@ -31283,7 +31382,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/vendor_product_list_screen.dart",
       "source_location": null,
       "id": "vendor_vendor_product_list_screen_onadd",
-      "community": 36,
+      "community": 176,
       "norm_label": "onadd"
     },
     {
@@ -31292,7 +31391,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/vendor_product_list_screen.dart",
       "source_location": null,
       "id": "vendor_vendor_product_list_screen_icon",
-      "community": 36,
+      "community": 176,
       "norm_label": "icon"
     },
     {
@@ -31301,7 +31400,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/vendor_product_list_screen.dart",
       "source_location": null,
       "id": "vendor_vendor_product_list_screen_ontap",
-      "community": 36,
+      "community": 176,
       "norm_label": "ontap"
     },
     {
@@ -31310,7 +31409,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/vendor_product_list_screen.dart",
       "source_location": null,
       "id": "vendor_vendor_product_list_screen_build",
-      "community": 36,
+      "community": 176,
       "norm_label": "build"
     },
     {
@@ -31319,7 +31418,7 @@
       "source_file": null,
       "source_location": null,
       "id": "route_seller_products_add",
-      "community": 36,
+      "community": 176,
       "norm_label": "route /seller/products/add"
     },
     {
@@ -31328,7 +31427,7 @@
       "source_file": "lib/features/marketplace/presentation/screens/vendor/vendor_product_list_screen.dart",
       "source_location": null,
       "id": "vendor_vendor_product_list_screen_confirmdelete",
-      "community": 36,
+      "community": 176,
       "norm_label": "_confirmdelete"
     },
     {
@@ -31337,7 +31436,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/cart_line_item.dart",
       "source_location": null,
       "id": "widgets_cart_line_item",
-      "community": 62,
+      "community": 129,
       "norm_label": "cart_line_item.dart"
     },
     {
@@ -31355,7 +31454,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/cart_line_item.dart",
       "source_location": null,
       "id": "widgets_cart_line_item_stepper",
-      "community": 62,
+      "community": 129,
       "norm_label": "_stepper"
     },
     {
@@ -31364,7 +31463,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/cart_line_item.dart",
       "source_location": null,
       "id": "widgets_cart_line_item_stepbtn",
-      "community": 62,
+      "community": 129,
       "norm_label": "_stepbtn"
     },
     {
@@ -31373,7 +31472,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/cart_line_item.dart",
       "source_location": null,
       "id": "widgets_cart_line_item_item",
-      "community": 62,
+      "community": 129,
       "norm_label": "item"
     },
     {
@@ -31382,7 +31481,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/cart_line_item.dart",
       "source_location": null,
       "id": "widgets_cart_line_item_quantity",
-      "community": 62,
+      "community": 129,
       "norm_label": "quantity"
     },
     {
@@ -31391,7 +31490,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/cart_line_item.dart",
       "source_location": null,
       "id": "widgets_cart_line_item_ondecrement",
-      "community": 62,
+      "community": 129,
       "norm_label": "ondecrement"
     },
     {
@@ -31400,7 +31499,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/cart_line_item.dart",
       "source_location": null,
       "id": "widgets_cart_line_item_onincrement",
-      "community": 62,
+      "community": 129,
       "norm_label": "onincrement"
     },
     {
@@ -31409,7 +31508,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/cart_line_item.dart",
       "source_location": null,
       "id": "widgets_cart_line_item_label",
-      "community": 62,
+      "community": 129,
       "norm_label": "label"
     },
     {
@@ -31418,7 +31517,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/cart_line_item.dart",
       "source_location": null,
       "id": "widgets_cart_line_item_ontap",
-      "community": 62,
+      "community": 129,
       "norm_label": "ontap"
     },
     {
@@ -31436,7 +31535,7 @@
       "source_file": null,
       "source_location": null,
       "id": "product_glyph_dart",
-      "community": 62,
+      "community": 129,
       "norm_label": "product_glyph.dart"
     },
     {
@@ -31445,7 +31544,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/product_card.dart",
       "source_location": null,
       "id": "widgets_product_card",
-      "community": 62,
+      "community": 129,
       "norm_label": "product_card.dart"
     },
     {
@@ -31463,7 +31562,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/product_card.dart",
       "source_location": null,
       "id": "widgets_product_card_productcardcompact",
-      "community": 62,
+      "community": 129,
       "norm_label": "productcardcompact"
     },
     {
@@ -31472,7 +31571,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/product_card.dart",
       "source_location": null,
       "id": "widgets_product_card_quickaddbutton",
-      "community": 62,
+      "community": 129,
       "norm_label": "_quickaddbutton"
     },
     {
@@ -31481,7 +31580,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/product_card.dart",
       "source_location": null,
       "id": "widgets_product_card_producttile",
-      "community": 62,
+      "community": 129,
       "norm_label": "_producttile"
     },
     {
@@ -31490,7 +31589,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/product_card.dart",
       "source_location": null,
       "id": "widgets_product_card_productmeta",
-      "community": 62,
+      "community": 129,
       "norm_label": "_productmeta"
     },
     {
@@ -31499,7 +31598,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/product_card.dart",
       "source_location": null,
       "id": "widgets_product_card_product",
-      "community": 62,
+      "community": 129,
       "norm_label": "product"
     },
     {
@@ -31508,7 +31607,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/product_card.dart",
       "source_location": null,
       "id": "widgets_product_card_ontap",
-      "community": 62,
+      "community": 129,
       "norm_label": "ontap"
     },
     {
@@ -31517,7 +31616,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/product_card.dart",
       "source_location": null,
       "id": "widgets_product_card_compact",
-      "community": 62,
+      "community": 129,
       "norm_label": "compact"
     },
     {
@@ -31526,7 +31625,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/product_card.dart",
       "source_location": null,
       "id": "widgets_product_card_build",
-      "community": 62,
+      "community": 129,
       "norm_label": "build"
     },
     {
@@ -31535,7 +31634,7 @@
       "source_file": null,
       "source_location": null,
       "id": "star_rating_widget_dart",
-      "community": 9,
+      "community": 129,
       "norm_label": "star_rating_widget.dart"
     },
     {
@@ -32066,7 +32165,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/web_checkout_resume_listener.dart",
       "source_location": null,
       "id": "widgets_web_checkout_resume_listener",
-      "community": 66,
+      "community": 348,
       "norm_label": "web_checkout_resume_listener.dart"
     },
     {
@@ -32075,7 +32174,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/web_checkout_resume_listener.dart",
       "source_location": null,
       "id": "widgets_web_checkout_resume_listener_webcheckoutresumelistener",
-      "community": 66,
+      "community": 348,
       "norm_label": "webcheckoutresumelistener"
     },
     {
@@ -32084,7 +32183,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/web_checkout_resume_listener.dart",
       "source_location": null,
       "id": "widgets_web_checkout_resume_listener_webcheckoutresumelistenerstate",
-      "community": 66,
+      "community": 348,
       "norm_label": "_webcheckoutresumelistenerstate"
     },
     {
@@ -32093,7 +32192,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/web_checkout_resume_listener.dart",
       "source_location": null,
       "id": "widgets_web_checkout_resume_listener_child",
-      "community": 66,
+      "community": 348,
       "norm_label": "child"
     },
     {
@@ -32102,7 +32201,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/web_checkout_resume_listener.dart",
       "source_location": null,
       "id": "widgets_web_checkout_resume_listener_createstate",
-      "community": 66,
+      "community": 348,
       "norm_label": "createstate"
     },
     {
@@ -32111,7 +32210,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/web_checkout_resume_listener.dart",
       "source_location": null,
       "id": "widgets_web_checkout_resume_listener_initstate",
-      "community": 66,
+      "community": 348,
       "norm_label": "initstate"
     },
     {
@@ -32120,7 +32219,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/web_checkout_resume_listener.dart",
       "source_location": null,
       "id": "widgets_web_checkout_resume_listener_dispose",
-      "community": 66,
+      "community": 348,
       "norm_label": "dispose"
     },
     {
@@ -32129,7 +32228,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/web_checkout_resume_listener.dart",
       "source_location": null,
       "id": "widgets_web_checkout_resume_listener_didchangeapplifecyclestate",
-      "community": 66,
+      "community": 348,
       "norm_label": "didchangeapplifecyclestate"
     },
     {
@@ -32147,7 +32246,7 @@
       "source_file": "lib/features/marketplace/presentation/widgets/web_checkout_resume_listener.dart",
       "source_location": null,
       "id": "widgets_web_checkout_resume_listener_build",
-      "community": 66,
+      "community": 348,
       "norm_label": "build"
     },
     {
@@ -33362,7 +33461,7 @@
       "source_file": "lib/features/matching/presentation/controllers/chat_conversation_controller.dart",
       "source_location": null,
       "id": "controllers_chat_conversation_controller_chattypingstatenotifier",
-      "community": 34,
+      "community": 130,
       "norm_label": "_chattypingstatenotifier"
     },
     {
@@ -33569,7 +33668,7 @@
       "source_file": "lib/features/matching/presentation/controllers/discovery_candidates_controller.dart",
       "source_location": null,
       "id": "controllers_discovery_candidates_controller_discoverycandidatesbuffer",
-      "community": 91,
+      "community": 55,
       "norm_label": "discoverycandidatesbuffer"
     },
     {
@@ -33578,7 +33677,7 @@
       "source_file": "lib/features/matching/presentation/controllers/discovery_candidates_controller.dart",
       "source_location": null,
       "id": "controllers_discovery_candidates_controller_swipeerrornotifier",
-      "community": 112,
+      "community": 404,
       "norm_label": "_swipeerrornotifier"
     },
     {
@@ -33587,7 +33686,7 @@
       "source_file": "lib/features/matching/presentation/controllers/discovery_candidates_controller.dart",
       "source_location": null,
       "id": "controllers_discovery_candidates_controller_discoverycandidatescontroller",
-      "community": 91,
+      "community": 55,
       "norm_label": "discoverycandidatescontroller"
     },
     {
@@ -33623,7 +33722,7 @@
       "source_file": "lib/features/matching/presentation/controllers/discovery_candidates_controller.dart",
       "source_location": null,
       "id": "controllers_discovery_candidates_controller_locationsyncerrorprovider",
-      "community": 91,
+      "community": 55,
       "norm_label": "locationsyncerrorprovider"
     },
     {
@@ -33722,7 +33821,7 @@
       "source_file": "lib/features/matching/presentation/controllers/discovery_candidates_controller.dart",
       "source_location": null,
       "id": "controllers_discovery_candidates_controller_build",
-      "community": 91,
+      "community": 55,
       "norm_label": "build"
     },
     {
@@ -33758,7 +33857,7 @@
       "source_file": "lib/features/matching/presentation/controllers/discovery_candidates_controller.dart",
       "source_location": null,
       "id": "controllers_discovery_candidates_controller_removefront",
-      "community": 87,
+      "community": 55,
       "norm_label": "removefront"
     },
     {
@@ -34028,7 +34127,7 @@
       "source_file": "lib/features/matching/presentation/controllers/discovery_controller.dart",
       "source_location": null,
       "id": "controllers_discovery_controller_discoverycontrollerprovider",
-      "community": 91,
+      "community": 55,
       "norm_label": "discoverycontrollerprovider"
     },
     {
@@ -34145,7 +34244,7 @@
       "source_file": "lib/features/matching/presentation/controllers/match_preference_controller.dart",
       "source_location": null,
       "id": "controllers_match_preference_controller_matchpreferencecontroller",
-      "community": 118,
+      "community": 174,
       "norm_label": "matchpreferencecontroller"
     },
     {
@@ -34190,7 +34289,7 @@
       "source_file": "lib/features/matching/presentation/controllers/match_preference_controller.dart",
       "source_location": null,
       "id": "controllers_match_preference_controller_matchpreferencecontrollerprovider",
-      "community": 87,
+      "community": 55,
       "norm_label": "matchpreferencecontrollerprovider"
     },
     {
@@ -34280,7 +34379,7 @@
       "source_file": "lib/features/matching/presentation/controllers/match_preferences_state.dart",
       "source_location": null,
       "id": "controllers_match_preferences_state",
-      "community": 118,
+      "community": 174,
       "norm_label": "match_preferences_state.dart"
     },
     {
@@ -34289,7 +34388,7 @@
       "source_file": "lib/features/matching/presentation/controllers/match_preferences_state.dart",
       "source_location": null,
       "id": "controllers_match_preferences_state_matchpreferencesstate",
-      "community": 118,
+      "community": 174,
       "norm_label": "matchpreferencesstate"
     },
     {
@@ -34415,7 +34514,7 @@
       "source_file": "lib/features/matching/presentation/matching_navigation.dart",
       "source_location": null,
       "id": "presentation_matching_navigation",
-      "community": 134,
+      "community": 34,
       "norm_label": "matching_navigation.dart"
     },
     {
@@ -34424,7 +34523,7 @@
       "source_file": "lib/features/matching/presentation/matching_navigation.dart",
       "source_location": null,
       "id": "presentation_matching_navigation_openmatchchat",
-      "community": 134,
+      "community": 34,
       "norm_label": "openmatchchat"
     },
     {
@@ -34433,7 +34532,7 @@
       "source_file": "lib/features/matching/presentation/matching_navigation.dart",
       "source_location": null,
       "id": "presentation_matching_navigation_openmatchesinbox",
-      "community": 170,
+      "community": 34,
       "norm_label": "openmatchesinbox"
     },
     {
@@ -34442,7 +34541,7 @@
       "source_file": "lib/features/matching/presentation/matching_navigation.dart",
       "source_location": null,
       "id": "presentation_matching_navigation_poporgo",
-      "community": 134,
+      "community": 34,
       "norm_label": "poporgo"
     },
     {
@@ -34451,7 +34550,7 @@
       "source_file": "lib/features/matching/presentation/matching_navigation.dart",
       "source_location": null,
       "id": "presentation_matching_navigation_opendirectchat",
-      "community": 134,
+      "community": 34,
       "norm_label": "opendirectchat"
     },
     {
@@ -35045,7 +35144,7 @@
       "source_file": "lib/features/matching/presentation/screens/matching_screen.dart",
       "source_location": null,
       "id": "screens_matching_screen_discoveryview",
-      "community": 91,
+      "community": 55,
       "norm_label": "_discoveryview"
     },
     {
@@ -35054,7 +35153,7 @@
       "source_file": "lib/features/matching/presentation/screens/matching_screen.dart",
       "source_location": null,
       "id": "screens_matching_screen_discoveryviewstate",
-      "community": 91,
+      "community": 55,
       "norm_label": "_discoveryviewstate"
     },
     {
@@ -35432,7 +35531,7 @@
       "source_file": "lib/features/matching/presentation/screens/matching_screen.dart",
       "source_location": null,
       "id": "screens_matching_screen_build",
-      "community": 91,
+      "community": 55,
       "norm_label": "build"
     },
     {
@@ -35468,7 +35567,7 @@
       "source_file": "lib/features/matching/presentation/screens/matching_screen.dart",
       "source_location": null,
       "id": "screens_matching_screen_didchangeapplifecyclestate",
-      "community": 91,
+      "community": 55,
       "norm_label": "didchangeapplifecyclestate"
     },
     {
@@ -35477,7 +35576,7 @@
       "source_file": "lib/features/matching/presentation/screens/matching_screen.dart",
       "source_location": null,
       "id": "screens_matching_screen_refreshlocationstate",
-      "community": 91,
+      "community": 55,
       "norm_label": "_refreshlocationstate"
     },
     {
@@ -35621,7 +35720,7 @@
       "source_file": "lib/features/matching/presentation/widgets/match_celebration_overlay.dart",
       "source_location": null,
       "id": "widgets_match_celebration_overlay",
-      "community": 129,
+      "community": 111,
       "norm_label": "match_celebration_overlay.dart"
     },
     {
@@ -35630,7 +35729,7 @@
       "source_file": "lib/features/matching/presentation/widgets/match_celebration_overlay.dart",
       "source_location": null,
       "id": "widgets_match_celebration_overlay_matchcelebrationoverlay",
-      "community": 129,
+      "community": 111,
       "norm_label": "matchcelebrationoverlay"
     },
     {
@@ -35639,7 +35738,7 @@
       "source_file": "lib/features/matching/presentation/widgets/match_celebration_overlay.dart",
       "source_location": null,
       "id": "widgets_match_celebration_overlay_avatarcircle",
-      "community": 129,
+      "community": 111,
       "norm_label": "_avatarcircle"
     },
     {
@@ -35648,7 +35747,7 @@
       "source_file": "lib/features/matching/presentation/widgets/match_celebration_overlay.dart",
       "source_location": null,
       "id": "widgets_match_celebration_overlay_floatingpawsbackground",
-      "community": 129,
+      "community": 111,
       "norm_label": "_floatingpawsbackground"
     },
     {
@@ -35657,7 +35756,7 @@
       "source_file": "lib/features/matching/presentation/widgets/match_celebration_overlay.dart",
       "source_location": null,
       "id": "widgets_match_celebration_overlay_activepet",
-      "community": 129,
+      "community": 111,
       "norm_label": "activepet"
     },
     {
@@ -35666,7 +35765,7 @@
       "source_file": "lib/features/matching/presentation/widgets/match_celebration_overlay.dart",
       "source_location": null,
       "id": "widgets_match_celebration_overlay_matchedpetname",
-      "community": 129,
+      "community": 111,
       "norm_label": "matchedpetname"
     },
     {
@@ -35675,7 +35774,7 @@
       "source_file": "lib/features/matching/presentation/widgets/match_celebration_overlay.dart",
       "source_location": null,
       "id": "widgets_match_celebration_overlay_matchedpetavatarurl",
-      "community": 129,
+      "community": 111,
       "norm_label": "matchedpetavatarurl"
     },
     {
@@ -35684,7 +35783,7 @@
       "source_file": "lib/features/matching/presentation/widgets/match_celebration_overlay.dart",
       "source_location": null,
       "id": "widgets_match_celebration_overlay_onsendmessage",
-      "community": 129,
+      "community": 111,
       "norm_label": "onsendmessage"
     },
     {
@@ -35693,7 +35792,7 @@
       "source_file": "lib/features/matching/presentation/widgets/match_celebration_overlay.dart",
       "source_location": null,
       "id": "widgets_match_celebration_overlay_onkeepswiping",
-      "community": 129,
+      "community": 111,
       "norm_label": "onkeepswiping"
     },
     {
@@ -35702,7 +35801,7 @@
       "source_file": "lib/features/matching/presentation/widgets/match_celebration_overlay.dart",
       "source_location": null,
       "id": "widgets_match_celebration_overlay_avatarurl",
-      "community": 129,
+      "community": 111,
       "norm_label": "avatarurl"
     },
     {
@@ -35711,7 +35810,7 @@
       "source_file": "lib/features/matching/presentation/widgets/match_celebration_overlay.dart",
       "source_location": null,
       "id": "widgets_match_celebration_overlay_fallbackemoji",
-      "community": 129,
+      "community": 111,
       "norm_label": "fallbackemoji"
     },
     {
@@ -35720,7 +35819,7 @@
       "source_file": "lib/features/matching/presentation/widgets/match_celebration_overlay.dart",
       "source_location": null,
       "id": "widgets_match_celebration_overlay_build",
-      "community": 129,
+      "community": 111,
       "norm_label": "build"
     },
     {
@@ -35729,7 +35828,7 @@
       "source_file": "lib/features/matching/presentation/widgets/match_celebration_overlay.dart",
       "source_location": null,
       "id": "widgets_match_celebration_overlay_buildpaw",
-      "community": 129,
+      "community": 111,
       "norm_label": "_buildpaw"
     },
     {
@@ -35747,7 +35846,7 @@
       "source_file": "lib/features/matching/presentation/widgets/match_preferences_sheet.dart",
       "source_location": null,
       "id": "widgets_match_preferences_sheet_matchpreferencessheet",
-      "community": 87,
+      "community": 55,
       "norm_label": "matchpreferencessheet"
     },
     {
@@ -35855,7 +35954,7 @@
       "source_file": "lib/features/matching/presentation/widgets/match_preferences_sheet.dart",
       "source_location": null,
       "id": "widgets_match_preferences_sheet_build",
-      "community": 87,
+      "community": 55,
       "norm_label": "build"
     },
     {
@@ -35963,7 +36062,7 @@
       "source_file": "lib/features/pet_profile/data/models/pet.dart",
       "source_location": null,
       "id": "lib_features_pet_profile_data_models_pet_dart_models_pet",
-      "community": 58,
+      "community": 399,
       "norm_label": "pet.dart"
     },
     {
@@ -36170,7 +36269,7 @@
       "source_file": "lib/features/pet_profile/data/repositories/pet_repository.dart",
       "source_location": null,
       "id": "repositories_pet_repository_petrepository",
-      "community": 102,
+      "community": 89,
       "norm_label": "petrepository"
     },
     {
@@ -36350,7 +36449,7 @@
       "source_file": "lib/features/pet_profile/domain/services/breed_identification_service.dart",
       "source_location": null,
       "id": "services_breed_identification_service_breedidentificationexception",
-      "community": 22,
+      "community": 288,
       "norm_label": "breedidentificationexception"
     },
     {
@@ -36953,7 +37052,7 @@
       "source_file": "lib/features/pet_profile/presentation/controllers/pet_list_controller.dart",
       "source_location": null,
       "id": "controllers_pet_list_controller_petlistnotifier",
-      "community": 106,
+      "community": 402,
       "norm_label": "petlistnotifier"
     },
     {
@@ -37016,7 +37115,7 @@
       "source_file": "lib/features/pet_profile/presentation/controllers/pet_list_controller.dart",
       "source_location": null,
       "id": "controllers_pet_list_controller_autogenerateroutines",
-      "community": 102,
+      "community": 402,
       "norm_label": "_autogenerateroutines"
     },
     {
@@ -37088,7 +37187,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_petfolio_features_auth_presentation_controllers_auth_controller_dart",
-      "community": 290,
+      "community": 399,
       "norm_label": "package:petfolio/features/auth/presentation/controllers/auth_controller.dart"
     },
     {
@@ -37952,7 +38051,7 @@
       "source_file": "lib/features/pet_profile/presentation/screens/onboarding_screen.dart",
       "source_location": null,
       "id": "screens_onboarding_screen_onboardingscreen",
-      "community": 23,
+      "community": 47,
       "norm_label": "onboardingscreen"
     },
     {
@@ -37961,7 +38060,7 @@
       "source_file": "lib/features/pet_profile/presentation/screens/onboarding_screen.dart",
       "source_location": null,
       "id": "screens_onboarding_screen_onboardingscreenstate",
-      "community": 23,
+      "community": 47,
       "norm_label": "_onboardingscreenstate"
     },
     {
@@ -38348,7 +38447,7 @@
       "source_file": "lib/features/pet_profile/presentation/screens/pet_profile_screen.dart",
       "source_location": null,
       "id": "screens_pet_profile_screen_herogamifiedbanner",
-      "community": 64,
+      "community": 169,
       "norm_label": "_herogamifiedbanner"
     },
     {
@@ -38357,7 +38456,7 @@
       "source_file": "lib/features/pet_profile/presentation/screens/pet_profile_screen.dart",
       "source_location": null,
       "id": "screens_pet_profile_screen_quickstatstrio",
-      "community": 64,
+      "community": 169,
       "norm_label": "_quickstatstrio"
     },
     {
@@ -38375,7 +38474,7 @@
       "source_file": "lib/features/pet_profile/presentation/screens/pet_profile_screen.dart",
       "source_location": null,
       "id": "screens_pet_profile_screen_dailyquestscard",
-      "community": 169,
+      "community": 64,
       "norm_label": "_dailyquestscard"
     },
     {
@@ -38951,7 +39050,7 @@
       "source_file": "lib/features/pet_profile/presentation/widgets/pet_activity_options.dart",
       "source_location": null,
       "id": "widgets_pet_activity_options",
-      "community": 30,
+      "community": 332,
       "norm_label": "pet_activity_options.dart"
     },
     {
@@ -38960,7 +39059,7 @@
       "source_file": "lib/features/pet_profile/presentation/widgets/pet_activity_options.dart",
       "source_location": null,
       "id": "widgets_pet_activity_options_petactivityoption",
-      "community": 30,
+      "community": 332,
       "norm_label": "petactivityoption"
     },
     {
@@ -38969,7 +39068,7 @@
       "source_file": "lib/features/pet_profile/presentation/widgets/pet_activity_options.dart",
       "source_location": null,
       "id": "widgets_pet_activity_options_id",
-      "community": 30,
+      "community": 332,
       "norm_label": "id"
     },
     {
@@ -38978,7 +39077,7 @@
       "source_file": "lib/features/pet_profile/presentation/widgets/pet_activity_options.dart",
       "source_location": null,
       "id": "widgets_pet_activity_options_label",
-      "community": 30,
+      "community": 332,
       "norm_label": "label"
     },
     {
@@ -38987,7 +39086,7 @@
       "source_file": "lib/features/pet_profile/presentation/widgets/pet_activity_options.dart",
       "source_location": null,
       "id": "widgets_pet_activity_options_icon",
-      "community": 30,
+      "community": 332,
       "norm_label": "icon"
     },
     {
@@ -38996,7 +39095,7 @@
       "source_file": "lib/features/pet_profile/presentation/widgets/pet_activity_options.dart",
       "source_location": null,
       "id": "widgets_pet_activity_options_kpetactivityoptions",
-      "community": 30,
+      "community": 332,
       "norm_label": "kpetactivityoptions"
     },
     {
@@ -39995,7 +40094,7 @@
       "source_file": "lib/features/social/data/repositories/comment_repository.dart",
       "source_location": null,
       "id": "repositories_comment_repository",
-      "community": 144,
+      "community": 113,
       "norm_label": "comment_repository.dart"
     },
     {
@@ -40022,7 +40121,7 @@
       "source_file": "lib/features/social/data/repositories/comment_repository.dart",
       "source_location": null,
       "id": "repositories_comment_repository_client",
-      "community": 144,
+      "community": 113,
       "norm_label": "_client"
     },
     {
@@ -40031,7 +40130,7 @@
       "source_file": "lib/features/social/data/repositories/comment_repository.dart",
       "source_location": null,
       "id": "repositories_comment_repository_fetchcomments",
-      "community": 144,
+      "community": 113,
       "norm_label": "fetchcomments"
     },
     {
@@ -40040,7 +40139,7 @@
       "source_file": "lib/features/social/data/repositories/comment_repository.dart",
       "source_location": null,
       "id": "repositories_comment_repository_fetchlikedcommentids",
-      "community": 144,
+      "community": 113,
       "norm_label": "_fetchlikedcommentids"
     },
     {
@@ -40049,7 +40148,7 @@
       "source_file": "lib/features/social/data/repositories/comment_repository.dart",
       "source_location": null,
       "id": "repositories_comment_repository_addcomment",
-      "community": 144,
+      "community": 113,
       "norm_label": "addcomment"
     },
     {
@@ -40058,7 +40157,7 @@
       "source_file": "lib/features/social/data/repositories/comment_repository.dart",
       "source_location": null,
       "id": "repositories_comment_repository_togglecommentlike",
-      "community": 144,
+      "community": 113,
       "norm_label": "togglecommentlike"
     },
     {
@@ -40067,7 +40166,7 @@
       "source_file": "lib/features/social/data/repositories/comment_repository.dart",
       "source_location": null,
       "id": "repositories_comment_repository_deletecomment",
-      "community": 144,
+      "community": 113,
       "norm_label": "deletecomment"
     },
     {
@@ -40076,7 +40175,7 @@
       "source_file": "lib/features/social/data/repositories/comment_repository.dart",
       "source_location": null,
       "id": "repositories_comment_repository_updatecomment",
-      "community": 144,
+      "community": 113,
       "norm_label": "updatecomment"
     },
     {
@@ -40085,7 +40184,7 @@
       "source_file": null,
       "source_location": null,
       "id": "models_comment_dart",
-      "community": 144,
+      "community": 113,
       "norm_label": "../models/comment.dart"
     },
     {
@@ -40175,7 +40274,7 @@
       "source_file": "lib/features/social/data/repositories/social_repository.dart",
       "source_location": null,
       "id": "repositories_social_repository_socialrepository",
-      "community": 13,
+      "community": 313,
       "norm_label": "socialrepository"
     },
     {
@@ -40445,7 +40544,7 @@
       "source_file": "lib/features/social/data/repositories/story_repository.dart",
       "source_location": null,
       "id": "repositories_story_repository_storyrepositoryprovider",
-      "community": 243,
+      "community": 34,
       "norm_label": "storyrepositoryprovider"
     },
     {
@@ -40922,7 +41021,7 @@
       "source_file": null,
       "source_location": null,
       "id": "socialrepository_get",
-      "community": 43,
+      "community": 177,
       "norm_label": "socialrepository get"
     },
     {
@@ -40994,7 +41093,7 @@
       "source_file": null,
       "source_location": null,
       "id": "data_repositories_social_repository_dart",
-      "community": 43,
+      "community": 177,
       "norm_label": "../../data/repositories/social_repository.dart"
     },
     {
@@ -41012,7 +41111,7 @@
       "source_file": "lib/features/social/presentation/controllers/follow_controller.dart",
       "source_location": null,
       "id": "controllers_follow_controller",
-      "community": 43,
+      "community": 177,
       "norm_label": "follow_controller.dart"
     },
     {
@@ -41021,7 +41120,7 @@
       "source_file": "lib/features/social/presentation/controllers/follow_controller.dart",
       "source_location": null,
       "id": "controllers_follow_controller_follownotifier",
-      "community": 43,
+      "community": 177,
       "norm_label": "follownotifier"
     },
     {
@@ -41030,7 +41129,7 @@
       "source_file": "lib/features/social/presentation/controllers/follow_controller.dart",
       "source_location": null,
       "id": "controllers_follow_controller_followstatusprovider",
-      "community": 169,
+      "community": 177,
       "norm_label": "followstatusprovider"
     },
     {
@@ -41039,7 +41138,7 @@
       "source_file": "lib/features/social/presentation/controllers/follow_controller.dart",
       "source_location": null,
       "id": "controllers_follow_controller_arg",
-      "community": 43,
+      "community": 177,
       "norm_label": "arg"
     },
     {
@@ -41048,7 +41147,7 @@
       "source_file": "lib/features/social/presentation/controllers/follow_controller.dart",
       "source_location": null,
       "id": "controllers_follow_controller_repo",
-      "community": 43,
+      "community": 177,
       "norm_label": "_repo"
     },
     {
@@ -41057,7 +41156,7 @@
       "source_file": "lib/features/social/presentation/controllers/follow_controller.dart",
       "source_location": null,
       "id": "controllers_follow_controller_build",
-      "community": 43,
+      "community": 177,
       "norm_label": "build"
     },
     {
@@ -41066,7 +41165,7 @@
       "source_file": "lib/features/social/presentation/controllers/follow_controller.dart",
       "source_location": null,
       "id": "controllers_follow_controller_toggle",
-      "community": 43,
+      "community": 177,
       "norm_label": "toggle"
     },
     {
@@ -41075,7 +41174,7 @@
       "source_file": null,
       "source_location": null,
       "id": "social_profile_controller_dart",
-      "community": 43,
+      "community": 177,
       "norm_label": "social_profile_controller.dart"
     },
     {
@@ -41543,7 +41642,7 @@
       "source_file": "lib/features/social/presentation/controllers/story_controller.dart",
       "source_location": null,
       "id": "controllers_story_controller",
-      "community": 243,
+      "community": 34,
       "norm_label": "story_controller.dart"
     },
     {
@@ -41552,7 +41651,7 @@
       "source_file": "lib/features/social/presentation/controllers/story_controller.dart",
       "source_location": null,
       "id": "controllers_story_controller_stories",
-      "community": 243,
+      "community": 34,
       "norm_label": "stories"
     },
     {
@@ -41561,7 +41660,7 @@
       "source_file": "lib/features/social/presentation/controllers/story_controller.dart",
       "source_location": null,
       "id": "lib_features_social_presentation_controllers_story_controller_dart_storiesprovider",
-      "community": 243,
+      "community": 34,
       "norm_label": "storiesprovider"
     },
     {
@@ -41570,7 +41669,7 @@
       "source_file": "lib/features/social/presentation/controllers/story_controller.dart",
       "source_location": null,
       "id": "controllers_story_controller_repo",
-      "community": 243,
+      "community": 34,
       "norm_label": "_repo"
     },
     {
@@ -41579,7 +41678,7 @@
       "source_file": null,
       "source_location": null,
       "id": "storyrepository_get",
-      "community": 243,
+      "community": 34,
       "norm_label": "storyrepository get"
     },
     {
@@ -41588,7 +41687,7 @@
       "source_file": "lib/features/social/presentation/controllers/story_controller.dart",
       "source_location": null,
       "id": "controllers_story_controller_build",
-      "community": 243,
+      "community": 34,
       "norm_label": "build"
     },
     {
@@ -41597,7 +41696,7 @@
       "source_file": "lib/features/social/presentation/controllers/story_controller.dart",
       "source_location": null,
       "id": "controllers_story_controller_markstoryviewed",
-      "community": 243,
+      "community": 34,
       "norm_label": "markstoryviewed"
     },
     {
@@ -41606,7 +41705,7 @@
       "source_file": "lib/features/social/presentation/controllers/story_controller.dart",
       "source_location": null,
       "id": "controllers_story_controller_addstory",
-      "community": 243,
+      "community": 34,
       "norm_label": "addstory"
     },
     {
@@ -41615,7 +41714,7 @@
       "source_file": "lib/features/social/presentation/controllers/story_controller.dart",
       "source_location": null,
       "id": "controllers_story_controller_sendreaction",
-      "community": 243,
+      "community": 34,
       "norm_label": "sendreaction"
     },
     {
@@ -41624,7 +41723,7 @@
       "source_file": null,
       "source_location": null,
       "id": "data_models_story_dart",
-      "community": 243,
+      "community": 34,
       "norm_label": "../../data/models/story.dart"
     },
     {
@@ -41633,7 +41732,7 @@
       "source_file": null,
       "source_location": null,
       "id": "data_repositories_story_repository_dart",
-      "community": 243,
+      "community": 34,
       "norm_label": "../../data/repositories/story_repository.dart"
     },
     {
@@ -41651,7 +41750,7 @@
       "source_file": "lib/features/social/presentation/screens/create_post_screen.dart",
       "source_location": null,
       "id": "screens_create_post_screen_createpostscreen",
-      "community": 47,
+      "community": 16,
       "norm_label": "createpostscreen"
     },
     {
@@ -41660,7 +41759,7 @@
       "source_file": "lib/features/social/presentation/screens/create_post_screen.dart",
       "source_location": null,
       "id": "screens_create_post_screen_createpostscreenstate",
-      "community": 47,
+      "community": 16,
       "norm_label": "_createpostscreenstate"
     },
     {
@@ -43136,7 +43235,7 @@
       "source_file": "lib/features/social/presentation/screens/social_profile_screen.dart",
       "source_location": null,
       "id": "screens_social_profile_screen_otherprofilebuttons",
-      "community": 169,
+      "community": 177,
       "norm_label": "_otherprofilebuttons"
     },
     {
@@ -43505,7 +43604,7 @@
       "source_file": "lib/features/social/presentation/screens/social_screen.dart",
       "source_location": null,
       "id": "screens_social_screen_storyitem",
-      "community": 73,
+      "community": 3,
       "norm_label": "_storyitem"
     },
     {
@@ -43514,7 +43613,7 @@
       "source_file": "lib/features/social/presentation/screens/social_screen.dart",
       "source_location": null,
       "id": "screens_social_screen_storyitemstate",
-      "community": 73,
+      "community": 3,
       "norm_label": "_storyitemstate"
     },
     {
@@ -44157,6 +44256,15 @@
       "norm_label": "package:video_player/video_player.dart"
     },
     {
+      "label": "../../../../core/widgets/petfolio_network_image.dart",
+      "file_type": "code",
+      "source_file": null,
+      "source_location": null,
+      "id": "core_widgets_petfolio_network_image_dart",
+      "community": 3,
+      "norm_label": "../../../../core/widgets/petfolio_network_image.dart"
+    },
+    {
       "label": "../../../../core/widgets/dashed_circle_painter.dart",
       "file_type": "code",
       "source_file": null,
@@ -44675,7 +44783,7 @@
       "source_file": "lib/features/social/presentation/widgets/post_comments_bottom_sheet.dart",
       "source_location": null,
       "id": "widgets_post_comments_bottom_sheet_commenttile",
-      "community": 26,
+      "community": 169,
       "norm_label": "_commenttile"
     },
     {
@@ -44702,7 +44810,7 @@
       "source_file": "lib/features/social/presentation/widgets/post_comments_bottom_sheet.dart",
       "source_location": null,
       "id": "widgets_post_comments_bottom_sheet_editcommentsheet",
-      "community": 26,
+      "community": 47,
       "norm_label": "_editcommentsheet"
     },
     {
@@ -44711,7 +44819,7 @@
       "source_file": "lib/features/social/presentation/widgets/post_comments_bottom_sheet.dart",
       "source_location": null,
       "id": "widgets_post_comments_bottom_sheet_editcommentsheetstate",
-      "community": 26,
+      "community": 47,
       "norm_label": "_editcommentsheetstate"
     },
     {
@@ -44891,7 +44999,7 @@
       "source_file": "lib/features/social/presentation/widgets/post_comments_bottom_sheet.dart",
       "source_location": null,
       "id": "widgets_post_comments_bottom_sheet_sendcomment",
-      "community": 26,
+      "community": 169,
       "norm_label": "_sendcomment"
     },
     {
@@ -45341,7 +45449,7 @@
       "source_file": "lib/marionette_debug_gate_io.dart",
       "source_location": null,
       "id": "lib_marionette_debug_gate_io",
-      "community": 288,
+      "community": 142,
       "norm_label": "marionette_debug_gate_io.dart"
     },
     {
@@ -45350,7 +45458,7 @@
       "source_file": "lib/marionette_debug_gate_io.dart",
       "source_location": null,
       "id": "lib_marionette_debug_gate_io_marionetteenabledinthisbuild",
-      "community": 288,
+      "community": 142,
       "norm_label": "marionetteenabledinthisbuild"
     },
     {
@@ -45359,7 +45467,7 @@
       "source_file": "lib/marionette_debug_gate_stub.dart",
       "source_location": null,
       "id": "lib_marionette_debug_gate_stub",
-      "community": 167,
+      "community": 142,
       "norm_label": "marionette_debug_gate_stub.dart"
     },
     {
@@ -45368,7 +45476,7 @@
       "source_file": "lib/marionette_debug_gate_stub.dart",
       "source_location": null,
       "id": "lib_marionette_debug_gate_stub_marionetteenabledinthisbuild",
-      "community": 167,
+      "community": 142,
       "norm_label": "marionetteenabledinthisbuild"
     },
     {
@@ -46025,7 +46133,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_petfolio_core_widgets_glass_card_dart",
-      "community": 179,
+      "community": 217,
       "norm_label": "package:petfolio/core/widgets/glass_card.dart"
     },
     {
@@ -46034,7 +46142,7 @@
       "source_file": "test/core/widgets/app_shell_widget_test.dart",
       "source_location": null,
       "id": "widgets_app_shell_widget_test",
-      "community": 69,
+      "community": 179,
       "norm_label": "app_shell_widget_test.dart"
     },
     {
@@ -46043,7 +46151,7 @@
       "source_file": "test/core/widgets/app_shell_widget_test.dart",
       "source_location": null,
       "id": "widgets_app_shell_widget_test_main",
-      "community": 69,
+      "community": 179,
       "norm_label": "main"
     },
     {
@@ -46052,7 +46160,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_petfolio_core_widgets_app_shell_dart",
-      "community": 5,
+      "community": 179,
       "norm_label": "package:petfolio/core/widgets/app_shell.dart"
     },
     {
@@ -46061,7 +46169,7 @@
       "source_file": "test/core/widgets/glass_card_widget_test.dart",
       "source_location": null,
       "id": "widgets_glass_card_widget_test",
-      "community": 179,
+      "community": 217,
       "norm_label": "glass_card_widget_test.dart"
     },
     {
@@ -46070,7 +46178,7 @@
       "source_file": "test/core/widgets/glass_card_widget_test.dart",
       "source_location": null,
       "id": "widgets_glass_card_widget_test_wrap",
-      "community": 179,
+      "community": 217,
       "norm_label": "_wrap"
     },
     {
@@ -46079,7 +46187,7 @@
       "source_file": "test/core/widgets/glass_card_widget_test.dart",
       "source_location": null,
       "id": "widgets_glass_card_widget_test_main",
-      "community": 179,
+      "community": 217,
       "norm_label": "main"
     },
     {
@@ -46088,7 +46196,7 @@
       "source_file": null,
       "source_location": null,
       "id": "container",
-      "community": 179,
+      "community": 217,
       "norm_label": "container"
     },
     {
@@ -46097,7 +46205,7 @@
       "source_file": "test/core/widgets/pet_avatar_widget_test.dart",
       "source_location": null,
       "id": "widgets_pet_avatar_widget_test",
-      "community": 179,
+      "community": 217,
       "norm_label": "pet_avatar_widget_test.dart"
     },
     {
@@ -46106,7 +46214,7 @@
       "source_file": "test/core/widgets/pet_avatar_widget_test.dart",
       "source_location": null,
       "id": "widgets_pet_avatar_widget_test_wrap",
-      "community": 179,
+      "community": 217,
       "norm_label": "_wrap"
     },
     {
@@ -46115,7 +46223,7 @@
       "source_file": "test/core/widgets/pet_avatar_widget_test.dart",
       "source_location": null,
       "id": "widgets_pet_avatar_widget_test_main",
-      "community": 179,
+      "community": 217,
       "norm_label": "main"
     },
     {
@@ -46367,7 +46475,7 @@
       "source_file": "test/features/marketplace/order_repository_exceptions_test.dart",
       "source_location": null,
       "id": "marketplace_order_repository_exceptions_test",
-      "community": 22,
+      "community": 288,
       "norm_label": "order_repository_exceptions_test.dart"
     },
     {
@@ -46376,7 +46484,7 @@
       "source_file": "test/features/marketplace/order_repository_exceptions_test.dart",
       "source_location": null,
       "id": "marketplace_order_repository_exceptions_test_rpcerror",
-      "community": 22,
+      "community": 288,
       "norm_label": "_rpcerror"
     },
     {
@@ -46385,7 +46493,7 @@
       "source_file": "test/features/marketplace/order_repository_exceptions_test.dart",
       "source_location": null,
       "id": "marketplace_order_repository_exceptions_test_main",
-      "community": 22,
+      "community": 288,
       "norm_label": "main"
     },
     {
@@ -46394,7 +46502,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_petfolio_features_marketplace_data_repositories_order_repository_dart",
-      "community": 22,
+      "community": 288,
       "norm_label": "package:petfolio/features/marketplace/data/repositories/order_repository.dart"
     },
     {
@@ -46403,7 +46511,7 @@
       "source_file": null,
       "source_location": null,
       "id": "postgrestexception",
-      "community": 22,
+      "community": 288,
       "norm_label": "postgrestexception"
     },
     {
@@ -46556,7 +46664,7 @@
       "source_file": "test/features/social/presentation/controllers/social_controller_test.dart",
       "source_location": null,
       "id": "controllers_social_controller_test",
-      "community": 271,
+      "community": 313,
       "norm_label": "social_controller_test.dart"
     },
     {
@@ -46565,7 +46673,7 @@
       "source_file": "test/features/social/presentation/controllers/social_controller_test.dart",
       "source_location": null,
       "id": "controllers_social_controller_test_mocksupabaseclient",
-      "community": 117,
+      "community": 69,
       "norm_label": "mocksupabaseclient"
     },
     {
@@ -46574,7 +46682,7 @@
       "source_file": "test/features/social/presentation/controllers/social_controller_test.dart",
       "source_location": null,
       "id": "controllers_social_controller_test_mockrealtimechannel",
-      "community": 139,
+      "community": 243,
       "norm_label": "mockrealtimechannel"
     },
     {
@@ -46583,7 +46691,7 @@
       "source_file": "test/features/social/presentation/controllers/social_controller_test.dart",
       "source_location": null,
       "id": "controllers_social_controller_test_mocksocialrepository",
-      "community": 13,
+      "community": 313,
       "norm_label": "mocksocialrepository"
     },
     {
@@ -46592,7 +46700,7 @@
       "source_file": "test/features/social/presentation/controllers/social_controller_test.dart",
       "source_location": null,
       "id": "controllers_social_controller_test_posts",
-      "community": 271,
+      "community": 313,
       "norm_label": "posts"
     },
     {
@@ -46601,7 +46709,7 @@
       "source_file": "test/features/social/presentation/controllers/social_controller_test.dart",
       "source_location": null,
       "id": "controllers_social_controller_test_togglelikeerror",
-      "community": 271,
+      "community": 313,
       "norm_label": "togglelikeerror"
     },
     {
@@ -46610,7 +46718,7 @@
       "source_file": "test/features/social/presentation/controllers/social_controller_test.dart",
       "source_location": null,
       "id": "controllers_social_controller_test_nosuchmethod",
-      "community": 271,
+      "community": 313,
       "norm_label": "nosuchmethod"
     },
     {
@@ -46619,7 +46727,7 @@
       "source_file": "test/features/social/presentation/controllers/social_controller_test.dart",
       "source_location": null,
       "id": "controllers_social_controller_test_fetchfeed",
-      "community": 271,
+      "community": 313,
       "norm_label": "fetchfeed"
     },
     {
@@ -46628,7 +46736,7 @@
       "source_file": "test/features/social/presentation/controllers/social_controller_test.dart",
       "source_location": null,
       "id": "controllers_social_controller_test_togglelike",
-      "community": 271,
+      "community": 313,
       "norm_label": "togglelike"
     },
     {
@@ -46637,7 +46745,7 @@
       "source_file": "test/features/social/presentation/controllers/social_controller_test.dart",
       "source_location": null,
       "id": "controllers_social_controller_test_main",
-      "community": 271,
+      "community": 313,
       "norm_label": "main"
     },
     {
@@ -46655,7 +46763,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_petfolio_features_social_data_repositories_social_repository_dart",
-      "community": 271,
+      "community": 313,
       "norm_label": "package:petfolio/features/social/data/repositories/social_repository.dart"
     },
     {
@@ -46664,7 +46772,7 @@
       "source_file": null,
       "source_location": null,
       "id": "package_petfolio_features_social_presentation_controllers_social_controller_dart",
-      "community": 271,
+      "community": 313,
       "norm_label": "package:petfolio/features/social/presentation/controllers/social_controller.dart"
     },
     {
@@ -46763,7 +46871,7 @@
       "source_file": "test/helpers/fake_supabase_client.dart",
       "source_location": null,
       "id": "helpers_fake_supabase_client_fakesupabaseclient",
-      "community": 117,
+      "community": 69,
       "norm_label": "fakesupabaseclient"
     },
     {
@@ -46790,7 +46898,7 @@
       "source_file": "test/helpers/fake_supabase_client.dart",
       "source_location": null,
       "id": "helpers_fake_supabase_client_fakerealtimechannel",
-      "community": 139,
+      "community": 243,
       "norm_label": "_fakerealtimechannel"
     },
     {
@@ -46853,7 +46961,7 @@
       "source_file": "test/security/rls_migration_contract_test.dart",
       "source_location": null,
       "id": "security_rls_migration_contract_test",
-      "community": 288,
+      "community": 244,
       "norm_label": "rls_migration_contract_test.dart"
     },
     {
@@ -46862,7 +46970,7 @@
       "source_file": "test/security/rls_migration_contract_test.dart",
       "source_location": null,
       "id": "security_rls_migration_contract_test_criticaltables",
-      "community": 288,
+      "community": 244,
       "norm_label": "_criticaltables"
     },
     {
@@ -46871,7 +46979,7 @@
       "source_file": "test/security/rls_migration_contract_test.dart",
       "source_location": null,
       "id": "security_rls_migration_contract_test_main",
-      "community": 288,
+      "community": 244,
       "norm_label": "main"
     },
     {
@@ -46880,7 +46988,7 @@
       "source_file": "test/security/stripe_client_contract_test.dart",
       "source_location": null,
       "id": "security_stripe_client_contract_test",
-      "community": 233,
+      "community": 244,
       "norm_label": "stripe_client_contract_test.dart"
     },
     {
@@ -46889,7 +46997,7 @@
       "source_file": "test/security/stripe_client_contract_test.dart",
       "source_location": null,
       "id": "security_stripe_client_contract_test_main",
-      "community": 233,
+      "community": 244,
       "norm_label": "main"
     },
     {
@@ -46898,7 +47006,7 @@
       "source_file": "test/widget_test.dart",
       "source_location": null,
       "id": "test_widget_test",
-      "community": 290,
+      "community": 399,
       "norm_label": "widget_test.dart"
     },
     {
@@ -46907,7 +47015,7 @@
       "source_file": "test/widget_test.dart",
       "source_location": null,
       "id": "test_widget_test_stubpetlistnotifier",
-      "community": 290,
+      "community": 402,
       "norm_label": "_stubpetlistnotifier"
     },
     {
@@ -46916,7 +47024,7 @@
       "source_file": "test/widget_test.dart",
       "source_location": null,
       "id": "test_widget_test_build",
-      "community": 290,
+      "community": 399,
       "norm_label": "build"
     },
     {
@@ -46925,7 +47033,7 @@
       "source_file": "test/widget_test.dart",
       "source_location": null,
       "id": "test_widget_test_main",
-      "community": 290,
+      "community": 399,
       "norm_label": "main"
     },
     {
@@ -49240,6 +49348,15 @@
       "id": "stripe_security_audit_10_plan_completion_status_2026_06_08",
       "community": 180,
       "norm_label": "10. plan completion status (2026-06-08)"
+    },
+    {
+      "label": "9. Automated contract tests",
+      "file_type": "document",
+      "source_file": "STRIPE_SECURITY_AUDIT.md",
+      "source_location": "L103",
+      "id": "stripe_security_audit_9_automated_contract_tests",
+      "community": 180,
+      "norm_label": "9. automated contract tests"
     },
     {
       "label": "audit_fixes_memory.md",
@@ -60240,13 +60357,13 @@
       "norm_label": "phase 4: discovery deck animation (performance)"
     },
     {
-      "label": "9. Automated contract tests",
-      "file_type": "document",
-      "source_file": "STRIPE_SECURITY_AUDIT.md",
-      "source_location": "L85",
-      "community": 180,
-      "norm_label": "9. automated contract tests",
-      "id": "stripe_security_audit_9_automated_contract_tests"
+      "label": "CacheManager?",
+      "file_type": "code",
+      "source_file": null,
+      "source_location": null,
+      "community": 65,
+      "norm_label": "cachemanager?",
+      "id": "cachemanager"
     },
     {
       "label": "New implementations",
@@ -63947,6 +64064,16 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "widgets_petfolio_network_image",
+      "target": "package_flutter_material_dart"
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
       "source_file": "lib/core/widgets/pf_achievement_tile.dart",
       "source_location": null,
       "weight": 1.0,
@@ -67312,6 +67439,17 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "context": "variable_type",
+      "source": "widgets_petfolio_network_image",
+      "target": "widget"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
       "source_file": "lib/core/widgets/pf_card.dart",
       "source_location": null,
       "weight": 1.0,
@@ -70250,6 +70388,16 @@
       "source_location": null,
       "weight": 1.0,
       "source": "services_care_recommendation_service",
+      "target": "dart_async"
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "widgets_petfolio_network_image",
       "target": "dart_async"
     },
     {
@@ -74055,6 +74203,16 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "widgets_petfolio_network_image_petfolionetworkimage",
+      "target": "statelesswidget"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
       "source_file": "lib/core/widgets/pf_achievement_tile.dart",
       "source_location": null,
       "weight": 1.0,
@@ -76417,6 +76575,17 @@
       "target": "platform_web_image_cache_webnetworkimagememcachethumb"
     },
     {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/platform/web_image_cache.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "context": "variable_type",
+      "source": "platform_web_image_cache",
+      "target": "widgets_petfolio_network_image_cachemanager"
+    },
+    {
       "relation": "imports",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -76425,6 +76594,16 @@
       "weight": 1.0,
       "source": "controllers_manual_kyc_controller",
       "target": "package_flutter_widgets_dart"
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "widgets_petfolio_network_image",
+      "target": "package_flutter_cache_manager_flutter_cache_manager_dart"
     },
     {
       "relation": "exports",
@@ -89329,6 +89508,17 @@
       "target": "int"
     },
     {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "context": "variable_type",
+      "source": "widgets_petfolio_network_image",
+      "target": "int"
+    },
+    {
       "relation": "imports",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -89436,6 +89626,16 @@
       "source_location": null,
       "weight": 1.0,
       "source": "widgets_match_celebration_overlay",
+      "target": "package_cached_network_image_cached_network_image_dart"
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "widgets_petfolio_network_image",
       "target": "package_cached_network_image_cached_network_image_dart"
     },
     {
@@ -89651,6 +89851,118 @@
       "context": "type_lookup",
       "source": "screens_story_viewer_screen",
       "target": "offset"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "context": "variable_type",
+      "source": "widgets_petfolio_network_image",
+      "target": "boxfit"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "widgets_petfolio_network_image",
+      "target": "widgets_petfolio_network_image_build"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "context": "variable_type",
+      "source": "widgets_petfolio_network_image",
+      "target": "widgets_petfolio_network_image_cachemanager"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "widgets_petfolio_network_image",
+      "target": "widgets_petfolio_network_image_errorfallback"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "widgets_petfolio_network_image",
+      "target": "widgets_petfolio_network_image_evictstalecache"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "widgets_petfolio_network_image",
+      "target": "widgets_petfolio_network_image_fit"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "widgets_petfolio_network_image",
+      "target": "widgets_petfolio_network_image_imageurl"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "widgets_petfolio_network_image",
+      "target": "widgets_petfolio_network_image_maxwidthdiskcache"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "widgets_petfolio_network_image",
+      "target": "widgets_petfolio_network_image_memcachewidth"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "widgets_petfolio_network_image",
+      "target": "widgets_petfolio_network_image_petfolionetworkimage"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/widgets/petfolio_network_image.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "widgets_petfolio_network_image",
+      "target": "widgets_petfolio_network_image_placeholder"
     },
     {
       "relation": "imports",
@@ -138569,6 +138881,16 @@
       "source_location": null,
       "weight": 1.0,
       "source": "screens_social_screen",
+      "target": "core_widgets_petfolio_network_image_dart"
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/features/social/presentation/screens/social_screen.dart",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "screens_social_screen",
       "target": "package_video_player_video_player_dart"
     },
     {
@@ -144676,9 +144998,9 @@
       "source_file": "STRIPE_SECURITY_AUDIT.md",
       "source_location": "L86",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "stripe_security_audit_stripe_security_audit_petfolio_marketplace_checkout",
-      "target": "stripe_security_audit_10_plan_completion_status_2026_06_08",
-      "confidence_score": 1.0
+      "target": "stripe_security_audit_10_plan_completion_status_2026_06_08"
     },
     {
       "relation": "contains",
@@ -155366,9 +155688,9 @@
       "source_file": "progress.md",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_petfolio_progress_log",
-      "target": "progress_2026_06_08_plan_remainder_b7_b8_b10_e10_polish",
-      "confidence_score": 1.0
+      "target": "progress_2026_06_08_plan_remainder_b7_b8_b10_e10_polish"
     },
     {
       "relation": "contains",
@@ -155416,9 +155738,9 @@
       "source_file": "progress.md",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_2026_06_08_plan_remainder_b7_b8_b10_e10_polish",
-      "target": "progress_backend",
-      "confidence_score": 1.0
+      "target": "progress_backend"
     },
     {
       "relation": "contains",
@@ -155426,9 +155748,9 @@
       "source_file": "progress.md",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_2026_06_08_plan_remainder_b7_b8_b10_e10_polish",
-      "target": "progress_features",
-      "confidence_score": 1.0
+      "target": "progress_features"
     },
     {
       "relation": "contains",
@@ -155436,9 +155758,9 @@
       "source_file": "progress.md",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_2026_06_08_plan_remainder_b7_b8_b10_e10_polish",
-      "target": "progress_performance",
-      "confidence_score": 1.0
+      "target": "progress_performance"
     },
     {
       "relation": "contains",
@@ -155446,9 +155768,9 @@
       "source_file": "progress.md",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_2026_06_08_plan_remainder_b7_b8_b10_e10_polish",
-      "target": "progress_tests",
-      "confidence_score": 1.0
+      "target": "progress_tests"
     },
     {
       "relation": "contains",
@@ -155456,9 +155778,9 @@
       "source_file": "progress.md",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_2026_06_08_plan_remainder_b7_b8_b10_e10_polish",
-      "target": "progress_ui_ux_remaining_b_items",
-      "confidence_score": 1.0
+      "target": "progress_ui_ux_remaining_b_items"
     },
     {
       "relation": "contains",
@@ -155696,9 +156018,9 @@
       "source_file": "progress.md",
       "source_location": "L196",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_2026_06_08_f4_golden_tests_for_apptheme_light_dark_variants",
-      "target": "progress_new_implementations_196",
-      "confidence_score": 1.0
+      "target": "progress_new_implementations_196"
     },
     {
       "relation": "contains",
@@ -155756,9 +156078,9 @@
       "source_file": "progress.md",
       "source_location": "L220",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_2026_06_08_phase_5_security_testing_plan_completion",
-      "target": "progress_new_implementations_220",
-      "confidence_score": 1.0
+      "target": "progress_new_implementations_220"
     },
     {
       "relation": "contains",
@@ -155866,9 +156188,9 @@
       "source_file": "progress.md",
       "source_location": "L252",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_2026_06_08_plan_completion_remaining_tasks_from_review_the_lib_directory",
-      "target": "progress_new_implementations_252",
-      "confidence_score": 1.0
+      "target": "progress_new_implementations_252"
     },
     {
       "relation": "contains",
@@ -156276,9 +156598,9 @@
       "source_file": "progress.md",
       "source_location": "L1631",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_phase_fix_plan_phases_5_10_pre_release_sweep_2026_06_07",
-      "target": "progress_next_step_1631",
-      "confidence_score": 1.0
+      "target": "progress_next_step_1631"
     },
     {
       "relation": "contains",
@@ -156346,9 +156668,9 @@
       "source_file": "progress.md",
       "source_location": "L1666",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_2026_05_14_dart_models_pet_caretask_healthlog_medicalrecord",
-      "target": "progress_data_contracts_1666",
-      "confidence_score": 1.0
+      "target": "progress_data_contracts_1666"
     },
     {
       "relation": "contains",
@@ -156426,9 +156748,9 @@
       "source_file": "progress.md",
       "source_location": "L1732",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_2026_05_14_care_health_repositories_appexception",
-      "target": "progress_next_step_1732",
-      "confidence_score": 1.0
+      "target": "progress_next_step_1732"
     },
     {
       "relation": "contains",
@@ -156526,9 +156848,9 @@
       "source_file": "progress.md",
       "source_location": "L1780",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_2026_05_14_onboarding_refactor_care_engine_data_capture",
-      "target": "progress_next_step_1780",
-      "confidence_score": 1.0
+      "target": "progress_next_step_1780"
     },
     {
       "relation": "contains",
@@ -156606,9 +156928,9 @@
       "source_file": "progress.md",
       "source_location": "L1748",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_2026_05_14_onboarding_refactor_care_engine_data_capture",
-      "target": "progress_what_was_implemented_1748",
-      "confidence_score": 1.0
+      "target": "progress_what_was_implemented_1748"
     },
     {
       "relation": "contains",
@@ -156666,9 +156988,9 @@
       "source_file": "progress.md",
       "source_location": "L1895",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_2026_06_01_social_dm_chat_instagram_style_direct_messages",
-      "target": "progress_data_layer_1895",
-      "confidence_score": 1.0
+      "target": "progress_data_layer_1895"
     },
     {
       "relation": "contains",
@@ -156746,9 +157068,9 @@
       "source_file": "progress.md",
       "source_location": "L1904",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "progress_2026_06_01_social_dm_chat_instagram_style_direct_messages",
-      "target": "progress_ui_1904",
-      "confidence_score": 1.0
+      "target": "progress_ui_1904"
     },
     {
       "relation": "contains",
@@ -157042,5 +157364,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "f9c776a0b9fc0c6782e026c903d940f22321e7ac"
+  "built_at_commit": "af06ebe6aefa26325638cdbf4692f2c7a81887c3"
 }

@@ -49,11 +49,16 @@ void _assertEnvVars() {
   }
 }
 
+bool _integrationTestBindingActive() {
+  return const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false);
+}
+
 Future<void> main() async {
   final marionetteEnabled = marionette_gate.marionetteEnabledInThisBuild;
-  if (marionetteEnabled) {
+  final integrationTest = _integrationTestBindingActive();
+  if (!integrationTest && marionetteEnabled) {
     MarionetteBinding.ensureInitialized();
-  } else {
+  } else if (!integrationTest) {
     WidgetsFlutterBinding.ensureInitialized();
   }
 
@@ -64,13 +69,15 @@ Future<void> main() async {
     PaintingBinding.instance.imageCache.maximumSizeBytes = 64 * 1024 * 1024;
   }
 
-  FlutterError.onError = (details) {
-    FlutterError.presentError(details);
-  };
-  PlatformDispatcher.instance.onError = (error, stack) {
-    debugPrint('Unhandled async error: $error\n$stack');
-    return true;
-  };
+  if (!integrationTest) {
+    FlutterError.onError = (details) {
+      FlutterError.presentError(details);
+    };
+    PlatformDispatcher.instance.onError = (error, stack) {
+      debugPrint('Unhandled async error: $error\n$stack');
+      return true;
+    };
+  }
 
   _assertEnvVars();
   await PrefsSchema.migrate();
