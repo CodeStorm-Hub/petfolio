@@ -43,7 +43,8 @@ class CommentRepository {
         .from('comments')
         .select('id, post_id, pet_id, content, created_at, parent_id, like_count, pet:pets(name, handle, avatar_url)')
         .eq('post_id', postId)
-        .order('created_at', ascending: true);
+        .order('created_at', ascending: true)
+        .limit(200);
 
     final comments = (rows as List).cast<Map<String, dynamic>>();
 

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/errors/app_exception.dart';
-import '../../../../core/platform/platform_notifications.dart';
+import '../../platform/platform_notifications.dart';
 import '../models/care_streak.dart';
 import '../models/care_task.dart';
 import '../models/care_task_log.dart';

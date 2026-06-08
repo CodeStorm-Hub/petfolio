@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../services/notification_service.dart';
+import 'package:petfolio/core/services/notification_service.dart';
 import 'care_fcm_reminder_sync.dart';
 import 'platform_notifications.dart';
 

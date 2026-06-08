@@ -1713,6 +1713,69 @@ Phase complete — please run (/remember) to save tokens before proceeding to th
 
 Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
 
+## 2026-06-07 — Stabilisation Phase 4: High-ROI Test Coverage
+
+- **`test/features/marketplace/checkout_state_test.dart`** — 17 pure unit tests: `CheckoutState.isLoading` (6), `isLoadingShop` (3), `copyWith` (4), exception messages (4). No Supabase or widgets.
+- **`test/features/marketplace/presentation/order_confirmation_test.dart`** — 4 widget tests (native confirmed state + 3 navigation paths) + 4 standalone `_poll()` unit tests (processing, paid, timeout, cancelled). Root cause of prior fake failure: `super(null)` in fake repo → fixed by standalone helper instead of inheritance.
+- **`test/core/router_redirect_test.dart`** — 17 pure unit tests on `computeRedirect()` (extracted in Phase 3) + 1 widget smoke test (logged-out → `LoginScreen`). No `pumpAndSettle` loops: redirect logic is pure and fast.
+- **`test/features/care/care_notifier_test.dart`** — 4 optimistic-update + rollback tests + 4 streak computation tests. Key insight: use `yesterday` as `selectedDate` in `_emptyDashboard()` so `_onDashboardChange` returns early and doesn't clobber the optimistic toggle.
+- **`test/features/matching/discovery_controller_test.dart`** — 4 tests: 3 buffer tests (logged-out, no pet, with candidates) + 1 swipe error test. Root causes fixed: (1) `_FakeMatchingRepository implements` (not `extends`) because constructor requires non-nullable `Ref`; (2) `await c.read(discoveryCandidatesControllerProvider.future)` required before `swipe()` — async `build()` means state is `AsyncLoading` otherwise, causing `swipe()` to exit early on empty deck; (3) listener-based assertion captures the transient `swipeErrorProvider` state before `addPostFrameCallback` clears it.
+- **`analysis_options.yaml`** — Clean (`No issues found`) after renaming private-underscore local variables in care test.
+
+Total: **55 new tests, 0 failures**, `flutter analyze` clean.
+
+**Next step:** Phase 4 complete — please run (/remember) to save tokens, then approve to proceed to Phase 5: Architecture Refactor.
+
+## 2026-06-07 — Stabilisation Phase 5: Architecture Refactor
+
+**Audit findings** — `lib/core/models/pet.dart` is correctly placed (cross-feature via re-export); `location_service.dart` / `notification_service.dart` are correctly placed (cross-feature or core-platform dependency). Two concrete moves executed:
+
+**Move 1 — `stripe_init_service.dart`**
+- `lib/core/services/stripe_init_service.dart` → `lib/features/marketplace/services/stripe_init_service.dart`
+- Updated: `lib/main.dart` import, `lib/features/marketplace/presentation/controllers/checkout_controller.dart` import (corrected to `'../../services/stripe_init_service.dart'`)
+- Deleted old file from `lib/core/services/`
+
+**Move 2 — Care notification platform cluster**
+- Moved all 4 files: `care_fcm_reminder_sync.dart`, `platform_notifications.dart`, `platform_notifications_io.dart`, `platform_notifications_web.dart`
+- From: `lib/core/platform/` → To: `lib/features/care/platform/`
+- Fixed import in `platform_notifications_io.dart`: `'../services/notification_service.dart'` → `'package:petfolio/core/services/notification_service.dart'`
+- Updated callers: `lib/main.dart`, `lib/features/care/data/repositories/pet_care_repository.dart`
+- Removed stale `export 'platform_notifications.dart'` from `lib/core/platform/platform_services.dart`
+- Deleted 4 old files from `lib/core/platform/`
+
+**Result:** `flutter analyze` — No issues. 74/74 tests passing.
+
+Phase 5 complete — please run (/remember) to save tokens before proceeding to Phase 6.
+
+## 2026-06-07 — Stabilisation Phase 6: Performance & Supabase Review
+
+Audited all 17 repository files. Added `.limit()` to every unbounded `.order()` query. Intentionally left unbounded: `pet_care_repository` (tasks per pet, bounded by pet_id, <20 typical), `pet_repository` (pets per owner, <10 typical).
+
+| Repository | Query | Limit added |
+|---|---|---|
+| `comment_repository.dart` | `fetchComments` per post | 200 |
+| `story_repository.dart` | `fetchActiveStories` (24h window) | 50 |
+| `order_repository.dart` | `fetchBuyerOrders` | 50 |
+| `order_repository.dart` | `fetchVendorOrders` | 50 |
+| `shop_repository.dart` | `fetchAllActiveShops` | 200 |
+| `vendor_product_repository.dart` | `fetchProductsByShop` | 200 |
+| `health_repository.dart` | `fetchLogsByType` | 100 |
+| `health_repository.dart` | `fetchWeightHistory` | 365 |
+| `health_repository.dart` | `fetchRecordsForPet` | 200 |
+| `health_repository.dart` | `fetchActiveRecords` | 100 |
+| `health_repository.dart` | `fetchRecordsByType` | 50 |
+| `admin_repository.dart` | `fetchSubmittedKycShops` | 200 |
+| `admin_repository.dart` | `fetchPendingReports` | 200 |
+| `admin_repository.dart` | `fetchPendingDeletionRequests` | 200 |
+| `admin_repository.dart` | `fetchDeliveredCodOrders` | 200 |
+| `admin_repository.dart` | `fetchAvailableLedgers` | 200 |
+
+**Already bounded:** `social_repository` (`.range()` pagination), `notification_repository` (`.limit(50)`), `health_repository` `fetchHealthLogs` (`.limit(100)`), `product_repository` storefront (`.range()`), admin overview metrics (`.limit(limit)`).
+
+`flutter analyze` — No issues. 74/74 tests passing.
+
+**All 6 phases of the stabilisation plan are complete.**
+
 ## 2026-06-05 — iOS mobile web PWA startup fix
 
 - **Root cause:** `flutter-first-frame` never fired on iOS WebKit — CanvasKit from gstatic CDN, Flutter service worker vs FCM SW contention, blocking Firebase/FCM before `runApp`, and `COEP`/`COOP` on `.wasm` responses.

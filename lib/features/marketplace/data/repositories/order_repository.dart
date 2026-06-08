@@ -188,7 +188,8 @@ class OrderRepository {
         .from('marketplace_orders')
         .select()
         .eq('buyer_id', userId)
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .limit(50);
 
     return (rows as List)
         .map((r) => MarketplaceOrder.fromJson(r as Map<String, dynamic>))
@@ -201,7 +202,8 @@ class OrderRepository {
         .from('marketplace_orders')
         .select()
         .eq('shop_id', shopId)
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .limit(50);
 
     return (rows as List)
         .map((r) => MarketplaceOrder.fromJson(r as Map<String, dynamic>))

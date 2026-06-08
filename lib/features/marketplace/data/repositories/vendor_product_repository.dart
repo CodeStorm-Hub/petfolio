@@ -19,7 +19,8 @@ class VendorProductRepository {
         .from('products')
         .select('*, shops!inner(shop_name)')
         .eq('shop_id', shopId)
-        .order('created_at');
+        .order('created_at')
+        .limit(200);
     return (rows as List)
         .map((r) => Product.fromJson(r as Map<String, dynamic>))
         .toList();

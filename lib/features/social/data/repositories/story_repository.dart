@@ -37,7 +37,8 @@ class StoryRepository {
             pet:pets(id, name, avatar_url, species)
           ''')
           .gte('created_at', cutoff)
-          .order('created_at', ascending: false);
+          .order('created_at', ascending: false)
+          .limit(50);
 
       final list = (rows as List).cast<Map<String, dynamic>>();
       return list.map((r) => Story.fromJson(r)).toList();

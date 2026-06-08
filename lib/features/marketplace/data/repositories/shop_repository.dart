@@ -28,7 +28,8 @@ class ShopRepository {
         .select()
         .eq('is_active', true)
         .eq('is_verified', true)
-        .order('shop_name');
+        .order('shop_name')
+        .limit(200);
     return (rows as List)
         .map((r) => Shop.fromJson(r as Map<String, dynamic>))
         .toList();

@@ -19,9 +19,9 @@ import 'core/firebase/fcm_service.dart';
 import 'firebase_options.dart';
 import 'core/router.dart';
 import 'features/auth/presentation/controllers/auth_controller.dart';
-import 'core/platform/platform_notifications.dart';
+import 'features/care/platform/platform_notifications.dart';
 import 'core/services/notification_service.dart';
-import 'core/services/stripe_init_service.dart';
+import 'features/marketplace/services/stripe_init_service.dart';
 import 'core/theme/theme.dart';
 import 'core/widgets/app_snack_bar.dart';
 
@@ -76,7 +76,7 @@ Future<void> main() async {
     await ensureStripeReady(publishableKey: _stripePublishableKey);
   }
 
-  await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
+  await Supabase.initialize(url: _supabaseUrl, publishableKey: _supabaseAnonKey);
 
   if (kIsWeb) {
     runApp(const ProviderScope(child: PetfolioApp()));

@@ -23,7 +23,8 @@ class AdminRepository {
         .from('shops')
         .select()
         .eq('kyc_status', 'submitted')
-        .order('updated_at', ascending: false);
+        .order('updated_at', ascending: false)
+        .limit(200);
     return (rows as List)
         .map((r) => Shop.fromJson(r as Map<String, dynamic>))
         .toList();
@@ -76,7 +77,8 @@ class AdminRepository {
         .from('reported_posts')
         .select('id, post_id, reporter_id, reason, created_at, post:post_id(content)')
         .eq('status', 'pending')
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .limit(200);
     return (rows as List)
         .map((r) => PostReport.fromJson(r as Map<String, dynamic>))
         .toList();
@@ -103,7 +105,8 @@ class AdminRepository {
         .from('shop_deletion_requests')
         .select('*, shop:shop_id(shop_name, owner_id)')
         .eq('status', 'pending')
-        .order('requested_at', ascending: true);
+        .order('requested_at', ascending: true)
+        .limit(200);
     return (rows as List)
         .map((r) => ShopDeletionRequest.fromJson(r as Map<String, dynamic>))
         .toList();
@@ -132,7 +135,8 @@ class AdminRepository {
         .eq('payment_method', 'cod')
         .eq('status', 'delivered')
         .eq('payment_status', 'pending')
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .limit(200);
     return (rows as List)
         .map((r) => MarketplaceOrder.fromJson(r as Map<String, dynamic>))
         .toList();
@@ -157,7 +161,8 @@ class AdminRepository {
         .from('vendor_ledgers')
         .select()
         .eq('status', LedgerStatus.available.name)
-        .order('created_at');
+        .order('created_at')
+        .limit(200);
     return (rows as List)
         .map((r) => VendorLedger.fromJson(r as Map<String, dynamic>))
         .toList();

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/models/pet.dart';
 import '../features/admin/presentation/controllers/admin_auth_controller.dart';
 import '../features/admin/presentation/screens/admin_screen.dart';
 import '../features/auth/presentation/controllers/auth_controller.dart';
@@ -56,7 +57,7 @@ import 'package:petfolio/core/widgets/app_shell.dart';
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = _RouterNotifier(ref);
 
-  return GoRouter(
+  final router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/home',
     refreshListenable: notifier,
@@ -334,11 +335,57 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+
+  ref.onDispose(router.dispose);
+  return router;
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Redirect logic
 // ─────────────────────────────────────────────────────────────────────────────
+
+/// Pure redirect logic, extracted for testability.
+///
+/// Returns the destination path to redirect to, or null to allow navigation.
+String? computeRedirect({
+  required bool isLoggedIn,
+  required bool isAdmin,
+  required List<Pet>? pets,
+  required String matchedLocation,
+  required String uriPath,
+  required Map<String, String> queryParameters,
+}) {
+  if (uriPath == '/' || uriPath.isEmpty) {
+    return isLoggedIn ? '/home' : '/login';
+  }
+
+  if (matchedLocation == '/pets') return '/home';
+  if (matchedLocation == '/shop') return '/marketplace';
+
+  if (!isLoggedIn) {
+    return (matchedLocation == '/login' || matchedLocation == '/register')
+        ? null
+        : '/login';
+  }
+
+  if (matchedLocation == '/login' || matchedLocation == '/register') {
+    return '/home';
+  }
+
+  if (pets != null && pets.isEmpty && matchedLocation != '/onboarding') {
+    return '/onboarding';
+  }
+
+  if (matchedLocation == '/onboarding' && pets != null && pets.isNotEmpty) {
+    if (queryParameters['mode'] != 'add') return '/care';
+  }
+
+  if (matchedLocation.startsWith('/admin')) {
+    if (!isAdmin) return '/home';
+  }
+
+  return null;
+}
 
 class _RouterNotifier extends ChangeNotifier {
   String? _lastDismissedLocation;
@@ -364,53 +411,21 @@ class _RouterNotifier extends ChangeNotifier {
   final Ref _ref;
 
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
-    final isLoggedIn = _ref.read(isLoggedInProvider);
     final loc = state.matchedLocation;
-    final path = state.uri.path;
 
     if (_lastDismissedLocation != loc) {
       _lastDismissedLocation = loc;
       dismissRootOverlayRoutes(_rootNavigatorKey);
     }
 
-    if (path == '/' || path.isEmpty) {
-      return isLoggedIn ? '/home' : '/login';
-    }
-
-    if (loc == '/pets') return '/home';
-    if (loc == '/shop') return '/marketplace';
-
-    // ── Not logged in → only /login and /register are allowed ────────
-    if (!isLoggedIn) {
-      return (loc == '/login' || loc == '/register') ? null : '/login';
-    }
-
-    // ── Logged in on an auth screen → leave ─────────────────────────
-    if (loc == '/login' || loc == '/register') return '/home';
-
-    // ── Logged in but no pets → go to /onboarding ───────────────────
-    // Only redirect when the pet list has finished loading AND is empty,
-    // so we don't flash the onboarding screen on cold start.
-    final pets = _ref.read(petListProvider).value;
-    if (pets != null && pets.isEmpty && loc != '/onboarding') {
-      return '/onboarding';
-    }
-
-    // Honor "?mode=add" when an authenticated user with pets opens onboarding
-    // from the switcher; otherwise bounce them back to /care so we don't show
-    // the first-run welcome twice.
-    if (loc == '/onboarding' && pets != null && pets.isNotEmpty) {
-      final mode = state.uri.queryParameters['mode'];
-      if (mode != 'add') return '/care';
-    }
-
-    // ── Admin route — only users with role=admin in appMetadata ─────────────
-    if (loc.startsWith('/admin')) {
-      final isAdmin = _ref.read(isAdminProvider);
-      if (!isAdmin) return '/home';
-    }
-
-    return null; // no redirect
+    return computeRedirect(
+      isLoggedIn: _ref.read(isLoggedInProvider),
+      isAdmin: _ref.read(isAdminProvider),
+      pets: _ref.read(petListProvider).value,
+      matchedLocation: loc,
+      uriPath: state.uri.path,
+      queryParameters: state.uri.queryParameters,
+    );
   }
 }
 

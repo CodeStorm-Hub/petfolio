@@ -9,7 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/platform/platform_payments.dart';
 import '../../../../core/platform/web_app_url.dart';
-import '../../../../core/services/stripe_init_service.dart';
+import '../../services/stripe_init_service.dart';
 import '../../data/repositories/order_repository.dart'
     show
         InsufficientStockException,

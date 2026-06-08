@@ -72,7 +72,8 @@ class HealthRepository {
           .select()
           .eq('pet_id', petId)
           .eq('log_type', type.name)
-          .order('occurred_at', ascending: false);
+          .order('occurred_at', ascending: false)
+          .limit(100);
       return rows.map(HealthLog.fromJson).toList();
     } on AppException {
       rethrow;
@@ -94,7 +95,8 @@ class HealthRepository {
           .eq('pet_id', petId)
           .eq('log_type', HealthLogType.weight.name)
           .not('weight_kg', 'is', null)
-          .order('occurred_at');
+          .order('occurred_at')
+          .limit(365);
       return rows.map(HealthLog.fromJson).toList();
     } on AppException {
       rethrow;
@@ -192,7 +194,8 @@ class MedicalVaultRepository {
           .from('medical_vault')
           .select()
           .eq('pet_id', petId)
-          .order('created_at', ascending: false);
+          .order('created_at', ascending: false)
+          .limit(200);
       return rows.map(MedicalRecord.fromJson).toList();
     } on AppException {
       rethrow;
@@ -213,7 +216,8 @@ class MedicalVaultRepository {
           .select()
           .eq('pet_id', petId)
           .eq('is_active', true)
-          .order('next_due_at', ascending: true, nullsFirst: false);
+          .order('next_due_at', ascending: true, nullsFirst: false)
+          .limit(100);
       return rows.map(MedicalRecord.fromJson).toList();
     } on AppException {
       rethrow;
@@ -235,7 +239,8 @@ class MedicalVaultRepository {
           .select()
           .eq('pet_id', petId)
           .eq('record_type', type.name)
-          .order('created_at', ascending: false);
+          .order('created_at', ascending: false)
+          .limit(50);
       return rows.map(MedicalRecord.fromJson).toList();
     } on AppException {
       rethrow;
