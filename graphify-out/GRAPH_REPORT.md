@@ -1,16 +1,16 @@
 # Graph Report - petfolio  (2026-06-08)
 
 ## Corpus Check
-- 486 files · ~756,216 words
+- 491 files · ~757,933 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 6810 nodes · 9468 edges · 408 communities (371 shown, 37 thin omitted)
+- 6862 nodes · 9528 edges · 415 communities (375 shown, 40 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `af06ebe6`
+- Built from commit: `cfd3b8bf`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -410,6 +410,13 @@
 - [[_COMMUNITY_Community 405|Community 405]]
 - [[_COMMUNITY_Community 406|Community 406]]
 - [[_COMMUNITY_Community 407|Community 407]]
+- [[_COMMUNITY_Community 408|Community 408]]
+- [[_COMMUNITY_Community 409|Community 409]]
+- [[_COMMUNITY_Community 410|Community 410]]
+- [[_COMMUNITY_Community 411|Community 411]]
+- [[_COMMUNITY_Community 412|Community 412]]
+- [[_COMMUNITY_Community 413|Community 413]]
+- [[_COMMUNITY_Community 414|Community 414]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `Petfolio — Progress Log` - 125 edges
@@ -438,7 +445,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (408 total, 37 thin omitted)
+## Communities (415 total, 40 thin omitted)
 
 ### Community 0 - "Color Design Tokens"
 Cohesion: 0.02
@@ -454,7 +461,7 @@ Nodes (80): package:flutter/cupertino.dart, static const AppThemeSpacing, static
 
 ### Community 3 - "Pet & Discovery Controllers"
 Cohesion: 0.03
-Nodes (75): ../../../../core/widgets/dashed_circle_painter.dart, ../../../../core/widgets/petfolio_network_image.dart, package:video_player/video_player.dart, post_detail_screen.dart, _ActionBtn, animateRing, avatarUrl, baseStyle (+67 more)
+Nodes (71): ../../../../core/widgets/dashed_circle_painter.dart, ../../../../core/widgets/petfolio_network_image.dart, package:video_player/video_player.dart, post_detail_screen.dart, _ActionBtn, animateRing, avatarUrl, baseStyle (+63 more)
 
 ### Community 4 - "Social Feed UI"
 Cohesion: 0.03
@@ -494,7 +501,7 @@ Nodes (60): ../../controllers/deletion_request_controller.dart, _AiConfigErrorBa
 
 ### Community 13 - "Chat System"
 Cohesion: 0.05
-Nodes (44): ../controllers/social_controller.dart, autofocus, autofocusComment, _Caption, comment, _commentController, _CommentDisplayItem, _commentFocusNode (+36 more)
+Nodes (47): ../controllers/social_controller.dart, autofocus, autofocusComment, _Caption, comment, _commentController, _CommentDisplayItem, _commentFocusNode (+39 more)
 
 ### Community 14 - "Marketplace Products"
 Cohesion: 0.04
@@ -506,19 +513,19 @@ Nodes (33): ChatConversationArgs get, ../controllers/chat_conversation_controlle
 
 ### Community 16 - "Web / JS Interop"
 Cohesion: 0.05
-Nodes (43): ../../../../core/widgets/pet_avatar.dart, ImageSource, avatarUrl, _buildAppBar, _CaptionCard, _captionController, charCount, color (+35 more)
+Nodes (41): ../../../../core/widgets/pet_avatar.dart, ImageSource, avatarUrl, _buildAppBar, _CaptionCard, _captionController, charCount, color (+33 more)
 
 ### Community 17 - "Social Profiles & Follow"
-Cohesion: 0.07
-Nodes (25): @JS, dart:js_interop, external bool get, external JSPromise, external _Location get, external String get, external _Window get, JSObject (+17 more)
+Cohesion: 0.13
+Nodes (14): @JS, dart:js_interop, external bool get, external JSPromise, external String get, contains, _fcmSwReady, _isIosStandalonePwa (+6 more)
 
 ### Community 18 - "Vendor Dashboard"
 Cohesion: 0.05
 Nodes (39): ../../../care/data/models/pet_awards_summary.dart, ../../../care/presentation/controllers/pet_awards_provider.dart, ../controllers/follow_controller.dart, ../controllers/social_profile_controller.dart, ../../../matching/presentation/matching_navigation.dart, package:share_plus/share_plus.dart, _ActionButton, avatarUrl (+31 more)
 
 ### Community 19 - "Order Management"
-Cohesion: 0.06
-Nodes (37): ../../controllers/vendor_orders_controller.dart, vendorOrdersProvider, ../../../../../core/widgets/app_bottom_sheet.dart, _ActionButtons, build, _color, controller, _formatDate (+29 more)
+Cohesion: 0.05
+Nodes (45): deletionRequestProvider, ../../controllers/vendor_orders_controller.dart, vendorOrdersProvider, ../../../../../core/widgets/app_bottom_sheet.dart, Route /seller/edit-shop, Route /seller/kyc, Route /seller/orders, Route /seller/products (+37 more)
 
 ### Community 20 - "Marketplace Browse"
 Cohesion: 0.06
@@ -530,11 +537,11 @@ Nodes (39): ../controllers/product_list_controller.dart, Product? get, accent, b
 
 ### Community 22 - "Nutrition & Weight Tracking"
 Cohesion: 0.08
-Nodes (25): @visibleForTesting, ../models/cart_item.dart, ../models/marketplace_order.dart, available, cancelOrder, _client, confirmCodOrder, confirmOrder (+17 more)
+Nodes (23): ../models/cart_item.dart, ../models/marketplace_order.dart, available, cancelOrder, _client, confirmCodOrder, confirmOrder, createCheckoutSession (+15 more)
 
 ### Community 23 - "Error Handling"
 Cohesion: 0.05
-Nodes (38): addAnotherPet, _ageMonths, _back, _breed, build, _buildPaw, createState, _ctrl (+30 more)
+Nodes (40): addAnotherPet, _ageMonths, _back, _breed, build, _buildPaw, createState, _ctrl (+32 more)
 
 ### Community 24 - "Onboarding Flow"
 Cohesion: 0.05
@@ -542,7 +549,7 @@ Nodes (38): background, _BtnColors, build, _buildContent, _buildVisual, _cancel,
 
 ### Community 25 - "Core Button Widget"
 Cohesion: 0.05
-Nodes (37): ../models/care_streak.dart, ../models/care_task.dart, _appliesOnDay, badgeTypes, badgeUnlocked, _buildTasksFromSnapshotData, bulkCreateTasks, CareDashboardSnapshot (+29 more)
+Nodes (39): ../models/care_streak.dart, ../models/care_task.dart, _appliesOnDay, badgeTypes, badgeUnlocked, _buildTasksFromSnapshotData, bulkCreateTasks, CareDashboardSnapshot (+31 more)
 
 ### Community 26 - "Care Streaks & XP"
 Cohesion: 0.06
@@ -553,16 +560,16 @@ Cohesion: 0.05
 Nodes (39): ../../controllers/manual_kyc_controller.dart, manualKycControllerProvider, Route /seller, accountCtrl, addressCtrl, bankCtrl, branchCtrl, build (+31 more)
 
 ### Community 28 - "Care Data Layer"
-Cohesion: 0.04
-Nodes (46): ../controllers/story_controller.dart, PageController, build, createState, _ctrl, _currentPetIndex, _currentStoryIndex, dispose (+38 more)
+Cohesion: 0.05
+Nodes (44): ../controllers/story_controller.dart, PageController, build, createState, _ctrl, _currentPetIndex, _currentStoryIndex, dispose (+36 more)
 
 ### Community 29 - "Vendor KYC"
 Cohesion: 0.07
 Nodes (31): ../controllers/create_post_controller.dart, _BrowseLibraryTile, _buildMediaSelector, _buildStoryPreview, _CameraViewfinderCard, _CameraViewfinderCardState, color, createState (+23 more)
 
 ### Community 30 - "Module 30"
-Cohesion: 0.05
-Nodes (41): build, buyerOrdersProvider, ../../controllers/buyer_orders_controller.dart, build, refresh, _repo, updateStatus, updateTracking (+33 more)
+Cohesion: 0.06
+Nodes (35): build, buyerOrdersProvider, ../../controllers/buyer_orders_controller.dart, build, BuyerOrderDetailScreen, _formatDate, icon, _IconBtn (+27 more)
 
 ### Community 31 - "Module 31"
 Cohesion: 0.05
@@ -572,24 +579,24 @@ Nodes (38): gear,
   health,, apparel, brand, category, _colorToHex, createdAt, currency, fromJson (+30 more)
 
 ### Community 32 - "Module 32"
-Cohesion: 0.06
-Nodes (38): care_streak_stream_provider.dart, CareTaskRepository get, activePetIdProvider, _applyBadgeDelta, _badgeBaseline, badgeTypes, bulkCreateTasks, copyWith (+30 more)
+Cohesion: 0.07
+Nodes (29): care_streak_stream_provider.dart, CareTaskRepository get, _applyBadgeDelta, _badgeBaseline, badgeTypes, bulkCreateTasks, copyWith, DailyRoutineState (+21 more)
 
 ### Community 33 - "Module 33"
 Cohesion: 0.06
 Nodes (32): FocusNode?, Iterable, TextInputType?, actionLabel, AuthBrand, AuthCard, AuthErrorBanner, AuthField (+24 more)
 
 ### Community 34 - "Module 34"
-Cohesion: 0.11
-Nodes (17): addStory, build, markStoryViewed, _repo, sendReaction, Stories, core/widgets/app_snack_bar.dart, ../../data/models/story.dart (+9 more)
+Cohesion: 0.08
+Nodes (24): ../controllers/cart_controller.dart, ../../data/models/cart_item.dart, CartItem, product_glyph.dart, star_rating_widget.dart, build, CartLineItem, item (+16 more)
 
 ### Community 35 - "Module 35"
 Cohesion: 0.20
 Nodes (9): body, createdAt, fromJson, id, isOwn, productId, ProductReview, rating (+1 more)
 
 ### Community 36 - "Module 36"
-Cohesion: 0.07
-Nodes (30): package:flutter/services.dart, AddEditProductScreen, _AddEditProductScreenState, _brandCtrl, build, _category, controller, createState (+22 more)
+Cohesion: 0.04
+Nodes (49): ../../controllers/vendor_products_controller.dart, vendorProductsProvider, package:flutter/services.dart, Product, Route /seller/products/add, AddEditProductScreen, _AddEditProductScreenState, _brandCtrl (+41 more)
 
 ### Community 37 - "Module 37"
 Cohesion: 0.07
@@ -613,15 +620,15 @@ Nodes (26): bool?, package:petfolio/core/platform/web_image_cache.dart, PetSpeci
 
 ### Community 42 - "Module 42"
 Cohesion: 0.07
-Nodes (28): AiRoutineNotifier, AiRoutineState, AiRoutineStatus, build, _buildSuggestions, cachedAt, cachedForPetId, conflictTitle (+20 more)
+Nodes (30): AiRoutineNotifier, AiRoutineState, AiRoutineStatus, build, _buildSuggestions, cachedAt, cachedForPetId, conflictTitle (+22 more)
 
 ### Community 43 - "Module 43"
 Cohesion: 0.11
 Nodes (18): build, caption, copyWith, CreatePostState, error, image, isStory, isSubmitting (+10 more)
 
 ### Community 44 - "Module 44"
-Cohesion: 0.04
-Nodes (43): adminRoutes, ../../controllers/my_shop_controller.dart, ../../../../core/widgets/primary_pill_button.dart, FcmMessageRouter, navigate, routeFromData, usePushForPath, FormFieldValidator (+35 more)
+Cohesion: 0.05
+Nodes (37): ../../controllers/my_shop_controller.dart, ../../../../core/widgets/primary_pill_button.dart, FormFieldValidator, build, controller, createState, _descCtrl, dispose (+29 more)
 
 ### Community 45 - "Module 45"
 Cohesion: 0.07
@@ -632,20 +639,20 @@ Cohesion: 0.07
 Nodes (26): ../models/feed_post.dart, ../models/pet_stats.dart, accent, _allowedExtensions, _client, createPost, deletePost, fetchFeed (+18 more)
 
 ### Community 47 - "Module 47"
-Cohesion: 0.09
-Nodes (33): ConsumerState, ConsumerStatefulWidget, CareScreen, _CareScreenState, _CareTaskCard, _CareTaskCardState, _CareTaskFormSheet, _CareTaskFormSheetState (+25 more)
+Cohesion: 0.08
+Nodes (37): ConsumerState, ConsumerStatefulWidget, CareScreen, _CareScreenState, _CareTaskCard, _CareTaskCardState, _CareTaskFormSheet, _CareTaskFormSheetState (+29 more)
 
 ### Community 48 - "Module 48"
-Cohesion: 0.25
-Nodes (8): deletionRequestProvider, Route /seller/edit-shop, Route /seller/kyc, Route /seller/orders, Route /seller/products, Route /seller/setup, build, _DangerZone
+Cohesion: 0.08
+Nodes (25): _appLaunched, bar, binding, end, enterText, _forceLogout, hasCredentials, _inAppShell (+17 more)
 
 ### Community 49 - "Module 49"
 Cohesion: 0.08
 Nodes (26): accountCtrl, bankCtrl, bizAddressCtrl, bizNameCtrl, bizPhoneCtrl, branchCtrl, build, copyWith (+18 more)
 
 ### Community 50 - "Module 50"
-Cohesion: 0.09
-Nodes (23): ../controllers/shop_list_controller.dart, shopByIdProvider, ../../controllers/shop_products_controller.dart, shopProductsProvider, build, _CircleBtn, _ContactInfoSection, _ContactRow (+15 more)
+Cohesion: 0.07
+Nodes (24): appointmentRoutes, ../controllers/shop_list_controller.dart, ../../controllers/shop_products_controller.dart, _CircleBtn, _ContactInfoSection, _ContactRow, _ErrorRetry, icon (+16 more)
 
 ### Community 51 - "Module 51"
 Cohesion: 0.07
@@ -657,27 +664,27 @@ Nodes (26): AiSuggestion, package:petfolio/core/widgets/app_snack_bar.dart, pack
 
 ### Community 53 - "Module 53"
 Cohesion: 0.05
-Nodes (39): package:flutter/physics.dart, package:petfolio/core/widgets/app_tutorial_overlay.dart, package:petfolio/features/marketplace/presentation/controllers/cart_controller.dart, package:petfolio/features/marketplace/presentation/screens/marketplace_screen.dart, package:petfolio/features/matching/presentation/matching_navigation.dart, package:petfolio/features/matching/presentation/widgets/match_preferences_sheet.dart, package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart, accentColor (+31 more)
+Nodes (42): CustomClipper, package:flutter/physics.dart, package:petfolio/core/widgets/app_tutorial_overlay.dart, package:petfolio/features/marketplace/presentation/controllers/cart_controller.dart, package:petfolio/features/marketplace/presentation/screens/marketplace_screen.dart, package:petfolio/features/matching/presentation/matching_navigation.dart, package:petfolio/features/matching/presentation/widgets/match_preferences_sheet.dart, package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart (+34 more)
 
 ### Community 54 - "Module 54"
 Cohesion: 0.09
 Nodes (24): discoveryCandidatesControllerProvider, swipeErrorProvider, arg, build, copyWith, DiscoveryNotifier, DiscoveryState, dragOffset (+16 more)
 
 ### Community 55 - "Module 55"
-Cohesion: 0.17
-Nodes (17): isLoggedInProvider, build, DiscoveryCandidatesBuffer, DiscoveryCandidatesController, locationSyncErrorProvider, removeFront, discoveryControllerProvider, matchPreferenceControllerProvider (+9 more)
+Cohesion: 0.16
+Nodes (18): isLoggedInProvider, build, DiscoveryCandidatesBuffer, DiscoveryCandidatesController, locationSyncErrorProvider, removeFront, discoveryControllerProvider, matchPreferenceControllerProvider (+10 more)
 
 ### Community 56 - "Module 56"
-Cohesion: 0.07
-Nodes (26): CartItem, copyWith, empty, frequencyWeeks, fromStorageJson, hasSubscription, isEmpty, isSubscribed (+18 more)
+Cohesion: 0.08
+Nodes (25): copyWith, empty, frequencyWeeks, fromStorageJson, hasSubscription, isEmpty, isSubscribed, itemCount (+17 more)
 
 ### Community 57 - "Module 57"
-Cohesion: 0.09
-Nodes (21): canCheckout, _CodConfirmSheet, createState, _handleCheckout, icon, _IconBtn, items, label (+13 more)
+Cohesion: 0.11
+Nodes (18): activeShopCount, ActivityType, AdminDashboardData, AdminDashboardNotifier, build, _buildActivity, _fetch, pendingKycCount (+10 more)
 
 ### Community 58 - "Module 58"
-Cohesion: 0.10
-Nodes (19): package:uuid/uuid.dart, _apiKey, _buildPrompt, CareRecommendationService, cause, _defaultPoints, _defaultTitleForType, _guidedSchema (+11 more)
+Cohesion: 0.09
+Nodes (20): package:petfolio/core/models/pet.dart, package:uuid/uuid.dart, _apiKey, _buildPrompt, CareRecommendationService, cause, _defaultPoints, _defaultTitleForType (+12 more)
 
 ### Community 59 - "Module 59"
 Cohesion: 0.11
@@ -685,15 +692,15 @@ Nodes (18): T, ../theme/app_theme.dart, AppBottomSheet, AppTutorialOverlay, _App
 
 ### Community 60 - "Module 60"
 Cohesion: 0.07
-Nodes (26): buyer_orders_controller.dart, cart_controller.dart, activeShopId, build, CheckoutNotifier, CheckoutState, CheckoutStatus, copyWith (+18 more)
+Nodes (27): buyer_orders_controller.dart, cart_controller.dart, activeShopId, build, CheckoutNotifier, CheckoutState, CheckoutStatus, copyWith (+19 more)
 
 ### Community 61 - "Module 61"
 Cohesion: 0.08
 Nodes (23): fcm_message_router.dart, fcm_token_repository.dart, FcmTokenRepository get, firebase_env.dart, clearTokenForSignOut, dispose, FcmService, _handleForeground (+15 more)
 
 ### Community 62 - "Module 62"
-Cohesion: 0.15
-Nodes (18): cartProvider, checkoutProvider, startCheckoutForShop, startCodCheckoutForShop, shopListProvider, build, CartScreen, _VendorGroup (+10 more)
+Cohesion: 0.13
+Nodes (22): cartProvider, checkoutProvider, startCheckoutForShop, startCodCheckoutForShop, shopByIdProvider, shopListProvider, shopProductsProvider, build (+14 more)
 
 ### Community 63 - "Module 63"
 Cohesion: 0.09
@@ -713,31 +720,31 @@ Nodes (18): Animation, refresh, orderRepositoryProvider, Route /marketplace, _ha
 
 ### Community 67 - "Module 67"
 Cohesion: 0.10
-Nodes (22): passwordResetProvider, package:petfolio/core/widgets/widgets.dart, Route /register, build, createState, dispose, _emailController, _emailCtrl (+14 more)
+Nodes (23): ../controllers/auth_controller.dart, passwordResetProvider, Route /register, build, createState, dispose, _emailController, _emailCtrl (+15 more)
 
 ### Community 68 - "Module 68"
 Cohesion: 0.05
 Nodes (45): _client, conversations, currentUserId, ../datasources/matching_supabase_data_source.dart, ensureChatThreadForMatch, ensureDirectChatThread, fetchDiscoveryCandidates, fetchMatchesForPet (+37 more)
 
 ### Community 69 - "Module 69"
-Cohesion: 0.11
-Nodes (17): MockSupabaseClient, FakeSupabaseClient, ../models/product.dart, _client, _defaultPageSize, fetchProducts, fetchProductsByShop, ProductRepository (+9 more)
+Cohesion: 0.15
+Nodes (15): ../controllers/shop_deletion_controller.dart, shopDeletionRequestsProvider, FormState, _destinationIcon, build, createState, _DeletionRequestCard, _DeletionRequestCardState (+7 more)
 
 ### Community 70 - "Module 70"
 Cohesion: 0.09
 Nodes (22): activeId, _AddPetCallout, createState, _EmptyState, _ErrorState, index, isActive, isReordering (+14 more)
 
 ### Community 71 - "Module 71"
-Cohesion: 0.12
-Nodes (15): all, build, byCat, clear, _cursorCreatedAt, _cursorId, _hasMore, isLoadingMore (+7 more)
+Cohesion: 0.17
+Nodes (11): external _Location get, external _Window get, JSObject, false, openWebCheckoutUrl, href, _Location, openWebCheckoutUrl (+3 more)
 
 ### Community 72 - "Module 72"
 Cohesion: 0.02
 Nodes (100): 2026-05-14 — Automated Medical Vault UI (Care), 2026-05-14 — Care routing, onboarding → Care, care cleanup, 2026-05-14 — CLAUDE.md Rules & Token Strategy Appended, 2026-05-15 — Care dashboard & health vault scoped to active pet ID, 2026-05-15 — Care dashboard Riverpod fix (tasks / add task / dates), 2026-05-15 — Care streak banner UI (Fitness / Snapchat style), 2026-05-15 — Care streak hero synced to selected date + Fitness-style layout, 2026-05-15 — Care streak QA (Marionette) + ring center + RPC calendar date (+92 more)
 
 ### Community 73 - "Module 73"
-Cohesion: 0.25
-Nodes (8): PostCard, _CommentInputBar, PostCard, _PostCardState, _VideoPostPlayer, _VideoPostPlayerState, StatefulWidget, _CommentInputBar
+Cohesion: 0.67
+Nodes (3): PostCard, PostCard, _PostCardState
 
 ### Community 74 - "Module 74"
 Cohesion: 0.15
@@ -760,8 +767,8 @@ Cohesion: 0.04
 Nodes (45): 10. Summary, 11. Screenshot Reference Index, 1. Pathao’s Core Design System, 2. Home Screen — Pathao’s Central Hub, 3. Navigation Architecture, 4. Reusable UI Patterns (Across Screens), 5. What Pathao Does Well (and What to Avoid), 6. PetFolio Today vs Pathao (+37 more)
 
 ### Community 79 - "Module 79"
-Cohesion: 0.10
-Nodes (19): core/firebase/fcm_background_handler.dart, core/platform/platform_notifications.dart, core/router.dart, core/services/notification_service.dart, core/services/stripe_init_service.dart, _assertEnvVars, initialize, initializeApp (+11 more)
+Cohesion: 0.09
+Nodes (21): core/firebase/fcm_background_handler.dart, core/platform/platform_notifications.dart, core/router.dart, core/services/notification_service.dart, integration_test_gate_stub.dart, _assertEnvVars, initialize, initializeApp (+13 more)
 
 ### Community 80 - "Module 80"
 Cohesion: 0.10
@@ -772,24 +779,24 @@ Cohesion: 0.10
 Nodes (19): ProductGlyphType, static final, build, _drawBag, _drawBall, _drawBone, _drawBowl, _drawBrush (+11 more)
 
 ### Community 82 - "Module 82"
-Cohesion: 0.14
-Nodes (16): admin_shared_widgets.dart, build, ../controllers/moderation_controller.dart, moderationProvider, refresh, _repo, resolve, ../../data/models/post_report.dart (+8 more)
+Cohesion: 0.21
+Nodes (11): admin_shared_widgets.dart, ../controllers/moderation_controller.dart, moderationProvider, build, createState, _loading, ModerationTab, report (+3 more)
 
 ### Community 83 - "Module 83"
-Cohesion: 0.09
-Nodes (23): care_fcm_reminder_sync.dart, media_picker.dart, platform_location.dart, platform_notifications.dart, platform_payments.dart, cancelAll, cancelForTask, initialize (+15 more)
+Cohesion: 0.12
+Nodes (17): care_fcm_reminder_sync.dart, cancelAll, cancelForTask, initialize, _IoPlatformNotifications, _native, platformNotifications, scheduleTaskReminder (+9 more)
 
 ### Community 84 - "Module 84"
 Cohesion: 0.11
 Nodes (17): ../controllers/active_pet_controller.dart, ../controllers/pet_list_controller.dart, _AddPetButton, color, _dashLength, _gapLength, isActive, _ManageRow (+9 more)
 
 ### Community 85 - "Module 85"
-Cohesion: 0.06
-Nodes (35): activeShopCount, ActivityType, AdminDashboardData, adminDashboardProvider, build, _buildActivity, ../controllers/admin_dashboard_controller.dart, _fetch (+27 more)
+Cohesion: 0.11
+Nodes (18): adminDashboardProvider, ../controllers/admin_dashboard_controller.dart, ../../../../core/widgets/glass_card.dart, _ActivityTile, AdminDashboardTab, build, _DashboardBody, data (+10 more)
 
 ### Community 86 - "Module 86"
-Cohesion: 0.10
-Nodes (20): ../controllers/auth_controller.dart, Route /login, build, _confirmController, createState, dispose, _emailController, _emailRegex (+12 more)
+Cohesion: 0.11
+Nodes (17): package:petfolio/core/widgets/widgets.dart, Route /login, build, _confirmController, createState, dispose, _emailController, _emailRegex (+9 more)
 
 ### Community 87 - "Module 87"
 Cohesion: 0.14
@@ -800,8 +807,8 @@ Cohesion: 0.11
 Nodes (19): double get, package:petfolio/core/theme/theme.dart, PetfolioThemeExtension, ThemeExtension, BoneSliderWidget, build, color, max (+11 more)
 
 ### Community 89 - "Module 89"
-Cohesion: 0.11
-Nodes (18): ../models/pet.dart, ../models/pet_gender.dart, _allowedExtensions, archivePet, _avatarExtension, _client, createPet, fetchPets (+10 more)
+Cohesion: 0.08
+Nodes (23): dart:typed_data, ../models/pet.dart, ../models/pet_gender.dart, ../models/shop.dart, _client, KycRepository, submitKyc, _uploadKycDoc (+15 more)
 
 ### Community 90 - "Module 90"
 Cohesion: 0.08
@@ -809,19 +816,19 @@ Nodes (33): _CommentInputBar, _CommentInputBarState, State, _CommentInputBarStat
 
 ### Community 91 - "Module 91"
 Cohesion: 0.13
-Nodes (16): @immutable, lat_lng.dart, location_service.dart, package:geolocator/geolocator.dart, package:petfolio/core/errors/app_exception.dart, LatLng, build, DeviceLatLngNotifier (+8 more)
+Nodes (15): @immutable, lat_lng.dart, location_service.dart, package:geolocator/geolocator.dart, package:petfolio/core/errors/app_exception.dart, LatLng, build, DeviceLatLngNotifier (+7 more)
 
 ### Community 92 - "Module 92"
 Cohesion: 0.11
 Nodes (17): app_bottom_sheet.dart, app_header.dart, app_shell.dart, app_snack_bar.dart, bone_slider.dart, glass_card.dart, paw_toggle.dart, pet_avatar.dart (+9 more)
 
 ### Community 93 - "Module 93"
-Cohesion: 0.22
-Nodes (8): platform_notifications_io.dart, cancelAll, cancelForTask, initialize, instance, PlatformNotifications, scheduleTaskReminder, static PlatformNotifications get
+Cohesion: 0.12
+Nodes (13): deleteCareFcmReminder, now, scheduled, upsertCareFcmReminder, userId, platform_notifications_io.dart, cancelAll, cancelForTask (+5 more)
 
 ### Community 94 - "Module 94"
-Cohesion: 0.07
-Nodes (29): msg, parseDeletionError, submitRequest, build, _client, _repo, saveShopDetails, _uploadShopAsset (+21 more)
+Cohesion: 0.06
+Nodes (30): msg, parseDeletionError, submitRequest, build, _client, _repo, saveShopDetails, _uploadShopAsset (+22 more)
 
 ### Community 95 - "Module 95"
 Cohesion: 0.11
@@ -832,16 +839,16 @@ Cohesion: 0.18
 Nodes (11): corsHeaders, corsHeaders, corsHeaders, SendBody, base64UrlEncode(), base64UrlEncodeJson(), getAccessToken(), isUnregisteredTokenError() (+3 more)
 
 ### Community 97 - "Module 97"
-Cohesion: 0.07
-Nodes (32): ../controllers/shop_deletion_controller.dart, shopDeletionRequestsProvider, FormState, _AdminBadge, AdminLayout, _AdminLayoutState, _AdminTab, _body (+24 more)
+Cohesion: 0.12
+Nodes (17): _AdminBadge, AdminLayout, _AdminLayoutState, _AdminTab, _body, createState, _destinations, _onDestinationSelected (+9 more)
 
 ### Community 98 - "Module 98"
 Cohesion: 0.11
 Nodes (18): activeColor, build, createState, _ctrl, didUpdateWidget, dispose, _h, initState (+10 more)
 
 ### Community 99 - "Module 99"
-Cohesion: 0.08
-Nodes (23): fcm_service.dart, child, createState, FcmLifecycle, _FcmLifecycleState, Widget, backgroundColor, build (+15 more)
+Cohesion: 0.11
+Nodes (17): backgroundColor, build, color, done, due, emoji, icon, label (+9 more)
 
 ### Community 100 - "Module 100"
 Cohesion: 0.12
@@ -855,24 +862,24 @@ Cohesion: 0.13
 Nodes (15): build, clearError, copyWith, EditProfileController, EditProfileState, errorMessage, isSubmitting, isSyncingLocation (+7 more)
 
 ### Community 102 - "Module 102"
-Cohesion: 0.15
-Nodes (15): addPet, archive, byOrder, _comparePetsListOrder, editPetProfile, petRepositoryProvider, refresh, reorder (+7 more)
+Cohesion: 0.12
+Nodes (18): addPet, archive, _autoGenerateRoutines, byOrder, _comparePetsListOrder, editPetProfile, petRepositoryProvider, refresh (+10 more)
 
 ### Community 103 - "Module 103"
-Cohesion: 0.12
-Nodes (16): _client, createShop, _errorMessageFromPayload, fetchAllActiveShops, fetchMyDeletionRequest, fetchMyShop, fetchShopById, _functionResponseMap (+8 more)
+Cohesion: 0.08
+Nodes (25): _ChatTypingStateNotifier, build, DeletionRequestNotifier, EditShopNotifier, refresh, Map, Shop, _client (+17 more)
 
 ### Community 104 - "Module 104"
-Cohesion: 0.10
-Nodes (18): build, _fetchGroups, ledgers, markShopPaid, overviewMetricsProvider, read, refresh, _repo (+10 more)
+Cohesion: 0.14
+Nodes (13): build, _fetchGroups, ledgers, markShopPaid, overviewMetricsProvider, read, refresh, _repo (+5 more)
 
 ### Community 105 - "Module 105"
 Cohesion: 0.13
 Nodes (14): @pragma, fcm_push_display.dart, firebaseMessagingBackgroundHandler, message, showFcmAsLocalNotification, body, data, id (+6 more)
 
 ### Community 106 - "Module 106"
-Cohesion: 0.18
-Nodes (22): AsyncNotifier, AdminDashboardNotifier, BuyerOrdersNotifier, ChatConversationController, CodOrdersNotifier, CommunitiesController, KycReviewNotifier, LedgerNotifier (+14 more)
+Cohesion: 0.22
+Nodes (19): AsyncNotifier, BuyerOrdersNotifier, ChatConversationController, CodOrdersNotifier, CommunitiesController, KycReviewNotifier, LedgerNotifier, ModerationNotifier (+11 more)
 
 ### Community 107 - "Module 107"
 Cohesion: 0.10
@@ -883,24 +890,24 @@ Cohesion: 0.13
 Nodes (15): CommentRepository get, _activePetId, add, build, CommentList, delete, edit, refresh (+7 more)
 
 ### Community 109 - "Module 109"
-Cohesion: 0.08
-Nodes (27): arg, broadcastTyping, build, ChatConversationArgs, effectiveThreadId, _hasMore, _loadingOlder, loadOlderMessages (+19 more)
+Cohesion: 0.06
+Nodes (33): arg, broadcastTyping, build, ChatConversationArgs, effectiveThreadId, _hasMore, _loadingOlder, loadOlderMessages (+25 more)
 
 ### Community 110 - "Module 110"
-Cohesion: 0.14
-Nodes (17): petAwardsSummaryProvider, fetchPostsForPet, fromJson, petByIdProvider, petStatsProvider, raw, read, repo (+9 more)
+Cohesion: 0.19
+Nodes (13): fetchPostsForPet, fromJson, petByIdProvider, petStatsProvider, raw, read, repo, socialProfilePostsProvider (+5 more)
 
 ### Community 111 - "Module 111"
 Cohesion: 0.13
 Nodes (14): ../../../../core/platform/web_image_cache.dart, package:cached_network_image/cached_network_image.dart, activePet, _AvatarCircle, avatarUrl, build, _buildPaw, fallbackEmoji (+6 more)
 
 ### Community 112 - "Module 112"
-Cohesion: 0.22
-Nodes (8): createdAt, fromJson, id, postContent, postId, PostReport, reason, reporterId
+Cohesion: 0.20
+Nodes (9): DateTime, createdAt, fromJson, id, postContent, postId, PostReport, reason (+1 more)
 
 ### Community 113 - "Module 113"
-Cohesion: 0.09
-Nodes (20): ../../../../core/errors/app_exception.dart, ../models/comment.dart, ../models/story.dart, addComment, _client, deleteComment, fetchComments, _fetchLikedCommentIds (+12 more)
+Cohesion: 0.08
+Nodes (24): addStory, build, markStoryViewed, _repo, sendReaction, ../../data/models/story.dart, ../../data/repositories/story_repository.dart, ../models/story.dart (+16 more)
 
 ### Community 114 - "Module 114"
 Cohesion: 0.14
@@ -915,8 +922,8 @@ Cohesion: 0.13
 Nodes (14): ../models/community.dart, ../models/community_post.dart, _client, CommunityRepository, createCommunity, createPost, fetchAll, fetchPosts (+6 more)
 
 ### Community 117 - "Module 117"
-Cohesion: 0.09
-Nodes (20): asyncState, when, client, fromJson, raw, ../../data/models/care_streak.dart, ../../data/models/pet_awards_summary.dart, ../models/app_notification.dart (+12 more)
+Cohesion: 0.04
+Nodes (48): asyncState, when, MockSupabaseClient, ../../data/models/care_streak.dart, FakeSupabaseClient, ../models/app_notification.dart, ../models/appointment.dart, ../models/product.dart (+40 more)
 
 ### Community 118 - "Module 118"
 Cohesion: 0.13
@@ -927,8 +934,8 @@ Cohesion: 0.11
 Nodes (18): ../controllers/matches_inbox_controller.dart, matchesInboxControllerProvider, ../../data/models/match_inbox_item.dart, ../matching_navigation.dart, ../../../pet_profile/presentation/controllers/pet_list_controller.dart, ../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart, Route /matching, build (+10 more)
 
 ### Community 120 - "Module 120"
-Cohesion: 0.10
-Nodes (19): Color, accentColor, avatarUrl, breed, fromJson, handle, petId, petName (+11 more)
+Cohesion: 0.20
+Nodes (9): accentColor, avatarUrl, breed, fromJson, handle, petId, petName, PetSearchResult (+1 more)
 
 ### Community 121 - "Module 121"
 Cohesion: 0.13
@@ -964,23 +971,23 @@ Nodes (13): isDm, isNewMatch, lastMessageAt, lastMessagePreview, matchedAt, matc
 
 ### Community 129 - "Module 129"
 Cohesion: 0.04
-Nodes (45): admin_layout.dart, ../controllers/admin_auth_controller.dart, isAdminProvider, ../controllers/cart_controller.dart, ../../../../core/theme/app_colors.dart, Product, product_glyph.dart, AdminScreen (+37 more)
+Nodes (46): admin_layout.dart, ../controllers/admin_auth_controller.dart, isAdminProvider, ../../../../core/theme/app_colors.dart, AdminScreen, build, canCheckout, _CodConfirmSheet (+38 more)
 
 ### Community 130 - "Module 130"
-Cohesion: 0.09
-Nodes (22): _ChatTypingStateNotifier, build, DeletionRequestNotifier, EditShopNotifier, refresh, Map, Shop, shopRepositoryProvider (+14 more)
+Cohesion: 0.15
+Nodes (13): build, _controllers, createState, didUpdateWidget, dispose, dx, dy, emoji (+5 more)
 
 ### Community 131 - "Module 131"
 Cohesion: 0.10
-Nodes (19): AdminRepository get, class, build, markCashReceived, refresh, _repo, approve, build (+11 more)
+Nodes (19): AdminRepository get, build, markCashReceived, refresh, _repo, approve, build, getDocumentUrl (+11 more)
 
 ### Community 132 - "Module 132"
 Cohesion: 0.05
 Nodes (41): 1.1 — Restructure the Layout, 1.2 — Fix XP Bar Visibility, 1.3 — Add Today's Summary Chip, 1.4 — Tighten Pet Switcher, 2.1 — Fix Grid Layout: 3 Columns Instead of 4, 2.2 — Differentiate Locked vs Owned States, 2.3 — Add Progress Hints on Locked Badges, 2.4 — Make Tiles Tappable (+33 more)
 
 ### Community 133 - "Module 133"
-Cohesion: 0.12
-Nodes (15): add, build, clear, clearShopCart, decrement, _loadFromPrefs, _persist, remove (+7 more)
+Cohesion: 0.13
+Nodes (14): add, build, clear, clearShopCart, decrement, _loadFromPrefs, _persist, remove (+6 more)
 
 ### Community 134 - "Module 134"
 Cohesion: 0.15
@@ -1003,12 +1010,12 @@ Cohesion: 0.15
 Nodes (12): copyWith, createdAt, fromJson, id, imageUrl, petAvatarUrl, petId, petName (+4 more)
 
 ### Community 139 - "Module 139"
-Cohesion: 0.10
-Nodes (20): GoTrueClient, GoTrueClient get, auth, currentSession, currentUser, _FakeGoTrueClient, noSuchMethod, user (+12 more)
+Cohesion: 0.09
+Nodes (21): core/firebase/fcm_service.dart, GoTrueClient, GoTrueClient get, auth, currentSession, currentUser, _FakeGoTrueClient, noSuchMethod (+13 more)
 
 ### Community 140 - "Module 140"
-Cohesion: 0.32
-Nodes (7): _dateTimeFromJson, fromJson, MatchingDiscoveryOwner, MatchingDiscoveryRow, null, _numToDouble, tryParse
+Cohesion: 0.26
+Nodes (11): @freezed, CareTask, LineItem, MarketplaceOrder, _dateTimeFromJson, fromJson, MatchingDiscoveryOwner, MatchingDiscoveryRow (+3 more)
 
 ### Community 141 - "Module 141"
 Cohesion: 0.15
@@ -1016,7 +1023,7 @@ Nodes (12): BoxBorder?, EdgeInsetsGeometry, backgroundColor, border, borderRadiu
 
 ### Community 142 - "Module 142"
 Cohesion: 0.17
-Nodes (8): bool get, marionetteEnabledInThisBuild, marionetteEnabledInThisBuild, isAppleMobileWeb, isIosStandalonePwa, waitForFcmServiceWorker, isWebPushSupported, registerWebPushIfAvailable
+Nodes (8): bool get, integrationTestActive, useStripeHostedCheckout, isAppleMobileWeb, isIosStandalonePwa, waitForFcmServiceWorker, isWebPushSupported, registerWebPushIfAvailable
 
 ### Community 143 - "Module 143"
 Cohesion: 0.05
@@ -1027,12 +1034,12 @@ Cohesion: 0.14
 Nodes (13): BoxFit, int?, package:flutter_cache_manager/flutter_cache_manager.dart, build, cacheManager, errorFallback, _evictStaleCache, fit (+5 more)
 
 ### Community 145 - "Module 145"
-Cohesion: 0.18
-Nodes (11): core/firebase/fcm_service.dart, ../../../../core/firebase/firebase_env.dart, ../../../../core/platform/web_push_environment.dart, core/theme/theme.dart, build, createState, _enable, _enabled (+3 more)
+Cohesion: 0.20
+Nodes (10): ../../../../core/firebase/firebase_env.dart, ../../../../core/platform/web_push_environment.dart, core/theme/theme.dart, build, createState, _enable, _enabled, _loading (+2 more)
 
 ### Community 146 - "Module 146"
-Cohesion: 0.10
-Nodes (19): CustomPainter, dart:math, _CameraGridPainter, _CameraViewfinderBracketsPainter, _WavePainter, _BoneSliderPainter, color, DashedCirclePainter (+11 more)
+Cohesion: 0.18
+Nodes (11): CustomPainter, _CameraGridPainter, _CameraViewfinderBracketsPainter, _WavePainter, _BoneSliderPainter, _BadgePainter, _GlassBorderPainter, _DashedRoundedBorderPainter (+3 more)
 
 ### Community 147 - "Module 147"
 Cohesion: 0.17
@@ -1059,8 +1066,8 @@ Cohesion: 0.28
 Nodes (9): DateTime? get, _, fromJson, isDueSoon, isVaccine, MedicalRecord, MedicalRecordType, needsReminder (+1 more)
 
 ### Community 153 - "Module 153"
-Cohesion: 0.29
-Nodes (6): channel, client, controller, mutualMatchInsertStreamProvider, dart:async, ../../data/models/pet_mutual_match.dart
+Cohesion: 0.15
+Nodes (12): Automated test matrix, Contract tests (`test/plan/synthetic_spring_implementation_contract_test.dart`), Executive summary, Fixes applied during validation, Hosted Supabase (live SQL), How to re-run, Known non-blocking noise, Marionette MCP — real-life scenarios (account: syed.reza181@gmail.com) (+4 more)
 
 ### Community 154 - "Module 154"
 Cohesion: 0.05
@@ -1092,7 +1099,7 @@ Nodes (39): Appointment, appointmentControllerProvider, ../controllers/appointme
 
 ### Community 161 - "Module 161"
 Cohesion: 0.32
-Nodes (8): _, fromJson, hasSeverity, HealthLog, HealthSeverity, isVetVisit, isWeightEntry, requiresFollowUp
+Nodes (8): _, fromJson, hasSeverity, HealthLog, HealthLogType, isVetVisit, isWeightEntry, requiresFollowUp
 
 ### Community 162 - "Module 162"
 Cohesion: 0.22
@@ -1119,16 +1126,16 @@ Cohesion: 0.11
 Nodes (16): canRequestWebToken, FirebaseEnv, isConfigured, options, vapidKey, android, DefaultFirebaseOptions, ios (+8 more)
 
 ### Community 168 - "Module 168"
-Cohesion: 0.24
-Nodes (11): filteredProductsProvider, marketplaceSearchQueryProvider, productListProvider, Route /marketplace/cart, build, _onScroll, _SearchBar, _SearchBarState (+3 more)
+Cohesion: 0.31
+Nodes (9): filteredProductsProvider, marketplaceSearchQueryProvider, productListProvider, build, _onScroll, _SearchBar, _SearchBarState, _ShopBody (+1 more)
 
 ### Community 169 - "Module 169"
 Cohesion: 0.05
 Nodes (53): active_pet_controller.dart, ConsumerWidget, activePetControllerProvider, build, careStreakRealtimeProvider, build, DiscoveryVisibilityController, setDiscoverable (+45 more)
 
 ### Community 170 - "Module 170"
-Cohesion: 0.16
-Nodes (15): authStateProvider, routerProvider, build, build, PetfolioApp, Route /care/appointments, Route /care/medical-vault, Route /care/nutrition (+7 more)
+Cohesion: 0.14
+Nodes (14): core/widgets/app_snack_bar.dart, openDirectChat, openMatchChat, openMatchesInbox, popOrGo, Route /care/appointments, Route /care/medical-vault, Route /care/nutrition (+6 more)
 
 ### Community 171 - "Module 171"
 Cohesion: 0.05
@@ -1141,31 +1148,31 @@ Nodes (11): male,
 
 ### Community 173 - "Module 173"
 Cohesion: 0.06
-Nodes (32): ../../domain/services/breed_identification_service.dart, File?, _colorScheme, _textTheme, _apply, breed, BreedIdentifierWidget, _BreedIdentifierWidgetState (+24 more)
+Nodes (31): ../../domain/services/breed_identification_service.dart, _colorScheme, _textTheme, _apply, breed, BreedIdentifierWidget, _BreedIdentifierWidgetState, build (+23 more)
 
 ### Community 174 - "Module 174"
-Cohesion: 0.23
-Nodes (11): @freezed, MatchPreferenceController, MatchPreferencesState, CareTask, LineItem, MarketplaceOrder, fromGeoJson, PetGeoPoint (+3 more)
+Cohesion: 0.27
+Nodes (7): MatchPreferenceController, MatchPreferencesState, fromGeoJson, PetGeoPoint, fromJson, PetMutualMatch, package:freezed_annotation/freezed_annotation.dart
 
 ### Community 175 - "Module 175"
 Cohesion: 0.06
 Nodes (31): 10. Parcel Onboarding Screen, 11. Rentals Screen (Top & Bottom View), 12. Courier Screen (Top & Bottom View), 13. Pathao Shop (Onboarding, Main Catalog, Scrolled Catalog), 14. E-Commerce Checkout Flow (Product Details, Customization, Address Form, Confirmed Checkout), 1. Home Screen (Top View), 1. Overview & Visual Identity, 2. Home Screen (Bottom View) (+23 more)
 
 ### Community 176 - "Module 176"
-Cohesion: 0.07
-Nodes (29): build, shopId, build, createProduct, ../../controllers/vendor_products_controller.dart, deleteProduct, _repo, updateProduct (+21 more)
+Cohesion: 0.17
+Nodes (11): Community, community_detail_screen.dart, ../../../../core/widgets/petfolio_empty_state.dart, ../../../../core/widgets/skeleton_loader.dart, MaterialPageRoute, _Avatar, build, community (+3 more)
 
 ### Community 177 - "Module 177"
-Cohesion: 0.11
-Nodes (17): arg, build, FollowNotifier, followStatusProvider, _repo, toggle, addLog, build (+9 more)
+Cohesion: 0.18
+Nodes (10): arg, build, FollowNotifier, followStatusProvider, _repo, toggle, ../../data/repositories/social_repository.dart, _OtherProfileButtons (+2 more)
 
 ### Community 178 - "Module 178"
 Cohesion: 0.33
 Nodes (5): empty, followerCount, followingCount, PetStats, postCount
 
 ### Community 179 - "Community 179"
-Cohesion: 0.09
-Nodes (19): appointmentRoutes, dismissRootOverlayRoutes, navigator, package:flutter/material.dart, package:petfolio/core/theme/app_theme.dart, package:petfolio/core/widgets/app_shell.dart, package:petfolio/core/widgets/petfolio_empty_state.dart, package:petfolio/core/widgets/skeleton_loader.dart (+11 more)
+Cohesion: 0.12
+Nodes (14): adminRoutes, dismissRootOverlayRoutes, navigator, package:flutter/material.dart, package:petfolio/core/theme/app_theme.dart, package:petfolio/core/widgets/app_shell.dart, package:petfolio/core/widgets/petfolio_empty_state.dart, package:petfolio/core/widgets/skeleton_loader.dart (+6 more)
 
 ### Community 180 - "Community 180"
 Cohesion: 0.17
@@ -1180,8 +1187,8 @@ Cohesion: 0.20
 Nodes (9): currentUserId, hasLocation, insertSwipe, main, petHasLocation, petHasLocationCalls, package:petfolio/features/matching/data/datasources/matching_supabase_data_source.dart, package:petfolio/features/matching/data/models/pet_swipe.dart (+1 more)
 
 ### Community 183 - "Module 183"
-Cohesion: 0.07
-Nodes (30): package:flutter_map/flutter_map.dart, package:latlong2/latlong.dart, build, _cleanup, copyWith, _distance, distanceMeters, duration (+22 more)
+Cohesion: 0.08
+Nodes (29): package:flutter_map/flutter_map.dart, package:latlong2/latlong.dart, build, _cleanup, copyWith, _distance, distanceMeters, elapsedSeconds (+21 more)
 
 ### Community 184 - "Module 184"
 Cohesion: 0.50
@@ -1192,8 +1199,8 @@ Cohesion: 0.50
 Nodes (3): normalized, petfolioAppUrl, query
 
 ### Community 187 - "Module 187"
-Cohesion: 0.25
-Nodes (7): ../models/appointment.dart, AppointmentRepository, _client, create, delete, fetchForPet, toggleComplete
+Cohesion: 0.18
+Nodes (7): dart:io, File, integrationTestActive, marionetteEnabledInThisBuild, main, _criticalTables, main
 
 ### Community 190 - "Module 190"
 Cohesion: 0.17
@@ -1202,6 +1209,10 @@ Nodes (11): ChangeNotifier, _RouterNotifier, ../../features/admin/presentation/c
 ### Community 191 - "Module 191"
 Cohesion: 0.07
 Nodes (28): `AppShell` — stacked chrome, Body — bootstrap & splash, Care notifications bug (web), CSS — mixed, Document head — good, Executive summary, Inventory, `kIsWeb` inventory (entire `lib/`) (+20 more)
+
+### Community 197 - "Module 197"
+Cohesion: 0.20
+Nodes (9): Color, dart:math, color, DashedCirclePainter, dashLength, dashSpace, paint, shouldRepaint (+1 more)
 
 ### Community 198 - "Module 198"
 Cohesion: 0.29
@@ -1228,8 +1239,8 @@ Cohesion: 0.08
 Nodes (25): Automation Harness Plan, Current Runtime Facts, Execution Strategy, Feature And Module Inventory From `lib/`, Full-Screen Routes, Live Supabase Inventory, Open Risks To Resolve Before Implementation, PetFolio Android Automation Test Plan (+17 more)
 
 ### Community 215 - "Community 215"
-Cohesion: 0.15
-Nodes (18): _activeCommunityIdProvider, build, _channel, _communityId, CommunityPostsNotifier, copyWith, createCommunity, createPost (+10 more)
+Cohesion: 0.11
+Nodes (27): activePetIdProvider, createTask, deleteTask, _load, refresh, selectDate, updateTask, _activeCommunityIdProvider (+19 more)
 
 ### Community 216 - "Community 216"
 Cohesion: 0.08
@@ -1272,12 +1283,12 @@ Cohesion: 0.10
 Nodes (20): 1. Architecture & Clean Code, 2. Supabase Integration, 3. State Management & Performance, 4. UI/UX Fidelity, 5. Testing, A. Unit Test for `SocialNotifier`, B. Widget Test for `_PostCard` Reaction Picker, Critical Bug: Realtime Notification Joins (+12 more)
 
 ### Community 226 - "Community 226"
-Cohesion: 0.12
-Nodes (19): ../controllers/vitals_controller.dart, vitalsNotifierProvider, package:fl_chart/fl_chart.dart, WidgetRef, _AddWeightLogSheet, _AddWeightLogSheetState, build, createState (+11 more)
+Cohesion: 0.10
+Nodes (23): addLog, ../controllers/vitals_controller.dart, vitalsNotifierProvider, ../../data/models/weight_log.dart, ../../data/repositories/vitals_repository.dart, package:fl_chart/fl_chart.dart, ../../../pet_profile/presentation/controllers/active_pet_controller.dart, WidgetRef (+15 more)
 
 ### Community 227 - "Community 227"
-Cohesion: 0.17
-Nodes (18): marketplaceRoutes, marketplace_routes.dart, presentation/screens/cart_screen.dart, presentation/screens/customer/buyer_order_detail_screen.dart, presentation/screens/customer/buyer_order_list_screen.dart, presentation/screens/customer/shop_storefront_screen.dart, presentation/screens/marketplace_screen.dart, presentation/screens/order_confirmation_screen.dart (+10 more)
+Cohesion: 0.06
+Nodes (41): all, build, byCat, clear, _cursorCreatedAt, _cursorId, _hasMore, isLoadingMore (+33 more)
 
 ### Community 228 - "Community 228"
 Cohesion: 0.11
@@ -1301,7 +1312,7 @@ Nodes (18): 10.2 All 17 Tables (Verbose Schema), `public.care_logs` — 4 rows, 
 
 ### Community 233 - "Community 233"
 Cohesion: 0.07
-Nodes (23): base, main, main, main, main, main, main, ../../helpers/fake_supabase_client.dart (+15 more)
+Nodes (24): base, main, main, main, main, main, main, ../../helpers/fake_supabase_client.dart (+16 more)
 
 ### Community 235 - "Community 235"
 Cohesion: 0.12
@@ -1317,7 +1328,7 @@ Nodes (16): background_color, categories, description, display, icons, id, lang,
 
 ### Community 238 - "Community 238"
 Cohesion: 0.15
-Nodes (16): @JsonEnum, CareFrequency, CareTaskType, HealthLogType, _, amountFormatted, cancelled, fromJson (+8 more)
+Nodes (16): @JsonEnum, CareFrequency, CareTaskType, HealthSeverity, _, amountFormatted, cancelled, fromJson (+8 more)
 
 ### Community 239 - "Community 239"
 Cohesion: 0.12
@@ -1336,12 +1347,12 @@ Cohesion: 0.12
 Nodes (15): Actions Performed, Admin Authorization, Auth and Onboarding, Care, Execution Summary, Marketplace, Matching, Medical Vault (+7 more)
 
 ### Community 243 - "Community 243"
-Cohesion: 0.09
-Nodes (28): _, @riverpod, CareDashboard, CreatePostController, MyShop, build, _channel, markAllRead (+20 more)
+Cohesion: 0.08
+Nodes (30): _, @riverpod, CareDashboard, CreatePostController, MyShop, build, _channel, markAllRead (+22 more)
 
 ### Community 244 - "Community 244"
-Cohesion: 0.10
-Nodes (17): dart:io, package:flutter_image_compress/flutter_image_compress.dart, bytes, _compress, compressed, dir, maxWidth, outFile (+9 more)
+Cohesion: 0.14
+Nodes (13): package:flutter_image_compress/flutter_image_compress.dart, bytes, _compress, compressed, dir, maxWidth, outFile, outPath (+5 more)
 
 ### Community 245 - "Community 245"
 Cohesion: 0.19
@@ -1364,12 +1375,12 @@ Cohesion: 0.14
 Nodes (14): Marketplace, V-MKT-01: Cart is in-memory only, V-MKT-02: Marketplace search bar is decorative, V-MKT-03: No sort (price, popularity) or advanced filters, V-MKT-04: Currency hard-coded to USD in UI, V-MKT-05: No cart-level tax, shipping calculation, or coupons, V-MKT-06: Subscription frequency in weeks only, V-MKT-07: No pause/resume subscription management UI (+6 more)
 
 ### Community 250 - "Community 250"
-Cohesion: 0.14
-Nodes (13): activePetPrefix, cartPrefix, _currentVersion, matchAgeMax, matchAgeMin, matchDistance, matchSpecies, migrate (+5 more)
+Cohesion: 0.10
+Nodes (19): package:shared_preferences/shared_preferences.dart, activePetPrefix, cartPrefix, _currentVersion, matchAgeMax, matchAgeMin, matchDistance, matchSpecies (+11 more)
 
 ### Community 251 - "Community 251"
-Cohesion: 0.09
-Nodes (25): Community, community_detail_screen.dart, communitiesControllerProvider, ../controllers/communities_controller.dart, ../../../../core/widgets/petfolio_empty_state.dart, ../../../../core/widgets/skeleton_loader.dart, MaterialPageRoute, _Avatar (+17 more)
+Cohesion: 0.15
+Nodes (14): communitiesControllerProvider, ../controllers/communities_controller.dart, CommunitiesScreen, build, _CreateCommunitySheet, _CreateCommunitySheetState, createState, _descCtrl (+6 more)
 
 ### Community 252 - "Community 252"
 Cohesion: 0.15
@@ -1408,8 +1419,8 @@ Cohesion: 0.29
 Nodes (7): chatConversationControllerProvider, chatTypingStateProvider, build, ChatScreen, _ChatScreenState, _send, _TypingIndicator
 
 ### Community 261 - "Community 261"
-Cohesion: 0.22
-Nodes (8): ../models/product_review.dart, _client, fetchOwnReview, fetchReviews, ProductReviewRepository, productReviewRepositoryProvider, upsertReview, _userId
+Cohesion: 0.20
+Nodes (9): ../../../../core/errors/app_exception.dart, ../models/comment.dart, addComment, _client, deleteComment, fetchComments, _fetchLikedCommentIds, toggleCommentLike (+1 more)
 
 ### Community 262 - "Community 262"
 Cohesion: 0.17
@@ -1488,8 +1499,8 @@ Cohesion: 0.22
 Nodes (8): ../../features/care/presentation/screens/care_screen.dart, ../../features/marketplace/presentation/screens/marketplace_screen.dart, ../../features/matching/presentation/screens/matching_screen.dart, ../../features/pet_profile/presentation/screens/pet_profile_screen.dart, ../../features/social/presentation/screens/social_screen.dart, appShellRoute, navigator_keys.dart, ../widgets/app_shell.dart
 
 ### Community 282 - "Community 282"
-Cohesion: 0.20
-Nodes (9): DateTime, copyWith, fromJson, id, notes, petId, recordedAt, weightKg (+1 more)
+Cohesion: 0.22
+Nodes (8): copyWith, fromJson, id, notes, petId, recordedAt, weightKg, WeightLog
 
 ### Community 283 - "Community 283"
 Cohesion: 0.22
@@ -1520,8 +1531,8 @@ Cohesion: 0.25
 Nodes (7): Automatic FCM events, Chat notification sound, Client, Firebase CLI (logged-in), PetFolio — Firebase FCM (petfolio-v1), Server push (Supabase), Test
 
 ### Community 290 - "Community 290"
-Cohesion: 0.29
-Nodes (6): hasCredentials, main, testEmail, testPassword, package:integration_test/integration_test.dart, package:petfolio/main.dart
+Cohesion: 0.11
+Nodes (16): _forceLogout, hasCredentials, main, pumpAndSettle, _pumpApp, session, testEmail, testPassword (+8 more)
 
 ### Community 291 - "Community 291"
 Cohesion: 0.18
@@ -1556,8 +1567,8 @@ Cohesion: 0.33
 Nodes (6): 2026-06-08 — Phase 1: Architecture Cleanup (plan sequential implementation), A1 — Router decomposition, A2 — StateNotifier migration, A5 — Barrel exports, A6 — DCM linting, D1 — Secure storage
 
 ### Community 301 - "Community 301"
-Cohesion: 0.40
-Nodes (5): TickerProviderStateMixin, CareGamifiedHeader, _CareGamifiedHeaderState, _TrophyCard, _TrophyCardState
+Cohesion: 0.14
+Nodes (13): client, fromJson, petAwardsSummaryProvider, raw, ../../data/models/pet_awards_summary.dart, _RecentAchievementsRow, TickerProviderStateMixin, build (+5 more)
 
 ### Community 303 - "Community 303"
 Cohesion: 0.29
@@ -1844,57 +1855,69 @@ Cohesion: 0.67
 Nodes (3): 2026-06-08 — Phase 2: UI/UX Polish + plan feature wiring, Phase 2 polish, Plan feature wiring
 
 ### Community 399 - "Community 399"
-Cohesion: 0.29
-Nodes (5): package:petfolio/core/models/pet.dart, package:petfolio/features/auth/presentation/controllers/auth_controller.dart, package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart, build, main
+Cohesion: 0.20
+Nodes (9): borderRadius, color, DashedRectPainter, dashLength, _dashPath, dashSpace, paint, shouldRepaint (+1 more)
 
 ### Community 400 - "Community 400"
 Cohesion: 0.33
 Nodes (6): CareStreak, fromJson, _lastCompletionFromJson, _lastCompletionToJson, s, tryParse
 
 ### Community 401 - "Community 401"
-Cohesion: 0.29
-Nodes (6): package:shared_preferences/shared_preferences.dart, build, _loadTheme, setThemeMode, _themeKey, toggleTheme
+Cohesion: 0.38
+Nodes (7): authStateProvider, routerProvider, build, build, PetfolioApp, themeProvider, AppShellHeader
 
 ### Community 402 - "Community 402"
-Cohesion: 0.40
-Nodes (6): generate, _autoGenerateRoutines, PetListNotifier, careTaskRepositoryProvider, careRecommendationServiceProvider, _StubPetListNotifier
+Cohesion: 0.29
+Nodes (6): build, refresh, _repo, updateStatus, updateTracking, OrderRepository get
 
 ### Community 403 - "Community 403"
 Cohesion: 0.33
 Nodes (6): HealthVaultController, medicalVaultRepositoryProvider, AddMedicalRecordSheet, _AddMedicalRecordSheetState, _save, StreamNotifier
 
 ### Community 404 - "Community 404"
-Cohesion: 0.50
-Nodes (5): _ActiveCommunityNotifier, _SwipeErrorNotifier, MarketplaceSearchNotifier, Notifier, String?
+Cohesion: 0.67
+Nodes (4): _ActiveCommunityNotifier, _SwipeErrorNotifier, Notifier, String?
 
 ### Community 405 - "Community 405"
 Cohesion: 0.40
 Nodes (5): editShopControllerProvider, build, EditShopScreen, _EditShopScreenState, _save
 
 ### Community 406 - "Community 406"
-Cohesion: 0.40
-Nodes (4): package:image_picker/image_picker.dart, pickGalleryImage, pickImage, prepareImageForUpload
+Cohesion: 0.33
+Nodes (6): fcm_service.dart, child, createState, FcmLifecycle, _FcmLifecycleState, Widget
 
 ### Community 407 - "Community 407"
+Cohesion: 0.29
+Nodes (6): media_picker.dart, platform_location.dart, platform_notifications.dart, platform_payments.dart, web_image_cache.dart, web_push_registration.dart
+
+### Community 408 - "Community 408"
+Cohesion: 0.33
+Nodes (5): class, build, refresh, resolve, ../../data/models/shop_deletion_request.dart
+
+### Community 409 - "Community 409"
+Cohesion: 0.33
+Nodes (5): int get, hashCode, latitude, longitude, operator
+
+### Community 410 - "Community 410"
 Cohesion: 0.67
-Nodes (3): CustomClipper, path, _WaveClipper
+Nodes (3): build, deleteLog, vitalsRepositoryProvider
 
 ## Knowledge Gaps
-- **4349 isolated node(s):** `orgId`, `projectId`, `DepthCtx`, `Ico`, `BIco` (+4344 more)
+- **4393 isolated node(s):** `orgId`, `projectId`, `DepthCtx`, `Ico`, `BIco` (+4388 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **37 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **40 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `PetfolioThemeExtension` connect `Module 88` to `Care Feature UI`, `App Theme & Spacing`, `Pet & Discovery Controllers`, `Social Feed UI`, `App Navigation (Router)`, `Location & Matching`, `Pet Profile Editing`, `Medical Vault`, `Vendor Shop Management`, `Matching Data Layer`, `Social Post Creation`, `Chat System`, `Marketplace Products`, `Social Posts & Reactions`, `Web / JS Interop`, `Module 145`, `Vendor Dashboard`, `Error Handling`, `Care Streaks & XP`, `Vendor KYC`, `Module 160`, `Module 33`, `Community 291`, `Module 164`, `Module 45`, `Module 173`, `Module 50`, `Module 51`, `Module 52`, `Module 183`, `Module 59`, `Module 64`, `Module 67`, `Module 70`, `Module 75`, `Module 76`, `Module 82`, `Module 84`, `Module 85`, `Module 86`, `Module 87`, `Community 217`, `Module 91`, `Community 220`, `Module 97`, `Community 226`, `Module 119`, `Community 251`, `Module 124`, `Module 126`, `Module 127`?**
-  _High betweenness centrality (0.015) - this node is a cross-community bridge._
-- **Why does `_` connect `Module 63` to `Module 104`, `Social Profiles & Follow`, `Community 179`, `Module 120`, `Community 217`, `Module 88`?**
-  _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `_` connect `Module 137` to `Module 174`, `Module 142`, `Community 238`, `Community 179`, `Module 152`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+- **Why does `PetfolioThemeExtension` connect `Module 88` to `Care Feature UI`, `App Theme & Spacing`, `Pet & Discovery Controllers`, `Social Feed UI`, `App Navigation (Router)`, `Location & Matching`, `Pet Profile Editing`, `Medical Vault`, `Vendor Shop Management`, `Matching Data Layer`, `Social Post Creation`, `Chat System`, `Marketplace Products`, `Social Posts & Reactions`, `Web / JS Interop`, `Module 145`, `Vendor Dashboard`, `Error Handling`, `Care Streaks & XP`, `Vendor KYC`, `Module 160`, `Module 33`, `Community 291`, `Module 164`, `Module 45`, `Module 173`, `Module 176`, `Module 50`, `Module 51`, `Module 52`, `Module 183`, `Module 59`, `Module 64`, `Module 67`, `Module 69`, `Module 70`, `Module 75`, `Module 76`, `Module 82`, `Module 84`, `Module 85`, `Module 86`, `Module 87`, `Community 217`, `Module 91`, `Community 220`, `Community 226`, `Module 119`, `Community 251`, `Module 124`, `Module 126`, `Module 127`?**
+  _High betweenness centrality (0.018) - this node is a cross-community bridge._
+- **Why does `_LocationSyncErrorNotifier` connect `Community 268` to `Community 404`, `Marketplace Browse`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **Why does `OrderStatus` connect `Community 238` to `Order Management`, `Module 30`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **What connects `orgId`, `projectId`, `DepthCtx` to the rest of the system?**
-  _4349 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _4393 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Color Design Tokens` be split into smaller, more focused modules?**
   _Cohesion score 0.01694915254237288 - nodes in this community are weakly interconnected._
 - **Should `Care Feature UI` be split into smaller, more focused modules?**

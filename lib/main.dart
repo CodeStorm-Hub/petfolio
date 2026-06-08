@@ -11,6 +11,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:marionette_flutter/marionette_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'integration_test_gate_stub.dart'
+    if (dart.library.io) 'integration_test_gate_io.dart'
+    as integration_test_gate;
 import 'marionette_debug_gate_stub.dart'
     if (dart.library.io) 'marionette_debug_gate_io.dart'
     as marionette_gate;
@@ -50,13 +53,21 @@ void _assertEnvVars() {
 }
 
 bool _integrationTestBindingActive() {
-  return const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false);
+  if (integration_test_gate.integrationTestActive) return true;
+  try {
+    final type = WidgetsBinding.instance.runtimeType.toString();
+    return type.contains('IntegrationTest') ||
+        type.contains('AutomatedTestWidgetsFlutterBinding');
+  } catch (_) {
+    return false;
+  }
 }
 
 Future<void> main() async {
-  final marionetteEnabled = marionette_gate.marionetteEnabledInThisBuild;
   final integrationTest = _integrationTestBindingActive();
-  if (!integrationTest && marionetteEnabled) {
+  final marionetteEnabled =
+      !integrationTest && marionette_gate.marionetteEnabledInThisBuild;
+  if (marionetteEnabled) {
     MarionetteBinding.ensureInitialized();
   } else if (!integrationTest) {
     WidgetsFlutterBinding.ensureInitialized();
@@ -96,14 +107,16 @@ Future<void> main() async {
     return;
   }
 
-  await NotificationService.instance.initialize(
-    onTap: FcmService.instance.handleNotificationTap,
-  );
-  await PlatformNotifications.instance.initialize();
+  if (!integrationTest) {
+    await NotificationService.instance.initialize(
+      onTap: FcmService.instance.handleNotificationTap,
+    );
+    await PlatformNotifications.instance.initialize();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  await FcmService.instance.initialize();
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    await FcmService.instance.initialize();
+  }
 
   runApp(const ProviderScope(child: PetfolioApp()));
 }

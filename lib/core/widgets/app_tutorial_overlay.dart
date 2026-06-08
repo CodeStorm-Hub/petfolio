@@ -64,6 +64,7 @@ class _AppTutorialOverlayState extends State<AppTutorialOverlay> {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
+                key: const ValueKey('app_tutorial_skip'),
                 onPressed: _finish,
                 child: const Text('Skip', style: TextStyle(color: Colors.white70)),
               ),

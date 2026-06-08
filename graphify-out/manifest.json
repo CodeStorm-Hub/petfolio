@@ -230,8 +230,8 @@
     "semantic_hash": "e7f11f5f0f50fcffc405851b9c38f443"
   },
   "lib/core/widgets/app_shell.dart": {
-    "mtime": 1780875700.3480735,
-    "ast_hash": "8222a6c2404829b0d4b848eaca988c1c",
+    "mtime": 1780878104.2849257,
+    "ast_hash": "6e9d48a9c11d1cb758476c841589b700",
     "semantic_hash": ""
   },
   "lib/core/widgets/app_snack_bar.dart": {
@@ -1225,8 +1225,8 @@
     "semantic_hash": "9d892236b4925a83af13663a9f816340"
   },
   "lib/main.dart": {
-    "mtime": 1780864492.9455369,
-    "ast_hash": "fbd2dced951b5974b19a696fd42b658f",
+    "mtime": 1780877083.9194808,
+    "ast_hash": "82845e011191f47fbe91f9690d9355d8",
     "semantic_hash": ""
   },
   "lib/marionette_debug_gate_io.dart": {
@@ -1800,8 +1800,8 @@
     "semantic_hash": ""
   },
   "integration_test/auth_care_flow_test.dart": {
-    "mtime": 1780867134.0752134,
-    "ast_hash": "5a0442d0df4e4b935e68d13f90d63886",
+    "mtime": 1780876435.1976948,
+    "ast_hash": "fea5bcc0d021c6e0e3a51e33400fe434",
     "semantic_hash": ""
   },
   "ios/Flutter/flutter_export_environment.sh": {
@@ -3700,8 +3700,8 @@
     "semantic_hash": ""
   },
   "lib/core/widgets/app_tutorial_overlay.dart": {
-    "mtime": 1780875700.3480735,
-    "ast_hash": "9a45b5cb47b61fd3c9ce515948bd5a52",
+    "mtime": 1780876841.3851976,
+    "ast_hash": "35a0d0625913d70bc5a88e6eca9637be",
     "semantic_hash": ""
   },
   "supabase/migrations/20260608140000_chat_read_receipts_story_reactions.sql": {
@@ -3725,8 +3725,33 @@
     "semantic_hash": ""
   },
   "lib/core/widgets/petfolio_network_image.dart": {
-    "mtime": 1780875840.6759727,
+    "mtime": 1780875924.0938194,
     "ast_hash": "18ff90cc3cf0f28839c6d6aaca126c35",
+    "semantic_hash": ""
+  },
+  "integration_test/synthetic_spring_validation_test.dart": {
+    "mtime": 1780878072.469198,
+    "ast_hash": "d9246df9ca539cd37a887ce156ff820e",
+    "semantic_hash": ""
+  },
+  "lib/integration_test_gate_io.dart": {
+    "mtime": 1780876930.6094942,
+    "ast_hash": "de4772ecc85475cf88c618ed4212ecb4",
+    "semantic_hash": ""
+  },
+  "lib/integration_test_gate_stub.dart": {
+    "mtime": 1780876930.6094942,
+    "ast_hash": "5c09c9109441b07e7f2dc23c16b80e18",
+    "semantic_hash": ""
+  },
+  "test/plan/synthetic_spring_implementation_contract_test.dart": {
+    "mtime": 1780876078.8727572,
+    "ast_hash": "d28b2377c14c407b2d6d29d6f8723993",
+    "semantic_hash": ""
+  },
+  "SYNTHETIC_SPRING_VALIDATION_REPORT.md": {
+    "mtime": 1780878234.2808056,
+    "ast_hash": "070e8f5b0bba99b856f3a8c0cd4b9bef",
     "semantic_hash": ""
   }
 }

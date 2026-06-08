@@ -429,6 +429,7 @@ class _FloatingNav extends StatelessWidget {
           for (var i = 0; i < appShellDestinations.length; i++)
             Expanded(
               child: _NavTab(
+                key: ValueKey('nav_${appShellDestinations[i].label.toLowerCase()}'),
                 destination: appShellDestinations[i],
                 isSelected: i == selectedIndex,
                 accentColor: tabAccentColors[i],
@@ -446,6 +447,7 @@ class _FloatingNav extends StatelessWidget {
 
 class _NavTab extends StatefulWidget {
   const _NavTab({
+    super.key,
     required this.destination,
     required this.isSelected,
     required this.accentColor,
