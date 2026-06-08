@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/activity/activity_routes.dart';
 import '../features/admin/admin_routes.dart';
 import '../features/appointments/appointment_routes.dart';
 import '../features/auth/auth_routes.dart';
@@ -37,6 +38,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ...matchingRoutes(rootNavigatorKey),
       ...marketplaceRoutes(rootNavigatorKey),
       ...adminRoutes(rootNavigatorKey),
+      ...activityRoutes(rootNavigatorKey),
     ],
   );
 });

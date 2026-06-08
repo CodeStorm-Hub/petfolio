@@ -17,7 +17,7 @@
 - **`lib/core/widgets/app_shell.dart`** — Tab 0: `home_outlined/home_rounded`, label `Home`, eyebrow `HOME`; live `🔥 N` streak pill in header trailing actions
 
 ### Next step
-**Phase 3 — Product Details Dual CTA** (`product_detail_screen.dart`): sticky bottom bar with "Add to Cart" + "Buy Now" dual CTAs.
+~~**Phase 3 — Product Details Dual CTA**~~ ✅ Complete — see below.
 
 ---
 
@@ -31,6 +31,70 @@
 - **Imports** — added `dart:async` (Timer) + `google_fonts`
 
 Phase complete — please run `/remember` to save tokens before proceeding to Phase 2.
+
+---
+
+## 2026-06-09 — Phase 3: Product Detail Redesign ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented (`lib/features/marketplace/presentation/screens/product_detail_screen.dart`)
+- **`_ProductHeroCarousel`** — replaces static `_ProductHero`; `PageView` swipeable images via `CachedNetworkImage` with `ProductGlyph` fallback; animated pill page-indicator dots; animated glyph scale+rotation pop on add-to-cart; `_WavePainter` bottom transition
+- **`_SellerRow`** — `Material + InkWell` ripple card; shop initial-letter `CircleAvatar` tinted with `product.gradientStart`; shop name + category label; chevron → `context.push('/shop/${product.shopId}')`
+- **`_ProductInfo`** — rating/free-delivery badges; brand eyebrow; name; variant; price row with subscribe-aware strikethrough + `-12%` `AppColors.poppy` badge when `subscribe && subscribable`
+- **`_DualCtaBar`** — replaces `_PayBar`; `OutlinedButton` "Add to Cart" (`Expanded(flex:1)`) + `FilledButton` "Buy Now · $price" (`Expanded(flex:2)`); `AppColors.poppy` fill; frosted backdrop separator
+- **`_VariantSheetContent`** — Pathao-style `showModalBottomSheet`; drag handle + "Customize as per your choice" `GoogleFonts.sora` header; auto-selected radio variant row with COMPLETE badge; `_SheetStepperBtn` qty stepper; Confirm CTA with inline price + strikethrough; `Navigator.pop(context, _qty)`
+- **`_handleAddToCart`** — inline add (no navigation) + `SnackBar` confirmation + glyph pop animation
+- **`_handleBuyNow`** — opens `_VariantSheetContent`, on confirm adds `qty` items sequentially then navigates to `/marketplace/cart`
+- **State cleanup** — removed `_quantity` (moved to sheet); added `_pageCtrl`/`_pageIndex`; removed `SingleTickerProviderStateMixin`
+- **Removed from scroll body** — `_QuantityStepper`, `_OrderSummaryCard`, `_SumRow`
+
+### Next step
+~~**Phase 4**~~ ✅ Complete — see below.
+
+---
+
+## 2026-06-09 — Phase 4: Cart / Checkout Stacked Section Cards ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented (`lib/features/marketplace/presentation/screens/cart_screen.dart`)
+- **Layout** — `bg: #F2F3F7` (light) / `surface1` (dark); all sections are `_SectionCard` (white elevated, warm shadow) stacked on gray — Pathao checkout pattern
+- **`_CartHeader`** — `GoogleFonts.sora` title + mint item-count pill + Clear danger button
+- **`_DeliverToCard`** (shared, top) — mint location icon + "DELIVER TO" eyebrow + address placeholder; tap → snackbar
+- **`_VendorCheckoutSection`** — per-vendor stacked sections:
+  - **Products card** — shop initial avatar + name + delivery estimate + `CartLineItem` lines + !canCheckout amber warning
+  - **Apply Promo card** — collapsed row → `AnimatedCrossFade` expands to `TextField` + mint Apply button
+  - **Pay via card** — lilac icon + `_PaymentChip` credit card / COD; haptic on change
+  - **Order Summary card** — Subtotal / Delivery (Free, mint) / divider / **Total** bold 18px
+  - **Green savings banner** — `🎉 You are saving $X` mint gradient; shown only when `shopSavingsCents > 0`
+  - **Place Order CTA** — poppy `FilledButton` 56px + inline price; disabled (ink300) when `!canCheckout`; COD → `_CodConfirmSheet`
+- **`_CodConfirmSheet`** — dark-mode-aware reskin; all checkout logic preserved
+- **All logic unchanged** — `checkoutProvider` listener, `startCheckoutForShop`, `startCodCheckoutForShop`, `verifiedShopIds` gate
+
+### Next step
+~~**Phase 5**~~ ✅ Complete — see below.
+
+---
+
+## 2026-06-09 — Phase 5: Notifications Tabs + Activity Screen ✅
+
+`flutter analyze` — **No issues found.**
+
+### Notifications (`lib/features/social/presentation/screens/notifications_screen.dart`)
+- **Pathao-style flat `TabBar`** — `UnderlineTabIndicator` poppy 3px, no pill, flat white bar; `labelColor: poppy`, `unselectedLabelColor: ink500`
+- **"Updates" tab** — social activity (like/comment/follow); unread count poppy badge on tab label; "Mark all read" header action when unread > 0
+- **"Promotions" tab** — future promo/deal notifications; `PetfolioEmptyState` when empty
+- **`_NotificationTile`** — fixed legacy color aliases (`coral500`→`poppy`, `meadow500`→`mint`, `blue500`→`sky`); Dart switch expressions for `_iconColor` + `_emoji`; unread dot uses `AppColors.poppy`
+
+### Activity screen (new — `lib/features/activity/`)
+- **`activity_screen.dart`** — unified timeline combining `buyerOrdersProvider` (orders) + `appointmentControllerProvider` (appointments)
+- **Filter chips** — `⚡ All | 🛍️ Orders | 🏥 Appointments`; poppy active fill, white outlined inactive; `AnimatedContainer` 180ms
+- **Date grouping** — "Today" / "Yesterday" / "MMM D, YYYY" section headers; sorted newest-first
+- **`_ActivityCard`** — status dot (tangerine=pending/upcoming, sky=shipped, mint=delivered/completed, poppy=cancelled/missed); emoji icon circle; title + subtitle; trailing value (amount/date) + status badge; action row ("Track Order" / "Reorder" / "Book Again")
+- **`_ActivityItem`** — unified wrapper over `MarketplaceOrder` + `Appointment` with computed `statusColor`, `statusLabel`, `actionLabel`, `actionRoute`
+- **Route** — `/activity` root-level (`parentNavigatorKey: rootKey`); registered in `router.dart`
+- **`activity_routes.dart`** — `activityRoutes(GlobalKey<NavigatorState>)` pattern matching other feature routes
 
 ---
 
