@@ -5,7 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
-import '../../controllers/buyer_orders_controller.dart';
+import '../../controllers/buyer_orders_controller.dart'
+    show buyerOrdersProvider, orderByIdProvider;
 import '../../../data/models/marketplace_order.dart';
 
 class BuyerOrderDetailScreen extends ConsumerWidget {
@@ -18,14 +19,33 @@ class BuyerOrderDetailScreen extends ConsumerWidget {
   final String orderId;
   final MarketplaceOrder? order;
 
+  void _goBack(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/marketplace');
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ordersAsync = ref.watch(buyerOrdersProvider);
-    final resolved = ordersAsync.value?.firstWhere(
-          (o) => o.id == orderId,
-          orElse: () => order!,
-        ) ??
-        order;
+    // Fast path: use pre-loaded order or find it in the cached list.
+    final cachedList = ref.watch(buyerOrdersProvider).value;
+    final fromCache = order ??
+        cachedList?.where((o) => o.id == orderId).firstOrNull;
+
+    // Fallback: direct fetch when not in cache yet (e.g. right after placement).
+    final orderAsync = fromCache != null
+        ? AsyncValue.data(fromCache)
+        : ref.watch(orderByIdProvider(orderId));
+
+    if (orderAsync.isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final resolved = orderAsync.value;
 
     if (resolved == null) {
       return Scaffold(
@@ -38,7 +58,7 @@ class BuyerOrderDetailScreen extends ConsumerWidget {
                     style: TextStyle(color: AppColors.ink500)),
                 const SizedBox(height: 12),
                 TextButton(
-                    onPressed: () => context.pop(),
+                    onPressed: () => _goBack(context),
                     child: const Text('Go back')),
               ],
             ),
@@ -60,7 +80,7 @@ class BuyerOrderDetailScreen extends ConsumerWidget {
                   children: [
                     _IconBtn(
                       icon: Icons.arrow_back_ios_new_rounded,
-                      onTap: () => context.pop(),
+                      onTap: () => _goBack(context),
                     ),
                     const SizedBox(width: 12),
                     const Text(

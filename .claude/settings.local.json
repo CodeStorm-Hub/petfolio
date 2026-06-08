@@ -182,7 +182,8 @@
       "Skill(deep-research:*)",
       "WebFetch(domain:flutter.dev)",
       "WebFetch(domain:m3.material.io)",
-      "PowerShell(@\\(\"G:\\\\GitHub\\\\petfolio\\\\lib\\\\features\\\\settings\", \"G:\\\\GitHub\\\\petfolio\\\\lib\\\\features\\\\profile\"\\) | ForEach-Object { if \\(Test-Path $_\\) { Get-ChildItem -Path $_ -Recurse -File | Select-Object -ExpandProperty FullName } })"
+      "PowerShell(@\\(\"G:\\\\GitHub\\\\petfolio\\\\lib\\\\features\\\\settings\", \"G:\\\\GitHub\\\\petfolio\\\\lib\\\\features\\\\profile\"\\) | ForEach-Object { if \\(Test-Path $_\\) { Get-ChildItem -Path $_ -Recurse -File | Select-Object -ExpandProperty FullName } })",
+      "PowerShell(cd \"G:\\\\GitHub\\\\petfolio\"; $py = Get-Content graphify-out\\\\.graphify_python -Raw; & $py -m graphify query \"checkout order flow process_checkout RPC inventory reservations\" 2>&1)"
     ]
   }
 }

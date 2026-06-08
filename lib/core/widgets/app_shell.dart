@@ -251,7 +251,7 @@ class AppShellHeader extends ConsumerWidget {
           const SizedBox(width: 8),
           _HeaderIconBtn(icon: Icons.notifications_rounded, onTap: () => context.push('/social/notifications')),
           const SizedBox(width: 8),
-          _HeaderIconBtn(icon: Icons.settings_rounded, onTap: () => context.push('/pets/manage')),
+          _HeaderIconBtn(icon: Icons.settings_rounded, onTap: () => context.push('/settings')),
         ]);
       case 1:
         trailingActions = Row(children: [
