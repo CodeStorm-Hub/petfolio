@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../../core/theme/theme.dart';
 import '../../data/models/product.dart';
@@ -325,24 +326,19 @@ class _ProductHeroCarousel extends StatelessWidget {
               bottom: 50,
               left: 0,
               right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(product.imageUrls.length, (i) {
-                  final active = i == pageIndex;
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeOutCubic,
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    width: active ? 20 : 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: active
-                          ? Colors.white
-                          : Colors.white.withAlpha(100),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  );
-                }),
+              child: Center(
+                child: SmoothPageIndicator(
+                  controller: pageCtrl,
+                  count: product.imageUrls.length,
+                  effect: const ExpandingDotsEffect(
+                    activeDotColor: Colors.white,
+                    dotColor: Color(0x66FFFFFF),
+                    dotHeight: 6,
+                    dotWidth: 6,
+                    expansionFactor: 3,
+                    spacing: 6,
+                  ),
+                ),
               ),
             ),
 

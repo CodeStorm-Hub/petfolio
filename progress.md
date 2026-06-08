@@ -1,5 +1,48 @@
 # Petfolio — Progress Log
 
+## 2026-06-09 — Pathao Gaps Phase 2 (P2 + P3 polish) ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+
+**Gap #8 (P2) — Marketplace "Show All" categories screen**
+- `selectedCategoryProvider` added to `product_list_controller.dart`
+- `marketplace_categories_screen.dart` — 2-col grid of all 8 categories; live count; stagger-in via `flutter_animate`
+- `/marketplace/categories` route in `marketplace_routes.dart`
+- `_CategoryChips` gains "All" tile → `/marketplace/categories`; `_selectedCat` → `selectedCategoryProvider`
+
+**Gap #9 (P2) — "Products you'll love" discovery section**
+- `_YoullLoveSection` sliver in `_ShopBody` (all-category view only)
+- One product per category, horizontal scroll strip, 140×220 tiles, "Browse all ›" link
+
+**Gap #10 (P2) — Buyer order action row**
+- `_OrderTile` gains action row: delivered → Rate/Reorder/Return; shipped → Track; cancelled → Reorder
+- `_ActionBtn` widget with color-tinted bg
+
+**Gap #12 (P2) — Loyalty XP chip on home hero**
+- `_PetHeroCard` → `ConsumerWidget`, watches `petAwardsSummaryProvider`
+- "Lv N · XXX XP" gold gradient pill below streak chip
+
+**Gap #13 (P3) — `smooth_page_indicator` in carousels**
+- `_HeroCarousel` → `SmoothPageIndicator` with `ExpandingDotsEffect`
+- `_ProductHeroCarousel` → `SmoothPageIndicator` (white on dark)
+
+**Gap #14 (P3) — `shimmer` package skeleton loaders**
+- `skeleton_loader.dart` → `Shimmer.fromColors`; reduce-motion path unchanged
+
+**Gap #15 (P3) — `flutter_animate` stagger-in**
+- Categories screen tiles: 40ms stagger `fadeIn + slideY`
+- Offers screen promo cards: 50ms stagger
+
+### Still pending
+- Gap #11 (P2): Promotions tab data source (notifications `promo` type)
+- Gap #16–20 (P3): lottie empty states, squircle cards, spring transitions, fidelity color seeding, tactile press
+
+Phase complete — please run (/remember) to save tokens before proceeding.
+
+---
+
 ## 2026-06-08 — Pathao UI Redesign Phase 1: Hub Home + All Features Sheet ✅
 
 `flutter analyze` — **No issues found.**

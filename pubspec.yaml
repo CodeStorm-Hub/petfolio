@@ -72,6 +72,12 @@ dependencies:
 
   marionette_flutter: ^0.5.0
 
+  # Animations & UX polish
+  flutter_animate: ^4.5.0
+  shimmer: ^3.0.0
+  lottie: ^3.3.1
+  smooth_page_indicator: ^1.2.0+3
+
   # Payments
   flutter_stripe: ^12.6.0
   flutter_stripe_web: ^7.6.0

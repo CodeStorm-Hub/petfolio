@@ -1,228 +1,160 @@
-I'll visualize the key Pathao screenshots and explore the PetFolio `lib/` structure in parallel to give you an informed assessment.
+Reading all docs and images in parallel with an online research sweep.
 
-Now let me see the remaining key screens and explore the current PetFolio lib structure.
+Now let me visualize the key Pathao screenshots and do codebase exploration + online research in parallel.
 
-Now I have a complete picture. Here's my full analysis.
+Now let me do a focused codebase scan of the key feature directories.
 
----
+Now let me do a quick online search for the latest Flutter M3 Expressive design patterns.
 
-## What I Saw in the Pathao Screenshots
-
-I visually reviewed all 35 screenshots. Here's a condensed map of every distinct UI pattern:
-
-| Screenshot | Pattern | Key Visual Detail |
-|---|---|---|
-| `01` Home top | **Bento grid launcher** | Large 2-col tiles for high-freq (Bike/Car), smaller tiles (Food/Parcel/CNG/All), promo banner above |
-| `02` Home bottom | **Spotlight carousel + filter chips + saved shortcuts** | Horizontal scroll promos, chip filters (All/Notice/Bike), Home/Work destination cards |
-| `03` Offers | **Segmented toggle + filtered promo cards** | "Available Promos / Point Deals" pill toggle, filter chips, copy-code cards |
-| `04` Activity | **Timeline log with horizontal chip filter** | Chips (Car/Bike/Food/Parcel), date-grouped timeline cards, route dots (pickup●→destination●), action row |
-| `05` Inbox | **Segmented tab + illustrated empty state** | Updates/Promotions tabs, red underline active tab, 3D mailbox empty state |
-| `06` Profile | **Loyalty tier card + grouped settings** | Gold card with progress bar, section headers (ACCOUNT / OFFERS), chevron list rows |
-| `12` All Services | **Bottom sheet catalog** | Drag handle, 2-col grid, icon-right cards, "See More" pill expansion |
-| `09` Food | **Category header + circular icons + restaurant cards** | "DELIVER TO" dropdown, horizontal circular food categories, 2-col promo banners, rating/distance/discount cards |
-| `13` Shop | **Search + hero carousel + category grid + vendor list** | Full-width search pill, pagination-dot carousel, 3-col category icons, countdown banner, shop cards with thumbnails |
-| `16` Product Details | **Seller row + image carousel + sticky dual CTA** | Seller avatar+name, swipeable image carousel, strikethrough price + discount badge, Add to Cart (outlined) + Buy Now (solid) |
-| `17` Customization sheet | **Variant picker + quantity stepper** | "Customize as per your choice" header, radio with COMPLETE badge, `−1+` stepper, Confirm CTA shows price inline |
-| `18`/`34` Checkout | **Stacked section cards + sticky CTA** | Deliver To card, Your Products card, Apply Promo row, Pay via card, green "You are saving" banner, disabled-until-valid Place Order button |
+Here is the complete, prioritized gap analysis:
 
 ---
 
-## PetFolio's Current State (from `lib/`)
+## Petfolio Gap Analysis — Full Findings
 
-PetFolio already has **all the feature modules** — they just lack the surface-layer UI polish that Pathao excels at:
+### P0 — Critical UX Gaps (blocking flows)
 
-| PetFolio Feature | Files | Current State |
-|---|---|---|
-| **Shell / Nav** | `core/widgets/app_shell.dart` | 5-tab floating pill nav (Pets/Care/Social/Match/Market) |
-| **Pet Profile / Home** | `features/pet_profile/` | Active pet screen — good data, but no launcher/hub layer |
-| **Care** | `features/care/` | Gamified tasks, streak, nutrition, walk, vitals — rich data, UI needs discovery |
-| **Social** | `features/social/` | Feed, stories, comments, follow, notifications — standard feed layout |
-| **Matching** | `features/matching/` | Swipe discovery, chat, matches inbox |
-| **Marketplace** | `features/marketplace/` | Full shop/product/cart/checkout/vendor — richest feature set |
-| **Communities** | `features/communities/` | Basic community screen |
-| **Appointments** | `features/appointments/` | Appointments screen |
-| **Notifications** | `features/social/presentation/screens/notifications_screen.dart` | Flat list, no tab segmentation |
+**1. Address Management — Missing entire feature**
+- `lib/features/marketplace/presentation/screens/address_screen.dart` does not exist
+- Cart `_DeliverToCard` shows a snackbar placeholder instead of a real address selector
+- Pathao pattern (`19_address_selection_screen.png`, `21_add_address_sheet.png`): bottom sheet with full address text field → City/Zone/Area breadcrumb dropdown → label tiles (Home/Work/Campus/Other) → "Set As Default" toggle → "Confirm Address" `FilledButton`
+- Supabase `user_addresses` table + Riverpod provider needed before this can be wired
+
+**2. Receipt Breakdown in Checkout — Missing**
+- Pathao `35_checkout_receipt_details.png` shows a "Receipt" card: **Total item price (N Items) / Store Discount / Subtotal / Delivery Charge / Total** — each line itemized
+- Current `cart_screen.dart` `_SumRow` only shows a flat subtotal; no delivery charge line, no item count label
 
 ---
 
-## Pathao UI Patterns → PetFolio Mapping (What to Implement)
+### P1 — High-Impact UX Gaps (affects key journeys)
 
-### 1. **Bento Grid Hub Home** *(Highest Priority)*
-**From:** `01_home_screen_top.png`
+**3. Shop Intro / Onboarding Screen — Missing**
+- `lib/features/marketplace/presentation/screens/shop_intro_screen.dart` does not exist
+- Pathao `13_shop_intro_screen.png`: illustration + "Introducing Pathao Shop" + 3 value props (Authentic Products / Pay Conveniently / Track Your Order) + "Let's explore" `FilledButton`
+- Should trigger on first visit to `/marketplace` via `shared_preferences` flag
 
-Pathao's home is a scannable **launcher** — you immediately see every service without scrolling. PetFolio's current home is a single pet profile deep-dive.
+**4. Offers/Promos Screen — Missing feature**
+- `lib/features/offers/` directory does not exist
+- Pathao `03_offers_screen.png`: "Offers" top title, **"Available Promos" (pill) + "Point Deals"** tab pair, filter chips (All / Food / Bike), card list per promo with code + description + "Valid till" date + "Add promo" `TextButton`
+- Marketplace currently has no dedicated promos browsing surface
 
-**Adapt for PetFolio:**
-- Replace `/home` with a `HubScreen` containing a bento grid:
+**5. Settings / Profile Screen — Missing feature**
+- `lib/features/settings/` does not exist — no settings screen at all
+- Pathao `06_profile_screen.png` + `06_profile_screen_bottom.png` pattern:
+  - Gold loyalty tier card: avatar + phone + rating, XP progress bar to next tier, "Point deals / Partner benefits" chevron links
+  - Grouped sections: **ACCOUNT** (Saved Address), **OFFERS** (Promos, Refer & Get Discounts), **SETTINGS** (Language, Permissions), **HELP & LEGAL** (Safety `NEW` badge, Emergency Support, Help, Support Requests, Policies), **MORE** (What's New dot badge)
+- Users cannot manage account, addresses, or preferences from anywhere in the app
 
-| Large tile (2-col) | Route |
-|---|---|
-| Care (streak flame + today's tasks count) | `/care` |
-| Social (latest PawsFeed post preview) | `/social` |
+**6. Activity Screen Not Reachable from Home**
+- `/activity` route exists but no `_QuickActionsRow` button in `hub_home_screen.dart` links to it
+- Pathao `04_activity_screen.png`: Activity is a first-class bottom nav item
+- Users can only reach Activity via direct deep link — no in-app path
 
-| Small tile | Route |
-|---|---|
-| Match | `/matching` |
-| Market | `/marketplace` |
-| Vet / Appointments | `/appointments` |
-| Communities | `/communities` |
-| **All** tile | opens `AllFeaturesSheet` |
-
-- **Header row**: Pet switcher pill (left) + Care streak/points pill (center-right) + avatar → settings (right)
-- **Promo banner slot**: "Vaccination due in 3 days" / "New shop added near you" — driven by care & marketplace data
-
----
-
-### 2. **All Features Bottom Sheet** *(Phase 1, pairs with #1)*
-**From:** `12_all_services_screen.png` / `12_all_services_screen_expanded.png`
-
-Drag-up sheet, 2-column grid, each card: title + subtitle left, illustration/icon right. "See More" expands to secondary features (Communities, Walk Tracker, Health Vault, Breed ID).
-
-PetFolio already has `app_bottom_sheet.dart` — build `AllFeaturesSheet` on top of it.
+**7. Care Screen Filter Chips — Missing**
+- `care_screen.dart` has no filter chips (All | Medical | Nutrition | Grooming | Walk)
+- All care tasks render in a flat undifferentiated list; no way to focus on one pillar
 
 ---
 
-### 3. **Horizontal Filter Chips (Standardize Everywhere)**
-**From:** `03_offers_screen.png`, `04_activity_screen.png`, `09_food_main_screen_home_address.png`
+### P2 — Medium-Impact UX Gaps (polish & completeness)
 
-Pathao uses the **same chip component** on Offers, Activity, Food, and Home — pill shape, solid-color active, outlined inactive.
+**8. Marketplace "Show All" Categories Page — Missing**
+- `marketplace_screen.dart` has category rows but no dedicated `/marketplace/categories` page
+- Pathao `13_shop_screen.png`: "Show All" chevron link triggers full categories grid
 
-PetFolio needs this on:
-- **Care screen** — filter chips: `All | Medical | Nutrition | Grooming | Walk`
-- **Marketplace** — filter chips: `All | Food | Toys | Health | Grooming`
-- **Activity/History** — filter chips: `Orders | Appointments | Care Logs | Matches`
-- **Notifications** — filter chips or segmented tab
+**9. "Products You'll Love" Section on Marketplace Main Screen — Missing**
+- Pathao `13_shop_screen_bottom.png`: horizontal product cards with percent-off badges under "Shops you'll love" and "Products you'll love" sections
+- Current `marketplace_screen.dart` only has shop/vendor listing, no product-level discovery surface
 
----
+**10. Buyer Order Actions — Return / Request Again / Rate**
+- Pathao `04_activity_screen_bottom.png`: each activity card has an action row: **Return | Request Again | RATE NOW**
+- `activity_screen.dart` `_ActivityCard` has a generic action row via `TextButton` but does not implement these three specific CTAs for orders
 
-### 4. **Activity / History Screen**
-**From:** `04_activity_screen.png`
+**11. Promotions Tab Always Empty**
+- `notifications_screen.dart` Promotions tab filters `!{'like','comment','follow'}` — always zero items
+- `AppNotification.type` only ever receives `'like'|'comment'|'follow'` from Supabase
+- Backend needs a `'promo'` notification type or the tab needs a separate promotions feed query
 
-Timeline cards grouped by date, with status dots, price, and action row (Return / Request Again / Rate Now). Horizontal service chips at top.
-
-**Adapt for PetFolio:**
-- Unified `/activity` screen pulling from: marketplace orders + appointments + care logs + matches
-- Filter chips: `All | Orders | Appointments | Care | Matches`
-- Card: date, type icon, summary, status dot, action row ("Reorder" / "Book Again" / "View Record")
-
----
-
-### 5. **Inbox with Segmented Tabs**
-**From:** `05_inbox_screen.png`, `05_inbox_promotions.png`
-
-Two tabs — **Updates** (system/FCM alerts) and **Promotions** (marketplace deals). Red underline active tab. 3D illustrated empty state.
-
-PetFolio already has `notifications_screen.dart` — enhance it:
-- Add tab segmentation: `Updates | Promotions`
-- `Updates` = FCM notifications (care reminders, match alerts, order updates)
-- `Promotions` = marketplace promo banners
-- 3D pet-themed illustrated empty state (PetFolio already has `petfolio_empty_state.dart`)
+**12. Home Hero — No Loyalty Points / Wallet Balance Chip**
+- Pathao `01_home_screen_top.png`: "152 Points" pill + "Pathao Pay ৳0" balance banner in hero area
+- `hub_home_screen.dart` `_WaveHeroSection` shows streak + tasks but no XP/points metric visible to the user at a glance
 
 ---
 
-### 6. **Profile: Loyalty/Level Tier Card**
-**From:** `06_profile_screen.png`
+### P3 — Low-Impact / Polish Gaps
 
-Gold tier card with avatar, rating, progress bar to next level, "Point deals" and "Partner benefits" quick links.
+**13. Missing `smooth_page_indicator` for carousels**
+- Product detail carousel (`_ProductHeroCarousel`) and marketplace hero carousel both use manual dot indicators built with `Container` + `AnimationController`
+- `smooth_page_indicator` (pub.dev) provides `WormEffect`, `JumpingDotEffect`, `ScaleEffect` — animated, accessible, zero-boilerplate
 
-**Adapt for PetFolio:**
-- Pet level card at top of `/pets/:id` or Settings — driven by `features/care/data/models/pet_level.dart` + `pet_awards_provider.dart`
-- Progress bar: current XP → next level
-- Quick links: "Care streak", "Achievements"
-- Already has: `gamified_care_ui.dart`, `pf_achievement_tile.dart`, `pf_stat_tile.dart`
+**14. Missing `shimmer` for skeleton loaders**
+- `lib/core/widgets/skeleton_loader.dart` exists but uses plain grey `Container`s — no shimmer gradient sweep
+- `shimmer` package (pub.dev) provides `Shimmer.fromColors()` — the standard expectation for loading states in 2025 apps
 
----
+**15. Missing `flutter_animate` for stagger-in effects**
+- No package for staggered list-item animations anywhere in the codebase (`flutter_animate` not in `pubspec.yaml`)
+- Pathao and all M3E reference apps use stagger-in (each card fades + slides in 80ms apart) on list reveals
+- `flutter_animate` provides `.animate().fadeIn().slideY()` with chainable delays; minimal boilerplate
 
-### 7. **Marketplace: Shop Catalog Screen**
-**From:** `13_shop_screen.png`
+**16. Missing `lottie` for empty state illustrations**
+- Pathao `05_inbox_screen.png`: animated 3D mailbox illustration for empty inbox
+- Petfolio `PetfolioEmptyState` uses an `Icon` — flat, non-animated
+- `lottie` package enables JSON-driven animations from LottieFiles without bundling video
 
-Search pill → hero carousel with pagination dots → Category icons row → countdown promo banner → "Shops you'll love" vendor list.
+**17. `RoundedSuperellipseBorder` (M3 Expressive squircle shape) — Not used**
+- M3 Expressive spec ([Building with M3 Expressive](https://m3.material.io/blog/building-with-m3-expressive)) mandates superellipse ("squircle") corners on cards, sheets, FABs
+- Flutter 3.27+ ships `RoundedSuperellipseBorder` natively; Petfolio uses `RoundedRectangleBorder` everywhere
+- `PfCard`, `_SectionCard` in cart, `_ActivityCard` — all should migrate to `RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(20))`
 
-PetFolio's `marketplace_screen.dart` needs:
-- Full-width search pill at top
-- Hero banner carousel (promotions/featured)
-- 3–4 category icons: `Food | Toys | Health | Grooming`
-- "Shops you'll love" section pulling from `shop_list_controller.dart`
-- Product cards from `product_card.dart` already exist
+**18. No Page Transition Spring Animations**
+- `GoRouter` uses the default `MaterialPage` transition; no `ZoomPageTransitionsBuilder` or `Curves.easeOutBack` / `ElasticOutCurve`
+- M3E motion spec: push transitions should use spatial springs (zoom + fade), not flat slide
+- Can be set globally in `ThemeData.pageTransitionsTheme`
 
----
+**19. `DynamicSchemeVariant.fidelity` Color Seeding — Not configured**
+- `app_theme.dart` uses a static `ColorScheme.fromSeed()`; Petfolio doesn't use `DynamicSchemeVariant.fidelity` or `.tonalSpot`
+- M3E recommends `DynamicSchemeVariant.fidelity` for richer, more saturated color mapping that preserves brand hues under dark mode
 
-### 8. **Food-Style Catalog → Marketplace Browse**
-**From:** `09_food_main_screen_home_address.png`
-
-"DELIVER TO" header + search + horizontal circular category icons + 2-col promo banners + vertical listing cards with rating/distance/discount tags.
-
-**Direct lift for `marketplace_screen.dart`:**
-- "Browsing for [Pet Name]" replacing "DELIVER TO"
-- Circular category icons (food photo style → pet product category icons)
-- Shop cards with: shop logo, distance, rating, discount badge, pet type tag
-
----
-
-### 9. **Product Details: Seller Row + Dual Sticky CTA**
-**From:** `16_product_details_screen.png`
-
-Seller avatar + name + category + chevron at top. Swipeable image carousel. Strikethrough original price + discount % badge + current price. Sticky footer: **Add to Cart** (outlined) + **Buy Now** (solid).
-
-PetFolio's `product_detail_screen.dart` needs:
-- Seller (shop) row with avatar linking to `shop_storefront_screen.dart`
-- Image carousel (if not already swipeable)
-- Price row with strikethrough + discount badge
-- Sticky dual CTA footer (already has cart/checkout logic via `cart_controller.dart`)
+**20. `m3e_buttons` / `m3e_expandable` — Not adopted**
+- Community packages ([m3e_buttons](https://pub.dev/packages/m3e_buttons), [m3e_expandable](https://pub.dev/packages/m3e_expandable)) provide spring-physics button press feedback and expand/collapse animations per the M3E spec
+- Current buttons use plain `FilledButton` with no tactile spring radius/shape animation on press
 
 ---
 
-### 10. **Product Customization Sheet**
-**From:** `17_product_customization_sheet.png`
+### Summary Table
 
-Bottom sheet sliding over product details. "Customize as per your choice" title. Radio variant options with COMPLETE badge on selected. `−` qty stepper `+`. Confirm button shows final price inline with strikethrough.
-
-PetFolio's marketplace has variant support in models — wire it to a sheet widget using `app_bottom_sheet.dart`.
-
----
-
-### 11. **Checkout: Stacked Section Cards**
-**From:** `18_checkout_screen.png`, `34_checkout_with_address.png`
-
-Each section (Deliver To, Products, Promo, Pay via) is a distinct white card on a gray background. Green "You are saving ৳X" banner above the sticky Place Order button. CTA is disabled until address is valid.
-
-PetFolio's `cart_screen.dart` / checkout flow needs this layout:
-- Section card: "Deliver To" (address picker)
-- Section card: "Your Products" (from `cart_line_item.dart`)
-- Section card: "Apply Promo Code" (green row)
-- Section card: "Pay via" (Stripe)
-- Green savings banner if any discount applies
-- Sticky "Place Order ৳{total}" CTA
-
----
-
-### 12. **Bottom Nav: Flat Bar with Top Indicator**
-**From:** All tab screens — `Home | Offers | Activity | Inbox`
-
-Pathao's nav: flat white bar, icon + label, **red horizontal bar above the active icon** (not a floating pill). Clean, no elevation.
-
-PetFolio currently uses a floating pill nav (in `app_shell.dart`). You could either:
-- **Keep current** floating pill (PetFolio's identity) but standardize the active accent color per-tab
-- Or offer a Pathao-style flat variant as an alternative
+| # | Area | Gap | Priority |
+|---|------|-----|----------|
+| 1 | Marketplace | Address management screen (entire feature missing) | P0 |
+| 2 | Marketplace | Receipt breakdown (delivery charge, item count, store discount) | P0 |
+| 3 | Marketplace | Shop intro/onboarding screen on first visit | P1 |
+| 4 | Marketplace | Offers/Promos screen (tab + filter chips + promo cards) | P1 |
+| 5 | Global | Settings/Profile screen (account, saved address, promos, refer) | P1 |
+| 6 | Navigation | Activity not reachable from Home quick actions | P1 |
+| 7 | Care | Filter chips (All/Medical/Nutrition/Grooming/Walk) | P1 |
+| 8 | Marketplace | "Show All" categories page | P2 |
+| 9 | Marketplace | "Products you'll love" discovery section | P2 |
+| 10 | Activity | Order action row (Return / Request Again / Rate) | P2 |
+| 11 | Notifications | Promotions tab has no data source | P2 |
+| 12 | Home | Loyalty points / XP chip in hero section | P2 |
+| 13 | Global | `smooth_page_indicator` for carousels | P3 |
+| 14 | Global | `shimmer` gradient for skeleton loaders | P3 |
+| 15 | Global | `flutter_animate` for stagger-in list animations | P3 |
+| 16 | Global | `lottie` for animated empty state illustrations | P3 |
+| 17 | Global (M3E) | `RoundedSuperellipseBorder` squircle shape on cards/sheets | P3 |
+| 18 | Global (M3E) | Spring page transition animations | P3 |
+| 19 | Global (M3E) | `DynamicSchemeVariant.fidelity` color seeding | P3 |
+| 20 | Global (M3E) | `m3e_buttons`/`m3e_expandable` tactile press feedback | P3 |
 
 ---
 
-## Implementation Priority Summary
+**Phase complete — please run `/remember` to save tokens before proceeding to the next phase.**
 
-| Priority | Pattern | PetFolio Target | Effort |
-|---|---|---|---|
-| 🔴 High | Bento Grid Hub Home | New `HubScreen` at `/home` | Medium |
-| 🔴 High | All Features Bottom Sheet | `AllFeaturesSheet` widget | Low |
-| 🔴 High | Marketplace Catalog Redesign | `marketplace_screen.dart` | Medium |
-| 🔴 High | Product Details Dual CTA | `product_detail_screen.dart` | Low |
-| 🔴 High | Checkout Stacked Cards | `cart_screen.dart` | Medium |
-| 🟡 Medium | Filter Chips (universal) | Care, Marketplace, Notifications | Low |
-| 🟡 Medium | Inbox Segmented Tabs | `notifications_screen.dart` | Low |
-| 🟡 Medium | Activity/History Screen | New `/activity` route | Medium |
-| 🟡 Medium | Product Customization Sheet | New bottom sheet widget | Low |
-| 🟢 Low | Loyalty/Level Tier Card | Profile/settings screen | Low |
-| 🟢 Low | Flat Bottom Nav Variant | `app_shell.dart` | Medium |
+Which gap(s) would you like to implement first?
 
-The most impactful single change is the **Hub Home + Bento Grid** — it transforms PetFolio from "an app you navigate by memory" into "a scannable launcher where every feature is one tap away." Everything else is polish layered on top.
-
-Want to start with a specific phase? I'd suggest Phase 1: Hub Home + All Features Sheet first since it changes the first impression most dramatically.
+Sources:
+- [Start building with Material 3 Expressive - Material Design](https://m3.material.io/blog/building-with-m3-expressive)
+- [smooth_page_indicator | Flutter package](https://pub.dev/packages/smooth_page_indicator)
+- [m3e_buttons | Flutter package](https://pub.dev/packages/m3e_buttons)
+- [m3e_expandable | Flutter package](https://pub.dev/packages/m3e_expandable)
+- [Shimmer Loading Effects in Flutter](https://blog.openreplay.com/shimmer-loading-effects-in-flutter/)

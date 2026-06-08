@@ -32,10 +32,20 @@ class CareScreen extends ConsumerStatefulWidget {
   ConsumerState<CareScreen> createState() => _CareScreenState();
 }
 
+enum _CareFilter { all, medical, nutrition, grooming, walk }
+
 class _CareScreenState extends ConsumerState<CareScreen> {
   bool _onboardingSuccessHandled = false;
-  // Set after onboarding completes; triggers background AI pre-warm in build().
   bool _shouldAutoTriggerAi = false;
+  _CareFilter _careFilter = _CareFilter.all;
+
+  static const _filterChips = [
+    (_CareFilter.all, 'All', '🐾'),
+    (_CareFilter.medical, 'Medical', '💊'),
+    (_CareFilter.nutrition, 'Nutrition', '🍖'),
+    (_CareFilter.grooming, 'Grooming', '✂️'),
+    (_CareFilter.walk, 'Walk', '🦮'),
+  ];
 
   @override
   void initState() {
@@ -247,7 +257,55 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                   .read(careDashboardProvider.notifier)
                                   .selectDate(d),
                             ),
-                            const SizedBox(height: 24.0),
+                            const SizedBox(height: 16.0),
+                            // ── Category filter chips ──────────────────────
+                            SizedBox(
+                              height: 38,
+                              child: ListView(
+                                scrollDirection: Axis.horizontal,
+                                children: _filterChips.map((chip) {
+                                  final active = _careFilter == chip.$1;
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        HapticFeedback.selectionClick();
+                                        setState(() => _careFilter = chip.$1);
+                                      },
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 160),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 14, vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: active ? AppColors.poppy : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(999),
+                                          border: Border.all(
+                                            color: active ? AppColors.poppy : pt.line,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(chip.$3, style: const TextStyle(fontSize: 13)),
+                                            const SizedBox(width: 5),
+                                            Text(
+                                              chip.$2,
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w700,
+                                                color: active ? Colors.white : pt.ink950,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                            const SizedBox(height: 16.0),
                             // ── TODAY'S QUESTS header with AI refresh ──────
                             Padding(
                               padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
@@ -328,6 +386,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                               petName: activePet.name,
                               species: species,
                               onAddTask: openAddSheet,
+                              categoryFilter: _careFilter,
                             ),
                             const SizedBox(height: 28),
                             PfSectionTitle(
@@ -690,6 +749,7 @@ class _DailyTasksDashboard extends ConsumerStatefulWidget {
     required this.petName,
     required this.species,
     this.onAddTask,
+    this.categoryFilter = _CareFilter.all,
   });
 
   final DailyRoutineState state;
@@ -697,6 +757,7 @@ class _DailyTasksDashboard extends ConsumerStatefulWidget {
   final String petName;
   final PetSpecies species;
   final VoidCallback? onAddTask;
+  final _CareFilter categoryFilter;
 
   @override
   ConsumerState<_DailyTasksDashboard> createState() => _DailyTasksDashboardState();
@@ -707,18 +768,34 @@ class _DailyTasksDashboardState extends ConsumerState<_DailyTasksDashboard> {
 
   static const _tabLabels = ['Daily', 'Weekly', 'Less Often'];
 
-  List<List<dbtask.CareTask>> _groupTasks(List<dbtask.CareTask> tasks) => [
-    tasks.where((t) =>
-      t.frequency == dbtask.CareFrequency.daily ||
-      t.frequency == dbtask.CareFrequency.twiceDaily ||
-      t.frequency == dbtask.CareFrequency.once ||
-      t.isLogDerived).toList(),
-    tasks.where((t) => t.frequency == dbtask.CareFrequency.weekly).toList(),
-    tasks.where((t) =>
-      t.frequency == dbtask.CareFrequency.biweekly ||
-      t.frequency == dbtask.CareFrequency.monthly ||
-      t.frequency == dbtask.CareFrequency.asNeeded).toList(),
-  ];
+  List<dbtask.CareTask> _applyFilter(List<dbtask.CareTask> tasks) {
+    final f = widget.categoryFilter;
+    if (f == _CareFilter.all) return tasks;
+    final types = switch (f) {
+      _CareFilter.medical   => {dbtask.CareTaskType.medication, dbtask.CareTaskType.vetVisit},
+      _CareFilter.nutrition => {dbtask.CareTaskType.feeding},
+      _CareFilter.grooming  => {dbtask.CareTaskType.grooming, dbtask.CareTaskType.bath, dbtask.CareTaskType.nailTrim, dbtask.CareTaskType.dental},
+      _CareFilter.walk      => {dbtask.CareTaskType.walk},
+      _CareFilter.all       => <dbtask.CareTaskType>{},
+    };
+    return tasks.where((t) => types.contains(t.taskType)).toList();
+  }
+
+  List<List<dbtask.CareTask>> _groupTasks(List<dbtask.CareTask> tasks) {
+    final filtered = _applyFilter(tasks);
+    return [
+      filtered.where((t) =>
+        t.frequency == dbtask.CareFrequency.daily ||
+        t.frequency == dbtask.CareFrequency.twiceDaily ||
+        t.frequency == dbtask.CareFrequency.once ||
+        t.isLogDerived).toList(),
+      filtered.where((t) => t.frequency == dbtask.CareFrequency.weekly).toList(),
+      filtered.where((t) =>
+        t.frequency == dbtask.CareFrequency.biweekly ||
+        t.frequency == dbtask.CareFrequency.monthly ||
+        t.frequency == dbtask.CareFrequency.asNeeded).toList(),
+    ];
+  }
 
   List<dbtask.CareTask> _sortGroup(List<dbtask.CareTask> tasks) =>
       [...tasks]..sort((a, b) {

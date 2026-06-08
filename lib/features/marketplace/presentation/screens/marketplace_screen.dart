@@ -11,6 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'shop_intro_screen.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../data/models/cart_item.dart';
@@ -20,6 +21,8 @@ import '../controllers/cart_controller.dart';
 import '../controllers/checkout_controller.dart';
 import '../controllers/product_list_controller.dart';
 import '../controllers/shop_list_controller.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import '../widgets/product_glyph.dart';
 import '../widgets/web_checkout_resume_listener.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
 
@@ -52,14 +55,22 @@ class MarketplaceScreen extends ConsumerStatefulWidget {
 }
 
 class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with TickerProviderStateMixin {
-  ProductCategory _selectedCat = ProductCategory.all;
   final List<FlyToCartItem> _flyingItems = [];
 
   @override
   void initState() {
     super.initState();
-    if (kIsWeb) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _handleStripeCancelQuery());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (kIsWeb) _handleStripeCancelQuery();
+      _maybeShowIntro();
+    });
+  }
+
+  Future<void> _maybeShowIntro() async {
+    if (!mounted) return;
+    final should = await ShopIntroScreen.shouldShow();
+    if (should && mounted) {
+      context.push('/marketplace/intro');
     }
   }
 
@@ -113,17 +124,19 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isWide = screenWidth >= ResponsiveLayout.mobileMax;
+    final selectedCat = ref.watch(selectedCategoryProvider);
 
     Widget bodyContent = Column(
       children: [
         _MarketHeader(onCart: _openCart),
         _CategoryChips(
-          selected: _selectedCat,
-          onSelected: (cat) => setState(() => _selectedCat = cat),
+          selected: selectedCat,
+          onSelected: (cat) =>
+              ref.read(selectedCategoryProvider.notifier).select(cat),
         ),
         Expanded(
           child: _ShopBody(
-            selectedCat: _selectedCat,
+            selectedCat: selectedCat,
             onProductTap: (p) => context.push('/marketplace/product/${p.id}', extra: p),
             onAdd: _addToCart,
           ),
@@ -418,9 +431,40 @@ class _CategoryChips extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _cats.length,
+        itemCount: _cats.length + 1,
         separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (_, i) {
+          if (i == _cats.length) {
+            return GestureDetector(
+              onTap: () => context.push('/marketplace/categories'),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 240),
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(22),
+                      color: Color.lerp(pt.ink950, Theme.of(context).colorScheme.surface, 0.88),
+                      border: Border.all(color: pt.line, width: 1.5),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text('⊞', style: TextStyle(fontSize: 26)),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'All',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: pt.ink950,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
           final cat = _cats[i];
           final isActive = cat.id == selected;
           return GestureDetector(
@@ -571,6 +615,13 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
             if (widget.selectedCat == ProductCategory.all)
               const _DeliveryStrip(),
 
+            if (widget.selectedCat == ProductCategory.all)
+              _YoullLoveSection(
+                allProducts: ref.watch(productListProvider).value ?? [],
+                onTap: widget.onProductTap,
+                onAdd: widget.onAdd,
+              ),
+
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -640,6 +691,217 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
           ],
         );
       },
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// "Products you'll love" discovery section
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _YoullLoveSection extends StatelessWidget {
+  const _YoullLoveSection({
+    required this.allProducts,
+    required this.onTap,
+    required this.onAdd,
+  });
+
+  final List<Product> allProducts;
+  final ValueChanged<Product> onTap;
+  final Function(Product, Rect?) onAdd;
+
+  List<Product> _pick(List<Product> all) {
+    if (all.isEmpty) return [];
+    final byCategory = <ProductCategory, List<Product>>{};
+    for (final p in all) {
+      byCategory.putIfAbsent(p.category, () => []).add(p);
+    }
+    final result = <Product>[];
+    final cats = byCategory.keys.toList();
+    for (var i = 0; i < cats.length && result.length < 8; i++) {
+      final bucket = byCategory[cats[i]]!;
+      result.add(bucket[i % bucket.length]);
+    }
+    return result;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final picks = _pick(allProducts);
+    if (picks.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+
+    return SliverToBoxAdapter(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Products you\'ll love',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: pt.ink950,
+                        ),
+                      ),
+                      Text(
+                        'Curated picks across all categories',
+                        style: TextStyle(fontSize: 12, color: pt.ink500),
+                      ),
+                    ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/marketplace/categories'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.poppy,
+                    textStyle: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text('Browse all ›'),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 220,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: picks.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 10),
+              itemBuilder: (_, i) => _YoullLoveTile(
+                product: picks[i],
+                onTap: () => onTap(picks[i]),
+                onAdd: onAdd,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+}
+
+class _YoullLoveTile extends StatelessWidget {
+  const _YoullLoveTile({
+    required this.product,
+    required this.onTap,
+    required this.onAdd,
+  });
+
+  final Product product;
+  final VoidCallback onTap;
+  final Function(Product, Rect?) onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final price = '\$${(product.priceCents / 100).toStringAsFixed(2)}';
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 140,
+        decoration: BoxDecoration(
+          color: isDark ? pt.surface2 : Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [
+            BoxShadow(color: Color(0x0A000000), blurRadius: 10, offset: Offset(0, 3)),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+              child: Container(
+                height: 110,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      product.gradientStart.withAlpha(isDark ? 80 : 50),
+                      product.gradientEnd.withAlpha(isDark ? 40 : 25),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: product.imageUrls.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: product.imageUrls.first,
+                        fit: BoxFit.cover,
+                        width: 140,
+                        height: 110,
+                      )
+                    : ProductGlyph(glyphType: product.glyphType, size: 52),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: pt.ink950,
+                      height: 1.3,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        price,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.poppy,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => onAdd(product, null),
+                        child: Container(
+                          width: 26,
+                          height: 26,
+                          decoration: BoxDecoration(
+                            color: AppColors.poppy,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.add_rounded, size: 16, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -736,24 +998,17 @@ class _HeroCarouselState extends State<_HeroCarousel> {
           ),
         ),
         const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(_slides.length, (i) {
-            final active = i == _currentPage;
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 280),
-              curve: Curves.easeOutCubic,
-              width: active ? 20 : 6,
-              height: 6,
-              margin: const EdgeInsets.symmetric(horizontal: 3),
-              decoration: BoxDecoration(
-                color: active
-                    ? AppColors.tangerine
-                    : AppColors.ink300.withAlpha(110),
-                borderRadius: BorderRadius.circular(3),
-              ),
-            );
-          }),
+        SmoothPageIndicator(
+          controller: _pageCtrl,
+          count: _slides.length,
+          effect: const ExpandingDotsEffect(
+            activeDotColor: AppColors.tangerine,
+            dotColor: AppColors.line,
+            dotHeight: 6,
+            dotWidth: 6,
+            expansionFactor: 3,
+            spacing: 6,
+          ),
         ),
         const SizedBox(height: 4),
       ],

@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'data/models/marketplace_order.dart';
 import 'data/models/product.dart';
 import 'presentation/screens/cart_screen.dart';
+import 'presentation/screens/shop_intro_screen.dart';
 import 'presentation/screens/customer/buyer_order_detail_screen.dart';
 import 'presentation/screens/customer/buyer_order_list_screen.dart';
 import 'presentation/screens/customer/shop_storefront_screen.dart';
 import 'presentation/screens/order_confirmation_screen.dart';
+import 'presentation/screens/marketplace_categories_screen.dart';
 import 'presentation/screens/product_detail_screen.dart';
 import 'presentation/screens/vendor/add_edit_product_screen.dart';
 import 'presentation/screens/vendor/edit_shop_screen.dart';
@@ -20,6 +22,16 @@ import 'presentation/screens/vendor/vendor_order_queue_screen.dart';
 import 'presentation/screens/vendor/vendor_product_list_screen.dart';
 
 List<RouteBase> marketplaceRoutes(GlobalKey<NavigatorState> rootKey) => [
+  GoRoute(
+    parentNavigatorKey: rootKey,
+    path: '/marketplace/intro',
+    builder: (_, _) => const ShopIntroScreen(),
+  ),
+  GoRoute(
+    parentNavigatorKey: rootKey,
+    path: '/marketplace/categories',
+    builder: (_, _) => const MarketplaceCategoriesScreen(),
+  ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/product/:id',

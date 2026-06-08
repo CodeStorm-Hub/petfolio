@@ -4,6 +4,22 @@ import '../../data/models/product.dart';
 import '../../data/repositories/product_repository.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Selected category (shared across marketplace + categories screen)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class SelectedCategoryNotifier extends Notifier<ProductCategory> {
+  @override
+  ProductCategory build() => ProductCategory.all;
+
+  void select(ProductCategory cat) => state = cat;
+}
+
+final selectedCategoryProvider =
+    NotifierProvider<SelectedCategoryNotifier, ProductCategory>(
+  SelectedCategoryNotifier.new,
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Provider
 // ─────────────────────────────────────────────────────────────────────────────
 

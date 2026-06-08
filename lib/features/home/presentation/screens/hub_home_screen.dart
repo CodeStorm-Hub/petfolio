@@ -8,7 +8,9 @@ import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/widgets.dart';
 import 'package:petfolio/features/care/data/models/care_task.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_dashboard_controller.dart';
+import 'package:petfolio/features/care/data/models/pet_level.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_streak_stream_provider.dart';
+import 'package:petfolio/features/care/presentation/controllers/pet_awards_provider.dart';
 import 'package:petfolio/features/pet_profile/data/models/pet.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
 
@@ -370,7 +372,7 @@ class _WaveHeroSection extends StatelessWidget {
 // Pet Hero Card — white card floating at the wave boundary
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _PetHeroCard extends StatelessWidget {
+class _PetHeroCard extends ConsumerWidget {
   const _PetHeroCard({
     required this.pet,
     required this.streak,
@@ -390,7 +392,12 @@ class _PetHeroCard extends StatelessWidget {
   final Color accentColor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final awardsAsync = ref.watch(petAwardsSummaryProvider(pet.id));
+    final petLevel = awardsAsync.maybeWhen(
+      data: (a) => PetLevel.fromXp(a.totalXp),
+      orElse: () => null,
+    );
     final ageYears = pet.ageInYears;
     final agePart = ageYears != null
         ? '$ageYears ${ageYears == 1 ? 'year' : 'years'}'
@@ -456,49 +463,75 @@ class _PetHeroCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          // Streak pill (primary) or task progress (fallback)
-          if (streak > 0)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.sunnySoftD : AppColors.sunnySoft,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(
-                  color: AppColors.sunny.withAlpha(isDark ? 80 : 55),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('🔥', style: TextStyle(fontSize: 14)),
-                  const SizedBox(width: 4),
-                  Text(
-                    '$streak',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.sunny700,
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // Streak pill (primary) or task progress (fallback)
+              if (streak > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.sunnySoftD : AppColors.sunnySoft,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: AppColors.sunny.withAlpha(isDark ? 80 : 55),
                     ),
                   ),
-                ],
-              ),
-            )
-          else if (totalTasks > 0)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-              decoration: BoxDecoration(
-                color: accentColor.withAlpha(isDark ? 45 : 28),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                '$doneTasks/$totalTasks',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  color: accentColor,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('🔥', style: TextStyle(fontSize: 12)),
+                      const SizedBox(width: 3),
+                      Text(
+                        '$streak',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.sunny700,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else if (totalTasks > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: accentColor.withAlpha(isDark ? 45 : 28),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    '$doneTasks/$totalTasks',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: accentColor,
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              if (petLevel != null) ...[
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFD4AF37), Color(0xFFF5D56E)],
+                    ),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    'Lv ${petLevel.level} · ${petLevel.currentXp} XP',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );
@@ -1065,6 +1098,14 @@ class _QuickActionsRow extends StatelessWidget {
         color: AppColors.sky,
         soft: isDark ? AppColors.skySoftD : AppColors.skySoft,
         route: '/appointments',
+      ),
+      _QuickAction(
+        icon: Icons.receipt_long_rounded,
+        label: 'My Activity',
+        sub: 'Orders & appointments',
+        color: AppColors.tangerine,
+        soft: isDark ? AppColors.tangerineSoftD : AppColors.tangerineSoft,
+        route: '/activity',
       ),
     ];
 

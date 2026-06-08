@@ -5,8 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/petfolio_empty_state.dart';
 import '../../data/models/cart_item.dart';
+import '../controllers/address_controller.dart';
+import '../widgets/address_sheet.dart';
 import '../../data/models/marketplace_order.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/checkout_controller.dart';
@@ -180,72 +183,93 @@ class _CartHeader extends StatelessWidget {
 // Deliver To card — shared across all vendor groups
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _DeliverToCard extends StatelessWidget {
+class _DeliverToCard extends ConsumerWidget {
   const _DeliverToCard({required this.isDark});
   final bool isDark;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selected = ref.watch(selectedAddressProvider);
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+
     return _SectionCard(
       isDark: isDark,
       child: InkWell(
         onTap: () {
           HapticFeedback.selectionClick();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Address management coming soon'),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              duration: const Duration(seconds: 2),
-            ),
-          );
+          AddressSheet.show(context);
         },
         borderRadius: BorderRadius.circular(18),
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.mint.withAlpha(isDark ? 50 : 25),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.location_on_rounded,
-                  size: 20,
-                  color: AppColors.mint,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'DELIVER TO',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.7,
-                        color: AppColors.ink500,
-                      ),
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.mint.withAlpha(isDark ? 50 : 25),
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Add your delivery address',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.ink950,
-                      ),
+                    child: const Icon(
+                      Icons.location_on_rounded,
+                      size: 20,
+                      color: AppColors.mint,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'DELIVER TO',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.7,
+                            color: pt.ink500,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          selected != null
+                              ? selected.displayLine1
+                              : 'Add your delivery address',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: pt.ink950,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    selected != null ? 'Change' : 'Add',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.poppy,
+                    ),
+                  ),
+                ],
               ),
-              const Icon(Icons.chevron_right_rounded, color: AppColors.ink500, size: 20),
+              if (selected != null) ...[
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.only(left: 54),
+                  child: Text(
+                    selected.displayLine2,
+                    style: TextStyle(fontSize: 12, color: pt.ink500),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -620,22 +644,46 @@ class _VendorCheckoutSectionState
 
         const SizedBox(height: 8),
 
-        // ── Order summary card ────────────────────────────────────────────
+        // ── Receipt card ─────────────────────────────────────────────────
         _SectionCard(
           isDark: widget.isDark,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const Text(
+                  'Receipt',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.ink950,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _SumRow(
+                  label: 'Total item price (${shopItems.fold<int>(0, (s, i) => s + i.quantity)} items)',
+                  value: '\$${((subtotalCents + shopSavingsCents) / 100).toStringAsFixed(2)}',
+                  labelColor: AppColors.ink500,
+                ),
+                if (shopSavingsCents > 0) ...[
+                  const SizedBox(height: 6),
+                  _SumRow(
+                    label: 'Store Discount',
+                    value: '- \$${(shopSavingsCents / 100).toStringAsFixed(2)}',
+                    valueColor: AppColors.poppy,
+                  ),
+                ],
+                const SizedBox(height: 6),
                 _SumRow(
                   label: 'Subtotal',
                   value: '\$${(subtotalCents / 100).toStringAsFixed(2)}',
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 _SumRow(
-                  label: 'Delivery',
+                  label: 'Delivery Charge',
                   value: deliveryCents == 0 ? 'Free' : '\$${(deliveryCents / 100).toStringAsFixed(2)}',
-                  valueColor: AppColors.mint700,
+                  valueColor: deliveryCents == 0 ? AppColors.mint700 : null,
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
@@ -796,6 +844,7 @@ class _SumRow extends StatelessWidget {
     this.bold = false,
     this.valueFontSize = 14,
     this.valueColor,
+    this.labelColor,
   });
 
   final String label;
@@ -803,6 +852,7 @@ class _SumRow extends StatelessWidget {
   final bool bold;
   final double valueFontSize;
   final Color? valueColor;
+  final Color? labelColor;
 
   @override
   Widget build(BuildContext context) {
@@ -814,7 +864,7 @@ class _SumRow extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
-            color: bold ? AppColors.ink950 : AppColors.ink500,
+            color: labelColor ?? (bold ? AppColors.ink950 : AppColors.ink500),
           ),
         ),
         Text(
