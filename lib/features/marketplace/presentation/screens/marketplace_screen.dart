@@ -1,10 +1,13 @@
 
 
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -560,7 +563,10 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
           slivers: [
             if (widget.selectedCat == ProductCategory.all)
               const SliverToBoxAdapter(
-                child: RepaintBoundary(child: _HeroBanner()),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(11, 8, 11, 0),
+                  child: RepaintBoundary(child: _HeroCarousel()),
+                ),
               ),
             if (widget.selectedCat == ProductCategory.all)
               const _DeliveryStrip(),
@@ -638,69 +644,216 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
   }
 }
 
-class _HeroBanner extends StatelessWidget {
-  const _HeroBanner();
+// ─────────────────────────────────────────────────────────────────────────────
+// Hero Carousel — auto-scrolling promo slides with dot indicator
+// ─────────────────────────────────────────────────────────────────────────────
+
+typedef _Slide = ({
+  String eyebrow,
+  String title,
+  String sub,
+  String emoji,
+  Color gradStart,
+  Color gradEnd,
+});
+
+class _HeroCarousel extends StatefulWidget {
+  const _HeroCarousel();
+
+  @override
+  State<_HeroCarousel> createState() => _HeroCarouselState();
+}
+
+class _HeroCarouselState extends State<_HeroCarousel> {
+  late final PageController _pageCtrl;
+  int _currentPage = 0;
+  Timer? _timer;
+
+  static const List<_Slide> _slides = [
+    (
+      eyebrow: 'MEMBERS ONLY',
+      title: '20% off all\ntreats this week',
+      sub: 'Limited time',
+      emoji: '🦴',
+      gradStart: AppColors.poppy,
+      gradEnd: AppColors.tangerine,
+    ),
+    (
+      eyebrow: 'NEW ARRIVALS',
+      title: 'Premium beds\nfor every pet',
+      sub: 'Comfort redefined',
+      emoji: '🛏️',
+      gradStart: AppColors.sky,
+      gradEnd: AppColors.lilac,
+    ),
+    (
+      eyebrow: 'FLASH SALE',
+      title: 'Toys up to\n40% off today',
+      sub: 'Limited stock',
+      emoji: '🎾',
+      gradStart: AppColors.mint,
+      gradEnd: AppColors.sky,
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pageCtrl = PageController(viewportFraction: 0.92);
+    _timer = Timer.periodic(const Duration(milliseconds: 3600), (_) {
+      if (!mounted || !_pageCtrl.hasClients) return;
+      final next = (_currentPage + 1) % _slides.length;
+      _pageCtrl.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOutCubic,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColors.poppy, AppColors.tangerine],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: 164,
+          child: PageView.builder(
+            controller: _pageCtrl,
+            onPageChanged: (i) => setState(() => _currentPage = i),
+            itemCount: _slides.length,
+            itemBuilder: (_, i) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              child: _PromoCard(slide: _slides[i]),
+            ),
           ),
-          boxShadow: [BoxShadow(color: AppColors.poppy.withAlpha(128), blurRadius: 30, spreadRadius: -12, offset: const Offset(0, 14))],
         ),
-        padding: const EdgeInsets.all(18),
-        clipBehavior: Clip.hardEdge,
-        child: Stack(
-          children: [
-            Positioned(
-              right: -20,
-              top: -20,
-              child: Opacity(
-                opacity: 0.18,
-                child: Text('🐾', style: TextStyle(fontSize: 50)),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(_slides.length, (i) {
+            final active = i == _currentPage;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 280),
+              curve: Curves.easeOutCubic,
+              width: active ? 20 : 6,
+              height: 6,
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              decoration: BoxDecoration(
+                color: active
+                    ? AppColors.tangerine
+                    : AppColors.ink300.withAlpha(110),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            );
+          }),
+        ),
+        const SizedBox(height: 4),
+      ],
+    );
+  }
+}
+
+class _PromoCard extends StatelessWidget {
+  const _PromoCard({required this.slide});
+  final _Slide slide;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(26),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [slide.gradStart, slide.gradEnd],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: slide.gradStart.withAlpha(85),
+            blurRadius: 22,
+            offset: const Offset(0, 8),
+            spreadRadius: -4,
+          ),
+        ],
+      ),
+      clipBehavior: Clip.hardEdge,
+      child: Stack(
+        children: [
+          // Background watermark emoji
+          Positioned(
+            right: -18,
+            top: -14,
+            child: Opacity(
+              opacity: 0.18,
+              child: Text(slide.emoji, style: const TextStyle(fontSize: 110)),
+            ),
+          ),
+          // Foreground emoji illustration (right side, slight tilt)
+          Positioned(
+            right: 14,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: Transform.rotate(
+                angle: -0.18,
+                child: Text(slide.emoji, style: const TextStyle(fontSize: 76)),
               ),
             ),
-            Row(
+          ),
+          // Text content (left side, avoids emoji area)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 110, 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('FOR MEMBERS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white70, letterSpacing: 0.5)),
-                      const SizedBox(height: 4),
-                      const Text('20% off treats\nthis week 🦴', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Colors.white, height: 1.1)),
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                        decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface, borderRadius: BorderRadius.circular(999)),
-                        child: const Text('Claim', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.poppy700)),
-                      ),
-                    ],
+                Text(
+                  slide.eyebrow,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white70,
+                    letterSpacing: 1.0,
                   ),
                 ),
-                Transform.translate(
-                  offset: const Offset(0, 0),
-                  child: Transform.rotate(
-                    angle: -0.2, // -12 deg approx
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        boxShadow: [BoxShadow(color: Color(0x33000000), blurRadius: 16, offset: Offset(0, 8))],
-                      ),
-                      child: const Text('🦴', style: TextStyle(fontSize: 80)),
+                const SizedBox(height: 6),
+                Text(
+                  slide.title,
+                  style: GoogleFonts.sora(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    'Shop Now →',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: slide.gradStart,
                     ),
                   ),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -734,127 +887,179 @@ class _NewProductTileState extends State<_NewProductTile> {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isHot = widget.product.rating != null && widget.product.rating! >= 4.5;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: widget.onTap,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(22),
         child: Container(
-        decoration: BoxDecoration(
-          color: pt.surface1,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: pt.line),
-          boxShadow: const [BoxShadow(color: Color(0x0C000000), blurRadius: 8, offset: Offset(0, 2))],
-        ),
-        clipBehavior: Clip.hardEdge,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              height: 130,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color.lerp(widget.product.gradientStart, Colors.white, 0.7)!,
-                    Color.lerp(widget.product.gradientStart, Colors.white, 0.3)!,
+          decoration: BoxDecoration(
+            color: isDark ? pt.surface2 : Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: isDark ? Border.all(color: Colors.white.withAlpha(12)) : null,
+            boxShadow: isDark
+                ? [BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 14, offset: const Offset(0, 4), spreadRadius: -2)]
+                : [
+                    BoxShadow(color: AppColors.shadowE3L, blurRadius: 18, offset: const Offset(0, 6), spreadRadius: -3),
+                    BoxShadow(color: widget.product.gradientStart.withAlpha(18), blurRadius: 10, offset: const Offset(0, 3)),
                   ],
-                ),
-              ),
-              child: Stack(
-                children: [
-                  Center(
-                    child: AnimatedScale(
-                      scale: _popping ? 1.2 : 1.0,
-                      duration: const Duration(milliseconds: 280),
-                      curve: Curves.elasticOut,
-                      child: widget.product.imageUrls.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: widget.product.imageUrls.first,
-                            height: 100,
-                            fit: BoxFit.contain,
-                            cacheManager: petfolioWebImageCacheManager(),
-                            memCacheWidth: networkImageMemCacheWidth(
-                              context,
-                              100,
-                              maxPixels: webNetworkImageMemCacheThumb,
-                            ),
-                          )
-                        : const Text('🦴', style: TextStyle(fontSize: 60)),
-                    ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: pt.surface1,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.star_rounded, size: 12, color: AppColors.sunny),
-                          const SizedBox(width: 3),
-                          Text(widget.product.rating != null ? widget.product.rating!.toStringAsFixed(1) : '—', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: pt.ink950)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(widget.product.name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: pt.ink950, height: 1.2), maxLines: 2, overflow: TextOverflow.ellipsis),
-                    const SizedBox(height: 4),
-                    Text(widget.product.brand, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: pt.ink500)),
-                    const Spacer(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('\$${(widget.product.priceCents / 100).toStringAsFixed(2)}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: pt.ink950)),
-                        IconButton(
-                          key: ValueKey<String>('marketplace_add_${widget.product.id}'),
-                          onPressed: _handleAdd,
-                          icon: AnimatedScale(
-                            scale: _popping ? 1.15 : 1.0,
-                            duration: const Duration(milliseconds: 280),
-                            curve: Curves.elasticOut,
-                            child: Container(
-                              key: _btnKey,
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: widget.product.gradientStart,
-                                shape: BoxShape.circle,
-                                boxShadow: [BoxShadow(color: Color.lerp(widget.product.gradientStart, Colors.black, 0.5)!, offset: const Offset(0, 4))],
-                              ),
-                              alignment: Alignment.center,
-                              child: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
-                            ),
-                          ),
-                          style: IconButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: const Size(44, 44),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                        ),
+          ),
+          clipBehavior: Clip.hardEdge,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── Image area ────────────────────────────────────────────
+              SizedBox(
+                height: 130,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color.lerp(widget.product.gradientStart, Colors.white, isDark ? 0.2 : 0.72)!,
+                        Color.lerp(widget.product.gradientStart, Colors.white, isDark ? 0.05 : 0.38)!,
                       ],
                     ),
-                  ],
+                  ),
+                  child: Stack(
+                    children: [
+                      // Product image
+                      Center(
+                        child: AnimatedScale(
+                          scale: _popping ? 1.2 : 1.0,
+                          duration: const Duration(milliseconds: 280),
+                          curve: Curves.elasticOut,
+                          child: widget.product.imageUrls.isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: widget.product.imageUrls.first,
+                                  height: 100,
+                                  fit: BoxFit.contain,
+                                  cacheManager: petfolioWebImageCacheManager(),
+                                  memCacheWidth: networkImageMemCacheWidth(
+                                    context,
+                                    100,
+                                    maxPixels: webNetworkImageMemCacheThumb,
+                                  ),
+                                )
+                              : const Text('🦴', style: TextStyle(fontSize: 60)),
+                        ),
+                      ),
+                      // Rating pill — top left
+                      Positioned(
+                        top: 8,
+                        left: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: isDark ? pt.surface2 : Colors.white,
+                            borderRadius: BorderRadius.circular(999),
+                            boxShadow: [BoxShadow(color: Colors.black.withAlpha(18), blurRadius: 6, offset: const Offset(0, 2))],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.star_rounded, size: 11, color: AppColors.sunny),
+                              const SizedBox(width: 3),
+                              Text(
+                                widget.product.rating != null ? widget.product.rating!.toStringAsFixed(1) : '—',
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: pt.ink950),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // HOT badge — top right (high-rated products only)
+                      if (isHot)
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppColors.poppy,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: const Text(
+                              '🔥 HOT',
+                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+
+              // ── Product info ──────────────────────────────────────────
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.product.name,
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: pt.ink950, height: 1.25),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        widget.product.brand,
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: pt.ink500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const Spacer(),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            '\$${(widget.product.priceCents / 100).toStringAsFixed(2)}',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: pt.ink950),
+                          ),
+                          const Spacer(),
+                          GestureDetector(
+                            key: ValueKey<String>('marketplace_add_${widget.product.id}'),
+                            onTap: _handleAdd,
+                            child: AnimatedScale(
+                              scale: _popping ? 1.18 : 1.0,
+                              duration: const Duration(milliseconds: 280),
+                              curve: Curves.elasticOut,
+                              child: Container(
+                                key: _btnKey,
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: widget.product.gradientStart,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: widget.product.gradientStart.withAlpha(90),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                      spreadRadius: -2,
+                                    ),
+                                  ],
+                                ),
+                                alignment: Alignment.center,
+                                child: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

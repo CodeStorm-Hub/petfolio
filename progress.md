@@ -17,7 +17,18 @@
 - **`lib/core/widgets/app_shell.dart`** — Tab 0: `home_outlined/home_rounded`, label `Home`, eyebrow `HOME`; live `🔥 N` streak pill in header trailing actions
 
 ### Next step
-**Phase 2 — Marketplace Catalog Redesign**: hero carousel, search pill, category icons, product cards with sale badges.
+**Phase 3 — Product Details Dual CTA** (`product_detail_screen.dart`): sticky bottom bar with "Add to Cart" + "Buy Now" dual CTAs.
+
+---
+
+## 2026-06-09 — Phase 2: Marketplace Catalog Redesign ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+- **`_HeroCarousel`** — replaces static `_HeroBanner`; 3-slide `PageView` (viewportFraction: 0.92) with 3.6 s `Timer` auto-scroll, animated pill page-indicator dots; each `_PromoCard` has gradient bg, foreground emoji (tilted), eyebrow label, `GoogleFonts.sora` title, white CTA pill
+- **`_NewProductTile`** — M3 Expressive white elevated card: `Colors.white` bg (light) / `pt.surface2` (dark), no border in light mode, multi-layer shadow with per-product `gradientStart` glow; **`🔥 HOT` badge** (top-right) on products with `rating ≥ 4.5`; add-to-cart button upgraded with accent glow shadow
+- **Imports** — added `dart:async` (Timer) + `google_fonts`
 
 Phase complete — please run `/remember` to save tokens before proceeding to Phase 2.
 
