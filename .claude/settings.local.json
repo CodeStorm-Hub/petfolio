@@ -177,7 +177,9 @@
       "mcp__mobile-mcp__mobile_press_button",
       "mcp__mobile-mcp__mobile_type_keys",
       "Bash(adb -s emulator-5554 logcat -d --pid=22669 -t 30)",
-      "Bash(adb -s emulator-5554 logcat -d -t 50)"
+      "Bash(adb -s emulator-5554 logcat -d -t 50)",
+      "Skill(deep-research)",
+      "Skill(deep-research:*)"
     ]
   }
 }

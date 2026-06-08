@@ -1,5 +1,27 @@
 # Petfolio — Progress Log
 
+## 2026-06-08 — Pathao UI Redesign Phase 1: Hub Home + All Features Sheet ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+- **`lib/features/home/presentation/widgets/all_features_sheet.dart`** — Pathao-style bottom sheet with 10-feature 2-col grid; spring scale animation, dark mode, haptics
+- **`lib/features/home/presentation/screens/hub_home_screen.dart`** — Bento grid hub home replacing `PetProfileScreen` at `/home`:
+  - `_PromoBanner` — contextual CTA driven by live care streak + task progress
+  - 2×3 `SliverGrid`: `_CareTile` (streak pill + progress bar from Supabase realtime), 4× `_BentoTile` (Social/Match/Market/Vet), `_AllTile` (dark → AllFeaturesSheet)
+  - `_QuickActionsRow` — horizontal strip (Shop / Log task / Post moment / Book vet)
+  - `_SpotlightCarousel` — 4 gradient hero cards
+  - `_DealsSection` — filter chips + promo banner
+  - Fade-in `AnimationController`, `BouncingScrollPhysics`, wide `maxWidth: 640`
+- **`lib/core/navigation/app_shell_routes.dart`** — `/home` → `HubHomeScreen`
+- **`lib/core/widgets/app_shell.dart`** — Tab 0: `home_outlined/home_rounded`, label `Home`, eyebrow `HOME`; live `🔥 N` streak pill in header trailing actions
+
+### Next step
+**Phase 2 — Marketplace Catalog Redesign**: hero carousel, search pill, category icons, product cards with sale badges.
+
+Phase complete — please run `/remember` to save tokens before proceeding to Phase 2.
+
+---
 
 ## 2026-06-08 — Plan remainder: B7/B8/B10/E10 + polish
 

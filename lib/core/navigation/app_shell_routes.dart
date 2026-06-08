@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/care/presentation/screens/care_screen.dart';
 import '../../features/marketplace/presentation/screens/marketplace_screen.dart';
 import '../../features/matching/presentation/screens/matching_screen.dart';
-import '../../features/pet_profile/presentation/screens/pet_profile_screen.dart';
+import '../../features/home/presentation/screens/hub_home_screen.dart';
 import '../../features/social/presentation/screens/social_screen.dart';
 import '../widgets/app_shell.dart';
 import 'navigator_keys.dart';
@@ -15,7 +15,7 @@ ShellRoute appShellRoute() => ShellRoute(
         GoRoute(
           path: '/home',
           pageBuilder: (context, state) =>
-              const NoTransitionPage(child: PetProfileScreen()),
+              const NoTransitionPage(child: HubHomeScreen()),
         ),
         GoRoute(
           path: '/care',

@@ -140,3 +140,4 @@ pubspec.lock
 
 *.iml
 
+!pathao-app-ui/*

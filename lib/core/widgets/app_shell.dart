@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
@@ -14,6 +16,8 @@ import 'package:petfolio/features/marketplace/presentation/screens/marketplace_s
 import 'package:petfolio/features/matching/presentation/matching_navigation.dart';
 import 'package:petfolio/features/matching/presentation/widgets/match_preferences_sheet.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/core/providers/shell_scroll_provider.dart';
+import 'package:petfolio/features/care/presentation/controllers/care_streak_stream_provider.dart';
 import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 
 // ── Tab accent colors (matches design system pillar colors) ──────────────────
@@ -42,7 +46,7 @@ class AppShellDestination {
 
 // ── Shell destinations (single source of truth) ───────────────────────────────
 const appShellDestinations = [
-  AppShellDestination(icon: Icons.pets_outlined,       activeIcon: Icons.pets,                  label: 'Pets',   path: '/home'),
+  AppShellDestination(icon: Icons.home_outlined,       activeIcon: Icons.home_rounded,           label: 'Home',   path: '/home'),
   AppShellDestination(icon: Icons.local_fire_department_outlined, activeIcon: Icons.local_fire_department, label: 'Care',   path: '/care'),
   AppShellDestination(icon: Icons.favorite_border,     activeIcon: Icons.favorite,              label: 'Social', path: '/social'),
   AppShellDestination(icon: Icons.auto_awesome_outlined, activeIcon: Icons.auto_awesome,        label: 'Match',  path: '/matching'),
@@ -201,7 +205,7 @@ class AppShellHeader extends ConsumerWidget {
     final activePet = ref.watch(activePetControllerProvider);
 
     final eyebrows = [
-      'ACTIVE PET',
+      'HOME',
       'CARE',
       'PAWSFEED',
       'MATCH · NEARBY',
@@ -212,6 +216,39 @@ class AppShellHeader extends ConsumerWidget {
     switch (selectedIndex) {
       case 0:
         trailingActions = Row(children: [
+          Consumer(builder: (context, ref, _) {
+            final pet = ref.watch(activePetControllerProvider);
+            if (pet == null) return const SizedBox.shrink();
+            final streakAsync = ref.watch(careStreakRealtimeProvider(pet.id));
+            final streak = streakAsync.maybeWhen(
+              data: (s) => s.currentStreak,
+              orElse: () => 0,
+            );
+            if (streak == 0) return const SizedBox.shrink();
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0x38FFFFFF),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('🔥', style: TextStyle(fontSize: 13)),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$streak',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          const SizedBox(width: 8),
           _HeaderIconBtn(icon: Icons.notifications_rounded, onTap: () => context.push('/social/notifications')),
           const SizedBox(width: 8),
           _HeaderIconBtn(icon: Icons.settings_rounded, onTap: () => context.push('/pets/manage')),
@@ -302,66 +339,95 @@ class AppShellHeader extends ConsumerWidget {
     }
 
     final topPadding = MediaQuery.paddingOf(context).top;
-    return Container(
-      color: Colors.transparent,
-      height: topPadding + 76.0,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(18, topPadding + 8, 18, 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            GestureDetector(
-              onTap: () => PetSwitcherSheet.show(context),
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(56),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (activePet != null) ...[
-                      PetAvatar(
-                        imageUrl: activePet.avatarUrl,
-                        species: activePet.speciesEnum,
-                        size: PetAvatarSize.sm,
-                        showRing: true,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Home tab: scroll-driven glass effect using species accent — white text
+    // stays readable throughout because we tint with the same wave color.
+    final scrollProgress = selectedIndex == 0
+        ? ref.watch(homeScrollProgressProvider)
+        : 0.0;
+    final waveColor = activePet?.speciesEnum.resolvedAccent(isDark)
+        ?? AppColors.tangerine;
+    final bgColor = Color.lerp(
+      Colors.transparent,
+      waveColor.withAlpha(238), // ~93% opacity — content behind is fully masked
+      scrollProgress,
+    )!;
+    final blurSigma = 24.0 * scrollProgress;
+
+    final innerContent = Padding(
+      padding: EdgeInsets.fromLTRB(18, topPadding + 8, 18, 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            onTap: () => PetSwitcherSheet.show(context),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withAlpha(56),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (activePet != null) ...[
+                    PetAvatar(
+                      imageUrl: activePet.avatarUrl,
+                      species: activePet.speciesEnum,
+                      size: PetAvatarSize.sm,
+                      showRing: true,
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        eyebrows[selectedIndex],
+                        style: const TextStyle(
+                          fontSize: 9, fontWeight: FontWeight.w700,
+                          color: Colors.white, letterSpacing: 0.6,
+                        ),
                       ),
-                      const SizedBox(width: 10),
-                    ],
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
+                      Row(children: [
                         Text(
-                          eyebrows[selectedIndex],
+                          activePet?.name ?? (selectedIndex == 4 ? 'Market' : 'PetFolio'),
                           style: const TextStyle(
-                            fontSize: 9, fontWeight: FontWeight.w700,
-                            color: Colors.white, letterSpacing: 0.6,
+                            fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white,
                           ),
                         ),
-                        Row(children: [
-                          Text(
-                            activePet?.name ?? (selectedIndex == 4 ? 'Market' : 'PetFolio'),
-                            style: const TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
-                        ]),
-                      ],
-                    ),
-                  ],
-                ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
+                      ]),
+                    ],
+                  ),
+                ],
               ),
             ),
-            trailingActions,
-          ],
-        ),
+          ),
+          trailingActions,
+        ],
       ),
     );
+
+    Widget header = Container(
+      color: bgColor,
+      height: topPadding + 76.0,
+      child: innerContent,
+    );
+
+    if (scrollProgress > 0.01) {
+      header = ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+          child: header,
+        ),
+      );
+    }
+
+    return header;
   }
 }
 
