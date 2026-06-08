@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 import '../theme/app_theme.dart';
 
 class PetfolioEmptyState extends StatefulWidget {
   const PetfolioEmptyState({
     super.key,
-    required this.icon,
+    this.icon,
+    this.lottieAsset,
     required this.title,
     this.subtitle,
     this.action,
-  });
+  }) : assert(icon != null || lottieAsset != null,
+            'Provide either icon or lottieAsset');
 
-  final IconData icon;
+  final IconData? icon;
+
+  /// Path to a bundled Lottie JSON file (e.g. 'assets/lottie/empty_inbox.json').
+  /// When provided, a looping Lottie animation replaces the static icon.
+  final String? lottieAsset;
+
   final String title;
   final String? subtitle;
   final Widget? action;
@@ -79,7 +87,16 @@ class _PetfolioEmptyStateState extends State<PetfolioEmptyState>
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(widget.icon, size: 48, color: pt.ink300),
+                    if (widget.lottieAsset != null)
+                      Lottie.asset(
+                        widget.lottieAsset!,
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.contain,
+                        repeat: true,
+                      )
+                    else
+                      Icon(widget.icon!, size: 48, color: pt.ink300),
                     const SizedBox(height: 12),
                     Text(
                       widget.title,

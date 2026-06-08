@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../marketplace/data/models/promo.dart';
+import '../../../marketplace/presentation/controllers/promo_controller.dart';
 import '../../data/models/app_notification.dart';
 import '../controllers/notification_controller.dart';
 
@@ -48,12 +52,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
 
     final allNotifs = notificationsAsync.value ?? [];
 
-    // Updates = social activity; Promotions = deals/offers (future type)
     final updates = allNotifs
         .where((n) => const {'like', 'comment', 'follow'}.contains(n.type))
-        .toList();
-    final promotions = allNotifs
-        .where((n) => !const {'like', 'comment', 'follow'}.contains(n.type))
         .toList();
     final unreadCount = updates.where((n) => !n.isRead).length;
 
@@ -179,7 +179,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                   controller: _tabCtrl,
                   children: [
                     _UpdatesTab(notifications: updates, pt: pt),
-                    _PromotionsTab(notifications: promotions, pt: pt),
+                    _PromotionsTab(pt: pt),
                   ],
                 ),
               ),
@@ -222,45 +222,176 @@ class _UpdatesTab extends StatelessWidget {
       itemCount: notifications.length,
       separatorBuilder: (_, _) =>
           Divider(height: 1, color: pt.line, indent: 72),
-      itemBuilder: (_, i) =>
-          _NotificationTile(notification: notifications[i], pt: pt),
+      itemBuilder: (_, i) => _NotificationTile(
+        notification: notifications[i],
+        pt: pt,
+      )
+          .animate(delay: Duration(milliseconds: 30 * i))
+          .fadeIn(duration: 200.ms)
+          .slideX(begin: -0.04, end: 0, duration: 240.ms, curve: Curves.easeOutCubic),
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Promotions tab — marketplace deals and offers
+// Promotions tab — marketplace deals from promoListProvider
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _PromotionsTab extends StatelessWidget {
-  const _PromotionsTab({
-    required this.notifications,
-    required this.pt,
-  });
+class _PromotionsTab extends ConsumerWidget {
+  const _PromotionsTab({required this.pt});
 
-  final List<AppNotification> notifications;
   final PetfolioThemeExtension pt;
 
   @override
-  Widget build(BuildContext context) {
-    if (notifications.isEmpty) {
-      return const PetfolioEmptyState(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final promosAsync = ref.watch(promoListProvider);
+
+    return promosAsync.when(
+      loading: () => const Center(child: TailWagLoader()),
+      error: (_, _) => const PetfolioEmptyState(
         icon: Icons.local_offer_outlined,
         title: 'No promotions yet',
         subtitle:
             "Exclusive deals and offers from\nthe Petfolio marketplace will\nappear here.",
-      );
-    }
-
-    return ListView.separated(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.paddingOf(context).bottom + 16,
       ),
-      itemCount: notifications.length,
-      separatorBuilder: (_, _) =>
-          Divider(height: 1, color: pt.line, indent: 72),
-      itemBuilder: (_, i) =>
-          _NotificationTile(notification: notifications[i], pt: pt),
+      data: (promos) {
+        if (promos.isEmpty) {
+          return const PetfolioEmptyState(
+            icon: Icons.local_offer_outlined,
+            title: 'No promotions yet',
+            subtitle:
+                "Exclusive deals and offers from\nthe Petfolio marketplace will\nappear here.",
+          );
+        }
+        return ListView.separated(
+          padding: EdgeInsets.fromLTRB(
+            16, 12, 16, MediaQuery.paddingOf(context).bottom + 24,
+          ),
+          itemCount: promos.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 8),
+          itemBuilder: (_, i) => _PromoNotifCard(
+            promo: promos[i],
+            isDark: isDark,
+            pt: pt,
+          )
+              .animate(delay: Duration(milliseconds: 40 * i))
+              .fadeIn(duration: 240.ms)
+              .slideY(begin: 0.08, end: 0, duration: 280.ms, curve: Curves.easeOutCubic),
+        );
+      },
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Promo deal card shown in the Promotions tab
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PromoNotifCard extends StatelessWidget {
+  const _PromoNotifCard({
+    required this.promo,
+    required this.isDark,
+    required this.pt,
+  });
+
+  final Promo promo;
+  final bool isDark;
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? pt.surface2 : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: pt.line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.poppy.withAlpha(18),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.local_offer_rounded,
+                    size: 18, color: AppColors.poppy),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  promo.code,
+                  style: GoogleFonts.sora(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                    color: pt.ink950,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.tangerine.withAlpha(22),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  promo.discountLabel,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.tangerine,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            promo.description,
+            style: TextStyle(fontSize: 13, color: pt.ink500, height: 1.4),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Icon(Icons.schedule_rounded, size: 13, color: pt.ink300),
+              const SizedBox(width: 4),
+              Text(
+                promo.validUntilFormatted,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: pt.ink500,
+                ),
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: () => HapticFeedback.selectionClick(),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: AppColors.poppy,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Text(
+                    'Copy code',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

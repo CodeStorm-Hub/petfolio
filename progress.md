@@ -1,5 +1,37 @@
 # Petfolio — Progress Log
 
+## 2026-06-09 — Pathao Gaps Phase 3 (Gap #11 + P3 finalization) ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+
+**Gap #11 (P2) — Promotions tab wired to live promo data**
+- `_PromotionsTab` → `ConsumerWidget`, watches `promoListProvider`
+- `_PromoNotifCard`: icon tile + code + discount badge + validity row + "Copy code" CTA
+- `TailWagLoader` loading state; `PetfolioEmptyState` empty/error states
+- Stagger-in: 40ms delay per card, `fadeIn + slideY`
+
+**Gap #15 (P3) — `flutter_animate` stagger on notification list**
+- `_UpdatesTab` tiles: `.animate(delay: 30ms×i).fadeIn(200ms).slideX(-0.04→0, 240ms)`
+
+**Gap #16 (P3) — `lottie` opt-in in `PetfolioEmptyState`**
+- Added optional `lottieAsset` param; `icon` is now optional (both optional, assert enforces at least one)
+- When `lottieAsset` provided → `Lottie.asset()` 120×120 looping; else `Icon` as before
+- All 14+ existing call sites unchanged
+
+### Already confirmed complete (verified this session, no work needed)
+- **#13** `smooth_page_indicator` — already in `product_detail_screen.dart`
+- **#14** shimmer skeleton loaders — already in `skeleton_loader.dart`
+- **#17** `RoundedSuperellipseBorder` squircle — already in `app_theme.dart` cardTheme + navBar
+- **#18** Spring page transitions — `ZoomPageTransitionsBuilder` already in `app_theme.dart`
+- **#19** `DynamicSchemeVariant.fidelity` — already in `app_theme.dart` `_colorScheme()`
+- **#20** Skipped — theme already provides StadiumBorder + spring curves on all buttons
+
+Phase complete — please run (/remember) to save tokens before proceeding.
+
+---
+
 ## 2026-06-09 — Pathao Gaps Phase 2 (P2 + P3 polish) ✅
 
 `flutter analyze` — **No issues found.**
