@@ -3599,11 +3599,6 @@
     "ast_hash": "8a14abfa3cfcd79fa309ad4107dd259a",
     "semantic_hash": ""
   },
-  "lib/features/communities/communities_routes.dart": {
-    "mtime": 1780874282.506421,
-    "ast_hash": "6571613d243de8ff045fcaa481c1e768",
-    "semantic_hash": ""
-  },
   "lib/features/communities/presentation/widgets/create_community_sheet.dart": {
     "mtime": 1780874457.915576,
     "ast_hash": "a7ee52b74a3a2714cad863cd4091bb1f",
@@ -3858,5 +3853,1970 @@
     "mtime": 1780933280.8035672,
     "ast_hash": "08de75cf2e0495b61ce8cf20d1335ad2",
     "semantic_hash": ""
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\errors\\app_exception.dart": {
+    "mtime": 1781012448.5631702,
+    "ast_hash": "9bd8e274a03254358429d83af3244535",
+    "semantic_hash": "9bd8e274a03254358429d83af3244535"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\firebase\\fcm_background_handler.dart": {
+    "mtime": 1780612310.9259503,
+    "ast_hash": "0f73ed5afb527aaba2a9da804624f542",
+    "semantic_hash": "0f73ed5afb527aaba2a9da804624f542"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\firebase\\fcm_lifecycle.dart": {
+    "mtime": 1780618173.1868513,
+    "ast_hash": "b2ddbb821dcb35f6658612a6282c6901",
+    "semantic_hash": "b2ddbb821dcb35f6658612a6282c6901"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\firebase\\fcm_message_router.dart": {
+    "mtime": 1780612310.926948,
+    "ast_hash": "ee3f1d21d716502423f938a6d8f215a2",
+    "semantic_hash": "ee3f1d21d716502423f938a6d8f215a2"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\firebase\\fcm_push_display.dart": {
+    "mtime": 1780612310.9279535,
+    "ast_hash": "49586ffca340def5e25a9e778bd90b02",
+    "semantic_hash": "49586ffca340def5e25a9e778bd90b02"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\firebase\\fcm_service.dart": {
+    "mtime": 1780618173.2019382,
+    "ast_hash": "00b4ed4007c685e169d20cb212130c20",
+    "semantic_hash": "00b4ed4007c685e169d20cb212130c20"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\firebase\\firebase_env.dart": {
+    "mtime": 1780612310.929946,
+    "ast_hash": "f5b99591448ed9dd7b4acda20a4a41aa",
+    "semantic_hash": "f5b99591448ed9dd7b4acda20a4a41aa"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\models\\pet.dart": {
+    "mtime": 1779832352.4433417,
+    "ast_hash": "0d0720670eea62dfbcbdc196708c5463",
+    "semantic_hash": "0d0720670eea62dfbcbdc196708c5463"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\navigation\\app_shell_routes.dart": {
+    "mtime": 1781013651.7637894,
+    "ast_hash": "f17060e4eaca06ac44eeee81cf779236",
+    "semantic_hash": "f17060e4eaca06ac44eeee81cf779236"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\navigation\\navigator_keys.dart": {
+    "mtime": 1780857506.2545304,
+    "ast_hash": "be8bddf07285daec6d6b761b7d57aca9",
+    "semantic_hash": "be8bddf07285daec6d6b761b7d57aca9"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\navigation\\route_overlay_dismissal.dart": {
+    "mtime": 1780612310.9309454,
+    "ast_hash": "00f2c43d3b819912c5d52ed73e8b9667",
+    "semantic_hash": "00f2c43d3b819912c5d52ed73e8b9667"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\navigation\\router_error_screen.dart": {
+    "mtime": 1780873877.6691191,
+    "ast_hash": "ed97e06708cd6a2c18a8fea564a65651",
+    "semantic_hash": "ed97e06708cd6a2c18a8fea564a65651"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\navigation\\router_notifier.dart": {
+    "mtime": 1780968722.166083,
+    "ast_hash": "3701ae0e1f6afc4766cccd4809f76461",
+    "semantic_hash": "3701ae0e1f6afc4766cccd4809f76461"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\navigation\\shell_destinations.dart": {
+    "mtime": 1780968568.9802208,
+    "ast_hash": "3ac0bbd0d9bbd1041e045d1c7c6d31bc",
+    "semantic_hash": "3ac0bbd0d9bbd1041e045d1c7c6d31bc"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\navigation\\shell_module_provider.dart": {
+    "mtime": 1780967403.7622123,
+    "ast_hash": "7c93efa09199310b5bfdea6ef9c1dc4b",
+    "semantic_hash": "7c93efa09199310b5bfdea6ef9c1dc4b"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\care_fcm_reminder_sync.dart": {
+    "mtime": 1780612310.9319446,
+    "ast_hash": "a32e902f39ff2ad1eb590c47553c62a3",
+    "semantic_hash": "a32e902f39ff2ad1eb590c47553c62a3"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\media_picker.dart": {
+    "mtime": 1780612310.9319446,
+    "ast_hash": "21404db08dede64a746a9ee8c9a5bc68",
+    "semantic_hash": "21404db08dede64a746a9ee8c9a5bc68"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\media_picker_io.dart": {
+    "mtime": 1780874774.473821,
+    "ast_hash": "6d55e97b258bbd29104451cd5e45b1f3",
+    "semantic_hash": "6d55e97b258bbd29104451cd5e45b1f3"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\media_picker_web.dart": {
+    "mtime": 1780874775.2216618,
+    "ast_hash": "c821ba00acbdcde3bbe8f8d4ffd033e4",
+    "semantic_hash": "c821ba00acbdcde3bbe8f8d4ffd033e4"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\platform_location.dart": {
+    "mtime": 1780612310.9341588,
+    "ast_hash": "c5f90a2b972d9509f45ee57c52a3f3d9",
+    "semantic_hash": "c5f90a2b972d9509f45ee57c52a3f3d9"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\platform_notifications.dart": {
+    "mtime": 1780612310.9341588,
+    "ast_hash": "85eb0652bb091910aabd838c2cb5bf47",
+    "semantic_hash": "85eb0652bb091910aabd838c2cb5bf47"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\platform_notifications_io.dart": {
+    "mtime": 1780612310.935151,
+    "ast_hash": "62b6926a6bdea8c9a9dd4b20f29374ad",
+    "semantic_hash": "62b6926a6bdea8c9a9dd4b20f29374ad"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\platform_notifications_web.dart": {
+    "mtime": 1780612310.935151,
+    "ast_hash": "067622039387b323b11b216c2ed286f8",
+    "semantic_hash": "067622039387b323b11b216c2ed286f8"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\platform_payments.dart": {
+    "mtime": 1780612310.9361527,
+    "ast_hash": "88dea59a7aeee9902a67e5ebf20a6a2a",
+    "semantic_hash": "88dea59a7aeee9902a67e5ebf20a6a2a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\platform_services.dart": {
+    "mtime": 1780612310.937152,
+    "ast_hash": "6cfa74a7daaecefe1b72414bbf94b71a",
+    "semantic_hash": "6cfa74a7daaecefe1b72414bbf94b71a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\web_app_url.dart": {
+    "mtime": 1780612310.937152,
+    "ast_hash": "d7fda0e25a7b5e9690b2f4aa167a20c2",
+    "semantic_hash": "d7fda0e25a7b5e9690b2f4aa167a20c2"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\web_checkout_redirect.dart": {
+    "mtime": 1780612310.937152,
+    "ast_hash": "bb143928eabff1d138d5da8f7ffa774b",
+    "semantic_hash": "bb143928eabff1d138d5da8f7ffa774b"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\web_checkout_redirect_stub.dart": {
+    "mtime": 1780612310.9386556,
+    "ast_hash": "5f0fbf670f21ce48533deecadbf6a1fc",
+    "semantic_hash": "5f0fbf670f21ce48533deecadbf6a1fc"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\web_checkout_redirect_web.dart": {
+    "mtime": 1780612310.9386556,
+    "ast_hash": "47609d173b95235853125c66fc75c329",
+    "semantic_hash": "47609d173b95235853125c66fc75c329"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\web_image_cache.dart": {
+    "mtime": 1780874800.6773412,
+    "ast_hash": "304e614833b552b2c5f1046002142b1a",
+    "semantic_hash": "304e614833b552b2c5f1046002142b1a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\web_push_environment.dart": {
+    "mtime": 1780618173.2069147,
+    "ast_hash": "a9668a202f31b7ef5dd2d773a9518acf",
+    "semantic_hash": "a9668a202f31b7ef5dd2d773a9518acf"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\web_push_environment_stub.dart": {
+    "mtime": 1780618173.2019382,
+    "ast_hash": "d7dd28099f419561aa437268367e6d46",
+    "semantic_hash": "d7dd28099f419561aa437268367e6d46"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\web_push_environment_web.dart": {
+    "mtime": 1780618842.8051832,
+    "ast_hash": "284af3ec30806ac7c5f376e4042e8c2d",
+    "semantic_hash": "284af3ec30806ac7c5f376e4042e8c2d"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\web_push_registration.dart": {
+    "mtime": 1780612310.9396617,
+    "ast_hash": "3d49cf873be1f9cf64c81f2d610a7f9f",
+    "semantic_hash": "3d49cf873be1f9cf64c81f2d610a7f9f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\web_push_registration_stub.dart": {
+    "mtime": 1780612310.9406636,
+    "ast_hash": "b5aa7c8ab2cb07186772de1b6a36c31f",
+    "semantic_hash": "b5aa7c8ab2cb07186772de1b6a36c31f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\platform\\web_push_registration_web.dart": {
+    "mtime": 1780612310.9406636,
+    "ast_hash": "9b1867d8ca12317a69b9c86b311711e1",
+    "semantic_hash": "9b1867d8ca12317a69b9c86b311711e1"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\providers\\shell_scroll_provider.dart": {
+    "mtime": 1780940648.0992503,
+    "ast_hash": "d142637c9630f0b3ffcea55fe3d9fa1f",
+    "semantic_hash": "d142637c9630f0b3ffcea55fe3d9fa1f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\router.dart": {
+    "mtime": 1781012921.4581952,
+    "ast_hash": "abc425ca51418cb8f8e92b6174f1196c",
+    "semantic_hash": "abc425ca51418cb8f8e92b6174f1196c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\services\\lat_lng.dart": {
+    "mtime": 1779721294.265071,
+    "ast_hash": "8d76243c11840c8d5d88ba49eca6228b",
+    "semantic_hash": "8d76243c11840c8d5d88ba49eca6228b"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\services\\location_providers.dart": {
+    "mtime": 1779721294.2661464,
+    "ast_hash": "2884f22f8036afa58c61203d6266d05f",
+    "semantic_hash": "2884f22f8036afa58c61203d6266d05f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\services\\location_service.dart": {
+    "mtime": 1780612310.9427538,
+    "ast_hash": "b5fede141009eabeb708d12d9697ca0e",
+    "semantic_hash": "b5fede141009eabeb708d12d9697ca0e"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\services\\notification_service.dart": {
+    "mtime": 1780612310.9437559,
+    "ast_hash": "6f54a437403d5a6f31603b88d9f813a2",
+    "semantic_hash": "6f54a437403d5a6f31603b88d9f813a2"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\services\\prefs_schema.dart": {
+    "mtime": 1780873877.6681166,
+    "ast_hash": "019f2a57c1be074f8f9904d57825d33f",
+    "semantic_hash": "019f2a57c1be074f8f9904d57825d33f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\services\\secure_storage_service.dart": {
+    "mtime": 1780873877.6691191,
+    "ast_hash": "e3929a2dfe2881d5d6f3040b0d369ff8",
+    "semantic_hash": "e3929a2dfe2881d5d6f3040b0d369ff8"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\services\\stripe_init_service.dart": {
+    "mtime": 1780612310.9437559,
+    "ast_hash": "da9c29c5af44063614fa1f5821f57f71",
+    "semantic_hash": "da9c29c5af44063614fa1f5821f57f71"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\theme\\app_colors.dart": {
+    "mtime": 1780584273.2994542,
+    "ast_hash": "cfdb7e056894768f0488f423610355e6",
+    "semantic_hash": "cfdb7e056894768f0488f423610355e6"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\theme\\app_theme.dart": {
+    "mtime": 1780874282.506421,
+    "ast_hash": "970e98fd325a6ca25ba2f4df3a8638bf",
+    "semantic_hash": "970e98fd325a6ca25ba2f4df3a8638bf"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\theme\\theme.dart": {
+    "mtime": 1779721294.2741697,
+    "ast_hash": "1de93edf9d7473fda0bac4d1de86251a",
+    "semantic_hash": "1de93edf9d7473fda0bac4d1de86251a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\theme\\theme_notifier.dart": {
+    "mtime": 1779721294.2751708,
+    "ast_hash": "995a837c81c0cf4635856c5ad0a1506a",
+    "semantic_hash": "995a837c81c0cf4635856c5ad0a1506a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\utils\\time_ago.dart": {
+    "mtime": 1780584273.2994542,
+    "ast_hash": "5607b1e8ba440311e8eea22169726bd0",
+    "semantic_hash": "5607b1e8ba440311e8eea22169726bd0"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\app_bottom_sheet.dart": {
+    "mtime": 1780847217.7622738,
+    "ast_hash": "fb610a899adf000b3afed051ac3134fc",
+    "semantic_hash": "fb610a899adf000b3afed051ac3134fc"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\app_header.dart": {
+    "mtime": 1779991953.2912548,
+    "ast_hash": "e7f11f5f0f50fcffc405851b9c38f443",
+    "semantic_hash": "e7f11f5f0f50fcffc405851b9c38f443"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\app_shell.dart": {
+    "mtime": 1781014113.6859038,
+    "ast_hash": "affe9ad6f4ae538f30a8bd1d5d04ce43",
+    "semantic_hash": "affe9ad6f4ae538f30a8bd1d5d04ce43"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\app_snack_bar.dart": {
+    "mtime": 1780705147.884003,
+    "ast_hash": "63a0e564a8fcb5ae3efeae5de3ad41ae",
+    "semantic_hash": "63a0e564a8fcb5ae3efeae5de3ad41ae"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\app_tutorial_overlay.dart": {
+    "mtime": 1780953996.9886334,
+    "ast_hash": "35a0d0625913d70bc5a88e6eca9637be",
+    "semantic_hash": "35a0d0625913d70bc5a88e6eca9637be"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\bone_slider.dart": {
+    "mtime": 1780857886.2583342,
+    "ast_hash": "39e4ea1a2c723ab1feafb1864c9dcad3",
+    "semantic_hash": "39e4ea1a2c723ab1feafb1864c9dcad3"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\dashed_circle_painter.dart": {
+    "mtime": 1779833114.357903,
+    "ast_hash": "2577f4276ed0e53a51dfe0982f59b530",
+    "semantic_hash": "2577f4276ed0e53a51dfe0982f59b530"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\dashed_rect_painter.dart": {
+    "mtime": 1779833114.357903,
+    "ast_hash": "cc1cc0c45769776444cac89db430d056",
+    "semantic_hash": "cc1cc0c45769776444cac89db430d056"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\glass_card.dart": {
+    "mtime": 1780874282.5013177,
+    "ast_hash": "4f9349b2174c50b3701554d5403b4d2e",
+    "semantic_hash": "4f9349b2174c50b3701554d5403b4d2e"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\paw_toggle.dart": {
+    "mtime": 1780857871.157197,
+    "ast_hash": "538539062edac5f34a87f0ea1f8adda6",
+    "semantic_hash": "538539062edac5f34a87f0ea1f8adda6"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\pet_avatar.dart": {
+    "mtime": 1780612310.9467561,
+    "ast_hash": "87f1b949f568e1d140e358d537f1f865",
+    "semantic_hash": "87f1b949f568e1d140e358d537f1f865"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\petfolio_empty_state.dart": {
+    "mtime": 1780955008.7715733,
+    "ast_hash": "b44ffd2586e6b6e27f7eeceb40f71332",
+    "semantic_hash": "b44ffd2586e6b6e27f7eeceb40f71332"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\petfolio_network_image.dart": {
+    "mtime": 1780875924.0938194,
+    "ast_hash": "18ff90cc3cf0f28839c6d6aaca126c35",
+    "semantic_hash": "18ff90cc3cf0f28839c6d6aaca126c35"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\pf_achievement_tile.dart": {
+    "mtime": 1779833114.3604143,
+    "ast_hash": "6e202b664a127564535ca58a8ff485c0",
+    "semantic_hash": "6e202b664a127564535ca58a8ff485c0"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\pf_card.dart": {
+    "mtime": 1780874282.4973216,
+    "ast_hash": "fd2b2bdbbda88abdd45095c7889a751a",
+    "semantic_hash": "fd2b2bdbbda88abdd45095c7889a751a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\pf_stat_tile.dart": {
+    "mtime": 1779833114.3614132,
+    "ast_hash": "8e4c71687e319a0d14fa22c937dd8029",
+    "semantic_hash": "8e4c71687e319a0d14fa22c937dd8029"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\primary_pill_button.dart": {
+    "mtime": 1780847225.8413887,
+    "ast_hash": "358b4c15a7084524e3ed34bb41a32447",
+    "semantic_hash": "358b4c15a7084524e3ed34bb41a32447"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\responsive_layout.dart": {
+    "mtime": 1779833114.3624144,
+    "ast_hash": "4106e66c2959797150fb2d84da401212",
+    "semantic_hash": "4106e66c2959797150fb2d84da401212"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\skeleton_loader.dart": {
+    "mtime": 1780954259.767658,
+    "ast_hash": "638ba982d6987310f6ffcdd814e15766",
+    "semantic_hash": "638ba982d6987310f6ffcdd814e15766"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\tail_wag_loader.dart": {
+    "mtime": 1780847247.4339788,
+    "ast_hash": "e9f41cf49447c8d347ff62b1de137bc6",
+    "semantic_hash": "e9f41cf49447c8d347ff62b1de137bc6"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\wave_header.dart": {
+    "mtime": 1780107017.7585816,
+    "ast_hash": "5b2b4d2ee601bb992184ef41a01fe8dd",
+    "semantic_hash": "5b2b4d2ee601bb992184ef41a01fe8dd"
+  },
+  "G:\\GitHub\\petfolio\\lib\\core\\widgets\\widgets.dart": {
+    "mtime": 1780515919.9945734,
+    "ast_hash": "5d645894955dfdadfedd6c8f58162d75",
+    "semantic_hash": "5d645894955dfdadfedd6c8f58162d75"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\activity\\activity_routes.dart": {
+    "mtime": 1780968593.9207408,
+    "ast_hash": "9817f9e34ca340c00ad2b988985cf049",
+    "semantic_hash": "9817f9e34ca340c00ad2b988985cf049"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\activity\\presentation\\screens\\activity_screen.dart": {
+    "mtime": 1780968630.0260708,
+    "ast_hash": "09ef0feb0ccaaedf35050dae1b33007e",
+    "semantic_hash": "09ef0feb0ccaaedf35050dae1b33007e"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\admin_routes.dart": {
+    "mtime": 1780857559.8027546,
+    "ast_hash": "f868a32e4985726ec719bcd6fe4e3984",
+    "semantic_hash": "f868a32e4985726ec719bcd6fe4e3984"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\data\\models\\post_report.dart": {
+    "mtime": 1779763325.247883,
+    "ast_hash": "a565368b4296848c8648543071c200b3",
+    "semantic_hash": "a565368b4296848c8648543071c200b3"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\data\\models\\shop_deletion_request.dart": {
+    "mtime": 1779763325.2498891,
+    "ast_hash": "f69d40ffea4e00e3ccfdda05493b2c0a",
+    "semantic_hash": "f69d40ffea4e00e3ccfdda05493b2c0a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\data\\repositories\\admin_repository.dart": {
+    "mtime": 1779991953.292253,
+    "ast_hash": "1eba4e35c661abc88944970f517a4851",
+    "semantic_hash": "1eba4e35c661abc88944970f517a4851"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\index.dart": {
+    "mtime": 1780873877.6625912,
+    "ast_hash": "6d6fa83009c4ea9a90c6f6e8a82e1cc4",
+    "semantic_hash": "6d6fa83009c4ea9a90c6f6e8a82e1cc4"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\controllers\\admin_auth_controller.dart": {
+    "mtime": 1779763325.2508962,
+    "ast_hash": "f1e1642380b0d8bf8e6297b2c4592ffe",
+    "semantic_hash": "f1e1642380b0d8bf8e6297b2c4592ffe"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\controllers\\admin_dashboard_controller.dart": {
+    "mtime": 1779763325.2508962,
+    "ast_hash": "597aa803e3584f08ffc5517aa1197eef",
+    "semantic_hash": "597aa803e3584f08ffc5517aa1197eef"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\controllers\\cod_orders_controller.dart": {
+    "mtime": 1779763325.2508962,
+    "ast_hash": "f5e7ae11b99807bdc0a702f5df47b0b8",
+    "semantic_hash": "f5e7ae11b99807bdc0a702f5df47b0b8"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\controllers\\kyc_review_controller.dart": {
+    "mtime": 1779763325.2524748,
+    "ast_hash": "79337a4823cc2a134d6bc4ef4b426fae",
+    "semantic_hash": "79337a4823cc2a134d6bc4ef4b426fae"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\controllers\\ledger_controller.dart": {
+    "mtime": 1779763325.2524748,
+    "ast_hash": "c7d071918efa6c7ad80aea6237fd8a5a",
+    "semantic_hash": "c7d071918efa6c7ad80aea6237fd8a5a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\controllers\\moderation_controller.dart": {
+    "mtime": 1779763325.2524748,
+    "ast_hash": "f32eb508368118e81c59271d37973483",
+    "semantic_hash": "f32eb508368118e81c59271d37973483"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\controllers\\shop_deletion_controller.dart": {
+    "mtime": 1779763325.2524748,
+    "ast_hash": "f89639c7f2b82cc8ff0cbded3e8c8e35",
+    "semantic_hash": "f89639c7f2b82cc8ff0cbded3e8c8e35"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\screens\\admin_layout.dart": {
+    "mtime": 1779991953.292253,
+    "ast_hash": "3a13aef7abff9ae7a25b7c5485d279bd",
+    "semantic_hash": "3a13aef7abff9ae7a25b7c5485d279bd"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\screens\\admin_screen.dart": {
+    "mtime": 1779832352.45673,
+    "ast_hash": "53f847971fb19cc3f71ba7801d3ae69c",
+    "semantic_hash": "53f847971fb19cc3f71ba7801d3ae69c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\widgets\\admin_dashboard_tab.dart": {
+    "mtime": 1779991953.293433,
+    "ast_hash": "bc97fd7aea20be950c2c431272f1c9a7",
+    "semantic_hash": "bc97fd7aea20be950c2c431272f1c9a7"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\widgets\\admin_shared_widgets.dart": {
+    "mtime": 1779763325.2544804,
+    "ast_hash": "469e0a420443e93e7ae31df0fe7c8ff2",
+    "semantic_hash": "469e0a420443e93e7ae31df0fe7c8ff2"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\widgets\\financial_ledger_tab.dart": {
+    "mtime": 1779991953.294433,
+    "ast_hash": "da3dfbb59de6312c6fe2e164a8134b4f",
+    "semantic_hash": "da3dfbb59de6312c6fe2e164a8134b4f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\widgets\\kyc_approvals_tab.dart": {
+    "mtime": 1779991953.2954333,
+    "ast_hash": "16be6406e33ed2d04722b10f20b8b89c",
+    "semantic_hash": "16be6406e33ed2d04722b10f20b8b89c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\widgets\\moderation_tab.dart": {
+    "mtime": 1779833114.3664145,
+    "ast_hash": "31cb15b0c3814c0482ccf9b4aaf27054",
+    "semantic_hash": "31cb15b0c3814c0482ccf9b4aaf27054"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\widgets\\orders_tab.dart": {
+    "mtime": 1779991953.2954333,
+    "ast_hash": "2145d34e72eedfef7dd4437ca55c329c",
+    "semantic_hash": "2145d34e72eedfef7dd4437ca55c329c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\widgets\\secure_doc_button.dart": {
+    "mtime": 1779991953.2964327,
+    "ast_hash": "375f18b55b4edf25d85235ef3904336b",
+    "semantic_hash": "375f18b55b4edf25d85235ef3904336b"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\admin\\presentation\\widgets\\shops_tab.dart": {
+    "mtime": 1779833114.3664145,
+    "ast_hash": "5577e7b70fca6bf79e98d550fcb662f9",
+    "semantic_hash": "5577e7b70fca6bf79e98d550fcb662f9"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\appointments\\appointment_routes.dart": {
+    "mtime": 1780967220.6116965,
+    "ast_hash": "d9a998aff3b9f6e11667c98e092dab5a",
+    "semantic_hash": "d9a998aff3b9f6e11667c98e092dab5a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\appointments\\data\\models\\appointment.dart": {
+    "mtime": 1780874282.506421,
+    "ast_hash": "38dd3ddcfa7a26ade326ad3f20bb202d",
+    "semantic_hash": "38dd3ddcfa7a26ade326ad3f20bb202d"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\appointments\\data\\repositories\\appointment_repository.dart": {
+    "mtime": 1780874282.506421,
+    "ast_hash": "2f661e249e54fad561a5aa05eecb4927",
+    "semantic_hash": "2f661e249e54fad561a5aa05eecb4927"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\appointments\\index.dart": {
+    "mtime": 1780863423.4361901,
+    "ast_hash": "d0c473ce5b12377eafc9e1d986572cd9",
+    "semantic_hash": "d0c473ce5b12377eafc9e1d986572cd9"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\appointments\\presentation\\controllers\\appointment_controller.dart": {
+    "mtime": 1780864072.0345347,
+    "ast_hash": "2c1b8afdc5e84222573ef6c77b8fb646",
+    "semantic_hash": "2c1b8afdc5e84222573ef6c77b8fb646"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\appointments\\presentation\\screens\\appointments_screen.dart": {
+    "mtime": 1780874282.4862876,
+    "ast_hash": "3e9fb7b02242f88ee7b157fc3d02dffc",
+    "semantic_hash": "3e9fb7b02242f88ee7b157fc3d02dffc"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\auth\\auth_routes.dart": {
+    "mtime": 1780857510.2588425,
+    "ast_hash": "9f2a04ceced434040e84e1b07c53122d",
+    "semantic_hash": "9f2a04ceced434040e84e1b07c53122d"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\auth\\data\\repositories\\auth_repository.dart": {
+    "mtime": 1780612310.9467561,
+    "ast_hash": "e9fcfce40575d83ef2e703bdd755634c",
+    "semantic_hash": "e9fcfce40575d83ef2e703bdd755634c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\auth\\index.dart": {
+    "mtime": 1780857585.2783275,
+    "ast_hash": "16548aeaff7967f08e9b4bc92adb3a90",
+    "semantic_hash": "16548aeaff7967f08e9b4bc92adb3a90"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\auth\\presentation\\controllers\\auth_controller.dart": {
+    "mtime": 1779991953.2972274,
+    "ast_hash": "58014a32f01ca457decab30894949a08",
+    "semantic_hash": "58014a32f01ca457decab30894949a08"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\auth\\presentation\\screens\\login_screen.dart": {
+    "mtime": 1780866031.170759,
+    "ast_hash": "2e6c7223a69a9c96c6aa1dced76e9c9c",
+    "semantic_hash": "2e6c7223a69a9c96c6aa1dced76e9c9c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\auth\\presentation\\screens\\registration_screen.dart": {
+    "mtime": 1779991953.298308,
+    "ast_hash": "de0fa08eeb7344eb7b5045e808b6a089",
+    "semantic_hash": "de0fa08eeb7344eb7b5045e808b6a089"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\auth\\presentation\\widgets\\auth_widgets.dart": {
+    "mtime": 1780612310.9487593,
+    "ast_hash": "a54f0744a8fc8c037717f0f662c6685b",
+    "semantic_hash": "a54f0744a8fc8c037717f0f662c6685b"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\care_routes.dart": {
+    "mtime": 1780967216.6828752,
+    "ast_hash": "194f08df82875a43c8b78bcbca3349b0",
+    "semantic_hash": "194f08df82875a43c8b78bcbca3349b0"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\data\\models\\care_streak.dart": {
+    "mtime": 1780687996.0378823,
+    "ast_hash": "28ea92a4a5a843bee901a23585c70218",
+    "semantic_hash": "28ea92a4a5a843bee901a23585c70218"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\data\\models\\care_task.dart": {
+    "mtime": 1780708666.9939134,
+    "ast_hash": "149634f83e3542652f28d0c4cc90f18f",
+    "semantic_hash": "149634f83e3542652f28d0c4cc90f18f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\data\\models\\health_log.dart": {
+    "mtime": 1780690613.2823234,
+    "ast_hash": "d9c659f0cc3d191756e25cda1310ce03",
+    "semantic_hash": "d9c659f0cc3d191756e25cda1310ce03"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\data\\models\\medical_record.dart": {
+    "mtime": 1779763325.2644334,
+    "ast_hash": "fa0040810ed692afbc0d887acd6269de",
+    "semantic_hash": "fa0040810ed692afbc0d887acd6269de"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\data\\models\\pet_awards_summary.dart": {
+    "mtime": 1780691625.4727457,
+    "ast_hash": "eb94a918229418df296524eac0f73120",
+    "semantic_hash": "eb94a918229418df296524eac0f73120"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\data\\models\\pet_level.dart": {
+    "mtime": 1780690620.0466847,
+    "ast_hash": "ee86e58bb17e93a68ab76722fdc4e148",
+    "semantic_hash": "ee86e58bb17e93a68ab76722fdc4e148"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\data\\models\\weight_log.dart": {
+    "mtime": 1780858152.9838564,
+    "ast_hash": "bbd5726d4f37620ee861bfb211e95db5",
+    "semantic_hash": "bbd5726d4f37620ee861bfb211e95db5"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\data\\repositories\\care_repository.dart": {
+    "mtime": 1779991953.3003075,
+    "ast_hash": "903931f039a68b9428a1aaa76089efdb",
+    "semantic_hash": "903931f039a68b9428a1aaa76089efdb"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\data\\repositories\\health_repository.dart": {
+    "mtime": 1780690497.216717,
+    "ast_hash": "217f5e1c0927bc8f888385bf0f90cef6",
+    "semantic_hash": "217f5e1c0927bc8f888385bf0f90cef6"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\data\\repositories\\pet_care_repository.dart": {
+    "mtime": 1781012448.5631702,
+    "ast_hash": "135a024e52837d60c746cf088385d45e",
+    "semantic_hash": "135a024e52837d60c746cf088385d45e"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\data\\repositories\\vitals_repository.dart": {
+    "mtime": 1780858262.1600513,
+    "ast_hash": "950c1dccdfe146df9bcf131072bbec38",
+    "semantic_hash": "950c1dccdfe146df9bcf131072bbec38"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\domain\\services\\care_recommendation_service.dart": {
+    "mtime": 1780707692.1118789,
+    "ast_hash": "206ea5c23e8118eecd7e79334b5bf74a",
+    "semantic_hash": "206ea5c23e8118eecd7e79334b5bf74a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\index.dart": {
+    "mtime": 1780857595.568252,
+    "ast_hash": "5aa7b222a0cb8eaae9164b807bf7c25d",
+    "semantic_hash": "5aa7b222a0cb8eaae9164b807bf7c25d"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\controllers\\ai_routine_controller.dart": {
+    "mtime": 1780707725.1814716,
+    "ast_hash": "7811a5aa131dd0937e73f4c103882df0",
+    "semantic_hash": "7811a5aa131dd0937e73f4c103882df0"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\controllers\\care_dashboard_controller.dart": {
+    "mtime": 1780858157.613152,
+    "ast_hash": "46a476b2b9d6b503322069d33f6cdc1e",
+    "semantic_hash": "46a476b2b9d6b503322069d33f6cdc1e"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\controllers\\care_streak_stream_provider.dart": {
+    "mtime": 1780688049.033243,
+    "ast_hash": "e2903e339f690b8d48e8d9814517c07b",
+    "semantic_hash": "e2903e339f690b8d48e8d9814517c07b"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\controllers\\health_vault_controller.dart": {
+    "mtime": 1780688360.1515193,
+    "ast_hash": "c5a272ed21525d330a69d104794c456f",
+    "semantic_hash": "c5a272ed21525d330a69d104794c456f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\controllers\\nutrition_controller.dart": {
+    "mtime": 1780690465.3157372,
+    "ast_hash": "b5726d5e8997f10191f8d4dc358f2a37",
+    "semantic_hash": "b5726d5e8997f10191f8d4dc358f2a37"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\controllers\\pet_awards_provider.dart": {
+    "mtime": 1779763325.2742712,
+    "ast_hash": "46032b6614556826af74b9fd8e7b52fd",
+    "semantic_hash": "46032b6614556826af74b9fd8e7b52fd"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\controllers\\vitals_controller.dart": {
+    "mtime": 1780858225.1324477,
+    "ast_hash": "333de76856e999d34191ff33ae482f86",
+    "semantic_hash": "333de76856e999d34191ff33ae482f86"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\screens\\care_screen.dart": {
+    "mtime": 1781037050.8638432,
+    "ast_hash": "510e7561e30743149858ed60907e501a",
+    "semantic_hash": "510e7561e30743149858ed60907e501a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\screens\\medical_vault_screen.dart": {
+    "mtime": 1780858064.759208,
+    "ast_hash": "0610f6769426b70c67fef2ea4e8d69e0",
+    "semantic_hash": "0610f6769426b70c67fef2ea4e8d69e0"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\screens\\nutrition_screen.dart": {
+    "mtime": 1780849230.7547922,
+    "ast_hash": "50c7cf857e00ac35208003abcdc2fbd2",
+    "semantic_hash": "50c7cf857e00ac35208003abcdc2fbd2"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\screens\\walk_tracking_screen.dart": {
+    "mtime": 1780866477.435946,
+    "ast_hash": "c4dd4fab736b645b7ac0863e52b66073",
+    "semantic_hash": "c4dd4fab736b645b7ac0863e52b66073"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\utils\\care_scheduled_time.dart": {
+    "mtime": 1781012448.559582,
+    "ast_hash": "74370dd41bbe75abd4a98963b122685d",
+    "semantic_hash": "74370dd41bbe75abd4a98963b122685d"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\widgets\\care_banners.dart": {
+    "mtime": 1781036623.3926573,
+    "ast_hash": "95d600ab9049abd7dbb7ae7bd407c738",
+    "semantic_hash": "95d600ab9049abd7dbb7ae7bd407c738"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\widgets\\care_coverflow_carousel.dart": {
+    "mtime": 1781037063.785635,
+    "ast_hash": "e11ae4ec7a5bb6f7457ed57f09d326ad",
+    "semantic_hash": "e11ae4ec7a5bb6f7457ed57f09d326ad"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\widgets\\care_daily_tasks_dashboard.dart": {
+    "mtime": 1781036594.8403528,
+    "ast_hash": "0d04ed79cc472b60f38bf9f50cc3fcac",
+    "semantic_hash": "0d04ed79cc472b60f38bf9f50cc3fcac"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\widgets\\care_date_picker.dart": {
+    "mtime": 1781036643.9686098,
+    "ast_hash": "44e4e88b21b0e2276c5b4975d74d0c0d",
+    "semantic_hash": "44e4e88b21b0e2276c5b4975d74d0c0d"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\widgets\\care_task_card.dart": {
+    "mtime": 1781035404.073406,
+    "ast_hash": "397ef20614f9d348eef0d485bc164417",
+    "semantic_hash": "397ef20614f9d348eef0d485bc164417"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\widgets\\care_task_form_sheet.dart": {
+    "mtime": 1781034951.0825007,
+    "ast_hash": "38380219897e9b47f0ed5597afedcf87",
+    "semantic_hash": "38380219897e9b47f0ed5597afedcf87"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\widgets\\gamified_care_ui.dart": {
+    "mtime": 1780857838.0588362,
+    "ast_hash": "bcdd4d8c576c7f6ca9ff29c512abfa0e",
+    "semantic_hash": "bcdd4d8c576c7f6ca9ff29c512abfa0e"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\widgets\\routine_recommendation_sheet.dart": {
+    "mtime": 1780705406.420441,
+    "ast_hash": "9d90f8461e9ecc0bde9ff87a901fa7ef",
+    "semantic_hash": "9d90f8461e9ecc0bde9ff87a901fa7ef"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\widgets\\vitals_chart_widget.dart": {
+    "mtime": 1780858192.6186612,
+    "ast_hash": "4cc7a1cd8130137a41dc30b2d99eea3e",
+    "semantic_hash": "4cc7a1cd8130137a41dc30b2d99eea3e"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\care\\presentation\\widgets\\web_push_enable_banner.dart": {
+    "mtime": 1780690676.0025134,
+    "ast_hash": "e5048a9801031da967fea26a35e1025b",
+    "semantic_hash": "e5048a9801031da967fea26a35e1025b"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\communities\\data\\models\\community.dart": {
+    "mtime": 1780874620.8358426,
+    "ast_hash": "371d2d8807753dcebca010bab7eda0f3",
+    "semantic_hash": "371d2d8807753dcebca010bab7eda0f3"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\communities\\data\\models\\community_post.dart": {
+    "mtime": 1780866180.0853336,
+    "ast_hash": "fb8a79bc16b2c8af4fc858d462380950",
+    "semantic_hash": "fb8a79bc16b2c8af4fc858d462380950"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\communities\\data\\repositories\\community_repository.dart": {
+    "mtime": 1780874620.8358426,
+    "ast_hash": "79778993a122ac0da5fed2f298ce6ff9",
+    "semantic_hash": "79778993a122ac0da5fed2f298ce6ff9"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\communities\\index.dart": {
+    "mtime": 1781012977.8125937,
+    "ast_hash": "f1d6bec344ed95e266e0aae4b8690826",
+    "semantic_hash": "f1d6bec344ed95e266e0aae4b8690826"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\communities\\presentation\\controllers\\communities_controller.dart": {
+    "mtime": 1780874620.8408964,
+    "ast_hash": "eea4af159e46c0b011f44b486cd5d45c",
+    "semantic_hash": "eea4af159e46c0b011f44b486cd5d45c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\communities\\presentation\\screens\\communities_screen.dart": {
+    "mtime": 1780874620.8358426,
+    "ast_hash": "983a7257661749457b9e91572898e5cc",
+    "semantic_hash": "983a7257661749457b9e91572898e5cc"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\communities\\presentation\\screens\\community_detail_screen.dart": {
+    "mtime": 1780874620.8358426,
+    "ast_hash": "a807919fb1122465eaeca25884a9e386",
+    "semantic_hash": "a807919fb1122465eaeca25884a9e386"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\communities\\presentation\\widgets\\create_community_sheet.dart": {
+    "mtime": 1780874457.915576,
+    "ast_hash": "a7ee52b74a3a2714cad863cd4091bb1f",
+    "semantic_hash": "a7ee52b74a3a2714cad863cd4091bb1f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\home\\presentation\\screens\\hub_home_screen.dart": {
+    "mtime": 1780953945.2898529,
+    "ast_hash": "d4eb1c919c4db8017127b721d23762b1",
+    "semantic_hash": "d4eb1c919c4db8017127b721d23762b1"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\home\\presentation\\widgets\\all_features_sheet.dart": {
+    "mtime": 1780934399.356398,
+    "ast_hash": "be7a6f189d2a3facfc4d44f5bbce23d4",
+    "semantic_hash": "be7a6f189d2a3facfc4d44f5bbce23d4"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\models\\cart_item.dart": {
+    "mtime": 1779763325.277912,
+    "ast_hash": "9045cbedd553e454da9c759ae53cb526",
+    "semantic_hash": "9045cbedd553e454da9c759ae53cb526"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\models\\marketplace_order.dart": {
+    "mtime": 1779763325.277912,
+    "ast_hash": "c8631fea842f60f111f09b24a062ed55",
+    "semantic_hash": "c8631fea842f60f111f09b24a062ed55"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\models\\product.dart": {
+    "mtime": 1780859464.7064075,
+    "ast_hash": "6a10d3f5afa3598689f1e9d78bd2832c",
+    "semantic_hash": "6a10d3f5afa3598689f1e9d78bd2832c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\models\\product_review.dart": {
+    "mtime": 1780874996.9762237,
+    "ast_hash": "8098003a3eb26036a5ec58e8cfc14e5b",
+    "semantic_hash": "8098003a3eb26036a5ec58e8cfc14e5b"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\models\\promo.dart": {
+    "mtime": 1780951909.787733,
+    "ast_hash": "ad4fd0a5488fed97119b25d51509369f",
+    "semantic_hash": "ad4fd0a5488fed97119b25d51509369f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\models\\shop.dart": {
+    "mtime": 1779763325.2819984,
+    "ast_hash": "d832972858a5e4a3fff55b881ed7e29f",
+    "semantic_hash": "d832972858a5e4a3fff55b881ed7e29f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\models\\user_address.dart": {
+    "mtime": 1780951904.815192,
+    "ast_hash": "78710f1733ea602d1fe56ed9f72bc2f6",
+    "semantic_hash": "78710f1733ea602d1fe56ed9f72bc2f6"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\models\\vendor_ledger.dart": {
+    "mtime": 1779763325.2839987,
+    "ast_hash": "ffde2b05f066aaba61310aa2b1bdd7e5",
+    "semantic_hash": "ffde2b05f066aaba61310aa2b1bdd7e5"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\repositories\\address_repository.dart": {
+    "mtime": 1780951934.7068057,
+    "ast_hash": "0b27b7f0ad14abd8e7e942bc9e33737b",
+    "semantic_hash": "0b27b7f0ad14abd8e7e942bc9e33737b"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\repositories\\kyc_repository.dart": {
+    "mtime": 1779763325.284999,
+    "ast_hash": "f59b780a95061006bde425c7fd803552",
+    "semantic_hash": "f59b780a95061006bde425c7fd803552"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\repositories\\order_repository.dart": {
+    "mtime": 1780875153.0077121,
+    "ast_hash": "6e976ef704a5fef71b6ca7ae1b533759",
+    "semantic_hash": "6e976ef704a5fef71b6ca7ae1b533759"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\repositories\\product_repository.dart": {
+    "mtime": 1780874786.7178967,
+    "ast_hash": "41dc9b192e58bcdc04579700d796910a",
+    "semantic_hash": "41dc9b192e58bcdc04579700d796910a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\repositories\\product_review_repository.dart": {
+    "mtime": 1780874998.8919053,
+    "ast_hash": "d44e5263072d5e82ebd7063895c9a959",
+    "semantic_hash": "d44e5263072d5e82ebd7063895c9a959"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\repositories\\promo_repository.dart": {
+    "mtime": 1780951937.9529219,
+    "ast_hash": "e1f33560ff99daecce2d33d8521c5bf3",
+    "semantic_hash": "e1f33560ff99daecce2d33d8521c5bf3"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\repositories\\shop_repository.dart": {
+    "mtime": 1779763325.2870111,
+    "ast_hash": "ecab5f15e68d57b94e563d33057b865f",
+    "semantic_hash": "ecab5f15e68d57b94e563d33057b865f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\data\\repositories\\vendor_product_repository.dart": {
+    "mtime": 1779763325.2870111,
+    "ast_hash": "d3ee2222a4faaf83cec56e9c79816748",
+    "semantic_hash": "d3ee2222a4faaf83cec56e9c79816748"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\index.dart": {
+    "mtime": 1780857610.65111,
+    "ast_hash": "736c9abaa225aa9d14d82fcc09cbf4da",
+    "semantic_hash": "736c9abaa225aa9d14d82fcc09cbf4da"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\marketplace_routes.dart": {
+    "mtime": 1780953124.6414473,
+    "ast_hash": "fcbf5ae9cc0fe8a6ee60bb5badd41915",
+    "semantic_hash": "fcbf5ae9cc0fe8a6ee60bb5badd41915"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\controllers\\address_controller.dart": {
+    "mtime": 1780952678.9402363,
+    "ast_hash": "bd095b6032809f2f69672fd086a29182",
+    "semantic_hash": "bd095b6032809f2f69672fd086a29182"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\controllers\\buyer_orders_controller.dart": {
+    "mtime": 1780958655.745191,
+    "ast_hash": "8c011ae0b4002a1d3ca0cd24a102117a",
+    "semantic_hash": "8c011ae0b4002a1d3ca0cd24a102117a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\controllers\\cart_controller.dart": {
+    "mtime": 1780873877.6625912,
+    "ast_hash": "e3ec7762209d7fd462950681c9a3356c",
+    "semantic_hash": "e3ec7762209d7fd462950681c9a3356c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\controllers\\checkout_controller.dart": {
+    "mtime": 1780859492.8278208,
+    "ast_hash": "432d741344ab11412d61d6663a6628fc",
+    "semantic_hash": "432d741344ab11412d61d6663a6628fc"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\controllers\\deletion_request_controller.dart": {
+    "mtime": 1779763325.2896018,
+    "ast_hash": "28c6028352637b3ac5f6ce366bb4ca73",
+    "semantic_hash": "28c6028352637b3ac5f6ce366bb4ca73"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\controllers\\edit_shop_controller.dart": {
+    "mtime": 1779763325.2896018,
+    "ast_hash": "27061e2af632d2e00aaa19d0fb4e72c9",
+    "semantic_hash": "27061e2af632d2e00aaa19d0fb4e72c9"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\controllers\\manual_kyc_controller.dart": {
+    "mtime": 1780612310.956501,
+    "ast_hash": "b2d58dc128374699a196d7cdd2505a02",
+    "semantic_hash": "b2d58dc128374699a196d7cdd2505a02"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\controllers\\my_shop_controller.dart": {
+    "mtime": 1779763325.2906098,
+    "ast_hash": "12cda703e789567220efe4e51825d028",
+    "semantic_hash": "12cda703e789567220efe4e51825d028"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\controllers\\product_list_controller.dart": {
+    "mtime": 1780953079.6110542,
+    "ast_hash": "bf2a69e72ee99c6fa8cc20e2978c4fcf",
+    "semantic_hash": "bf2a69e72ee99c6fa8cc20e2978c4fcf"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\controllers\\product_reviews_controller.dart": {
+    "mtime": 1780874999.747471,
+    "ast_hash": "e1b8fe54206014f202267dbc9ab51122",
+    "semantic_hash": "e1b8fe54206014f202267dbc9ab51122"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\controllers\\promo_controller.dart": {
+    "mtime": 1780952682.5462613,
+    "ast_hash": "434d64d5a162fba4efefb78825fea49d",
+    "semantic_hash": "434d64d5a162fba4efefb78825fea49d"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\controllers\\shop_list_controller.dart": {
+    "mtime": 1779763325.2926085,
+    "ast_hash": "f6cbb5f7fc68225ad5371f99a85096d4",
+    "semantic_hash": "f6cbb5f7fc68225ad5371f99a85096d4"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\controllers\\shop_products_controller.dart": {
+    "mtime": 1779763325.2926085,
+    "ast_hash": "5e9cdd4e7557da71bf9b51239f78a832",
+    "semantic_hash": "5e9cdd4e7557da71bf9b51239f78a832"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\controllers\\vendor_orders_controller.dart": {
+    "mtime": 1779763325.2926085,
+    "ast_hash": "011140ec715376e007012e3ad7a09c84",
+    "semantic_hash": "011140ec715376e007012e3ad7a09c84"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\controllers\\vendor_products_controller.dart": {
+    "mtime": 1779763325.2936127,
+    "ast_hash": "0ec770172970129d7708110775fb4887",
+    "semantic_hash": "0ec770172970129d7708110775fb4887"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\cart_screen.dart": {
+    "mtime": 1780952342.4596684,
+    "ast_hash": "03d73d5ec041a1a0489fcdfd09a6a421",
+    "semantic_hash": "03d73d5ec041a1a0489fcdfd09a6a421"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\customer\\buyer_order_detail_screen.dart": {
+    "mtime": 1780958998.3772237,
+    "ast_hash": "6055b4a1eeeb102fe0d25f4a83b9a505",
+    "semantic_hash": "6055b4a1eeeb102fe0d25f4a83b9a505"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\customer\\buyer_order_list_screen.dart": {
+    "mtime": 1780953806.7389848,
+    "ast_hash": "808b9ce0a7036e1261b6798de180ad60",
+    "semantic_hash": "808b9ce0a7036e1261b6798de180ad60"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\customer\\shop_storefront_screen.dart": {
+    "mtime": 1779991953.3118632,
+    "ast_hash": "197238fcd762a4d426d2a0355f1b9152",
+    "semantic_hash": "197238fcd762a4d426d2a0355f1b9152"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\marketplace_categories_screen.dart": {
+    "mtime": 1780954328.2195442,
+    "ast_hash": "459cb320eee87dfb53d24a63f8058d63",
+    "semantic_hash": "459cb320eee87dfb53d24a63f8058d63"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\marketplace_screen.dart": {
+    "mtime": 1780953997.7484388,
+    "ast_hash": "292a47527b80fd18d6acc2165c88c3b3",
+    "semantic_hash": "292a47527b80fd18d6acc2165c88c3b3"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\order_confirmation_screen.dart": {
+    "mtime": 1780612310.959493,
+    "ast_hash": "a74a3ff9ac9c3a3db2203b204002b0ce",
+    "semantic_hash": "a74a3ff9ac9c3a3db2203b204002b0ce"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\product_detail_screen.dart": {
+    "mtime": 1780954032.4754384,
+    "ast_hash": "2038701f3c9306176f766ebe4be0a876",
+    "semantic_hash": "2038701f3c9306176f766ebe4be0a876"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\shop_intro_screen.dart": {
+    "mtime": 1780952079.6413403,
+    "ast_hash": "eb731f016ee87d76f1a2c72d464eafc0",
+    "semantic_hash": "eb731f016ee87d76f1a2c72d464eafc0"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\vendor\\add_edit_product_screen.dart": {
+    "mtime": 1779991953.3138623,
+    "ast_hash": "a64a5252dbb1aadb5c51ae3d6d364a5a",
+    "semantic_hash": "a64a5252dbb1aadb5c51ae3d6d364a5a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\vendor\\edit_shop_screen.dart": {
+    "mtime": 1780612310.9604926,
+    "ast_hash": "cab676dddd1ea27de5aa5726d548d7d6",
+    "semantic_hash": "cab676dddd1ea27de5aa5726d548d7d6"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\vendor\\manual_kyc_screen.dart": {
+    "mtime": 1779991953.315025,
+    "ast_hash": "32b92ae1ef2ad9ecefaf0a670512fe4c",
+    "semantic_hash": "32b92ae1ef2ad9ecefaf0a670512fe4c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\vendor\\seller_dashboard_screen.dart": {
+    "mtime": 1779991953.3160255,
+    "ast_hash": "7da0232b2e50114e6653ea997abaff58",
+    "semantic_hash": "7da0232b2e50114e6653ea997abaff58"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\vendor\\shop_setup_screen.dart": {
+    "mtime": 1779991953.3160255,
+    "ast_hash": "d80b7217441e7784109085499a0634f7",
+    "semantic_hash": "d80b7217441e7784109085499a0634f7"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\vendor\\stripe_onboarding_screen.dart": {
+    "mtime": 1779833114.378123,
+    "ast_hash": "b5a84b24a19a62a10f72caa1b5b9ba70",
+    "semantic_hash": "b5a84b24a19a62a10f72caa1b5b9ba70"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\vendor\\vendor_order_detail_screen.dart": {
+    "mtime": 1779991953.317027,
+    "ast_hash": "d09ff5c5e74aa08a3fd4d6d0b3d85298",
+    "semantic_hash": "d09ff5c5e74aa08a3fd4d6d0b3d85298"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\vendor\\vendor_order_queue_screen.dart": {
+    "mtime": 1779991953.3180246,
+    "ast_hash": "9b5f6bde1f691ac54c904eba1159d808",
+    "semantic_hash": "9b5f6bde1f691ac54c904eba1159d808"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\screens\\vendor\\vendor_product_list_screen.dart": {
+    "mtime": 1779833114.380646,
+    "ast_hash": "6975eb3d7bc81bfeb410a02af7bc4607",
+    "semantic_hash": "6975eb3d7bc81bfeb410a02af7bc4607"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\widgets\\address_sheet.dart": {
+    "mtime": 1780952766.596907,
+    "ast_hash": "d8206ddebccf5c0e14080fefffb874a7",
+    "semantic_hash": "d8206ddebccf5c0e14080fefffb874a7"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\widgets\\cart_line_item.dart": {
+    "mtime": 1779833114.380646,
+    "ast_hash": "5c85fadbc093e458a91c19cfb247d9b2",
+    "semantic_hash": "5c85fadbc093e458a91c19cfb247d9b2"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\widgets\\product_card.dart": {
+    "mtime": 1780875700.3535988,
+    "ast_hash": "e01e4752a01e5135611db7f9b4315a80",
+    "semantic_hash": "e01e4752a01e5135611db7f9b4315a80"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\widgets\\product_glyph.dart": {
+    "mtime": 1779763325.302746,
+    "ast_hash": "ffd08c51d7c3f32c60104a025f9453e1",
+    "semantic_hash": "ffd08c51d7c3f32c60104a025f9453e1"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\widgets\\product_reviews_section.dart": {
+    "mtime": 1780875010.3633077,
+    "ast_hash": "29d63a2677e00b7bba2b8f233116d51f",
+    "semantic_hash": "29d63a2677e00b7bba2b8f233116d51f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\widgets\\star_rating_widget.dart": {
+    "mtime": 1780875001.0149107,
+    "ast_hash": "9a5e21b67036248339f5959600f145b9",
+    "semantic_hash": "9a5e21b67036248339f5959600f145b9"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\widgets\\subscription_toggle.dart": {
+    "mtime": 1779991953.3180246,
+    "ast_hash": "50ee92168900ea4a3ad5baa11917e891",
+    "semantic_hash": "50ee92168900ea4a3ad5baa11917e891"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\marketplace\\presentation\\widgets\\web_checkout_resume_listener.dart": {
+    "mtime": 1780612310.9604926,
+    "ast_hash": "a72930c8879898d37722e8c9c05ba75e",
+    "semantic_hash": "a72930c8879898d37722e8c9c05ba75e"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\data\\datasources\\matching_supabase_data_source.dart": {
+    "mtime": 1780875700.3546042,
+    "ast_hash": "77faed539cb6cf1a4b1dc6e135454726",
+    "semantic_hash": "77faed539cb6cf1a4b1dc6e135454726"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\data\\models\\chat_message.dart": {
+    "mtime": 1780875700.3546042,
+    "ast_hash": "4d1f8c3fe39a5d48a7ef93740e7cbc2e",
+    "semantic_hash": "4d1f8c3fe39a5d48a7ef93740e7cbc2e"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\data\\models\\chat_thread.dart": {
+    "mtime": 1779763325.302746,
+    "ast_hash": "9a18dcff064d6af54a5e7600c7cfdf74",
+    "semantic_hash": "9a18dcff064d6af54a5e7600c7cfdf74"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\data\\models\\discovery_candidate.dart": {
+    "mtime": 1779763325.302746,
+    "ast_hash": "c8be8cd5355c1368b196a81887a0ee6d",
+    "semantic_hash": "c8be8cd5355c1368b196a81887a0ee6d"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\data\\models\\match_inbox_item.dart": {
+    "mtime": 1780584273.3115602,
+    "ast_hash": "66e9858dec3ed66139c13d1718c24344",
+    "semantic_hash": "66e9858dec3ed66139c13d1718c24344"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\data\\models\\matching_discovery_row.dart": {
+    "mtime": 1780584273.3115602,
+    "ast_hash": "4ba4ee3d14c31d0333184864c5b49fa7",
+    "semantic_hash": "4ba4ee3d14c31d0333184864c5b49fa7"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\data\\models\\pet_geo_point.dart": {
+    "mtime": 1779763325.3092804,
+    "ast_hash": "c5b57b11a055db14804a9b948d07dd21",
+    "semantic_hash": "c5b57b11a055db14804a9b948d07dd21"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\data\\models\\pet_mutual_match.dart": {
+    "mtime": 1779763325.3099287,
+    "ast_hash": "3ecf2d46c02ea19f5b7666999e80f255",
+    "semantic_hash": "3ecf2d46c02ea19f5b7666999e80f255"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\data\\models\\pet_swipe.dart": {
+    "mtime": 1779763325.3099287,
+    "ast_hash": "f9aebbda4eab77cd739077b36f2f3605",
+    "semantic_hash": "f9aebbda4eab77cd739077b36f2f3605"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\data\\repositories\\matching_repository.dart": {
+    "mtime": 1781013596.7128904,
+    "ast_hash": "140601641face47dd13f81406fa39794",
+    "semantic_hash": "140601641face47dd13f81406fa39794"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\index.dart": {
+    "mtime": 1780857604.7119067,
+    "ast_hash": "75c0ab8f28d1954a3fb9306787f92a28",
+    "semantic_hash": "75c0ab8f28d1954a3fb9306787f92a28"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\matching_routes.dart": {
+    "mtime": 1781012913.0104704,
+    "ast_hash": "8b460e53357aea8028b4f9dd5c5e3e3e",
+    "semantic_hash": "8b460e53357aea8028b4f9dd5c5e3e3e"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\presentation\\controllers\\chat_conversation_controller.dart": {
+    "mtime": 1780875700.3546042,
+    "ast_hash": "33ea0b4f9fc3ad1b01437de276a6f43e",
+    "semantic_hash": "33ea0b4f9fc3ad1b01437de276a6f43e"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\presentation\\controllers\\discovery_candidates_controller.dart": {
+    "mtime": 1780612310.9630017,
+    "ast_hash": "7ba57d4cfdbad89e5ae2e3e827c1ebba",
+    "semantic_hash": "7ba57d4cfdbad89e5ae2e3e827c1ebba"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\presentation\\controllers\\discovery_controller.dart": {
+    "mtime": 1780584273.315713,
+    "ast_hash": "f2ea9d7a2872bba23079950d7a50132a",
+    "semantic_hash": "f2ea9d7a2872bba23079950d7a50132a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\presentation\\controllers\\match_liked_controller.dart": {
+    "mtime": 1781013590.7360513,
+    "ast_hash": "4053b4acb68244da03aefa1ee021f1b7",
+    "semantic_hash": "4053b4acb68244da03aefa1ee021f1b7"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\presentation\\controllers\\match_preference_controller.dart": {
+    "mtime": 1780584273.315713,
+    "ast_hash": "2d6f241f69fdd632c8819cc22095e2e0",
+    "semantic_hash": "2d6f241f69fdd632c8819cc22095e2e0"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\presentation\\controllers\\match_preferences_state.dart": {
+    "mtime": 1779763325.3099287,
+    "ast_hash": "0b34d8967f5d3ad52b8b7ccbef0b37f4",
+    "semantic_hash": "0b34d8967f5d3ad52b8b7ccbef0b37f4"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\presentation\\controllers\\matches_inbox_controller.dart": {
+    "mtime": 1779763325.3099287,
+    "ast_hash": "037af6e768f74b0f2b112bff85b85178",
+    "semantic_hash": "037af6e768f74b0f2b112bff85b85178"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\presentation\\controllers\\mutual_match_realtime_provider.dart": {
+    "mtime": 1779763325.3099287,
+    "ast_hash": "60fb4739aae963bc3c80fcf550bf8f84",
+    "semantic_hash": "60fb4739aae963bc3c80fcf550bf8f84"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\presentation\\matching_navigation.dart": {
+    "mtime": 1781012948.5772529,
+    "ast_hash": "d865eb7b2c6ce88c08d943136934ef7f",
+    "semantic_hash": "d865eb7b2c6ce88c08d943136934ef7f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\presentation\\screens\\chat_screen.dart": {
+    "mtime": 1780875700.3546042,
+    "ast_hash": "44b6fc07cd7f5953f39280eaa1f9d14b",
+    "semantic_hash": "44b6fc07cd7f5953f39280eaa1f9d14b"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\presentation\\screens\\match_liked_screen.dart": {
+    "mtime": 1781016227.1935205,
+    "ast_hash": "593f08e952f2647416323a82c0f31299",
+    "semantic_hash": "593f08e952f2647416323a82c0f31299"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\presentation\\screens\\matches_inbox_screen.dart": {
+    "mtime": 1780612310.9650013,
+    "ast_hash": "abe70709877fc38ec91d9791850a479d",
+    "semantic_hash": "abe70709877fc38ec91d9791850a479d"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\presentation\\screens\\matching_screen.dart": {
+    "mtime": 1780874282.506421,
+    "ast_hash": "77b2b24a9106eef36c4f6fbc30a02c72",
+    "semantic_hash": "77b2b24a9106eef36c4f6fbc30a02c72"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\presentation\\widgets\\match_celebration_overlay.dart": {
+    "mtime": 1780612310.9670012,
+    "ast_hash": "b2dea103fe382fb1fe102bc35f54f75e",
+    "semantic_hash": "b2dea103fe382fb1fe102bc35f54f75e"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\matching\\presentation\\widgets\\match_preferences_sheet.dart": {
+    "mtime": 1779991953.3231676,
+    "ast_hash": "04137bbb7f2a561d6d3d60b36d5a6e7d",
+    "semantic_hash": "04137bbb7f2a561d6d3d60b36d5a6e7d"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\offers\\offers_routes.dart": {
+    "mtime": 1780952145.4210262,
+    "ast_hash": "7b4cf5da836470c3d80e88dd5ecfbc10",
+    "semantic_hash": "7b4cf5da836470c3d80e88dd5ecfbc10"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\offers\\presentation\\screens\\offers_screen.dart": {
+    "mtime": 1780954345.4932292,
+    "ast_hash": "4f2a81099db588ff4c6829877764fef1",
+    "semantic_hash": "4f2a81099db588ff4c6829877764fef1"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\data\\models\\activity_level.dart": {
+    "mtime": 1779832352.496752,
+    "ast_hash": "4875ec444d1d3dd0ae816cf9ab80e355",
+    "semantic_hash": "4875ec444d1d3dd0ae816cf9ab80e355"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\data\\models\\pet.dart": {
+    "mtime": 1779832352.496752,
+    "ast_hash": "e00b846f857ab9d40bf5ef77b1a33a11",
+    "semantic_hash": "e00b846f857ab9d40bf5ef77b1a33a11"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\data\\models\\pet_gender.dart": {
+    "mtime": 1779832352.496752,
+    "ast_hash": "74d2360a4b03ae6b626eb01536d9d80f",
+    "semantic_hash": "74d2360a4b03ae6b626eb01536d9d80f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\data\\models\\pet_species.dart": {
+    "mtime": 1779833114.3861547,
+    "ast_hash": "278a6e8885fe6df01b55e0ad82729cbe",
+    "semantic_hash": "278a6e8885fe6df01b55e0ad82729cbe"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\data\\repositories\\pet_repository.dart": {
+    "mtime": 1780619883.130033,
+    "ast_hash": "947ceefacfab12ca57e0541e3e7b3a90",
+    "semantic_hash": "947ceefacfab12ca57e0541e3e7b3a90"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\domain\\services\\breed_identification_service.dart": {
+    "mtime": 1780866311.1454787,
+    "ast_hash": "23a4681acc59ed46303182ea7edc727b",
+    "semantic_hash": "23a4681acc59ed46303182ea7edc727b"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\index.dart": {
+    "mtime": 1780857590.2484603,
+    "ast_hash": "e4eca5dcc13805f9b2654c76af2b4e0f",
+    "semantic_hash": "e4eca5dcc13805f9b2654c76af2b4e0f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\pet_profile_routes.dart": {
+    "mtime": 1780857519.3247714,
+    "ast_hash": "db0e52f36759354b34bef8524cf4fe49",
+    "semantic_hash": "db0e52f36759354b34bef8524cf4fe49"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\presentation\\controllers\\active_pet_controller.dart": {
+    "mtime": 1779832352.496752,
+    "ast_hash": "9efbbfd1dcce748b517e5f4e90fd0d9c",
+    "semantic_hash": "9efbbfd1dcce748b517e5f4e90fd0d9c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\presentation\\controllers\\discovery_visibility_controller.dart": {
+    "mtime": 1779832352.496752,
+    "ast_hash": "47d9e9cd6d286b5ae808121827fcf7ef",
+    "semantic_hash": "47d9e9cd6d286b5ae808121827fcf7ef"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\presentation\\controllers\\edit_profile_controller.dart": {
+    "mtime": 1780619883.130033,
+    "ast_hash": "2a11d384ae6f5bb3cf70a5d51857faf6",
+    "semantic_hash": "2a11d384ae6f5bb3cf70a5d51857faf6"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\presentation\\controllers\\pet_list_controller.dart": {
+    "mtime": 1780707971.786886,
+    "ast_hash": "1153aa8db7066b09973319ac2b6cc02d",
+    "semantic_hash": "1153aa8db7066b09973319ac2b6cc02d"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\presentation\\screens\\edit_profile_screen.dart": {
+    "mtime": 1780874282.4973216,
+    "ast_hash": "8c7ac6c584d760630f3ea1da8cc4cc1c",
+    "semantic_hash": "8c7ac6c584d760630f3ea1da8cc4cc1c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\presentation\\screens\\manage_pets_screen.dart": {
+    "mtime": 1780584273.322074,
+    "ast_hash": "9d94580f209b5d0ac50f9df07cff1d2a",
+    "semantic_hash": "9d94580f209b5d0ac50f9df07cff1d2a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\presentation\\screens\\onboarding_screen.dart": {
+    "mtime": 1780874282.4872923,
+    "ast_hash": "4521eb05355ca7de4d875b3263329d07",
+    "semantic_hash": "4521eb05355ca7de4d875b3263329d07"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\presentation\\screens\\pet_profile_screen.dart": {
+    "mtime": 1780875700.3535988,
+    "ast_hash": "fa1e2c7f3e99935226d8a00d7da3a5b8",
+    "semantic_hash": "fa1e2c7f3e99935226d8a00d7da3a5b8"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\presentation\\widgets\\breed_identifier_widget.dart": {
+    "mtime": 1780874780.8160415,
+    "ast_hash": "206b19b0a7be51b20262bb6c3e6ebd55",
+    "semantic_hash": "206b19b0a7be51b20262bb6c3e6ebd55"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\presentation\\widgets\\pet_activity_options.dart": {
+    "mtime": 1779763325.3276198,
+    "ast_hash": "ae79d6ad746435383ff7c573d1271c8c",
+    "semantic_hash": "ae79d6ad746435383ff7c573d1271c8c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\pet_profile\\presentation\\widgets\\pet_switcher_sheet.dart": {
+    "mtime": 1780584273.3250206,
+    "ast_hash": "d659afbc5f0f24ece6357d95e979f618",
+    "semantic_hash": "d659afbc5f0f24ece6357d95e979f618"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\profile\\presentation\\screens\\me_screen.dart": {
+    "mtime": 1780968784.5248911,
+    "ast_hash": "74eb3c91cefff46a669bf9533fc57c26",
+    "semantic_hash": "74eb3c91cefff46a669bf9533fc57c26"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\settings\\presentation\\screens\\settings_screen.dart": {
+    "mtime": 1780968727.644509,
+    "ast_hash": "452996ed4fb1739a87c789d5d4c9ff9c",
+    "semantic_hash": "452996ed4fb1739a87c789d5d4c9ff9c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\settings\\settings_routes.dart": {
+    "mtime": 1780952730.0203872,
+    "ast_hash": "5d35e9d6a3a126cd4d5ccf98670839c7",
+    "semantic_hash": "5d35e9d6a3a126cd4d5ccf98670839c7"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\data\\models\\app_notification.dart": {
+    "mtime": 1780584273.3255863,
+    "ast_hash": "552b4833994273620fcd9246d34def57",
+    "semantic_hash": "552b4833994273620fcd9246d34def57"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\data\\models\\comment.dart": {
+    "mtime": 1780584273.3261285,
+    "ast_hash": "2aa514aca2e2b69dd629349cb216b524",
+    "semantic_hash": "2aa514aca2e2b69dd629349cb216b524"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\data\\models\\feed_post.dart": {
+    "mtime": 1780863758.0284696,
+    "ast_hash": "bb7323d2c30b8a498c2a238972e9946d",
+    "semantic_hash": "bb7323d2c30b8a498c2a238972e9946d"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\data\\models\\pet_search_result.dart": {
+    "mtime": 1779763325.3276198,
+    "ast_hash": "75eb8b9770ba2c4ecd6a02961d7327ee",
+    "semantic_hash": "75eb8b9770ba2c4ecd6a02961d7327ee"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\data\\models\\pet_stats.dart": {
+    "mtime": 1779763325.3323781,
+    "ast_hash": "5bc92df6f85bf02444c3ac5dd371f3c7",
+    "semantic_hash": "5bc92df6f85bf02444c3ac5dd371f3c7"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\data\\models\\story.dart": {
+    "mtime": 1779763325.3328855,
+    "ast_hash": "cae5ae061b8942e86f8e9d98117f560e",
+    "semantic_hash": "cae5ae061b8942e86f8e9d98117f560e"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\data\\repositories\\comment_repository.dart": {
+    "mtime": 1780584273.3266666,
+    "ast_hash": "91a0def30dbc00fa519bd062e723fe08",
+    "semantic_hash": "91a0def30dbc00fa519bd062e723fe08"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\data\\repositories\\notification_repository.dart": {
+    "mtime": 1780584273.3272045,
+    "ast_hash": "3aaf8be07ac6614065ec27908b0d18fc",
+    "semantic_hash": "3aaf8be07ac6614065ec27908b0d18fc"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\data\\repositories\\social_repository.dart": {
+    "mtime": 1780863777.475631,
+    "ast_hash": "e8ca4e9981677fef82b3c9f80bad200f",
+    "semantic_hash": "e8ca4e9981677fef82b3c9f80bad200f"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\data\\repositories\\story_repository.dart": {
+    "mtime": 1780875700.3546042,
+    "ast_hash": "f1c9b4bf454befc6137abd21f85a918a",
+    "semantic_hash": "f1c9b4bf454befc6137abd21f85a918a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\index.dart": {
+    "mtime": 1780857600.1303256,
+    "ast_hash": "5d4ed7f5b405a19bb23a30d2c0947de9",
+    "semantic_hash": "5d4ed7f5b405a19bb23a30d2c0947de9"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\controllers\\comment_controller.dart": {
+    "mtime": 1780584273.32916,
+    "ast_hash": "fccfdf66d7afe678fe843883deea7858",
+    "semantic_hash": "fccfdf66d7afe678fe843883deea7858"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\controllers\\create_post_controller.dart": {
+    "mtime": 1780092009.472971,
+    "ast_hash": "4267722b1b250aecfa74cb122c2abce6",
+    "semantic_hash": "4267722b1b250aecfa74cb122c2abce6"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\controllers\\follow_controller.dart": {
+    "mtime": 1779832352.5100346,
+    "ast_hash": "08e05148d23a7a783d1ec10ebddd087d",
+    "semantic_hash": "08e05148d23a7a783d1ec10ebddd087d"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\controllers\\notification_controller.dart": {
+    "mtime": 1780092009.4739718,
+    "ast_hash": "4bf6f9dc380fe655f15cc7c8f2a25dce",
+    "semantic_hash": "4bf6f9dc380fe655f15cc7c8f2a25dce"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\controllers\\social_controller.dart": {
+    "mtime": 1780092009.4749703,
+    "ast_hash": "4d20a0368a199d5e72b5544217adcb08",
+    "semantic_hash": "4d20a0368a199d5e72b5544217adcb08"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\controllers\\social_profile_controller.dart": {
+    "mtime": 1780584273.3298776,
+    "ast_hash": "bbf1632d0d535b3397e0fd5659732d67",
+    "semantic_hash": "bbf1632d0d535b3397e0fd5659732d67"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\controllers\\story_controller.dart": {
+    "mtime": 1780875700.3535988,
+    "ast_hash": "cf865730c952068caf60f5edef8d8dc1",
+    "semantic_hash": "cf865730c952068caf60f5edef8d8dc1"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\screens\\create_post_screen.dart": {
+    "mtime": 1780874779.7945216,
+    "ast_hash": "9cf40e05f3ea0cd32ee8786d8ffcdef0",
+    "semantic_hash": "9cf40e05f3ea0cd32ee8786d8ffcdef0"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\screens\\create_story_screen.dart": {
+    "mtime": 1780874785.1662183,
+    "ast_hash": "2ed9e60089d4855af902947ddff1b81a",
+    "semantic_hash": "2ed9e60089d4855af902947ddff1b81a"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\screens\\notifications_screen.dart": {
+    "mtime": 1780968615.6604645,
+    "ast_hash": "94c8ddb8b4a1ae779184b1cf03a84d1c",
+    "semantic_hash": "94c8ddb8b4a1ae779184b1cf03a84d1c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\screens\\post_detail_screen.dart": {
+    "mtime": 1780864814.7733388,
+    "ast_hash": "4428a5394a6f7f3b0646f67365830946",
+    "semantic_hash": "4428a5394a6f7f3b0646f67365830946"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\screens\\social_profile_screen.dart": {
+    "mtime": 1780612310.9715087,
+    "ast_hash": "0fcd68fddb7d0b24bbaf5cbf068c1fc7",
+    "semantic_hash": "0fcd68fddb7d0b24bbaf5cbf068c1fc7"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\screens\\social_screen.dart": {
+    "mtime": 1780875847.7878594,
+    "ast_hash": "fd8d8ec23b5ead37d96dafe091cae754",
+    "semantic_hash": "fd8d8ec23b5ead37d96dafe091cae754"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\screens\\story_viewer_screen.dart": {
+    "mtime": 1780875700.3546042,
+    "ast_hash": "38298d2e9b78ef6d4473e14e94dee364",
+    "semantic_hash": "38298d2e9b78ef6d4473e14e94dee364"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\widgets\\post_comments_bottom_sheet.dart": {
+    "mtime": 1780612310.9740312,
+    "ast_hash": "e2924182864a1249f1ec305ed6ca1dce",
+    "semantic_hash": "e2924182864a1249f1ec305ed6ca1dce"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\presentation\\widgets\\reaction_burst.dart": {
+    "mtime": 1779833114.395669,
+    "ast_hash": "309558456078722aa21010dacfffac7c",
+    "semantic_hash": "309558456078722aa21010dacfffac7c"
+  },
+  "G:\\GitHub\\petfolio\\lib\\features\\social\\social_routes.dart": {
+    "mtime": 1781012899.4545267,
+    "ast_hash": "bad5e4a16555e0da6f928cf15278cf09",
+    "semantic_hash": "bad5e4a16555e0da6f928cf15278cf09"
+  },
+  "G:\\GitHub\\petfolio\\lib\\firebase_options.dart": {
+    "mtime": 1780612310.9740312,
+    "ast_hash": "9d892236b4925a83af13663a9f816340",
+    "semantic_hash": "9d892236b4925a83af13663a9f816340"
+  },
+  "G:\\GitHub\\petfolio\\lib\\integration_test_gate_io.dart": {
+    "mtime": 1780953996.9970148,
+    "ast_hash": "de4772ecc85475cf88c618ed4212ecb4",
+    "semantic_hash": "de4772ecc85475cf88c618ed4212ecb4"
+  },
+  "G:\\GitHub\\petfolio\\lib\\integration_test_gate_stub.dart": {
+    "mtime": 1780953996.9886334,
+    "ast_hash": "5c09c9109441b07e7f2dc23c16b80e18",
+    "semantic_hash": "5c09c9109441b07e7f2dc23c16b80e18"
+  },
+  "G:\\GitHub\\petfolio\\lib\\main.dart": {
+    "mtime": 1780953996.9970148,
+    "ast_hash": "82845e011191f47fbe91f9690d9355d8",
+    "semantic_hash": "82845e011191f47fbe91f9690d9355d8"
+  },
+  "G:\\GitHub\\petfolio\\lib\\marionette_debug_gate_io.dart": {
+    "mtime": 1781012448.5631702,
+    "ast_hash": "33597919ecadb1d27537e99027c8e3d7",
+    "semantic_hash": "33597919ecadb1d27537e99027c8e3d7"
+  },
+  "G:\\GitHub\\petfolio\\lib\\marionette_debug_gate_stub.dart": {
+    "mtime": 1781012448.582053,
+    "ast_hash": "3936eab3b38208cbe2d1a25570ca0d39",
+    "semantic_hash": "3936eab3b38208cbe2d1a25570ca0d39"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\functions\\_shared\\fcm_send.ts": {
+    "mtime": 1780612310.9780314,
+    "ast_hash": "7dedfe71b10212c67f8b223f205fece0",
+    "semantic_hash": "7dedfe71b10212c67f8b223f205fece0"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\functions\\create-payment-intent\\index.ts": {
+    "mtime": 1780612310.979031,
+    "ast_hash": "eb045f9947f9824730be58cc84bcf975",
+    "semantic_hash": "eb045f9947f9824730be58cc84bcf975"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\functions\\process-care-fcm-reminders\\index.ts": {
+    "mtime": 1780612310.9800313,
+    "ast_hash": "c436b71d4f960a1898fc78e06fed97ed",
+    "semantic_hash": "c436b71d4f960a1898fc78e06fed97ed"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\functions\\process-fcm-outbox\\index.ts": {
+    "mtime": 1780612310.9810312,
+    "ast_hash": "35a3c8bc4b0ad643deb5b3b701657e6e",
+    "semantic_hash": "35a3c8bc4b0ad643deb5b3b701657e6e"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\functions\\register-web-push-subscription\\index.ts": {
+    "mtime": 1780612310.9810312,
+    "ast_hash": "88064d9b25183a666c0190e54ec557a0",
+    "semantic_hash": "88064d9b25183a666c0190e54ec557a0"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\functions\\send-fcm-notification\\index.ts": {
+    "mtime": 1780612310.9820316,
+    "ast_hash": "3270c3ba4da0b0a5617d4a37897f2038",
+    "semantic_hash": "3270c3ba4da0b0a5617d4a37897f2038"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\functions\\stripe-onboard-vendor\\index.ts": {
+    "mtime": 1779221213.9163568,
+    "ast_hash": "9dacbe1eacadc4fba33aae1c5c3f6961",
+    "semantic_hash": "9dacbe1eacadc4fba33aae1c5c3f6961"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\functions\\stripe-webhook\\index.ts": {
+    "mtime": 1780612310.9825351,
+    "ast_hash": "3a9b8bce2312d6f4624c669b93c9624a",
+    "semantic_hash": "3a9b8bce2312d6f4624c669b93c9624a"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260512000000_marketplace.sql": {
+    "mtime": 1778553470.9265313,
+    "ast_hash": "ae86db2678bb1422df17f9961de869d1",
+    "semantic_hash": "ae86db2678bb1422df17f9961de869d1"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260513000000_add_bio_to_pets.sql": {
+    "mtime": 1778871281.93519,
+    "ast_hash": "36f80a30c7b20c73608e93bde3e533b2",
+    "semantic_hash": "36f80a30c7b20c73608e93bde3e533b2"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260513192825_pet_care_health.sql": {
+    "mtime": 1778700697.3243585,
+    "ast_hash": "7cda909c682f1f5b496013646659d879",
+    "semantic_hash": "7cda909c682f1f5b496013646659d879"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260514000000_add_follows_table.sql": {
+    "mtime": 1778871281.9371972,
+    "ast_hash": "181497401d16e4df58dc226fd510524c",
+    "semantic_hash": "181497401d16e4df58dc226fd510524c"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260514000001_remove_memorial_feature.sql": {
+    "mtime": 1778871281.9371972,
+    "ast_hash": "28b6e8655de06ff98218a4dd64c2ac9e",
+    "semantic_hash": "28b6e8655de06ff98218a4dd64c2ac9e"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260514000002_add_comments_table.sql": {
+    "mtime": 1778871281.9465716,
+    "ast_hash": "3ac5e15f71e8671d17f1fb7d51d26134",
+    "semantic_hash": "3ac5e15f71e8671d17f1fb7d51d26134"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260514000003_social_and_gamification_refinements.sql": {
+    "mtime": 1778871281.9556487,
+    "ast_hash": "dec5d153dda35248af2d7b7273739854",
+    "semantic_hash": "dec5d153dda35248af2d7b7273739854"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260514000004_auto_count_triggers.sql": {
+    "mtime": 1778871281.9599898,
+    "ast_hash": "c42c2816051e35ad0dbc6252387e64c6",
+    "semantic_hash": "c42c2816051e35ad0dbc6252387e64c6"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260515000000_fix_gamification_missing_table.sql": {
+    "mtime": 1781012448.5631702,
+    "ast_hash": "54ca614ef55343df0b4d58e34ff4cefe",
+    "semantic_hash": "54ca614ef55343df0b4d58e34ff4cefe"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260515140000_care_streaks_badges.sql": {
+    "mtime": 1778881098.5669312,
+    "ast_hash": "c5f8d81d9f3cc907585716f5b5bab3a3",
+    "semantic_hash": "c5f8d81d9f3cc907585716f5b5bab3a3"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260515180000_care_streaks_realtime.sql": {
+    "mtime": 1778881098.5669312,
+    "ast_hash": "a3e2c365f2f6dac002fe0e6cacd863b5",
+    "semantic_hash": "a3e2c365f2f6dac002fe0e6cacd863b5"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260515193000_check_daily_completion_completion_date.sql": {
+    "mtime": 1778881098.5679338,
+    "ast_hash": "ea870c055ca72345416b62fbc13d3908",
+    "semantic_hash": "ea870c055ca72345416b62fbc13d3908"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260516120000_care_logs_type_day.sql": {
+    "mtime": 1781012448.5686598,
+    "ast_hash": "1b6eb07b17a942b1e516462fa716274e",
+    "semantic_hash": "1b6eb07b17a942b1e516462fa716274e"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260516200000_pets_display_order_archive.sql": {
+    "mtime": 1778881098.5689347,
+    "ast_hash": "636da84b208fa43755322cac562e9122",
+    "semantic_hash": "636da84b208fa43755322cac562e9122"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260517000000_drop_duplicate_care_logs_unique_index.sql": {
+    "mtime": 1781012448.5686598,
+    "ast_hash": "a7e5f2f64c94fceba2731b7a6ff71c2d",
+    "semantic_hash": "a7e5f2f64c94fceba2731b7a6ff71c2d"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260517010000_matching_postgis_swipes_matches.sql": {
+    "mtime": 1779035407.3207314,
+    "ast_hash": "eb5a156eba98fdc8ba1f9d1290eea057",
+    "semantic_hash": "eb5a156eba98fdc8ba1f9d1290eea057"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260517120000_matches_realtime.sql": {
+    "mtime": 1779035407.3207314,
+    "ast_hash": "5070ef3ab60a6dd87a8181feb2c8fc06",
+    "semantic_hash": "5070ef3ab60a6dd87a8181feb2c8fc06"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260518100000_swipes_update_policy.sql": {
+    "mtime": 1779035407.3207314,
+    "ast_hash": "b7d013d861a6c5c4766e0b4cf7d060bd",
+    "semantic_hash": "b7d013d861a6c5c4766e0b4cf7d060bd"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260518110000_matching_discovery_pagination_filters.sql": {
+    "mtime": 1779035407.3268163,
+    "ast_hash": "ca6169cc61374a30826a2ad5e1f885cc",
+    "semantic_hash": "ca6169cc61374a30826a2ad5e1f885cc"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260518120000_pets_is_discoverable.sql": {
+    "mtime": 1779035407.3268163,
+    "ast_hash": "f298d1070d90a4acbbe593a99ace8e35",
+    "semantic_hash": "f298d1070d90a4acbbe593a99ace8e35"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260518130000_set_pet_location_point_rpc.sql": {
+    "mtime": 1779035407.3268163,
+    "ast_hash": "f5189cf058adb4381c9f363210bc9ec7",
+    "semantic_hash": "f5189cf058adb4381c9f363210bc9ec7"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260518140000_chat_threads_mutual_match.sql": {
+    "mtime": 1779035407.3268163,
+    "ast_hash": "92485848a721a3e5c3d9e718bab52121",
+    "semantic_hash": "92485848a721a3e5c3d9e718bab52121"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260518150000_seed_matching_discoverable_pets.sql": {
+    "mtime": 1779035407.3268163,
+    "ast_hash": "2aded52dfd4aa74f06b11fabf901d395",
+    "semantic_hash": "2aded52dfd4aa74f06b11fabf901d395"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260518160000_matching_discovery_exclude_own_pets.sql": {
+    "mtime": 1779035407.3288229,
+    "ast_hash": "7ee4dd841394fda2029073efe5189554",
+    "semantic_hash": "7ee4dd841394fda2029073efe5189554"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260518170000_get_match_inbox_rpc.sql": {
+    "mtime": 1779035407.3288229,
+    "ast_hash": "5f351a4b08a6633222db3297c35342e3",
+    "semantic_hash": "5f351a4b08a6633222db3297c35342e3"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260518180000_chat_threads_race_condition.sql": {
+    "mtime": 1779035407.3288229,
+    "ast_hash": "4a8e6334313189505458b5484831dcff",
+    "semantic_hash": "4a8e6334313189505458b5484831dcff"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260518190000_swipes_advanced_actions.sql": {
+    "mtime": 1779035407.3298304,
+    "ast_hash": "b607c4136ec5db8c00460189dc038546",
+    "semantic_hash": "b607c4136ec5db8c00460189dc038546"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260518200000_pr6_review_fixes.sql": {
+    "mtime": 1779035407.3298304,
+    "ast_hash": "c0bc1fba00b38783b3a6eeba6beac11b",
+    "semantic_hash": "c0bc1fba00b38783b3a6eeba6beac11b"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260518210000_drop_pets_discoverable_location_idx.sql": {
+    "mtime": 1779035407.3309844,
+    "ast_hash": "24ffe4af631d4d9f3afcbc03d11fa571",
+    "semantic_hash": "24ffe4af631d4d9f3afcbc03d11fa571"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260519000000_shops_table.sql": {
+    "mtime": 1779221213.9183693,
+    "ast_hash": "7f8bb012181f3822f2ba33b5b79d5156",
+    "semantic_hash": "7f8bb012181f3822f2ba33b5b79d5156"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260519010000_products_vendor_columns.sql": {
+    "mtime": 1779221213.9183693,
+    "ast_hash": "9faa09a0f996f84a017513a71f8dd7a4",
+    "semantic_hash": "9faa09a0f996f84a017513a71f8dd7a4"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260519020000_orders_vendor_columns.sql": {
+    "mtime": 1779221213.9193776,
+    "ast_hash": "eb0ff87b37a1074b5ed85025dde757a7",
+    "semantic_hash": "eb0ff87b37a1074b5ed85025dde757a7"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260519030000_marketplace_images_bucket.sql": {
+    "mtime": 1779221213.9193776,
+    "ast_hash": "619aa4a3f73d4a1ec4e7e45a6a577987",
+    "semantic_hash": "619aa4a3f73d4a1ec4e7e45a6a577987"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260519040000_vendor_kyc_ledger.sql": {
+    "mtime": 1779221213.9203832,
+    "ast_hash": "8ad8c3980780c9ed535bd2d7b77a51a9",
+    "semantic_hash": "8ad8c3980780c9ed535bd2d7b77a51a9"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260519050000_kyc_fixes_and_admin.sql": {
+    "mtime": 1779221213.9203832,
+    "ast_hash": "a34fabe3aaa8cf923ceaa4d5e483d9b5",
+    "semantic_hash": "a34fabe3aaa8cf923ceaa4d5e483d9b5"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260519060000_expand_shop_attributes.sql": {
+    "mtime": 1779221213.9213836,
+    "ast_hash": "1a31a8e047b4d20097970c41c6419a75",
+    "semantic_hash": "1a31a8e047b4d20097970c41c6419a75"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260520000000_add_reported_posts.sql": {
+    "mtime": 1779221213.9213836,
+    "ast_hash": "f96fb1dee4d90161b172482b8c663d75",
+    "semantic_hash": "f96fb1dee4d90161b172482b8c663d75"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260520120000_admin_kyc_rpc.sql": {
+    "mtime": 1779318700.7671907,
+    "ast_hash": "fa945dfdb4940382c2fd6be8bc56e702",
+    "semantic_hash": "fa945dfdb4940382c2fd6be8bc56e702"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260521000000_review_fixes.sql": {
+    "mtime": 1779221213.9223833,
+    "ast_hash": "1c483fb213fcb4466f8bb1235d82aa72",
+    "semantic_hash": "1c483fb213fcb4466f8bb1235d82aa72"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260521120000_checkout_transaction_rpc.sql": {
+    "mtime": 1779318700.7671907,
+    "ast_hash": "83338539964ed1b021e1a3ceba55ca43",
+    "semantic_hash": "83338539964ed1b021e1a3ceba55ca43"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260521130000_notifications_type_check.sql": {
+    "mtime": 1779318700.7671907,
+    "ast_hash": "b2e5c7983be193fadfa7f9c49bc7fce5",
+    "semantic_hash": "b2e5c7983be193fadfa7f9c49bc7fce5"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260522000000_fix_daily_completion_gamification.sql": {
+    "mtime": 1779318700.7701073,
+    "ast_hash": "b8542938946d276cbf3cec5aa1f13a6d",
+    "semantic_hash": "b8542938946d276cbf3cec5aa1f13a6d"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260523100000_checkout_pricing_and_reservations.sql": {
+    "mtime": 1779318700.7701073,
+    "ast_hash": "3c0d386071cb8c58989abbb9b708854c",
+    "semantic_hash": "3c0d386071cb8c58989abbb9b708854c"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260523110000_post_images_bucket.sql": {
+    "mtime": 1779318700.7701073,
+    "ast_hash": "705acc19327afd27fd48144172fe0f43",
+    "semantic_hash": "705acc19327afd27fd48144172fe0f43"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260523120000_reject_vendor_kyc.sql": {
+    "mtime": 1779318700.7701073,
+    "ast_hash": "23bf4f58f75e943c3879ffca7430f274",
+    "semantic_hash": "23bf4f58f75e943c3879ffca7430f274"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260523120001_notifications_type_check_safe.sql": {
+    "mtime": 1779318700.7701073,
+    "ast_hash": "362af9e8c24743dacef40d760a97fff0",
+    "semantic_hash": "362af9e8c24743dacef40d760a97fff0"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260523130000_medical_documents_bucket.sql": {
+    "mtime": 1779318700.7701073,
+    "ast_hash": "7a27d78e5bb1f5d6b5b392fb0822f37f",
+    "semantic_hash": "7a27d78e5bb1f5d6b5b392fb0822f37f"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260523140000_reported_posts_moderation.sql": {
+    "mtime": 1779318700.7701073,
+    "ast_hash": "24ef1c3cd19a3f2241b7e2f0a53c981a",
+    "semantic_hash": "24ef1c3cd19a3f2241b7e2f0a53c981a"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260524000000_performance_security_fixes.sql": {
+    "mtime": 1779657904.5894961,
+    "ast_hash": "1940a8e405ff998b31e62157507c9a3f",
+    "semantic_hash": "1940a8e405ff998b31e62157507c9a3f"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260524000001_function_grants_fix.sql": {
+    "mtime": 1779657904.590495,
+    "ast_hash": "663dccde59fa6e80009a252700242f8a",
+    "semantic_hash": "663dccde59fa6e80009a252700242f8a"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260524100000_optimization_rpcs.sql": {
+    "mtime": 1779657904.590495,
+    "ast_hash": "8cbf80962760a5d00f065db4c548d0b6",
+    "semantic_hash": "8cbf80962760a5d00f065db4c548d0b6"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260525000000_matching_discovery_actor_discoverable.sql": {
+    "mtime": 1779657904.5914972,
+    "ast_hash": "d0a17535b38a6710437487bc7ef067b3",
+    "semantic_hash": "d0a17535b38a6710437487bc7ef067b3"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260525200000_pr10_security_fixes.sql": {
+    "mtime": 1779657904.5914972,
+    "ast_hash": "5fadad2cfc846a7a2591ddfcdf6a47ee",
+    "semantic_hash": "5fadad2cfc846a7a2591ddfcdf6a47ee"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260525210000_add_pet_stories.sql": {
+    "mtime": 1779719513.5729403,
+    "ast_hash": "c479e0de3b1db60e4931194e8598b48d",
+    "semantic_hash": "c479e0de3b1db60e4931194e8598b48d"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260525220000_comment_likes_replies.sql": {
+    "mtime": 1779719513.5729403,
+    "ast_hash": "7eeb0870625b4f0ef65bd2bbfb28164b",
+    "semantic_hash": "7eeb0870625b4f0ef65bd2bbfb28164b"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260529080000_comments_update_policy.sql": {
+    "mtime": 1780092009.4837835,
+    "ast_hash": "87f2db64c43de118fb3e04b6f08f7645",
+    "semantic_hash": "87f2db64c43de118fb3e04b6f08f7645"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260531000000_audit_fixes.sql": {
+    "mtime": 1780584273.3432639,
+    "ast_hash": "29619e55fa894259513d34a765c94b3c",
+    "semantic_hash": "29619e55fa894259513d34a765c94b3c"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260531100000_notifications_insert_check.sql": {
+    "mtime": 1780345651.8628137,
+    "ast_hash": "a362df061773272f12ea2b1b31601396",
+    "semantic_hash": "a362df061773272f12ea2b1b31601396"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260531100100_function_search_path.sql": {
+    "mtime": 1780345651.8684034,
+    "ast_hash": "0e98deb6cb4c29c1a1ad317877e80cd2",
+    "semantic_hash": "0e98deb6cb4c29c1a1ad317877e80cd2"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260531100200_bucket_listing_lockdown.sql": {
+    "mtime": 1780345651.8697495,
+    "ast_hash": "93e79a26e10c8be508735f89e37b542e",
+    "semantic_hash": "93e79a26e10c8be508735f89e37b542e"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260531100300_fk_covering_indexes.sql": {
+    "mtime": 1780345651.8697495,
+    "ast_hash": "cad3af207488203bf410c23d81acdae8",
+    "semantic_hash": "cad3af207488203bf410c23d81acdae8"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260531100400_consolidate_rls_policies.sql": {
+    "mtime": 1780345651.8697495,
+    "ast_hash": "e3930d71f0c7b76de7d5c49d00fbd5b7",
+    "semantic_hash": "e3930d71f0c7b76de7d5c49d00fbd5b7"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260531100500_revoke_anon_execute.sql": {
+    "mtime": 1780345651.8697495,
+    "ast_hash": "ab910aae9ea95fd5eb7cc778f0ec69a4",
+    "semantic_hash": "ab910aae9ea95fd5eb7cc778f0ec69a4"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260531100600_revoke_trigger_fn_execute.sql": {
+    "mtime": 1780345651.8697495,
+    "ast_hash": "c834cd3f2dc1dd8c233def8823bf26da",
+    "semantic_hash": "c834cd3f2dc1dd8c233def8823bf26da"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260531100700_care_tasks_dedupe_and_unique_index.sql": {
+    "mtime": 1780345651.8697495,
+    "ast_hash": "e50ec3c96c2e7b120ef3b8d6b6037356",
+    "semantic_hash": "e50ec3c96c2e7b120ef3b8d6b6037356"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260531200000_audit_fixes.sql": {
+    "mtime": 1780584273.3432639,
+    "ast_hash": "065f172ba829478fad9534420fd507af",
+    "semantic_hash": "065f172ba829478fad9534420fd507af"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260601000000_care_tasks_dedup_add_scheduled_time.sql": {
+    "mtime": 1780345651.8697495,
+    "ast_hash": "7cb6797e81ff3d23839ae9e8695aa13c",
+    "semantic_hash": "7cb6797e81ff3d23839ae9e8695aa13c"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260601000000_social_fixes.sql": {
+    "mtime": 1780584273.3447993,
+    "ast_hash": "28fdc7f93c939a84c8832f38d6d08445",
+    "semantic_hash": "28fdc7f93c939a84c8832f38d6d08445"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260601010000_social_dm_chat.sql": {
+    "mtime": 1780584273.3453653,
+    "ast_hash": "a5725983d31e7672771f1bfa1afa1fdd",
+    "semantic_hash": "a5725983d31e7672771f1bfa1afa1fdd"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260601020000_security_definer_search_path_fix.sql": {
+    "mtime": 1780584273.3464458,
+    "ast_hash": "fa2a8578a92c1607dab8899c09f066bb",
+    "semantic_hash": "fa2a8578a92c1607dab8899c09f066bb"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260604000000_fix_matching_discovery_candidates_offset_signature.sql": {
+    "mtime": 1780612310.9835422,
+    "ast_hash": "ee97c4eb3e547cdd71ae36f5cd22a654",
+    "semantic_hash": "ee97c4eb3e547cdd71ae36f5cd22a654"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260604120000_pr15_review_fixes.sql": {
+    "mtime": 1780584273.347119,
+    "ast_hash": "09f44ec3a0d568b2aaac23022bed5f86",
+    "semantic_hash": "09f44ec3a0d568b2aaac23022bed5f86"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260604180000_pr17_revoke_anon_execute_sensitive_rpcs.sql": {
+    "mtime": 1780584273.3476624,
+    "ast_hash": "56ad4f7287ecba9deb0f9aa031c36d06",
+    "semantic_hash": "56ad4f7287ecba9deb0f9aa031c36d06"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260605100000_pwa_phase2.sql": {
+    "mtime": 1780612310.9835422,
+    "ast_hash": "99593c88c320bd53807aef1984dd9a33",
+    "semantic_hash": "99593c88c320bd53807aef1984dd9a33"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260605120000_restore_matching_discovery_candidates_cursor.sql": {
+    "mtime": 1780612310.9845486,
+    "ast_hash": "1359d4bca1878bf7ff66a663e3b714bc",
+    "semantic_hash": "1359d4bca1878bf7ff66a663e3b714bc"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260605130000_waitlist_insert_policy_hardening.sql": {
+    "mtime": 1780612310.9855483,
+    "ast_hash": "130e375edf1158e30ece1a8b841fab64",
+    "semantic_hash": "130e375edf1158e30ece1a8b841fab64"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260605210000_pets_storage_bucket.sql": {
+    "mtime": 1780683732.430014,
+    "ast_hash": "187a9fa74d1941e7fafe8fcecf0e2a01",
+    "semantic_hash": "187a9fa74d1941e7fafe8fcecf0e2a01"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260606120000_user_fcm_devices.sql": {
+    "mtime": 1780612310.9855483,
+    "ast_hash": "1ccefc5f4c10502e2406eda24fa95e3c",
+    "semantic_hash": "1ccefc5f4c10502e2406eda24fa95e3c"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260607000000_products_rating_categories.sql": {
+    "mtime": 1780850666.3343687,
+    "ast_hash": "b40fb94f95012c62656a67f6a95cf910",
+    "semantic_hash": "b40fb94f95012c62656a67f6a95cf910"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260607140000_fcm_dispatch_system.sql": {
+    "mtime": 1780612310.9865468,
+    "ast_hash": "aaf8222ced4369ab554b7897df6ea874",
+    "semantic_hash": "aaf8222ced4369ab554b7897df6ea874"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260608000000_communities.sql": {
+    "mtime": 1780866162.285748,
+    "ast_hash": "03face4fcd841a230efe672197e222c7",
+    "semantic_hash": "03face4fcd841a230efe672197e222c7"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260608010000_appointments.sql": {
+    "mtime": 1780869157.0343938,
+    "ast_hash": "2963a2165661d0132099f7f1a91639bf",
+    "semantic_hash": "2963a2165661d0132099f7f1a91639bf"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260608020000_pet_weight_logs.sql": {
+    "mtime": 1780869170.4452085,
+    "ast_hash": "31245f40d4002f0e708210915b28afe4",
+    "semantic_hash": "31245f40d4002f0e708210915b28afe4"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260608120000_product_reviews.sql": {
+    "mtime": 1780874996.1481695,
+    "ast_hash": "2ccf1a06fe48e6f9d5463fb6e83ba6bc",
+    "semantic_hash": "2ccf1a06fe48e6f9d5463fb6e83ba6bc"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\migrations\\20260608140000_chat_read_receipts_story_reactions.sql": {
+    "mtime": 1780875700.3546042,
+    "ast_hash": "e109cebb29c51890a7cb8f834d4b49b5",
+    "semantic_hash": "e109cebb29c51890a7cb8f834d4b49b5"
+  },
+  "G:\\GitHub\\petfolio\\supabase\\schema.sql": {
+    "mtime": 1778531669.7365942,
+    "ast_hash": "f3de990a6f4f5b479b3a070b7191e6e8",
+    "semantic_hash": "f3de990a6f4f5b479b3a070b7191e6e8"
   }
 }
