@@ -1,160 +1,393 @@
-Reading all docs and images in parallel with an online research sweep.
+Let me read the screenshots, the current router and shell, then research the design pattern in parallel.
 
-Now let me visualize the key Pathao screenshots and do codebase exploration + online research in parallel.
+Let me get the right food screen and read the shell + home in parallel with web research.
 
-Now let me do a focused codebase scan of the key feature directories.
+I now have everything. Let me read the current AppShell to fully understand the existing implementation before writing the plan.
 
-Now let me do a quick online search for the latest Flutter M3 Expressive design patterns.
-
-Here is the complete, prioritized gap analysis:
+Now I have the complete picture. I can see the current AppShell already has a beautiful custom floating pill nav with spring physics. Let me now write the full analysis and implementation plan.
 
 ---
 
-## Petfolio Gap Analysis — Full Findings
+# Petfolio — Contextual Navigation Redesign Plan
 
-### P0 — Critical UX Gaps (blocking flows)
+## What the Pathao Screenshots Tell Us
 
-**1. Address Management — Missing entire feature**
-- `lib/features/marketplace/presentation/screens/address_screen.dart` does not exist
-- Cart `_DeliverToCard` shows a snackbar placeholder instead of a real address selector
-- Pathao pattern (`19_address_selection_screen.png`, `21_add_address_sheet.png`): bottom sheet with full address text field → City/Zone/Area breadcrumb dropdown → label tiles (Home/Work/Campus/Other) → "Set As Default" toggle → "Confirm Address" `FilledButton`
-- Supabase `user_addresses` table + Riverpod provider needed before this can be wired
+**Home Screen (global shell):**
+- Bottom nav: `Home | Offers | Activity | Inbox` — 4 utility-level tabs
+- These are always present regardless of what you're doing
+- Home tab = the launcher hub (bento grid of services)
 
-**2. Receipt Breakdown in Checkout — Missing**
-- Pathao `35_checkout_receipt_details.png` shows a "Receipt" card: **Total item price (N Items) / Store Discount / Subtotal / Delivery Charge / Total** — each line itemized
-- Current `cart_screen.dart` `_SumRow` only shows a flat subtotal; no delivery charge line, no item count label
+**Food Screen (module shell):**
+- Bottom nav completely **replaced** with: `Food | Pick-up | Offers | Favorites | Reorder` — 5 feature-level tabs
+- A `← back arrow` appears in the AppBar to escape back to the global Home hub
+- The global 4-tab nav is **gone** while inside the module
 
----
-
-### P1 — High-Impact UX Gaps (affects key journeys)
-
-**3. Shop Intro / Onboarding Screen — Missing**
-- `lib/features/marketplace/presentation/screens/shop_intro_screen.dart` does not exist
-- Pathao `13_shop_intro_screen.png`: illustration + "Introducing Pathao Shop" + 3 value props (Authentic Products / Pay Conveniently / Track Your Order) + "Let's explore" `FilledButton`
-- Should trigger on first visit to `/marketplace` via `shared_preferences` flag
-
-**4. Offers/Promos Screen — Missing feature**
-- `lib/features/offers/` directory does not exist
-- Pathao `03_offers_screen.png`: "Offers" top title, **"Available Promos" (pill) + "Point Deals"** tab pair, filter chips (All / Food / Bike), card list per promo with code + description + "Valid till" date + "Add promo" `TextButton`
-- Marketplace currently has no dedicated promos browsing surface
-
-**5. Settings / Profile Screen — Missing feature**
-- `lib/features/settings/` does not exist — no settings screen at all
-- Pathao `06_profile_screen.png` + `06_profile_screen_bottom.png` pattern:
-  - Gold loyalty tier card: avatar + phone + rating, XP progress bar to next tier, "Point deals / Partner benefits" chevron links
-  - Grouped sections: **ACCOUNT** (Saved Address), **OFFERS** (Promos, Refer & Get Discounts), **SETTINGS** (Language, Permissions), **HELP & LEGAL** (Safety `NEW` badge, Emergency Support, Help, Support Requests, Policies), **MORE** (What's New dot badge)
-- Users cannot manage account, addresses, or preferences from anywhere in the app
-
-**6. Activity Screen Not Reachable from Home**
-- `/activity` route exists but no `_QuickActionsRow` button in `hub_home_screen.dart` links to it
-- Pathao `04_activity_screen.png`: Activity is a first-class bottom nav item
-- Users can only reach Activity via direct deep link — no in-app path
-
-**7. Care Screen Filter Chips — Missing**
-- `care_screen.dart` has no filter chips (All | Medical | Nutrition | Grooming | Walk)
-- All care tasks render in a flat undifferentiated list; no way to focus on one pillar
+**The Core Pattern:** Two-tier navigation — a lean global shell for utility, and a rich module-specific shell for each major feature. The hub is the gateway, not a peer of the features.
 
 ---
 
-### P2 — Medium-Impact UX Gaps (polish & completeness)
+## Current Petfolio Architecture (What Exists Now)
 
-**8. Marketplace "Show All" Categories Page — Missing**
-- `marketplace_screen.dart` has category rows but no dedicated `/marketplace/categories` page
-- Pathao `13_shop_screen.png`: "Show All" chevron link triggers full categories grid
+```
+AppShell (FloatingNav — 5 equal tabs)
+  ├── /home       → HubHomeScreen       [Tab 1 - Home]
+  ├── /care       → CareScreen          [Tab 2 - Care]
+  ├── /social     → SocialScreen        [Tab 3 - Social]
+  ├── /matching   → MatchingScreen      [Tab 4 - Match]
+  └── /marketplace → MarketplaceScreen  [Tab 5 - Market]
 
-**9. "Products You'll Love" Section on Marketplace Main Screen — Missing**
-- Pathao `13_shop_screen_bottom.png`: horizontal product cards with percent-off badges under "Shops you'll love" and "Products you'll love" sections
-- Current `marketplace_screen.dart` only has shop/vendor listing, no product-level discovery surface
+Root Navigator (outside shell — pushed on top):
+  ├── /care/nutrition, /care/walk, /care/medical-vault, /care/appointments
+  ├── /social/stories, /social/create-post, /social/communities, /social/notifications
+  ├── /matching/inbox, /matching/chat/:id
+  ├── /marketplace/product/:id, /marketplace/cart, /seller, etc.
+  ├── /activity, /offers, /settings  ← NO SHELL, buried in AllFeaturesSheet
+  └── /onboarding, /login, /register
+```
 
-**10. Buyer Order Actions — Return / Request Again / Rate**
-- Pathao `04_activity_screen_bottom.png`: each activity card has an action row: **Return | Request Again | RATE NOW**
-- `activity_screen.dart` `_ActivityCard` has a generic action row via `TextButton` but does not implement these three specific CTAs for orders
-
-**11. Promotions Tab Always Empty**
-- `notifications_screen.dart` Promotions tab filters `!{'like','comment','follow'}` — always zero items
-- `AppNotification.type` only ever receives `'like'|'comment'|'follow'` from Supabase
-- Backend needs a `'promo'` notification type or the tab needs a separate promotions feed query
-
-**12. Home Hero — No Loyalty Points / Wallet Balance Chip**
-- Pathao `01_home_screen_top.png`: "152 Points" pill + "Pathao Pay ৳0" balance banner in hero area
-- `hub_home_screen.dart` `_WaveHeroSection` shows streak + tasks but no XP/points metric visible to the user at a glance
-
----
-
-### P3 — Low-Impact / Polish Gaps
-
-**13. Missing `smooth_page_indicator` for carousels**
-- Product detail carousel (`_ProductHeroCarousel`) and marketplace hero carousel both use manual dot indicators built with `Container` + `AnimationController`
-- `smooth_page_indicator` (pub.dev) provides `WormEffect`, `JumpingDotEffect`, `ScaleEffect` — animated, accessible, zero-boilerplate
-
-**14. Missing `shimmer` for skeleton loaders**
-- `lib/core/widgets/skeleton_loader.dart` exists but uses plain grey `Container`s — no shimmer gradient sweep
-- `shimmer` package (pub.dev) provides `Shimmer.fromColors()` — the standard expectation for loading states in 2025 apps
-
-**15. Missing `flutter_animate` for stagger-in effects**
-- No package for staggered list-item animations anywhere in the codebase (`flutter_animate` not in `pubspec.yaml`)
-- Pathao and all M3E reference apps use stagger-in (each card fades + slides in 80ms apart) on list reveals
-- `flutter_animate` provides `.animate().fadeIn().slideY()` with chainable delays; minimal boilerplate
-
-**16. Missing `lottie` for empty state illustrations**
-- Pathao `05_inbox_screen.png`: animated 3D mailbox illustration for empty inbox
-- Petfolio `PetfolioEmptyState` uses an `Icon` — flat, non-animated
-- `lottie` package enables JSON-driven animations from LottieFiles without bundling video
-
-**17. `RoundedSuperellipseBorder` (M3 Expressive squircle shape) — Not used**
-- M3 Expressive spec ([Building with M3 Expressive](https://m3.material.io/blog/building-with-m3-expressive)) mandates superellipse ("squircle") corners on cards, sheets, FABs
-- Flutter 3.27+ ships `RoundedSuperellipseBorder` natively; Petfolio uses `RoundedRectangleBorder` everywhere
-- `PfCard`, `_SectionCard` in cart, `_ActivityCard` — all should migrate to `RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(20))`
-
-**18. No Page Transition Spring Animations**
-- `GoRouter` uses the default `MaterialPage` transition; no `ZoomPageTransitionsBuilder` or `Curves.easeOutBack` / `ElasticOutCurve`
-- M3E motion spec: push transitions should use spatial springs (zoom + fade), not flat slide
-- Can be set globally in `ThemeData.pageTransitionsTheme`
-
-**19. `DynamicSchemeVariant.fidelity` Color Seeding — Not configured**
-- `app_theme.dart` uses a static `ColorScheme.fromSeed()`; Petfolio doesn't use `DynamicSchemeVariant.fidelity` or `.tonalSpot`
-- M3E recommends `DynamicSchemeVariant.fidelity` for richer, more saturated color mapping that preserves brand hues under dark mode
-
-**20. `m3e_buttons` / `m3e_expandable` — Not adopted**
-- Community packages ([m3e_buttons](https://pub.dev/packages/m3e_buttons), [m3e_expandable](https://pub.dev/packages/m3e_expandable)) provide spring-physics button press feedback and expand/collapse animations per the M3E spec
-- Current buttons use plain `FilledButton` with no tactile spring radius/shape animation on press
+**The Problem:**
+- Care sub-screens (Nutrition, Walk, Medical, Vets) are pushed _over_ the shell — user loses Care tab context
+- Activity, Offers, and Settings have zero navigation entry points visible to a normal user
+- Social Notifications, Communities, Matching Inbox — only reachable via hidden AppBar icons
+- All 5 tabs are equal weight, but Home is really a hub (launcher), not a peer feature
+- The existing `_FloatingNav` (spring animated, pill-shaped) is already excellent — needs configuration swapping, not a rebuild
 
 ---
 
-### Summary Table
+## Proposed Architecture: Contextual Shell
 
-| # | Area | Gap | Priority |
-|---|------|-----|----------|
-| 1 | Marketplace | Address management screen (entire feature missing) | P0 |
-| 2 | Marketplace | Receipt breakdown (delivery charge, item count, store discount) | P0 |
-| 3 | Marketplace | Shop intro/onboarding screen on first visit | P1 |
-| 4 | Marketplace | Offers/Promos screen (tab + filter chips + promo cards) | P1 |
-| 5 | Global | Settings/Profile screen (account, saved address, promos, refer) | P1 |
-| 6 | Navigation | Activity not reachable from Home quick actions | P1 |
-| 7 | Care | Filter chips (All/Medical/Nutrition/Grooming/Walk) | P1 |
-| 8 | Marketplace | "Show All" categories page | P2 |
-| 9 | Marketplace | "Products you'll love" discovery section | P2 |
-| 10 | Activity | Order action row (Return / Request Again / Rate) | P2 |
-| 11 | Notifications | Promotions tab has no data source | P2 |
-| 12 | Home | Loyalty points / XP chip in hero section | P2 |
-| 13 | Global | `smooth_page_indicator` for carousels | P3 |
-| 14 | Global | `shimmer` gradient for skeleton loaders | P3 |
-| 15 | Global | `flutter_animate` for stagger-in list animations | P3 |
-| 16 | Global | `lottie` for animated empty state illustrations | P3 |
-| 17 | Global (M3E) | `RoundedSuperellipseBorder` squircle shape on cards/sheets | P3 |
-| 18 | Global (M3E) | Spring page transition animations | P3 |
-| 19 | Global (M3E) | `DynamicSchemeVariant.fidelity` color seeding | P3 |
-| 20 | Global (M3E) | `m3e_buttons`/`m3e_expandable` tactile press feedback | P3 |
+```
+AppShell (path-aware, renders the correct FloatingNav config)
+  │
+  ├── GLOBAL SHELL  (when at /home, /notifications, /activity, /me)
+  │    FloatingNav: Home | Notifs | Activity | Me
+  │
+  ├── CARE MODULE   (when at /care or any /care/* path)
+  │    FloatingNav: Dashboard | Nutrition | Health | Walk | Vets
+  │    AppBar: ← Home
+  │
+  ├── SOCIAL MODULE (when at /social or any /social/* path)
+  │    FloatingNav: Feed | Stories | Communities | Profile
+  │    AppBar: ← Home
+  │
+  ├── MATCH MODULE  (when at /matching or any /matching/* path)
+  │    FloatingNav: Discover | Inbox | Liked
+  │    AppBar: ← Home
+  │
+  └── MARKET MODULE (when at /marketplace or any /marketplace/* path,
+                     or /seller/*, /shop/*)
+       FloatingNav: Shop | Categories | Cart | Sell
+       AppBar: ← Home
+```
 
 ---
 
-**Phase complete — please run `/remember` to save tokens before proceeding to the next phase.**
+## Proposed Bottom Navigation — Per Module
 
-Which gap(s) would you like to implement first?
+### Global Shell (4 tabs)
+> **Shown when:** at `/home`, `/notifications`, `/activity`, `/me`
 
-Sources:
-- [Start building with Material 3 Expressive - Material Design](https://m3.material.io/blog/building-with-m3-expressive)
-- [smooth_page_indicator | Flutter package](https://pub.dev/packages/smooth_page_indicator)
-- [m3e_buttons | Flutter package](https://pub.dev/packages/m3e_buttons)
-- [m3e_expandable | Flutter package](https://pub.dev/packages/m3e_expandable)
-- [Shimmer Loading Effects in Flutter](https://blog.openreplay.com/shimmer-loading-effects-in-flutter/)
+| # | Icon | Label | Route | Accent | What's Here |
+|---|------|-------|-------|--------|-------------|
+| 1 | `home_rounded` | **Home** | `/home` | Tangerine | HubHomeScreen — bento grid launcher |
+| 2 | `notifications_rounded` | **Alerts** | `/notifications` | Sunny | Combined: social notifs + system notifs + promos |
+| 3 | `receipt_long_rounded` | **Activity** | `/activity` | Poppy | Order history + appointment history |
+| 4 | `manage_accounts_rounded` | **Me** | `/me` | Lilac | Pet profile, Settings, Addresses, Theme toggle |
+
+> **How to reach a module:** Tap any tile in the Home bento grid (Care tile → enters Care module). AllFeaturesSheet remains as a "see everything" overlay from Home.
+
+---
+
+### Care Module (5 tabs)
+> **Shown when:** on `/care`, `/care/nutrition`, `/care/medical-vault`, `/care/walk`, `/care/appointments`
+> **Back to Home:** `←` in AppBar → `context.go('/home')`
+
+| # | Icon | Label | Route (bring inside shell) | Accent |
+|---|------|-------|--------------------------|--------|
+| 1 | `local_fire_department` | **Dashboard** | `/care` | Sunny |
+| 2 | `restaurant_rounded` | **Nutrition** | `/care/nutrition` | Mint |
+| 3 | `medical_services_rounded` | **Health** | `/care/health` | Poppy |
+| 4 | `directions_walk_rounded` | **Walk** | `/care/walk` | Tangerine |
+| 5 | `event_available_rounded` | **Vets** | `/care/appointments` | Lilac |
+
+> **Note:** `/care/medical-vault` → rename route to `/care/health` for clarity. Sub-screens like Edit vitals, Add record stay as `context.push` over this shell.
+
+---
+
+### Social Module (4 tabs)
+> **Shown when:** on `/social`, `/social/stories`, `/social/communities`, `/social/profile/:id`
+> **Back to Home:** `←` in AppBar → `context.go('/home')`
+
+| # | Icon | Label | Route | Accent |
+|---|------|-------|-------|--------|
+| 1 | `dynamic_feed_rounded` | **Feed** | `/social` | Poppy |
+| 2 | `auto_stories_rounded` | **Stories** | `/social/stories` | Sunny |
+| 3 | `groups_rounded` | **Community** | `/social/communities` | Lilac |
+| 4 | `pets_rounded` | **My Pet** | `/social/profile/me` | Tangerine |
+
+> **Create Post FAB:** Stays as floating action button on Feed and Stories tabs (not a nav item).
+> **Social notifications:** Moved to global Alerts tab — no longer buried behind an AppBar icon.
+
+---
+
+### Match Module (3 tabs)
+> **Shown when:** on `/matching`, `/matching/inbox`, `/matching/chat/:id`
+> **Back to Home:** `←` in AppBar → `context.go('/home')`
+
+| # | Icon | Label | Route | Accent |
+|---|------|-------|-------|--------|
+| 1 | `auto_awesome_rounded` | **Discover** | `/matching` | Lilac |
+| 2 | `chat_bubble_rounded` | **Messages** | `/matching/inbox` | Tangerine |
+| 3 | `favorite_rounded` | **Liked** | `/matching/liked` | Poppy |
+
+> **Note:** `/matching/liked` is a new screen to surface mutual matches / liked profiles. Chat screen (`/matching/chat/:id`) stays as a push _over_ the shell (full-screen, no nav bar — correct UX pattern like any messaging app).
+
+---
+
+### Marketplace Module (4 tabs)
+> **Shown when:** on `/marketplace`, `/marketplace/categories`, `/marketplace/cart`, `/seller`, `/shop/:id`
+> **Back to Home:** `←` in AppBar → `context.go('/home')`
+
+| # | Icon | Label | Route | Accent | Badge |
+|---|------|-------|-------|--------|-------|
+| 1 | `storefront_rounded` | **Shop** | `/marketplace` | Mint | — |
+| 2 | `category_rounded` | **Browse** | `/marketplace/categories` | Tangerine | — |
+| 3 | `shopping_cart_rounded` | **Cart** | `/marketplace/cart` | Poppy | Item count |
+| 4 | `sell_rounded` | **Sell** | `/seller` | Sunny | — |
+
+> **My Orders:** Accessible from the global **Activity** tab (not buried in Marketplace).
+> **Cart badge:** Item count dot shown on Cart tab icon when `cartProvider.itemCount > 0`.
+
+---
+
+## How to Get Back to Home from Any Module
+
+Three consistent back-to-home entry points — users can always escape:
+
+1. **AppBar back arrow `←`** (most visible): Every module screen shows `← Home` in top-left. `context.go('/home')` resets to global shell.
+2. **Long-press any nav tab** (power user): Long-pressing the first module tab pops to its root route (standard GoRouter `initialLocation: true`).
+3. **Double-tap Home tile (from AllFeaturesSheet)**: When already in a module, tapping the Home tile in AllFeaturesSheet = `context.go('/home')`.
+
+> There is **no persistent "Home" tab inside module navs** (unlike the current design where Home is always tab 1). This is intentional — it's cleaner and matches the Pathao mental model. The back arrow is unambiguous.
+
+---
+
+## Technical Implementation Plan
+
+### Architecture Approach: Path-Aware Single Shell (Option A — Recommended)
+
+Keeps the existing `ShellRoute` and the beautiful `_FloatingNav` widget. Only adds:
+1. A `shellModuleProvider` (Riverpod `StateProvider`)
+2. Multiple `AppShellDestinationSet` configs
+3. `AnimatedSwitcher` wrapping the nav bar
+4. Path-to-module mapping in `AppShell._moduleFromPath()`
+
+This avoids a full GoRouter restructure to `StatefulShellRoute` (which would require rewriting all 12 route files and break the redirect system).
+
+---
+
+### Phase 1 — New Provider & Destination Sets
+**New file:** `lib/core/navigation/shell_module_provider.dart`
+
+```dart
+enum ShellModule { global, care, social, matching, marketplace }
+
+final shellModuleProvider = StateProvider<ShellModule>(
+  (ref) => ShellModule.global,
+);
+```
+
+**New file:** `lib/core/navigation/shell_destinations.dart`
+
+Define 5 `List<AppShellDestination>` constants:
+- `globalDestinations` — 4 tabs (Home, Alerts, Activity, Me)
+- `careDestinations` — 5 tabs (Dashboard, Nutrition, Health, Walk, Vets)
+- `socialDestinations` — 4 tabs (Feed, Stories, Community, My Pet)
+- `matchingDestinations` — 3 tabs (Discover, Messages, Liked)
+- `marketplaceDestinations` — 4 tabs (Shop, Browse, Cart, Sell)
+
+Each set also carries `accentColors[]` and `moduleName` (for AppBar eyebrow).
+
+---
+
+### Phase 2 — Update AppShell
+
+**Changes to `lib/core/widgets/app_shell.dart`:**
+
+1. **`_moduleFromPath(String location) → ShellModule`**
+   ```
+   /care*        → ShellModule.care
+   /social*      → ShellModule.social
+   /matching*    → ShellModule.matching
+   /marketplace*, /seller*, /shop*  → ShellModule.marketplace
+   default       → ShellModule.global
+   ```
+
+2. **`_selectedSubIndex(ShellModule module, String location) → int`**
+   Returns which tab within the current module's destination set is active.
+   - E.g., `/care/nutrition` → careDestinations index 1
+
+3. **Wrap `_FloatingNav` with `AnimatedSwitcher`:**
+   ```dart
+   AnimatedSwitcher(
+     duration: const Duration(milliseconds: 220),
+     transitionBuilder: (child, anim) => FadeTransition(
+       opacity: anim,
+       child: SlideTransition(
+         position: Tween(begin: Offset(0, 0.15), end: Offset.zero)
+           .animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
+         child: child,
+       ),
+     ),
+     child: _FloatingNav(
+       key: ValueKey(currentModule), // ← triggers AnimatedSwitcher on module change
+       destinations: _destinationsFor(currentModule),
+       selectedIndex: _selectedSubIndex(currentModule, location),
+       onSelect: (i) => context.go(_destinationsFor(currentModule)[i].path),
+       accentColors: _accentColorsFor(currentModule),
+     ),
+   ),
+   ```
+
+4. **Module AppBar back-arrow:** When `currentModule != ShellModule.global`, the `AppShellHeader` left side shows `← Home` button instead of the pet switcher pill. The pet switcher moves to the right side.
+
+---
+
+### Phase 3 — Route Restructure
+
+**Move sub-routes inside the ShellRoute** (so they keep the module nav bar visible):
+
+| Route | Current | Proposed |
+|-------|---------|----------|
+| `/care/nutrition` | root push (loses nav) | inside ShellRoute ✅ |
+| `/care/medical-vault` | root push | inside ShellRoute ✅ |
+| `/care/walk` | root push | inside ShellRoute ✅ |
+| `/care/appointments` | root push | inside ShellRoute ✅ |
+| `/social/stories` | root push | inside ShellRoute ✅ |
+| `/social/communities` | root push | inside ShellRoute ✅ |
+| `/social/notifications` | root push | → merge into `/notifications` in global shell |
+| `/matching/inbox` | root push | inside ShellRoute ✅ |
+| `/activity` | root push (no nav) | inside ShellRoute, global tab ✅ |
+| `/offers` | root push (no nav) | → merge into `/notifications` as a tab or sub-section |
+| `/settings` | root push (no nav) | → `/me` screen inside ShellRoute global tab ✅ |
+
+**Keep as root pushes** (full-screen modal behavior — correct):
+- `/social/create-post`, `/social/create-story` — creation flows
+- `/matching/chat/:id` — immersive chat (like WhatsApp — no bottom nav)
+- `/social/post/:id` — full-screen post detail
+- `/marketplace/product/:id`, `/marketplace/order/:id` — detail screens
+- `/onboarding`, `/login`, `/register` — pre-auth
+
+---
+
+### Phase 4 — New Screens to Create
+
+| Screen | Route | Why |
+|--------|-------|-----|
+| `NotificationsScreen` (merged) | `/notifications` | Unify social notifs + system notifs + promos into one global Alerts tab |
+| `MeScreen` | `/me` | Replaces `/settings` — adds pet management, theme, addresses, logout |
+| `MatchLikedScreen` | `/matching/liked` | Surfaces mutual matches / liked pets (using existing `matches` + `swipes` tables) |
+
+---
+
+### Phase 5 — AppShellHeader Adaptation
+
+The header currently switches its trailing icons per tab index (0–4). With contextual nav, it needs to:
+
+| Context | Left side | Right side |
+|---------|-----------|------------|
+| Global/Home | Pet switcher pill | 🔥streak + 🔔 → /notifications + ⚙ → /me |
+| Global/Alerts | "ALERTS" label | Mark-all-read button |
+| Global/Activity | "ACTIVITY" label | Filter icon |
+| Global/Me | "MY PROFILE" label | — |
+| Care module | `← Home` + "CARE" | Walk shortcut + Dark mode toggle |
+| Social module | `← Home` + "PAWSFEED" | Search + Create (FAB instead?) |
+| Match module | `← Home` + "MATCH" | Preferences filter |
+| Market module | `← Home` + "MARKET" | Cart badge button |
+
+---
+
+### Phase 6 — Accent Color & Visual Consistency
+
+Each module has a "pillar color" already defined in the current codebase:
+| Module | Color | `AppColors` |
+|--------|-------|-------------|
+| Home | Tangerine | `AppColors.tangerine` |
+| Care | Sunny | `AppColors.sunny` |
+| Social | Poppy | `AppColors.poppy` |
+| Match | Lilac | `AppColors.lilac` |
+| Marketplace | Mint | `AppColors.mint` |
+
+The `_FloatingNav` already uses `tabAccentColors[]`. With contextual nav, each module's 3–5 tabs will all use that module's pillar color for selected state — consistent with the existing spring animation system.
+
+---
+
+## What Doesn't Change
+
+- The `_FloatingNav` widget + spring animation system — **no rebuild needed**
+- GoRouter redirect/auth logic in `RouterNotifier` — untouched
+- All 47 screen widgets — no changes to their internal code
+- All repositories, controllers, providers — untouched
+- The `_WideNavRail` for tablet — just needs the same destination config update
+- `AppShellDestination` class — unchanged
+
+---
+
+## File Change Summary
+
+| File | Change Type | Description |
+|------|------------|-------------|
+| `lib/core/navigation/shell_destinations.dart` | **NEW** | 5 destination set configs |
+| `lib/core/navigation/shell_module_provider.dart` | **NEW** | `ShellModule` enum + Riverpod provider |
+| `lib/core/widgets/app_shell.dart` | **MODIFY** | Path→module mapping, AnimatedSwitcher nav, header adaptation |
+| `lib/core/router.dart` | **MODIFY** | Move 8 sub-routes inside ShellRoute; add `/notifications`, `/me`, `/matching/liked` |
+| `lib/core/navigation/app_shell_routes.dart` | **MODIFY** | Add Care/Social/Matching/Marketplace sub-routes inside shell |
+| `lib/features/social/social_routes.dart` | **MODIFY** | `/social/notifications` → delegates to `/notifications` |
+| `lib/features/settings/settings_routes.dart` | **MODIFY** | `/settings` → `/me` |
+| `lib/features/offers/offers_routes.dart` | **MODIFY** | Merge into `/notifications` tab |
+| `lib/features/home/presentation/screens/hub_home_screen.dart` | **MINOR** | Care/Social/Match/Market tiles navigate _into_ module root (already do) |
+| `lib/features/notifications/` | **NEW FEATURE** | `NotificationsScreen` (merged alerts + promos) |
+| `lib/features/profile/` | **NEW FEATURE** | `MeScreen` (profile hub: pets, settings, addresses) |
+| `lib/features/matching/presentation/screens/match_liked_screen.dart` | **NEW** | Liked/mutual matches screen |
+
+**Total new files: ~8 | Modified files: ~9 | Deleted/merged routes: 3**
+
+---
+
+## Implementation Sequence (5 Phases — Confirm Before Each)
+
+```
+Phase 1 — Foundation
+  → Create shell_module_provider.dart + shell_destinations.dart
+  → Update app_shell.dart with path→module detection + AnimatedSwitcher
+  → Update app_shell_routes.dart with sub-routes inside shell
+  ✅ Confirm: nav swaps correctly when navigating to /care, /social, etc.
+
+Phase 2 — Global Shell Completion
+  → Create /notifications (merged) screen
+  → Create /me screen (profile + settings hub)
+  → Update AppShellHeader for module back-arrow
+  ✅ Confirm: global 4-tab nav works, notifications and Me screens load
+
+Phase 3 — Module Sub-route Migration
+  → Move care sub-routes inside shell
+  → Move social/stories + communities inside shell
+  → Move matching/inbox inside shell
+  ✅ Confirm: sub-screens retain the module nav bar
+
+Phase 4 — New Screens
+  → MatchLikedScreen for /matching/liked
+  → MeScreen sub-sections (pet switcher, settings, addresses)
+  ✅ Confirm: new tabs are functional
+
+Phase 5 — Polish
+  → AnimatedSwitcher slide/fade tuning
+  → Wide screen NavigationRail context-awareness
+  → AppBar eyebrow text updates per module
+  → Cart badge on Marketplace nav tab
+  ✅ Final review
+```
+
+---
+
+Ready to start Phase 1 on your confirmation. Which phase would you like to begin with?

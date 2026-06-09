@@ -2,6 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "arch-explorer",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "8090", "G:\\GitHub\\petfolio"],
+      "port": 8090
+    },
+    {
       "name": "flutter-web",
       "runtimeExecutable": "flutter",
       "runtimeArgs": [
