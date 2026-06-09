@@ -185,6 +185,18 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
           paymentIntentClientSecret: clientSecret,
           merchantDisplayName: 'PetFolio',
           style: ThemeMode.system,
+          googlePay: kIsWeb
+              ? null
+              : const PaymentSheetGooglePay(
+                  merchantCountryCode: 'US',
+                  currencyCode: 'usd',
+                  testEnv: true,
+                ),
+          applePay: kIsWeb
+              ? null
+              : const PaymentSheetApplePay(
+                  merchantCountryCode: 'US',
+                ),
         ),
       );
 

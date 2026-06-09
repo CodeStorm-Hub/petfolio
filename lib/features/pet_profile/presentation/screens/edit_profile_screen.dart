@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,6 +15,7 @@ import 'package:petfolio/features/pet_profile/presentation/controllers/discovery
 import 'package:petfolio/features/pet_profile/presentation/controllers/edit_profile_controller.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart';
 import 'package:petfolio/features/pet_profile/data/models/activity_level.dart';
+import '../widgets/breed_identifier_widget.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key, required this.pet});
@@ -273,6 +275,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             ),
                           ),
                         ),
+                        if (!kIsWeb) ...[
+                          const SizedBox(height: 12),
+                          BreedIdentifierWidget(
+                            onBreedIdentified: (breed, speciesName) {
+                              setState(() {
+                                _breedController.text = breed;
+                              });
+                              ref
+                                  .read(editProfileControllerProvider.notifier)
+                                  .clearError();
+                            },
+                          ),
+                        ],
                         const SizedBox(height: 16),
                         _LabeledField(
                           label: 'Bio',

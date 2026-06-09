@@ -1,0 +1,9 @@
+export 'care_routes.dart';
+export 'presentation/controllers/care_dashboard_controller.dart';
+export 'presentation/controllers/health_vault_controller.dart';
+export 'presentation/controllers/nutrition_controller.dart';
+export 'presentation/controllers/ai_routine_controller.dart';
+export 'presentation/screens/care_screen.dart';
+export 'presentation/screens/medical_vault_screen.dart';
+export 'presentation/screens/nutrition_screen.dart';
+export 'presentation/widgets/gamified_care_ui.dart';

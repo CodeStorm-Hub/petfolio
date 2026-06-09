@@ -200,6 +200,7 @@ class SocialRepository {
       breed: breed,
       imageUrls: (r['image_urls'] as List?)?.cast<String>() ?? const [],
       petAvatarUrl: pet['avatar_url'] as String?,
+      videoUrl: r['video_url'] as String?,
     );
   }
 

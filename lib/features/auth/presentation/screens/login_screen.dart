@@ -285,6 +285,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
                         // Email
                         AuthField(
+                          key: const ValueKey('login_email'),
                           controller: _emailController,
                           label: 'Email',
                           keyboardType: TextInputType.emailAddress,
@@ -305,6 +306,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
                         // Password
                         AuthField(
+                          key: const ValueKey('login_password'),
                           controller: _passwordController,
                           label: 'Password',
                           obscureText: _obscurePassword,

@@ -95,9 +95,9 @@ class PetListNotifier extends AsyncNotifier<List<Pet>> {
     final service = ref.read(careRecommendationServiceProvider);
     final repo = ref.read(careTaskRepositoryProvider);
     try {
-      final tasks = await service.generateRecommendations(pet);
-      if (tasks.isNotEmpty) {
-        await repo.bulkCreateTasks(tasks);
+      final result = await service.generateRecommendations(pet);
+      if (result.suggestions.isNotEmpty) {
+        await repo.bulkCreateTasks(result.suggestions);
       }
     } catch (e) {
       debugPrint('Auto-generation of routines failed for pet ${pet.id}: $e');

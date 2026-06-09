@@ -8,11 +8,13 @@ class PawToggle extends StatefulWidget {
     required this.value,
     required this.onChanged,
     this.activeColor = AppColors.tangerine,
+    this.semanticLabel = 'Toggle',
   });
 
   final bool value;
   final ValueChanged<bool> onChanged;
   final Color activeColor;
+  final String semanticLabel;
 
   @override
   State<PawToggle> createState() => _PawToggleState();
@@ -59,7 +61,11 @@ class _PawToggleState extends State<PawToggle> with SingleTickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Semantics(
+      label: widget.semanticLabel,
+      toggled: widget.value,
+      onTap: () => widget.onChanged(!widget.value),
+      child: SizedBox(
       width: _w,
       height: 48,
       child: Align(
@@ -123,6 +129,6 @@ class _PawToggleState extends State<PawToggle> with SingleTickerProviderStateMix
           ),
         ),
       ),
-    );
+    ));
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -87,10 +88,11 @@ class _OrderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final actions = _actionsFor(order.status);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           color: AppColors.surface0,
@@ -98,60 +100,107 @@ class _OrderTile extends StatelessWidget {
             BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
-        child: Row(
+        child: Column(
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: _statusColor(order.status).withAlpha(26),
-              ),
-              child: Icon(
-                _statusIcon(order.status),
-                size: 22,
-                color: _statusColor(order.status),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
                 children: [
-                  Text(
-                    order.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      color: AppColors.ink950,
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: _statusColor(order.status).withAlpha(26),
+                    ),
+                    child: Icon(
+                      _statusIcon(order.status),
+                      size: 22,
+                      color: _statusColor(order.status),
                     ),
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    '${_formatDate(order.createdAt)}  ·  ${order.amountFormatted}',
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.ink500),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          order.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: AppColors.ink950,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          '${_formatDate(order.createdAt)}  ·  ${order.amountFormatted}',
+                          style: const TextStyle(
+                              fontSize: 12, color: AppColors.ink500),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _StatusChip(status: order.status),
+                      const SizedBox(height: 4),
+                      const Icon(Icons.chevron_right_rounded,
+                          size: 18, color: AppColors.ink300),
+                    ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _StatusChip(status: order.status),
-                const SizedBox(height: 4),
-                const Icon(Icons.chevron_right_rounded,
-                    size: 18, color: AppColors.ink300),
-              ],
-            ),
+            if (actions.isNotEmpty) ...[
+              Divider(height: 1, color: AppColors.line),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Row(
+                  children: actions.map((a) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: _ActionBtn(
+                      label: a.$1,
+                      icon: a.$2,
+                      color: a.$3,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${a.$1} — coming soon'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                    ),
+                  )).toList(),
+                ),
+              ),
+            ],
           ],
         ),
       ),
     );
   }
+
+  List<(String, IconData, Color)> _actionsFor(OrderStatus s) => switch (s) {
+        OrderStatus.delivered => [
+            ('Rate', Icons.star_outline_rounded, AppColors.sunny),
+            ('Reorder', Icons.replay_rounded, AppColors.mint),
+            ('Return', Icons.assignment_return_outlined, AppColors.poppy),
+          ],
+        OrderStatus.shipped => [
+            ('Track', Icons.local_shipping_outlined, AppColors.sky),
+          ],
+        OrderStatus.cancelled => [
+            ('Reorder', Icons.replay_rounded, AppColors.mint),
+          ],
+        _ => [],
+      };
 
   Color _statusColor(OrderStatus s) => switch (s) {
         OrderStatus.pending    => AppColors.warning,
@@ -175,6 +224,50 @@ class _OrderTile extends StatelessWidget {
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
     return '${m[dt.month - 1]} ${dt.day}';
+  }
+}
+
+class _ActionBtn extends StatelessWidget {
+  const _ActionBtn({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: color.withAlpha(20),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color.withAlpha(60)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

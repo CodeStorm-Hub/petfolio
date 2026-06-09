@@ -8,8 +8,8 @@ import '../../../pet_profile/presentation/controllers/active_pet_controller.dart
 import '../../data/models/medical_record.dart';
 import '../../data/repositories/health_repository.dart';
 
-final healthVaultControllerProvider = StreamNotifierProvider<
-    HealthVaultController, List<MedicalRecord>>(
+final healthVaultControllerProvider =
+    StreamNotifierProvider.autoDispose<HealthVaultController, List<MedicalRecord>>(
   HealthVaultController.new,
 );
 
@@ -45,21 +45,37 @@ class HealthVaultController extends StreamNotifier<List<MedicalRecord>> {
   MedicalVaultRepository get _repo => ref.read(medicalVaultRepositoryProvider);
 
   Future<bool> addRecord(MedicalRecord record) async {
+    // Use a sentinel ID so the replacement loop can find the optimistic entry
+    // even after the realtime stream delivers the real row.
+    const sentinelId = '_tmp_optimistic_';
+    final optimistic = record.copyWith(id: sentinelId);
     final prevState = state;
 
-    state = state.whenData((records) => [record, ...records]);
+    state = state.whenData((records) => [optimistic, ...records]);
 
     try {
       final created = await _repo.createRecord(record);
-      state = state.whenData((records) => [
-            for (final r in records)
-              if (r.id == record.id) created else r,
-          ]);
+      // Replace the sentinel with the server-assigned record. If the realtime
+      // stream already delivered the real row before we get here, the sentinel
+      // will be gone and the loop is a no-op — the stream's state wins.
+      state = state.whenData((records) {
+        final hasSentinel = records.any((r) => r.id == sentinelId);
+        if (!hasSentinel) return records; // stream already applied the real row
+        return [
+          for (final r in records)
+            if (r.id == sentinelId) created else r,
+        ];
+      });
       return true;
     } catch (e, st) {
-      debugPrint(
-          '[HealthVaultController] addRecord failed, reverting: $e\n$st');
-      state = prevState;
+      debugPrint('[HealthVaultController] addRecord failed: $e\n$st');
+      // Only roll back if the sentinel is still present (stream hasn't
+      // overwritten state with a partial result).
+      state = state.whenData((records) {
+        final hasSentinel = records.any((r) => r.id == sentinelId);
+        if (hasSentinel) return prevState.value ?? records;
+        return records;
+      });
       AppSnackBar.showError(e);
       return false;
     }

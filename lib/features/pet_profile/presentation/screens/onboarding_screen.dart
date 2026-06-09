@@ -1,4 +1,6 @@
 import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +9,7 @@ import 'package:petfolio/core/widgets/widgets.dart';
 
 import '../controllers/active_pet_controller.dart';
 import '../controllers/pet_list_controller.dart';
+import '../widgets/breed_identifier_widget.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key, this.addAnotherPet = false});
@@ -22,6 +25,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   late int _step = widget.addAnotherPet ? 1 : 0;
   PetSpecies _species = PetSpecies.dog;
   String _name = '';
+  String? _breed;
   int _ageMonths = 24;
   final List<String> _personality = [];
   bool _isSubmitting = false;
@@ -42,6 +46,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       final pet = await ref.read(petListProvider.notifier).addPet(
             name: _name,
             species: _species.name,
+            breed: _breed,
             dateOfBirth: DateTime.now().subtract(Duration(days: _ageMonths * 30)),
             bio: _personality.join(', '),
           );
@@ -152,7 +157,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         return _StepName(
           name: _name,
           species: _species,
+          breed: _breed,
           onNameChanged: (n) => setState(() => _name = n),
+          onBreedIdentified: (breed, _) => setState(() => _breed = breed),
           onNext: _next,
         );
       case 3:
@@ -497,10 +504,19 @@ class _StepSpecies extends StatelessWidget {
 }
 
 class _StepName extends StatelessWidget {
-  const _StepName({required this.name, required this.species, required this.onNameChanged, required this.onNext});
+  const _StepName({
+    required this.name,
+    required this.species,
+    this.breed,
+    required this.onNameChanged,
+    this.onBreedIdentified,
+    required this.onNext,
+  });
   final String name;
   final PetSpecies species;
+  final String? breed;
   final ValueChanged<String> onNameChanged;
+  final void Function(String breed, String species)? onBreedIdentified;
   final VoidCallback onNext;
 
   @override
@@ -569,7 +585,21 @@ class _StepName extends StatelessWidget {
               );
             }).toList(),
           ),
-          
+          if (!kIsWeb && onBreedIdentified != null) ...[
+            const SizedBox(height: 20),
+            BreedIdentifierWidget(onBreedIdentified: onBreedIdentified!),
+            if (breed != null && breed!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Detected breed: $breed',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+              ),
+            ],
+          ],
           const Spacer(),
           PrimaryPillButton(
             label: 'Lovely name',

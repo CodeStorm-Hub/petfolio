@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -35,6 +36,11 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
   static const int _storyDurationMs = 5000; // 5 seconds per story
   static const int _tickMs = 50; // Update progress every 50ms
   bool _isPaused = false;
+
+  // E10: Reaction state
+  bool _showReactions = false;
+  final List<_FloatingEmojiData> _floatingEmojis = [];
+  int _emojiKeyCounter = 0;
 
   @override
   void initState() {
@@ -194,6 +200,26 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
     });
   }
 
+  void _sendReaction(String emoji) {
+    HapticFeedback.lightImpact();
+    final stack = _petStacks.isEmpty ? null : _petStacks[_currentPetIndex];
+    final story = stack?.stories.elementAtOrNull(_currentStoryIndex);
+    if (story != null) {
+      ref.read(storiesProvider.notifier).sendReaction(
+            storyId: story.id,
+            emoji: emoji,
+          );
+    }
+    setState(() {
+      _showReactions = false;
+      _floatingEmojis.add(_FloatingEmojiData(key: _emojiKeyCounter++, emoji: emoji));
+    });
+    // Auto-remove after animation
+    Future.delayed(const Duration(milliseconds: 1100), () {
+      if (mounted) setState(() => _floatingEmojis.removeWhere((e) => e.emoji == emoji));
+    });
+  }
+
   String _timeAgo(DateTime time) {
     final difference = DateTime.now().difference(time);
     if (difference.inMinutes < 1) return 'now';
@@ -323,6 +349,83 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+
+                // E10: Floating emoji bursts
+                ..._floatingEmojis.map(
+                  (data) => Positioned(
+                    bottom: 100,
+                    left: 0,
+                    right: 0,
+                    child: Center(child: _FloatingEmoji(key: ValueKey(data.key), emoji: data.emoji)),
+                  ),
+                ),
+
+                // E10: Reaction bar at bottom
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: SafeArea(
+                    top: false,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_showReactions)
+                          Container(
+                            margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withAlpha(160),
+                              borderRadius: BorderRadius.circular(40),
+                              border: Border.all(color: Colors.white.withAlpha(30)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: ['🐾', '❤️', '😂', '😮', '🔥'].map((emoji) {
+                                return GestureDetector(
+                                  onTap: () => _sendReaction(emoji),
+                                  child: Text(emoji, style: const TextStyle(fontSize: 28)),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                          child: GestureDetector(
+                            onTap: () {
+                              if (_showReactions) {
+                                setState(() => _showReactions = false);
+                                _resume();
+                              } else {
+                                _pause();
+                                setState(() => _showReactions = true);
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withAlpha(120),
+                                borderRadius: BorderRadius.circular(40),
+                                border: Border.all(color: Colors.white.withAlpha(50)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text('🐾', style: TextStyle(fontSize: 18)),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'React',
+                                    style: TextStyle(color: Colors.white.withAlpha(200), fontSize: 14, fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
@@ -487,5 +590,68 @@ class PetStoryStack {
   bool hasUnviewed(String? userId) {
     if (userId == null) return false;
     return stories.any((s) => !s.viewedByUsers.contains(userId));
+  }
+}
+
+// ─── E10: Reaction helpers ────────────────────────────────────────────────────
+
+class _FloatingEmojiData {
+  const _FloatingEmojiData({required this.key, required this.emoji});
+  final int key;
+  final String emoji;
+}
+
+class _FloatingEmoji extends StatefulWidget {
+  const _FloatingEmoji({super.key, required this.emoji});
+  final String emoji;
+
+  @override
+  State<_FloatingEmoji> createState() => _FloatingEmojiState();
+}
+
+class _FloatingEmojiState extends State<_FloatingEmoji>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _opacity;
+  late final Animation<Offset> _slide;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _opacity = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 20),
+      TweenSequenceItem(tween: ConstantTween(1.0), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 30),
+    ]).animate(_ctrl);
+    _slide = Tween<Offset>(begin: Offset.zero, end: const Offset(0, -2.5))
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+    _scale = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.4, end: 1.3), weight: 30),
+      TweenSequenceItem(tween: Tween(begin: 1.3, end: 1.0), weight: 20),
+      TweenSequenceItem(tween: ConstantTween(1.0), weight: 50),
+    ]).animate(_ctrl);
+    _ctrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacity,
+      child: SlideTransition(
+        position: _slide,
+        child: ScaleTransition(
+          scale: _scale,
+          child: Text(widget.emoji, style: const TextStyle(fontSize: 48)),
+        ),
+      ),
+    );
   }
 }

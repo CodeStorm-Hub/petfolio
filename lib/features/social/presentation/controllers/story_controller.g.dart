@@ -33,7 +33,7 @@ final class StoriesProvider
   Stories create() => Stories();
 }
 
-String _$storiesHash() => r'be77a0a14ce1103859dddde46676458715039f29';
+String _$storiesHash() => r'0578eff4c01db5148fbbc9d146c83992530401e1';
 
 abstract class _$Stories extends $AsyncNotifier<List<Story>> {
   FutureOr<List<Story>> build();

@@ -1,5 +1,594 @@
 # Petfolio — Progress Log
 
+## 2026-06-09 — Contextual Navigation Phase 5 (Polish) ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+
+**`lib/core/widgets/app_shell.dart`**
+- **Cart badge on Marketplace Cart tab**: `_AppShellState.build` computes `cartCount` from `cartProvider` when in marketplace module; builds `badgeCounts = [0, 0, cartCount, 0]` and passes it to `_FloatingNav` + `_WideNavRail`
+- **`_FloatingNav`**: added optional `badgeCounts: List<int>?`; passes `badgeCounts?[i] ?? 0` to each `_NavTab`
+- **`_NavTab`**: added `badgeCount: int` (default 0); wraps icon in `Stack(clipBehavior: Clip.none)` with a `Positioned` poppy badge dot (supports `99+`); border color adapts to dark/light surface
+- **`_WideNavRail`**: added `required module` + optional `badgeCounts`; when `module != global` wraps `NavigationRail` in a `Column` with a 48×48 ← Home icon button + divider at the top; badge dot shown on rail icons too
+- **AnimatedSwitcher**: already well-tuned (220ms, fade + slide-up 15%), left unchanged
+
+### Contextual nav — all 5 phases complete ✅
+
+Phase complete — please run (/remember) to save tokens before proceeding.
+
+---
+
+## 2026-06-09 — Contextual Navigation Phase 4 (MatchLikedScreen) ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+
+**New: `lib/features/matching/presentation/controllers/match_liked_controller.dart`**
+- `LikedPetItem` model (petId, petName, avatarUrl, breed, isMutual, matchId, likedAt)
+- `MatchLikedSnapshot` (mutual, pending lists)
+- `matchLikedControllerProvider` — fetches swipes + matches in parallel, resolves pet profiles via `fetchPetsByIds`, separates mutual/pending
+
+**New: `lib/features/matching/presentation/screens/match_liked_screen.dart`**
+- Two `SliverGrid` sections (2-col): Mutual Matches (❤️ poppy, Chat button) + You Liked (🐾 lilac)
+- `_LikedCard`: photo or initial placeholder, name, breed, heart badge for mutual, Chat FilledButton
+- `PetfolioEmptyState` when empty; `RefreshIndicator` on scroll
+
+**`lib/features/matching/data/repositories/matching_repository.dart`** — Added `fetchPetsByIds` delegate
+
+**`lib/core/navigation/app_shell_routes.dart`** — Added `/matching/liked` shell route
+
+### Next → Phase 5: Polish
+- Cart badge on Marketplace nav tab
+- Wide-screen NavigationRail context-awareness
+- AnimatedSwitcher tuning
+
+Phase complete — please run (/remember) to save tokens before proceeding to Phase 5.
+
+---
+## 2026-06-09 - Contextual Navigation Phase 2 (Global Shell Completion)
+
+`flutter analyze` - **No issues found.**
+
+### Implemented
+
+**`lib/core/navigation/shell_destinations.dart`** - `globalDestinations` updated from 5 tabs to 4 (Home/Alerts/Activity/Me); `globalAccents` trimmed to match
+
+**`lib/core/navigation/app_shell_routes.dart`** - `/notifications`, `/activity`, `/me` added inside ShellRoute
+
+**New: `lib/features/profile/presentation/screens/me_screen.dart`** - Shell-tab Me screen; profile card with active pet/initials + Gold Member pill; MY PETS (switch/add), ACCOUNT (addresses, orders, seller), PREFERENCES (notifications, dark mode), OFFERS, HELP & LEGAL, Sign Out; no internal header - uses `SizedBox(height: topPad + 76)` spacer for AppShellHeader
+
+**`lib/features/social/presentation/screens/notifications_screen.dart`** - `showHeader` param added; when false hides back-button header and adds spacer; used by `/notifications` shell tab
+
+**`lib/features/activity/presentation/screens/activity_screen.dart`** - same `showHeader` pattern
+
+**`lib/core/widgets/app_shell.dart`** - `_globalEyebrows` trimmed to 4 entries (HOME/ALERTS/ACTIVITY/ME); `_buildTrailing` rewritten with direct switch on subIndex for global shell: Home=streak+notifs+me, Alerts=mark-all-read, Activity=filter, Me=dark mode toggle
+
+**`lib/core/navigation/router_notifier.dart`** - redirects: `/settings` to `/me`, `/social/notifications` to `/notifications`
+
+**`lib/features/activity/activity_routes.dart`** - returns empty list (moved to shell)
+
+**`lib/features/settings/presentation/screens/settings_screen.dart`** - `push('/activity')` changed to `go('/activity')`
+
+### Next step → Phase 4: New Screens
+- `MatchLikedScreen` for `/matching/liked` tab
+- MeScreen sub-sections polish (pet switcher, addresses)
+
+Phase complete - please run (/remember) to save tokens before proceeding to Phase 4.
+
+---
+## 2026-06-09 — Contextual Navigation Phase 3 (Module Sub-route Migration) ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+
+**`lib/core/navigation/app_shell_routes.dart`**
+- Added `/social/stories` → `StoryViewerScreen(initialPetId: queryParam)`
+- Added `/social/communities` → `CommunitiesScreen()` with nested `:communityId` → `CommunityDetailScreen`
+- Added `/social/profile/me` → `_MePetProfileTab` (reads `activePetControllerProvider`, renders `SocialProfileScreen`)
+- Added `/matching/inbox` → `MatchesInboxScreen()`
+
+**`lib/features/social/social_routes.dart`** — removed `/social/stories` (now shell route)
+
+**`lib/features/matching/matching_routes.dart`** — removed `/matching/inbox` (now shell route)
+
+**Deleted: `lib/features/communities/communities_routes.dart`** — entire file removed; routes migrated to shell. Barrel `index.dart` export removed.
+
+**`lib/core/router.dart`** — removed `communitiesRoutes` import + call
+
+**Navigation fixes (push → go for shell tabs):**
+- `app_shell.dart`: Communities icon + Inbox icon shortcut
+- `care_screen.dart`: Communities "Explore" tile
+- `matching_navigation.dart`: `openMatchesInbox()`
+
+---
+## 2026-06-09 — Contextual Navigation Phase 1 (Foundation) ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+
+**New files**
+- `lib/core/navigation/shell_module_provider.dart` — `ShellModule` enum (global, care, social, matching, marketplace)
+- `lib/core/navigation/shell_destinations.dart` — 5 destination sets + accent arrays + helpers (`moduleFromPath`, `destinationsFor`, `accentsFor`, `selectedSubIndex`)
+
+**`lib/core/widgets/app_shell.dart`**
+- `_FloatingNav` / `_WideNavRail` now accept `destinations` + `accentColors` (no longer hardcoded)
+- `_AppShellState` computes `module` + `subIndex` from GoRouter path each build
+- `AnimatedSwitcher` (fade + slide-up 220 ms) wraps `_FloatingNav` keyed on `ShellModule`
+- `AppShellHeader` takes `module + subIndex`; shows `← Home` pill in modules, pet switcher in global shell
+- Trailing actions mapped per module
+
+**`lib/core/navigation/app_shell_routes.dart`** — care sub-routes inside ShellRoute: `/care/nutrition`, `/care/health`, `/care/walk`, `/care/appointments`
+
+**`lib/core/navigation/router_notifier.dart`** — redirect `/care/medical-vault` → `/care/health`
+
+**`lib/features/care/care_routes.dart`** + **`appointment_routes.dart`** — return empty list (moved to shell)
+
+**`lib/features/care/presentation/screens/care_screen.dart`** — `push` → `go` for care sub-routes; medical vault → `/care/health`
+
+### Next step — Phase 2: Global Shell Completion
+- Create `/notifications` merged screen + `/me` screen
+- Update `globalDestinations` from 5 → 4 tabs (Home, Alerts, Activity, Me)
+
+Phase complete — please run (/remember) to save tokens before proceeding to Phase 2.
+
+---
+
+## 2026-06-09 — Pathao Gaps Phase 3 (Gap #11 + P3 finalization) ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+
+**Gap #11 (P2) — Promotions tab wired to live promo data**
+- `_PromotionsTab` → `ConsumerWidget`, watches `promoListProvider`
+- `_PromoNotifCard`: icon tile + code + discount badge + validity row + "Copy code" CTA
+- `TailWagLoader` loading state; `PetfolioEmptyState` empty/error states
+- Stagger-in: 40ms delay per card, `fadeIn + slideY`
+
+**Gap #15 (P3) — `flutter_animate` stagger on notification list**
+- `_UpdatesTab` tiles: `.animate(delay: 30ms×i).fadeIn(200ms).slideX(-0.04→0, 240ms)`
+
+**Gap #16 (P3) — `lottie` opt-in in `PetfolioEmptyState`**
+- Added optional `lottieAsset` param; `icon` is now optional (both optional, assert enforces at least one)
+- When `lottieAsset` provided → `Lottie.asset()` 120×120 looping; else `Icon` as before
+- All 14+ existing call sites unchanged
+
+### Already confirmed complete (verified this session, no work needed)
+- **#13** `smooth_page_indicator` — already in `product_detail_screen.dart`
+- **#14** shimmer skeleton loaders — already in `skeleton_loader.dart`
+- **#17** `RoundedSuperellipseBorder` squircle — already in `app_theme.dart` cardTheme + navBar
+- **#18** Spring page transitions — `ZoomPageTransitionsBuilder` already in `app_theme.dart`
+- **#19** `DynamicSchemeVariant.fidelity` — already in `app_theme.dart` `_colorScheme()`
+- **#20** Skipped — theme already provides StadiumBorder + spring curves on all buttons
+
+Phase complete — please run (/remember) to save tokens before proceeding.
+
+---
+
+## 2026-06-09 — Pathao Gaps Phase 2 (P2 + P3 polish) ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+
+**Gap #8 (P2) — Marketplace "Show All" categories screen**
+- `selectedCategoryProvider` added to `product_list_controller.dart`
+- `marketplace_categories_screen.dart` — 2-col grid of all 8 categories; live count; stagger-in via `flutter_animate`
+- `/marketplace/categories` route in `marketplace_routes.dart`
+- `_CategoryChips` gains "All" tile → `/marketplace/categories`; `_selectedCat` → `selectedCategoryProvider`
+
+**Gap #9 (P2) — "Products you'll love" discovery section**
+- `_YoullLoveSection` sliver in `_ShopBody` (all-category view only)
+- One product per category, horizontal scroll strip, 140×220 tiles, "Browse all ›" link
+
+**Gap #10 (P2) — Buyer order action row**
+- `_OrderTile` gains action row: delivered → Rate/Reorder/Return; shipped → Track; cancelled → Reorder
+- `_ActionBtn` widget with color-tinted bg
+
+**Gap #12 (P2) — Loyalty XP chip on home hero**
+- `_PetHeroCard` → `ConsumerWidget`, watches `petAwardsSummaryProvider`
+- "Lv N · XXX XP" gold gradient pill below streak chip
+
+**Gap #13 (P3) — `smooth_page_indicator` in carousels**
+- `_HeroCarousel` → `SmoothPageIndicator` with `ExpandingDotsEffect`
+- `_ProductHeroCarousel` → `SmoothPageIndicator` (white on dark)
+
+**Gap #14 (P3) — `shimmer` package skeleton loaders**
+- `skeleton_loader.dart` → `Shimmer.fromColors`; reduce-motion path unchanged
+
+**Gap #15 (P3) — `flutter_animate` stagger-in**
+- Categories screen tiles: 40ms stagger `fadeIn + slideY`
+- Offers screen promo cards: 50ms stagger
+
+### Still pending
+- Gap #11 (P2): Promotions tab data source (notifications `promo` type)
+- Gap #16–20 (P3): lottie empty states, squircle cards, spring transitions, fidelity color seeding, tactile press
+
+Phase complete — please run (/remember) to save tokens before proceeding.
+
+---
+
+## 2026-06-08 — Pathao UI Redesign Phase 1: Hub Home + All Features Sheet ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+- **`lib/features/home/presentation/widgets/all_features_sheet.dart`** — Pathao-style bottom sheet with 10-feature 2-col grid; spring scale animation, dark mode, haptics
+- **`lib/features/home/presentation/screens/hub_home_screen.dart`** — Bento grid hub home replacing `PetProfileScreen` at `/home`:
+  - `_PromoBanner` — contextual CTA driven by live care streak + task progress
+  - 2×3 `SliverGrid`: `_CareTile` (streak pill + progress bar from Supabase realtime), 4× `_BentoTile` (Social/Match/Market/Vet), `_AllTile` (dark → AllFeaturesSheet)
+  - `_QuickActionsRow` — horizontal strip (Shop / Log task / Post moment / Book vet)
+  - `_SpotlightCarousel` — 4 gradient hero cards
+  - `_DealsSection` — filter chips + promo banner
+  - Fade-in `AnimationController`, `BouncingScrollPhysics`, wide `maxWidth: 640`
+- **`lib/core/navigation/app_shell_routes.dart`** — `/home` → `HubHomeScreen`
+- **`lib/core/widgets/app_shell.dart`** — Tab 0: `home_outlined/home_rounded`, label `Home`, eyebrow `HOME`; live `🔥 N` streak pill in header trailing actions
+
+### Next step
+~~**Phase 3 — Product Details Dual CTA**~~ ✅ Complete — see below.
+
+---
+
+## 2026-06-09 — Phase 2: Marketplace Catalog Redesign ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+- **`_HeroCarousel`** — replaces static `_HeroBanner`; 3-slide `PageView` (viewportFraction: 0.92) with 3.6 s `Timer` auto-scroll, animated pill page-indicator dots; each `_PromoCard` has gradient bg, foreground emoji (tilted), eyebrow label, `GoogleFonts.sora` title, white CTA pill
+- **`_NewProductTile`** — M3 Expressive white elevated card: `Colors.white` bg (light) / `pt.surface2` (dark), no border in light mode, multi-layer shadow with per-product `gradientStart` glow; **`🔥 HOT` badge** (top-right) on products with `rating ≥ 4.5`; add-to-cart button upgraded with accent glow shadow
+- **Imports** — added `dart:async` (Timer) + `google_fonts`
+
+Phase complete — please run `/remember` to save tokens before proceeding to Phase 2.
+
+---
+
+## 2026-06-09 — Phase 3: Product Detail Redesign ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented (`lib/features/marketplace/presentation/screens/product_detail_screen.dart`)
+- **`_ProductHeroCarousel`** — replaces static `_ProductHero`; `PageView` swipeable images via `CachedNetworkImage` with `ProductGlyph` fallback; animated pill page-indicator dots; animated glyph scale+rotation pop on add-to-cart; `_WavePainter` bottom transition
+- **`_SellerRow`** — `Material + InkWell` ripple card; shop initial-letter `CircleAvatar` tinted with `product.gradientStart`; shop name + category label; chevron → `context.push('/shop/${product.shopId}')`
+- **`_ProductInfo`** — rating/free-delivery badges; brand eyebrow; name; variant; price row with subscribe-aware strikethrough + `-12%` `AppColors.poppy` badge when `subscribe && subscribable`
+- **`_DualCtaBar`** — replaces `_PayBar`; `OutlinedButton` "Add to Cart" (`Expanded(flex:1)`) + `FilledButton` "Buy Now · $price" (`Expanded(flex:2)`); `AppColors.poppy` fill; frosted backdrop separator
+- **`_VariantSheetContent`** — Pathao-style `showModalBottomSheet`; drag handle + "Customize as per your choice" `GoogleFonts.sora` header; auto-selected radio variant row with COMPLETE badge; `_SheetStepperBtn` qty stepper; Confirm CTA with inline price + strikethrough; `Navigator.pop(context, _qty)`
+- **`_handleAddToCart`** — inline add (no navigation) + `SnackBar` confirmation + glyph pop animation
+- **`_handleBuyNow`** — opens `_VariantSheetContent`, on confirm adds `qty` items sequentially then navigates to `/marketplace/cart`
+- **State cleanup** — removed `_quantity` (moved to sheet); added `_pageCtrl`/`_pageIndex`; removed `SingleTickerProviderStateMixin`
+- **Removed from scroll body** — `_QuantityStepper`, `_OrderSummaryCard`, `_SumRow`
+
+### Next step
+~~**Phase 4**~~ ✅ Complete — see below.
+
+---
+
+## 2026-06-09 — Phase 4: Cart / Checkout Stacked Section Cards ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented (`lib/features/marketplace/presentation/screens/cart_screen.dart`)
+- **Layout** — `bg: #F2F3F7` (light) / `surface1` (dark); all sections are `_SectionCard` (white elevated, warm shadow) stacked on gray — Pathao checkout pattern
+- **`_CartHeader`** — `GoogleFonts.sora` title + mint item-count pill + Clear danger button
+- **`_DeliverToCard`** (shared, top) — mint location icon + "DELIVER TO" eyebrow + address placeholder; tap → snackbar
+- **`_VendorCheckoutSection`** — per-vendor stacked sections:
+  - **Products card** — shop initial avatar + name + delivery estimate + `CartLineItem` lines + !canCheckout amber warning
+  - **Apply Promo card** — collapsed row → `AnimatedCrossFade` expands to `TextField` + mint Apply button
+  - **Pay via card** — lilac icon + `_PaymentChip` credit card / COD; haptic on change
+  - **Order Summary card** — Subtotal / Delivery (Free, mint) / divider / **Total** bold 18px
+  - **Green savings banner** — `🎉 You are saving $X` mint gradient; shown only when `shopSavingsCents > 0`
+  - **Place Order CTA** — poppy `FilledButton` 56px + inline price; disabled (ink300) when `!canCheckout`; COD → `_CodConfirmSheet`
+- **`_CodConfirmSheet`** — dark-mode-aware reskin; all checkout logic preserved
+- **All logic unchanged** — `checkoutProvider` listener, `startCheckoutForShop`, `startCodCheckoutForShop`, `verifiedShopIds` gate
+
+### Next step
+~~**Phase 5**~~ ✅ Complete — see below.
+
+---
+
+## 2026-06-09 — Phase 5: Notifications Tabs + Activity Screen ✅
+
+`flutter analyze` — **No issues found.**
+
+### Notifications (`lib/features/social/presentation/screens/notifications_screen.dart`)
+- **Pathao-style flat `TabBar`** — `UnderlineTabIndicator` poppy 3px, no pill, flat white bar; `labelColor: poppy`, `unselectedLabelColor: ink500`
+- **"Updates" tab** — social activity (like/comment/follow); unread count poppy badge on tab label; "Mark all read" header action when unread > 0
+- **"Promotions" tab** — future promo/deal notifications; `PetfolioEmptyState` when empty
+- **`_NotificationTile`** — fixed legacy color aliases (`coral500`→`poppy`, `meadow500`→`mint`, `blue500`→`sky`); Dart switch expressions for `_iconColor` + `_emoji`; unread dot uses `AppColors.poppy`
+
+### Activity screen (new — `lib/features/activity/`)
+- **`activity_screen.dart`** — unified timeline combining `buyerOrdersProvider` (orders) + `appointmentControllerProvider` (appointments)
+- **Filter chips** — `⚡ All | 🛍️ Orders | 🏥 Appointments`; poppy active fill, white outlined inactive; `AnimatedContainer` 180ms
+- **Date grouping** — "Today" / "Yesterday" / "MMM D, YYYY" section headers; sorted newest-first
+- **`_ActivityCard`** — status dot (tangerine=pending/upcoming, sky=shipped, mint=delivered/completed, poppy=cancelled/missed); emoji icon circle; title + subtitle; trailing value (amount/date) + status badge; action row ("Track Order" / "Reorder" / "Book Again")
+- **`_ActivityItem`** — unified wrapper over `MarketplaceOrder` + `Appointment` with computed `statusColor`, `statusLabel`, `actionLabel`, `actionRoute`
+- **Route** — `/activity` root-level (`parentNavigatorKey: rootKey`); registered in `router.dart`
+- **`activity_routes.dart`** — `activityRoutes(GlobalKey<NavigatorState>)` pattern matching other feature routes
+
+---
+
+## 2026-06-08 — Plan remainder: B7/B8/B10/E10 + polish
+
+**`flutter analyze` — No issues found. `flutter test` — 108/108 pass. Supabase migration applied.**
+
+### UI / UX (remaining B-items)
+- **B2:** `SkeletonLoader` on marketplace grid, social feed initial load, pet profile header
+- **B8:** Star rating + review count on `ProductCard` tiles and meta row
+- **B10:** First-launch `AppTutorialOverlay` (5-tab walkthrough, `SharedPreferences` flag)
+- **B12:** `_PetProfileHeaderSkeleton` while pets load
+
+### Features
+- **B7:** Chat read receipts — UPDATE RLS policy, `markMessagesAsRead`, realtime `is_read` sync, double-check icon on sent messages (typing was already wired)
+- **E10:** Story reactions persisted to `story_reactions` table + `StoryRepository.sendReaction`
+
+### Performance
+- **C3:** `_SocialPostListSliver` watches posts via Riverpod `select()` to limit rebuild scope
+
+### Backend
+- Migration `20260608140000_chat_read_receipts_story_reactions.sql` applied to hosted Supabase
+
+### Tests
+- `auth_repository_test`, `vitals_repository_test`, `app_shell_widget_test`
+- RLS contract extended for `story_reactions`
+
+**Deferred (documented in `STRIPE_SECURITY_AUDIT.md`):** F5 live Stripe E2E, D4 certificate pinning, A4 use-case layer refactor.
+
+**Plan complete — please run (/remember) to save tokens.**
+
+---
+
+## 2026-06-08 — Phase 5: Security & Testing
+
+**`flutter analyze` — No issues found. `flutter test` — 103/103 pass.**
+
+### Stripe security audit
+- `STRIPE_SECURITY_AUDIT.md` — documents server-side PI creation, webhook HMAC, publishable-key-only client, CoD path, redirect URL validation
+- Extracted `mapAndThrowCheckoutRpcException` in `order_repository.dart` for testable checkout RPC error mapping
+
+### Security contract tests
+- `test/security/stripe_client_contract_test.dart` — no `sk_*` / `STRIPE_SECRET_KEY` in `lib/`; Edge Function holds secret
+- `test/security/rls_migration_contract_test.dart` — 14 critical tables have RLS + policies in SQL migrations
+
+### Repository unit tests
+- `order_repository_exceptions_test.dart` — SHOP_INACTIVE, SHOP_NOT_VERIFIED, INSUFFICIENT_STOCK mapping
+- `matching_repository_cache_test.dart` — location cache, demo swipe skip, action mapping
+- `appointment_repository_test.dart` — unauthenticated create guard
+- `product_review_repository_test.dart` — unauthenticated upsert guard
+
+### Widget tests
+- `skeleton_loader_widget_test.dart` — block, circle, listTile, reduced-motion
+- `star_rating_widget_test.dart` — full/half stars, tap callback, semantics
+- `petfolio_empty_state_widget_test.dart` — title/action, combined semantics label
+
+**Next step:** Plan complete — please run (/remember) to save tokens.
+
+---
+
+## 2026-06-08 — Phase 4: Feature Additions
+
+**`flutter analyze` — No issues found. `flutter test` — 51/51 pass. Supabase migration applied.**
+
+### Verified already complete (prior phases)
+- **Pet vitals chart** — `VitalsChartCard` in medical vault (`fl_chart`)
+- **Apple Pay / Google Pay** — `PaymentSheetGooglePay` + `PaymentSheetApplePay` in `checkout_controller.dart`
+- **Vet appointments** — `features/appointments/` with schema-aligned model + routes
+- **Walk tracking** — `/care/walk` + `WalkTrackingScreen`
+
+### New: Product reviews (E4)
+- Migration `20260608120000_product_reviews.sql` — `product_reviews` table, RLS, aggregate trigger updating `products.rating` + `review_count`
+- `ProductReview` model, `ProductReviewRepository`, `ProductReviewsNotifier`
+- `StarRatingWidget` + `ProductReviewsSection` on `product_detail_screen` (list + write-review sheet)
+- Unit test: `test/features/marketplace/product_review_model_test.dart`
+
+**Next step:** Phase 5 — Security & Testing (Stripe audit, RLS tests, repository unit tests). Phase complete — please run (/remember) before Phase 5.
+
+---
+
+## 2026-06-08 — Phase 3: Performance
+
+**`flutter analyze` — No issues found. `flutter test` — 50/50 pass.**
+
+### Image compression pipeline
+- Unified `pickImage` / `prepareImageForUpload` in `media_picker_io.dart` + web stub
+- Camera + gallery picks in `create_post_screen`, `create_story_screen`, and `breed_identifier_widget` now compress on mobile before upload
+
+### Marketplace pagination
+- Fixed keyset cursor to **newest-first** (`created_at desc`, `lt` cursor) in `product_repository.dart`
+- Wired infinite scroll in `marketplace_screen.dart` `_ShopBody` with scroll listener + load-more spinner
+
+### RepaintBoundary isolation
+- Stories row wrapped in `RepaintBoundary` (`social_screen.dart`)
+- Marketplace hero banner wrapped in `RepaintBoundary`; product grid tiles already isolated
+
+### Web image cache
+- Added `petfolioWebImageCacheManager()` with 200-object LRU disk cap (`web_image_cache.dart`)
+- Applied to feed post images + marketplace product tiles on web
+- Explicit `flutter_cache_manager` dependency in `pubspec.yaml`
+
+**Next step:** Phase 4 — Feature additions (product ratings, Apple/Google Pay, etc.). Phase complete — please run (/remember) before Phase 4.
+
+---
+
+## 2026-06-08 — Phase 2: UI/UX Polish + plan feature wiring
+
+**`flutter analyze` — No issues found. `flutter test` — 50/50 pass.**
+
+### Phase 2 polish
+- **AppTheme M3E:** `SearchBarTheme` + expressive `NavigationBarTheme` (pill indicator, selected icon/label styles)
+- **SkeletonLoader:** appointments list loading state
+- **Semantics:** `GlassCard`, `PfCard` (`semanticLabel`), `PetfolioEmptyState` (title/subtitle)
+- **Story ring:** rotating sweep-gradient ring on unviewed stories (`_StoryItem.animateRing`)
+- **Matching:** swipe exit uses `PetfolioThemeExtension.curveSpring` (haptics already present)
+- **Gamified care:** confetti + animated XP bar verified in `gamified_care_ui.dart`
+
+### Plan feature wiring
+- **Appointments schema fix:** model maps `location`/`status`; `toInsertJson(ownerId:)`; repo injects `owner_id`; toggle uses `status`
+- **Walk tracking:** route `/care/walk` + Care tab explore tile + shell header shortcut
+- **Communities:** `communities_routes.dart` (`/social/communities`, detail with `extra`); Social header button; GoRouter navigation from list
+- **Breed ID:** `BreedIdentifierWidget` in `EditProfileScreen` + onboarding name step (mobile only, `!kIsWeb`)
+- **Vitals:** already wired via `VitalsChartCard` in medical vault
+
+**Next step:** Phase 3 — Performance (image compress, const audit, RepaintBoundary, cursor pagination). Phase complete — please run (/remember) before Phase 3.
+
+---
+
+## 2026-06-08 — Phase 1: Architecture Cleanup (plan sequential implementation)
+
+**`flutter analyze` — No issues found. `flutter test` — 50/50 pass.**
+
+### A1 — Router decomposition
+- Extracted `app_shell_routes.dart`, `router_notifier.dart`, `router_error_screen.dart` under `lib/core/navigation/`
+- `router.dart` now composes feature routes only (~40 lines)
+
+### A2 — StateNotifier migration
+- Verified: no legacy `StateNotifier` controllers remain (Riverpod 3 `Notifier`/`AsyncNotifier` only)
+
+### A6 — DCM linting
+- Added `dev:dcm` + root `dcm.yaml` with metrics/rules (excludes `*.g.dart`, `*.freezed.dart`, `test/`)
+
+### D1 — Secure storage
+- Added `SecureStorageService` (`lib/core/services/secure_storage_service.dart`)
+- Marketplace cart persistence migrated from `SharedPreferences` → `flutter_secure_storage` with one-time legacy migration
+
+### A5 — Barrel exports
+- Added `lib/features/admin/index.dart`, `lib/features/communities/index.dart`
+
+**Next step:** Phase 2 — UI/UX Polish (AppTheme M3E tokens audit, SkeletonLoader standardisation, Semantics, story ring, haptics, confetti). Phase complete — please run (/remember) before Phase 2.
+
+---
+
+## 2026-06-08 — Plan completion: E3/E6/E7/F3/F4 + analyze clean
+
+**`flutter analyze` — No issues found. `flutter test` — 50/50 pass. App verified on emulator-5554 (Pixel 10, Android 17).**
+
+### New implementations
+
+**E3 — Pet communities (full stack)**
+- `supabase/migrations/20260608000000_communities.sql` — 4 tables with RLS, auto-increment triggers, realtime publication
+- `lib/features/communities/` — models, repository, `CommunitiesController`, `CommunityPostsNotifier` (Supabase realtime), screens
+
+**E6 — AI breed identification**
+- `lib/features/pet_profile/domain/services/breed_identification_service.dart` — NVIDIA Vision API, base64 image, structured JSON response
+- `lib/features/pet_profile/presentation/widgets/breed_identifier_widget.dart` — camera/gallery picker, result card with confidence %
+
+**E7 — Walk tracking**
+- `lib/features/care/presentation/screens/walk_tracking_screen.dart` — FlutterMap (OSM tiles), GPS stream, PolylineLayer, MarkerLayer, distance via latlong2, elapsed timer
+
+**F3 — Integration test**
+- `integration_test/auth_care_flow_test.dart` — 5 auth flow tests; optional 6th with real credentials via `--dart-define=TEST_EMAIL/PASSWORD`
+
+**F4 — AppTheme golden tests**
+- `test/core/theme/app_theme_golden_test.dart` — 4 tests; baselines in `test/core/theme/goldens/`
+
+### Lint fixes (this session)
+- `PostsState` renamed from `_PostsState` (private type in public API)
+- `__` → `_` in lambda params across communities screens
+- Unnecessary cast removed in `community_detail_screen.dart`
+- `use_null_aware_elements` suppressed on `community_repository.dart:90` (conflicting lint — `?key` applies to key nullability, not value)
+
+### Pending (deferred)
+- Wire `CommunitiesScreen` + `WalkTrackingScreen` into GoRouter (currently via `Navigator.push`)
+- Wire `BreedIdentifierWidget` into pet profile onboarding
+- **F5**: Stripe integration test — requires live Stripe test mode
+
+**Next step:** Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-06-08 — F4: Golden tests for AppTheme light/dark variants
+
+**`flutter analyze` — No issues found. `flutter test` — 50/50 pass.**
+
+### New implementations
+
+**F4 — AppTheme golden tests**
+- `test/core/theme/app_theme_golden_test.dart` — 4 tests:
+  - `light theme panel`: renders color rows, brand swatches, GlassCard pet row, PetAvatar species row, pillar accent pills; baseline captured at 390×700 in `goldens/app_theme_light.png`.
+  - `dark theme panel`: same panel under `AppTheme.dark()`; captured at `goldens/app_theme_dark.png`.
+  - `color tokens differ between light and dark`: asserts `surface1`, `ink950`, `cream` diverge across themes.
+  - `pillar accent colors are fully opaque in both themes`: asserts all 5 pillar colors have `a == 1.0` in both themes. (Pillar accents are tone-shifted per theme, not identical.)
+- Baselines generated with `flutter test --update-goldens`; committed under `test/core/theme/goldens/`.
+- `GoogleFonts.config.allowRuntimeFetching = false` set in `setUpAll` for offline/CI safety.
+
+**Next step:** Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-06-08 — Phase 5: Security & Testing (plan completion)
+
+**`flutter analyze` — No issues found. `flutter test` — 46/46 pass.**
+
+### Scoping decisions
+- **D1 (flutter_secure_storage)**: SharedPreferences stores only non-sensitive data — theme index, match filter prefs, active pet ID, care completion counter, cart JSON. Supabase manages its own auth tokens via its internal secure mechanism. No migration required.
+- **E8 (dark mode covers)**: Already complete — `WaveHeader` uses `species.resolvedAccent(isDark)` and the card overlay adapts border alpha by brightness.
+- **E9 (in_app_review)**: Already wired in `care_dashboard_controller.dart` lines 345–356 (triggers after 3rd care completion).
+
+### New implementations
+
+**D5 — Comment input validation**
+- `post_detail_screen.dart`: Added `maxLength: 500` + `maxLengthEnforcement: MaxLengthEnforcement.enforced` to `_CommentInputBar` TextField. Custom `buildCounter` shows remaining char count only when ≤ 50 left; turns `AppColors.poppy` when < 20 remain. Existing `_sendComment()` already trims + guards empty.
+
+**F2 — Widget tests for core shared widgets**
+- `test/core/widgets/pet_avatar_widget_test.dart` — 7 tests: species emoji (dog, cat), initials rendering, xl size applied, `onTap` fires, status dot visible when `isOnline: true`, Semantics label set.
+- `test/core/widgets/glass_card_widget_test.dart` — 7 tests: renders child, solid fallback on `forceOpaque: true`, solid fallback on `disableAnimations: true`, BackdropFilter present in glass mode, custom width/height, custom borderRadius, dark theme renders without error.
+
+### Remaining from plan (deferred — large scope or blocked)
+- **E3**: Group chat / pet communities (new DB schema + full feature build)
+- **E6**: AI breed identification (camera integration + NVIDIA API)
+- **E7**: Walk tracking (`flutter_map` not yet added; requires GPS foreground service)
+- **F3**: Integration test — auth → onboarding → care flow (needs emulator)
+- **F4**: Golden tests for AppTheme light/dark variants
+- **F5**: Stripe test-mode checkout integration test
+
+**Next step:** Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
+## 2026-06-08 — Plan completion: remaining tasks from review-the-lib-directory
+
+**`flutter analyze` — No issues found. `flutter test` — 32/32 pass.**
+
+### Fixes from this session
+
+**Appointments module (new files from prior session — all errors resolved)**
+- `appointment_controller.dart`: Replaced invalid `FamilyAsyncNotifier` (not exported in Riverpod 3.3.1) with plain `AsyncNotifier` that watches `activePetIdProvider` directly in `build()`. Provider changed from `.family` to plain `AsyncNotifierProvider`.
+- `appointments_screen.dart`: Replaced broken `AppHeader(title:, onOpenSwitcher:)` with a native `Scaffold.appBar`; removed all `(petId)` family calls; fixed `unnecessary_underscores`, `unused_local_variable isDark`, removed unused `_daysWithEvents`.
+- `appointment_repository.dart`: Removed `unnecessary_cast` on `.single()` result.
+
+### New implementations
+
+**B10 — Social feed empty-state CTA**
+- `petfolio_empty_state.dart`: Added optional `action` Widget parameter; renders below subtitle with 20px gap.
+- `social_screen.dart`: Replaced plain `Text('No posts yet')` with `PetfolioEmptyState(icon, title, subtitle, action: FilledButton → /social/create-post)`.
+
+**B12 — Pet profile header shimmer** ✅ Already complete (`PetAvatar._NetworkAvatar` uses `SkeletonLoader` as `CachedNetworkImage` placeholder).
+
+**C3 — Social feed `select()` optimisation**
+- Extracted `_LoadMoreSliver` (`ConsumerWidget`) that watches only `socialControllerProvider(petId).select((v) => v.asData?.value.isLoadingMore ?? false)`. The full `SocialView` no longer rebuilds on pagination ticks — only the spinner widget does.
+
+**C6 — Web image cache LRU cap**
+- `main.dart`: Added `PaintingBinding.instance.imageCache.maximumSizeBytes = 64 * 1024 * 1024` inside `if (kIsWeb)` block. Prevents unbounded memory growth in long-running web sessions.
+
+**E10 — Story reactions**
+- `story_viewer_screen.dart`: Added `_showReactions` / `_floatingEmojis` state; `_sendReaction(emoji)` triggers haptic + fly-up burst; "React" pill at bottom toggles a 5-emoji tray (🐾 ❤️ 😂 😮 🔥); story pauses while tray is open. `_FloatingEmoji` StatefulWidget with `TweenSequence` scale/opacity/slide animation.
+
+**F1 — Unit tests**
+- `test/features/appointments/appointment_model_test.dart` — 9 tests: `fromJson` (all fields, null optionals), `toJson` (omits id, UTC ISO 8601, null fields), `copyWith` (preserves, updates, toggles).
+- `test/features/care/weight_log_model_test.dart` — 4 tests: `fromJson` (full, int weight coercion), `copyWith` (update, preserve).
+
+### Remaining from plan (not implemented — scope/complexity)
+- **E3**: Group chat / pet communities (requires new DB tables + full feature)
+- **E6**: AI breed identification (camera + NVIDIA API integration)
+- **E7**: Walk tracking with `flutter_map`
+- **E8**: Dark mode pet profile covers (theme-adaptive banner images)
+- **F3–F5**: Integration, golden, Stripe payment tests
+
+**Next step:** Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+---
 
 ## AI AGENT HANDOVER & ARCHITECTURE GUIDE
 
@@ -50,6 +639,101 @@
 - **Circular Imports Avoidance**: Do NOT import [router.dart](file:///home/kratzer/workspace/petfolio/lib/core/router.dart) from screens that the router imports. Instead, navigate using literal path strings or query parameter deep links.
 - **Error UI Handling**: For optimistic UI actions (like toggling care tasks or seller onboarding), show errors using `AppSnackBar.showError` (via `appSnackBarMessengerKey` on `MaterialApp.router`). Do not put long-lived state providers in `AsyncValue.error` states for transient/action-level failures.
 - **Web Safe Target**: Marionette execution runs exclusively in debug builds via conditional compiler imports (`marionette_debug_gate_stub.dart` vs `_io.dart`) to keep `main.dart` from importing `dart:io` on web targets.
+
+## 2026-06-07 — M3E Tier 3: Spring Empty States & Branded Loading
+
+**Files changed:**
+- `lib/core/widgets/petfolio_empty_state.dart`
+- `lib/features/care/presentation/screens/nutrition_screen.dart`
+- `lib/features/social/presentation/screens/notifications_screen.dart`
+- `lib/features/matching/presentation/screens/matching_screen.dart`
+
+**`PetfolioEmptyState` — spring entrance animation (used in 6+ screens)**
+- Converted `StatelessWidget` → `StatefulWidget` with `SingleTickerProviderStateMixin`
+- `AnimationController(duration: 560ms)` auto-starts in `initState`
+- Three layered animations:
+  - `_scale`: `0.72 → 1.0` with `Curves.easeOutBack` — M3E spring overshoot bounce
+  - `_opacity`: `0.0 → 1.0` with `Interval(0.0, 0.60, Curves.easeOut)` — fast fade in
+  - `_slide`: `Offset(0, 0.12) → Offset.zero` with `Curves.easeOutCubic` — subtle upward drift
+- No API changes — all callers (`matches_inbox`, `cart`, `nutrition`, `medical_vault`, `pet_profile`, `manage_pets`) auto-inherit the animation
+
+**`TailWagLoader` full-screen loading (dog wag animation instead of bare spinner)**
+- `nutrition_screen.dart`: `Scaffold(body: Center(child: CircularProgressIndicator()))` → `TailWagLoader()`
+- `notifications_screen.dart`: added `widgets.dart` import + replaced `CircularProgressIndicator.adaptive()` in `.when(loading:)`
+- `matching_screen.dart`: replaced both `CircularProgressIndicator.adaptive()` full-screen states (discovery buffer load + location access load)
+- Inline button/pagination spinners (`strokeWidth: 2` inside `SizedBox(18/20px)`) left as `CircularProgressIndicator` — correct for that context
+
+`flutter analyze` — **No issues found.**
+
+**Skipped (out of scope for this session):**
+- `FloatingToolbar` in Care/Pet Profile — requires full re-read of `pet_profile_screen.dart`
+- Remaining 50+ inline `CircularProgressIndicator` instances — intentionally kept (inline context, correct M3E behavior)
+
+**Next step:** Phase complete — please run (/remember) to save tokens before proceeding.
+
+---
+
+## 2026-06-07 — M3E Tier 2: Spring Motions & Squircle Upgrades
+
+**Files changed:**
+- `lib/features/care/presentation/screens/care_screen.dart`
+- `lib/features/social/presentation/screens/social_screen.dart`
+- `lib/features/marketplace/presentation/screens/marketplace_screen.dart`
+
+### Tier 1 (prior session, recap)
+- `DynamicSchemeVariant.fidelity` — richer M3E palette
+- `ZoomPageTransitionsBuilder` + `CupertinoPageTransitionsBuilder` page transitions
+- M3E `TabBar` pill indicator (`BoxDecoration` + `BorderRadius.circular(radiusPill)`)
+- `RoundedSuperellipseBorder` on `CardTheme` + `PfCard.squircle` (direct dp, no 2× multiplier)
+- Squircle tokens: `squircleCard=24`, `squircleContainer/squircleDialog=28`
+
+### Tier 2 (this session)
+
+**care_screen.dart**
+- Added `import 'package:flutter/services.dart'`
+- `HapticFeedback.mediumImpact()` in `_CoverFlowCarousel._onToggle`
+- `HapticFeedback.mediumImpact()` in `_CareTaskCard._toggle`
+- New `_SpringCheckButton` widget replaces check button `GestureDetector + AnimatedContainer`:
+  - `AnimationController(80ms forward / 500ms reverse)` driven by `onTapDown/Up/Cancel`
+  - `Tween(1.0→0.82)` with `Curves.easeOut` / `Curves.elasticOut` reverse — M3E spring bounce
+  - `ScaleTransition` wraps existing `AnimatedContainer`
+
+**social_screen.dart**
+- `PostCard`: `squircle: true` added to `PfCard` — feed posts now render as true superellipses
+
+**marketplace_screen.dart**
+- Fly-to-cart X animation: `Curves.easeIn` → `Curves.easeInOutCubicEmphasized`
+- `_CategoryChips` upgrade: `AnimatedScale(1.0→1.07, Curves.easeOutBack, 340ms)` spring pop on active; `AnimatedContainer` for border/shadow; `AnimatedDefaultTextStyle` for label color
+
+`flutter analyze` — **No issues found.**
+
+**Next step:** Tier 3 — `LoadingIndicator` replacing `CircularProgressIndicator`, `FloatingToolbar` in Care/Pet Profile, `PetfolioEmptyState` spring entrance. Phase complete — please run (/remember) to save tokens before proceeding.
+
+---
+
+## 2026-06-06 — Care Screen: CoverFlow 3-D Task Carousel
+
+**Files changed**: `lib/features/care/presentation/screens/care_screen.dart`
+
+- **Removed widgets**: `_DoneCollapseRow`, `_TaskGrid`, `_CareTaskGridTile`, `_CareTaskGridTileState` — the "Done (N) ▾" collapse pill and 4-column Streaks grid are gone entirely.
+- **Removed state**: `_showDone` field from `_DailyTasksDashboardState`; `onSelect` simplified.
+- **New `_CoverFlowCarousel`** (`ConsumerStatefulWidget`):
+  - **Task ordering**: completed left · due-today pending center · remaining pending right. `initialPage` = first pending task.
+  - **3-D CoverFlow**: `Transform.translate` → `Transform.scale` → `Transform(Matrix4..setEntry(3,2,0.0012)..rotateY(rotY))`. No deprecated `Matrix4.translate/scale`.
+  - **Z-order**: stack entries sorted by distance from `_page` so center card always renders on top.
+  - **Smooth animation**: single `AnimationController` + `Animation<double>` with `_onTick` listener drives fractional `_page`. `_goTo(i)` fires a new `Tween` per navigation.
+  - **Swipe + tap**: `onHorizontalDragEnd` (260 px/s threshold); side cards tappable to focus.
+  - **Live sync**: `didUpdateWidget` patches `_ordered` by task ID — order stable during session.
+- **New `_CoverFlowCard`** (198×214 px, radius 28): icon circle 64 px, title, sublabel, XP chip, animated check button, long-press context menu. Done = tinted bg + color border + strikethrough. Due = poppy border + red badge.
+- **New `_XpBurst`**: fly-up "+XP ⭐" with `TweenSequence` opacity envelope, 1.2 s auto-dispose.
+- **New `_NavArrow`**: animated chevron pill buttons, grayed at list ends.
+- **Dot indicators**: active dot expands to 22 px; completed dots mint; capped at 12.
+- **Helpers**: `_cfColor`, `_cfEmoji`, `_cfSublabel` as file-scope private functions.
+- `flutter analyze` — **No issues found.**
+
+**Next step:** Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+---
 
 ## 2026-06-01 — Care Screen Redesign (from PetFolio Redesign/Care Redesign.html)
 
@@ -382,12 +1066,12 @@ Served `PetFolio Redesign.html` via local HTTP server, navigated all 5 tabs via 
 - [x] Phase 3 — **P1-1 / P1-3** `reject_vendor_kyc` RPC + safe notifications constraint ✅
 - [x] Phase 4 — **P1-4 / P1-5 / P2-7 / P2-11 / P3-5** Error UX batch ✅
 - [x] Phase 5 — **P2-1 / P2-3 / P2-4 / P2-5** Pet profile UI wiring ✅
-- [ ] Phase 5 — **P1-4 / P1-5** Error UX – health: add Retry button to `_ProfileHealthTab` error state; surface `addRecord` / `updateRecord` / `deactivateRecord` failures via `AppSnackBar.showError`
-- [ ] Phase 6 — **P2-11 / P2-7** Error UX – social & care: add `AppSnackBar.showError` to `toggleLike`, `updateCaption`, delete in `SocialController`; same for `CareNotifier.toggle`
-- [ ] Phase 7 — **P2-1 / P2-3** Awards tab + hero week bars: wire Awards tab to `pet_badges` / badge types; replace hardcoded 7-bar opacity in `_HeroCard` with real `weekGoalHit` data
-- [ ] Phase 8 — **P2-4 / P2-5** Seller card gating + hero chip: gate `_SellerDashboardCard` on `myShopProvider` / KYC status; replace hardcoded `'on a walk'` chip with real activity/care state
-- [ ] Phase 9 — **P1-3** Notifications constraint migration: change `DROP CONSTRAINT notifications_type_check` to `DROP CONSTRAINT IF EXISTS`
-- [ ] Phase 10 — **P2-2 / P2-6 / P2-8–12 / P3-\*** Remaining medium/low issues + pre-release sweep: profile overview reminders, legacy `CareNotifier` task types, null `nextDueAt` sort, document upload in vault, admin moderation UI, accessibility, timezone policy, SharedPreferences schema versioning, placeholder header taps; run `flutter pub run build_runner build --delete-conflicting-outputs` + `npx supabase db reset` / push
+- [x] Phase 5 — **P1-4 / P1-5** Error UX – health: Retry button in `medical_vault_screen.dart` + `AppSnackBar.showError` on all three `HealthVaultController` mutations ✅ (already implemented)
+- [x] Phase 6 — **P2-11 / P2-7** Error UX – social & care: `AppSnackBar.showError` on `toggleLike`, `updateCaption`, `deletePost` in `SocialController`; `CareNotifier.toggle` rollback ✅ (already implemented)
+- [x] Phase 7 — **P2-1 / P2-3** Awards tab: `_RecentAchievementsRow` → `ConsumerWidget(petId)`, wired to `petAwardsSummaryProvider`; shows all `kBadgeCatalog` badges with real `owned` state; `CareGamifiedWeeklyChart` already used real `weekGoalHit` data ✅
+- [x] Phase 8 — **P2-4 / P2-5** Seller card gating + hero chip: `_SellerDashboardCard` already wired to `myShopProvider`/KYC; `'on a walk'` chip not present in codebase ✅ (already implemented)
+- [x] Phase 9 — **P1-3** Notifications constraint migration: `20260521130000` + `20260523120001` already use `DROP CONSTRAINT IF EXISTS` ✅
+- [x] Phase 10 — **P2-2 / P2-6 / P2-8–12 / P3-\*** Pre-release sweep complete ✅: profile overview reminders (P2-2 done), legacy task-type fallback (pet_care_repository.dart:487), null-last nextDueAt sort (health_vault_controller.dart), document upload in vault (medical_vault_screen.dart), admin moderation UI (moderation_tab.dart), timezone policy (P3-6 done), SharedPreferences versioning (PrefsSchema, this session), placeholder taps fixed (wishlist → snackbar, Gallery → snackbar); build_runner regenerated
 
 `flutter analyze` (2026-05-20): **No issues found.**
 
@@ -1212,6 +1896,50 @@ Added the backend schema for a Pet Care & Health Management system. No Flutter c
 
 ---
 
+## Phase: M3E Remaining Tasks — Complete (2026-06-07)
+
+- **`lib/core/services/prefs_schema.dart`** — new `PrefsSchema` class with all SharedPreferences key constants + `migrate()` startup guard (v0→v1 baseline stamp)
+- **`lib/main.dart`** — `await PrefsSchema.migrate()` inserted after `_assertEnvVars()`; import added
+- **`lib/features/care/presentation/widgets/gamified_care_ui.dart`** — XP subtitle now shows next level title (e.g. `…XP to "Pet Whisperer"`) via `lv.nextTitle`
+- **`lib/features/social/presentation/screens/social_screen.dart`** — `PostCard` avatar wrapped in `SweepGradient` conic ring (`ShapeDecoration + CircleBorder`) with 2.5 px gradient border + 1.5 px surface gap
+- **`lib/features/marketplace/data/models/product.dart`** — `ProductCategory` enum extended with `beds` and `apparel` (labels wired); `double? rating` field added to constructor, `fromJson`, `fromStorageJson`, `toStorageJson`
+- **`lib/features/marketplace/presentation/screens/marketplace_screen.dart`** — `_cats` uses `ProductCategory.beds`/`.apparel` (hacks removed); `_NewProductTile` star chip wired to `product.rating`; `_DeliveryStrip` sliver inserted after `_HeroBanner` (all tab only); `_DeliveryStrip` ConsumerWidget appended at EOF
+- **`supabase/migrations/20260607000000_products_rating_categories.sql`** — adds `rating DECIMAL(3,2)` column + updates category CHECK constraint to include `beds` and `apparel`
+- `flutter analyze` → **No issues found**
+
+---
+
+## Phase: FloatingToolbar — Pet Profile (2026-06-07)
+
+**File changed:** `lib/features/pet_profile/presentation/screens/pet_profile_screen.dart`
+
+- Added `floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat` + `floatingActionButton: _FloatingToolbar(pet: activePet)` to the `Scaffold`
+- **`_FloatingToolbar`** — `StatefulWidget` with `SingleTickerProviderStateMixin`; spring entrance via `AnimationController(620ms)` + `Curves.elasticOut` on a `0→1 ScaleTransition`
+- Pill container: `BoxDecoration(color: surface, borderRadius: 999, boxShadow: ...)`
+- Three **`_ToolbarBtn`** actions:
+  - **Edit** (`Icons.edit_rounded`, tangerine) → `context.push('/pet/${pet.id}/edit')`
+  - **Care** (`Icons.favorite_rounded`, poppy) → `context.push('/care')`
+  - **Post** (`Icons.camera_alt_rounded`, sky) → `context.push('/social/create-post')`
+- `flutter analyze` → **No issues found**
+
+### Next step
+All M3E tasks complete — no pending items.
+
+---
+
+## Phase: Fix Plan Phases 5–10 + Pre-release Sweep (2026-06-07)
+
+**Audited and closed all remaining Fix Plan items:**
+
+- Phases 5, 6, 8, 9 — already fully implemented in prior sessions; checkboxes updated ✅
+- **Phase 7** — `_RecentAchievementsRow` converted from `StatelessWidget` (hardcoded 5 badges) to `ConsumerWidget(petId)` watching `petAwardsSummaryProvider`; now renders all 6 `kBadgeCatalog` badges with real `owned` state from DB
+- **Phase 10 (placeholder taps)** — `product_card.dart` wishlist `onTap: () {}` → `AppSnackBar.show('Wishlist coming soon 💛')`; `pet_profile_screen.dart` Gallery → `AppSnackBar.show('Photo gallery coming soon 📸')`
+- `flutter pub run build_runner build` — 0 new outputs (all `.g.dart` files up to date)
+- `flutter analyze` → **No issues found**
+
+### Next step
+All Fix Plan phases complete. Codebase is in pre-release ready state.
+
 ### RLS Summary
 
 All three new tables enforce **pet-owner-only** access. The ownership check used consistently:
@@ -1712,6 +2440,60 @@ Phase complete — please run (/remember) to save tokens before proceeding to th
 **Manual:** Confirm GitHub secret `FIREBASE_VAPID_KEY` matches Firebase Console → Cloud Messaging → Web Push certificates. Test push from **Home Screen icon**, not Chrome tab.
 
 Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+## 2026-06-06 — Care Feature Bug Fixes + AI Routine Overhaul
+
+### Care Task Completion / Undo Fixes
+- Added `task_id UUID` column to `care_logs` with partial unique indexes; dropped old `care_type`-only unique index
+- Updated `toggle_care_task` RPC: writes `task_id` on complete; deletes by `task_id` on undo
+- Added backward-compat DELETE for null-task_id legacy entries (undo now works for rows created before migration)
+- Added lazy migration UPDATE: completing a task backfills `task_id` on any existing null-task_id log
+- Fixed `_buildTasksFromSnapshotData`: matches by `task_id` first, falls back to `care_type` only when unambiguous (exactly 1 task of that type today)
+- Fixed `_computeWeekGoalHitFromSnapshotData` with same ambiguity-safe logic
+- DB cleanup migration: removed duplicate `care_tasks` rows across all pets
+
+### AI Routine Recommendations — Full Overhaul
+
+**New `ai_routine_controller.dart`**
+- `AiSuggestion` model: wraps `CareTask` + `isDuplicate` + `conflictTitle` + `isSelected` (default `false` — opt-in)
+- `AiRoutineState` enum: `idle | loading | success | error`
+- `AiRoutineNotifier`: 24h per-pet cache, concurrent-call guard (`isLoading` early return), `generate()` / `forceRefresh()` / `invalidateCache()`
+- Fuzzy duplicate detection: exact title → 80% similarity → same task-type + frequency bucket
+
+**`care_recommendation_service.dart`**
+- Added `once` to guided JSON schema and `_parseFrequency`
+- Fixed `defaultValue: ''` on `String.fromEnvironment` (was missing)
+- Improved config error message (actionable: add key + rebuild)
+
+**`routine_recommendation_sheet.dart`** (rewritten)
+- Opt-in selection — all cards start deselected
+- "Already in routine" greyed badge on duplicate cards + conflict title footnote
+- Fixed frequency grouping: `asNeeded` → "As Needed" group (was "Daily"); `twiceDaily` → "Twice Daily"; `once` → "One-Time"
+- Fixed summary chips: separate chip per frequency (was conflating `twiceDaily` + `asNeeded` into daily)
+- `PopScope` confirm-on-dismiss dialog when tasks are selected
+- Retry button on save failure via `AppSnackBar.showError(onRetry:)`
+- Cache invalidated after save so next open re-fetches against updated task list
+
+**`care_screen.dart`**
+- Removed direct `CareRecommendationService()` instantiation — notifier owns the service via `careRecommendationServiceProvider`
+- `_generateRoutine`: 3-case handler (cached → instant sheet, already loading → no-op, fresh → generate + sheet)
+- `_forceRefreshRoutine`: properly `await`s `forceRefresh()` before showing sheet (fixed race condition)
+- `_autoPrewarmAi`: silently starts background generation post-onboarding (no sheet shown)
+- `_shouldAutoTriggerAi` flag: set on `onboardingComplete=1`, triggers background pre-warm once pet is available
+- `GestureDetector` → `InkWell` with ripple on AI icon button
+- Config error → permanent `_AiConfigErrorBanner` widget (not transient snackbar)
+- `_AiRoutineBanner` now has 3 states: generating (spinner + "Preparing…") / ready (✓ "Your AI Routine is Ready!") / idle
+
+**`app_snack_bar.dart`**
+- `showError` gains optional `onRetry: VoidCallback?` → shows "Retry" `SnackBarAction`
+
+### Graphify Knowledge Graph Rebuilt
+- Rebuilt on `lib/` (307 Dart files) → 4,126 nodes, 6,305 edges, 208 communities
+- `activePetControllerProvider` identified as highest god node (63 edges); blast radius traced: 14 screens, 9 controllers, 4 widgets
+
+**Next step:** Test AI routine flow end-to-end (onboarding → auto pre-warm → banner ready state → sheet → save).
+
+---
 
 ## 2026-06-05 — iOS mobile web PWA startup fix
 

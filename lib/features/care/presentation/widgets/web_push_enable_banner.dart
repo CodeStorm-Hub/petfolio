@@ -91,7 +91,7 @@ class _WebPushEnableBannerState extends ConsumerState<WebPushEnableBanner> {
         AppSnackBar.showError(error);
       }
     } catch (e) {
-      if (mounted) AppSnackBar.showError(e.toString());
+      if (mounted) AppSnackBar.showError(e);
     } finally {
       if (mounted) setState(() => _loading = false);
     }

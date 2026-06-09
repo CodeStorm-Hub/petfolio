@@ -24,7 +24,7 @@ class NutritionScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pet = ref.watch(activePetControllerProvider);
     if (pet == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: TailWagLoader()));
     }
     return _NutritionBody(pet: pet);
   }
@@ -40,14 +40,6 @@ class _NutritionBody extends ConsumerStatefulWidget {
 }
 
 class _NutritionBodyState extends ConsumerState<_NutritionBody> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(
-      () => ref.read(nutritionProvider(widget.pet.id).notifier).refresh(),
-    );
-  }
-
   void _openLogSheet() {
     showModalBottomSheet<void>(
       context: context,
@@ -77,6 +69,7 @@ class _NutritionBodyState extends ConsumerState<_NutritionBody> {
                   pt: pt,
                   history: nutrition.history,
                   petName: widget.pet.name,
+                  onRetry: () => ref.read(nutritionProvider(widget.pet.id).notifier).refresh(),
                 ),
                 const SizedBox(height: 16),
                 _CalorieCard(
@@ -161,11 +154,13 @@ class _WeightTrendCard extends StatelessWidget {
     required this.pt,
     required this.history,
     required this.petName,
+    required this.onRetry,
   });
 
   final PetfolioThemeExtension pt;
   final AsyncValue<List<HealthLog>> history;
   final String petName;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -215,11 +210,20 @@ class _WeightTrendCard extends StatelessWidget {
             ),
             error: (e, _) => SizedBox(
               height: 100,
-              child: Center(
-                child: Text(
-                  'Could not load weight history.',
-                  style: TextStyle(color: cs.error),
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Could not load weight history.',
+                    style: TextStyle(color: cs.error),
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton.icon(
+                    onPressed: onRetry,
+                    icon: const Icon(Icons.refresh_rounded, size: 16),
+                    label: const Text('Retry'),
+                  ),
+                ],
               ),
             ),
           ),
@@ -238,15 +242,18 @@ class _WeightLineChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final spots = logs
-        .asMap()
-        .entries
-        .map((e) => FlSpot(e.key.toDouble(), e.value.weightKg!))
-        .toList();
+    final baseMs = logs.first.occurredAt.millisecondsSinceEpoch.toDouble();
+    const msPerDay = 86400000.0;
+    final spots = logs.map((log) {
+      final x = (log.occurredAt.millisecondsSinceEpoch - baseMs) / msPerDay;
+      return FlSpot(x, log.weightKg!);
+    }).toList();
 
     final minY = spots.map((s) => s.y).reduce(math.min);
     final maxY = spots.map((s) => s.y).reduce(math.max);
     final padding = (maxY - minY) < 0.5 ? 0.5 : (maxY - minY) * 0.15;
+    final maxX = spots.last.x;
+    final labelInterval = maxX < 7 ? 1.0 : (maxX / 4).ceilToDouble();
 
     return SizedBox(
       height: 180,
@@ -255,7 +262,7 @@ class _WeightLineChart extends StatelessWidget {
         child: LineChart(
           LineChartData(
             minX: 0,
-            maxX: (spots.length - 1).clamp(0, 1000000).toDouble(),
+            maxX: maxX.clamp(0.0, double.maxFinite),
             minY: minY - padding,
             maxY: maxY + padding,
             lineBarsData: [
@@ -306,16 +313,11 @@ class _WeightLineChart extends StatelessWidget {
                 sideTitles: SideTitles(
                   showTitles: true,
                   reservedSize: 28,
-                  interval: 1,
+                  interval: labelInterval,
                   getTitlesWidget: (value, meta) {
-                    final idx = value.round();
-                    if ((value - idx).abs() > 0.001) {
-                      return const SizedBox.shrink();
-                    }
-                    if (idx < 0 || idx >= logs.length) {
-                      return const SizedBox.shrink();
-                    }
-                    final date = logs[idx].occurredAt;
+                    final date = DateTime.fromMillisecondsSinceEpoch(
+                      (baseMs + value * msPerDay).round(),
+                    ).toLocal();
                     return Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(

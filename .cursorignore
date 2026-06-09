@@ -135,8 +135,7 @@ skills-lock.json
 # ==========================================
 .idea/
 .vscode/
-.claude/
 
-.cursor/
 *.iml
 .metadata
+!pathao-app-ui/*

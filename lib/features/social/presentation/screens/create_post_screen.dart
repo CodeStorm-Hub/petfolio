@@ -26,7 +26,6 @@ class CreatePostScreen extends ConsumerStatefulWidget {
 
 class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   final _captionController = TextEditingController();
-  final _picker = ImagePicker();
   Uint8List? _previewBytes;
   static const _maxChars = 500;
 
@@ -55,13 +54,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     );
     if (source == null || !mounted) return;
 
-    final XFile? pickedFile = kIsWeb && source == ImageSource.gallery
-        ? await pickGalleryImage(maxWidth: 1920, imageQuality: 85)
-        : await _picker.pickImage(
-            source: source,
-            maxWidth: 1920,
-            imageQuality: 85,
-          );
+    final XFile? pickedFile = await pickImage(
+      source: source,
+      maxWidth: 1920,
+      imageQuality: 85,
+    );
     if (pickedFile != null && mounted) {
       ref.read(createPostControllerProvider.notifier).setImage(pickedFile);
       final bytes = await pickedFile.readAsBytes();

@@ -10,6 +10,7 @@ class BoneSliderWidget extends StatelessWidget {
     this.min = 0.0,
     this.max = 100.0,
     this.color = AppColors.tangerine,
+    this.semanticLabel = 'Slider',
   });
 
   final double value;
@@ -17,6 +18,7 @@ class BoneSliderWidget extends StatelessWidget {
   final double min;
   final double max;
   final Color color;
+  final String semanticLabel;
 
   static const double _thumbW = 44.0;
   static const double _totalH = 64.0;
@@ -25,7 +27,11 @@ class BoneSliderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
+    return Semantics(
+      label: semanticLabel,
+      slider: true,
+      value: value.toStringAsFixed(0),
+      child: LayoutBuilder(
       builder: (context, constraints) {
         final w = constraints.maxWidth;
         final trackW = w - _thumbW;
@@ -57,7 +63,7 @@ class BoneSliderWidget extends StatelessWidget {
           ),
         );
       },
-    );
+    ));
   }
 }
 

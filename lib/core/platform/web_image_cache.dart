@@ -1,10 +1,26 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 const int webNetworkImageMemCacheMax = 1080;
 const int webNetworkImageMemCacheFeed = 640;
 const int webNetworkImageMemCacheThumb = 256;
 const int webNetworkImageMemCacheAvatar = 160;
+
+const int webImageDiskCacheMaxObjects = 200;
+
+CacheManager? _webDiskCache;
+
+CacheManager? petfolioWebImageCacheManager() {
+  if (!kIsWeb) return null;
+  return _webDiskCache ??= CacheManager(
+    Config(
+      'petfolioWebImageCache',
+      maxNrOfCacheObjects: webImageDiskCacheMaxObjects,
+      stalePeriod: const Duration(days: 7),
+    ),
+  );
+}
 
 int? networkImageMemCacheWidth(
   BuildContext context,

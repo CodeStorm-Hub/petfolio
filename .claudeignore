@@ -128,15 +128,16 @@ supabase/.temp/
 # 7. DEPENDENCY LOCKS
 # ==========================================
 pubspec.lock
-skills-lock.json
+
 
 # ==========================================
 # 8. IDE & ENVIRONMENT
 # ==========================================
 .idea/
 .vscode/
-.claude/
 
-.cursor/
+
+
 *.iml
-.metadata
+
+!pathao-app-ui/*

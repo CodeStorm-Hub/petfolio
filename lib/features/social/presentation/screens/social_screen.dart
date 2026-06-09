@@ -1,8 +1,9 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,6 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/petfolio_network_image.dart';
 import '../../../../core/widgets/dashed_circle_painter.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/data/models/pet.dart';
@@ -133,11 +135,25 @@ class _SocialViewState extends ConsumerState<_SocialView> {
         // Feed scrolls from y=0; top padding reserves space below the wave header.
         feedAsync.when(
           skipLoadingOnReload: true,
-          loading: () => Center(
-            child: Padding(
-              padding: EdgeInsets.only(top: headerHeight),
-              child: const TailWagLoader(label: 'Loading feed…'),
-            ),
+          loading: () => CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: SizedBox(height: headerHeight)),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (_, i) => Padding(
+                      padding: EdgeInsets.only(bottom: i == 1 ? 0 : 18),
+                      child: SkeletonLoader.feedCard(
+                        key: ValueKey('feed-skel-$i'),
+                      ),
+                    ),
+                    childCount: 2,
+                  ),
+                ),
+              ),
+            ],
           ),
           error: (_, _) => Center(
             child: Padding(
@@ -172,47 +188,37 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                     child: SizedBox(height: headerHeight),
                   ),
                   const SliverToBoxAdapter(
-                    child: _StoriesRow(),
+                    child: RepaintBoundary(
+                      child: _StoriesRow(),
+                    ),
                   ),
                   if (feedState.posts.isEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,
                       child: Center(
-                        child: Text(
-                          'No posts yet — be the first to share!',
-                          style: TextStyle(color: pt.ink500),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: PetfolioEmptyState(
+                            icon: Icons.camera_alt_rounded,
+                            title: 'No posts yet',
+                            subtitle: 'Be the first to share a moment with the pack!',
+                            action: FilledButton.icon(
+                              style: FilledButton.styleFrom(backgroundColor: AppColors.poppy),
+                              onPressed: () => context.push('/social/create-post'),
+                              icon: const Icon(Icons.add_rounded, size: 18),
+                              label: const Text('Share a Post'),
+                            ),
+                          ),
                         ),
                       ),
                     )
                   else
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      sliver: SliverList.builder(
-                        itemCount: feedState.posts.length,
-                        itemBuilder: (ctx, i) {
-                          final post = feedState.posts[i];
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: i == feedState.posts.length - 1 ? 0 : 18),
-                            child: RepaintBoundary(
-                              child: PostCard(
-                                post: post,
-                                onLike: () => notifier.toggleLike(post.id),
-                                onTapPost: () => context.push('/social/post/${post.id}', extra: post),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                    _SocialPostListSliver(
+                      petId: widget.petId,
+                      headerHeight: headerHeight,
+                      onLike: notifier.toggleLike,
                     ),
-                  if (feedState.isLoadingMore)
-                    const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Center(
-                          child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                        ),
-                      ),
-                    ),
+                  _LoadMoreSliver(petId: widget.petId),
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
@@ -297,6 +303,74 @@ class _IconBtn extends StatelessWidget {
         alignment: Alignment.center,
         child: Icon(icon, size: 20, color: defaultColor),
       ),
+    );
+  }
+}
+
+// ─── C3: select()-optimised post list ────────────────────────────────────────
+
+class _SocialPostListSliver extends ConsumerWidget {
+  const _SocialPostListSliver({
+    required this.petId,
+    required this.headerHeight,
+    required this.onLike,
+  });
+
+  final String petId;
+  final double headerHeight;
+  final Future<void> Function(String postId) onLike;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final posts = ref.watch(
+      socialControllerProvider(petId).select(
+        (v) => v.asData?.value.posts ?? const <FeedPost>[],
+      ),
+    );
+
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      sliver: SliverList.builder(
+        itemCount: posts.length,
+        itemBuilder: (ctx, i) {
+          final post = posts[i];
+          return Padding(
+            padding: EdgeInsets.only(bottom: i == posts.length - 1 ? 0 : 18),
+            child: RepaintBoundary(
+              child: PostCard(
+                post: post,
+                onLike: () => onLike(post.id),
+                onTapPost: () => context.push('/social/post/${post.id}', extra: post),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ─── C3: select()-optimised load-more spinner ────────────────────────────────
+// Watches only isLoadingMore so the full feed list doesn't rebuild on pagination.
+
+class _LoadMoreSliver extends ConsumerWidget {
+  const _LoadMoreSliver({required this.petId});
+  final String petId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isLoading = ref.watch(
+      socialControllerProvider(petId).select(
+        (v) => v.asData?.value.isLoadingMore ?? false,
+      ),
+    );
+    return SliverToBoxAdapter(
+      child: isLoading
+          ? const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Center(child: CircularProgressIndicator.adaptive(strokeWidth: 2)),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }
@@ -414,6 +488,7 @@ class _StoriesRow extends ConsumerWidget {
                   ringColors: activePetStack.hasUnviewed(userId)
                       ? const [AppColors.sunset500, AppColors.coral500]
                       : [pt.ink300, pt.ink300],
+                  animateRing: activePetStack.hasUnviewed(userId),
                   onTap: () => context.push('/social/stories?petId=${pet.id}'),
                   onLongPress: () => _showOwnStoryOptions(context, ref, pet),
                 )
@@ -442,6 +517,7 @@ class _StoriesRow extends ConsumerWidget {
                     ringColors: stack.hasUnviewed(userId)
                         ? const [AppColors.sunset500, AppColors.coral500]
                         : [pt.ink300, pt.ink300],
+                    animateRing: stack.hasUnviewed(userId),
                     onTap: () => context.push('/social/stories?petId=${stack.petId}'),
                   ),
                 );
@@ -515,13 +591,14 @@ class _OwnStoryOptionsSheet extends ConsumerWidget {
   }
 }
 
-class _StoryItem extends StatelessWidget {
+class _StoryItem extends StatefulWidget {
   const _StoryItem({
     required this.initial,
     required this.label,
     required this.ringColors,
     this.avatarUrl,
     this.isAdd = false,
+    this.animateRing = false,
     this.onTap,
     this.onLongPress,
   });
@@ -531,17 +608,57 @@ class _StoryItem extends StatelessWidget {
   final List<Color> ringColors;
   final String? avatarUrl;
   final bool isAdd;
+  final bool animateRing;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
+
+  @override
+  State<_StoryItem> createState() => _StoryItemState();
+}
+
+class _StoryItemState extends State<_StoryItem>
+    with SingleTickerProviderStateMixin {
+  AnimationController? _ringCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.animateRing && !widget.isAdd) {
+      _ringCtrl = AnimationController(
+        vsync: this,
+        duration: const Duration(seconds: 3),
+      )..repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _StoryItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.animateRing && !widget.isAdd) {
+      _ringCtrl ??= AnimationController(
+        vsync: this,
+        duration: const Duration(seconds: 3),
+      )..repeat();
+    } else {
+      _ringCtrl?.dispose();
+      _ringCtrl = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    _ringCtrl?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final surface = Theme.of(context).colorScheme.surface;
     final ink950 = Theme.of(context).extension<PetfolioThemeExtension>()!.ink950;
 
-    if (isAdd) {
+    if (widget.isAdd) {
       return GestureDetector(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -582,39 +699,69 @@ class _StoryItem extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ink950)),
+            Text(widget.label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ink950)),
           ],
         ),
       );
     }
 
+    final ring = widget.ringColors;
+    final gradientColors = ring.length >= 2
+        ? [...ring, ring.first]
+        : [ring.first, ring.first, ring.first];
+
+    Widget ringContainer({required Widget child}) {
+      final body = Container(
+        width: 62,
+        height: 62,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: widget.animateRing && _ringCtrl != null
+              ? SweepGradient(colors: gradientColors)
+              : LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: ring.length >= 2 ? ring : [ring.first, ring.first],
+                ),
+        ),
+        padding: const EdgeInsets.all(2.5),
+        child: child,
+      );
+
+      if (widget.animateRing && _ringCtrl != null) {
+        return AnimatedBuilder(
+          animation: _ringCtrl!,
+          builder: (_, child) => Transform.rotate(
+            angle: _ringCtrl!.value * 2 * math.pi,
+            child: child,
+          ),
+          child: body,
+        );
+      }
+      return body;
+    }
+
     return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
+      onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 62,
-            height: 62,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: ringColors.length >= 2 ? ringColors : [ringColors.first, ringColors.first],
-              ),
-            ),
-            padding: const EdgeInsets.all(2.5),
+          ringContainer(
             child: Container(
               decoration: BoxDecoration(shape: BoxShape.circle, color: surface),
               padding: const EdgeInsets.all(2),
               child: CircleAvatar(
-                backgroundColor: ringColors.first.withAlpha(180),
-                backgroundImage: avatarUrl != null ? CachedNetworkImageProvider(avatarUrl!) : null,
-                child: avatarUrl == null
-                    ? Text(initial,
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white))
+                backgroundColor: ring.first.withAlpha(180),
+                backgroundImage: widget.avatarUrl != null
+                    ? CachedNetworkImageProvider(widget.avatarUrl!)
+                    : null,
+                child: widget.avatarUrl == null
+                    ? Text(widget.initial,
+                        style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white))
                     : null,
               ),
             ),
@@ -623,7 +770,7 @@ class _StoryItem extends StatelessWidget {
           SizedBox(
             width: 62,
             child: Text(
-              label,
+              widget.label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ink950),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -671,12 +818,12 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
   late Animation<double> _pickerFadeAnimation;
 
   void _fireBurst(String kind, double x, double y) {
-    final count = 8 + Random().nextInt(4);
+    final count = 8 + math.Random().nextInt(4);
     final newItems = List.generate(count, (i) {
       return ReactionBurstItem(
         id: '${DateTime.now().millisecondsSinceEpoch}_$i',
         emoji: _emojiForKind(kind),
-        dx: x + (Random().nextDouble() - 0.5) * 40,
+        dx: x + (math.Random().nextDouble() - 0.5) * 40,
         dy: y,
       );
     });
@@ -898,6 +1045,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
 
     return PfCard(
       padding: EdgeInsets.zero,
+      squircle: true,
       child: Stack(
         children: [
           Column(
@@ -911,11 +1059,43 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () => context.push('/social/profile/${widget.post.petId}'),
-                      child: CircleAvatar(
-                        radius: 22,
-                        backgroundColor: widget.post.accentColor,
-                        backgroundImage: widget.post.petAvatarUrl != null ? CachedNetworkImageProvider(widget.post.petAvatarUrl!) : null,
-                        child: widget.post.petAvatarUrl == null ? Text(widget.post.petName.isNotEmpty ? widget.post.petName[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)) : null,
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: ShapeDecoration(
+                          shape: const CircleBorder(),
+                          gradient: SweepGradient(
+                            startAngle: 3.84,
+                            endAngle: 3.84 + math.pi * 2,
+                            colors: const [
+                              AppColors.tangerine,
+                              AppColors.poppy,
+                              AppColors.sunny,
+                              AppColors.mint,
+                              AppColors.tangerine,
+                            ],
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(2.5),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Theme.of(context).colorScheme.surface,
+                          ),
+                          padding: const EdgeInsets.all(1.5),
+                          child: CircleAvatar(
+                            backgroundColor: widget.post.accentColor,
+                            backgroundImage: widget.post.petAvatarUrl != null
+                                ? CachedNetworkImageProvider(widget.post.petAvatarUrl!)
+                                : null,
+                            child: widget.post.petAvatarUrl == null
+                                ? Text(
+                                    widget.post.petName.isNotEmpty ? widget.post.petName[0].toUpperCase() : '?',
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                                  )
+                                : null,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -988,10 +1168,13 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                         borderRadius: BorderRadius.circular(22),
                       ),
                       clipBehavior: Clip.hardEdge,
-                      child: widget.post.imageUrls.isNotEmpty 
-                        ? CachedNetworkImage(
+                      child: widget.post.videoUrl != null
+                        ? _VideoPostPlayer(url: widget.post.videoUrl!)
+                        : widget.post.imageUrls.isNotEmpty
+                        ? PetfolioNetworkImage(
                             imageUrl: widget.post.imageUrls.first,
                             fit: BoxFit.cover,
+                            cacheManager: petfolioWebImageCacheManager(),
                             memCacheWidth: networkImageMemCacheWidth(
                               context,
                               MediaQuery.sizeOf(context).width - 28,
@@ -1001,6 +1184,33 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                               context,
                               MediaQuery.sizeOf(context).width - 28,
                               maxPixels: webNetworkImageMemCacheFeed,
+                            ),
+                            placeholder: ColoredBox(
+                              color: widget.post.subjectColor.withAlpha(50),
+                              child: LayoutBuilder(
+                                builder: (context, constraints) => SkeletonLoader(
+                                  width: constraints.maxWidth,
+                                  height: constraints.maxHeight,
+                                  borderRadius: 22,
+                                ),
+                              ),
+                            ),
+                            errorFallback: Center(
+                              child: Container(
+                                width: 150,
+                                height: 160,
+                                decoration: BoxDecoration(
+                                  color: widget.post.subjectColor.withAlpha(160),
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(90),
+                                    topRight: Radius.circular(75),
+                                    bottomLeft: Radius.circular(60),
+                                    bottomRight: Radius.circular(100),
+                                  ),
+                                ),
+                                alignment: Alignment.center,
+                                child: const Text('🐾', style: TextStyle(fontSize: 64)),
+                              ),
                             ),
                           )
                         : Center(
@@ -1025,15 +1235,17 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 ),
               ),
               
-              // Text
+              // Caption with hashtag highlighting
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: Text(widget.post.caption,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: ink950,
-                          fontWeight: FontWeight.w500,
-                          height: 1.5,
-                        )),
+                child: _RichCaption(
+                  text: widget.post.caption,
+                  baseStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: ink950,
+                    fontWeight: FontWeight.w500,
+                    height: 1.5,
+                  ),
+                ),
               ),
               
               // Reaction stack visualizer
@@ -1279,4 +1491,110 @@ class _ReactPickerBtn extends StatelessWidget {
 
 extension on BorderSide {
   BoxShadow toBoxShadow() => BoxShadow(color: color, blurRadius: 0, spreadRadius: width);
+}
+
+// ─── B4: Hashtag-highlighting caption ────────────────────────────────────────
+
+class _RichCaption extends StatelessWidget {
+  const _RichCaption({required this.text, this.baseStyle});
+
+  final String text;
+  final TextStyle? baseStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    final hashStyle = baseStyle?.copyWith(
+      color: AppColors.lilac700,
+      fontWeight: FontWeight.w700,
+    );
+    final regex = RegExp(r'#\w+');
+    final spans = <TextSpan>[];
+    var cursor = 0;
+    for (final m in regex.allMatches(text)) {
+      if (m.start > cursor) {
+        spans.add(TextSpan(text: text.substring(cursor, m.start), style: baseStyle));
+      }
+      spans.add(TextSpan(text: m.group(0), style: hashStyle));
+      cursor = m.end;
+    }
+    if (cursor < text.length) {
+      spans.add(TextSpan(text: text.substring(cursor), style: baseStyle));
+    }
+    return Text.rich(TextSpan(children: spans));
+  }
+}
+
+// ─── B3: Muted auto-play video player ────────────────────────────────────────
+
+class _VideoPostPlayer extends StatefulWidget {
+  const _VideoPostPlayer({required this.url});
+  final String url;
+
+  @override
+  State<_VideoPostPlayer> createState() => _VideoPostPlayerState();
+}
+
+class _VideoPostPlayerState extends State<_VideoPostPlayer> {
+  late final VideoPlayerController _ctrl;
+  bool _initialized = false;
+  bool _muted = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = VideoPlayerController.networkUrl(Uri.parse(widget.url))
+      ..setLooping(true)
+      ..setVolume(0)
+      ..initialize().then((_) {
+        if (mounted) {
+          setState(() => _initialized = true);
+          _ctrl.play();
+        }
+      });
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _toggleMute() {
+    setState(() => _muted = !_muted);
+    _ctrl.setVolume(_muted ? 0 : 1);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_initialized) {
+      return const Center(child: CircularProgressIndicator.adaptive(strokeWidth: 2));
+    }
+    return Stack(
+      alignment: Alignment.bottomRight,
+      children: [
+        AspectRatio(
+          aspectRatio: _ctrl.value.aspectRatio,
+          child: VideoPlayer(_ctrl),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: GestureDetector(
+            onTap: _toggleMute,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Icon(
+                _muted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                color: Colors.white,
+                size: 16,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

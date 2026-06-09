@@ -11,6 +11,8 @@ class PfCard extends StatelessWidget {
     this.borderRadius = 24.0,
     this.boxShadow,
     this.border,
+    this.squircle = false,
+    this.semanticLabel,
   });
 
   final Widget child;
@@ -19,27 +21,53 @@ class PfCard extends StatelessWidget {
   final double borderRadius;
   final List<BoxShadow>? boxShadow;
   final BoxBorder? border;
+  final bool squircle;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      padding: padding,
-      decoration: BoxDecoration(
-        color: backgroundColor ?? cs.surface,
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: border,
-        boxShadow: boxShadow ?? [
-          BoxShadow(
-            color: isDark ? AppColors.shadowE1D : AppColors.shadowE1L,
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
+    final bg = backgroundColor ?? cs.surface;
+    final shadows = boxShadow ?? [
+      BoxShadow(
+        color: isDark ? AppColors.shadowE1D : AppColors.shadowE1L,
+        blurRadius: 20,
+        offset: const Offset(0, 8),
       ),
-      child: child,
-    );
+    ];
+
+    Widget card;
+    if (squircle) {
+      final borderSide = border is Border
+          ? (border! as Border).top
+          : BorderSide(color: isDark ? AppColors.lineD : AppColors.line);
+      card = Container(
+        padding: padding,
+        decoration: ShapeDecoration(
+          color: bg,
+          shadows: shadows,
+          shape: RoundedSuperellipseBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+            side: borderSide,
+          ),
+        ),
+        child: child,
+      );
+    } else {
+      card = Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(borderRadius),
+          border: border,
+          boxShadow: shadows,
+        ),
+        child: child,
+      );
+    }
+
+    if (semanticLabel == null) return card;
+    return Semantics(label: semanticLabel, container: true, child: card);
   }
 }

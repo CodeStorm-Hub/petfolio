@@ -6,7 +6,6 @@ import '../../../../core/errors/app_exception.dart';
 import '../../../../core/platform/platform_notifications.dart';
 import '../models/care_streak.dart';
 import '../models/care_task.dart';
-import '../models/care_task_log.dart';
 
 /// Snapshot of everything the care dashboard needs, fetched in one RPC call.
 class CareDashboardSnapshot {
@@ -109,6 +108,11 @@ class PetCareRepository {
   static DateTime _localDateOnly(DateTime dt) =>
       DateUtils.dateOnly(dt.toLocal());
 
+  /// Public accessor used by callers that need the DB snake_case care_type
+  /// from an enum value (e.g. the dashboard controller pre-resolving it before
+  /// calling [toggleCompletion]).
+  String taskTypeToCareType(CareTaskType t) => _taskTypeToLogCareType(t);
+
   static String _taskTypeToLogCareType(CareTaskType t) {
     switch (t) {
       case CareTaskType.vetVisit:
@@ -202,41 +206,8 @@ class PetCareRepository {
     );
   }
 
-  static bool _appliesOnDay(CareTask task, DateTime dayLocal) {
-    final start = _localDateOnly(task.createdAt);
-
-    switch (task.frequency) {
-      case CareFrequency.daily:
-      case CareFrequency.twiceDaily:
-      case CareFrequency.asNeeded:
-        return true;
-      case CareFrequency.once:
-        if (dayLocal.isBefore(start)) return false;
-        if (task.isCompleted && task.completedAt != null) {
-          return dayLocal == _localDateOnly(task.completedAt!);
-        }
-        return !dayLocal.isBefore(start);
-      case CareFrequency.weekly:
-        if (dayLocal.isBefore(start)) return false;
-        final diff = dayLocal.difference(start).inDays;
-        return diff >= 0 && diff % 7 == 0;
-      case CareFrequency.biweekly:
-        if (dayLocal.isBefore(start)) return false;
-        final diff = dayLocal.difference(start).inDays;
-        return diff >= 0 && diff % 14 == 0;
-      case CareFrequency.monthly:
-        if (dayLocal.isBefore(start)) return false;
-        final lastDayOfMonth =
-            DateTime(dayLocal.year, dayLocal.month + 1, 0).day;
-        final anchorDay =
-            start.day > lastDayOfMonth ? lastDayOfMonth : start.day;
-        if (dayLocal.day != anchorDay) return false;
-        if (dayLocal.year == start.year && dayLocal.month == start.month) {
-          return !dayLocal.isBefore(start);
-        }
-        return true;
-    }
-  }
+  static bool _appliesOnDay(CareTask task, DateTime dayLocal) =>
+      task.appliesToDay(dayLocal);
 
   static bool _doneForDay(
     CareTask task,
@@ -255,8 +226,7 @@ class PetCareRepository {
     return fromLog;
   }
 
-  static bool _usesCareLogsForToggle(CareFrequency f) =>
-      f != CareFrequency.once;
+
 
   Future<CareStreak> getPetStreak(String petId) async {
     try {
@@ -330,6 +300,12 @@ class PetCareRepository {
               '|${(r['title'] as String).toLowerCase().trim()}')
           .toSet();
 
+      // Today's local date — used to anchor new tasks so they always
+      // appear on the correct day of week / month regardless of the UTC
+      // offset between the client and the Supabase server.
+      final todayLocal = DateUtils.dateOnly(DateTime.now().toLocal());
+      final todayStr = _fmtYmd(todayLocal);
+
       final payloads = tasks.where((t) {
         final key =
             '${_taskTypeToLogCareType(t.taskType)}'
@@ -340,15 +316,26 @@ class PetCareRepository {
         final payload = Map<String, dynamic>.from(task.toJson())
           ..remove('id')
           ..remove('category_icon');
+        // Always pin anchor_date to today (local). Without this, the DB
+        // stores NULL and effectiveAnchor falls back to created_at UTC,
+        // which may differ by a day in positive-offset timezones — causing
+        // weekly tasks to only appear on the wrong day of the week.
+        if (payload['anchor_date'] == null) {
+          payload['anchor_date'] = todayStr;
+        }
         if (isAiSuggested) payload['is_ai_suggested'] = true;
         return payload;
       }).toList();
 
       if (payloads.isEmpty) return [];
 
+      // The DB unique index uses an expression (lower(btrim(title))) which
+      // cannot be referenced by column name in onConflict. Use ignoreDuplicates
+      // so Postgres generates ON CONFLICT DO NOTHING against any constraint.
+      // The client-side pre-filter above is a best-effort optimisation only.
       final rows = await _client
           .from('care_tasks')
-          .insert(payloads)
+          .upsert(payloads, ignoreDuplicates: true)
           .select();
 
       final savedTasks = rows.map((row) => CareTask.fromJson(row)).toList();
@@ -381,6 +368,8 @@ class PetCareRepository {
           .select()
           .single();
       final saved = CareTask.fromJson(row);
+      // Cancel old notification before scheduling the (possibly new) time.
+      PlatformNotifications.instance.cancelForTask(saved.id).ignore();
       _scheduleNotificationIfNeeded(saved);
       return saved;
     } on AppException {
@@ -436,6 +425,7 @@ class PetCareRepository {
           'p_selected_date': _fmtYmd(dSel),
           'p_week_start': _fmtYmd(minD),
           'p_week_end': _fmtYmd(maxD),
+          'p_client_today': _fmtYmd(dToday),
         },
       );
 
@@ -493,27 +483,69 @@ class PetCareRepository {
     List<Map<String, dynamic>> logs,
     DateTime dayLocal,
   ) {
-    final doneTypes = logs
-        .map((r) => r['care_type'] as String?)
-        .whereType<String>()
-        .toSet();
+    // Primary: task_id-based map (new schema — one log entry per real task per day).
+    // Fallback: care_type-based map for legacy null-task_id entries and
+    // log-derived synthetic tasks.
+    final logByTaskId = <String, DateTime?>{};
+    final logByType = <String, DateTime?>{};
+
+    for (final row in logs) {
+      final taskId = row['task_id'] as String?;
+      final ct = row['care_type'] as String?;
+      final raw = row['occurred_at'];
+      final ts = raw is String ? DateTime.tryParse(raw)?.toLocal() : null;
+      if (taskId != null) {
+        logByTaskId.putIfAbsent(taskId, () => ts);
+      }
+      if (ct != null) {
+        logByType.putIfAbsent(ct, () => ts);
+      }
+    }
+
+    // Count how many applicable tasks share each care_type on this day.
+    // Used to guard legacy care_type fallback: if multiple tasks share the
+    // same care_type, one log entry cannot reliably say which task was done.
+    final taskCountByCareType = <String, int>{};
+    for (final task in definitions) {
+      if (!_appliesOnDay(task, dayLocal)) continue;
+      final ct = _taskTypeToLogCareType(task.taskType);
+      taskCountByCareType[ct] = (taskCountByCareType[ct] ?? 0) + 1;
+    }
 
     final out = <CareTask>[];
     for (final task in definitions) {
       if (!_appliesOnDay(task, dayLocal)) continue;
       final careType = _taskTypeToLogCareType(task.taskType);
-      final fromLog = doneTypes.contains(careType);
+
+      final bool fromLog;
+      final DateTime? loggedAt;
+
+      if (logByTaskId.containsKey(task.id)) {
+        // New schema: this task has its own log entry — unambiguous.
+        fromLog = true;
+        loggedAt = logByTaskId[task.id];
+      } else {
+        // Legacy fallback (null-task_id logs from before the task_id migration).
+        // Only trust care_type matching when exactly one task of this type
+        // exists today — otherwise it's ambiguous which task was completed.
+        final count = taskCountByCareType[careType] ?? 0;
+        fromLog = count == 1 && logByType.containsKey(careType);
+        loggedAt = fromLog ? logByType[careType] : null;
+      }
+
       final done = _doneForDay(task, dayLocal, fromLog);
       out.add(task.copyWith(
         isCompleted: done,
-        completedAt: done ? DateTime.now() : null,
+        completedAt: done ? (loggedAt ?? task.completedAt) : null,
       ));
     }
 
-    // Synthesise tasks for care types that appear in logs but have no
-    // matching care_task definition (e.g. ad-hoc log entries).
+    // Synthesise tasks for log entries with no matching care_task definition
+    // (ad-hoc entries that have no real task — always null task_id).
     final byCareTypeFirstRow = <String, Map<String, dynamic>>{};
     for (final row in logs) {
+      final taskId = row['task_id'] as String?;
+      if (taskId != null) continue; // skip real-task logs
       final ct = row['care_type'] as String?;
       if (ct == null) continue;
       byCareTypeFirstRow.putIfAbsent(ct, () => row);
@@ -540,32 +572,54 @@ class PetCareRepository {
     List<Map<String, dynamic>> logsWeek,
     List<DateTime> weekDays,
   ) {
-    final expected = <String>{};
-    for (final task in definitions) {
-      if (task.frequency == CareFrequency.daily ||
-          task.frequency == CareFrequency.twiceDaily) {
-        expected.add(_taskTypeToLogCareType(task.taskType));
-      }
-    }
-    if (expected.isEmpty) {
-      expected.addAll({'feeding', 'walk', 'medication'});
+    // Collect all daily tasks grouped by care_type to detect ambiguity.
+    final dailyTasks = definitions
+        .where((t) =>
+            t.frequency == CareFrequency.daily ||
+            t.frequency == CareFrequency.twiceDaily)
+        .toList();
+
+    if (dailyTasks.isEmpty) {
+      return List.filled(weekDays.length, true);
     }
 
-    final byDay = <String, Set<String>>{};
+    // Count tasks per care_type to know when legacy care_type fallback is safe.
+    final dailyCountByCareType = <String, int>{};
+    for (final task in dailyTasks) {
+      final ct = _taskTypeToLogCareType(task.taskType);
+      dailyCountByCareType[ct] = (dailyCountByCareType[ct] ?? 0) + 1;
+    }
+
+    // Build per-day lookup maps (both task_id and care_type).
+    final byDayTaskIds = <String, Set<String>>{};
+    final byDayCareTypes = <String, Set<String>>{};
     for (final d in weekDays) {
-      byDay[_fmtYmd(d)] = {};
+      byDayTaskIds[_fmtYmd(d)] = {};
+      byDayCareTypes[_fmtYmd(d)] = {};
     }
     for (final row in logsWeek) {
       final day = _loggedDayKey(row['logged_date']);
+      if (day.isEmpty) continue;
+      final taskId = row['task_id'] as String?;
       final ct = row['care_type'] as String?;
-      if (day.isEmpty || ct == null) continue;
-      byDay.putIfAbsent(day, () => {}).add(ct);
+      if (taskId != null) byDayTaskIds.putIfAbsent(day, () => {}).add(taskId);
+      if (ct != null) byDayCareTypes.putIfAbsent(day, () => {}).add(ct);
     }
 
     return weekDays.map((d) {
       final key = _fmtYmd(DateUtils.dateOnly(d));
-      final done = byDay[key] ?? const {};
-      return expected.every((e) => done.contains(e));
+      final completedIds = byDayTaskIds[key] ?? const <String>{};
+      final completedTypes = byDayCareTypes[key] ?? const <String>{};
+
+      return dailyTasks.every((task) {
+        // Primary: task_id log (new schema — unambiguous).
+        if (completedIds.contains(task.id)) return true;
+
+        // Legacy fallback: care_type log, only when unambiguous (1 task of type).
+        final ct = _taskTypeToLogCareType(task.taskType);
+        final count = dailyCountByCareType[ct] ?? 0;
+        return count == 1 && completedTypes.contains(ct);
+      });
     }).toList();
   }
 
@@ -590,133 +644,57 @@ class PetCareRepository {
     ).ignore();
   }
 
+  /// Toggles task completion via a single `toggle_care_task` RPC call.
+  ///
+  /// [careType] must be the DB snake_case string (e.g. 'vet_visit') and is
+  /// provided by the caller (already known from the local dashboard state),
+  /// avoiding an extra round-trip to fetch the task row.
   Future<ToggleCompletionResult> toggleCompletion(
     String taskId, {
     required bool isCompleted,
     required String petId,
+    required String careType,
     required DateTime forDay,
+    required CareTask localTask,
   }) async {
     try {
       _requireAuth();
-      final dayStr = _fmtYmd(DateUtils.dateOnly(forDay));
-      if (taskId.startsWith('log:')) {
-        final logId = taskId.substring(4);
-        final row = await _client
-            .from('care_logs')
-            .select('id, care_type, occurred_at, pet_id, logged_date')
-            .eq('id', logId)
-            .maybeSingle();
-        if (row == null) throw const NotFoundException();
-        final map = Map<String, dynamic>.from(row);
-        if ((map['pet_id'] as String?) != petId) throw const NotFoundException();
-        if (_loggedDayKey(map['logged_date']) != dayStr) throw const NotFoundException();
-        final dayLocal = DateUtils.dateOnly(forDay);
-        final synthetic = _careTaskFromLogRow(map, petId, dayLocal);
-        if (isCompleted) {
-          return ToggleCompletionResult(task: synthetic, badgeUnlocked: false);
-        }
-        await _client.from('care_logs').delete().eq('id', logId);
-        return ToggleCompletionResult(
-          task: synthetic.copyWith(
-            isCompleted: false,
-            completedAt: null,
-            updatedAt: DateTime.now(),
-          ),
-          badgeUnlocked: false,
-        );
-      }
+      final now = DateTime.now();
+      final occurredAt = now.toUtc();
+      final day = DateUtils.dateOnly(forDay);
 
-      final userId = _client.auth.currentUser!.id;
-      final existing = await _client
-          .from('care_tasks')
-          .select()
-          .eq('id', taskId)
-          .single();
-      final task = CareTask.fromJson(existing);
-      final careType = _taskTypeToLogCareType(task.taskType);
-
-      if (_usesCareLogsForToggle(task.frequency)) {
-        if (isCompleted) {
-          await _client.from('care_logs').upsert(
-            {
-              'pet_id': petId,
-              'logged_by': userId,
-              'care_type': careType,
-              'logged_date': dayStr,
-              'occurred_at': '${dayStr}T00:00:00.000Z',
-            },
-            onConflict: 'pet_id, care_type, logged_date',
-          );
-        } else {
-          await _client
-              .from('care_logs')
-              .delete()
-              .eq('pet_id', petId)
-              .eq('care_type', careType)
-              .eq('logged_date', dayStr);
-        }
-      } else {
-        if (isCompleted) {
-          await _client
-              .from('care_tasks')
-              .update({
-                'is_completed': true,
-                'completed_at': DateTime.now().toUtc().toIso8601String(),
-              })
-              .eq('id', taskId);
-          await _client.from('care_logs').upsert(
-            {
-              'pet_id': petId,
-              'logged_by': userId,
-              'care_type': careType,
-              'logged_date': dayStr,
-              'occurred_at': '${dayStr}T00:00:00.000Z',
-            },
-            onConflict: 'pet_id, care_type, logged_date',
-          );
-        } else {
-          await _client
-              .from('care_tasks')
-              .update({
-                'is_completed': false,
-                'completed_at': null,
-              })
-              .eq('id', taskId);
-          await _client
-              .from('care_logs')
-              .delete()
-              .eq('pet_id', petId)
-              .eq('care_type', careType)
-              .eq('logged_date', dayStr);
-        }
-      }
-
-      var badgeUnlocked   = false;
-      var unlockedBadges  = <String>[];
-
-      if (isCompleted) {
-        final raw = await _client.rpc(
-          'check_daily_completion',
-          params: {
-            'target_pet_id':  petId,
-            'completion_date': dayStr,
-          },
-        );
-        if (raw is Map) {
-          final v = raw['badge_unlocked'];
-          badgeUnlocked = v == true || v == 'true';
-          final arr = raw['unlocked_badges'];
-          if (arr is List) {
-            unlockedBadges = arr.whereType<String>().toList();
-          }
-        }
-      }
-
-      final merged = task.copyWith(
-        isCompleted: isCompleted,
-        completedAt: isCompleted ? DateTime.now() : null,
-        updatedAt: DateTime.now(),
+      final raw = await _client.rpc(
+        'toggle_care_task',
+        params: {
+          'p_task_id':      taskId,
+          'p_pet_id':       petId,
+          'p_care_type':    careType,
+          'p_is_completed': isCompleted,
+          'p_day':          _fmtYmd(day),
+          'p_occurred_at':  occurredAt.toIso8601String(),
+        },
       );
+
+      if (raw == null) throw const NetworkException(message: 'Empty RPC response');
+
+      final result = raw as Map<String, dynamic>;
+      final badgeUnlocked = result['badge_unlocked'] == true;
+      final unlockedBadges = (result['unlocked_badges'] as List?)
+              ?.whereType<String>()
+              .toList() ??
+          [];
+
+      final rawCompletedAt = result['completed_at'];
+      final completedAt = rawCompletedAt is String
+          ? DateTime.tryParse(rawCompletedAt)?.toLocal()
+          : null;
+
+      final merged = localTask.copyWith(
+        isCompleted: isCompleted,
+        completedAt: completedAt,
+        updatedAt: now,
+      );
+
       return ToggleCompletionResult(
         task: merged,
         badgeUnlocked: badgeUnlocked,

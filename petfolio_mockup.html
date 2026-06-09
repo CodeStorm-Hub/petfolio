@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetFolio — UI Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1014; font-family: -apple-system, 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px 0 40px; }
+
+  /* ── Color tokens ── */
+  :root {
+    --cream: #FFF4E6; --cream2: #FFEAAD2;
+    --tangerine: #FF8A4C; --tangerine700: #E0651E; --tangerineSoft: #FFE0CB;
+    --poppy: #FF3D3D; --poppySoft: #FFE0E0;
+    --mint: #2FCBA0; --mintSoft: #BFF1E0;
+    --sunny: #FFC53D; --sunnySoft: #FFEDB3;
+    --lilac: #A98BFF; --lilacSoft: #E2D6FF;
+    --sky: #6EC8FF; --skySoft: #CDEAFF;
+    --ink950: #261308; --ink700: #5E3A28; --ink500: #957762; --ink300: #D6C2B0;
+    --surface0: #FFFFFF; --surface1: #FFF4E6; --surface2: #FFFAF3;
+    --line: #F4E2CB; --line2: #EFD8BB;
+  }
+
+  /* ── Scaffold ── */
+  h1 { color: #fff; font-size: 13px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; opacity: .5; margin-bottom: 16px; }
+  .screen-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; }
+  .screen-nav button {
+    background: #2a1820; color: #d6c2b0; border: 1px solid #47313f;
+    padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all .15s;
+  }
+  .screen-nav button.active { background: var(--tangerine); color: #fff; border-color: var(--tangerine); }
+
+  /* ── Phone frame ── */
+  .phone {
+    width: 390px; height: 844px; background: var(--surface1);
+    border-radius: 44px; overflow: hidden; position: relative;
+    box-shadow: 0 40px 80px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.08);
+    flex-shrink: 0;
+  }
+  .phone-inner { width: 100%; height: 100%; overflow: hidden; position: relative; }
+
+  /* ── Status bar ── */
+  .status-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 28px 6px; font-size: 12px; font-weight: 600; color: var(--ink700);
+  }
+  .status-icons { display: flex; gap: 5px; align-items: center; }
+  .status-icons span { font-size: 11px; }
+
+  /* ── Screen container ── */
+  .screen { display: none; flex-direction: column; height: 100%; }
+  .screen.active { display: flex; }
+
+  /* ── Scrollable body ── */
+  .screen-body { flex: 1; overflow-y: auto; overflow-x: hidden; }
+  .screen-body::-webkit-scrollbar { display: none; }
+
+  /* ── Bottom Nav ── */
+  .bottom-nav {
+    display: flex; background: var(--surface0); border-top: 1px solid var(--line);
+    padding: 8px 0 20px; flex-shrink: 0;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    cursor: pointer; position: relative; padding-top: 4px;
+  }
+  .nav-item .nav-bar {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 28px; height: 3px; border-radius: 0 0 3px 3px; background: transparent;
+    transition: background .2s;
+  }
+  .nav-item.active .nav-bar { background: var(--tangerine); }
+  .nav-item .nav-icon { font-size: 20px; line-height: 1; }
+  .nav-item .nav-label { font-size: 10px; font-weight: 500; color: var(--ink500); }
+  .nav-item.active .nav-label { color: var(--tangerine); font-weight: 700; }
+
+  /* ── Section headers ── */
+  .section-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 16px 8px; }
+  .section-header h3 { font-size: 13px; font-weight: 700; color: var(--ink700); letter-spacing: .04em; text-transform: uppercase; }
+  .section-header a { font-size: 12px; color: var(--tangerine); font-weight: 600; }
+
+  /* ── Chip filters ── */
+  .chip-row { display: flex; gap: 8px; padding: 4px 16px 12px; overflow-x: auto; }
+  .chip-row::-webkit-scrollbar { display: none; }
+  .chip {
+    padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    white-space: nowrap; cursor: pointer; transition: all .15s; border: 1.5px solid var(--line2);
+    background: var(--surface0); color: var(--ink500);
+  }
+  .chip.active { background: var(--tangerine); color: #fff; border-color: var(--tangerine); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface0); border-radius: 16px; margin: 0 16px 12px;
+    padding: 14px; box-shadow: 0 2px 8px rgba(38,19,8,.06);
+  }
+
+  /* ── Promo banner ── */
+  .promo-banner {
+    margin: 8px 16px 0; border-radius: 16px; padding: 14px 16px;
+    background: linear-gradient(135deg, var(--tangerine), var(--tangerine700));
+    color: #fff; display: flex; justify-content: space-between; align-items: center;
+  }
+  .promo-banner .promo-text p { font-size: 11px; opacity: .85; }
+  .promo-banner .promo-text h4 { font-size: 15px; font-weight: 700; margin-top: 2px; }
+  .promo-banner .promo-badge {
+    background: rgba(255,255,255,.2); border-radius: 10px; padding: 8px 12px;
+    font-size: 20px; text-align: center;
+  }
+
+  /* ── HOME SCREEN ── */
+  .home-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 16px 12px;
+  }
+  .pet-switcher {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface0); border: 1.5px solid var(--line);
+    border-radius: 24px; padding: 6px 12px 6px 6px;
+    box-shadow: 0 2px 6px rgba(38,19,8,.08);
+  }
+  .pet-avatar-sm {
+    width: 28px; height: 28px; border-radius: 14px; object-fit: cover;
+    background: var(--tangerineSoft); display: flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .pet-switcher span { font-size: 13px; font-weight: 700; color: var(--ink950); }
+  .pet-switcher .chevron { font-size: 10px; color: var(--ink500); margin-left: 2px; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .streak-pill {
+    display: flex; align-items: center; gap: 4px;
+    background: var(--sunnySoft); border-radius: 20px; padding: 6px 10px;
+    font-size: 12px; font-weight: 700; color: var(--ink700);
+  }
+  .avatar-btn {
+    width: 36px; height: 36px; border-radius: 18px;
+    background: linear-gradient(135deg, var(--tangerine), var(--lilac));
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+    cursor: pointer;
+  }
+
+  /* ── Bento grid ── */
+  .bento-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 4px 16px 8px; }
+  .bento-tile {
+    border-radius: 20px; padding: 16px; cursor: pointer; position: relative; overflow: hidden;
+    min-height: 100px; display: flex; flex-direction: column; justify-content: space-between;
+    transition: transform .15s;
+  }
+  .bento-tile:active { transform: scale(.97); }
+  .bento-tile .tile-label { font-size: 13px; font-weight: 800; color: var(--ink950); }
+  .bento-tile .tile-sub { font-size: 11px; color: var(--ink500); margin-top: 2px; }
+  .bento-tile .tile-icon { font-size: 36px; text-align: right; }
+  .bento-tile .tile-badge {
+    position: absolute; top: 10px; right: 10px;
+    background: var(--poppy); color: #fff; border-radius: 10px;
+    padding: 2px 7px; font-size: 10px; font-weight: 700;
+  }
+  .bento-tile.care { background: linear-gradient(135deg, var(--sunnySoft), #fff8e0); }
+  .bento-tile.social { background: linear-gradient(135deg, var(--poppySoft), #fff0f0); }
+  .bento-tile.match { background: linear-gradient(135deg, var(--lilacSoft), #f0ecff); }
+  .bento-tile.market { background: linear-gradient(135deg, var(--mintSoft), #e8faf4); }
+  .bento-tile.vet { background: linear-gradient(135deg, var(--skySoft), #eaf7ff); }
+  .bento-tile.community { background: linear-gradient(135deg, var(--tangerineSoft), #fff5ed); }
+  .bento-tile.all { background: var(--ink950); }
+  .bento-tile.all .tile-label { color: #fff; }
+  .bento-tile.all .tile-sub { color: rgba(255,255,255,.6); }
+
+  /* Spotlight carousel */
+  .spotlight-scroll { display: flex; gap: 10px; padding: 4px 16px 4px; overflow-x: auto; }
+  .spotlight-scroll::-webkit-scrollbar { display: none; }
+  .spotlight-card {
+    flex-shrink: 0; width: 160px; border-radius: 16px; overflow: hidden; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(38,19,8,.1);
+  }
+  .spotlight-card .sc-img {
+    height: 90px; display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+  }
+  .spotlight-card .sc-info { padding: 8px 10px; background: var(--surface0); }
+  .spotlight-card .sc-info p { font-size: 11px; font-weight: 700; color: var(--ink950); }
+  .spotlight-card .sc-info span { font-size: 10px; color: var(--ink500); }
+
+  /* Quick actions */
+  .quick-actions { display: flex; gap: 10px; padding: 0 16px 4px; overflow-x: auto; }
+  .quick-actions::-webkit-scrollbar { display: none; }
+  .qa-card {
+    flex-shrink: 0; background: var(--surface0); border: 1.5px solid var(--line);
+    border-radius: 14px; padding: 10px 14px; display: flex; align-items: center; gap: 8px;
+    cursor: pointer; min-width: 160px;
+  }
+  .qa-card .qa-icon { font-size: 24px; }
+  .qa-card .qa-text p { font-size: 12px; font-weight: 700; color: var(--ink950); }
+  .qa-card .qa-text span { font-size: 11px; color: var(--ink500); }
+
+  /* ── CARE SCREEN ── */
+  .care-header { background: linear-gradient(160deg, var(--sunny), var(--tangerine)); padding: 12px 16px 20px; }
+  .care-header h2 { font-size: 20px; font-weight: 800; color: #fff; }
+  .care-header p { font-size: 13px; color: rgba(255,255,255,.8); margin-top: 2px; }
+  .streak-row { display: flex; gap: 8px; margin-top: 12px; }
+  .streak-card {
+    flex: 1; background: rgba(255,255,255,.25); border-radius: 12px; padding: 10px 12px;
+    backdrop-filter: blur(8px);
+  }
+  .streak-card .sc-num { font-size: 22px; font-weight: 800; color: #fff; }
+  .streak-card .sc-lbl { font-size: 11px; color: rgba(255,255,255,.8); }
+  .task-item {
+    display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+    border-bottom: 1px solid var(--line); cursor: pointer;
+  }
+  .task-check {
+    width: 24px; height: 24px; border-radius: 12px; border: 2px solid var(--line2);
+    display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
+  }
+  .task-check.done { background: var(--mint); border-color: var(--mint); color: #fff; }
+  .task-info { flex: 1; }
+  .task-info h4 { font-size: 13px; font-weight: 700; color: var(--ink950); }
+  .task-info p { font-size: 11px; color: var(--ink500); margin-top: 1px; }
+  .task-time { font-size: 11px; color: var(--ink500); }
+
+  /* ── MARKETPLACE SCREEN ── */
+  .market-header { padding: 8px 16px 12px; }
+  .market-header h2 { font-size: 20px; font-weight: 800; color: var(--ink950); }
+  .market-header p { font-size: 13px; color: var(--ink500); margin-top: 1px; }
+  .search-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface0); border: 1.5px solid var(--line2);
+    border-radius: 24px; padding: 10px 14px; margin: 0 16px 12px;
+    box-shadow: 0 2px 6px rgba(38,19,8,.05);
+  }
+  .search-pill span { font-size: 14px; }
+  .search-pill p { font-size: 13px; color: var(--ink300); }
+  .hero-carousel {
+    margin: 0 16px 16px; border-radius: 18px; overflow: hidden; position: relative;
+    height: 140px; background: linear-gradient(135deg, var(--tangerine), var(--tangerine700));
+    display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+  }
+  .hero-carousel .hc-text h3 { font-size: 20px; font-weight: 800; color: #fff; }
+  .hero-carousel .hc-text p { font-size: 13px; color: rgba(255,255,255,.8); margin-top: 4px; }
+  .hero-carousel .hc-text .hc-cta {
+    background: #fff; color: var(--tangerine700); border-radius: 20px;
+    padding: 6px 14px; font-size: 12px; font-weight: 700; display: inline-block; margin-top: 8px;
+  }
+  .hero-carousel .hc-icon { font-size: 60px; }
+  .carousel-dots { display: flex; gap: 4px; justify-content: center; margin-bottom: 8px; }
+  .carousel-dots span { width: 6px; height: 6px; border-radius: 3px; background: var(--line2); }
+  .carousel-dots span.active { width: 18px; background: var(--tangerine); }
+  .categories-row { display: flex; gap: 12px; padding: 0 16px 12px; overflow-x: auto; }
+  .categories-row::-webkit-scrollbar { display: none; }
+  .cat-item { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+  .cat-icon {
+    width: 56px; height: 56px; border-radius: 28px; background: var(--tangerineSoft);
+    display: flex; align-items: center; justify-content: center; font-size: 26px;
+  }
+  .cat-icon.mint { background: var(--mintSoft); }
+  .cat-icon.lilac { background: var(--lilacSoft); }
+  .cat-icon.sunny { background: var(--sunnySoft); }
+  .cat-item span { font-size: 11px; font-weight: 600; color: var(--ink700); }
+  .shop-card {
+    display: flex; gap: 12px; background: var(--surface0); border-radius: 16px;
+    margin: 0 16px 10px; padding: 12px; box-shadow: 0 2px 8px rgba(38,19,8,.06); cursor: pointer;
+  }
+  .shop-card .shop-img {
+    width: 64px; height: 64px; border-radius: 12px; background: var(--tangerineSoft);
+    display: flex; align-items: center; justify-content: center; font-size: 30px; flex-shrink: 0;
+  }
+  .shop-card .shop-info { flex: 1; }
+  .shop-card .shop-info h4 { font-size: 14px; font-weight: 700; color: var(--ink950); }
+  .shop-card .shop-info p { font-size: 12px; color: var(--ink500); margin-top: 2px; }
+  .shop-card .shop-meta { display: flex; gap: 8px; margin-top: 6px; align-items: center; }
+  .rating { background: var(--sunnySoft); color: var(--sunny700, #C68B0F); border-radius: 8px; padding: 2px 6px; font-size: 11px; font-weight: 700; }
+  .discount-badge { background: var(--mintSoft); color: var(--mint700, #198C6E); border-radius: 8px; padding: 2px 7px; font-size: 11px; font-weight: 700; }
+  .distance { font-size: 11px; color: var(--ink500); }
+
+  /* ── PRODUCT DETAIL ── */
+  .product-back { padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .back-btn { width: 36px; height: 36px; background: var(--surface0); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; box-shadow: 0 2px 6px rgba(38,19,8,.1); }
+  .product-actions { display: flex; gap: 8px; }
+  .product-img-carousel {
+    height: 260px; background: linear-gradient(160deg, var(--mintSoft), var(--skySoft));
+    display: flex; align-items: center; justify-content: center; font-size: 100px;
+    position: relative;
+  }
+  .img-pagination { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; }
+  .img-pagination span { width: 6px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.5); }
+  .img-pagination span.active { width: 18px; background: #fff; }
+  .seller-row {
+    display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .seller-avatar { width: 36px; height: 36px; border-radius: 18px; background: var(--tangerineSoft); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .seller-info { flex: 1; }
+  .seller-info h4 { font-size: 13px; font-weight: 700; color: var(--ink950); }
+  .seller-info p { font-size: 11px; color: var(--ink500); }
+  .product-info { padding: 14px 16px; }
+  .product-info h2 { font-size: 17px; font-weight: 800; color: var(--ink950); line-height: 1.3; }
+  .price-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .price-original { font-size: 14px; color: var(--ink300); text-decoration: line-through; }
+  .price-badge { background: var(--poppySoft); color: var(--poppy); border-radius: 6px; padding: 2px 6px; font-size: 12px; font-weight: 700; }
+  .price-current { font-size: 22px; font-weight: 800; color: var(--ink950); }
+  .shipping-card {
+    margin: 0 16px; background: var(--surface2); border-radius: 14px; padding: 12px 14px; border: 1px solid var(--line);
+  }
+  .shipping-card h4 { font-size: 12px; font-weight: 700; color: var(--ink700); margin-bottom: 8px; }
+  .shipping-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .shipping-row span { font-size: 14px; }
+  .shipping-row p { font-size: 12px; color: var(--ink500); }
+  .product-sticky-cta {
+    display: flex; gap: 10px; padding: 12px 16px 24px; background: var(--surface0);
+    border-top: 1px solid var(--line); position: sticky; bottom: 0;
+  }
+  .btn-outline {
+    flex: 1; padding: 14px; border-radius: 14px; font-size: 14px; font-weight: 700;
+    border: 2px solid var(--tangerine); color: var(--tangerine); background: transparent; cursor: pointer;
+  }
+  .btn-solid {
+    flex: 1; padding: 14px; border-radius: 14px; font-size: 14px; font-weight: 700;
+    background: var(--tangerine); color: #fff; border: none; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(255,138,76,.35);
+  }
+
+  /* ── CHECKOUT ── */
+  .checkout-section { margin: 0 16px 10px; }
+  .checkout-section .cs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .checkout-section .cs-header h3 { font-size: 14px; font-weight: 700; color: var(--ink950); }
+  .checkout-section .cs-header span { font-size: 12px; color: var(--tangerine); font-weight: 600; cursor: pointer; }
+  .address-box {
+    background: var(--surface2); border: 1.5px solid var(--line2); border-radius: 12px;
+    padding: 12px 14px; display: flex; align-items: center; gap: 10px;
+  }
+  .address-box .addr-icon { font-size: 20px; }
+  .address-box .addr-text p { font-size: 13px; font-weight: 600; color: var(--ink950); }
+  .address-box .addr-text span { font-size: 12px; color: var(--ink500); }
+  .cart-item-row { display: flex; gap: 10px; align-items: center; }
+  .cart-item-img { width: 56px; height: 56px; border-radius: 10px; background: var(--mintSoft); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  .cart-item-info { flex: 1; }
+  .cart-item-info h4 { font-size: 13px; font-weight: 700; color: var(--ink950); }
+  .cart-item-info p { font-size: 12px; color: var(--ink500); }
+  .qty-stepper { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+  .qty-btn { width: 26px; height: 26px; border-radius: 13px; background: var(--surface2); border: 1px solid var(--line2); font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .qty-num { font-size: 14px; font-weight: 700; color: var(--ink950); width: 20px; text-align: center; }
+  .promo-row {
+    display: flex; align-items: center; gap: 10px; background: var(--mintSoft);
+    border-radius: 12px; padding: 12px 14px; cursor: pointer;
+  }
+  .promo-row span { font-size: 20px; }
+  .promo-row p { flex: 1; font-size: 13px; font-weight: 600; color: var(--mint700, #198C6E); }
+  .promo-row .arrow { font-size: 14px; color: var(--mint700, #198C6E); }
+  .pay-via-row { display: flex; align-items: center; gap: 10px; }
+  .pay-via-row .pv-icon { width: 36px; height: 36px; background: var(--lilacSoft); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .pay-via-row .pv-info { flex: 1; }
+  .pay-via-row .pv-info h4 { font-size: 13px; font-weight: 700; color: var(--ink950); }
+  .pay-via-row .pv-info p { font-size: 12px; color: var(--ink500); }
+  .savings-banner {
+    margin: 0 16px 8px; background: var(--mintSoft); border-radius: 12px;
+    padding: 10px 14px; display: flex; align-items: center; gap: 8px;
+  }
+  .savings-banner span { font-size: 16px; }
+  .savings-banner p { font-size: 13px; font-weight: 700; color: var(--mint700, #198C6E); }
+  .place-order-btn {
+    margin: 0 16px 24px; background: var(--tangerine); color: #fff; border: none;
+    border-radius: 16px; padding: 16px 20px; width: calc(100% - 32px); cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 6px 16px rgba(255,138,76,.4); font-size: 16px; font-weight: 700;
+  }
+
+  /* ── SOCIAL / PAWSFEED ── */
+  .social-header { padding: 8px 16px 10px; display: flex; justify-content: space-between; align-items: center; }
+  .social-header h2 { font-size: 22px; font-weight: 800; color: var(--ink950); }
+  .social-header .social-icons { display: flex; gap: 8px; }
+  .social-header .social-icons button { background: none; border: none; font-size: 22px; cursor: pointer; }
+  .stories-row { display: flex; gap: 12px; padding: 4px 16px 12px; overflow-x: auto; }
+  .stories-row::-webkit-scrollbar { display: none; }
+  .story-item { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+  .story-ring {
+    width: 60px; height: 60px; border-radius: 30px;
+    border: 2.5px solid var(--tangerine); padding: 2px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .story-ring .story-inner { width: 100%; height: 100%; border-radius: 26px; background: var(--tangerineSoft); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  .story-item span { font-size: 11px; color: var(--ink700); font-weight: 500; }
+  .story-item.add-story .story-ring { border-color: var(--line2); }
+  .post-card { background: var(--surface0); margin: 0 0 10px; }
+  .post-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px 8px; }
+  .post-avatar { width: 38px; height: 38px; border-radius: 19px; background: var(--lilacSoft); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .post-author h4 { font-size: 13px; font-weight: 700; color: var(--ink950); }
+  .post-author p { font-size: 11px; color: var(--ink500); }
+  .post-img { height: 260px; background: linear-gradient(160deg, var(--tangerineSoft), var(--sunnySoft)); display: flex; align-items: center; justify-content: center; font-size: 80px; }
+  .post-actions { display: flex; gap: 16px; padding: 10px 16px 8px; }
+  .post-actions button { background: none; border: none; font-size: 22px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .post-actions button span.count { font-size: 13px; color: var(--ink500); font-weight: 600; }
+  .post-caption { padding: 0 16px 12px; font-size: 13px; color: var(--ink700); line-height: 1.5; }
+
+  /* ── MATCHING ── */
+  .match-screen-body { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 12px 16px; gap: 12px; overflow: hidden; }
+  .match-card {
+    width: 100%; max-height: 440px; border-radius: 24px; overflow: hidden; position: relative;
+    background: linear-gradient(160deg, var(--lilacSoft), var(--skySoft));
+    display: flex; align-items: flex-end; flex: 1;
+    box-shadow: 0 8px 24px rgba(38,19,8,.12);
+  }
+  .match-card .mc-bg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 140px; opacity: .8; }
+  .match-card .mc-info {
+    position: relative; z-index: 1; width: 100%; padding: 16px;
+    background: linear-gradient(to top, rgba(38,19,8,.7), transparent);
+  }
+  .match-card .mc-info h2 { font-size: 22px; font-weight: 800; color: #fff; }
+  .match-card .mc-info p { font-size: 13px; color: rgba(255,255,255,.8); margin-top: 2px; }
+  .match-card .mc-tags { display: flex; gap: 6px; margin-top: 8px; }
+  .mc-tag { background: rgba(255,255,255,.2); border-radius: 20px; padding: 4px 10px; font-size: 11px; color: #fff; backdrop-filter: blur(4px); }
+  .swipe-btns { display: flex; gap: 20px; align-items: center; }
+  .swipe-btn { width: 56px; height: 56px; border-radius: 28px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .swipe-btn.nope { background: var(--surface0); box-shadow: 0 4px 12px rgba(38,19,8,.1); }
+  .swipe-btn.like { background: var(--tangerine); box-shadow: 0 6px 16px rgba(255,138,76,.4); width: 68px; height: 68px; border-radius: 34px; font-size: 26px; }
+  .swipe-btn.star { background: var(--sunnySoft); box-shadow: 0 4px 12px rgba(255,197,61,.3); }
+
+  /* ── NOTIFICATIONS ── */
+  .tab-bar { display: flex; border-bottom: 1px solid var(--line); background: var(--surface0); }
+  .tab-item { flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 600; color: var(--ink500); cursor: pointer; position: relative; }
+  .tab-item.active { color: var(--tangerine); }
+  .tab-item.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--tangerine); border-radius: 2px 2px 0 0; }
+  .notif-item { display: flex; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .notif-icon { width: 44px; height: 44px; border-radius: 22px; background: var(--tangerineSoft); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .notif-text h4 { font-size: 13px; font-weight: 700; color: var(--ink950); }
+  .notif-text p { font-size: 12px; color: var(--ink500); margin-top: 2px; line-height: 1.4; }
+  .notif-text .notif-time { font-size: 11px; color: var(--ink300); margin-top: 4px; }
+  .notif-dot { width: 8px; height: 8px; border-radius: 4px; background: var(--tangerine); flex-shrink: 0; margin-top: 6px; }
+
+  /* ── ACTIVITY ── */
+  .activity-item {
+    background: var(--surface0); border-radius: 16px; margin: 0 16px 10px; padding: 14px;
+    box-shadow: 0 2px 8px rgba(38,19,8,.06); cursor: pointer;
+  }
+  .activity-item .ai-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+  .activity-item .ai-type { font-size: 11px; font-weight: 700; color: var(--ink500); text-transform: uppercase; letter-spacing: .05em; }
+  .activity-item .ai-date { font-size: 11px; color: var(--ink500); }
+  .route-dots { display: flex; flex-direction: column; gap: 4px; }
+  .route-dot-row { display: flex; align-items: center; gap: 10px; }
+  .dot { width: 10px; height: 10px; border-radius: 5px; flex-shrink: 0; }
+  .dot.pickup { background: var(--sky); }
+  .dot.dest { background: var(--tangerine); }
+  .dot-line { width: 1px; height: 10px; background: var(--line2); margin-left: 4px; }
+  .route-dot-row p { font-size: 13px; color: var(--ink700); }
+  .ai-actions { display: flex; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .ai-action-btn { flex: 1; padding: 8px; border-radius: 10px; border: 1.5px solid var(--line2); background: transparent; font-size: 12px; font-weight: 600; color: var(--ink700); cursor: pointer; text-align: center; }
+  .ai-action-btn.primary { background: var(--tangerine); color: #fff; border-color: var(--tangerine); }
+  .ai-price { font-size: 16px; font-weight: 800; color: var(--ink950); text-align: right; }
+
+  /* ── PROFILE ── */
+  .profile-header { background: linear-gradient(160deg, var(--tangerine), var(--tangerine700)); padding: 16px; }
+  .profile-user-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .profile-avatar { width: 56px; height: 56px; border-radius: 28px; background: rgba(255,255,255,.3); display: flex; align-items: center; justify-content: center; font-size: 28px; border: 2px solid rgba(255,255,255,.5); }
+  .profile-user-info h2 { font-size: 16px; font-weight: 800; color: #fff; }
+  .profile-user-info p { font-size: 12px; color: rgba(255,255,255,.8); }
+  .level-card {
+    background: rgba(255,255,255,.2); border-radius: 16px; padding: 14px;
+    backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.3);
+  }
+  .level-card .lc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .level-badge { background: var(--sunny); color: var(--ink950); border-radius: 8px; padding: 3px 10px; font-size: 12px; font-weight: 800; }
+  .level-card .lc-top p { font-size: 12px; color: rgba(255,255,255,.8); }
+  .level-bar { height: 6px; background: rgba(255,255,255,.25); border-radius: 3px; overflow: hidden; }
+  .level-bar-fill { height: 100%; background: #fff; border-radius: 3px; width: 65%; }
+  .level-card .lc-bottom { display: flex; justify-content: space-between; margin-top: 6px; }
+  .level-card .lc-bottom p { font-size: 11px; color: rgba(255,255,255,.7); }
+  .level-quick-links { display: flex; margin-top: 10px; }
+  .lql-btn { flex: 1; padding: 8px; text-align: center; background: rgba(255,255,255,.2); font-size: 12px; font-weight: 700; color: #fff; border-radius: 8px; cursor: pointer; }
+  .lql-btn:first-child { margin-right: 5px; }
+  .settings-section { background: var(--surface0); margin-bottom: 8px; }
+  .settings-label { padding: 12px 16px 4px; font-size: 11px; font-weight: 700; color: var(--ink500); text-transform: uppercase; letter-spacing: .06em; }
+  .settings-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .settings-item .si-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--tangerineSoft); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .settings-item .si-icon.mint { background: var(--mintSoft); }
+  .settings-item .si-icon.lilac { background: var(--lilacSoft); }
+  .settings-item .si-info { flex: 1; }
+  .settings-item .si-info h4 { font-size: 14px; font-weight: 600; color: var(--ink950); }
+  .settings-item .si-info p { font-size: 12px; color: var(--ink500); }
+  .settings-item .si-chevron { color: var(--ink300); font-size: 14px; }
+
+  /* ── ALL FEATURES SHEET ── */
+  .sheet-overlay { position: absolute; inset: 0; background: rgba(38,19,8,.5); z-index: 100; display: flex; flex-direction: column; justify-content: flex-end; }
+  .sheet-overlay.hidden { display: none; }
+  .sheet-panel { background: var(--surface0); border-radius: 24px 24px 0 0; max-height: 85%; overflow-y: auto; }
+  .sheet-panel::-webkit-scrollbar { display: none; }
+  .sheet-handle { width: 36px; height: 4px; background: var(--line2); border-radius: 2px; margin: 10px auto 0; }
+  .sheet-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; }
+  .sheet-header h3 { font-size: 17px; font-weight: 800; color: var(--ink950); }
+  .sheet-close { width: 28px; height: 28px; border-radius: 14px; background: var(--surface2); border: none; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .all-features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 4px 16px 24px; }
+  .af-card {
+    background: var(--surface2); border-radius: 16px; padding: 14px 12px;
+    display: flex; gap: 10px; cursor: pointer; border: 1px solid var(--line);
+    align-items: center;
+  }
+  .af-icon { font-size: 30px; flex-shrink: 0; }
+  .af-info h4 { font-size: 13px; font-weight: 700; color: var(--ink950); }
+  .af-info p { font-size: 11px; color: var(--ink500); margin-top: 2px; }
+
+  /* ── CUSTOMIZATION SHEET ── */
+  .custom-sheet-content { padding: 0 16px 24px; }
+  .custom-sheet-content h3 { font-size: 16px; font-weight: 800; color: var(--ink950); padding: 14px 0 12px; }
+  .variant-option {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 14px; border-radius: 14px; border: 2px solid var(--line2);
+    margin-bottom: 8px; cursor: pointer;
+  }
+  .variant-option.selected { border-color: var(--tangerine); background: var(--tangerineSoft); }
+  .variant-option .vo-left { display: flex; align-items: center; gap: 10px; }
+  .radio { width: 18px; height: 18px; border-radius: 9px; border: 2px solid var(--line2); }
+  .radio.checked { border-color: var(--tangerine); background: var(--tangerine); display: flex; align-items: center; justify-content: center; }
+  .radio.checked::after { content: ''; width: 6px; height: 6px; border-radius: 3px; background: #fff; }
+  .variant-option span { font-size: 14px; font-weight: 600; color: var(--ink950); }
+  .complete-badge { background: var(--mintSoft); color: var(--mint700, #198C6E); border-radius: 8px; padding: 3px 8px; font-size: 11px; font-weight: 700; }
+  .qty-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; }
+  .qty-row p { font-size: 14px; font-weight: 700; color: var(--ink950); }
+  .qty-control { display: flex; align-items: center; gap: 16px; }
+  .qty-control button { width: 32px; height: 32px; border-radius: 16px; border: 2px solid var(--line2); background: var(--surface0); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .qty-control span { font-size: 16px; font-weight: 800; color: var(--ink950); width: 24px; text-align: center; }
+  .confirm-btn {
+    width: 100%; padding: 16px; background: var(--tangerine); color: #fff; border: none;
+    border-radius: 16px; font-size: 15px; font-weight: 700; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 6px 16px rgba(255,138,76,.35);
+  }
+  .confirm-btn .original-price { text-decoration: line-through; opacity: .7; font-size: 13px; margin-right: 6px; }
+</style>
+</head>
+<body>
+<h1>PetFolio — Interactive UI Mockup (Pathao-Inspired)</h1>
+
+<div class="screen-nav">
+  <button class="active" onclick="showScreen('home')">🏠 Hub Home</button>
+  <button onclick="showScreen('care')">🌟 Care</button>
+  <button onclick="showScreen('social')">🐾 Social</button>
+  <button onclick="showScreen('matching')">💜 Match</button>
+  <button onclick="showScreen('marketplace')">🛍️ Market</button>
+  <button onclick="showScreen('product')">📦 Product</button>
+  <button onclick="showScreen('checkout')">💳 Checkout</button>
+  <button onclick="showScreen('activity')">📋 Activity</button>
+  <button onclick="showScreen('notifications')">🔔 Inbox</button>
+  <button onclick="showScreen('profile')">👤 Profile</button>
+</div>
+
+<div class="phone">
+  <div class="phone-inner">
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 1: HUB HOME
+    ════════════════════════════════════════════════════ -->
+    <div class="screen active" id="screen-home">
+      <div class="status-bar">
+        <span>9:41</span>
+        <div class="status-icons"><span>●●●●</span><span>WiFi</span><span>🔋</span></div>
+      </div>
+      <div class="screen-body">
+        <!-- Header -->
+        <div class="home-header">
+          <div class="pet-switcher" onclick="toggleSheet()">
+            <div class="pet-avatar-sm">🐶</div>
+            <span>Biscuit</span>
+            <span class="chevron">▾</span>
+          </div>
+          <div class="header-right">
+            <div class="streak-pill">🔥 12 day streak</div>
+            <div class="avatar-btn">👤</div>
+          </div>
+        </div>
+
+        <!-- Promo Banner -->
+        <div class="promo-banner">
+          <div class="promo-text">
+            <p>Biscuit's vaccination</p>
+            <h4>Due in 3 days — Book Vet</h4>
+          </div>
+          <div class="promo-badge">💉</div>
+        </div>
+
+        <!-- Section: Services -->
+        <div class="section-header">
+          <h3>Services</h3>
+          <a onclick="toggleSheet()">All ›</a>
+        </div>
+
+        <!-- Bento Grid -->
+        <div class="bento-grid">
+          <div class="bento-tile care" onclick="showScreen('care')">
+            <div>
+              <div class="tile-label">Care</div>
+              <div class="tile-sub">4/6 tasks done</div>
+            </div>
+            <div class="tile-icon">🌟</div>
+          </div>
+          <div class="bento-tile social" onclick="showScreen('social')">
+            <div>
+              <div class="tile-label">PawsFeed</div>
+              <div class="tile-sub">12 new posts</div>
+            </div>
+            <div class="tile-icon">🐾</div>
+          </div>
+          <div class="bento-tile match" onclick="showScreen('matching')">
+            <div>
+              <div class="tile-label">Match</div>
+              <div class="tile-sub">3 new likes</div>
+            </div>
+            <div class="tile-icon">💜</div>
+            <div class="tile-badge">3</div>
+          </div>
+          <div class="bento-tile market" onclick="showScreen('marketplace')">
+            <div>
+              <div class="tile-label">Market</div>
+              <div class="tile-sub">Explore shops</div>
+            </div>
+            <div class="tile-icon">🛍️</div>
+          </div>
+          <div class="bento-tile vet">
+            <div>
+              <div class="tile-label">Vet</div>
+              <div class="tile-sub">Book appointment</div>
+            </div>
+            <div class="tile-icon">🏥</div>
+          </div>
+          <div class="bento-tile all" onclick="toggleSheet()">
+            <div>
+              <div class="tile-label">All</div>
+              <div class="tile-sub" style="color:rgba(255,255,255,.5)">More features</div>
+            </div>
+            <div style="font-size:28px;text-align:right;color:rgba(255,255,255,.4)">⊞</div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section-header"><h3>Quick Actions</h3></div>
+        <div class="quick-actions">
+          <div class="qa-card" onclick="showScreen('marketplace')">
+            <div class="qa-icon">🛒</div>
+            <div class="qa-text"><p>Shop for Biscuit</p><span>Pet food & toys</span></div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-icon">💊</div>
+            <div class="qa-text"><p>Low on Medication</p><span>Reorder now</span></div>
+          </div>
+        </div>
+
+        <!-- Spotlight -->
+        <div class="section-header"><h3>Pet Spotlight</h3><a>See All ›</a></div>
+        <div class="spotlight-scroll">
+          <div class="spotlight-card">
+            <div class="sc-img" style="background:linear-gradient(135deg,#FFE0CB,#FFEDB3)">🐕</div>
+            <div class="sc-info"><p>Buddy — Golden</p><span>Wants to play! 0.5km</span></div>
+          </div>
+          <div class="spotlight-card">
+            <div class="sc-img" style="background:linear-gradient(135deg,#E2D6FF,#BFF1E0)">🐈</div>
+            <div class="sc-info"><p>Luna — Persian</p><span>Match candidate ✨</span></div>
+          </div>
+          <div class="spotlight-card">
+            <div class="sc-img" style="background:linear-gradient(135deg,#CDEAFF,#E2D6FF)">🐾</div>
+            <div class="sc-info"><p>New in PawsFeed</p><span>Mochi's first walk 🥺</span></div>
+          </div>
+          <div class="spotlight-card">
+            <div class="sc-img" style="background:linear-gradient(135deg,#BFF1E0,#CDEAFF)">🛍️</div>
+            <div class="sc-info"><p>PetMart Sale</p><span>Up to 30% off today</span></div>
+          </div>
+        </div>
+
+        <!-- Exclusive Deals -->
+        <div class="section-header"><h3>Exclusive Deals</h3><a>See All ›</a></div>
+        <div class="chip-row">
+          <div class="chip active">All</div>
+          <div class="chip">Food</div>
+          <div class="chip">Grooming</div>
+          <div class="chip">Vet</div>
+          <div class="chip">Toys</div>
+        </div>
+        <div style="margin:0 16px 16px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,var(--tangerine),var(--lilac));height:90px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;">
+          <div style="color:#fff"><p style="font-size:11px;opacity:.8">Limited time offer</p><h4 style="font-size:16px;font-weight:800">30% OFF Pet Food 🎉</h4></div>
+          <div style="font-size:40px">🍖</div>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+
+      <!-- Bottom Nav -->
+      <div class="bottom-nav">
+        <div class="nav-item active" onclick="showScreen('home')"><div class="nav-bar"></div><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+        <div class="nav-item" onclick="showScreen('activity')"><div class="nav-bar"></div><div class="nav-icon">📋</div><div class="nav-label">Activity</div></div>
+        <div class="nav-item" onclick="showScreen('marketplace')"><div class="nav-bar"></div><div class="nav-icon">🛍️</div><div class="nav-label">Deals</div></div>
+        <div class="nav-item" onclick="showScreen('notifications')"><div class="nav-bar"></div><div class="nav-icon">🔔</div><div class="nav-label">Inbox</div></div>
+        <div class="nav-item" onclick="showScreen('profile')"><div class="nav-bar"></div><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+      </div>
+
+      <!-- All Features Sheet -->
+      <div class="sheet-overlay hidden" id="all-features-sheet">
+        <div class="sheet-panel">
+          <div class="sheet-handle"></div>
+          <div class="sheet-header">
+            <h3>All Features</h3>
+            <button class="sheet-close" onclick="toggleSheet()">✕</button>
+          </div>
+          <div class="all-features-grid">
+            <div class="af-card" onclick="showScreen('care');toggleSheet()"><div class="af-icon">🌟</div><div class="af-info"><h4>Care Tasks</h4><p>Daily routines & health</p></div></div>
+            <div class="af-card" onclick="showScreen('social');toggleSheet()"><div class="af-icon">🐾</div><div class="af-info"><h4>PawsFeed</h4><p>Social posts & stories</p></div></div>
+            <div class="af-card" onclick="showScreen('matching');toggleSheet()"><div class="af-icon">💜</div><div class="af-info"><h4>Pet Match</h4><p>Playdate & breeding</p></div></div>
+            <div class="af-card" onclick="showScreen('marketplace');toggleSheet()"><div class="af-icon">🛍️</div><div class="af-info"><h4>Marketplace</h4><p>Shops & products</p></div></div>
+            <div class="af-card"><div class="af-icon">🏥</div><div class="af-info"><h4>Appointments</h4><p>Vet & grooming</p></div></div>
+            <div class="af-card"><div class="af-icon">🗺️</div><div class="af-info"><h4>Walk Tracker</h4><p>GPS route logging</p></div></div>
+            <div class="af-card"><div class="af-icon">📊</div><div class="af-info"><h4>Health Vault</h4><p>Medical records</p></div></div>
+            <div class="af-card"><div class="af-icon">👥</div><div class="af-info"><h4>Communities</h4><p>Breed groups & clubs</p></div></div>
+            <div class="af-card"><div class="af-icon">🔬</div><div class="af-info"><h4>Breed ID</h4><p>AI identification</p></div></div>
+            <div class="af-card"><div class="af-icon">🤖</div><div class="af-info"><h4>AI Routine</h4><p>Smart care suggestions</p></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 2: CARE
+    ════════════════════════════════════════════════════ -->
+    <div class="screen" id="screen-care">
+      <div class="status-bar" style="background:linear-gradient(160deg,var(--sunny),var(--tangerine));color:#fff;">
+        <span>9:41</span>
+        <div class="status-icons"><span>●●●●</span><span>WiFi</span><span>🔋</span></div>
+      </div>
+      <div class="screen-body">
+        <div class="care-header">
+          <h2>Care — Biscuit 🐶</h2>
+          <p>Keep the streak going!</p>
+          <div class="streak-row">
+            <div class="streak-card"><div class="sc-num">🔥 12</div><div class="sc-lbl">Day Streak</div></div>
+            <div class="streak-card"><div class="sc-num">⭐ 340</div><div class="sc-lbl">XP Points</div></div>
+            <div class="streak-card"><div class="sc-num">4/6</div><div class="sc-lbl">Today Done</div></div>
+          </div>
+        </div>
+
+        <div class="section-header"><h3>Today's Tasks</h3></div>
+        <div class="chip-row">
+          <div class="chip active">All</div>
+          <div class="chip">Medical</div>
+          <div class="chip">Nutrition</div>
+          <div class="chip">Grooming</div>
+          <div class="chip">Walk</div>
+        </div>
+        <div style="background:var(--surface0);border-radius:16px;margin:0 16px 12px;box-shadow:0 2px 8px rgba(38,19,8,.06);overflow:hidden;">
+          <div class="task-item">
+            <div class="task-check done">✓</div>
+            <div class="task-info"><h4>Morning Feed 🍖</h4><p>200g premium dry kibble</p></div>
+            <div class="task-time" style="color:var(--mint)">Done</div>
+          </div>
+          <div class="task-item">
+            <div class="task-check done">✓</div>
+            <div class="task-info"><h4>Morning Walk 🦮</h4><p>30 min — Riverside Park</p></div>
+            <div class="task-time" style="color:var(--mint)">Done</div>
+          </div>
+          <div class="task-item">
+            <div class="task-check done">✓</div>
+            <div class="task-info"><h4>Vitamins 💊</h4><p>1x Omega-3 capsule</p></div>
+            <div class="task-time" style="color:var(--mint)">Done</div>
+          </div>
+          <div class="task-item">
+            <div class="task-check done">✓</div>
+            <div class="task-info"><h4>Grooming Brush 🪮</h4><p>Full body brush</p></div>
+            <div class="task-time" style="color:var(--mint)">Done</div>
+          </div>
+          <div class="task-item">
+            <div class="task-check"></div>
+            <div class="task-info"><h4>Evening Feed 🍗</h4><p>180g — Due at 6:00 PM</p></div>
+            <div class="task-time">6:00 PM</div>
+          </div>
+          <div class="task-item" style="border-bottom:none">
+            <div class="task-check"></div>
+            <div class="task-info"><h4>Dental Chew 🦷</h4><p>After dinner</p></div>
+            <div class="task-time">7:30 PM</div>
+          </div>
+        </div>
+
+        <div class="section-header"><h3>Upcoming</h3></div>
+        <div class="card" style="display:flex;align-items:center;gap:12px;">
+          <div style="font-size:32px">💉</div>
+          <div style="flex:1"><h4 style="font-size:14px;font-weight:700;color:var(--ink950)">Rabies Vaccination</h4><p style="font-size:12px;color:var(--ink500)">Due in 3 days — Dr. Alam's Clinic</p></div>
+          <div style="background:var(--poppySoft);color:var(--poppy);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700">3d</div>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="showScreen('home')"><div class="nav-bar"></div><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+        <div class="nav-item active"><div class="nav-bar"></div><div class="nav-icon">📋</div><div class="nav-label">Activity</div></div>
+        <div class="nav-item" onclick="showScreen('marketplace')"><div class="nav-bar"></div><div class="nav-icon">🛍️</div><div class="nav-label">Deals</div></div>
+        <div class="nav-item" onclick="showScreen('notifications')"><div class="nav-bar"></div><div class="nav-icon">🔔</div><div class="nav-label">Inbox</div></div>
+        <div class="nav-item" onclick="showScreen('profile')"><div class="nav-bar"></div><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 3: SOCIAL / PAWSFEED
+    ════════════════════════════════════════════════════ -->
+    <div class="screen" id="screen-social">
+      <div class="status-bar"><span>9:41</span><div class="status-icons"><span>●●●●</span><span>WiFi</span><span>🔋</span></div></div>
+      <div class="screen-body">
+        <div class="social-header">
+          <h2>PawsFeed</h2>
+          <div class="social-icons"><button>🔍</button><button>✏️</button></div>
+        </div>
+        <!-- Stories -->
+        <div class="stories-row">
+          <div class="story-item add-story">
+            <div class="story-ring"><div class="story-inner" style="background:var(--surface2);font-size:22px">➕</div></div>
+            <span>Your story</span>
+          </div>
+          <div class="story-item"><div class="story-ring"><div class="story-inner">🐶</div></div><span>Biscuit</span></div>
+          <div class="story-item"><div class="story-ring" style="border-color:var(--lilac)"><div class="story-inner" style="background:var(--lilacSoft)">🐈</div></div><span>Luna</span></div>
+          <div class="story-item"><div class="story-ring" style="border-color:var(--mint)"><div class="story-inner" style="background:var(--mintSoft)">🐕</div></div><span>Rocky</span></div>
+          <div class="story-item"><div class="story-ring" style="border-color:var(--sunny)"><div class="story-inner" style="background:var(--sunnySoft)">🐾</div></div><span>Mochi</span></div>
+        </div>
+        <!-- Post 1 -->
+        <div class="post-card">
+          <div class="post-header">
+            <div class="post-avatar">🐶</div>
+            <div class="post-author"><h4>Biscuit & Co.</h4><p>2 hours ago · 📍 Riverside Park</p></div>
+          </div>
+          <div class="post-img">🐶🌳</div>
+          <div class="post-actions">
+            <button>❤️<span class="count">128</span></button>
+            <button>💬<span class="count">24</span></button>
+            <button>🔗</button>
+            <button style="margin-left:auto">🔖</button>
+          </div>
+          <div class="post-caption"><b>Biscuit</b> loved his morning walk today! Golden hour at Riverside 🌅 #GoldenRetriever #MorningWalk</div>
+        </div>
+        <!-- Post 2 -->
+        <div class="post-card">
+          <div class="post-header">
+            <div class="post-avatar" style="background:var(--lilacSoft)">🐈</div>
+            <div class="post-author"><h4>Luna's World</h4><p>5 hours ago</p></div>
+          </div>
+          <div class="post-img" style="background:linear-gradient(160deg,var(--lilacSoft),var(--skySoft))">🐈☀️</div>
+          <div class="post-actions">
+            <button>❤️<span class="count">94</span></button>
+            <button>💬<span class="count">11</span></button>
+            <button>🔗</button>
+          </div>
+          <div class="post-caption"><b>Luna</b> claiming the sunny spot as always 😸 #PersianCat #CatLife</div>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="showScreen('home')"><div class="nav-bar"></div><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+        <div class="nav-item" onclick="showScreen('activity')"><div class="nav-bar"></div><div class="nav-icon">📋</div><div class="nav-label">Activity</div></div>
+        <div class="nav-item" onclick="showScreen('marketplace')"><div class="nav-bar"></div><div class="nav-icon">🛍️</div><div class="nav-label">Deals</div></div>
+        <div class="nav-item active" onclick="showScreen('notifications')"><div class="nav-bar"></div><div class="nav-icon">🔔</div><div class="nav-label">Inbox</div></div>
+        <div class="nav-item" onclick="showScreen('profile')"><div class="nav-bar"></div><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 4: MATCHING
+    ════════════════════════════════════════════════════ -->
+    <div class="screen" id="screen-matching">
+      <div class="status-bar"><span>9:41</span><div class="status-icons"><span>●●●●</span><span>WiFi</span><span>🔋</span></div></div>
+      <div style="padding:8px 16px 4px;display:flex;justify-content:space-between;align-items:center;">
+        <h2 style="font-size:22px;font-weight:800;color:var(--ink950)">Pet Match</h2>
+        <div style="display:flex;gap:8px;">
+          <div style="background:var(--lilacSoft);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--lilac700,#6E4DDB);cursor:pointer">⚙️ Preferences</div>
+          <div style="background:var(--sunnySoft);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--sunny700,#C68B0F);cursor:pointer" onclick="showScreen('notifications')">💌 3</div>
+        </div>
+      </div>
+      <div class="match-screen-body">
+        <div class="chip-row" style="padding:0 0 4px;align-self:flex-start;width:100%">
+          <div class="chip active">Playdate</div>
+          <div class="chip">Breeding</div>
+          <div class="chip">Walking Buddy</div>
+        </div>
+        <div class="match-card">
+          <div class="mc-bg">🐕</div>
+          <div class="mc-info">
+            <h2>Buddy, 2y</h2>
+            <p>Golden Retriever · Male · 0.8 km away</p>
+            <div class="mc-tags">
+              <div class="mc-tag">Vaccinated ✓</div>
+              <div class="mc-tag">Friendly</div>
+              <div class="mc-tag">Playful</div>
+            </div>
+          </div>
+        </div>
+        <div class="swipe-btns">
+          <button class="swipe-btn nope">✕</button>
+          <button class="swipe-btn star">⭐</button>
+          <button class="swipe-btn like">🐾</button>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="showScreen('home')"><div class="nav-bar"></div><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+        <div class="nav-item" onclick="showScreen('activity')"><div class="nav-bar"></div><div class="nav-icon">📋</div><div class="nav-label">Activity</div></div>
+        <div class="nav-item active"><div class="nav-bar"></div><div class="nav-icon">🛍️</div><div class="nav-label">Deals</div></div>
+        <div class="nav-item" onclick="showScreen('notifications')"><div class="nav-bar"></div><div class="nav-icon">🔔</div><div class="nav-label">Inbox</div></div>
+        <div class="nav-item" onclick="showScreen('profile')"><div class="nav-bar"></div><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 5: MARKETPLACE
+    ════════════════════════════════════════════════════ -->
+    <div class="screen" id="screen-marketplace">
+      <div class="status-bar"><span>9:41</span><div class="status-icons"><span>●●●●</span><span>WiFi</span><span>🔋</span></div></div>
+      <div class="screen-body">
+        <div class="market-header">
+          <h2>Marketplace</h2>
+          <p>Shopping for Biscuit 🐶</p>
+        </div>
+        <div class="search-pill">
+          <span>🔍</span>
+          <p>Search pet food, toys, health...</p>
+        </div>
+        <!-- Hero Carousel -->
+        <div class="hero-carousel">
+          <div class="hc-text">
+            <h3>UP TO 30% OFF</h3>
+            <p>Premium pet food brands</p>
+            <div class="hc-cta">Shop Now →</div>
+          </div>
+          <div class="hc-icon">🍖</div>
+        </div>
+        <div class="carousel-dots">
+          <span class="active"></span><span></span><span></span><span></span>
+        </div>
+        <!-- Categories -->
+        <div class="section-header"><h3>Categories</h3><a>Show All ›</a></div>
+        <div class="categories-row">
+          <div class="cat-item"><div class="cat-icon">🍖</div><span>Food</span></div>
+          <div class="cat-item"><div class="cat-icon sunny">🧸</div><span>Toys</span></div>
+          <div class="cat-item"><div class="cat-icon mint">💊</div><span>Health</span></div>
+          <div class="cat-item"><div class="cat-icon lilac">🛁</div><span>Grooming</span></div>
+          <div class="cat-item"><div class="cat-icon" style="background:var(--skySoft)">🛏️</div><span>Beds</span></div>
+        </div>
+        <!-- Countdown banner -->
+        <div style="margin:0 16px 16px;border-radius:16px;background:linear-gradient(135deg,var(--lilac),var(--mint));padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+          <div style="color:#fff"><p style="font-size:11px;opacity:.8">Flash sale</p><h4 style="font-size:14px;font-weight:800">Grooming Kits — Ends in 2h 14m</h4></div>
+          <div style="font-size:36px">🪮</div>
+        </div>
+        <!-- Shops -->
+        <div class="section-header"><h3>Shops You'll Love</h3><a>See All ›</a></div>
+        <div class="shop-card" onclick="showScreen('product')">
+          <div class="shop-img">🐾</div>
+          <div class="shop-info">
+            <h4>PetMart BD</h4>
+            <p>Premium food & accessories</p>
+            <div class="shop-meta">
+              <div class="rating">⭐ 4.8</div>
+              <div class="discount-badge">30% OFF</div>
+              <div class="distance">1.2 km</div>
+            </div>
+          </div>
+        </div>
+        <div class="shop-card" onclick="showScreen('product')">
+          <div class="shop-img" style="background:var(--mintSoft)">💊</div>
+          <div class="shop-info">
+            <h4>VetCare Supplies</h4>
+            <p>Medical & health products</p>
+            <div class="shop-meta">
+              <div class="rating">⭐ 4.9</div>
+              <div class="discount-badge">15% OFF</div>
+              <div class="distance">2.4 km</div>
+            </div>
+          </div>
+        </div>
+        <div class="shop-card">
+          <div class="shop-img" style="background:var(--lilacSoft)">🛁</div>
+          <div class="shop-info">
+            <h4>Pawsome Grooming</h4>
+            <p>Shampoos, brushes & kits</p>
+            <div class="shop-meta">
+              <div class="rating">⭐ 4.7</div>
+              <div class="distance">0.8 km</div>
+            </div>
+          </div>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="showScreen('home')"><div class="nav-bar"></div><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+        <div class="nav-item" onclick="showScreen('activity')"><div class="nav-bar"></div><div class="nav-icon">📋</div><div class="nav-label">Activity</div></div>
+        <div class="nav-item active"><div class="nav-bar"></div><div class="nav-icon">🛍️</div><div class="nav-label">Deals</div></div>
+        <div class="nav-item" onclick="showScreen('notifications')"><div class="nav-bar"></div><div class="nav-icon">🔔</div><div class="nav-label">Inbox</div></div>
+        <div class="nav-item" onclick="showScreen('profile')"><div class="nav-bar"></div><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 6: PRODUCT DETAIL
+    ════════════════════════════════════════════════════ -->
+    <div class="screen" id="screen-product">
+      <div class="status-bar"><span>9:41</span><div class="status-icons"><span>●●●●</span><span>WiFi</span><span>🔋</span></div></div>
+      <div class="screen-body" style="padding-bottom:0">
+        <div class="product-back">
+          <div class="back-btn" onclick="showScreen('marketplace')">‹</div>
+          <div style="font-size:14px;font-weight:700;color:var(--ink950)">Product Details</div>
+          <div class="product-actions">
+            <div class="back-btn">📦</div>
+            <div class="back-btn">🛒</div>
+          </div>
+        </div>
+        <div class="product-img-carousel">
+          🐾
+          <div class="img-pagination">
+            <span class="active"></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="seller-row">
+          <div class="seller-avatar">🐾</div>
+          <div class="seller-info"><h4>PetMart BD</h4><p>Health & Nutrition</p></div>
+          <span style="color:var(--ink300)">›</span>
+        </div>
+        <div class="product-info">
+          <h2>Royal Canin Adult Dog Food — 2kg Bag</h2>
+          <div class="price-row">
+            <span class="price-original">৳1,200</span>
+            <span class="price-badge">-15%</span>
+            <span class="price-current">৳1,020</span>
+          </div>
+        </div>
+        <div class="shipping-card">
+          <h4>Shipping & Returns</h4>
+          <div class="shipping-row"><span>🚚</span><p>Delivered in 1-2 days via PetFolio Express</p></div>
+          <div class="shipping-row"><span>↩️</span><p>7-day returns on eligible items</p></div>
+          <div class="shipping-row" style="margin-bottom:0"><span>🛡️</span><p>Verified seller · Secure checkout</p></div>
+        </div>
+        <div style="margin:12px 16px 0">
+          <div class="section-header" style="padding:0 0 8px"><h3>Product Details</h3></div>
+          <p style="font-size:13px;color:var(--ink500);line-height:1.6">Complete & balanced nutrition for adult dogs. High-quality proteins support lean muscle mass. Optimal fibre blend for digestive health.</p>
+        </div>
+        <div style="height:80px"></div>
+      </div>
+      <!-- Sticky CTA — outside scroll -->
+      <div class="product-sticky-cta">
+        <button class="btn-outline" onclick="showScreen('checkout')">Add to Cart</button>
+        <button class="btn-solid" onclick="toggleCustomSheet()">Buy Now</button>
+      </div>
+
+      <!-- Customization Sheet -->
+      <div class="sheet-overlay hidden" id="custom-sheet">
+        <div class="sheet-panel">
+          <div class="sheet-handle"></div>
+          <div style="padding:0 16px">
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 0 8px;border-bottom:1px solid var(--line);">
+              <div style="font-size:36px">🐾</div>
+              <div><h4 style="font-size:13px;font-weight:700;color:var(--ink950)">Royal Canin Adult</h4><p style="font-size:12px;color:var(--ink500)">2kg Bag</p></div>
+            </div>
+          </div>
+          <div class="custom-sheet-content">
+            <h3>Customize as per your choice</h3>
+            <div class="variant-option selected">
+              <div class="vo-left"><div class="radio checked"></div><span>2kg Bag</span></div>
+              <span class="complete-badge">SELECTED</span>
+            </div>
+            <div class="variant-option">
+              <div class="vo-left"><div class="radio"></div><span>4kg Bag</span></div>
+              <span style="font-size:13px;color:var(--ink500)">৳1,920</span>
+            </div>
+            <div class="variant-option">
+              <div class="vo-left"><div class="radio"></div><span>10kg Bag</span></div>
+              <span style="font-size:13px;color:var(--ink500)">৳4,600</span>
+            </div>
+            <div class="qty-row">
+              <p>Quantity</p>
+              <div class="qty-control">
+                <button>−</button>
+                <span>1</span>
+                <button>+</button>
+              </div>
+            </div>
+            <button class="confirm-btn" onclick="toggleCustomSheet();showScreen('checkout')">
+              <span>Confirm & Checkout</span>
+              <span><span class="original-price">৳1,200</span>৳1,020 →</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 7: CHECKOUT
+    ════════════════════════════════════════════════════ -->
+    <div class="screen" id="screen-checkout">
+      <div class="status-bar"><span>9:41</span><div class="status-icons"><span>●●●●</span><span>WiFi</span><span>🔋</span></div></div>
+      <div style="padding:10px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);background:var(--surface0)">
+        <div class="back-btn" onclick="showScreen('product')">‹</div>
+        <h2 style="font-size:17px;font-weight:800;color:var(--ink950)">Checkout</h2>
+      </div>
+      <div class="screen-body">
+        <div style="height:12px"></div>
+        <!-- Deliver To -->
+        <div class="checkout-section">
+          <div class="cs-header"><h3>Deliver To</h3><span onclick="">Manage Address</span></div>
+          <div class="card" style="margin:0;padding:12px 14px">
+            <div class="address-box">
+              <div class="addr-icon">🏠</div>
+              <div class="addr-text">
+                <p>Home</p>
+                <span>House 12, Road 5, Block A, Mirpur 12, Dhaka</span>
+              </div>
+            </div>
+            <div style="margin-top:10px;background:var(--surface2);border:1.5px dashed var(--line2);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--ink300);text-align:center;">
+              📝 Additional instructions (optional)
+            </div>
+          </div>
+        </div>
+        <!-- Your Products -->
+        <div class="checkout-section">
+          <div class="cs-header"><h3>Your Products</h3></div>
+          <div class="card" style="margin:0">
+            <div style="font-size:12px;font-weight:700;color:var(--ink500);margin-bottom:10px;display:flex;align-items:center;gap:6px"><span>🐾</span> PetMart BD</div>
+            <div class="cart-item-row">
+              <div class="cart-item-img">🐾</div>
+              <div class="cart-item-info">
+                <h4>Royal Canin Adult Dog Food</h4>
+                <p>2kg Bag</p>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+                  <div class="qty-stepper">
+                    <div class="qty-btn">−</div>
+                    <div class="qty-num">1</div>
+                    <div class="qty-btn">+</div>
+                  </div>
+                  <div style="text-align:right"><span style="font-size:12px;color:var(--ink300);text-decoration:line-through">৳1,200</span><br><span style="font-size:15px;font-weight:800;color:var(--ink950)">৳1,020</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Apply Promo -->
+        <div class="checkout-section">
+          <div class="card" style="margin:0;padding:12px 14px">
+            <div class="promo-row">
+              <span>🏷️</span>
+              <p>Apply Promo Code</p>
+              <div class="arrow">›</div>
+            </div>
+          </div>
+        </div>
+        <!-- Pay via -->
+        <div class="checkout-section">
+          <div class="cs-header"><h3>Pay via</h3></div>
+          <div class="card" style="margin:0;padding:12px 14px">
+            <div class="pay-via-row">
+              <div class="pv-icon">💳</div>
+              <div class="pv-info"><h4>Credit / Debit Card</h4><p>Visa •••• 4242</p></div>
+              <span style="color:var(--ink300)">›</span>
+            </div>
+          </div>
+        </div>
+        <!-- Order Summary -->
+        <div class="checkout-section">
+          <div class="cs-header"><h3>Order Summary</h3></div>
+          <div class="card" style="margin:0;padding:12px 14px">
+            <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;color:var(--ink700)"><span>Subtotal</span><span>৳1,020</span></div>
+            <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;color:var(--ink700)"><span>Shipping</span><span>৳50</span></div>
+            <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;color:var(--mint700,#198C6E);font-weight:700"><span>Discount</span><span>−৳180</span></div>
+            <div style="height:1px;background:var(--line);margin:8px 0"></div>
+            <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:800;color:var(--ink950)"><span>Total</span><span>৳890</span></div>
+          </div>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+      <!-- Bottom -->
+      <div style="background:var(--surface0);border-top:1px solid var(--line)">
+        <div class="savings-banner">
+          <span>🎉</span>
+          <p>You are saving ৳180 on this order!</p>
+        </div>
+        <button class="place-order-btn">
+          <span>Place Order</span>
+          <span>৳890 →</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 8: ACTIVITY
+    ════════════════════════════════════════════════════ -->
+    <div class="screen" id="screen-activity">
+      <div class="status-bar"><span>9:41</span><div class="status-icons"><span>●●●●</span><span>WiFi</span><span>🔋</span></div></div>
+      <div style="padding:8px 16px 4px;background:var(--surface0);border-bottom:1px solid var(--line)">
+        <h2 style="font-size:22px;font-weight:800;color:var(--ink950)">Activity</h2>
+      </div>
+      <div class="screen-body">
+        <div class="chip-row" style="padding-top:12px">
+          <div class="chip active">All</div>
+          <div class="chip">Orders</div>
+          <div class="chip">Appointments</div>
+          <div class="chip">Care Logs</div>
+          <div class="chip">Matches</div>
+        </div>
+
+        <div style="padding:0 16px 4px;font-size:12px;font-weight:700;color:var(--ink500);text-transform:uppercase;letter-spacing:.05em">Today</div>
+        <div class="activity-item">
+          <div class="ai-header"><span class="ai-type">🛍️ ORDER</span><span class="ai-date">Jun 8, 10:32 AM</span></div>
+          <div class="route-dots">
+            <div class="route-dot-row"><div class="dot pickup"></div><p style="font-size:13px;color:var(--ink700)">PetMart BD · Royal Canin 2kg</p></div>
+            <div style="margin-left:4px"><div class="dot-line"></div></div>
+            <div class="route-dot-row"><div class="dot dest"></div><p style="font-size:13px;color:var(--ink700)">Home — Mirpur 12</p></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px;align-items:center">
+            <div style="background:var(--sunnySoft);color:var(--sunny700,#C68B0F);border-radius:8px;padding:3px 8px;font-size:11px;font-weight:700">In Transit 🚚</div>
+            <div class="ai-price">৳890</div>
+          </div>
+          <div class="ai-actions">
+            <div class="ai-action-btn">Track Order</div>
+            <div class="ai-action-btn primary">Reorder</div>
+          </div>
+        </div>
+
+        <div style="padding:4px 16px 4px;font-size:12px;font-weight:700;color:var(--ink500);text-transform:uppercase;letter-spacing:.05em">Yesterday</div>
+        <div class="activity-item">
+          <div class="ai-header"><span class="ai-type">💉 APPOINTMENT</span><span class="ai-date">Jun 7, 3:00 PM</span></div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="font-size:28px">🏥</div>
+            <div><p style="font-size:13px;font-weight:700;color:var(--ink950)">Deworming — Dr. Alam's Clinic</p><p style="font-size:12px;color:var(--ink500)">Biscuit · 30 min session</p></div>
+          </div>
+          <div class="ai-actions">
+            <div class="ai-action-btn">View Record</div>
+            <div class="ai-action-btn primary">Book Again</div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="ai-header"><span class="ai-type">🌟 CARE LOG</span><span class="ai-date">Jun 7</span></div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="font-size:28px">🐶</div>
+            <div><p style="font-size:13px;font-weight:700;color:var(--ink950)">All 6 tasks completed!</p><p style="font-size:12px;color:var(--ink500)">Streak extended to 11 days 🔥</p></div>
+            <div class="ai-price" style="font-size:14px;color:var(--mint)">+50 XP</div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="ai-header"><span class="ai-type">💜 MATCH</span><span class="ai-date">Jun 7, 11:20 AM</span></div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="font-size:28px">🐕</div>
+            <div><p style="font-size:13px;font-weight:700;color:var(--ink950)">Matched with Buddy!</p><p style="font-size:12px;color:var(--ink500)">Golden Retriever · 0.8 km away</p></div>
+          </div>
+          <div class="ai-actions">
+            <div class="ai-action-btn primary">Start Chat</div>
+          </div>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="showScreen('home')"><div class="nav-bar"></div><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+        <div class="nav-item active"><div class="nav-bar"></div><div class="nav-icon">📋</div><div class="nav-label">Activity</div></div>
+        <div class="nav-item" onclick="showScreen('marketplace')"><div class="nav-bar"></div><div class="nav-icon">🛍️</div><div class="nav-label">Deals</div></div>
+        <div class="nav-item" onclick="showScreen('notifications')"><div class="nav-bar"></div><div class="nav-icon">🔔</div><div class="nav-label">Inbox</div></div>
+        <div class="nav-item" onclick="showScreen('profile')"><div class="nav-bar"></div><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 9: NOTIFICATIONS / INBOX
+    ════════════════════════════════════════════════════ -->
+    <div class="screen" id="screen-notifications">
+      <div class="status-bar"><span>9:41</span><div class="status-icons"><span>●●●●</span><span>WiFi</span><span>🔋</span></div></div>
+      <div style="padding:8px 16px 4px;background:var(--surface0)">
+        <h2 style="font-size:22px;font-weight:800;color:var(--ink950)">Inbox</h2>
+      </div>
+      <div class="tab-bar" style="background:var(--surface0)">
+        <div class="tab-item active" id="tab-updates" onclick="switchTab('updates')">Updates</div>
+        <div class="tab-item" id="tab-promos" onclick="switchTab('promos')">Promotions</div>
+      </div>
+      <div class="screen-body" id="notif-updates">
+        <div class="notif-item">
+          <div class="notif-icon" style="background:var(--sunnySoft)">🔥</div>
+          <div class="notif-text" style="flex:1">
+            <h4>Streak Alert!</h4>
+            <p>Log Biscuit's evening feed to keep your 12-day streak alive.</p>
+            <div class="notif-time">5 mins ago</div>
+          </div>
+          <div class="notif-dot"></div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon" style="background:var(--lilacSoft)">💜</div>
+          <div class="notif-text" style="flex:1">
+            <h4>New Match!</h4>
+            <p>Buddy from Mirpur liked Biscuit. Start a conversation!</p>
+            <div class="notif-time">2 hours ago</div>
+          </div>
+          <div class="notif-dot"></div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon" style="background:var(--mintSoft)">🚚</div>
+          <div class="notif-text" style="flex:1">
+            <h4>Order Shipped</h4>
+            <p>Your Royal Canin order is on the way. Arriving today by 6 PM.</p>
+            <div class="notif-time">3 hours ago</div>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon" style="background:var(--poppySoft)">💉</div>
+          <div class="notif-text" style="flex:1">
+            <h4>Vaccination Reminder</h4>
+            <p>Biscuit's rabies booster is due in 3 days. Book Dr. Alam's Clinic.</p>
+            <div class="notif-time">Yesterday</div>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon" style="background:var(--skySoft)">💬</div>
+          <div class="notif-text" style="flex:1">
+            <h4>New Comment</h4>
+            <p>rocky_dad commented: "Biscuit is so adorable! 😍"</p>
+            <div class="notif-time">Yesterday</div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-body" id="notif-promos" style="display:none">
+        <div class="notif-item">
+          <div class="notif-icon" style="background:var(--tangerineSoft)">🏷️</div>
+          <div class="notif-text" style="flex:1">
+            <h4>30% OFF Pet Food Today!</h4>
+            <p>Use code PETLOVE30 on your next order. Valid until midnight.</p>
+            <div class="notif-time">5:10 PM, Jun 8</div>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon" style="background:var(--mintSoft)">🪮</div>
+          <div class="notif-text" style="flex:1">
+            <h4>Grooming Kit Flash Sale</h4>
+            <p>Premium grooming kits from Pawsome starting at ৳450. Ends in 2h.</p>
+            <div class="notif-time">4:00 PM, Jun 8</div>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon" style="background:var(--sunnySoft)">⭐</div>
+          <div class="notif-text" style="flex:1">
+            <h4>Level Up Reward!</h4>
+            <p>Biscuit reached Level 5! Claim your 100 bonus XP and a free treat coupon.</p>
+            <div class="notif-time">Jun 7</div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="showScreen('home')"><div class="nav-bar"></div><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+        <div class="nav-item" onclick="showScreen('activity')"><div class="nav-bar"></div><div class="nav-icon">📋</div><div class="nav-label">Activity</div></div>
+        <div class="nav-item" onclick="showScreen('marketplace')"><div class="nav-bar"></div><div class="nav-icon">🛍️</div><div class="nav-label">Deals</div></div>
+        <div class="nav-item active"><div class="nav-bar"></div><div class="nav-icon">🔔</div><div class="nav-label">Inbox</div></div>
+        <div class="nav-item" onclick="showScreen('profile')"><div class="nav-bar"></div><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 10: PROFILE
+    ════════════════════════════════════════════════════ -->
+    <div class="screen" id="screen-profile">
+      <div class="status-bar" style="background:linear-gradient(160deg,var(--tangerine),var(--tangerine700));color:#fff">
+        <span>9:41</span>
+        <div class="status-icons"><span>●●●●</span><span>WiFi</span><span>🔋</span></div>
+      </div>
+      <div class="screen-body">
+        <div class="profile-header">
+          <div class="profile-user-row">
+            <div class="profile-avatar">👤</div>
+            <div class="profile-user-info">
+              <h2>Salman Reza</h2>
+              <p>01709279556 · ⭐ 4.9</p>
+            </div>
+          </div>
+          <div class="level-card">
+            <div class="lc-top">
+              <div class="level-badge">🏆 Level 5 — Gold</div>
+              <p>340 / 500 XP</p>
+            </div>
+            <div class="level-bar"><div class="level-bar-fill"></div></div>
+            <div class="lc-bottom"><p>160 XP to Platinum</p><p>🔥 12-day streak</p></div>
+            <div class="level-quick-links">
+              <div class="lql-btn">XP Deals ›</div>
+              <div class="lql-btn">Achievements ›</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:8px;background:var(--surface1)"></div>
+
+        <div class="settings-section">
+          <div class="settings-label">My Pets</div>
+          <div class="settings-item">
+            <div class="si-icon">🐶</div>
+            <div class="si-info"><h4>Biscuit</h4><p>Golden Retriever · 2 years</p></div>
+            <div class="si-chevron">›</div>
+          </div>
+          <div class="settings-item" style="border-bottom:none">
+            <div class="si-icon" style="background:var(--surface2);border:2px dashed var(--line2)">➕</div>
+            <div class="si-info"><h4>Add Another Pet</h4><p>Up to 5 pets</p></div>
+            <div class="si-chevron">›</div>
+          </div>
+        </div>
+
+        <div style="height:8px;background:var(--surface1)"></div>
+
+        <div class="settings-section">
+          <div class="settings-label">Account</div>
+          <div class="settings-item">
+            <div class="si-icon">👤</div>
+            <div class="si-info"><h4>Edit Profile</h4><p>Name, photo, bio</p></div>
+            <div class="si-chevron">›</div>
+          </div>
+          <div class="settings-item">
+            <div class="si-icon mint">🏪</div>
+            <div class="si-info"><h4>My Shop</h4><p>Seller dashboard</p></div>
+            <div class="si-chevron">›</div>
+          </div>
+          <div class="settings-item">
+            <div class="si-icon lilac">📦</div>
+            <div class="si-info"><h4>My Orders</h4><p>Track & manage orders</p></div>
+            <div class="si-chevron">›</div>
+          </div>
+          <div class="settings-item" style="border-bottom:none">
+            <div class="si-icon" style="background:var(--skySoft)">📍</div>
+            <div class="si-info"><h4>Saved Addresses</h4><p>Home, Work, others</p></div>
+            <div class="si-chevron">›</div>
+          </div>
+        </div>
+
+        <div style="height:8px;background:var(--surface1)"></div>
+
+        <div class="settings-section">
+          <div class="settings-label">Offers</div>
+          <div class="settings-item">
+            <div class="si-icon" style="background:var(--sunnySoft)">🏷️</div>
+            <div class="si-info"><h4>Promo Codes</h4><p>View available offers</p></div>
+            <div class="si-chevron">›</div>
+          </div>
+          <div class="settings-item" style="border-bottom:none">
+            <div class="si-icon" style="background:var(--poppySoft)">🎁</div>
+            <div class="si-info"><h4>Refer & Earn</h4><p>Get 50 XP per referral</p></div>
+            <div class="si-chevron">›</div>
+          </div>
+        </div>
+
+        <div style="height:8px;background:var(--surface1)"></div>
+
+        <div class="settings-section">
+          <div class="settings-label">App</div>
+          <div class="settings-item">
+            <div class="si-icon" style="background:var(--surface2)">🌙</div>
+            <div class="si-info"><h4>Dark Mode</h4><p>Currently light</p></div>
+            <div style="width:44px;height:24px;background:var(--line2);border-radius:12px;position:relative;cursor:pointer"><div style="width:20px;height:20px;background:#fff;border-radius:10px;position:absolute;top:2px;left:2px;box-shadow:0 1px 4px rgba(0,0,0,.2)"></div></div>
+          </div>
+          <div class="settings-item" style="border-bottom:none">
+            <div class="si-icon" style="background:var(--poppySoft)">🚪</div>
+            <div class="si-info"><h4>Sign Out</h4><p></p></div>
+            <div class="si-chevron">›</div>
+          </div>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="showScreen('home')"><div class="nav-bar"></div><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+        <div class="nav-item" onclick="showScreen('activity')"><div class="nav-bar"></div><div class="nav-icon">📋</div><div class="nav-label">Activity</div></div>
+        <div class="nav-item" onclick="showScreen('marketplace')"><div class="nav-bar"></div><div class="nav-icon">🛍️</div><div class="nav-label">Deals</div></div>
+        <div class="nav-item" onclick="showScreen('notifications')"><div class="nav-bar"></div><div class="nav-icon">🔔</div><div class="nav-label">Inbox</div></div>
+        <div class="nav-item active"><div class="nav-bar"></div><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
+      </div>
+    </div>
+
+  </div><!-- phone-inner -->
+</div><!-- phone -->
+
+<script>
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    document.querySelectorAll('.screen-nav button').forEach((b, i) => {
+      const ids = ['home','care','social','matching','marketplace','product','checkout','activity','notifications','profile'];
+      b.classList.toggle('active', ids[i] === id);
+    });
+  }
+
+  function toggleSheet() {
+    const sheet = document.getElementById('all-features-sheet');
+    sheet.classList.toggle('hidden');
+  }
+
+  function toggleCustomSheet() {
+    const sheet = document.getElementById('custom-sheet');
+    sheet.classList.toggle('hidden');
+  }
+
+  function switchTab(tab) {
+    document.getElementById('tab-updates').classList.toggle('active', tab === 'updates');
+    document.getElementById('tab-promos').classList.toggle('active', tab === 'promos');
+    document.getElementById('notif-updates').style.display = tab === 'updates' ? 'block' : 'none';
+    document.getElementById('notif-promos').style.display = tab === 'promos' ? 'block' : 'none';
+  }
+
+  // Chip interactivity
+  document.querySelectorAll('.chip-row').forEach(row => {
+    row.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        row.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+      });
+    });
+  });
+</script>
+</body>
+</html>

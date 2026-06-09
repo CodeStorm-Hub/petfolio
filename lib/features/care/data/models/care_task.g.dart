@@ -22,6 +22,9 @@ _CareTask _$CareTaskFromJson(Map<String, dynamic> json) => _CareTask(
   categoryIcon: json['category_icon'] as String?,
   createdAt: DateTime.parse(json['created_at'] as String),
   updatedAt: DateTime.parse(json['updated_at'] as String),
+  anchorDate: json['anchor_date'] == null
+      ? null
+      : DateTime.parse(json['anchor_date'] as String),
 );
 
 Map<String, dynamic> _$CareTaskToJson(_CareTask instance) => <String, dynamic>{
@@ -38,6 +41,7 @@ Map<String, dynamic> _$CareTaskToJson(_CareTask instance) => <String, dynamic>{
   'category_icon': instance.categoryIcon,
   'created_at': instance.createdAt.toIso8601String(),
   'updated_at': instance.updatedAt.toIso8601String(),
+  'anchor_date': instance.anchorDate?.toIso8601String(),
 };
 
 const _$CareTaskTypeEnumMap = {

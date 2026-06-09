@@ -11,7 +11,9 @@ enum ProductCategory {
   toys,
   treats,
   health,
-  grooming;
+  grooming,
+  beds,
+  apparel;
 
   String get label => switch (this) {
         ProductCategory.all      => 'All',
@@ -21,6 +23,8 @@ enum ProductCategory {
         ProductCategory.treats   => 'Treats',
         ProductCategory.health   => 'Health',
         ProductCategory.grooming => 'Grooming',
+        ProductCategory.beds     => 'Beds',
+        ProductCategory.apparel  => 'Apparel',
       };
 
   static ProductCategory fromString(String s) => values.firstWhere(
@@ -57,6 +61,9 @@ class Product {
     required this.imageUrls,
     required this.inventoryCount,
     this.subPriceCentsDb,
+    this.rating,
+    this.reviewCount,
+    this.createdAt,
   });
 
   final String          id;
@@ -82,6 +89,15 @@ class Product {
 
   /// Vendor-set subscription price. Null = fall back to the computed 12%-off value.
   final int? subPriceCentsDb;
+
+  /// Average star rating (0.0 – 5.0). Null = not yet rated.
+  final double? rating;
+
+  /// Total number of reviews. Null = no reviews yet.
+  final int? reviewCount;
+
+  /// Row creation timestamp — used as keyset cursor for pagination.
+  final DateTime? createdAt;
 
   // ── Computed ───────────────────────────────────────────────────────────────
 
@@ -115,6 +131,11 @@ class Product {
         imageUrls:        (json['image_urls'] as List<dynamic>?)?.cast<String>() ?? [],
         inventoryCount:   (json['inventory_count'] as int?) ?? 0,
         subPriceCentsDb:  json['sub_price_cents'] as int?,
+        rating:           (json['rating'] as num?)?.toDouble(),
+        reviewCount:      json['review_count'] as int?,
+        createdAt:        json['created_at'] != null
+            ? DateTime.tryParse(json['created_at'] as String)
+            : null,
       );
 
   static ProductGlyphType _parseGlyph(String s) => switch (s) {
@@ -146,6 +167,8 @@ class Product {
         'image_urls':       imageUrls,
         'inventory_count':  inventoryCount,
         if (subPriceCentsDb != null) 'sub_price_cents': subPriceCentsDb,
+        if (rating != null) 'rating': rating,
+        if (reviewCount != null) 'review_count': reviewCount,
       };
 
   factory Product.fromStorageJson(Map<String, dynamic> json) => Product(
@@ -165,6 +188,8 @@ class Product {
         imageUrls:       (json['image_urls'] as List<dynamic>?)?.cast<String>() ?? [],
         inventoryCount:  (json['inventory_count'] as int?) ?? 0,
         subPriceCentsDb: json['sub_price_cents'] as int?,
+        rating:          (json['rating'] as num?)?.toDouble(),
+        reviewCount:     json['review_count'] as int?,
       );
 
   static Color _hexColor(String hex) {

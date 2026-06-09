@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
@@ -45,6 +47,10 @@ class DailyRoutineState {
         badgeTypes: badgeTypes ?? this.badgeTypes,
       );
 }
+
+const _kCompletionCountKey = 'care_completion_count';
+const _kReviewRequestedKey = 'care_review_requested';
+const _kReviewThreshold = 3;
 
 @Riverpod(keepAlive: true)
 class CareDashboard extends _$CareDashboard {
@@ -123,17 +129,27 @@ class CareDashboard extends _$CareDashboard {
   CareTaskRepository get _repo => ref.read(careTaskRepositoryProvider);
 
   void _applyBadgeDelta(String petId, Set<String> next) {
+    final newBadges = next.difference(_badgeBaseline);
+    _badgeBaseline = Set<String>.from(next);
+
+    if (newBadges.isEmpty) return;
+
     if (!_hydratedBadgePets.contains(petId)) {
+      // First load for this pet in this session: coalesce all new badges into
+      // a single notification to avoid a storm of snackbars on cold start.
       _hydratedBadgePets.add(petId);
-      _badgeBaseline = Set<String>.from(next);
+      if (newBadges.length == 1) {
+        AppSnackBar.showBadgeUnlocked(newBadges.first);
+      } else {
+        AppSnackBar.show('${newBadges.length} badges unlocked! 🏆');
+      }
       return;
     }
-    final newlyHasHero =
-        next.contains('7_day_hero') && !_badgeBaseline.contains('7_day_hero');
-    if (newlyHasHero) {
-      AppSnackBar.showBadgeUnlocked();
+
+    // Subsequent loads: show each badge individually (incremental unlock).
+    for (final badge in newBadges) {
+      AppSnackBar.showBadgeUnlocked(badge);
     }
-    _badgeBaseline = Set<String>.from(next);
   }
 
   Future<void> _load(String petId, DateTime date) async {
@@ -244,6 +260,12 @@ class CareDashboard extends _$CareDashboard {
     final prev = _routine.tasks.value;
     if (prev == null) return;
 
+    final localTask = prev.firstWhere(
+      (t) => t.id == taskId,
+      orElse: () => throw StateError('Task $taskId not in dashboard state'),
+    );
+    final careType = _repo.taskTypeToCareType(localTask.taskType);
+
     final nextList = prev
         .map((t) => t.id == taskId
             ? t.copyWith(
@@ -267,7 +289,9 @@ class CareDashboard extends _$CareDashboard {
         taskId,
         isCompleted: isCompleted,
         petId: petId,
+        careType: careType,
         forDay: _routine.selectedDate,
+        localTask: localTask,
       );
       if (ref.read(activePetIdProvider) != petId) return;
       final current = _routine.tasks.value ?? prev;
@@ -282,7 +306,10 @@ class CareDashboard extends _$CareDashboard {
         badgeTypes: _badgeBaseline,
       );
       state = _routine;
-      if (isCompleted) ref.invalidate(petAwardsSummaryProvider(petId));
+      if (isCompleted) {
+        ref.invalidate(petAwardsSummaryProvider(petId));
+        _maybeRequestReview();
+      }
       if (outcome.badgeUnlocked && outcome.unlockedBadges.isNotEmpty) {
         for (final badge in outcome.unlockedBadges) {
           AppSnackBar.showBadgeUnlocked(badge);
@@ -296,7 +323,7 @@ class CareDashboard extends _$CareDashboard {
         _routine = _routine.copyWith(badgeTypes: _badgeBaseline);
         state = _routine;
       }
-      // State is already correctly synced from outcome.task above.
+          // State is already correctly synced from outcome.task above.
       // Streak updates arrive via careStreakRealtimeProvider.
       // A full _load() reload is intentionally skipped here to avoid
       // wiping and re-fetching the entire dashboard on every tap.
@@ -310,6 +337,23 @@ class CareDashboard extends _$CareDashboard {
         );
         state = _routine;
         AppSnackBar.showError(e);
+      }
+    }
+  }
+
+  Future<void> _maybeRequestReview() async {
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyRequested = prefs.getBool(_kReviewRequestedKey) ?? false;
+    if (alreadyRequested) return;
+
+    final count = (prefs.getInt(_kCompletionCountKey) ?? 0) + 1;
+    await prefs.setInt(_kCompletionCountKey, count);
+
+    if (count >= _kReviewThreshold) {
+      final review = InAppReview.instance;
+      if (await review.isAvailable()) {
+        await review.requestReview();
+        await prefs.setBool(_kReviewRequestedKey, true);
       }
     }
   }

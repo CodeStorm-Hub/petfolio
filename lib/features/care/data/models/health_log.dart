@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show DateUtils;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'health_log.freezed.dart';
@@ -53,7 +54,9 @@ abstract class HealthLog with _$HealthLog {
 
   bool get followUpOverdue {
     if (followUpDate == null) return false;
-    return followUpDate!.isBefore(DateTime.now());
+    final dueDay = DateUtils.dateOnly(followUpDate!.toLocal());
+    final today = DateUtils.dateOnly(DateTime.now().toLocal());
+    return dueDay.isBefore(today);
   }
 
   int get daysUntilFollowUp {

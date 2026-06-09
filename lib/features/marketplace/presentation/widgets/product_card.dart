@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_snack_bar.dart';
 import '../../data/models/product.dart';
 import '../controllers/cart_controller.dart';
 import 'product_glyph.dart';
+import 'star_rating_widget.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ProductCard — used in the 2-column grid on the shop screen
@@ -177,6 +180,34 @@ class _ProductTile extends StatelessWidget {
                 ),
               ),
             ),
+            // Rating badge
+            if (product.rating != null && product.rating! > 0)
+              Positioned(
+                top: 8,
+                left: product.subscribable ? 88 : 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    color: Colors.white.withAlpha(242),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.star_rounded, size: 12, color: AppColors.sunny700),
+                      const SizedBox(width: 2),
+                      Text(
+                        product.rating!.toStringAsFixed(1),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             // "SUB · SAVE 12%" badge
             if (product.subscribable)
               Positioned(
@@ -203,7 +234,7 @@ class _ProductTile extends StatelessWidget {
               top: 8,
               right: 8,
               child: GestureDetector(
-                onTap: () {},
+                onTap: () => AppSnackBar.show('Wishlist coming soon 💛'),
                 behavior: HitTestBehavior.opaque,
                 child: Container(
                   width: 30,
@@ -267,6 +298,24 @@ class _ProductMeta extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
+        if (product.rating != null && product.rating! > 0)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(
+              children: [
+                StarRatingWidget(rating: product.rating!, size: 12),
+                if (product.reviewCount != null && product.reviewCount! > 0) ...[
+                  const SizedBox(width: 4),
+                  Text(
+                    '(${product.reviewCount})',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+              ],
+            ),
+          ),
         Row(
           children: [
             Text(

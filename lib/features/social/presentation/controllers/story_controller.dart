@@ -72,4 +72,15 @@ class Stories extends _$Stories {
       rethrow;
     }
   }
+
+  Future<void> sendReaction({
+    required String storyId,
+    required String emoji,
+  }) async {
+    try {
+      await _repo.sendReaction(storyId: storyId, emoji: emoji);
+    } catch (e) {
+      AppSnackBar.showError(e);
+    }
+  }
 }

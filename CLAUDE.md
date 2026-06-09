@@ -7,21 +7,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Petfolio** is a Flutter mobile app combining a social network, pet discovery/matching platform, health tracker, and e-commerce marketplace. It uses **Supabase** for backend authentication and data, **Riverpod** for state management, **Go Router** for navigation, and **Stripe** for payments.
 
 ## Petfolio Project Context
-- **Stack**: Flutter, Riverpod (Generator), GoRouter, Supabase.
+- **Stack**: Flutter, Riverpod (Generator — `@riverpod` annotations, `build_runner` required), GoRouter, Supabase.
 - **Architecture**: Feature-first (e.g., `lib/features/<feature_name>/`).
 - **Styling**: Material 3, Adaptive Design. No hardcoded colors; use `AppTheme` and `AppColors`.
+- **State**: All state via Riverpod `@riverpod`/`@notifier` providers. Do NOT use `ChangeNotifier`, `ValueNotifier`, or `StreamBuilder` directly.
+
+## Key Files
+- Entry point: `lib/main.dart`
+- Router: `lib/core/router.dart`
+- Theme / colors: `lib/core/theme/` — `app_theme.dart`, `app_colors.dart`
+- Features: `lib/features/<feature>/` — each has `data/`, `domain/`, `presentation/`
+- Coding standards: `.claude/flutter-rules.md` (Dart style, layout, theming rules)
 
 ## Claude Code Rules
 - **Progressive Disclosure**: Only read the files explicitly required for the immediate task. Do not scan the entire `lib/` folder.
 - **Conciseness**: Keep explanations brief. Do not output raw markdown for unchanged code.
-- **Verification**: Always run `dart analyze` and `flutter test` after making changes.
+- **Verification**: Always run `flutter analyze` and `flutter test` after making changes.
 - **No Mock Data**: Always bind UI directly to Supabase schemas or Riverpod controllers.
 
 ## Development Setup
 
 ### Prerequisites
-- Flutter 3.11.5+ SDK installed
-- Dart 3.11.5+
+- Flutter 3.22.0+ SDK installed
+- Dart 3.4.0+
 - Android/iOS development tools (for emulator/device builds)
 
 ### Installation
@@ -63,12 +71,12 @@ flutter run
 ### Code Generation
 Run after modifying any `@freezed`, `@JsonSerializable`, or `@riverpod` annotated class:
 ```bash
-flutter pub run build_runner build --delete-conflicting-outputs
+dart run build_runner build --delete-conflicting-outputs
 ```
 
 Watch mode:
 ```bash
-flutter pub run build_runner watch
+dart run build_runner watch
 ```
 
 ### Static Analysis

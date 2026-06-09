@@ -42,11 +42,8 @@ class NutritionNotifier extends Notifier<NutritionState> {
   HealthRepository get _repo => ref.read(healthRepositoryProvider);
 
   Future<void> _load(String petId) async {
-    state = state.copyWith(history: const AsyncLoading());
     state = state.copyWith(
-      history: await AsyncValue.guard(
-        () => _repo.fetchWeightHistory(petId),
-      ),
+      history: await AsyncValue.guard(() => _repo.fetchWeightHistory(petId)),
     );
   }
 

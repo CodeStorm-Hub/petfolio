@@ -7,6 +7,21 @@ import '../../data/models/chat_message.dart';
 import '../../data/repositories/matching_repository.dart';
 import 'matches_inbox_controller.dart';
 
+/// Tracks which thread IDs have an actively-typing remote participant.
+final chatTypingStateProvider =
+    NotifierProvider<_ChatTypingStateNotifier, Map<String, bool>>(
+  _ChatTypingStateNotifier.new,
+);
+
+class _ChatTypingStateNotifier extends Notifier<Map<String, bool>> {
+  @override
+  Map<String, bool> build() => {};
+
+  void set(String threadId, {required bool typing}) {
+    state = {...state, threadId: typing};
+  }
+}
+
 typedef ChatConversationArgs = ({
   String threadId,
   String? matchId,
@@ -28,6 +43,9 @@ class ChatConversationController extends AsyncNotifier<List<ChatMessage>> {
   String? _resolvedThreadId;
   bool _hasMore = true;
   bool _loadingOlder = false;
+
+  RealtimeChannel? _typingChannel;
+  Timer? _typingClearTimer;
 
   String get effectiveThreadId => _resolvedThreadId ?? arg.threadId;
   bool get hasMore => _hasMore;
@@ -66,6 +84,8 @@ class ChatConversationController extends AsyncNotifier<List<ChatMessage>> {
     );
     if (initialMessages.length < 50) _hasMore = false;
 
+    unawaited(_markInboundRead(initialMessages));
+
     final client = Supabase.instance.client;
     final channel = client
         .channel('public:chat_messages:thread:$_resolvedThreadId')
@@ -84,16 +104,69 @@ class ChatConversationController extends AsyncNotifier<List<ChatMessage>> {
             final current = state.value;
             if (current != null && !current.any((m) => m.id == msg.id)) {
               state = AsyncValue.data([...current, msg]);
+              unawaited(_markInboundRead([msg]));
             }
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'chat_messages',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'thread_id',
+            value: _resolvedThreadId!,
+          ),
+          callback: (payload) {
+            final row = Map<String, dynamic>.from(payload.newRecord);
+            final updated = ChatMessage.fromJson(row);
+            final current = state.value;
+            if (current == null) return;
+            state = AsyncValue.data([
+              for (final m in current)
+                m.id == updated.id ? updated : m,
+            ]);
+          },
+        )
+        .subscribe();
+
+    final myUserId = client.auth.currentUser?.id;
+    _typingChannel = client
+        .channel('typing:$_resolvedThreadId')
+        .onBroadcast(
+          event: 'typing',
+          callback: (payload) {
+            final senderId = payload['user_id'] as String?;
+            if (senderId == null || senderId == myUserId) return;
+            ref
+                .read(chatTypingStateProvider.notifier)
+                .set(_resolvedThreadId!, typing: true);
+            _typingClearTimer?.cancel();
+            _typingClearTimer = Timer(const Duration(seconds: 3), () {
+              ref
+                  .read(chatTypingStateProvider.notifier)
+                  .set(_resolvedThreadId!, typing: false);
+            });
           },
         )
         .subscribe();
 
     ref.onDispose(() {
       unawaited(channel.unsubscribe());
+      unawaited(_typingChannel?.unsubscribe());
+      _typingClearTimer?.cancel();
     });
 
     return initialMessages;
+  }
+
+  void broadcastTyping() {
+    final myId = Supabase.instance.client.auth.currentUser?.id;
+    if (myId == null || _resolvedThreadId == null) return;
+    _typingChannel?.sendBroadcastMessage(
+      event: 'typing',
+      payload: {'user_id': myId},
+    );
   }
 
   /// Loads the next page of older messages, prepending them to the current list.
@@ -143,5 +216,24 @@ class ChatConversationController extends AsyncNotifier<List<ChatMessage>> {
     final sent = await repo.sendMessage(threadId: threadId, content: trimmed);
     state = AsyncData([...previous, sent]);
     ref.invalidate(matchesInboxControllerProvider(arg.actorPetId));
+  }
+
+  Future<void> _markInboundRead(List<ChatMessage> messages) async {
+    final myId = Supabase.instance.client.auth.currentUser?.id;
+    if (myId == null || _resolvedThreadId == null) return;
+    final hasUnreadInbound = messages.any(
+      (m) => m.senderId != myId && !m.isRead,
+    );
+    if (!hasUnreadInbound) return;
+
+    final repo = ref.read(matchingRepositoryProvider);
+    await repo.markMessagesAsRead(_resolvedThreadId!);
+
+    final current = state.value;
+    if (current == null) return;
+    state = AsyncValue.data([
+      for (final m in current)
+        m.senderId != myId ? m.copyWith(isRead: true) : m,
+    ]);
   }
 }

@@ -297,6 +297,18 @@ class MatchingSupabaseDataSource {
 
     return ChatMessage.fromJson(Map<String, dynamic>.from(row));
   }
+
+  Future<void> markMessagesAsRead(String threadId) async {
+    final uid = currentUserId;
+    if (uid == null) return;
+
+    await _client
+        .from('chat_messages')
+        .update({'is_read': true})
+        .eq('thread_id', threadId)
+        .neq('sender_id', uid)
+        .eq('is_read', false);
+  }
 }
 
 class MatchInboxSnapshot {

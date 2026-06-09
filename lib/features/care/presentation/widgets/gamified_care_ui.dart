@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,7 +9,6 @@ import 'package:petfolio/core/widgets/widgets.dart';
 
 import '../../../../core/models/pet.dart';
 import '../../data/models/care_task.dart' show CareFrequency;
-import '../../data/models/care_task_log.dart';
 import '../../data/models/pet_awards_summary.dart';
 import '../../data/models/pet_level.dart';
 import '../controllers/care_dashboard_controller.dart';
@@ -31,13 +31,16 @@ class CareGamifiedHeader extends ConsumerStatefulWidget {
 }
 
 class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController _coinCtrl;
   late final AnimationController _pulseCtrl;
+  late final ConfettiController _confettiCtrl;
+  int? _lastLevel;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _coinCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 4500),
@@ -46,13 +49,38 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
       vsync: this,
       duration: const Duration(milliseconds: 2200),
     )..repeat();
+    _confettiCtrl = ConfettiController(
+      duration: const Duration(seconds: 2),
+    );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached ||
+        state == AppLifecycleState.hidden) {
+      _coinCtrl.stop();
+      _pulseCtrl.stop();
+    } else if (state == AppLifecycleState.resumed) {
+      if (!_coinCtrl.isAnimating) _coinCtrl.repeat();
+      if (!_pulseCtrl.isAnimating) _pulseCtrl.repeat();
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _coinCtrl.dispose();
     _pulseCtrl.dispose();
+    _confettiCtrl.dispose();
     super.dispose();
+  }
+
+  void _checkLevelUp(int currentLevel) {
+    if (_lastLevel != null && currentLevel > _lastLevel!) {
+      _confettiCtrl.play();
+    }
+    _lastLevel = currentLevel;
   }
 
   @override
@@ -68,6 +96,10 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
       data: (a) => PetLevel.fromXp(a.totalXp),
       orElse: () => PetLevel.fromXp(0),
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _checkLevelUp(lv.level);
+    });
 
     final tasks = widget.dashboard.tasks.value ?? [];
     final planned = tasks
@@ -135,6 +167,30 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
               // SizedBox = 120 → gap ≈ 33px on all device topPad values
               const SizedBox(height: 120),
             ],
+          ),
+        ),
+
+        // Level-up confetti burst
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiCtrl,
+              blastDirectionality: BlastDirectionality.explosive,
+              numberOfParticles: 30,
+              gravity: 0.3,
+              colors: const [
+                AppColors.tangerine,
+                AppColors.sunny,
+                AppColors.poppy,
+                AppColors.mint,
+                AppColors.lilac,
+              ],
+              shouldLoop: false,
+            ),
           ),
         ),
 
@@ -532,7 +588,7 @@ class _HeroLevelContent extends StatelessWidget {
         Text(
           lv.isMaxLevel
               ? '${lv.currentXp} XP — Max level! 👑'
-              : '${lv.currentXp} / ${lv.levelEndXp} XP · ${lv.xpToNext} XP to Lv ${lv.level + 1}',
+              : '${lv.currentXp} / ${lv.levelEndXp} XP · ${lv.xpToNext} XP to "${lv.nextTitle}"',
           style: const TextStyle(
             fontSize: 10.5,
             fontWeight: FontWeight.w700,
@@ -1095,6 +1151,7 @@ class _TrophyCard extends StatefulWidget {
 class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin {
   late final AnimationController _floatCtrl;
   late final AnimationController _sheenCtrl;
+  late final AnimationStatusListener _sheenListener;
 
   @override
   void initState() {
@@ -1107,13 +1164,15 @@ class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin 
     final sheenDuration = Duration(milliseconds: 3800 + widget.index * 200);
     _sheenCtrl = AnimationController(vsync: this, duration: sheenDuration);
 
+    _sheenListener = (s) {
+      if (s == AnimationStatus.completed && mounted) _sheenCtrl.repeat();
+    };
+
     if (widget.owned) {
       final delayFraction =
           (widget.index * 300 / sheenDuration.inMilliseconds).clamp(0.0, 1.0);
+      _sheenCtrl.addStatusListener(_sheenListener);
       _sheenCtrl.forward(from: delayFraction);
-      _sheenCtrl.addStatusListener((s) {
-        if (s == AnimationStatus.completed && mounted) _sheenCtrl.repeat();
-      });
     }
   }
 
@@ -1123,15 +1182,15 @@ class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin 
     if (!oldWidget.owned && widget.owned && !_sheenCtrl.isAnimating) {
       final delayFraction =
           (widget.index * 300 / _sheenCtrl.duration!.inMilliseconds).clamp(0.0, 1.0);
+      _sheenCtrl.removeStatusListener(_sheenListener);
+      _sheenCtrl.addStatusListener(_sheenListener);
       _sheenCtrl.forward(from: delayFraction);
-      _sheenCtrl.addStatusListener((s) {
-        if (s == AnimationStatus.completed && mounted) _sheenCtrl.repeat();
-      });
     }
   }
 
   @override
   void dispose() {
+    _sheenCtrl.removeStatusListener(_sheenListener);
     _floatCtrl.dispose();
     _sheenCtrl.dispose();
     super.dispose();

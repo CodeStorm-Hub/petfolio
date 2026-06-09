@@ -11,6 +11,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:marionette_flutter/marionette_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'integration_test_gate_stub.dart'
+    if (dart.library.io) 'integration_test_gate_io.dart'
+    as integration_test_gate;
 import 'marionette_debug_gate_stub.dart'
     if (dart.library.io) 'marionette_debug_gate_io.dart'
     as marionette_gate;
@@ -21,6 +24,7 @@ import 'core/router.dart';
 import 'features/auth/presentation/controllers/auth_controller.dart';
 import 'core/platform/platform_notifications.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/prefs_schema.dart';
 import 'core/services/stripe_init_service.dart';
 import 'core/theme/theme.dart';
 import 'core/widgets/app_snack_bar.dart';
@@ -48,27 +52,46 @@ void _assertEnvVars() {
   }
 }
 
+bool _integrationTestBindingActive() {
+  if (integration_test_gate.integrationTestActive) return true;
+  try {
+    final type = WidgetsBinding.instance.runtimeType.toString();
+    return type.contains('IntegrationTest') ||
+        type.contains('AutomatedTestWidgetsFlutterBinding');
+  } catch (_) {
+    return false;
+  }
+}
+
 Future<void> main() async {
-  final marionetteEnabled = marionette_gate.marionetteEnabledInThisBuild;
+  final integrationTest = _integrationTestBindingActive();
+  final marionetteEnabled =
+      !integrationTest && marionette_gate.marionetteEnabledInThisBuild;
   if (marionetteEnabled) {
     MarionetteBinding.ensureInitialized();
-  } else {
+  } else if (!integrationTest) {
     WidgetsFlutterBinding.ensureInitialized();
   }
 
   if (kIsWeb) {
     usePathUrlStrategy();
+    // C6: Cap Flutter's in-memory image cache to 64 MB on web to prevent
+    // unbounded growth in long-running sessions.
+    PaintingBinding.instance.imageCache.maximumSizeBytes = 64 * 1024 * 1024;
   }
 
-  FlutterError.onError = (details) {
-    FlutterError.presentError(details);
-  };
-  PlatformDispatcher.instance.onError = (error, stack) {
-    debugPrint('Unhandled async error: $error\n$stack');
-    return true;
-  };
+  if (!integrationTest) {
+    FlutterError.onError = (details) {
+      FlutterError.presentError(details);
+    };
+    PlatformDispatcher.instance.onError = (error, stack) {
+      debugPrint('Unhandled async error: $error\n$stack');
+      return true;
+    };
+  }
 
   _assertEnvVars();
+  await PrefsSchema.migrate();
 
   GoogleFonts.config.allowRuntimeFetching = kIsWeb;
 
@@ -84,14 +107,16 @@ Future<void> main() async {
     return;
   }
 
-  await NotificationService.instance.initialize(
-    onTap: FcmService.instance.handleNotificationTap,
-  );
-  await PlatformNotifications.instance.initialize();
+  if (!integrationTest) {
+    await NotificationService.instance.initialize(
+      onTap: FcmService.instance.handleNotificationTap,
+    );
+    await PlatformNotifications.instance.initialize();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  await FcmService.instance.initialize();
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    await FcmService.instance.initialize();
+  }
 
   runApp(const ProviderScope(child: PetfolioApp()));
 }

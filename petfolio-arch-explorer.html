@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetFolio — Architecture Dependency Explorer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #232637; --border: #2e3147;
+    --text: #e2e8f0; --muted: #64748b; --accent: #6366f1;
+    --green: #22c55e; --green-bg: #052e16; --green-dim: #14532d; --green-border: #166534;
+    --yellow: #eab308; --yellow-bg: #1c1407; --yellow-dim: #3d2a02; --yellow-border: #713f12;
+    --orange: #f97316; --orange-bg: #1c0a00; --orange-dim: #431407; --orange-border: #7c2d12;
+    --radius: 8px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 13px; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+
+  /* HEADER */
+  #header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; z-index: 10; }
+  #header .logo { display: flex; align-items: center; gap: 8px; }
+  #header .logo svg { width: 28px; height: 28px; }
+  #header h1 { font-size: 15px; font-weight: 700; color: var(--text); }
+  #header .subtitle { font-size: 11px; color: var(--muted); margin-left: 4px; }
+  #header .spacer { flex: 1; }
+  #header .badge { background: var(--surface2); border: 1px solid var(--border); padding: 3px 8px; border-radius: 20px; font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+  #header .badge span { color: var(--accent); font-weight: 600; }
+
+  /* MAIN LAYOUT */
+  #layout { flex: 1; display: grid; grid-template-columns: 220px 1fr; grid-template-rows: 1fr; overflow: hidden; position: relative; }
+
+  /* SIDEBAR */
+  #sidebar { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 14px; }
+  .sidebar-section { display: flex; flex-direction: column; gap: 6px; }
+  .sidebar-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 0 2px; }
+  .toggle-btn { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface2); cursor: pointer; font-size: 12px; color: var(--text); transition: all 0.15s; user-select: none; }
+  .toggle-btn:hover { border-color: var(--accent); }
+  .toggle-btn.active { background: #312e81; border-color: var(--accent); color: #a5b4fc; }
+  .toggle-btn .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .toggle-btn .dot.green { background: var(--green); }
+  .toggle-btn .dot.yellow { background: var(--yellow); }
+  .toggle-btn .dot.orange { background: var(--orange); }
+  .toggle-btn .dot.gray { background: var(--muted); }
+
+  .feature-filter { display: flex; flex-wrap: wrap; gap: 4px; }
+  .feat-chip { padding: 3px 8px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface2); font-size: 10px; cursor: pointer; color: var(--muted); transition: all 0.15s; }
+  .feat-chip:hover { color: var(--text); border-color: var(--accent); }
+  .feat-chip.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  .preset-btn { padding: 7px 10px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface2); cursor: pointer; font-size: 12px; color: var(--text); width: 100%; text-align: left; transition: all 0.15s; }
+  .preset-btn:hover { border-color: var(--accent); background: #1e2035; }
+  .preset-btn.active { border-color: var(--accent); background: #1a1d35; color: #a5b4fc; }
+
+  .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 2px; border-bottom: 1px solid var(--border); }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label { color: var(--muted); font-size: 11px; }
+  .stat-val { font-weight: 600; font-size: 12px; }
+  .stat-val.green { color: var(--green); }
+  .stat-val.yellow { color: var(--yellow); }
+  .stat-val.orange { color: var(--orange); }
+
+  /* CANVAS */
+  #canvas-wrapper { position: relative; overflow: auto; background: var(--bg); }
+  #canvas { min-width: 2200px; padding: 16px; position: relative; }
+
+  /* Layer headers */
+  .layer-row { margin-bottom: 16px; }
+  .layer-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 6px 12px; border-radius: var(--radius); border-left: 3px solid; }
+  .layer-header.presentation { background: var(--green-bg); border-color: var(--green); }
+  .layer-header.domain { background: var(--yellow-bg); border-color: var(--yellow); }
+  .layer-header.data { background: var(--orange-bg); border-color: var(--orange); }
+  .layer-header .layer-name { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+  .layer-header.presentation .layer-name { color: var(--green); }
+  .layer-header.domain .layer-name { color: var(--yellow); }
+  .layer-header.data .layer-name { color: var(--orange); }
+  .layer-header .layer-desc { font-size: 11px; color: var(--muted); }
+  .layer-header .layer-count { margin-left: auto; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+  .layer-header.presentation .layer-count { background: var(--green-dim); color: var(--green); }
+  .layer-header.domain .layer-count { background: var(--yellow-dim); color: var(--yellow); }
+  .layer-header.data .layer-count { background: var(--orange-dim); color: var(--orange); }
+
+  /* Feature groups in each layer row */
+  .feature-groups { display: flex; flex-wrap: wrap; gap: 10px; }
+  .feature-group { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); min-width: 160px; max-width: 220px; overflow: hidden; transition: opacity 0.3s; }
+  .feature-group.dimmed { opacity: 0.12; pointer-events: none; }
+  .feature-group-header { padding: 5px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
+  .feature-group.presentation .feature-group-header { background: var(--green-bg); color: var(--green); }
+  .feature-group.domain .feature-group-header { background: var(--yellow-bg); color: var(--yellow); }
+  .feature-group.data .feature-group-header { background: var(--orange-bg); color: var(--orange); }
+  .feature-group-files { padding: 6px; display: flex; flex-direction: column; gap: 3px; }
+
+  /* File nodes */
+  .file-node { padding: 5px 8px; border-radius: 5px; border: 1px solid transparent; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .file-node:hover { border-color: var(--accent) !important; background: #1e2035 !important; }
+  .file-node.selected { border-color: var(--accent) !important; background: #1e2035 !important; box-shadow: 0 0 0 1px var(--accent); }
+  .file-node.presentation { background: #0a1a0e; border-color: #1a3d22; }
+  .file-node.domain { background: #150f00; border-color: #3d2a02; }
+  .file-node.data { background: #150500; border-color: #3a1500; }
+  .file-node .node-icon { font-size: 11px; flex-shrink: 0; }
+  .file-node .node-name { font-size: 11px; font-family: var(--mono); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+  .file-node .node-name.ui { color: #86efac; }
+  .file-node .node-name.controller { color: #fde68a; }
+  .file-node .node-name.repo { color: #fdba74; }
+  .file-node .node-name.model { color: #c4b5fd; }
+  .file-node .has-dep { width: 5px; height: 5px; background: #6366f1; border-radius: 50%; flex-shrink: 0; margin-left: auto; }
+
+  /* SVG overlay for dependency lines */
+  #dep-overlay { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 5; }
+
+  /* INSPECTOR PANEL — floating overlay */
+  #inspector {
+    position: fixed; top: 49px; right: 0; bottom: 52px;
+    width: 320px; background: var(--surface); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+    transform: translateX(100%); transition: transform 0.2s ease;
+    z-index: 50; box-shadow: -4px 0 24px rgba(0,0,0,0.5);
+  }
+  #inspector.open { transform: translateX(0); }
+  #inspector-header { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  #inspector-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  #inspector-subtitle { font-size: 10px; color: var(--muted); font-family: var(--mono); margin-top: 2px; word-break: break-all; }
+  #inspector-close { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 4px; width: 22px; height: 22px; cursor: pointer; font-size: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; line-height: 1; }
+  #inspector-close:hover { color: var(--text); border-color: var(--accent); }
+  #inspector-body { flex: 1; overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+  .inspector-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 8px; color: var(--muted); }
+  .inspector-empty svg { opacity: 0.3; }
+  .inspector-field { display: flex; flex-direction: column; gap: 4px; }
+  .inspector-field-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .inspector-field-value { font-size: 12px; color: var(--text); }
+  .inspector-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .inspector-badge.yes { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
+  .inspector-badge.no { background: #1e1e1e; color: var(--muted); border: 1px solid var(--border); }
+  .inspector-badge.link { background: #1e1a35; color: #a5b4fc; border: 1px solid #3730a3; }
+  .inspector-bullet { display: flex; align-items: flex-start; gap: 6px; font-size: 12px; color: var(--text); line-height: 1.5; }
+  .inspector-bullet::before { content: '▸'; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+  .dep-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-family: var(--mono); background: #1e1a35; color: #a5b4fc; border: 1px solid #3730a3; margin: 2px; cursor: pointer; }
+  .dep-chip:hover { background: #2d2a55; }
+  .layer-badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+  .layer-badge.presentation { background: var(--green-dim); color: var(--green); }
+  .layer-badge.domain { background: var(--yellow-dim); color: var(--yellow); }
+  .layer-badge.data { background: var(--orange-dim); color: var(--orange); }
+
+  /* PROMPT BAR */
+  #prompt-bar { background: var(--surface); border-top: 1px solid var(--border); padding: 10px 14px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
+  #prompt-bar-header { display: flex; align-items: center; gap: 8px; }
+  #prompt-bar-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  #prompt-mode-toggle { display: flex; gap: 4px; margin-left: auto; }
+  .mode-btn { padding: 3px 10px; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 11px; cursor: pointer; transition: all 0.15s; }
+  .mode-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+  #prompt-text { font-family: var(--mono); font-size: 11px; color: #c7d2fe; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; line-height: 1.6; min-height: 52px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; }
+  #copy-btn { align-self: flex-end; padding: 5px 14px; border-radius: var(--radius); background: var(--accent); border: none; color: white; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  #copy-btn:hover { background: #4f46e5; }
+  #copy-btn.copied { background: var(--green); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* Zoom controls */
+  #zoom-controls { position: absolute; bottom: 12px; right: 12px; display: flex; gap: 4px; z-index: 20; }
+  .zoom-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .zoom-btn:hover { border-color: var(--accent); }
+  #zoom-label { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0 8px; font-size: 11px; color: var(--muted); display: flex; align-items: center; }
+
+  /* Show-only-visual animation */
+  .dimmed-layer { opacity: 0.07 !important; pointer-events: none !important; transition: opacity 0.3s; }
+  .visible-layer { opacity: 1 !important; transition: opacity 0.3s; }
+
+  /* Connection filter pills */
+  .conn-filter { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface2); cursor: pointer; font-size: 11px; color: var(--text); transition: all 0.15s; }
+  .conn-filter:hover { border-color: var(--accent); }
+  .conn-filter.active { border-color: currentColor; }
+  .conn-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  .divider { height: 1px; background: var(--border); margin: 2px 0; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div class="logo">
+    <svg viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" rx="8" fill="#6366f1"/>
+      <text x="14" y="19" text-anchor="middle" font-size="14" fill="white">🐾</text>
+    </svg>
+    <h1>PetFolio</h1>
+    <span class="subtitle">Architecture Dependency Explorer</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="badge">Flutter · Riverpod · Supabase · <span id="total-count">—</span> files</div>
+  <div class="badge">Branch: <span>bento-grid</span></div>
+</div>
+
+<!-- LAYOUT -->
+<div id="layout">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Views / Presets</div>
+      <button class="preset-btn active" onclick="applyPreset('full')" id="preset-full">🗺 Full Architecture</button>
+      <button class="preset-btn" onclick="applyPreset('ui-only')" id="preset-ui">🎨 UI Screens Only</button>
+      <button class="preset-btn" onclick="applyPreset('marketplace')" id="preset-mkt">🛍 Marketplace Flow</button>
+      <button class="preset-btn" onclick="applyPreset('care')" id="preset-care">🏥 Care + Gamification</button>
+      <button class="preset-btn" onclick="applyPreset('social')" id="preset-social">📱 Social + Matching</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Layer Visibility</div>
+      <div class="toggle-btn active" id="toggle-presentation" onclick="toggleLayer('presentation')">
+        <span class="dot green"></span> Presentation
+      </div>
+      <div class="toggle-btn active" id="toggle-domain" onclick="toggleLayer('domain')">
+        <span class="dot yellow"></span> Domain
+      </div>
+      <div class="toggle-btn active" id="toggle-data" onclick="toggleLayer('data')">
+        <span class="dot orange"></span> Data
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="toggle-btn" id="ui-only-toggle" onclick="toggleUIOnly()">
+        <span>👁</span> Show Only Visual Elements
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Connection Types</div>
+      <div class="conn-filter active" id="conn-screen-ctrl" onclick="toggleConn('screen-ctrl')" style="color:#6366f1">
+        <span class="conn-dot" style="background:#6366f1"></span> Screen → Controller
+      </div>
+      <div class="conn-filter active" id="conn-ctrl-repo" onclick="toggleConn('ctrl-repo')" style="color:#10b981">
+        <span class="conn-dot" style="background:#10b981"></span> Controller → Repo
+      </div>
+      <div class="conn-filter active" id="conn-repo-model" onclick="toggleConn('repo-model')" style="color:#f59e0b">
+        <span class="conn-dot" style="background:#f59e0b"></span> Repo → Model
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Feature Modules</div>
+      <div class="feature-filter" id="feature-chips"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Stats</div>
+      <div class="stat-row"><span class="stat-label">Screens</span><span class="stat-val green" id="stat-screens">—</span></div>
+      <div class="stat-row"><span class="stat-label">Widgets</span><span class="stat-val green" id="stat-widgets">—</span></div>
+      <div class="stat-row"><span class="stat-label">Controllers</span><span class="stat-val yellow" id="stat-controllers">—</span></div>
+      <div class="stat-row"><span class="stat-label">Repositories</span><span class="stat-val orange" id="stat-repos">—</span></div>
+      <div class="stat-row"><span class="stat-label">Models</span><span class="stat-val" style="color:#c4b5fd" id="stat-models">—</span></div>
+    </div>
+  </aside>
+
+  <!-- CANVAS -->
+  <div id="canvas-wrapper">
+    <div id="canvas">
+      <svg id="dep-overlay" style="position:absolute;top:0;left:0;pointer-events:none;z-index:5;"></svg>
+      <div id="canvas-content"></div>
+    </div>
+    <div id="zoom-controls">
+      <button class="zoom-btn" onclick="zoom(-0.1)">−</button>
+      <div id="zoom-label">100%</div>
+      <button class="zoom-btn" onclick="zoom(0.1)">+</button>
+      <button class="zoom-btn" onclick="resetZoom()" title="Reset">⌂</button>
+    </div>
+  </div>
+
+  <!-- INSPECTOR (floating overlay, outside grid) -->
+  </div><!-- close #layout -->
+  <aside id="inspector">
+    <div id="inspector-header">
+      <div style="min-width:0">
+        <div id="inspector-title">File Inspector</div>
+        <div id="inspector-subtitle">Click any file to inspect</div>
+      </div>
+      <button id="inspector-close" onclick="closeInspector()">✕</button>
+    </div>
+    <div id="inspector-body">
+      <div class="inspector-empty">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="20" stroke="#64748b" stroke-width="2"/><path d="M24 16v8m0 8h.01" stroke="#64748b" stroke-width="2" stroke-linecap="round"/></svg>
+        <div style="font-size:12px;color:var(--muted);text-align:center">Click any file node<br>to inspect its details</div>
+      </div>
+    </div>
+  </aside>
+
+<!-- PROMPT BAR -->
+<div id="prompt-bar">
+  <div id="prompt-bar-header">
+    <div id="prompt-bar-label">⚡ Generated Prompt</div>
+    <div id="prompt-mode-toggle">
+      <button class="mode-btn active" id="mode-widget" onclick="setPromptMode('widget')">Mock Widget</button>
+      <button class="mode-btn" id="mode-test" onclick="setPromptMode('test')">Widget Test</button>
+      <button class="mode-btn" id="mode-review" onclick="setPromptMode('review')">Code Review</button>
+    </div>
+    <button id="copy-btn" onclick="copyPrompt()">Copy</button>
+  </div>
+  <div id="prompt-text">Select a UI screen or widget above to generate a prompt.</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  DATA — PetFolio Architecture
+// ═══════════════════════════════════════════════════════
+
+const FEATURES = [
+  {
+    id: 'core',
+    name: 'Core',
+    color: '#6366f1',
+    files: [
+      // Presentation
+      { id: 'app_shell', name: 'app_shell.dart', layer: 'presentation', type: 'widget', path: 'lib/core/widgets/app_shell.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['Bottom nav scaffold (5 tabs: Home, Social, Match, Care, Market)', 'Hosts the AppShell with GoRouter shell route', 'Passes active index to nav items'] },
+      { id: 'app_header', name: 'app_header.dart', layer: 'presentation', type: 'widget', path: 'lib/core/widgets/app_header.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['Consistent top app bar across features', 'Title + optional trailing actions'] },
+      { id: 'router', name: 'router.dart', layer: 'presentation', type: 'controller', path: 'lib/core/router.dart', rendersUI: false, stateLink: 'router_notifier', deps: ['router_notifier'], responsibilities: ['Central GoRouter — assembles all feature route lists', 'Defines the shell scaffold', 'Handles redirects for unauthenticated users'] },
+      { id: 'router_notifier', name: 'router_notifier.dart', layer: 'domain', type: 'controller', path: 'lib/core/navigation/router_notifier.dart', rendersUI: false, stateLink: 'auth_controller', deps: ['auth_controller'], responsibilities: ['Riverpod Notifier that triggers GoRouter refresh on auth state change', 'Listens to auth_controller and notifies GoRouter'] },
+      { id: 'pet_avatar', name: 'pet_avatar.dart', layer: 'presentation', type: 'widget', path: 'lib/core/widgets/pet_avatar.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['Circular pet photo with fallback initials', 'Sized variant props'] },
+      { id: 'petfolio_empty_state', name: 'petfolio_empty_state.dart', layer: 'presentation', type: 'widget', path: 'lib/core/widgets/petfolio_empty_state.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['Lottie + text empty state widget', 'Used across all features when lists are empty'] },
+      { id: 'skeleton_loader', name: 'skeleton_loader.dart', layer: 'presentation', type: 'widget', path: 'lib/core/widgets/skeleton_loader.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['Shimmer skeleton for loading states', 'Configurable width/height/radius'] },
+      { id: 'glass_card', name: 'glass_card.dart', layer: 'presentation', type: 'widget', path: 'lib/core/widgets/glass_card.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['Frosted-glass card container', 'Used for hero tiles and banners'] },
+      { id: 'primary_pill_button', name: 'primary_pill_button.dart', layer: 'presentation', type: 'widget', path: 'lib/core/widgets/primary_pill_button.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['Main CTA button (pill shape)', 'Loading / disabled states'] },
+      { id: 'app_theme', name: 'app_theme.dart', layer: 'presentation', type: 'widget', path: 'lib/core/theme/app_theme.dart', rendersUI: false, stateLink: 'theme_notifier', deps: ['theme_notifier'], responsibilities: ['Material 3 ThemeData factory', 'Uses app_colors tokens for all surfaces'] },
+      { id: 'theme_notifier', name: 'theme_notifier.dart', layer: 'domain', type: 'controller', path: 'lib/core/theme/theme_notifier.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Riverpod Notifier for light/dark toggle', 'Persists theme preference to shared_preferences'] },
+      // Data
+      { id: 'notification_service', name: 'notification_service.dart', layer: 'data', type: 'service', path: 'lib/core/services/notification_service.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['High-level notification orchestrator', 'Wraps platform + FCM notification delivery'] },
+      { id: 'secure_storage', name: 'secure_storage_service.dart', layer: 'data', type: 'service', path: 'lib/core/services/secure_storage_service.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Thin wrapper around flutter_secure_storage', 'Stores tokens and sensitive credentials'] },
+    ]
+  },
+
+  {
+    id: 'auth',
+    name: 'Auth',
+    color: '#ec4899',
+    files: [
+      { id: 'login_screen', name: 'login_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/auth/presentation/screens/login_screen.dart', rendersUI: true, stateLink: 'auth_controller', deps: ['auth_controller'], responsibilities: ['Email/password login form', 'Google OAuth login button', 'Routes to registration or home on success'] },
+      { id: 'registration_screen', name: 'registration_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/auth/presentation/screens/registration_screen.dart', rendersUI: true, stateLink: 'auth_controller', deps: ['auth_controller'], responsibilities: ['Multi-step signup wizard', 'Email, password, display name fields', 'Triggers auth_controller.signUp()'] },
+      { id: 'auth_widgets', name: 'auth_widgets.dart', layer: 'presentation', type: 'widget', path: 'lib/features/auth/presentation/widgets/auth_widgets.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['Shared form fields for auth flows', 'Social login buttons (Google)', 'Divider and helper text widgets'] },
+      { id: 'auth_controller', name: 'auth_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/auth/presentation/controllers/auth_controller.dart', rendersUI: false, stateLink: 'auth_repository', deps: ['auth_repository'], responsibilities: ['Riverpod Notifier wrapping auth repo', 'Exposes signIn / signUp / signOut', 'Feeds router_notifier on state change'] },
+      { id: 'auth_repository', name: 'auth_repository.dart', layer: 'data', type: 'repository', path: 'lib/features/auth/data/repositories/auth_repository.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Supabase signIn, signUp, signOut', 'onAuthStateChange stream', 'Google OAuth via Supabase provider'] },
+    ]
+  },
+
+  {
+    id: 'pet_profile',
+    name: 'Pet Profile',
+    color: '#f59e0b',
+    files: [
+      { id: 'onboarding_screen', name: 'onboarding_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/pet_profile/presentation/screens/onboarding_screen.dart', rendersUI: true, stateLink: 'active_pet_controller', deps: ['active_pet_controller'], responsibilities: ['First-run pet creation wizard', 'Species, breed, birthday, photo fields', 'Triggers navigation to main shell on completion'] },
+      { id: 'manage_pets_screen', name: 'manage_pets_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/pet_profile/presentation/screens/manage_pets_screen.dart', rendersUI: true, stateLink: 'pet_list_controller', deps: ['pet_list_controller', 'active_pet_controller'], responsibilities: ['List of user\'s pets', 'Switch active pet', 'Add / delete pet actions'] },
+      { id: 'pet_profile_screen', name: 'pet_profile_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/pet_profile/presentation/screens/pet_profile_screen.dart', rendersUI: true, stateLink: 'social_profile_controller', deps: ['social_profile_controller', 'active_pet_controller'], responsibilities: ['Public pet profile (viewed by others)', 'Posts grid, follower/following counts', 'Follow/unfollow action'] },
+      { id: 'edit_profile_screen', name: 'edit_profile_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/pet_profile/presentation/screens/edit_profile_screen.dart', rendersUI: true, stateLink: 'edit_profile_controller', deps: ['edit_profile_controller'], responsibilities: ['Edit pet name, breed, birthday, bio', 'Pet photo upload to Supabase Storage', 'Breed identification trigger'] },
+      { id: 'breed_identifier_widget', name: 'breed_identifier_widget.dart', layer: 'presentation', type: 'widget', path: 'lib/features/pet_profile/presentation/widgets/breed_identifier_widget.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['Camera capture for breed ID', 'Calls NVIDIA Vision API', 'Displays breed result card'] },
+      { id: 'pet_switcher_sheet', name: 'pet_switcher_sheet.dart', layer: 'presentation', type: 'widget', path: 'lib/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart', rendersUI: true, stateLink: 'pet_list_controller', deps: ['pet_list_controller'], responsibilities: ['Bottom sheet to swap active pet', 'Pet avatar list with active indicator'] },
+      { id: 'active_pet_controller', name: 'active_pet_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/pet_profile/presentation/controllers/active_pet_controller.dart', rendersUI: false, stateLink: 'pet_repository', deps: ['pet_repository'], responsibilities: ['Global state — currently selected pet', 'Read by care, matching, social, marketplace', 'Persists selection to shared_preferences'] },
+      { id: 'pet_list_controller', name: 'pet_list_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/pet_profile/presentation/controllers/pet_list_controller.dart', rendersUI: false, stateLink: 'pet_repository', deps: ['pet_repository'], responsibilities: ['Stream of the user\'s pets list', 'Triggers rebuild on pet CRUD'] },
+      { id: 'edit_profile_controller', name: 'edit_profile_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/pet_profile/presentation/controllers/edit_profile_controller.dart', rendersUI: false, stateLink: 'pet_repository', deps: ['pet_repository'], responsibilities: ['Handles pet photo upload + field edits', 'Calls breed_identification_service'] },
+      { id: 'pet_model', name: 'pet.dart', layer: 'domain', type: 'model', path: 'lib/features/pet_profile/data/models/pet.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Full Pet DTO (Freezed + JsonSerializable)', 'Fields: species, breed, birthday, photo, visibility flags'] },
+      { id: 'pet_repository', name: 'pet_repository.dart', layer: 'data', type: 'repository', path: 'lib/features/pet_profile/data/repositories/pet_repository.dart', rendersUI: false, stateLink: null, deps: ['pet_model'], responsibilities: ['CRUD for pets Supabase table', 'Photo upload to Supabase Storage', 'Realtime stream for active pet changes'] },
+      { id: 'breed_identification_service', name: 'breed_identification_service.dart', layer: 'data', type: 'service', path: 'lib/features/pet_profile/data/breed_identification_service.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Calls NVIDIA Vision API with pet photo', 'Returns breed name + confidence score'] },
+    ]
+  },
+
+  {
+    id: 'home',
+    name: 'Home',
+    color: '#8b5cf6',
+    files: [
+      { id: 'hub_home_screen', name: 'hub_home_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/home/presentation/screens/hub_home_screen.dart', rendersUI: true, stateLink: 'active_pet_controller', deps: ['active_pet_controller', 'pet_awards_provider'], responsibilities: ['Bento-grid home with quick-access tiles', 'XP level chip hero section', 'Smooth page indicator carousels', 'Stagger-in animations (flutter_animate)'] },
+      { id: 'all_features_sheet', name: 'all_features_sheet.dart', layer: 'presentation', type: 'widget', path: 'lib/features/home/presentation/widgets/all_features_sheet.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['"See all" sheet listing every app feature', 'Grid of feature tiles with icons'] },
+    ]
+  },
+
+  {
+    id: 'social',
+    name: 'Social',
+    color: '#06b6d4',
+    files: [
+      { id: 'social_screen', name: 'social_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/social/presentation/screens/social_screen.dart', rendersUI: true, stateLink: 'social_controller', deps: ['social_controller', 'story_controller'], responsibilities: ['Main feed with stories row + posts list', 'Infinite scroll pagination', 'Pull-to-refresh'] },
+      { id: 'social_profile_screen', name: 'social_profile_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/social/presentation/screens/social_profile_screen.dart', rendersUI: true, stateLink: 'social_profile_controller', deps: ['social_profile_controller', 'follow_controller'], responsibilities: ['Another pet\'s public profile page', 'Posts grid, follower/following counts', 'Follow/unfollow button with optimistic update'] },
+      { id: 'create_post_screen', name: 'create_post_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/social/presentation/screens/create_post_screen.dart', rendersUI: true, stateLink: 'create_post_controller', deps: ['create_post_controller'], responsibilities: ['Post composer with media picker', 'Caption input with emoji support', 'Media upload progress indicator'] },
+      { id: 'create_story_screen', name: 'create_story_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/social/presentation/screens/create_story_screen.dart', rendersUI: true, stateLink: 'story_controller', deps: ['story_controller'], responsibilities: ['Story camera/gallery picker', '24hr expiry stories to Supabase Storage'] },
+      { id: 'post_detail_screen', name: 'post_detail_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/social/presentation/screens/post_detail_screen.dart', rendersUI: true, stateLink: 'comment_controller', deps: ['comment_controller'], responsibilities: ['Single post with inline comments', 'Like / unlike with reaction_burst', 'Share post action'] },
+      { id: 'story_viewer_screen', name: 'story_viewer_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/social/presentation/screens/story_viewer_screen.dart', rendersUI: true, stateLink: 'story_controller', deps: ['story_controller'], responsibilities: ['Full-screen story viewer with progress bar', 'Tap-to-advance, swipe-to-close gestures', 'Tracks view via story_controller'] },
+      { id: 'notifications_screen', name: 'notifications_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/social/presentation/screens/notifications_screen.dart', rendersUI: true, stateLink: 'notification_controller', deps: ['notification_controller'], responsibilities: ['Tabbed notification center (Likes, Comments, Follows)', 'Stagger-in animation for notification cards', 'Mark-all-read action'] },
+      { id: 'reaction_burst', name: 'reaction_burst.dart', layer: 'presentation', type: 'widget', path: 'lib/features/social/presentation/widgets/reaction_burst.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['Animated heart burst on double-tap like', 'Lottie or custom animation overlay'] },
+      { id: 'post_comments_sheet', name: 'post_comments_bottom_sheet.dart', layer: 'presentation', type: 'widget', path: 'lib/features/social/presentation/widgets/post_comments_bottom_sheet.dart', rendersUI: true, stateLink: 'comment_controller', deps: ['comment_controller'], responsibilities: ['Slide-up comment sheet', 'Real-time comment updates', 'Comment input with keyboard avoidance'] },
+      { id: 'social_controller', name: 'social_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/social/presentation/controllers/social_controller.dart', rendersUI: false, stateLink: 'social_repository', deps: ['social_repository'], responsibilities: ['Feed pagination provider (AsyncNotifier)', 'Like/unlike optimistic updates', 'Post delete action'] },
+      { id: 'story_controller', name: 'story_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/social/presentation/controllers/story_controller.dart', rendersUI: false, stateLink: 'story_repository', deps: ['story_repository'], responsibilities: ['Story upload + view tracking', 'Filters out expired stories client-side'] },
+      { id: 'comment_controller', name: 'comment_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/social/presentation/controllers/comment_controller.dart', rendersUI: false, stateLink: 'comment_repository', deps: ['comment_repository'], responsibilities: ['Comment list + add comment', 'Realtime updates via Supabase Realtime'] },
+      { id: 'notification_controller', name: 'notification_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/social/presentation/controllers/notification_controller.dart', rendersUI: false, stateLink: 'notification_repository', deps: ['notification_repository'], responsibilities: ['Notification list + mark-read', 'Unread count badge provider'] },
+      { id: 'social_repository', name: 'social_repository.dart', layer: 'data', type: 'repository', path: 'lib/features/social/data/repositories/social_repository.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Feed posts CRUD, likes, search', 'Follow/unfollow Supabase RPC calls'] },
+      { id: 'feed_post_model', name: 'feed_post.dart', layer: 'domain', type: 'model', path: 'lib/features/social/data/models/feed_post.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Post DTO (Freezed)', 'Fields: id, petId, imageUrl, caption, likeCount, createdAt'] },
+    ]
+  },
+
+  {
+    id: 'matching',
+    name: 'Matching',
+    color: '#f43f5e',
+    files: [
+      { id: 'matching_screen', name: 'matching_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/matching/presentation/screens/matching_screen.dart', rendersUI: true, stateLink: 'discovery_controller', deps: ['discovery_controller', 'match_preference_controller'], responsibilities: ['Swipe card stack UI (like Tinder)', 'Smooth_page_indicator dots', 'Match celebration overlay on mutual match'] },
+      { id: 'matches_inbox_screen', name: 'matches_inbox_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/matching/presentation/screens/matches_inbox_screen.dart', rendersUI: true, stateLink: 'matches_inbox_controller', deps: ['matches_inbox_controller'], responsibilities: ['List of mutual matches', 'Navigate to chat from match card'] },
+      { id: 'chat_screen', name: 'chat_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/matching/presentation/screens/chat_screen.dart', rendersUI: true, stateLink: 'chat_conversation_controller', deps: ['chat_conversation_controller'], responsibilities: ['Real-time chat conversation', 'Supabase Realtime message stream', 'Message input with send button'] },
+      { id: 'match_celebration_overlay', name: 'match_celebration_overlay.dart', layer: 'presentation', type: 'widget', path: 'lib/features/matching/presentation/widgets/match_celebration_overlay.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['Confetti animation on new mutual match', 'Animated "It\'s a Match!" banner'] },
+      { id: 'match_preferences_sheet', name: 'match_preferences_sheet.dart', layer: 'presentation', type: 'widget', path: 'lib/features/matching/presentation/widgets/match_preferences_sheet.dart', rendersUI: true, stateLink: 'match_preference_controller', deps: ['match_preference_controller'], responsibilities: ['Filter sheet (distance, species, size)', 'Bone-shaped distance slider'] },
+      { id: 'discovery_controller', name: 'discovery_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/matching/presentation/controllers/discovery_controller.dart', rendersUI: false, stateLink: 'matching_repository', deps: ['matching_repository', 'active_pet_controller'], responsibilities: ['Swipe card deck state', 'Records swipe left/right to Supabase', 'Detects mutual match via RPC result'] },
+      { id: 'matching_repository', name: 'matching_repository.dart', layer: 'data', type: 'repository', path: 'lib/features/matching/data/repositories/matching_repository.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Business logic on top of matching data source', 'Calls get_discovery_candidates RPC', 'Swipe upsert with mutual-match detection'] },
+      { id: 'discovery_candidate', name: 'discovery_candidate.dart', layer: 'domain', type: 'model', path: 'lib/features/matching/data/models/discovery_candidate.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Match candidate DTO (Freezed)', 'Fields: petId, name, species, distance, photoUrl'] },
+    ]
+  },
+
+  {
+    id: 'care',
+    name: 'Care',
+    color: '#10b981',
+    files: [
+      { id: 'care_screen', name: 'care_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/care/presentation/screens/care_screen.dart', rendersUI: true, stateLink: 'care_dashboard_controller', deps: ['care_dashboard_controller', 'pet_awards_provider'], responsibilities: ['Main care dashboard with task checklist', 'Streak banner with current streak count', 'Gamified XP bar and level badge', 'Care filter chips for task categories'] },
+      { id: 'medical_vault_screen', name: 'medical_vault_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/care/presentation/screens/medical_vault_screen.dart', rendersUI: true, stateLink: 'health_vault_controller', deps: ['health_vault_controller'], responsibilities: ['Medical records list + in-app PDF viewer', 'Add record: vet name, date, notes, attachments'] },
+      { id: 'nutrition_screen', name: 'nutrition_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/care/presentation/screens/nutrition_screen.dart', rendersUI: true, stateLink: 'nutrition_controller', deps: ['nutrition_controller'], responsibilities: ['Meal tracker with food log entries', 'Nutrition goal progress bars'] },
+      { id: 'walk_tracking_screen', name: 'walk_tracking_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/care/presentation/screens/walk_tracking_screen.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['GPS walk recorder with Google Maps widget', 'Start/pause/stop walk controls', 'Distance + duration live counters'] },
+      { id: 'gamified_care_ui', name: 'gamified_care_ui.dart', layer: 'presentation', type: 'widget', path: 'lib/features/care/presentation/widgets/gamified_care_ui.dart', rendersUI: true, stateLink: 'pet_awards_provider', deps: ['pet_awards_provider'], responsibilities: ['XP bar with animated fill', 'Level badge (e.g., "Level 3 Caretaker")', 'Achievement tile list'] },
+      { id: 'routine_recommendation_sheet', name: 'routine_recommendation_sheet.dart', layer: 'presentation', type: 'widget', path: 'lib/features/care/presentation/widgets/routine_recommendation_sheet.dart', rendersUI: true, stateLink: 'ai_routine_controller', deps: ['ai_routine_controller'], responsibilities: ['AI-generated routine result sheet', 'Shows tasks recommended by NVIDIA API', 'One-tap add all tasks action'] },
+      { id: 'vitals_chart_widget', name: 'vitals_chart_widget.dart', layer: 'presentation', type: 'widget', path: 'lib/features/care/presentation/widgets/vitals_chart_widget.dart', rendersUI: true, stateLink: 'vitals_controller', deps: ['vitals_controller'], responsibilities: ['Line chart for vitals over time (fl_chart)', 'Weight, temperature, heart-rate series toggle'] },
+      { id: 'care_dashboard_controller', name: 'care_dashboard_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/care/presentation/controllers/care_dashboard_controller.dart', rendersUI: false, stateLink: 'care_repository', deps: ['care_repository', 'active_pet_controller'], responsibilities: ['Today\'s tasks, streak, level state', 'Task completion toggles', 'Streak calculation trigger'] },
+      { id: 'ai_routine_controller', name: 'ai_routine_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/care/presentation/controllers/ai_routine_controller.dart', rendersUI: false, stateLink: 'care_recommendation_service', deps: ['care_recommendation_service'], responsibilities: ['Triggers + caches AI routine generation', 'Calls NVIDIA API via care_recommendation_service'] },
+      { id: 'pet_awards_provider', name: 'pet_awards_provider.dart', layer: 'domain', type: 'controller', path: 'lib/features/care/presentation/controllers/pet_awards_provider.dart', rendersUI: false, stateLink: 'care_repository', deps: ['care_repository'], responsibilities: ['XP / awards stream provider', 'Computes level from XP total'] },
+      { id: 'care_task_model', name: 'care_task.dart', layer: 'domain', type: 'model', path: 'lib/features/care/data/models/care_task.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Daily task DTO (Freezed)', 'Fields: id, petId, title, scheduledTime, completedAt'] },
+      { id: 'care_repository', name: 'care_repository.dart', layer: 'data', type: 'repository', path: 'lib/features/care/data/repositories/care_repository.dart', rendersUI: false, stateLink: null, deps: ['care_task_model'], responsibilities: ['Tasks CRUD + streak calculation', 'Supabase RPC for streak aggregation'] },
+      { id: 'care_recommendation_service', name: 'care_recommendation_service.dart', layer: 'data', type: 'service', path: 'lib/features/care/data/care_recommendation_service.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Calls NVIDIA API for AI-generated care routines', 'Passes species, age, activity level as context'] },
+    ]
+  },
+
+  {
+    id: 'marketplace',
+    name: 'Marketplace',
+    color: '#f97316',
+    files: [
+      { id: 'marketplace_screen', name: 'marketplace_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/marketplace/presentation/screens/marketplace_screen.dart', rendersUI: true, stateLink: 'shop_list_controller', deps: ['shop_list_controller', 'product_list_controller'], responsibilities: ['Home: featured shops, categories, search', 'Smooth_page_indicator banner carousel', 'Category filter chips with live counts'] },
+      { id: 'marketplace_categories_screen', name: 'marketplace_categories_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/marketplace/presentation/screens/marketplace_categories_screen.dart', rendersUI: true, stateLink: 'product_list_controller', deps: ['product_list_controller'], responsibilities: ['Browse products by category grid', 'Live product counts per category', 'Shimmer loading placeholders'] },
+      { id: 'shop_storefront_screen', name: 'shop_storefront_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/marketplace/presentation/screens/shop_storefront_screen.dart', rendersUI: true, stateLink: 'shop_products_controller', deps: ['shop_products_controller'], responsibilities: ['Shop page with products grid', 'Shop header: logo, name, verified badge, rating'] },
+      { id: 'shop_intro_screen', name: 'shop_intro_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/marketplace/presentation/screens/shop_intro_screen.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['Vendor intro / about page', 'Shop story, policies, contact info'] },
+      { id: 'product_detail_screen', name: 'product_detail_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/marketplace/presentation/screens/product_detail_screen.dart', rendersUI: true, stateLink: 'cart_controller', deps: ['cart_controller', 'product_reviews_controller'], responsibilities: ['Product image carousel (smooth_page_indicator)', 'Variant selector bottom sheet', 'Discount badge + original/sale price', 'Dual CTA: Add to Cart + Buy Now', 'Seller info row with shop navigation'] },
+      { id: 'cart_screen', name: 'cart_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/marketplace/presentation/screens/cart_screen.dart', rendersUI: true, stateLink: 'cart_controller', deps: ['cart_controller', 'checkout_controller', 'promo_controller'], responsibilities: ['Stacked vendor cards (items grouped by shop)', 'Savings banner with total discount', 'Promo code input field', 'Checkout summary + place order CTA'] },
+      { id: 'order_confirmation_screen', name: 'order_confirmation_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/marketplace/presentation/screens/order_confirmation_screen.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['Post-payment success screen', 'Full receipt breakdown (subtotal, delivery, discount, total)', 'Lottie success animation'] },
+      { id: 'buyer_order_list_screen', name: 'buyer_order_list_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/marketplace/presentation/screens/buyer_order_list_screen.dart', rendersUI: true, stateLink: 'buyer_orders_controller', deps: ['buyer_orders_controller'], responsibilities: ['Order history list with status chips', 'Rate / Reorder / Track action rows'] },
+      { id: 'buyer_order_detail_screen', name: 'buyer_order_detail_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/marketplace/presentation/screens/buyer_order_detail_screen.dart', rendersUI: true, stateLink: 'buyer_orders_controller', deps: ['buyer_orders_controller'], responsibilities: ['Single order detail with item breakdown', 'Tracking status timeline', 'Contact seller button'] },
+      // Vendor screens
+      { id: 'seller_dashboard_screen', name: 'seller_dashboard_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/marketplace/presentation/screens/seller_dashboard_screen.dart', rendersUI: true, stateLink: 'my_shop_controller', deps: ['my_shop_controller', 'vendor_orders_controller'], responsibilities: ['Vendor home: revenue chart, order count, product count', 'Quick actions: add product, view orders', 'Earnings summary card'] },
+      { id: 'add_edit_product_screen', name: 'add_edit_product_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/marketplace/presentation/screens/add_edit_product_screen.dart', rendersUI: true, stateLink: 'vendor_products_controller', deps: ['vendor_products_controller'], responsibilities: ['Product form: images (multi-upload), variants, price, inventory', 'Variant editor (size, color, quantity)', 'Preview before publish'] },
+      { id: 'vendor_order_queue_screen', name: 'vendor_order_queue_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/marketplace/presentation/screens/vendor_order_queue_screen.dart', rendersUI: true, stateLink: 'vendor_orders_controller', deps: ['vendor_orders_controller'], responsibilities: ['Incoming orders queue with real-time updates', 'Accept / Reject / Fulfill actions'] },
+      { id: 'stripe_onboarding_screen', name: 'stripe_onboarding_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/marketplace/presentation/screens/stripe_onboarding_screen.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['Stripe Connect onboarding WebView', 'Tracks onboarding completion via deep link'] },
+      // Controllers
+      { id: 'cart_controller', name: 'cart_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/marketplace/presentation/controllers/cart_controller.dart', rendersUI: false, stateLink: 'order_repository', deps: ['order_repository'], responsibilities: ['Cart state: add/remove/update quantity', 'Groups items by vendor', 'Computes subtotal, discount, savings'] },
+      { id: 'checkout_controller', name: 'checkout_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/marketplace/presentation/controllers/checkout_controller.dart', rendersUI: false, stateLink: 'order_repository', deps: ['order_repository', 'address_controller'], responsibilities: ['Stripe payment intent creation', 'Order creation after payment success', 'CoD order flow (no Stripe)'] },
+      { id: 'buyer_orders_controller', name: 'buyer_orders_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/marketplace/presentation/controllers/buyer_orders_controller.dart', rendersUI: false, stateLink: 'order_repository', deps: ['order_repository'], responsibilities: ['Buyer order history + status', 'Paginated order list'] },
+      { id: 'promo_controller', name: 'promo_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/marketplace/presentation/controllers/promo_controller.dart', rendersUI: false, stateLink: 'promo_repository', deps: ['promo_repository'], responsibilities: ['Promo code validation against Supabase promos table', 'Returns discount amount/percentage'] },
+      { id: 'address_controller', name: 'address_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/marketplace/presentation/controllers/address_controller.dart', rendersUI: false, stateLink: 'address_repository', deps: ['address_repository'], responsibilities: ['Saved addresses CRUD', 'Default address selection'] },
+      // Models
+      { id: 'product_model', name: 'product.dart', layer: 'domain', type: 'model', path: 'lib/features/marketplace/data/models/product.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Product DTO (Freezed)', 'Fields: name, price, images, variants, inventory, shopId'] },
+      { id: 'cart_item_model', name: 'cart_item.dart', layer: 'domain', type: 'model', path: 'lib/features/marketplace/data/models/cart_item.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Cart line item DTO', 'Fields: productId, variantId, quantity, price'] },
+      { id: 'marketplace_order_model', name: 'marketplace_order.dart', layer: 'domain', type: 'model', path: 'lib/features/marketplace/data/models/marketplace_order.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Order DTO with items, status, payment method', 'Nested order_items list'] },
+      { id: 'promo_model', name: 'promo.dart', layer: 'domain', type: 'model', path: 'lib/features/marketplace/data/models/promo.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Promo code DTO', 'Fields: code, discountType, amount, expiresAt, minOrderValue'] },
+      // Repositories
+      { id: 'product_repository', name: 'product_repository.dart', layer: 'data', type: 'repository', path: 'lib/features/marketplace/data/repositories/product_repository.dart', rendersUI: false, stateLink: null, deps: ['product_model'], responsibilities: ['products table queries + search RPC', 'Category-filtered product lists'] },
+      { id: 'order_repository', name: 'order_repository.dart', layer: 'data', type: 'repository', path: 'lib/features/marketplace/data/repositories/order_repository.dart', rendersUI: false, stateLink: null, deps: ['marketplace_order_model'], responsibilities: ['orders + order_items Supabase tables', 'Stripe payment intent creation via Edge Function'] },
+      { id: 'address_repository', name: 'address_repository.dart', layer: 'data', type: 'repository', path: 'lib/features/marketplace/data/repositories/address_repository.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['user_addresses Supabase table CRUD', 'Default address management'] },
+      { id: 'promo_repository', name: 'promo_repository.dart', layer: 'data', type: 'repository', path: 'lib/features/marketplace/data/repositories/promo_repository.dart', rendersUI: false, stateLink: null, deps: ['promo_model'], responsibilities: ['promos table queries', 'Validates code against current date + min order'] },
+    ]
+  },
+
+  {
+    id: 'communities',
+    name: 'Communities',
+    color: '#84cc16',
+    files: [
+      { id: 'communities_screen', name: 'communities_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/communities/presentation/screens/communities_screen.dart', rendersUI: true, stateLink: 'communities_controller', deps: ['communities_controller'], responsibilities: ['Browse/search pet communities', 'Joined vs discovery tabs'] },
+      { id: 'community_detail_screen', name: 'community_detail_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/communities/presentation/screens/community_detail_screen.dart', rendersUI: true, stateLink: 'communities_controller', deps: ['communities_controller'], responsibilities: ['Community feed + member list', 'Post to community action'] },
+      { id: 'create_community_sheet', name: 'create_community_sheet.dart', layer: 'presentation', type: 'widget', path: 'lib/features/communities/presentation/widgets/create_community_sheet.dart', rendersUI: true, stateLink: 'communities_controller', deps: ['communities_controller'], responsibilities: ['Create new community bottom sheet', 'Name, description, cover image inputs'] },
+      { id: 'communities_controller', name: 'communities_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/communities/presentation/controllers/communities_controller.dart', rendersUI: false, stateLink: 'community_repository', deps: ['community_repository'], responsibilities: ['Community list + membership state', 'Join/leave optimistic updates'] },
+      { id: 'community_repository', name: 'community_repository.dart', layer: 'data', type: 'repository', path: 'lib/features/communities/data/repositories/community_repository.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Join/leave, post, list communities from Supabase'] },
+    ]
+  },
+
+  {
+    id: 'appointments',
+    name: 'Appointments',
+    color: '#3b82f6',
+    files: [
+      { id: 'appointments_screen', name: 'appointments_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/appointments/presentation/screens/appointments_screen.dart', rendersUI: true, stateLink: 'appointment_controller', deps: ['appointment_controller'], responsibilities: ['Calendar view + appointment list', 'Book new appointment flow', 'Upcoming vs past tabs'] },
+      { id: 'appointment_controller', name: 'appointment_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/appointments/presentation/controllers/appointment_controller.dart', rendersUI: false, stateLink: 'appointment_repository', deps: ['appointment_repository'], responsibilities: ['Appointment list provider', 'Create/update/cancel appointment actions'] },
+      { id: 'appointment_model', name: 'appointment.dart', layer: 'domain', type: 'model', path: 'lib/features/appointments/data/models/appointment.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Appointment DTO (Freezed)', 'Fields: vet, date, notes, status, petId'] },
+      { id: 'appointment_repository', name: 'appointment_repository.dart', layer: 'data', type: 'repository', path: 'lib/features/appointments/data/repositories/appointment_repository.dart', rendersUI: false, stateLink: null, deps: ['appointment_model'], responsibilities: ['Supabase appointments table CRUD', 'Filter by petId and upcoming/past'] },
+    ]
+  },
+
+  {
+    id: 'activity',
+    name: 'Activity',
+    color: '#a855f7',
+    files: [
+      { id: 'activity_screen', name: 'activity_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/activity/presentation/screens/activity_screen.dart', rendersUI: true, stateLink: 'active_pet_controller', deps: ['active_pet_controller'], responsibilities: ['Timeline of cross-feature activity', 'Walk records, care completions, matches', 'flutter_animate stagger-in animation for items'] },
+    ]
+  },
+
+  {
+    id: 'offers',
+    name: 'Offers',
+    color: '#f59e0b',
+    files: [
+      { id: 'offers_screen', name: 'offers_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/offers/presentation/screens/offers_screen.dart', rendersUI: true, stateLink: 'promo_controller', deps: ['promo_controller'], responsibilities: ['Promo codes and active discount offers', 'Promo notification cards with stagger-in', 'Lottie empty state when no offers'] },
+    ]
+  },
+
+  {
+    id: 'settings',
+    name: 'Settings',
+    color: '#64748b',
+    files: [
+      { id: 'settings_screen', name: 'settings_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/settings/presentation/screens/settings_screen.dart', rendersUI: true, stateLink: 'theme_notifier', deps: ['theme_notifier', 'auth_controller', 'active_pet_controller'], responsibilities: ['Profile settings (avatar, display name)', 'Notification preferences toggles', 'Light/dark theme toggle', 'Account management (sign out, delete account)'] },
+    ]
+  },
+
+  {
+    id: 'admin',
+    name: 'Admin',
+    color: '#dc2626',
+    files: [
+      { id: 'admin_screen', name: 'admin_screen.dart', layer: 'presentation', type: 'screen', path: 'lib/features/admin/presentation/screens/admin_screen.dart', rendersUI: true, stateLink: 'admin_auth_controller', deps: ['admin_auth_controller'], responsibilities: ['Admin entry screen with auth gate', 'Tab-based admin layout'] },
+      { id: 'admin_layout', name: 'admin_layout.dart', layer: 'presentation', type: 'widget', path: 'lib/features/admin/presentation/widgets/admin_layout.dart', rendersUI: true, stateLink: null, deps: [], responsibilities: ['Tab-based admin layout', 'Dashboard, Moderation, KYC, Orders, Shops, Ledger tabs'] },
+      { id: 'admin_dashboard_controller', name: 'admin_dashboard_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/admin/presentation/controllers/admin_dashboard_controller.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['Dashboard stats: users, orders, revenue', 'Aggregation from Supabase RPCs'] },
+      { id: 'kyc_review_controller', name: 'kyc_review_controller.dart', layer: 'domain', type: 'controller', path: 'lib/features/admin/presentation/controllers/kyc_review_controller.dart', rendersUI: false, stateLink: 'kyc_repository', deps: ['kyc_repository'], responsibilities: ['Approve/reject vendor KYC documents', 'Updates kyc_documents table status'] },
+      { id: 'kyc_repository', name: 'kyc_repository.dart', layer: 'data', type: 'repository', path: 'lib/features/marketplace/data/repositories/kyc_repository.dart', rendersUI: false, stateLink: null, deps: [], responsibilities: ['kyc_documents table queries', 'Stripe Connect onboarding link generation'] },
+    ]
+  },
+];
+
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+
+const state = {
+  selectedFile: null,
+  layers: { presentation: true, domain: true, data: true },
+  uiOnly: false,
+  activeFeatures: new Set(FEATURES.map(f => f.id)),
+  connFilters: { 'screen-ctrl': true, 'ctrl-repo': true, 'repo-model': true },
+  zoom: 1,
+  promptMode: 'widget',
+};
+
+// ═══════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════
+
+function getFile(id) {
+  for (const f of FEATURES) {
+    const file = f.files.find(x => x.id === id);
+    if (file) return { file, feature: f };
+  }
+  return null;
+}
+
+function countByType(type) {
+  return FEATURES.flatMap(f => f.files).filter(f => f.type === type).length;
+}
+function countByLayer(layer) {
+  return FEATURES.flatMap(f => f.files).filter(f => f.layer === layer).length;
+}
+
+const LAYER_ICONS = { presentation: '🎨', domain: '⚙️', data: '🗄️' };
+const TYPE_ICONS = { screen: '📱', widget: '🧩', controller: '⚡', repository: '🗃️', service: '🔌', model: '📦' };
+
+// ═══════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════
+
+function render() {
+  renderCanvas();
+  updateStats();
+  updateDepLines();
+  updatePrompt();
+}
+
+function renderCanvas() {
+  const container = document.getElementById('canvas-content');
+  const layers = ['presentation', 'domain', 'data'];
+  const layerLabels = {
+    presentation: 'Presentation Layer',
+    domain: 'Domain Layer',
+    data: 'Data Layer',
+  };
+  const layerDescs = {
+    presentation: 'Screens · Widgets · Theme · Navigation · Controllers (UI-facing)',
+    domain: 'Models (Entities) · Business Logic · Controllers · Services',
+    data: 'Repositories · Data Sources · Platform Abstractions · External Services',
+  };
+
+  let html = '';
+
+  for (const layer of layers) {
+    const isVisible = state.layers[layer];
+    const dimmed = (state.uiOnly && layer !== 'presentation') ? 'dimmed-layer' : (isVisible ? 'visible-layer' : 'dimmed-layer');
+
+    // Gather files for this layer across all active features
+    const featureGroups = FEATURES
+      .filter(f => state.activeFeatures.has(f.id))
+      .map(feat => {
+        const files = feat.files.filter(f => f.layer === layer);
+        return { feat, files };
+      })
+      .filter(g => g.files.length > 0);
+
+    const totalCount = featureGroups.reduce((sum, g) => sum + g.files.length, 0);
+
+    html += `<div class="layer-row ${dimmed}" id="layer-${layer}">`;
+    html += `<div class="layer-header ${layer}">
+      <span>${LAYER_ICONS[layer]}</span>
+      <span class="layer-name">${layerLabels[layer]}</span>
+      <span class="layer-desc">${layerDescs[layer]}</span>
+      <span class="layer-count">${totalCount} files</span>
+    </div>`;
+    html += `<div class="feature-groups">`;
+
+    for (const { feat, files } of featureGroups) {
+      html += `<div class="feature-group ${layer}" id="fg-${feat.id}-${layer}">`;
+      html += `<div class="feature-group-header" style="border-bottom:1px solid ${feat.color}22">${feat.name}</div>`;
+      html += `<div class="feature-group-files">`;
+      for (const file of files) {
+        const isSelected = state.selectedFile === file.id;
+        const nameClass = file.rendersUI ? 'ui' : (file.type === 'controller' ? 'controller' : (file.type === 'repository' ? 'repo' : (file.type === 'model' ? 'model' : '')));
+        const hasDep = file.deps && file.deps.length > 0;
+        html += `<div class="file-node ${layer} ${isSelected ? 'selected' : ''}" id="fn-${file.id}" onclick="selectFile('${file.id}')">
+          <span class="node-icon">${TYPE_ICONS[file.type] || '📄'}</span>
+          <span class="node-name ${nameClass}" title="${file.path}">${file.name}</span>
+          ${hasDep ? '<span class="has-dep" title="Has dependency connections"></span>' : ''}
+        </div>`;
+      }
+      html += `</div></div>`;
+    }
+
+    html += `</div></div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function updateStats() {
+  document.getElementById('stat-screens').textContent = countByType('screen');
+  document.getElementById('stat-widgets').textContent = countByType('widget');
+  document.getElementById('stat-controllers').textContent = countByType('controller');
+  document.getElementById('stat-repos').textContent = countByType('repository');
+  document.getElementById('stat-models').textContent = countByType('model');
+  document.getElementById('total-count').textContent = FEATURES.flatMap(f => f.files).length;
+}
+
+// ═══════════════════════════════════════════════════════
+//  DEPENDENCY LINES
+// ═══════════════════════════════════════════════════════
+
+function getNodeCenter(nodeId) {
+  const el = document.getElementById(`fn-${nodeId}`);
+  if (!el) return null;
+  const wrapper = document.getElementById('canvas-wrapper');
+  const canvasRect = document.getElementById('canvas').getBoundingClientRect();
+  const rect = el.getBoundingClientRect();
+  return {
+    x: (rect.left - canvasRect.left + rect.width / 2) / state.zoom,
+    y: (rect.top - canvasRect.top + rect.height / 2) / state.zoom,
+  };
+}
+
+function updateDepLines() {
+  if (!state.selectedFile) {
+    document.getElementById('dep-overlay').innerHTML = '';
+    return;
+  }
+
+  setTimeout(() => {
+    const result = getFile(state.selectedFile);
+    if (!result) return;
+    const { file } = result;
+
+    const canvas = document.getElementById('canvas');
+    const svg = document.getElementById('dep-overlay');
+    svg.style.width = canvas.scrollWidth + 'px';
+    svg.style.height = canvas.scrollHeight + 'px';
+    svg.setAttribute('width', canvas.scrollWidth);
+    svg.setAttribute('height', canvas.scrollHeight);
+
+    let svgContent = `
+      <defs>
+        <marker id="arr-purple" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#6366f1" opacity="0.9"/>
+        </marker>
+        <marker id="arr-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#10b981" opacity="0.9"/>
+        </marker>
+        <marker id="arr-amber" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#f59e0b" opacity="0.9"/>
+        </marker>
+      </defs>
+    `;
+
+    const fromCenter = getNodeCenter(file.id);
+    if (!fromCenter) { svg.innerHTML = svgContent; return; }
+
+    for (const depId of (file.deps || [])) {
+      const toCenter = getNodeCenter(depId);
+      if (!toCenter) continue;
+
+      const depFile = getFile(depId);
+      if (!depFile) continue;
+
+      // Determine connection type
+      let color = '#6366f1';
+      let marker = 'arr-purple';
+      let dash = '';
+      if (file.layer === 'presentation' && depFile.file.layer === 'domain') {
+        if (!state.connFilters['screen-ctrl']) continue;
+        color = '#6366f1'; marker = 'arr-purple';
+      } else if (file.layer === 'domain' && depFile.file.layer === 'data') {
+        if (!state.connFilters['ctrl-repo']) continue;
+        color = '#10b981'; marker = 'arr-green'; dash = 'stroke-dasharray="6 3"';
+      } else if (file.layer === 'data' && depFile.file.layer === 'domain') {
+        if (!state.connFilters['repo-model']) continue;
+        color = '#f59e0b'; marker = 'arr-amber'; dash = 'stroke-dasharray="4 4"';
+      } else {
+        color = '#6366f1'; marker = 'arr-purple';
+      }
+
+      const dx = toCenter.x - fromCenter.x;
+      const dy = toCenter.y - fromCenter.y;
+      const cx1 = fromCenter.x + dx * 0.3;
+      const cy1 = fromCenter.y + dy * 0.1;
+      const cx2 = fromCenter.x + dx * 0.7;
+      const cy2 = fromCenter.y + dy * 0.9;
+
+      svgContent += `<path d="M ${fromCenter.x} ${fromCenter.y} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${toCenter.x} ${toCenter.y}"
+        fill="none" stroke="${color}" stroke-width="1.5" opacity="0.7" ${dash} marker-end="url(#${marker})"/>`;
+    }
+
+    // Also draw lines from files that depend on this file
+    for (const feat of FEATURES) {
+      for (const f of feat.files) {
+        if (f.deps && f.deps.includes(file.id) && f.id !== file.id) {
+          const fromC = getNodeCenter(f.id);
+          if (!fromC) continue;
+          const dx = fromCenter.x - fromC.x;
+          const dy = fromCenter.y - fromC.y;
+          const cx1 = fromC.x + dx * 0.3;
+          const cy1 = fromC.y + dy * 0.1;
+          const cx2 = fromC.x + dx * 0.7;
+          const cy2 = fromC.y + dy * 0.9;
+          svgContent += `<path d="M ${fromC.x} ${fromC.y} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${fromCenter.x} ${fromCenter.y}"
+            fill="none" stroke="#6366f150" stroke-width="1" opacity="0.4" stroke-dasharray="3 3" marker-end="url(#arr-purple)"/>`;
+        }
+      }
+    }
+
+    svg.innerHTML = svgContent;
+  }, 50);
+}
+
+// ═══════════════════════════════════════════════════════
+//  FILE INSPECTOR
+// ═══════════════════════════════════════════════════════
+
+function selectFile(fileId) {
+  if (state.selectedFile) {
+    const prev = document.getElementById(`fn-${state.selectedFile}`);
+    if (prev) prev.classList.remove('selected');
+  }
+  state.selectedFile = fileId;
+  const el = document.getElementById(`fn-${fileId}`);
+  if (el) el.classList.add('selected');
+  document.getElementById('inspector').classList.add('open');
+  renderInspector();
+  updateDepLines();
+  updatePrompt();
+}
+
+function closeInspector() {
+  document.getElementById('inspector').classList.remove('open');
+  if (state.selectedFile) {
+    const el = document.getElementById(`fn-${state.selectedFile}`);
+    if (el) el.classList.remove('selected');
+  }
+  state.selectedFile = null;
+  document.getElementById('dep-overlay').innerHTML = '';
+  updatePrompt();
+}
+
+function renderInspector() {
+  const result = getFile(state.selectedFile);
+  if (!result) return;
+  const { file, feature } = result;
+
+  document.getElementById('inspector-title').textContent = file.name;
+  document.getElementById('inspector-subtitle').textContent = file.path;
+
+  const layerColors = { presentation: 'var(--green)', domain: 'var(--yellow)', data: 'var(--orange)' };
+
+  let html = '';
+
+  // Layer badge
+  html += `<div class="inspector-field">
+    <div class="inspector-field-label">Architecture Layer</div>
+    <div>
+      <span class="layer-badge ${file.layer}">${LAYER_ICONS[file.layer]} ${file.layer.charAt(0).toUpperCase() + file.layer.slice(1)}</span>
+      <span class="layer-badge" style="background:${feature.color}22;color:${feature.color};border:1px solid ${feature.color}44;margin-left:4px">📦 ${feature.name}</span>
+    </div>
+  </div>`;
+
+  // Renders UI?
+  html += `<div class="inspector-field">
+    <div class="inspector-field-label">Renders UI?</div>
+    <span class="inspector-badge ${file.rendersUI ? 'yes' : 'no'}">${file.rendersUI ? '✓ Yes — Visual Screen/Widget' : '✗ No — Logic/Data Only'}</span>
+  </div>`;
+
+  // File type
+  html += `<div class="inspector-field">
+    <div class="inspector-field-label">File Type</div>
+    <div class="inspector-field-value">${TYPE_ICONS[file.type]} ${file.type.charAt(0).toUpperCase() + file.type.slice(1)}</div>
+  </div>`;
+
+  // State Management Link
+  html += `<div class="inspector-field">
+    <div class="inspector-field-label">State Management Link</div>`;
+  if (file.stateLink) {
+    html += `<span class="inspector-badge link">⚡ ${file.stateLink}</span>`;
+  } else if (file.type === 'controller') {
+    html += `<span class="inspector-badge link">⚡ This IS a Riverpod Provider</span>`;
+  } else {
+    html += `<div class="inspector-field-value" style="color:var(--muted);font-size:11px">No direct state dependency</div>`;
+  }
+  html += `</div>`;
+
+  // Dependencies
+  if (file.deps && file.deps.length > 0) {
+    html += `<div class="inspector-field">
+      <div class="inspector-field-label">Depends On</div>
+      <div>`;
+    for (const dep of file.deps) {
+      const depResult = getFile(dep);
+      const depName = depResult ? depResult.file.name : dep;
+      html += `<span class="dep-chip" onclick="selectFile('${dep}')" title="Jump to ${depName}">→ ${depName}</span>`;
+    }
+    html += `</div></div>`;
+  }
+
+  // Responsibilities
+  html += `<div class="inspector-field">
+    <div class="inspector-field-label">Responsibilities</div>
+    <div style="display:flex;flex-direction:column;gap:4px">`;
+  for (const r of file.responsibilities) {
+    html += `<div class="inspector-bullet">${r}</div>`;
+  }
+  html += `</div></div>`;
+
+  // File path
+  html += `<div class="inspector-field">
+    <div class="inspector-field-label">Full Path</div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--muted);word-break:break-all;line-height:1.6">${file.path}</div>
+  </div>`;
+
+  document.getElementById('inspector-body').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+//  PROMPT GENERATION
+// ═══════════════════════════════════════════════════════
+
+function setPromptMode(mode) {
+  state.promptMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`mode-${mode}`).classList.add('active');
+  updatePrompt();
+}
+
+function updatePrompt() {
+  const el = document.getElementById('prompt-text');
+  const result = state.selectedFile ? getFile(state.selectedFile) : null;
+
+  if (!result) {
+    el.textContent = 'Select a UI screen or widget above to generate a prompt.';
+    return;
+  }
+
+  const { file, feature } = result;
+
+  if (state.promptMode === 'widget') {
+    if (!file.rendersUI) {
+      el.textContent = `"${file.name}" does not render UI. Select a screen or widget file to generate a mock widget prompt.`;
+      return;
+    }
+    const deps = file.deps && file.deps.length > 0
+      ? `\nIt is driven by ${file.deps.join(', ')} (Riverpod providers).`
+      : '';
+    const resps = file.responsibilities.join('; ');
+    el.textContent = `I'm working on the PetFolio Flutter app (Riverpod + Supabase, Material 3).
+
+Generate a self-contained mock widget for "${file.name}" located at ${file.path}.
+
+The widget belongs to the ${feature.name} feature's Presentation Layer and is responsible for: ${resps}.${deps}
+
+Requirements:
+- Use hardcoded mock data (no real Riverpod providers)
+- Follow Material 3 design with PetFolio's color palette (primary: #6366f1)
+- Include all visible UI elements: ${file.responsibilities.slice(0, 3).join(', ')}
+- Make it a StatelessWidget returning a complete Scaffold or container
+- Use AppColors / AppTheme token references where possible`;
+
+  } else if (state.promptMode === 'test') {
+    const controller = file.stateLink || (file.deps && file.deps[0]) || 'its Riverpod provider';
+    el.textContent = `Write a widget test for "${file.name}" (${file.path}) in the PetFolio Flutter app.
+
+Feature: ${feature.name} | Layer: ${file.layer} | Type: ${file.type}
+Responsibilities: ${file.responsibilities.join('; ')}
+
+Test requirements:
+1. Mock ${controller} using Riverpod's ProviderContainer / overrides
+2. Pump the widget with a ProviderScope and mock data
+3. Verify: ${file.responsibilities.slice(0, 2).map((r, i) => `\n   ${i + 1}. ${r}`).join('')}
+4. Test loading state (AsyncLoading) and error state (AsyncError)
+5. Test at least one user interaction (tap / scroll) if applicable
+
+Use flutter_test, mockito or manual stub — no real Supabase calls.`;
+
+  } else if (state.promptMode === 'review') {
+    el.textContent = `Review the implementation of "${file.name}" (${file.path}) in the PetFolio Flutter app.
+
+Context:
+- Feature: ${feature.name}
+- Layer: ${file.layer} (${file.type})
+- State link: ${file.stateLink || 'none'}
+- Responsibilities: ${file.responsibilities.join('; ')}
+
+Please check for:
+1. Correct Riverpod usage (ref.watch vs ref.read, AsyncValue handling)
+2. Proper error and loading state handling in the UI
+3. Material 3 / AppTheme compliance (no hardcoded colors)
+4. Missing null checks or unsafe operations
+5. Performance issues (unnecessary rebuilds, expensive operations in build())
+6. Accessibility (semantics labels, contrast)`;
+  }
+}
+
+function copyPrompt() {
+  const text = document.getElementById('prompt-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  CONTROLS
+// ═══════════════════════════════════════════════════════
+
+function toggleLayer(layer) {
+  state.layers[layer] = !state.layers[layer];
+  const btn = document.getElementById(`toggle-${layer}`);
+  btn.classList.toggle('active', state.layers[layer]);
+  const layerEl = document.getElementById(`layer-${layer}`);
+  if (layerEl) {
+    layerEl.classList.toggle('dimmed-layer', !state.layers[layer]);
+    layerEl.classList.toggle('visible-layer', state.layers[layer]);
+  }
+  updateDepLines();
+}
+
+function toggleUIOnly() {
+  state.uiOnly = !state.uiOnly;
+  const btn = document.getElementById('ui-only-toggle');
+  btn.classList.toggle('active', state.uiOnly);
+
+  ['domain', 'data'].forEach(layer => {
+    const layerEl = document.getElementById(`layer-${layer}`);
+    if (layerEl) {
+      layerEl.classList.toggle('dimmed-layer', state.uiOnly);
+      layerEl.classList.toggle('visible-layer', !state.uiOnly);
+    }
+  });
+}
+
+function toggleConn(type) {
+  state.connFilters[type] = !state.connFilters[type];
+  const btn = document.getElementById(`conn-${type}`);
+  btn.classList.toggle('active', state.connFilters[type]);
+  updateDepLines();
+}
+
+function applyPreset(preset) {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+
+  if (preset === 'full') {
+    state.activeFeatures = new Set(FEATURES.map(f => f.id));
+    state.layers = { presentation: true, domain: true, data: true };
+    state.uiOnly = false;
+    document.getElementById('preset-full').classList.add('active');
+  } else if (preset === 'ui-only') {
+    state.activeFeatures = new Set(FEATURES.map(f => f.id));
+    state.layers = { presentation: true, domain: false, data: false };
+    state.uiOnly = true;
+    document.getElementById('preset-ui').classList.add('active');
+  } else if (preset === 'marketplace') {
+    state.activeFeatures = new Set(['core', 'marketplace', 'auth']);
+    state.layers = { presentation: true, domain: true, data: true };
+    state.uiOnly = false;
+    document.getElementById('preset-mkt').classList.add('active');
+  } else if (preset === 'care') {
+    state.activeFeatures = new Set(['core', 'care', 'pet_profile']);
+    state.layers = { presentation: true, domain: true, data: true };
+    state.uiOnly = false;
+    document.getElementById('preset-care').classList.add('active');
+  } else if (preset === 'social') {
+    state.activeFeatures = new Set(['core', 'social', 'matching', 'communities']);
+    state.layers = { presentation: true, domain: true, data: true };
+    state.uiOnly = false;
+    document.getElementById('preset-social').classList.add('active');
+  }
+
+  // Sync layer toggle buttons
+  ['presentation', 'domain', 'data'].forEach(layer => {
+    document.getElementById(`toggle-${layer}`).classList.toggle('active', state.layers[layer]);
+  });
+  document.getElementById('ui-only-toggle').classList.toggle('active', state.uiOnly);
+
+  // Sync feature chips
+  document.querySelectorAll('.feat-chip').forEach(chip => {
+    const id = chip.dataset.id;
+    chip.classList.toggle('active', state.activeFeatures.has(id));
+  });
+
+  render();
+}
+
+function toggleFeature(id) {
+  if (state.activeFeatures.has(id)) {
+    if (state.activeFeatures.size > 1) state.activeFeatures.delete(id);
+  } else {
+    state.activeFeatures.add(id);
+  }
+  const chip = document.querySelector(`.feat-chip[data-id="${id}"]`);
+  if (chip) chip.classList.toggle('active', state.activeFeatures.has(id));
+  render();
+}
+
+// ═══════════════════════════════════════════════════════
+//  ZOOM
+// ═══════════════════════════════════════════════════════
+
+function zoom(delta) {
+  state.zoom = Math.max(0.4, Math.min(2, state.zoom + delta));
+  document.getElementById('canvas-content').style.transform = `scale(${state.zoom})`;
+  document.getElementById('canvas-content').style.transformOrigin = 'top left';
+  document.getElementById('zoom-label').textContent = Math.round(state.zoom * 100) + '%';
+  setTimeout(updateDepLines, 100);
+}
+
+function resetZoom() {
+  state.zoom = 1;
+  document.getElementById('canvas-content').style.transform = '';
+  document.getElementById('zoom-label').textContent = '100%';
+  setTimeout(updateDepLines, 100);
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+
+function init() {
+  // Build feature chips
+  const chipsContainer = document.getElementById('feature-chips');
+  chipsContainer.innerHTML = FEATURES.map(f =>
+    `<div class="feat-chip active" data-id="${f.id}" onclick="toggleFeature('${f.id}')" style="border-color:${f.color}55;color:${f.color}">${f.name}</div>`
+  ).join('');
+
+  render();
+
+  // Redraw dep lines on scroll
+  document.getElementById('canvas-wrapper').addEventListener('scroll', () => {
+    if (state.selectedFile) updateDepLines();
+  });
+
+}
+
+init();
+</script>
+</body>
+</html>

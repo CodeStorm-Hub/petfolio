@@ -25,7 +25,7 @@ class _TailWagLoaderState extends State<TailWagLoader> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 600))
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 500))
       ..repeat(reverse: true);
   }
 
@@ -46,7 +46,8 @@ class _TailWagLoaderState extends State<TailWagLoader> with SingleTickerProvider
             return CustomPaint(
               size: Size(widget.size, widget.size),
               painter: _DogPainter(
-                tailAngle: Curves.easeInOut.transform(_ctrl.value),
+                // M3E spring curve — easeOutBack gives a wag overshoot
+                tailAngle: Curves.easeInOutBack.transform(_ctrl.value),
                 color: widget.color,
               ),
             );

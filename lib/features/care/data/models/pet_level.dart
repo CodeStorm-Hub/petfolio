@@ -77,7 +77,11 @@ class PetLevel {
   int get xpForLevel => levelEndXp - levelStartXp;
   int get xpToNext => isMaxLevel ? 0 : levelEndXp - currentXp;
   double get progress => isMaxLevel ? 1.0 : (xpInLevel / xpForLevel).clamp(0.0, 1.0);
-  String get nextTitle => isMaxLevel ? title : _titles[(level).clamp(0, _titles.length - 1)];
+  String get nextTitle {
+    if (isMaxLevel) return title;
+    final nextIdx = (level).clamp(0, _titles.length - 1);
+    return _titles[nextIdx];
+  }
 }
 
 // ── Badge catalog ─────────────────────────────────────────────────────────────

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -1034,10 +1035,23 @@ class _CommentInputBarState extends State<_CommentInputBar> {
                 autofocus: widget.autofocus,
                 minLines: 1,
                 maxLines: 4,
+                maxLength: 500,
+                maxLengthEnforcement: MaxLengthEnforcement.enforced,
                 style: TextStyle(
                   fontSize: 14,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
+                buildCounter: (_, {required currentLength, required isFocused, maxLength}) {
+                  final remaining = (maxLength ?? 500) - currentLength;
+                  if (remaining > 50) return null;
+                  return Text(
+                    '$remaining',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: remaining < 20 ? AppColors.poppy : pt.ink300,
+                    ),
+                  );
+                },
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   focusedBorder: InputBorder.none,

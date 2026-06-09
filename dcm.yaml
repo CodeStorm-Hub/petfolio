@@ -1,0 +1,21 @@
+dart:
+  metrics:
+    cyclomatic-complexity: 20
+    number-of-parameters: 6
+    source-lines-of-code: 50
+  metrics-exclude:
+    - test/**
+    - lib/**.g.dart
+    - lib/**.freezed.dart
+  rules:
+    - avoid-dynamic
+    - avoid-passing-async-when-sync-expected
+    - prefer-match-file-name
+    - prefer-conditional-expressions
+    - no-equal-then-else
+    - avoid-unused-parameters
+    - avoid-nested-conditional-expressions:
+        acceptable-level: 2
+    - prefer-trailing-comma
+  rules-exclude:
+    - test/**

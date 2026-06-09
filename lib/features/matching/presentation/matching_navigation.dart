@@ -34,7 +34,7 @@ Future<void> openMatchChat(
 }
 
 void openMatchesInbox(BuildContext context) {
-  context.push('/matching/inbox');
+  context.go('/matching/inbox');
 }
 
 void popOrGo(BuildContext context, String fallbackLocation) {

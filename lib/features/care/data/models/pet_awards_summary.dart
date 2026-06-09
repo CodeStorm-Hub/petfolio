@@ -9,7 +9,7 @@ class UnlockedBadge {
     final at = rawAt is String ? DateTime.tryParse(rawAt) : null;
     return UnlockedBadge(
       badgeType: json['badge_type'] as String,
-      unlockedAt: at ?? DateTime.now(),
+      unlockedAt: at ?? DateTime.utc(2020),
     );
   }
 }
