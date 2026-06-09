@@ -35,7 +35,7 @@
       "source": "dart-lang/skills",
       "sourceType": "github",
       "skillPath": "skills/dart-migrate-to-checks-package/SKILL.md",
-      "computedHash": "f0a9f90e76e4e807ff6fac2566913feaf6823df2456ff05efa20de75a064a8ff"
+      "computedHash": "c9e99ca93c56a78000d1afd1bbe9abdd263d0568ec3993b4034365dd663e0838"
     },
     "dart-resolve-package-conflicts": {
       "source": "dart-lang/skills",
@@ -48,6 +48,18 @@
       "sourceType": "github",
       "skillPath": "skills/dart-run-static-analysis/SKILL.md",
       "computedHash": "7b143ff93bfb118ce9d72fca56cef4b38d75bfe9044367101db09cf32e6815ad"
+    },
+    "dart-setup-ffi-assets": {
+      "source": "dart-lang/skills",
+      "sourceType": "github",
+      "skillPath": "skills/dart-setup-ffi-assets/SKILL.md",
+      "computedHash": "d1813c87bd7c556d1aeda275d4b4fa49ce3a3fc19d5d3d8c203c5b9aeaefac51"
+    },
+    "dart-use-ffigen": {
+      "source": "dart-lang/skills",
+      "sourceType": "github",
+      "skillPath": "skills/dart-use-ffigen/SKILL.md",
+      "computedHash": "5eefc97ee5160fc6c68af3ed77371bbc10b7cd782dd661eaa1e7516b8b6ba2e2"
     },
     "dart-use-pattern-matching": {
       "source": "dart-lang/skills",
