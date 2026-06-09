@@ -170,7 +170,7 @@ class _LikedContent extends ConsumerWidget {
                 crossAxisCount: 2,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                childAspectRatio: 0.85,
+                childAspectRatio: 0.76,
               ),
               itemCount: snapshot.mutual.length,
               itemBuilder: (context, i) {
@@ -302,7 +302,7 @@ class _LikedCard extends StatelessWidget {
                   flex: 2,
                   child: Padding(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -327,7 +327,7 @@ class _LikedCard extends StatelessWidget {
                           ),
                         ],
                         if (item.isMutual && onTap != null) ...[
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 4),
                           SizedBox(
                             height: 28,
                             child: FilledButton.icon(
