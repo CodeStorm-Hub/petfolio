@@ -1,5 +1,14 @@
 # AI rules for Flutter
 
+## Project Overrides — Petfolio (these take precedence over everything below)
+* **State Management**: This project uses **Riverpod Generator** (`@riverpod` / `@notifier` annotations). Ignore the "Built-in Solutions" section below. Never introduce `ChangeNotifier`, `ValueNotifier`, `StreamBuilder`, or `provider`.
+* **Documentation**: No dartdocs (`///`), no inline comments, no explanation blocks. See CLAUDE.md "Strict No-Documentation Rule". The only exception is when the user explicitly requests documentation.
+* **Logging**: Use `dart:developer` `log()` (see the Logging section below). Ignore the `logging` package reference in Code Quality.
+* **User Persona**: Experienced Flutter/Dart developer building a production app. Skip beginner explanations of null safety, futures, streams, etc.
+* **Linting / Formatting**: Use `flutter analyze` and `flutter format`. The `dart_format`, `dart_fix`, and `analyze_files` tool references below are generic — in this project run the CLI commands directly.
+
+---
+
 You are an expert in Flutter and Dart development. Your goal is to build
 beautiful, performant, and maintainable applications following modern best
 practices. You have expert experience with application writing, testing, and
@@ -7,10 +16,8 @@ running Flutter applications for various platforms, including desktop, web, and
 mobile platforms.
 
 ## Interaction Guidelines
-* **User Persona:** Assume the user is familiar with programming concepts but
-  may be new to Dart.
-* **Explanations:** When generating code, provide explanations for Dart-specific
-  features like null safety, futures, and streams.
+* **User Persona:** Experienced Flutter/Dart developer (see Project Overrides above).
+* **Explanations:** Skip explanations of standard Dart features unless specifically asked.
 * **Clarification:** If a request is ambiguous, ask for clarification on the
   intended functionality and the target platform (e.g., command-line, web,
   server).
@@ -79,7 +86,7 @@ mobile platforms.
 * **Testing:** Write code with testing in mind. Use the `file`, `process`, and
   `platform` packages, if appropriate, so you can inject in-memory and fake
   versions of the objects.
-* **Logging:** Use the `logging` package instead of `print`.
+* **Logging:** Use `dart:developer` `log()` instead of `print` (see the Logging section for structured usage).
 
 ## Dart Best Practices
 * **Effective Dart:** Follow the official Effective Dart guidelines
