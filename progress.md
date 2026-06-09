@@ -1,5 +1,37 @@
 # Petfolio — Progress Log
 
+## 2026-06-09 - Contextual Navigation Phase 2 (Global Shell Completion)
+
+`flutter analyze` - **No issues found.**
+
+### Implemented
+
+**`lib/core/navigation/shell_destinations.dart`** - `globalDestinations` updated from 5 tabs to 4 (Home/Alerts/Activity/Me); `globalAccents` trimmed to match
+
+**`lib/core/navigation/app_shell_routes.dart`** - `/notifications`, `/activity`, `/me` added inside ShellRoute
+
+**New: `lib/features/profile/presentation/screens/me_screen.dart`** - Shell-tab Me screen; profile card with active pet/initials + Gold Member pill; MY PETS (switch/add), ACCOUNT (addresses, orders, seller), PREFERENCES (notifications, dark mode), OFFERS, HELP & LEGAL, Sign Out; no internal header - uses `SizedBox(height: topPad + 76)` spacer for AppShellHeader
+
+**`lib/features/social/presentation/screens/notifications_screen.dart`** - `showHeader` param added; when false hides back-button header and adds spacer; used by `/notifications` shell tab
+
+**`lib/features/activity/presentation/screens/activity_screen.dart`** - same `showHeader` pattern
+
+**`lib/core/widgets/app_shell.dart`** - `_globalEyebrows` trimmed to 4 entries (HOME/ALERTS/ACTIVITY/ME); `_buildTrailing` rewritten with direct switch on subIndex for global shell: Home=streak+notifs+me, Alerts=mark-all-read, Activity=filter, Me=dark mode toggle
+
+**`lib/core/navigation/router_notifier.dart`** - redirects: `/settings` to `/me`, `/social/notifications` to `/notifications`
+
+**`lib/features/activity/activity_routes.dart`** - returns empty list (moved to shell)
+
+**`lib/features/settings/presentation/screens/settings_screen.dart`** - `push('/activity')` changed to `go('/activity')`
+
+### Next step - Phase 3: Module Sub-route Migration
+- Move `/social/stories`, `/social/communities` inside shell
+- Move `/matching/inbox` inside shell
+- New `/matching/liked` screen (MatchLikedScreen)
+
+Phase complete - please run (/remember) to save tokens before proceeding to Phase 3.
+
+---
 ## 2026-06-09 — Contextual Navigation Phase 1 (Foundation) ✅
 
 `flutter analyze` — **No issues found.**
