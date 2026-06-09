@@ -18,7 +18,9 @@ import '../controllers/notification_controller.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 
 class NotificationsScreen extends ConsumerStatefulWidget {
-  const NotificationsScreen({super.key});
+  const NotificationsScreen({super.key, this.showHeader = true});
+
+  final bool showHeader;
 
   @override
   ConsumerState<NotificationsScreen> createState() =>
@@ -57,48 +59,54 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
         .toList();
     final unreadCount = updates.where((n) => !n.isRead).length;
 
+    final topPad = MediaQuery.paddingOf(context).top;
+
     return Scaffold(
       backgroundColor: pt.surface1,
       body: SafeArea(
+        top: widget.showHeader,
         bottom: false,
         child: Column(
           children: [
-            // ── Header ─────────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(6, 10, 16, 0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded),
-                    color: AppColors.ink950,
-                    onPressed: () => context.pop(),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Notifications',
-                    style: GoogleFonts.sora(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 20,
+            // ── Header (push-mode only) ────────────────────────────────────
+            if (widget.showHeader)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(6, 10, 16, 0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_rounded),
                       color: AppColors.ink950,
+                      onPressed: () => context.pop(),
                     ),
-                  ),
-                  const Spacer(),
-                  if (unreadCount > 0)
-                    TextButton(
-                      onPressed: () =>
-                          ref.read(notificationsProvider.notifier).markAllRead(),
-                      child: Text(
-                        'Mark all read',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.poppy,
-                        ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Notifications',
+                      style: GoogleFonts.sora(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 20,
+                        color: AppColors.ink950,
                       ),
                     ),
-                ],
-              ),
-            ),
+                    const Spacer(),
+                    if (unreadCount > 0)
+                      TextButton(
+                        onPressed: () =>
+                            ref.read(notificationsProvider.notifier).markAllRead(),
+                        child: Text(
+                          'Mark all read',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.poppy,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              )
+            else
+              SizedBox(height: topPad + 76),
 
             // ── Pathao-style flat tab bar ──────────────────────────────────
             Container(

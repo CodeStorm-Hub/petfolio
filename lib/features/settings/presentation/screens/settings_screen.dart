@@ -69,7 +69,7 @@ class SettingsScreen extends ConsumerWidget {
                   _SettingsTile(
                     icon: Icons.shopping_bag_outlined,
                     label: 'My Orders',
-                    onTap: () => context.push('/activity'),
+                    onTap: () => context.go('/activity'),
                   ),
                 ],
               ),

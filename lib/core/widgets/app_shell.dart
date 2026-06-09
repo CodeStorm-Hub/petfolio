@@ -8,6 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:petfolio/core/navigation/shell_destinations.dart';
+import 'package:petfolio/core/navigation/shell_module_provider.dart';
+import 'package:petfolio/features/social/presentation/controllers/notification_controller.dart';
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/pet_avatar.dart';
 import 'package:petfolio/core/widgets/app_tutorial_overlay.dart';
@@ -19,39 +22,6 @@ import 'package:petfolio/features/pet_profile/presentation/controllers/active_pe
 import 'package:petfolio/core/providers/shell_scroll_provider.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_streak_stream_provider.dart';
 import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
-
-// ── Tab accent colors (matches design system pillar colors) ──────────────────
-const tabAccentColors = [
-  AppColors.tangerine, // Pets
-  AppColors.sunny,     // Care
-  AppColors.poppy,     // Social
-  AppColors.lilac,     // Match
-  AppColors.mint,      // Market
-];
-
-// ── Nav destination descriptor ───────────────────────────────────────────────
-class AppShellDestination {
-  const AppShellDestination({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-    required this.path,
-  });
-
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
-  final String path;
-}
-
-// ── Shell destinations (single source of truth) ───────────────────────────────
-const appShellDestinations = [
-  AppShellDestination(icon: Icons.home_outlined,       activeIcon: Icons.home_rounded,           label: 'Home',   path: '/home'),
-  AppShellDestination(icon: Icons.local_fire_department_outlined, activeIcon: Icons.local_fire_department, label: 'Care',   path: '/care'),
-  AppShellDestination(icon: Icons.favorite_border,     activeIcon: Icons.favorite,              label: 'Social', path: '/social'),
-  AppShellDestination(icon: Icons.auto_awesome_outlined, activeIcon: Icons.auto_awesome,        label: 'Match',  path: '/matching'),
-  AppShellDestination(icon: Icons.storefront_outlined, activeIcon: Icons.storefront,            label: 'Market', path: '/marketplace'),
-];
 
 // ── App shell ─────────────────────────────────────────────────────────────────
 
@@ -84,12 +54,12 @@ class _AppShellState extends ConsumerState<AppShell> {
     }
   }
 
-  int _selectedIndex(BuildContext context) {
+  ShellModule _currentModule(BuildContext context) =>
+      moduleFromPath(GoRouterState.of(context).matchedLocation);
+
+  int _currentSubIndex(ShellModule module, BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
-    for (var i = 0; i < appShellDestinations.length; i++) {
-      if (location.startsWith(appShellDestinations[i].path)) return i;
-    }
-    return 0;
+    return selectedSubIndex(destinationsFor(module), location);
   }
 
   Widget _wrapWithTutorial(Widget shell) {
@@ -108,8 +78,32 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedIndex = _selectedIndex(context);
+    final module = _currentModule(context);
+    final subIndex = _currentSubIndex(module, context);
+    final dests = destinationsFor(module);
+    final accents = accentsFor(module);
     final isWide = MediaQuery.sizeOf(context).width >= 600;
+
+    Widget floatingNav = AnimatedSwitcher(
+      duration: const Duration(milliseconds: 220),
+      transitionBuilder: (child, anim) => FadeTransition(
+        opacity: anim,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.15),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
+          child: child,
+        ),
+      ),
+      child: _FloatingNav(
+        key: ValueKey(module),
+        destinations: dests,
+        selectedIndex: subIndex,
+        onSelect: (i) => context.go(dests[i].path),
+        accentColors: accents,
+      ),
+    );
 
     if (isWide) {
       return _wrapWithTutorial(
@@ -117,8 +111,10 @@ class _AppShellState extends ConsumerState<AppShell> {
           body: Row(
             children: [
               _WideNavRail(
-                selectedIndex: selectedIndex,
-                onSelect: (i) => context.go(appShellDestinations[i].path),
+                destinations: dests,
+                accentColors: accents,
+                selectedIndex: subIndex,
+                onSelect: (i) => context.go(dests[i].path),
               ),
               const VerticalDivider(thickness: 1, width: 1),
               Expanded(
@@ -127,7 +123,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                     Positioned.fill(child: widget.child),
                     Positioned(
                       top: 0, left: 0, right: 0,
-                      child: AppShellHeader(selectedIndex: selectedIndex),
+                      child: AppShellHeader(module: module, subIndex: subIndex),
                     ),
                   ],
                 ),
@@ -146,10 +142,8 @@ class _AppShellState extends ConsumerState<AppShell> {
             children: [
               Positioned.fill(child: widget.child),
               Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: AppShellHeader(selectedIndex: selectedIndex),
+                top: 0, left: 0, right: 0,
+                child: AppShellHeader(module: module, subIndex: subIndex),
               ),
             ],
           ),
@@ -157,10 +151,7 @@ class _AppShellState extends ConsumerState<AppShell> {
             top: false,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: _FloatingNav(
-                selectedIndex: selectedIndex,
-                onSelect: (i) => context.go(appShellDestinations[i].path),
-              ),
+              child: floatingNav,
             ),
           ),
         ),
@@ -175,16 +166,13 @@ class _AppShellState extends ConsumerState<AppShell> {
             Positioned.fill(child: widget.child),
             Positioned(
               top: 0, left: 0, right: 0,
-              child: AppShellHeader(selectedIndex: selectedIndex),
+              child: AppShellHeader(module: module, subIndex: subIndex),
             ),
             Positioned(
               left: 16,
               right: 16,
               bottom: 12 + MediaQuery.paddingOf(context).bottom,
-              child: _FloatingNav(
-                selectedIndex: selectedIndex,
-                onSelect: (i) => context.go(appShellDestinations[i].path),
-              ),
+              child: floatingNav,
             ),
           ],
         ),
@@ -196,69 +184,95 @@ class _AppShellState extends ConsumerState<AppShell> {
 // ── Header ────────────────────────────────────────────────────────────────────
 
 class AppShellHeader extends ConsumerWidget {
-  const AppShellHeader({super.key, required this.selectedIndex});
+  const AppShellHeader({super.key, required this.module, required this.subIndex});
 
-  final int selectedIndex;
+  final ShellModule module;
+  final int subIndex;
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final activePet = ref.watch(activePetControllerProvider);
+  static const _globalEyebrows = ['HOME', 'ALERTS', 'ACTIVITY', 'ME'];
+  static const _moduleEyebrows = {
+    ShellModule.care:        'CARE',
+    ShellModule.social:      'PAWSFEED',
+    ShellModule.matching:    'MATCH · NEARBY',
+    ShellModule.marketplace: 'MARKET',
+  };
 
-    final eyebrows = [
-      'HOME',
-      'CARE',
-      'PAWSFEED',
-      'MATCH · NEARBY',
-      'SHOP FOR',
-    ];
-
-    Widget trailingActions;
-    switch (selectedIndex) {
-      case 0:
-        trailingActions = Row(children: [
-          Consumer(builder: (context, ref, _) {
-            final pet = ref.watch(activePetControllerProvider);
-            if (pet == null) return const SizedBox.shrink();
-            final streakAsync = ref.watch(careStreakRealtimeProvider(pet.id));
-            final streak = streakAsync.maybeWhen(
-              data: (s) => s.currentStreak,
-              orElse: () => 0,
-            );
-            if (streak == 0) return const SizedBox.shrink();
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0x38FFFFFF),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('🔥', style: TextStyle(fontSize: 13)),
-                  const SizedBox(width: 4),
-                  Text(
-                    '$streak',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
+  Widget _buildTrailing(BuildContext context, WidgetRef ref) {
+    if (module == ShellModule.global) {
+      switch (subIndex) {
+        case 0: // Home
+          return Row(children: [
+            Consumer(builder: (context, ref, _) {
+              final pet = ref.watch(activePetControllerProvider);
+              if (pet == null) return const SizedBox.shrink();
+              final streakAsync = ref.watch(careStreakRealtimeProvider(pet.id));
+              final streak = streakAsync.maybeWhen(
+                data: (s) => s.currentStreak,
+                orElse: () => 0,
+              );
+              if (streak == 0) return const SizedBox.shrink();
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0x38FFFFFF),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('🔥', style: TextStyle(fontSize: 13)),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$streak',
+                      style: const TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              );
+            }),
+            const SizedBox(width: 8),
+            _HeaderIconBtn(icon: Icons.notifications_rounded, onTap: () => context.go('/notifications')),
+            const SizedBox(width: 8),
+            _HeaderIconBtn(icon: Icons.manage_accounts_rounded, onTap: () => context.go('/me')),
+          ]);
+        case 1: // Alerts
+          return Consumer(builder: (context, ref, _) {
+            final notifs = ref.watch(notificationsProvider).value ?? [];
+            final unread = notifs.where((n) => !n.isRead).length;
+            if (unread == 0) return const SizedBox.shrink();
+            return TextButton(
+              onPressed: () => ref.read(notificationsProvider.notifier).markAllRead(),
+              child: const Text(
+                'Mark all read',
+                style: TextStyle(
+                  fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white,
+                ),
               ),
             );
-          }),
-          const SizedBox(width: 8),
-          _HeaderIconBtn(icon: Icons.notifications_rounded, onTap: () => context.push('/social/notifications')),
-          const SizedBox(width: 8),
-          _HeaderIconBtn(icon: Icons.settings_rounded, onTap: () => context.push('/settings')),
-        ]);
-      case 1:
-        trailingActions = Row(children: [
+          });
+        case 2: // Activity
+          return _HeaderIconBtn(icon: Icons.tune_rounded, onTap: () {});
+        case 3: // Me
+        default:
+          return Consumer(builder: (context, ref, _) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return _HeaderIconBtn(
+              icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+              onTap: () => ref.read(themeProvider.notifier).toggleTheme(),
+            );
+          });
+      }
+    }
+
+    switch (module) {
+      case ShellModule.care:
+        return Row(children: [
           _HeaderIconBtn(
             icon: Icons.directions_walk_rounded,
             tooltip: 'Walk tracking',
-            onTap: () => context.push('/care/walk'),
+            onTap: () => context.go('/care/walk'),
           ),
           const SizedBox(width: 8),
           Consumer(builder: (context, ref, _) {
@@ -270,8 +284,8 @@ class AppShellHeader extends ConsumerWidget {
             );
           }),
         ]);
-      case 2:
-        trailingActions = Row(children: [
+      case ShellModule.social:
+        return Row(children: [
           _HeaderIconBtn(
             icon: Icons.groups_rounded,
             tooltip: 'Communities',
@@ -282,15 +296,14 @@ class AppShellHeader extends ConsumerWidget {
           const SizedBox(width: 8),
           _HeaderIconBtn(icon: Icons.send_rounded, onTap: () => context.push('/matching/inbox')),
         ]);
-      case 3:
-        trailingActions = Row(children: [
+      case ShellModule.matching:
+        return Row(children: [
           _HeaderIconBtn(icon: Icons.chat_bubble_outline_rounded, onTap: () => openMatchesInbox(context)),
           const SizedBox(width: 8),
           _HeaderIconBtn(icon: Icons.tune_rounded, onTap: () => MatchPreferencesSheet.show(context)),
         ]);
-      case 4:
-      default:
-        trailingActions = Consumer(builder: (context, ref, _) {
+      case ShellModule.marketplace:
+        return Consumer(builder: (context, ref, _) {
           final cart = ref.watch(cartProvider);
           return GestureDetector(
             key: const ValueKey<String>('market_action_cart'),
@@ -336,78 +349,121 @@ class AppShellHeader extends ConsumerWidget {
             ),
           );
         });
+      case ShellModule.global:
+        return const SizedBox.shrink();
     }
+  }
 
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activePet = ref.watch(activePetControllerProvider);
     final topPadding = MediaQuery.paddingOf(context).top;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Home tab: scroll-driven glass effect using species accent — white text
-    // stays readable throughout because we tint with the same wave color.
-    final scrollProgress = selectedIndex == 0
-        ? ref.watch(homeScrollProgressProvider)
-        : 0.0;
-    final waveColor = activePet?.speciesEnum.resolvedAccent(isDark)
-        ?? AppColors.tangerine;
+    final isHome = module == ShellModule.global && subIndex == 0;
+    final scrollProgress = isHome ? ref.watch(homeScrollProgressProvider) : 0.0;
+    final waveColor = activePet?.speciesEnum.resolvedAccent(isDark) ?? AppColors.tangerine;
     final bgColor = Color.lerp(
       Colors.transparent,
-      waveColor.withAlpha(238), // ~93% opacity — content behind is fully masked
+      waveColor.withAlpha(238),
       scrollProgress,
     )!;
     final blurSigma = 24.0 * scrollProgress;
+
+    final eyebrow = module == ShellModule.global
+        ? _globalEyebrows[subIndex.clamp(0, _globalEyebrows.length - 1)]
+        : _moduleEyebrows[module] ?? '';
+
+    Widget leftWidget;
+    if (module != ShellModule.global) {
+      leftWidget = GestureDetector(
+        onTap: () => context.go('/home'),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(10, 6, 14, 6),
+          decoration: BoxDecoration(
+            color: Colors.white.withAlpha(56),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 14),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'HOME',
+                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 0.6),
+                  ),
+                  Text(
+                    eyebrow,
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      leftWidget = GestureDetector(
+        onTap: () => PetSwitcherSheet.show(context),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
+          decoration: BoxDecoration(
+            color: Colors.white.withAlpha(56),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (activePet != null) ...[
+                PetAvatar(
+                  imageUrl: activePet.avatarUrl,
+                  species: activePet.speciesEnum,
+                  size: PetAvatarSize.sm,
+                  showRing: true,
+                ),
+                const SizedBox(width: 10),
+              ],
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    eyebrow,
+                    style: const TextStyle(
+                      fontSize: 9, fontWeight: FontWeight.w700,
+                      color: Colors.white, letterSpacing: 0.6,
+                    ),
+                  ),
+                  Row(children: [
+                    Text(
+                      activePet?.name ?? (subIndex == 4 ? 'Market' : 'PetFolio'),
+                      style: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
+                  ]),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     final innerContent = Padding(
       padding: EdgeInsets.fromLTRB(18, topPadding + 8, 18, 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GestureDetector(
-            onTap: () => PetSwitcherSheet.show(context),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
-              decoration: BoxDecoration(
-                color: Colors.white.withAlpha(56),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (activePet != null) ...[
-                    PetAvatar(
-                      imageUrl: activePet.avatarUrl,
-                      species: activePet.speciesEnum,
-                      size: PetAvatarSize.sm,
-                      showRing: true,
-                    ),
-                    const SizedBox(width: 10),
-                  ],
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        eyebrows[selectedIndex],
-                        style: const TextStyle(
-                          fontSize: 9, fontWeight: FontWeight.w700,
-                          color: Colors.white, letterSpacing: 0.6,
-                        ),
-                      ),
-                      Row(children: [
-                        Text(
-                          activePet?.name ?? (selectedIndex == 4 ? 'Market' : 'PetFolio'),
-                          style: const TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
-                      ]),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          trailingActions,
+          leftWidget,
+          _buildTrailing(context, ref),
         ],
       ),
     );
@@ -468,8 +524,16 @@ class _HeaderIconBtn extends StatelessWidget {
 // ── Floating pill bottom nav ──────────────────────────────────────────────────
 
 class _FloatingNav extends StatelessWidget {
-  const _FloatingNav({required this.selectedIndex, required this.onSelect});
+  const _FloatingNav({
+    super.key,
+    required this.destinations,
+    required this.accentColors,
+    required this.selectedIndex,
+    required this.onSelect,
+  });
 
+  final List<AppShellDestination> destinations;
+  final List<Color> accentColors;
   final int selectedIndex;
   final ValueChanged<int> onSelect;
 
@@ -492,13 +556,13 @@ class _FloatingNav extends StatelessWidget {
       ),
       child: Row(
         children: [
-          for (var i = 0; i < appShellDestinations.length; i++)
+          for (var i = 0; i < destinations.length; i++)
             Expanded(
               child: _NavTab(
-                key: ValueKey('nav_${appShellDestinations[i].label.toLowerCase()}'),
-                destination: appShellDestinations[i],
+                key: ValueKey('nav_${destinations[i].label.toLowerCase()}'),
+                destination: destinations[i],
                 isSelected: i == selectedIndex,
-                accentColor: tabAccentColors[i],
+                accentColor: accentColors[i],
                 isDark: isDark,
                 onTap: () => onSelect(i),
               ),
@@ -621,8 +685,15 @@ class _NavTabState extends State<_NavTab> with SingleTickerProviderStateMixin {
 // ── Wide nav rail ─────────────────────────────────────────────────────────────
 
 class _WideNavRail extends StatelessWidget {
-  const _WideNavRail({required this.selectedIndex, required this.onSelect});
+  const _WideNavRail({
+    required this.destinations,
+    required this.accentColors,
+    required this.selectedIndex,
+    required this.onSelect,
+  });
 
+  final List<AppShellDestination> destinations;
+  final List<Color> accentColors;
   final int selectedIndex;
   final ValueChanged<int> onSelect;
 
@@ -637,20 +708,20 @@ class _WideNavRail extends StatelessWidget {
       indicatorColor: Colors.transparent,
       onDestinationSelected: onSelect,
       destinations: [
-        for (var i = 0; i < appShellDestinations.length; i++)
+        for (var i = 0; i < destinations.length; i++)
           NavigationRailDestination(
             padding: EdgeInsets.zero,
             icon: Icon(
-              appShellDestinations[i].icon,
-              color: selectedIndex == i ? tabAccentColors[i] : (isDark ? AppColors.ink500D : AppColors.ink500),
+              destinations[i].icon,
+              color: selectedIndex == i ? accentColors[i] : (isDark ? AppColors.ink500D : AppColors.ink500),
             ),
-            selectedIcon: Icon(appShellDestinations[i].activeIcon, color: tabAccentColors[i]),
+            selectedIcon: Icon(destinations[i].activeIcon, color: accentColors[i]),
             label: Text(
-              appShellDestinations[i].label,
+              destinations[i].label,
               style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: selectedIndex == i ? FontWeight.w700 : FontWeight.w500,
-                color: selectedIndex == i ? tabAccentColors[i] : (isDark ? AppColors.ink500D : AppColors.ink500),
+                color: selectedIndex == i ? accentColors[i] : (isDark ? AppColors.ink500D : AppColors.ink500),
               ),
             ),
           ),

@@ -42,6 +42,9 @@ class RouterNotifier extends ChangeNotifier {
 
     if (loc == '/pets') return '/home';
     if (loc == '/shop') return '/marketplace';
+    if (loc == '/care/medical-vault') return '/care/health';
+    if (loc == '/settings') return '/me';
+    if (loc == '/social/notifications') return '/notifications';
 
     if (!isLoggedIn) {
       return (loc == '/login' || loc == '/register') ? null : '/login';

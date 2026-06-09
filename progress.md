@@ -1,5 +1,38 @@
 # Petfolio — Progress Log
 
+## 2026-06-09 — Contextual Navigation Phase 1 (Foundation) ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+
+**New files**
+- `lib/core/navigation/shell_module_provider.dart` — `ShellModule` enum (global, care, social, matching, marketplace)
+- `lib/core/navigation/shell_destinations.dart` — 5 destination sets + accent arrays + helpers (`moduleFromPath`, `destinationsFor`, `accentsFor`, `selectedSubIndex`)
+
+**`lib/core/widgets/app_shell.dart`**
+- `_FloatingNav` / `_WideNavRail` now accept `destinations` + `accentColors` (no longer hardcoded)
+- `_AppShellState` computes `module` + `subIndex` from GoRouter path each build
+- `AnimatedSwitcher` (fade + slide-up 220 ms) wraps `_FloatingNav` keyed on `ShellModule`
+- `AppShellHeader` takes `module + subIndex`; shows `← Home` pill in modules, pet switcher in global shell
+- Trailing actions mapped per module
+
+**`lib/core/navigation/app_shell_routes.dart`** — care sub-routes inside ShellRoute: `/care/nutrition`, `/care/health`, `/care/walk`, `/care/appointments`
+
+**`lib/core/navigation/router_notifier.dart`** — redirect `/care/medical-vault` → `/care/health`
+
+**`lib/features/care/care_routes.dart`** + **`appointment_routes.dart`** — return empty list (moved to shell)
+
+**`lib/features/care/presentation/screens/care_screen.dart`** — `push` → `go` for care sub-routes; medical vault → `/care/health`
+
+### Next step — Phase 2: Global Shell Completion
+- Create `/notifications` merged screen + `/me` screen
+- Update `globalDestinations` from 5 → 4 tabs (Home, Alerts, Activity, Me)
+
+Phase complete — please run (/remember) to save tokens before proceeding to Phase 2.
+
+---
+
 ## 2026-06-09 — Pathao Gaps Phase 3 (Gap #11 + P3 finalization) ✅
 
 `flutter analyze` — **No issues found.**

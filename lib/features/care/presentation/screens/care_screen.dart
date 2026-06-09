@@ -2843,7 +2843,7 @@ class _CareExploreRow extends StatelessWidget {
             iconColor: AppColors.sky700,
             title: 'Walk Tracker',
             subtitle: 'Live GPS route map',
-            onTap: () => context.push('/care/walk'),
+            onTap: () => context.go('/care/walk'),
           ),
         ),
         const SizedBox(width: 10),
@@ -2963,7 +2963,7 @@ class _UtilityBanner extends StatelessWidget {
               title: 'Nutrition',
               subtitle: 'Weight & caloric needs',
               detail: 'Track daily feeding',
-              onTap: () => context.push('/care/nutrition'),
+              onTap: () => context.go('/care/nutrition'),
             ),
             VerticalDivider(width: 1, thickness: 1, color: pt.line),
             _UtilityHalf(
@@ -2974,7 +2974,7 @@ class _UtilityBanner extends StatelessWidget {
               title: 'Medical Vault',
               subtitle: 'Vaccines · Meds · Vet',
               detail: 'View health records',
-              onTap: () => context.push('/care/medical-vault'),
+              onTap: () => context.go('/care/health'),
             ),
           ],
         ),
@@ -3493,7 +3493,7 @@ class _AppointmentsBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return GestureDetector(
-      onTap: () => context.push('/care/appointments'),
+      onTap: () => context.go('/care/appointments'),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         decoration: BoxDecoration(

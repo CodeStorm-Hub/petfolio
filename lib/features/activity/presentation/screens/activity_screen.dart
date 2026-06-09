@@ -18,7 +18,9 @@ import '../../../marketplace/presentation/controllers/buyer_orders_controller.da
 // ─────────────────────────────────────────────────────────────────────────────
 
 class ActivityScreen extends ConsumerStatefulWidget {
-  const ActivityScreen({super.key});
+  const ActivityScreen({super.key, this.showHeader = true});
+
+  final bool showHeader;
 
   @override
   ConsumerState<ActivityScreen> createState() => _ActivityScreenState();
@@ -46,37 +48,43 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     final filtered = _applyFilter(allItems, _filter);
     final grouped = _groupByDate(filtered);
 
+    final topPad = MediaQuery.paddingOf(context).top;
+
     return Scaffold(
       backgroundColor: isDark ? pt.surface1 : const Color(0xFFF2F3F7),
       body: SafeArea(
+        top: widget.showHeader,
         bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header ────────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(6, 10, 16, 0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_rounded,
-                      color: AppColors.ink950,
+            // ── Header (push-mode only) ────────────────────────────────────
+            if (widget.showHeader)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(6, 10, 16, 0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back_rounded,
+                        color: AppColors.ink950,
+                      ),
+                      onPressed: () => context.pop(),
                     ),
-                    onPressed: () => context.pop(),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Activity',
-                    style: GoogleFonts.sora(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 20,
-                      color: AppColors.ink950,
+                    const SizedBox(width: 4),
+                    Text(
+                      'Activity',
+                      style: GoogleFonts.sora(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 20,
+                        color: AppColors.ink950,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
+                  ],
+                ),
+              )
+            else
+              SizedBox(height: topPad + 76),
 
             // ── Filter chips ──────────────────────────────────────────────
             Padding(
