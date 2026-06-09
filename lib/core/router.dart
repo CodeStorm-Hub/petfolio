@@ -8,7 +8,6 @@ import '../features/settings/settings_routes.dart';
 import '../features/appointments/appointment_routes.dart';
 import '../features/auth/auth_routes.dart';
 import '../features/care/care_routes.dart';
-import '../features/communities/communities_routes.dart';
 import '../features/marketplace/marketplace_routes.dart';
 import '../features/matching/matching_routes.dart';
 import '../features/pet_profile/pet_profile_routes.dart';
@@ -36,7 +35,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       ...careRoutes(rootNavigatorKey),
       ...appointmentRoutes(rootNavigatorKey),
       ...socialRoutes(rootNavigatorKey),
-      ...communitiesRoutes(rootNavigatorKey),
       ...matchingRoutes(rootNavigatorKey),
       ...marketplaceRoutes(rootNavigatorKey),
       ...adminRoutes(rootNavigatorKey),

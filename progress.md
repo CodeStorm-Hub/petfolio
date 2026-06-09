@@ -1,5 +1,52 @@
 # Petfolio — Progress Log
 
+## 2026-06-09 — Contextual Navigation Phase 5 (Polish) ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+
+**`lib/core/widgets/app_shell.dart`**
+- **Cart badge on Marketplace Cart tab**: `_AppShellState.build` computes `cartCount` from `cartProvider` when in marketplace module; builds `badgeCounts = [0, 0, cartCount, 0]` and passes it to `_FloatingNav` + `_WideNavRail`
+- **`_FloatingNav`**: added optional `badgeCounts: List<int>?`; passes `badgeCounts?[i] ?? 0` to each `_NavTab`
+- **`_NavTab`**: added `badgeCount: int` (default 0); wraps icon in `Stack(clipBehavior: Clip.none)` with a `Positioned` poppy badge dot (supports `99+`); border color adapts to dark/light surface
+- **`_WideNavRail`**: added `required module` + optional `badgeCounts`; when `module != global` wraps `NavigationRail` in a `Column` with a 48×48 ← Home icon button + divider at the top; badge dot shown on rail icons too
+- **AnimatedSwitcher**: already well-tuned (220ms, fade + slide-up 15%), left unchanged
+
+### Contextual nav — all 5 phases complete ✅
+
+Phase complete — please run (/remember) to save tokens before proceeding.
+
+---
+
+## 2026-06-09 — Contextual Navigation Phase 4 (MatchLikedScreen) ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+
+**New: `lib/features/matching/presentation/controllers/match_liked_controller.dart`**
+- `LikedPetItem` model (petId, petName, avatarUrl, breed, isMutual, matchId, likedAt)
+- `MatchLikedSnapshot` (mutual, pending lists)
+- `matchLikedControllerProvider` — fetches swipes + matches in parallel, resolves pet profiles via `fetchPetsByIds`, separates mutual/pending
+
+**New: `lib/features/matching/presentation/screens/match_liked_screen.dart`**
+- Two `SliverGrid` sections (2-col): Mutual Matches (❤️ poppy, Chat button) + You Liked (🐾 lilac)
+- `_LikedCard`: photo or initial placeholder, name, breed, heart badge for mutual, Chat FilledButton
+- `PetfolioEmptyState` when empty; `RefreshIndicator` on scroll
+
+**`lib/features/matching/data/repositories/matching_repository.dart`** — Added `fetchPetsByIds` delegate
+
+**`lib/core/navigation/app_shell_routes.dart`** — Added `/matching/liked` shell route
+
+### Next → Phase 5: Polish
+- Cart badge on Marketplace nav tab
+- Wide-screen NavigationRail context-awareness
+- AnimatedSwitcher tuning
+
+Phase complete — please run (/remember) to save tokens before proceeding to Phase 5.
+
+---
 ## 2026-06-09 - Contextual Navigation Phase 2 (Global Shell Completion)
 
 `flutter analyze` - **No issues found.**
@@ -24,12 +71,37 @@
 
 **`lib/features/settings/presentation/screens/settings_screen.dart`** - `push('/activity')` changed to `go('/activity')`
 
-### Next step - Phase 3: Module Sub-route Migration
-- Move `/social/stories`, `/social/communities` inside shell
-- Move `/matching/inbox` inside shell
-- New `/matching/liked` screen (MatchLikedScreen)
+### Next step → Phase 4: New Screens
+- `MatchLikedScreen` for `/matching/liked` tab
+- MeScreen sub-sections polish (pet switcher, addresses)
 
-Phase complete - please run (/remember) to save tokens before proceeding to Phase 3.
+Phase complete - please run (/remember) to save tokens before proceeding to Phase 4.
+
+---
+## 2026-06-09 — Contextual Navigation Phase 3 (Module Sub-route Migration) ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+
+**`lib/core/navigation/app_shell_routes.dart`**
+- Added `/social/stories` → `StoryViewerScreen(initialPetId: queryParam)`
+- Added `/social/communities` → `CommunitiesScreen()` with nested `:communityId` → `CommunityDetailScreen`
+- Added `/social/profile/me` → `_MePetProfileTab` (reads `activePetControllerProvider`, renders `SocialProfileScreen`)
+- Added `/matching/inbox` → `MatchesInboxScreen()`
+
+**`lib/features/social/social_routes.dart`** — removed `/social/stories` (now shell route)
+
+**`lib/features/matching/matching_routes.dart`** — removed `/matching/inbox` (now shell route)
+
+**Deleted: `lib/features/communities/communities_routes.dart`** — entire file removed; routes migrated to shell. Barrel `index.dart` export removed.
+
+**`lib/core/router.dart`** — removed `communitiesRoutes` import + call
+
+**Navigation fixes (push → go for shell tabs):**
+- `app_shell.dart`: Communities icon + Inbox icon shortcut
+- `care_screen.dart`: Communities "Explore" tile
+- `matching_navigation.dart`: `openMatchesInbox()`
 
 ---
 ## 2026-06-09 — Contextual Navigation Phase 1 (Foundation) ✅

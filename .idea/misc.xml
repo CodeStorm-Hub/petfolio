@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Kotlin2JsCompilerArguments">
     <option name="moduleKind" value="plain" />
@@ -5,7 +6,7 @@
   <component name="Kotlin2JvmCompilerArguments">
     <option name="jvmTarget" value="1.8" />
   </component>
-  <component name="ProjectRootManager" version="2">
+  <component name="ProjectRootManager" version="2" project-jdk-name="Android API 36.1, extension level 20 Platform" project-jdk-type="Android SDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

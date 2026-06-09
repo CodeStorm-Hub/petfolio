@@ -1,4 +1,3 @@
-export 'communities_routes.dart';
 export 'data/models/community.dart';
 export 'data/models/community_post.dart';
 export 'data/repositories/community_repository.dart';

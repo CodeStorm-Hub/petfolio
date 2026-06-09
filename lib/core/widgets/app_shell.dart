@@ -84,6 +84,13 @@ class _AppShellState extends ConsumerState<AppShell> {
     final accents = accentsFor(module);
     final isWide = MediaQuery.sizeOf(context).width >= 600;
 
+    final cartCount = module == ShellModule.marketplace
+        ? ref.watch(cartProvider).itemCount
+        : 0;
+    final badgeCounts = module == ShellModule.marketplace
+        ? [0, 0, cartCount, 0]
+        : null;
+
     Widget floatingNav = AnimatedSwitcher(
       duration: const Duration(milliseconds: 220),
       transitionBuilder: (child, anim) => FadeTransition(
@@ -102,6 +109,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         selectedIndex: subIndex,
         onSelect: (i) => context.go(dests[i].path),
         accentColors: accents,
+        badgeCounts: badgeCounts,
       ),
     );
 
@@ -115,6 +123,8 @@ class _AppShellState extends ConsumerState<AppShell> {
                 accentColors: accents,
                 selectedIndex: subIndex,
                 onSelect: (i) => context.go(dests[i].path),
+                module: module,
+                badgeCounts: badgeCounts,
               ),
               const VerticalDivider(thickness: 1, width: 1),
               Expanded(
@@ -289,12 +299,12 @@ class AppShellHeader extends ConsumerWidget {
           _HeaderIconBtn(
             icon: Icons.groups_rounded,
             tooltip: 'Communities',
-            onTap: () => context.push('/social/communities'),
+            onTap: () => context.go('/social/communities'),
           ),
           const SizedBox(width: 8),
           _HeaderIconBtn(icon: Icons.search, onTap: () {}),
           const SizedBox(width: 8),
-          _HeaderIconBtn(icon: Icons.send_rounded, onTap: () => context.push('/matching/inbox')),
+          _HeaderIconBtn(icon: Icons.send_rounded, onTap: () => context.go('/matching/inbox')),
         ]);
       case ShellModule.matching:
         return Row(children: [
@@ -530,12 +540,14 @@ class _FloatingNav extends StatelessWidget {
     required this.accentColors,
     required this.selectedIndex,
     required this.onSelect,
+    this.badgeCounts,
   });
 
   final List<AppShellDestination> destinations;
   final List<Color> accentColors;
   final int selectedIndex;
   final ValueChanged<int> onSelect;
+  final List<int>? badgeCounts;
 
   @override
   Widget build(BuildContext context) {
@@ -565,6 +577,7 @@ class _FloatingNav extends StatelessWidget {
                 accentColor: accentColors[i],
                 isDark: isDark,
                 onTap: () => onSelect(i),
+                badgeCount: badgeCounts?[i] ?? 0,
               ),
             ),
         ],
@@ -583,6 +596,7 @@ class _NavTab extends StatefulWidget {
     required this.accentColor,
     required this.isDark,
     required this.onTap,
+    this.badgeCount = 0,
   });
 
   final AppShellDestination destination;
@@ -590,6 +604,7 @@ class _NavTab extends StatefulWidget {
   final Color accentColor;
   final bool isDark;
   final VoidCallback onTap;
+  final int badgeCount;
 
   @override
   State<_NavTab> createState() => _NavTabState();
@@ -647,22 +662,47 @@ class _NavTabState extends State<_NavTab> with SingleTickerProviderStateMixin {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Transform.scale(
-                scale: 1.0 + 0.08 * t,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: widget.accentColor.withAlpha(bgAlpha),
-                    borderRadius: BorderRadius.circular(999),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Transform.scale(
+                    scale: 1.0 + 0.08 * t,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: widget.accentColor.withAlpha(bgAlpha),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Icon(
+                        tC > 0.5
+                            ? widget.destination.activeIcon
+                            : widget.destination.icon,
+                        color: iconColor,
+                        size: 22,
+                      ),
+                    ),
                   ),
-                  child: Icon(
-                    tC > 0.5
-                        ? widget.destination.activeIcon
-                        : widget.destination.icon,
-                    color: iconColor,
-                    size: 22,
-                  ),
-                ),
+                  if (widget.badgeCount > 0)
+                    Positioned(
+                      top: -4,
+                      right: -4,
+                      child: Container(
+                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.poppy,
+                          shape: widget.badgeCount > 9 ? BoxShape.rectangle : BoxShape.circle,
+                          borderRadius: widget.badgeCount > 9 ? BorderRadius.circular(8) : null,
+                          border: Border.all(color: widget.isDark ? AppColors.surface0D : AppColors.surface0, width: 1.5),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          widget.badgeCount > 99 ? '99+' : '${widget.badgeCount}',
+                          style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900, height: 1.2),
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 2),
               Text(
@@ -690,30 +730,58 @@ class _WideNavRail extends StatelessWidget {
     required this.accentColors,
     required this.selectedIndex,
     required this.onSelect,
+    required this.module,
+    this.badgeCounts,
   });
 
   final List<AppShellDestination> destinations;
   final List<Color> accentColors;
   final int selectedIndex;
   final ValueChanged<int> onSelect;
+  final ShellModule module;
+  final List<int>? badgeCounts;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? AppColors.surface0D : AppColors.surface0;
 
-    return NavigationRail(
+    final rail = NavigationRail(
       selectedIndex: selectedIndex,
       labelType: NavigationRailLabelType.all,
-      backgroundColor: isDark ? AppColors.surface0D : AppColors.surface0,
+      backgroundColor: bg,
       indicatorColor: Colors.transparent,
       onDestinationSelected: onSelect,
       destinations: [
         for (var i = 0; i < destinations.length; i++)
           NavigationRailDestination(
             padding: EdgeInsets.zero,
-            icon: Icon(
-              destinations[i].icon,
-              color: selectedIndex == i ? accentColors[i] : (isDark ? AppColors.ink500D : AppColors.ink500),
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  destinations[i].icon,
+                  color: selectedIndex == i ? accentColors[i] : (isDark ? AppColors.ink500D : AppColors.ink500),
+                ),
+                if ((badgeCounts?[i] ?? 0) > 0)
+                  Positioned(
+                    top: -4, right: -6,
+                    child: Container(
+                      constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.poppy,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: bg, width: 1.5),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${badgeCounts![i]}',
+                        style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w900),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             selectedIcon: Icon(destinations[i].activeIcon, color: accentColors[i]),
             label: Text(
@@ -726,6 +794,41 @@ class _WideNavRail extends StatelessWidget {
             ),
           ),
       ],
+    );
+
+    if (module == ShellModule.global) return rail;
+
+    return Container(
+      color: bg,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 12, 8, 4),
+            child: Tooltip(
+              message: 'Back to Home',
+              child: InkWell(
+                onTap: () => context.go('/home'),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: 48, height: 48,
+                  decoration: BoxDecoration(
+                    color: (isDark ? AppColors.ink500D : AppColors.ink500).withAlpha(20),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.home_rounded,
+                    color: isDark ? AppColors.ink500D : AppColors.ink500,
+                    size: 22,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Divider(height: 1, color: isDark ? AppColors.lineD : AppColors.line),
+          Expanded(child: rail),
+        ],
+      ),
     );
   }
 }

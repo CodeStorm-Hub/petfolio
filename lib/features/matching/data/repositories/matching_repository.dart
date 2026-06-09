@@ -133,6 +133,10 @@ class MatchingRepository {
   Future<List<PetSwipe>> fetchSwipesByActor(String actorPetId) =>
       _dataSource.fetchSwipesByActor(actorPetId);
 
+  Future<Map<String, Map<String, dynamic>>> fetchPetsByIds(
+          List<String> petIds) =>
+      _dataSource.fetchPetsByIds(petIds);
+
   Future<void> setActivePetLocation({
     required String petId,
     required double latitude,

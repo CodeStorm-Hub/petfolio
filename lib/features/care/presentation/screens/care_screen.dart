@@ -2854,7 +2854,7 @@ class _CareExploreRow extends StatelessWidget {
             iconColor: AppColors.poppy700,
             title: 'Communities',
             subtitle: 'Pet parent groups',
-            onTap: () => context.push('/social/communities'),
+            onTap: () => context.go('/social/communities'),
           ),
         ),
       ],

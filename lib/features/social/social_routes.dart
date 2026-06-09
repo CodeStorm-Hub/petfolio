@@ -7,7 +7,6 @@ import 'presentation/screens/create_story_screen.dart';
 import 'presentation/screens/notifications_screen.dart';
 import 'presentation/screens/post_detail_screen.dart';
 import 'presentation/screens/social_profile_screen.dart';
-import 'presentation/screens/story_viewer_screen.dart';
 
 List<RouteBase> socialRoutes(GlobalKey<NavigatorState> rootKey) => [
   GoRoute(
@@ -40,13 +39,5 @@ List<RouteBase> socialRoutes(GlobalKey<NavigatorState> rootKey) => [
     builder: (context, state) => SocialProfileScreen(
       petId: state.pathParameters['petId']!,
     ),
-  ),
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/social/stories',
-    builder: (context, state) {
-      final petId = state.uri.queryParameters['petId'] ?? '';
-      return StoryViewerScreen(initialPetId: petId);
-    },
   ),
 ];
