@@ -855,6 +855,10 @@ class _YoullLoveTile extends StatelessWidget {
                         fit: BoxFit.cover,
                         width: 140,
                         height: 110,
+                        placeholder: (_, _) =>
+                            ProductGlyph(glyphType: product.glyphType, size: 52),
+                        errorWidget: (_, _, _) =>
+                            ProductGlyph(glyphType: product.glyphType, size: 52),
                       )
                     : ProductGlyph(glyphType: product.glyphType, size: 52),
               ),

@@ -1,3 +1,10 @@
+# Claude Code Refined Prompt: Comprehensive Android Automation Testing & UI/UX Audit for PetFolio
+
+Copy and paste the prompt below into **Claude Code** (running in the PetFolio repository root) to initiate the automated testing process.
+
+---
+
+```markdown
 Role: Senior Mobile QA Automation Engineer & Flutter UI/UX Expert
 System: Android Emulator (emulator-5554)
 MCP Tools Available: `mobile-mcp`, `marionette-mcp`, `supabase`, `chrome-devtools-mcp`
@@ -32,7 +39,7 @@ For each module listed below, perform the actions, dump the UI structure, captur
 * **Actions**:
   - Locate the login screen fields (`login_email`, `login_password`, `login_cta`).
   - Attempt login with invalid format (`invalidemail`) and empty form. Validate that the UI displays format and validation errors.
-  - Submit the form using real credentials (email: `syed.reza181@gmail.com` / password: `123qweasd`).
+  - Submit the form using real credentials (email: `syed.reza181@gmail.com` / password: provided via environment).
   - **Onboarding / Switch Pet**:
     - Tap the active pet avatar switcher pill in the top header.
     - Open the bottom sheet of the pet list, and tap on another pet (e.g., "Tommy" or "Ziggy") to switch context. Verify that providers (care tasks, appointments) invalidate and reload the UI.
@@ -147,3 +154,4 @@ Structure the report as follows:
 - **Logcat / Observatory Warnings**: Critical error stack traces, exceptions, or RenderFlex overflow logs caught during execution.
 
 Ensure you save all screenshots and dumps into the `/qa_artifacts/` directory with clear names matching your report tables.
+```

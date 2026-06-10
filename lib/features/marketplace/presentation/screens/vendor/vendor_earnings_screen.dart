@@ -65,7 +65,24 @@ class VendorEarningsScreen extends ConsumerWidget {
                 child: Center(child: CircularProgressIndicator.adaptive()),
               ),
               error: (e, _) => SliverFillRemaining(
-                child: Center(child: Text('Failed to load earnings', style: TextStyle(color: pt.ink500))),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.cloud_off_rounded, size: 48, color: pt.ink300),
+                      const SizedBox(height: 12),
+                      Text('Failed to load earnings', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: pt.ink500)),
+                      const SizedBox(height: 4),
+                      Text(e.toString(), style: TextStyle(fontSize: 12, color: pt.ink300), textAlign: TextAlign.center),
+                      const SizedBox(height: 16),
+                      FilledButton.icon(
+                        onPressed: () => ref.invalidate(_vendorLedgerProvider),
+                        icon: const Icon(Icons.refresh_rounded, size: 16),
+                        label: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               data: (entries) {
                 if (entries.isEmpty) {

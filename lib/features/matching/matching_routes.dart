@@ -18,6 +18,7 @@ List<RouteBase> matchingRoutes(GlobalKey<NavigatorState> rootKey) => [
         otherPetName: petNameRaw != null
             ? Uri.decodeComponent(petNameRaw)
             : 'Match',
+        fromMatchInbox: query['fromMatch'] == 'true',
       );
     },
   ),

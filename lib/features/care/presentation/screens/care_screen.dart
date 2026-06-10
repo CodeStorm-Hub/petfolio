@@ -256,7 +256,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                             const SizedBox(height: 16.0),
                             // ── Category filter chips ──────────────────────
                             SizedBox(
-                              height: 38,
+                              height: 40,
                               child: ListView(
                                 scrollDirection: Axis.horizontal,
                                 children: _filterChips.map((chip) {
@@ -287,6 +287,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                             const SizedBox(width: 5),
                                             Text(
                                               chip.$2,
+                                              overflow: TextOverflow.visible,
                                               style: TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w700,

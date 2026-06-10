@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -266,6 +267,44 @@ class _ClinicHeroCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
+                if (clinic.avatarUrl != null) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: CachedNetworkImage(
+                      imageUrl: clinic.avatarUrl!,
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.cover,
+                      placeholder: (_, _) => Container(
+                        width: 56,
+                        height: 56,
+                        color: Colors.white24,
+                        alignment: Alignment.center,
+                        child: const Text('🏥', style: TextStyle(fontSize: 28)),
+                      ),
+                      errorWidget: (_, _, _) => Container(
+                        width: 56,
+                        height: 56,
+                        color: Colors.white24,
+                        alignment: Alignment.center,
+                        child: const Text('🏥', style: TextStyle(fontSize: 28)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ] else ...[
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text('🏥', style: TextStyle(fontSize: 28)),
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

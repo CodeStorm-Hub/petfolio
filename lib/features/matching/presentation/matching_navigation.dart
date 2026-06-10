@@ -47,12 +47,16 @@ void popOrGo(BuildContext context, String fallbackLocation) {
 
 /// Opens (or creates) a direct message thread between [actorPetId] and [otherPetId].
 /// Safe to call from any widget — handles errors with a snack bar.
+///
+/// Pass [fromMatchInbox] as true when navigating from the Match module so the
+/// chat breadcrumb shows "Match · Chat" instead of "Social · Chat".
 Future<void> openDirectChat(
   BuildContext context,
   WidgetRef ref, {
   required String actorPetId,
   required String otherPetId,
   required String otherPetName,
+  bool fromMatchInbox = false,
 }) async {
   try {
     final threadId = await ref.read(matchingRepositoryProvider).ensureDirectChatThread(
@@ -65,7 +69,8 @@ Future<void> openDirectChat(
       '/matching/chat/$threadId'
       '?otherPetId=$otherPetId'
       '&petName=$encodedName'
-      '&actorPetId=$actorPetId',
+      '&actorPetId=$actorPetId'
+      '${fromMatchInbox ? "&fromMatch=true" : ""}',
     );
   } catch (e, st) {
     debugPrint('[openDirectChat] failed: $e\n$st');

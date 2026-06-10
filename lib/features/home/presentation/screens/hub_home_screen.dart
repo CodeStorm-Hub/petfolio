@@ -36,10 +36,11 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
   late final AnimationController _fadeCtrl;
   late final Animation<double> _fadeAnim;
   late final ScrollController _scrollCtrl;
+  late final _scrollProgressNotifier =
+      ref.read(homeScrollProgressProvider.notifier);
   int _selectedDealChip = 0;
 
   static const _dealChips = ['All', 'Food', 'Grooming', 'Health', 'Toys'];
-  // Scroll distance (px) over which the header transitions transparent → glass
   static const _kScrollThreshold = 90.0;
 
   @override
@@ -55,15 +56,14 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
 
   void _onScroll() {
     final progress = (_scrollCtrl.offset / _kScrollThreshold).clamp(0.0, 1.0);
-    ref.read(homeScrollProgressProvider.notifier).set(progress);
+    _scrollProgressNotifier.set(progress);
   }
 
   @override
   void dispose() {
     _fadeCtrl.dispose();
     _scrollCtrl.dispose();
-    // Reset header to transparent when leaving the screen
-    ref.read(homeScrollProgressProvider.notifier).set(0.0);
+    _scrollProgressNotifier.set(0.0);
     super.dispose();
   }
 

@@ -183,6 +183,7 @@ class _MatchesInboxView extends ConsumerWidget {
                                   actorPetId: pet.id,
                                   otherPetId: item.otherPetId,
                                   otherPetName: item.otherPetName,
+                                  fromMatchInbox: true,
                                 )
                             : () => openMatchChat(
                                   context,

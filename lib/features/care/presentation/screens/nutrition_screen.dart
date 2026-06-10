@@ -45,7 +45,6 @@ class _NutritionBodyState extends ConsumerState<_NutritionBody> {
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
-      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _LogWeightSheet(petId: widget.pet.id),
     );
@@ -825,7 +824,8 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final mq = MediaQuery.of(context);
+    final bottomPadding = mq.viewInsets.bottom + mq.padding.bottom + 24;
 
     return Container(
       decoration: BoxDecoration(
@@ -834,7 +834,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
           top: Radius.circular(PetfolioThemeExtension.radius2xl),
         ),
       ),
-      padding: EdgeInsets.fromLTRB(24, 0, 24, bottomInset + 24),
+      padding: EdgeInsets.fromLTRB(24, 0, 24, bottomPadding),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -872,6 +872,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
                   controller: _weightController,
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
+                  textInputAction: TextInputAction.next,
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(
                         RegExp(r'^\d*\.?\d{0,3}')),
@@ -896,6 +897,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
             controller: _notesController,
             maxLines: 2,
             textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _save(),
             decoration: const InputDecoration(
               labelText: 'Notes (optional)',
               hintText: 'e.g. After vet visit',
