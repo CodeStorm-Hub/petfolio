@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -19,6 +20,7 @@ class BookingConfirmationSheet extends ConsumerStatefulWidget {
 class _BookingConfirmationSheetState
     extends ConsumerState<BookingConfirmationSheet> {
   final _notesCtrl = TextEditingController();
+  final _reasonCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -36,6 +38,7 @@ class _BookingConfirmationSheetState
   @override
   void dispose() {
     _notesCtrl.dispose();
+    _reasonCtrl.dispose();
     super.dispose();
   }
 
@@ -68,106 +71,316 @@ class _BookingConfirmationSheetState
       padding: EdgeInsets.fromLTRB(
         20, 0, 20, MediaQuery.viewInsetsOf(context).bottom + 24,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Drag handle ─────────────────────────────────────────────────
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: pt.line,
-                  borderRadius: BorderRadius.circular(2),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Drag handle ─────────────────────────────────────────────────
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: pt.line,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
             ),
-          ),
 
-          Text(
-            'Confirm Booking',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w900,
-              color: pt.ink950,
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // ── Booking summary ──────────────────────────────────────────────
-          _BookingSummary(state: bookingState, pt: pt, isDark: isDark),
-          const SizedBox(height: 20),
-
-          // ── Pet picker ───────────────────────────────────────────────────
-          Text(
-            'For which pet?',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: pt.ink500,
-              letterSpacing: 0.3,
-            ),
-          ),
-          const SizedBox(height: 10),
-          petsAsync.when(
-            loading: () => const SizedBox(
-              height: 72,
-              child: Center(child: TailWagLoader()),
-            ),
-            error: (_, _) => Text(
-              'Could not load pets.',
-              style: TextStyle(fontSize: 13, color: pt.ink500),
-            ),
-            data: (pets) => _PetPicker(
-              pets: pets,
-              selectedPetId: bookingState.petId,
-              onSelect: (id) => ref
-                  .read(vetBookingControllerProvider.notifier)
-                  .selectPet(id),
-              pt: pt,
-              isDark: isDark,
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // ── Notes ────────────────────────────────────────────────────────
-          TextField(
-            controller: _notesCtrl,
-            maxLines: 2,
-            onChanged: (v) =>
-                ref.read(vetBookingControllerProvider.notifier).setNotes(v),
-            decoration: InputDecoration(
-              hintText: 'Any notes for the vet? (optional)',
-              hintStyle: TextStyle(color: pt.ink300, fontSize: 13),
-              filled: true,
-              fillColor: pt.surface2,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide.none,
+            Text(
+              'Confirm Booking',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                color: pt.ink950,
               ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
-          ),
-          const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-          // ── Confirm button ────────────────────────────────────────────────
-          PrimaryPillButton(
-            label: 'Confirm Booking',
-            isFullWidth: true,
-            isLoading: bookingState.isLoading,
-            color: AppColors.sky,
-            onPressed: bookingState.canBook && !bookingState.isLoading
-                ? () {
-                    HapticFeedback.mediumImpact();
-                    ref.read(vetBookingControllerProvider.notifier).book();
+            // ── Booking summary ──────────────────────────────────────────────
+            _BookingSummary(state: bookingState, pt: pt, isDark: isDark),
+            const SizedBox(height: 20),
+
+            // ── Pet picker ───────────────────────────────────────────────────
+            Text(
+              'For which pet?',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: pt.ink500,
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(height: 10),
+            petsAsync.when(
+              loading: () => const SizedBox(
+                height: 72,
+                child: Center(child: TailWagLoader()),
+              ),
+              error: (_, _) => Text(
+                'Could not load pets.',
+                style: TextStyle(fontSize: 13, color: pt.ink500),
+              ),
+              data: (pets) => _PetPicker(
+                pets: pets,
+                selectedPetId: bookingState.petId,
+                onSelect: (id) => ref
+                    .read(vetBookingControllerProvider.notifier)
+                    .selectPet(id),
+                pt: pt,
+                isDark: isDark,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Intake Triage & Urgency ─────────────────────────────────────
+            Text(
+              'Urgency Level',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: pt.ink500,
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: ['Routine', 'Soon', 'Urgent'].map((level) {
+                final isSelected = bookingState.urgency == level;
+                final Color activeColor;
+                if (level == 'Urgent') {
+                  activeColor = AppColors.poppy;
+                } else if (level == 'Soon') {
+                  activeColor = AppColors.tangerine;
+                } else {
+                  activeColor = AppColors.mint;
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: ChoiceChip(
+                    label: Text(level),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      if (selected) {
+                        HapticFeedback.selectionClick();
+                        ref
+                            .read(vetBookingControllerProvider.notifier)
+                            .selectUrgency(level);
+                      }
+                    },
+                    selectedColor: activeColor.withAlpha(isDark ? 50 : 25),
+                    backgroundColor: pt.surface2,
+                    labelStyle: TextStyle(
+                      color: isSelected ? activeColor : pt.ink500,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: isSelected ? activeColor : Colors.transparent,
+                        width: 1.5,
+                      ),
+                    ),
+                    showCheckmark: false,
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Chief Complaint ─────────────────────────────────────────────
+            Text(
+              'Chief Complaint / Reason',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: pt.ink500,
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _reasonCtrl,
+              maxLines: 1,
+              onChanged: (v) => ref
+                  .read(vetBookingControllerProvider.notifier)
+                  .selectReason(v),
+              decoration: InputDecoration(
+                hintText: 'Describe symptoms or reason for visit...',
+                hintStyle: TextStyle(color: pt.ink300, fontSize: 13),
+                filled: true,
+                fillColor: pt.surface2,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: ['Vaccination', 'Checkup', 'Limping', 'Fever', 'Injury']
+                  .map((chip) => ActionChip(
+                        label: Text(chip),
+                        onPressed: () {
+                          HapticFeedback.selectionClick();
+                          _reasonCtrl.text = chip;
+                          ref
+                              .read(vetBookingControllerProvider.notifier)
+                              .selectReason(chip);
+                        },
+                        backgroundColor: pt.surface2,
+                        labelStyle: TextStyle(
+                          color: pt.ink700,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide.none,
+                        ),
+                      ))
+                  .toList(),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Media Upload ────────────────────────────────────────────────
+            Text(
+              'Attach Photo / Video',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: pt.ink500,
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(height: 10),
+            if (bookingState.selectedMedia != null)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: pt.surface2,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: pt.line),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      bookingState.selectedMedia!.name.toLowerCase().endsWith('.mp4') ||
+                              bookingState.selectedMedia!.name.toLowerCase().endsWith('.mov')
+                          ? Icons.videocam_rounded
+                          : Icons.image_rounded,
+                      color: AppColors.sky,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        bookingState.selectedMedia!.name,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: pt.ink700,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, size: 18),
+                      color: pt.ink500,
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        ref
+                            .read(vetBookingControllerProvider.notifier)
+                            .selectMedia(null);
+                      },
+                    ),
+                  ],
+                ),
+              )
+            else
+              OutlinedButton.icon(
+                onPressed: () async {
+                  HapticFeedback.selectionClick();
+                  final picker = ImagePicker();
+                  final picked = await picker.pickImage(source: ImageSource.gallery);
+                  if (picked != null) {
+                    ref
+                        .read(vetBookingControllerProvider.notifier)
+                        .selectMedia(picked);
                   }
-                : null,
-          ),
-        ],
+                },
+                icon: const Icon(Icons.add_photo_alternate_rounded, size: 18),
+                label: const Text('Add Photo/Video'),
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  side: BorderSide(color: pt.line),
+                  foregroundColor: pt.ink700,
+                  textStyle: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            const SizedBox(height: 20),
+
+            // ── Notes ────────────────────────────────────────────────────────
+            Text(
+              'Additional Notes',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: pt.ink500,
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _notesCtrl,
+              maxLines: 2,
+              onChanged: (v) =>
+                  ref.read(vetBookingControllerProvider.notifier).setNotes(v),
+              decoration: InputDecoration(
+                hintText: 'Any other notes for the vet? (optional)',
+                hintStyle: TextStyle(color: pt.ink300, fontSize: 13),
+                filled: true,
+                fillColor: pt.surface2,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // ── Confirm button ────────────────────────────────────────────────
+            PrimaryPillButton(
+              label: 'Confirm Booking',
+              isFullWidth: true,
+              isLoading: bookingState.isLoading,
+              color: AppColors.sky,
+              onPressed: bookingState.canBook && !bookingState.isLoading
+                  ? () {
+                      HapticFeedback.mediumImpact();
+                      ref.read(vetBookingControllerProvider.notifier).book();
+                    }
+                  : null,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -223,9 +436,6 @@ class _BookingSummary extends StatelessWidget {
           _Row(
             icon: Icons.medical_services_rounded,
             label: state.service?.name ?? '—',
-            sublabel: state.service != null
-                ? '${state.service!.formattedDuration}  ·  ${state.service!.formattedPrice}'
-                : null,
             pt: pt,
           ),
           const SizedBox(height: 10),
@@ -236,6 +446,63 @@ class _BookingSummary extends StatelessWidget {
                 : 'No slot selected',
             pt: pt,
           ),
+          if (state.service != null) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 1, color: Colors.black12),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ESTIMATED DURATION',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        color: pt.ink500,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      state.service!.formattedDuration,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: pt.ink950,
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'TOTAL PRICE',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        color: pt.ink500,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      state.service!.formattedPrice,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.sky,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -243,10 +510,9 @@ class _BookingSummary extends StatelessWidget {
 }
 
 class _Row extends StatelessWidget {
-  const _Row({required this.icon, required this.label, required this.pt, this.sublabel});
+  const _Row({required this.icon, required this.label, required this.pt});
   final IconData icon;
   final String label;
-  final String? sublabel;
   final PetfolioThemeExtension pt;
 
   @override
@@ -257,23 +523,13 @@ class _Row extends StatelessWidget {
         Icon(icon, size: 16, color: AppColors.sky),
         const SizedBox(width: 10),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: pt.ink950,
-                ),
-              ),
-              if (sublabel != null)
-                Text(
-                  sublabel!,
-                  style: TextStyle(fontSize: 11, color: pt.ink500),
-                ),
-            ],
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: pt.ink950,
+            ),
           ),
         ),
       ],

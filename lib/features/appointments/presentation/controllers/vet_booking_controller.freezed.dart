@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$VetBookingState {
 
- VetClinic? get clinic; VetService? get service; DateTime? get selectedDate; DateTime? get selectedSlot; String? get petId; String? get notes; VetBookingStatus get status; String? get errorMessage;
+ VetClinic? get clinic; VetService? get service; DateTime? get selectedDate; DateTime? get selectedSlot; String? get petId; String? get notes; VetBookingStatus get status; String? get errorMessage; String get urgency; String? get reason; String? get mediaUrl; XFile? get selectedMedia;
 /// Create a copy of VetBookingState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $VetBookingStateCopyWith<VetBookingState> get copyWith => _$VetBookingStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VetBookingState&&(identical(other.clinic, clinic) || other.clinic == clinic)&&(identical(other.service, service) || other.service == service)&&(identical(other.selectedDate, selectedDate) || other.selectedDate == selectedDate)&&(identical(other.selectedSlot, selectedSlot) || other.selectedSlot == selectedSlot)&&(identical(other.petId, petId) || other.petId == petId)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.status, status) || other.status == status)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VetBookingState&&(identical(other.clinic, clinic) || other.clinic == clinic)&&(identical(other.service, service) || other.service == service)&&(identical(other.selectedDate, selectedDate) || other.selectedDate == selectedDate)&&(identical(other.selectedSlot, selectedSlot) || other.selectedSlot == selectedSlot)&&(identical(other.petId, petId) || other.petId == petId)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.status, status) || other.status == status)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.urgency, urgency) || other.urgency == urgency)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.mediaUrl, mediaUrl) || other.mediaUrl == mediaUrl)&&(identical(other.selectedMedia, selectedMedia) || other.selectedMedia == selectedMedia));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,clinic,service,selectedDate,selectedSlot,petId,notes,status,errorMessage);
+int get hashCode => Object.hash(runtimeType,clinic,service,selectedDate,selectedSlot,petId,notes,status,errorMessage,urgency,reason,mediaUrl,selectedMedia);
 
 @override
 String toString() {
-  return 'VetBookingState(clinic: $clinic, service: $service, selectedDate: $selectedDate, selectedSlot: $selectedSlot, petId: $petId, notes: $notes, status: $status, errorMessage: $errorMessage)';
+  return 'VetBookingState(clinic: $clinic, service: $service, selectedDate: $selectedDate, selectedSlot: $selectedSlot, petId: $petId, notes: $notes, status: $status, errorMessage: $errorMessage, urgency: $urgency, reason: $reason, mediaUrl: $mediaUrl, selectedMedia: $selectedMedia)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $VetBookingStateCopyWith<$Res>  {
   factory $VetBookingStateCopyWith(VetBookingState value, $Res Function(VetBookingState) _then) = _$VetBookingStateCopyWithImpl;
 @useResult
 $Res call({
- VetClinic? clinic, VetService? service, DateTime? selectedDate, DateTime? selectedSlot, String? petId, String? notes, VetBookingStatus status, String? errorMessage
+ VetClinic? clinic, VetService? service, DateTime? selectedDate, DateTime? selectedSlot, String? petId, String? notes, VetBookingStatus status, String? errorMessage, String urgency, String? reason, String? mediaUrl, XFile? selectedMedia
 });
 
 
@@ -62,7 +62,7 @@ class _$VetBookingStateCopyWithImpl<$Res>
 
 /// Create a copy of VetBookingState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? clinic = freezed,Object? service = freezed,Object? selectedDate = freezed,Object? selectedSlot = freezed,Object? petId = freezed,Object? notes = freezed,Object? status = null,Object? errorMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? clinic = freezed,Object? service = freezed,Object? selectedDate = freezed,Object? selectedSlot = freezed,Object? petId = freezed,Object? notes = freezed,Object? status = null,Object? errorMessage = freezed,Object? urgency = null,Object? reason = freezed,Object? mediaUrl = freezed,Object? selectedMedia = freezed,}) {
   return _then(_self.copyWith(
 clinic: freezed == clinic ? _self.clinic : clinic // ignore: cast_nullable_to_non_nullable
 as VetClinic?,service: freezed == service ? _self.service : service // ignore: cast_nullable_to_non_nullable
@@ -72,7 +72,11 @@ as DateTime?,petId: freezed == petId ? _self.petId : petId // ignore: cast_nulla
 as String?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
 as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as VetBookingStatus,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,urgency: null == urgency ? _self.urgency : urgency // ignore: cast_nullable_to_non_nullable
+as String,reason: freezed == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
+as String?,mediaUrl: freezed == mediaUrl ? _self.mediaUrl : mediaUrl // ignore: cast_nullable_to_non_nullable
+as String?,selectedMedia: freezed == selectedMedia ? _self.selectedMedia : selectedMedia // ignore: cast_nullable_to_non_nullable
+as XFile?,
   ));
 }
 /// Create a copy of VetBookingState
@@ -181,10 +185,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( VetClinic? clinic,  VetService? service,  DateTime? selectedDate,  DateTime? selectedSlot,  String? petId,  String? notes,  VetBookingStatus status,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( VetClinic? clinic,  VetService? service,  DateTime? selectedDate,  DateTime? selectedSlot,  String? petId,  String? notes,  VetBookingStatus status,  String? errorMessage,  String urgency,  String? reason,  String? mediaUrl,  XFile? selectedMedia)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VetBookingState() when $default != null:
-return $default(_that.clinic,_that.service,_that.selectedDate,_that.selectedSlot,_that.petId,_that.notes,_that.status,_that.errorMessage);case _:
+return $default(_that.clinic,_that.service,_that.selectedDate,_that.selectedSlot,_that.petId,_that.notes,_that.status,_that.errorMessage,_that.urgency,_that.reason,_that.mediaUrl,_that.selectedMedia);case _:
   return orElse();
 
 }
@@ -202,10 +206,10 @@ return $default(_that.clinic,_that.service,_that.selectedDate,_that.selectedSlot
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( VetClinic? clinic,  VetService? service,  DateTime? selectedDate,  DateTime? selectedSlot,  String? petId,  String? notes,  VetBookingStatus status,  String? errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( VetClinic? clinic,  VetService? service,  DateTime? selectedDate,  DateTime? selectedSlot,  String? petId,  String? notes,  VetBookingStatus status,  String? errorMessage,  String urgency,  String? reason,  String? mediaUrl,  XFile? selectedMedia)  $default,) {final _that = this;
 switch (_that) {
 case _VetBookingState():
-return $default(_that.clinic,_that.service,_that.selectedDate,_that.selectedSlot,_that.petId,_that.notes,_that.status,_that.errorMessage);case _:
+return $default(_that.clinic,_that.service,_that.selectedDate,_that.selectedSlot,_that.petId,_that.notes,_that.status,_that.errorMessage,_that.urgency,_that.reason,_that.mediaUrl,_that.selectedMedia);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -222,10 +226,10 @@ return $default(_that.clinic,_that.service,_that.selectedDate,_that.selectedSlot
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( VetClinic? clinic,  VetService? service,  DateTime? selectedDate,  DateTime? selectedSlot,  String? petId,  String? notes,  VetBookingStatus status,  String? errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( VetClinic? clinic,  VetService? service,  DateTime? selectedDate,  DateTime? selectedSlot,  String? petId,  String? notes,  VetBookingStatus status,  String? errorMessage,  String urgency,  String? reason,  String? mediaUrl,  XFile? selectedMedia)?  $default,) {final _that = this;
 switch (_that) {
 case _VetBookingState() when $default != null:
-return $default(_that.clinic,_that.service,_that.selectedDate,_that.selectedSlot,_that.petId,_that.notes,_that.status,_that.errorMessage);case _:
+return $default(_that.clinic,_that.service,_that.selectedDate,_that.selectedSlot,_that.petId,_that.notes,_that.status,_that.errorMessage,_that.urgency,_that.reason,_that.mediaUrl,_that.selectedMedia);case _:
   return null;
 
 }
@@ -237,7 +241,7 @@ return $default(_that.clinic,_that.service,_that.selectedDate,_that.selectedSlot
 
 
 class _VetBookingState extends VetBookingState {
-  const _VetBookingState({this.clinic, this.service, this.selectedDate, this.selectedSlot, this.petId, this.notes, this.status = VetBookingStatus.idle, this.errorMessage}): super._();
+  const _VetBookingState({this.clinic, this.service, this.selectedDate, this.selectedSlot, this.petId, this.notes, this.status = VetBookingStatus.idle, this.errorMessage, this.urgency = 'Routine', this.reason, this.mediaUrl, this.selectedMedia}): super._();
   
 
 @override final  VetClinic? clinic;
@@ -248,6 +252,10 @@ class _VetBookingState extends VetBookingState {
 @override final  String? notes;
 @override@JsonKey() final  VetBookingStatus status;
 @override final  String? errorMessage;
+@override@JsonKey() final  String urgency;
+@override final  String? reason;
+@override final  String? mediaUrl;
+@override final  XFile? selectedMedia;
 
 /// Create a copy of VetBookingState
 /// with the given fields replaced by the non-null parameter values.
@@ -259,16 +267,16 @@ _$VetBookingStateCopyWith<_VetBookingState> get copyWith => __$VetBookingStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VetBookingState&&(identical(other.clinic, clinic) || other.clinic == clinic)&&(identical(other.service, service) || other.service == service)&&(identical(other.selectedDate, selectedDate) || other.selectedDate == selectedDate)&&(identical(other.selectedSlot, selectedSlot) || other.selectedSlot == selectedSlot)&&(identical(other.petId, petId) || other.petId == petId)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.status, status) || other.status == status)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VetBookingState&&(identical(other.clinic, clinic) || other.clinic == clinic)&&(identical(other.service, service) || other.service == service)&&(identical(other.selectedDate, selectedDate) || other.selectedDate == selectedDate)&&(identical(other.selectedSlot, selectedSlot) || other.selectedSlot == selectedSlot)&&(identical(other.petId, petId) || other.petId == petId)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.status, status) || other.status == status)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.urgency, urgency) || other.urgency == urgency)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.mediaUrl, mediaUrl) || other.mediaUrl == mediaUrl)&&(identical(other.selectedMedia, selectedMedia) || other.selectedMedia == selectedMedia));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,clinic,service,selectedDate,selectedSlot,petId,notes,status,errorMessage);
+int get hashCode => Object.hash(runtimeType,clinic,service,selectedDate,selectedSlot,petId,notes,status,errorMessage,urgency,reason,mediaUrl,selectedMedia);
 
 @override
 String toString() {
-  return 'VetBookingState(clinic: $clinic, service: $service, selectedDate: $selectedDate, selectedSlot: $selectedSlot, petId: $petId, notes: $notes, status: $status, errorMessage: $errorMessage)';
+  return 'VetBookingState(clinic: $clinic, service: $service, selectedDate: $selectedDate, selectedSlot: $selectedSlot, petId: $petId, notes: $notes, status: $status, errorMessage: $errorMessage, urgency: $urgency, reason: $reason, mediaUrl: $mediaUrl, selectedMedia: $selectedMedia)';
 }
 
 
@@ -279,7 +287,7 @@ abstract mixin class _$VetBookingStateCopyWith<$Res> implements $VetBookingState
   factory _$VetBookingStateCopyWith(_VetBookingState value, $Res Function(_VetBookingState) _then) = __$VetBookingStateCopyWithImpl;
 @override @useResult
 $Res call({
- VetClinic? clinic, VetService? service, DateTime? selectedDate, DateTime? selectedSlot, String? petId, String? notes, VetBookingStatus status, String? errorMessage
+ VetClinic? clinic, VetService? service, DateTime? selectedDate, DateTime? selectedSlot, String? petId, String? notes, VetBookingStatus status, String? errorMessage, String urgency, String? reason, String? mediaUrl, XFile? selectedMedia
 });
 
 
@@ -296,7 +304,7 @@ class __$VetBookingStateCopyWithImpl<$Res>
 
 /// Create a copy of VetBookingState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? clinic = freezed,Object? service = freezed,Object? selectedDate = freezed,Object? selectedSlot = freezed,Object? petId = freezed,Object? notes = freezed,Object? status = null,Object? errorMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? clinic = freezed,Object? service = freezed,Object? selectedDate = freezed,Object? selectedSlot = freezed,Object? petId = freezed,Object? notes = freezed,Object? status = null,Object? errorMessage = freezed,Object? urgency = null,Object? reason = freezed,Object? mediaUrl = freezed,Object? selectedMedia = freezed,}) {
   return _then(_VetBookingState(
 clinic: freezed == clinic ? _self.clinic : clinic // ignore: cast_nullable_to_non_nullable
 as VetClinic?,service: freezed == service ? _self.service : service // ignore: cast_nullable_to_non_nullable
@@ -306,7 +314,11 @@ as DateTime?,petId: freezed == petId ? _self.petId : petId // ignore: cast_nulla
 as String?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
 as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as VetBookingStatus,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,urgency: null == urgency ? _self.urgency : urgency // ignore: cast_nullable_to_non_nullable
+as String,reason: freezed == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
+as String?,mediaUrl: freezed == mediaUrl ? _self.mediaUrl : mediaUrl // ignore: cast_nullable_to_non_nullable
+as String?,selectedMedia: freezed == selectedMedia ? _self.selectedMedia : selectedMedia // ignore: cast_nullable_to_non_nullable
+as XFile?,
   ));
 }
 

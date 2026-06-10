@@ -13,6 +13,8 @@ class FcmMessageRouter {
     switch (type) {
       case 'care_reminder':
         return '/care';
+      case 'appointment_reminder':
+        return '/care/appointments';
       case 'match':
         return '/matching/inbox';
       case 'chat_message':

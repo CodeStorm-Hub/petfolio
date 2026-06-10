@@ -1,6 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/services/notification_service.dart';
 import '../../data/models/vet_clinic.dart';
 import '../../data/models/vet_service.dart';
 import '../../data/repositories/vet_repository.dart';
@@ -23,6 +26,10 @@ abstract class VetBookingState with _$VetBookingState {
     String? notes,
     @Default(VetBookingStatus.idle) VetBookingStatus status,
     String? errorMessage,
+    @Default('Routine') String urgency,
+    String? reason,
+    String? mediaUrl,
+    XFile? selectedMedia,
   }) = _VetBookingState;
 
   bool get canBook =>
@@ -73,6 +80,18 @@ class VetBookingController extends Notifier<VetBookingState> {
     state = state.copyWith(notes: notes.isEmpty ? null : notes);
   }
 
+  void selectUrgency(String urgency) {
+    state = state.copyWith(urgency: urgency);
+  }
+
+  void selectReason(String reason) {
+    state = state.copyWith(reason: reason.trim().isEmpty ? null : reason.trim());
+  }
+
+  void selectMedia(XFile? media) {
+    state = state.copyWith(selectedMedia: media);
+  }
+
   void resetStatus() {
     state = state.copyWith(
       status: VetBookingStatus.idle,
@@ -84,13 +103,57 @@ class VetBookingController extends Notifier<VetBookingState> {
     if (!state.canBook) return;
     state = state.copyWith(status: VetBookingStatus.loading, errorMessage: null);
     try {
+      String? mediaUrl = state.mediaUrl;
+
+      // Upload selected media file to Supabase Storage if present
+      if (state.selectedMedia != null) {
+        final client = Supabase.instance.client;
+        final userId = client.auth.currentUser?.id;
+        if (userId == null) {
+          throw StateError('Must be signed in to upload appointment media');
+        }
+
+        final bytes = await state.selectedMedia!.readAsBytes();
+        final ext = state.selectedMedia!.name.split('.').last.toLowerCase();
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}.$ext';
+        final path = '$userId/$fileName';
+        final mimeType = _getMimeType(ext);
+
+        await client.storage.from('appointment-media').uploadBinary(
+          path,
+          bytes,
+          fileOptions: FileOptions(contentType: mimeType, upsert: false),
+        );
+
+        mediaUrl = client.storage.from('appointment-media').getPublicUrl(path);
+      }
+
       await ref.read(vetRepositoryProvider).bookAppointment(
             petId: state.petId!,
             clinic: state.clinic!,
             service: state.service!,
             scheduledAt: state.selectedSlot!,
             notes: state.notes,
+            urgency: state.urgency,
+            reason: state.reason,
+            mediaUrl: mediaUrl,
           );
+
+      // Trigger immediate local "Booking Received" notification
+      try {
+        await NotificationService.instance.showPushNotification(
+          id: DateTime.now().millisecondsSinceEpoch.abs() % 1000000,
+          title: 'Booking Received 🎉',
+          body: 'Your appointment for "${state.service!.name}" has been booked successfully.',
+          data: {
+            'type': 'appointment_reminder',
+            'route': '/care/appointments',
+          },
+        );
+      } catch (_) {
+        // Silently catch local notification trigger errors if platform is unsupported
+      }
+
       // Refresh the existing appointments calendar so the new booking appears.
       ref.invalidate(appointmentControllerProvider);
       state = state.copyWith(status: VetBookingStatus.success);
@@ -101,9 +164,32 @@ class VetBookingController extends Notifier<VetBookingState> {
       );
     }
   }
+
+  String _getMimeType(String ext) {
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      case 'heic':
+        return 'image/heic';
+      case 'mp4':
+        return 'video/mp4';
+      case 'mov':
+      case 'qt':
+        return 'video/quicktime';
+      case 'webm':
+        return 'video/webm';
+      default:
+        return 'application/octet-stream';
+    }
+  }
 }
 
 final vetBookingControllerProvider =
     NotifierProvider<VetBookingController, VetBookingState>(
-  VetBookingController.new,
-);
+      VetBookingController.new,
+    );

@@ -91,6 +91,9 @@ class VetRepository {
     required VetService service,
     required DateTime scheduledAt,
     String? notes,
+    String? urgency,
+    String? reason,
+    String? mediaUrl,
   }) async {
     final ownerId = _client.auth.currentUser?.id;
     if (ownerId == null) throw StateError('Must be signed in to book');
@@ -100,12 +103,15 @@ class VetRepository {
       'owner_id':     ownerId,
       'title':        service.name,
       'scheduled_at': scheduledAt.toUtc().toIso8601String(),
-      'status':       'upcoming',
+      'status':       'pending',
       'vet_name':     null,
       'location':     clinic.name,
       'clinic_id':    clinic.id,
       'service_id':   service.id,
+      'urgency':      urgency,
       if (notes != null && notes.isNotEmpty) 'notes': notes,
+      if (reason != null && reason.isNotEmpty) 'reason': reason,
+      if (mediaUrl != null && mediaUrl.isNotEmpty) 'media_url': mediaUrl,
     };
 
     final row = await _client
