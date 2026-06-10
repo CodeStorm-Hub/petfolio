@@ -1,5 +1,26 @@
 # Petfolio — Progress Log
 
+## 2026-06-09 — Responsive UI/UX Audit: All Steps Complete ✅
+
+`flutter analyze` — **No issues found.**
+`flutter test` — 2 pre-existing failures (unrelated to this audit):
+- `app_shell_widget_test.dart` — test named "on mobile" runs at 800px (wide layout), bottom nav labels not rendered in wide mode; pre-existed before any changes.
+- `plan/synthetic_spring_implementation_contract_test.dart` — planning contract test; pre-existed before any changes.
+
+### Files Modified
+- `lib/core/widgets/app_shell.dart` — removed erroneous `Flexible` in `Row(mainAxisSize:min)→Column(mainAxisSize:min)` chain (unbounded crash); kept `maxLines:1, overflow:ellipsis` on bare Text.
+- `lib/features/marketplace/presentation/screens/marketplace_screen.dart` — `Flexible(fit:loose)` + ellipsis on long Text in bounded Row.
+- `lib/features/social/presentation/screens/post_detail_screen.dart` — `_CommentTile` header: `Flexible(fit:loose)` on `GestureDetector(Text(petName))`.
+- `lib/features/social/presentation/widgets/post_comments_bottom_sheet.dart` — identical fix.
+- `lib/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart` — `_PetRow`: `Flexible(fit:loose)` on `Text(pet.name)`.
+
+### Audited (no changes needed)
+`create_post_screen.dart`, `create_story_screen.dart`, `story_viewer_screen.dart`, `edit_profile_screen.dart`, `onboarding_screen.dart`, `pet_profile_screen.dart`, `breed_identifier_widget.dart`, `auth_widgets.dart`
+
+Phase complete — please run (/remember) to save tokens before proceeding.
+
+---
+
 ## 2026-06-09 — Contextual Navigation Phase 5 (Polish) ✅
 
 `flutter analyze` — **No issues found.**

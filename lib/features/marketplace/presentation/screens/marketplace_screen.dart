@@ -628,18 +628,23 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      widget.selectedCat == ProductCategory.all
-                          ? 'Trending in your pack'
-                          : widget.selectedCat.label,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: Theme.of(context)
-                            .extension<PetfolioThemeExtension>()!
-                            .ink950,
+                    Flexible(
+                      child: Text(
+                        widget.selectedCat == ProductCategory.all
+                            ? 'Trending in your pack'
+                            : widget.selectedCat.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Theme.of(context)
+                              .extension<PetfolioThemeExtension>()!
+                              .ink950,
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
                       '${filtered.length}+ items',
                       style: TextStyle(
@@ -1386,12 +1391,14 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Your basket', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: ink950)),
-                    Text('${cart.itemCount} item${cart.itemCount == 1 ? '' : 's'} · ships to Brooklyn', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: ink500)),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Your basket', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: ink950)),
+                      Text('${cart.itemCount} item${cart.itemCount == 1 ? '' : 's'} · ships to Brooklyn', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: ink500)),
+                    ],
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close_rounded),
@@ -1599,7 +1606,7 @@ class _CartItemRow extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.product.name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: pt.ink950)),
+                Text(item.product.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: pt.ink950)),
                 Text(item.product.brand, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: pt.ink500)),
                 const SizedBox(height: 2),
                 Text('\$${((item.product.priceCents * item.quantity) / 100).toStringAsFixed(2)}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: pt.ink950)),

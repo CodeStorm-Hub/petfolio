@@ -452,6 +452,8 @@ class AppShellHeader extends ConsumerWidget {
                   Row(children: [
                     Text(
                       activePet?.name ?? (subIndex == 4 ? 'Market' : 'PetFolio'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white,
                       ),
@@ -472,7 +474,7 @@ class AppShellHeader extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          leftWidget,
+          Flexible(fit: FlexFit.loose, child: leftWidget),
           _buildTrailing(context, ref),
         ],
       ),
@@ -707,6 +709,8 @@ class _NavTabState extends State<_NavTab> with SingleTickerProviderStateMixin {
               const SizedBox(height: 2),
               Text(
                 widget.destination.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight: tC > 0.5 ? FontWeight.w700 : FontWeight.w500,
@@ -796,14 +800,19 @@ class _WideNavRail extends StatelessWidget {
       ],
     );
 
-    if (module == ShellModule.global) return rail;
+    if (module == ShellModule.global) {
+      return SafeArea(bottom: false, right: false, child: rail);
+    }
 
-    return Container(
-      color: bg,
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 12, 8, 4),
+    return SafeArea(
+      bottom: false,
+      right: false,
+      child: Container(
+        color: bg,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 12, 8, 4),
             child: Tooltip(
               message: 'Back to Home',
               child: InkWell(
@@ -829,6 +838,7 @@ class _WideNavRail extends StatelessWidget {
           Expanded(child: rail),
         ],
       ),
-    );
+    ),
+  );
   }
 }

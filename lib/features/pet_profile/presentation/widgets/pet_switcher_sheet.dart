@@ -282,12 +282,17 @@ class _PetRow extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          pet.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18,
-                            letterSpacing: -0.2,
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: Text(
+                            pet.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
+                              letterSpacing: -0.2,
+                            ),
                           ),
                         ),
                         if (isActive) ...[
