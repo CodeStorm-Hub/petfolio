@@ -1090,6 +1090,7 @@ class _QuickActionsRow extends StatelessWidget {
         color: AppColors.poppy,
         soft: isDark ? AppColors.poppySoftD : AppColors.poppySoft,
         route: '/social/create-post',
+        push: true,
       ),
       _QuickAction(
         icon: Icons.medical_services_rounded,
@@ -1098,6 +1099,7 @@ class _QuickActionsRow extends StatelessWidget {
         color: AppColors.sky,
         soft: isDark ? AppColors.skySoftD : AppColors.skySoft,
         route: '/appointments',
+        push: true,
       ),
       _QuickAction(
         icon: Icons.receipt_long_rounded,
@@ -1144,7 +1146,11 @@ class _QuickActionCardState extends State<_QuickActionCard> {
       onTapCancel: () => setState(() => _pressed = false),
       onTap: () {
         HapticFeedback.selectionClick();
-        context.push(widget.action.route);
+        if (widget.action.push) {
+          context.push(widget.action.route);
+        } else {
+          context.go(widget.action.route);
+        }
       },
       child: AnimatedScale(
         scale: _pressed ? 0.96 : 1.0,
@@ -1217,6 +1223,7 @@ class _QuickAction {
     required this.color,
     required this.soft,
     required this.route,
+    this.push = false,
   });
   final IconData icon;
   final String label;
@@ -1224,6 +1231,7 @@ class _QuickAction {
   final Color color;
   final Color soft;
   final String route;
+  final bool push;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -9,6 +9,8 @@ class Appointment {
     this.vetName,
     this.clinicName,
     this.notes,
+    this.clinicId,
+    this.serviceId,
   });
 
   final String id;
@@ -20,6 +22,8 @@ class Appointment {
   final String? vetName;
   final String? clinicName;
   final String? notes;
+  final String? clinicId;
+  final String? serviceId;
 
   factory Appointment.fromJson(Map<String, dynamic> json) {
     final status = json['status'] as String?;
@@ -36,6 +40,8 @@ class Appointment {
       vetName: json['vet_name'] as String?,
       clinicName: (json['location'] ?? json['clinic_name']) as String?,
       notes: json['notes'] as String?,
+      clinicId: json['clinic_id'] as String?,
+      serviceId: json['service_id'] as String?,
     );
   }
 
@@ -48,6 +54,8 @@ class Appointment {
         if (vetName != null) 'vet_name': vetName,
         if (clinicName != null) 'location': clinicName,
         if (notes != null) 'notes': notes,
+        if (clinicId != null) 'clinic_id': clinicId,
+        if (serviceId != null) 'service_id': serviceId,
       };
 
   Map<String, dynamic> toJson() => toInsertJson(ownerId: 'test-owner');
@@ -59,6 +67,8 @@ class Appointment {
     String? clinicName,
     String? notes,
     DateTime? scheduledAt,
+    String? clinicId,
+    String? serviceId,
   }) =>
       Appointment(
         id: id,
@@ -70,5 +80,7 @@ class Appointment {
         vetName: vetName ?? this.vetName,
         clinicName: clinicName ?? this.clinicName,
         notes: notes ?? this.notes,
+        clinicId: clinicId ?? this.clinicId,
+        serviceId: serviceId ?? this.serviceId,
       );
 }

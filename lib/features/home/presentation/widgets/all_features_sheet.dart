@@ -14,6 +14,7 @@ class AllFeaturesSheet {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => const _AllFeaturesSheetContent(),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../communities/data/models/community.dart';
+import '../communities/presentation/screens/community_detail_screen.dart';
 import 'data/models/feed_post.dart';
 import 'presentation/screens/create_post_screen.dart';
 import 'presentation/screens/create_story_screen.dart';
@@ -39,5 +41,14 @@ List<RouteBase> socialRoutes(GlobalKey<NavigatorState> rootKey) => [
     builder: (context, state) => SocialProfileScreen(
       petId: state.pathParameters['petId']!,
     ),
+  ),
+  GoRoute(
+    parentNavigatorKey: rootKey,
+    path: '/social/communities/:communityId',
+    builder: (context, state) {
+      final extra = state.extra;
+      if (extra is Community) return CommunityDetailScreen(community: extra);
+      return const Scaffold(body: Center(child: Text('Community not found')));
+    },
   ),
 ];

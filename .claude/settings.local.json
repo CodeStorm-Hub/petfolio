@@ -184,7 +184,11 @@
       "WebFetch(domain:m3.material.io)",
       "PowerShell(@\\(\"G:\\\\GitHub\\\\petfolio\\\\lib\\\\features\\\\settings\", \"G:\\\\GitHub\\\\petfolio\\\\lib\\\\features\\\\profile\"\\) | ForEach-Object { if \\(Test-Path $_\\) { Get-ChildItem -Path $_ -Recurse -File | Select-Object -ExpandProperty FullName } })",
       "PowerShell(cd \"G:\\\\GitHub\\\\petfolio\"; $py = Get-Content graphify-out\\\\.graphify_python -Raw; & $py -m graphify query \"checkout order flow process_checkout RPC inventory reservations\" 2>&1)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "WebFetch(domain:apps.apple.com)",
+      "WebFetch(domain:www.vetsoftwarehub.com)",
+      "WebFetch(domain:www.vetstoria.com)",
+      "WebFetch(domain:vitusvet.com)"
     ]
   }
 }
