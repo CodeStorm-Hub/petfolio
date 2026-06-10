@@ -315,7 +315,7 @@ class _WaveHeroSection extends StatelessWidget {
                 ),
                 // Greeting content
                 Padding(
-                  padding: EdgeInsets.fromLTRB(20, topPad + 76.0 + 14, 120, 72),
+                  padding: EdgeInsets.fromLTRB(20, topPad + 76.0 + 14, 120, 50),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
