@@ -8,6 +8,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/petfolio_empty_state.dart';
 import '../../data/models/cart_item.dart';
+import '../../data/models/promo.dart';
+import '../../data/repositories/promo_repository.dart';
 import '../controllers/address_controller.dart';
 import '../widgets/address_sheet.dart';
 import '../../data/models/marketplace_order.dart';
@@ -307,13 +309,51 @@ class _VendorCheckoutSectionState
   PaymentMethod _method = PaymentMethod.stripe;
   final _promoCtrl = TextEditingController();
   bool _promoExpanded = false;
-  final bool _promoApplied = false;
+  bool _promoApplied = false;
+  bool _promoLoading = false;
+  Promo? _appliedPromo;
 
   @override
   void dispose() {
     _promoCtrl.dispose();
     super.dispose();
   }
+
+  Future<void> _applyPromo(int subtotalCents) async {
+    final code = _promoCtrl.text.trim();
+    if (code.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(_snack('Enter a promo code first', error: true));
+      return;
+    }
+    setState(() => _promoLoading = true);
+    try {
+      final promo = await ref.read(promoRepositoryProvider).validateCode(code);
+      if (!mounted) return;
+      if (promo == null) {
+        ScaffoldMessenger.of(context).showSnackBar(_snack('Promo code not valid or expired', error: true));
+        setState(() { _promoLoading = false; _promoExpanded = false; });
+      } else if (subtotalCents < promo.minOrderCents) {
+        final min = '\$${(promo.minOrderCents / 100).toStringAsFixed(0)}';
+        ScaffoldMessenger.of(context).showSnackBar(_snack('Minimum order $min required for this code', error: true));
+        setState(() { _promoLoading = false; _promoExpanded = false; });
+      } else {
+        HapticFeedback.mediumImpact();
+        ScaffoldMessenger.of(context).showSnackBar(_snack('${promo.discountLabel} applied!'));
+        setState(() { _appliedPromo = promo; _promoApplied = true; _promoLoading = false; _promoExpanded = false; });
+      }
+    } catch (_) {
+      if (mounted) setState(() { _promoLoading = false; _promoExpanded = false; });
+    }
+  }
+
+  SnackBar _snack(String msg, {bool error = false}) => SnackBar(
+        content: Text(msg),
+        backgroundColor: error ? AppColors.danger : AppColors.mint700,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        duration: const Duration(seconds: 2),
+      );
 
   void _handleCheckout(int subtotalCents) {
     if (_method == PaymentMethod.cod) {
@@ -346,7 +386,11 @@ class _VendorCheckoutSectionState
     final shopItems = widget.items;
     final shopSavingsCents = shopItems.fold<int>(0, (s, i) => s + i.savingsCentsTotal);
     final deliveryCents = 0; // free delivery
-    final totalCents = subtotalCents + deliveryCents;
+    final promoCents = _appliedPromo == null ? 0 : _appliedPromo!.discountType == PromoDiscountType.percent
+        ? (subtotalCents * _appliedPromo!.discountValue ~/ 100)
+            .clamp(0, _appliedPromo!.maxDiscountCents ?? 999999)
+        : _appliedPromo!.discountValue.clamp(0, subtotalCents);
+    final totalCents = (subtotalCents + deliveryCents - promoCents).clamp(0, subtotalCents);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -538,25 +582,7 @@ class _VendorCheckoutSectionState
                   ),
                   const SizedBox(width: 10),
                   FilledButton(
-                    onPressed: () {
-                      HapticFeedback.selectionClick();
-                      setState(() => _promoExpanded = false);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            _promoCtrl.text.trim().isEmpty
-                                ? 'Enter a promo code first'
-                                : 'Promo code not valid',
-                          ),
-                          backgroundColor: AppColors.danger,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
-                          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
-                    },
+                    onPressed: _promoLoading ? null : () => _applyPromo(subtotalCents),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.mint,
                       foregroundColor: Colors.white,
@@ -679,6 +705,14 @@ class _VendorCheckoutSectionState
                   label: 'Subtotal',
                   value: '\$${(subtotalCents / 100).toStringAsFixed(2)}',
                 ),
+                if (promoCents > 0) ...[
+                  const SizedBox(height: 6),
+                  _SumRow(
+                    label: 'Promo (${_appliedPromo!.code})',
+                    value: '- \$${(promoCents / 100).toStringAsFixed(2)}',
+                    valueColor: AppColors.mint700,
+                  ),
+                ],
                 const SizedBox(height: 6),
                 _SumRow(
                   label: 'Delivery Charge',

@@ -201,10 +201,54 @@ class NotificationService {
       title: 'Care Reminder',
       body: title,
       scheduledDate: scheduled,
-      notificationDetails: NotificationDetails(android: androidDetails),
+      notificationDetails: NotificationDetails(
+        android: androidDetails,
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: repeating ? DateTimeComponents.time : null,
     );
+  }
+
+  Future<void> scheduleAppointmentReminder({
+    required String appointmentId,
+    required String serviceName,
+    required DateTime scheduledAt,
+  }) async {
+    final reminderTime = scheduledAt.subtract(const Duration(hours: 1));
+    if (reminderTime.isBefore(DateTime.now())) return;
+
+    final tzScheduled = tz.TZDateTime.from(reminderTime, tz.local);
+    final androidDetails = AndroidNotificationDetails(
+      _channelId,
+      _channelName,
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+
+    await _plugin.zonedSchedule(
+      id: _idFor(appointmentId),
+      title: 'Appointment in 1 hour',
+      body: serviceName,
+      scheduledDate: tzScheduled,
+      notificationDetails: NotificationDetails(
+        android: androidDetails,
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
+  }
+
+  Future<void> cancelAppointmentReminder(String appointmentId) async {
+    await _plugin.cancel(id: _idFor(appointmentId));
   }
 
   Future<void> cancelForTask(String taskId) async {

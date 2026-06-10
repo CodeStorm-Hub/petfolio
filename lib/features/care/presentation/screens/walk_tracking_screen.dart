@@ -135,7 +135,7 @@ class WalkTrackingScreen extends ConsumerWidget {
             children: [
               TileLayer(
                 urlTemplate: _tileUrl,
-                userAgentPackageName: 'com.example.petfolio',
+                userAgentPackageName: 'app.petfolio.petfolio',
               ),
               if (walk.points.length >= 2)
                 PolylineLayer(

@@ -151,7 +151,7 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
     pillarSocial: AppColors.poppy,
     pillarMatch: AppColors.lilac,
     pillarHealth: AppColors.mint,
-    pillarMarket: AppColors.mint,
+    pillarMarket: AppColors.sky,
     tangerineSoft: AppColors.tangerineSoft,
     poppySoft: AppColors.poppySoft,
     mintSoft: AppColors.mintSoft,
@@ -189,7 +189,7 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
     pillarSocial: AppColors.poppyD,
     pillarMatch: AppColors.lilacD,
     pillarHealth: AppColors.mintD,
-    pillarMarket: AppColors.mintD,
+    pillarMarket: AppColors.skyD,
     tangerineSoft: AppColors.tangerineSoftD,
     poppySoft: AppColors.poppySoftD,
     mintSoft: AppColors.mintSoftD,
@@ -315,6 +315,10 @@ final class AppThemeSpacing {
   double get md => 12;
   double get lg => 16;
   double get xl => 24;
+  double get xxl => 32;
+  double get xxxl => 48;
+  double get xxxxl => 64;
+  double get xxxxxl => 96;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

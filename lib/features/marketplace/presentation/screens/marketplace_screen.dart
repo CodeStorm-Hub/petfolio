@@ -25,6 +25,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../widgets/product_glyph.dart';
 import '../widgets/web_checkout_resume_listener.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
+import '../widgets/address_sheet.dart';
 
 
 
@@ -1673,7 +1674,7 @@ class _DeliveryStrip extends ConsumerWidget {
               ),
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () => AddressSheet.show(context),
               child: Text(
                 'Set address',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.tangerine),

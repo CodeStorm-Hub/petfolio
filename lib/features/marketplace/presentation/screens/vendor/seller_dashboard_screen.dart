@@ -637,6 +637,11 @@ class _QuickActions extends StatelessWidget {
         label: 'Edit shop',
         route: '/seller/edit-shop',
       ),
+      (
+        icon: Icons.account_balance_wallet_outlined,
+        label: 'Earnings',
+        route: '/seller/earnings',
+      ),
     ];
 
     return Column(

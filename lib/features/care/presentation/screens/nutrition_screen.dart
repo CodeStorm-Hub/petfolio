@@ -124,7 +124,7 @@ class _NutritionAppBar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'NUTRITION',
+            'WEIGHT & HEALTH',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w700,
               letterSpacing: 1.4,

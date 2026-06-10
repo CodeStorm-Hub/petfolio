@@ -188,7 +188,8 @@
       "WebFetch(domain:apps.apple.com)",
       "WebFetch(domain:www.vetsoftwarehub.com)",
       "WebFetch(domain:www.vetstoria.com)",
-      "WebFetch(domain:vitusvet.com)"
+      "WebFetch(domain:vitusvet.com)",
+      "mcp__62036b11-6fe4-42d7-b814-e64c7714d92c__execute_sql"
     ]
   }
 }

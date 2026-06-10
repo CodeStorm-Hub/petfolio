@@ -7,6 +7,7 @@ import 'package:video_player/video_player.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:share_plus/share_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/platform/web_image_cache.dart';
@@ -1337,8 +1338,21 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                         },
                       ),
                     ),
-                    Expanded(child: const _ActionBtn(icon: Icons.ios_share_rounded, label: 'Share')),
-                    Expanded(child: const _ActionBtn(icon: Icons.bookmark_border_rounded, label: 'Save')),
+                    Expanded(child: _ActionBtn(
+                      icon: Icons.ios_share_rounded,
+                      label: 'Share',
+                      onTap: () {
+                        final caption = widget.post.caption.isNotEmpty ? widget.post.caption : 'Check out this post on PetFolio!';
+                        SharePlus.instance.share(ShareParams(text: caption));
+                      },
+                    )),
+                    Expanded(child: _ActionBtn(
+                      icon: Icons.bookmark_border_rounded,
+                      label: 'Save',
+                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Saved posts coming soon'), duration: Duration(seconds: 2)),
+                      ),
+                    )),
                   ],
                 ),
               ),

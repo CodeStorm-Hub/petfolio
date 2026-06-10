@@ -754,7 +754,6 @@ class _WideNavRail extends StatelessWidget {
       selectedIndex: selectedIndex,
       labelType: NavigationRailLabelType.all,
       backgroundColor: bg,
-      indicatorColor: Colors.transparent,
       onDestinationSelected: onSelect,
       destinations: [
         for (var i = 0; i < destinations.length; i++)

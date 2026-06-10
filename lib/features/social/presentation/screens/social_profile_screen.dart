@@ -307,8 +307,20 @@ class _ProfileHeader extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _ProfileStatColumn(value: postCount?.toString() ?? '-', label: 'Posts'),
-                    _ProfileStatColumn(value: followerCount?.toString() ?? '-', label: 'Followers'),
-                    _ProfileStatColumn(value: followingCount?.toString() ?? '-', label: 'Following'),
+                    _ProfileStatColumn(
+                      value: followerCount?.toString() ?? '-',
+                      label: 'Followers',
+                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Followers list coming soon'), duration: Duration(seconds: 2)),
+                      ),
+                    ),
+                    _ProfileStatColumn(
+                      value: followingCount?.toString() ?? '-',
+                      label: 'Following',
+                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Following list coming soon'), duration: Duration(seconds: 2)),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -398,14 +410,15 @@ class _ProfileAvatar extends StatelessWidget {
 
 // Single stat column (number + label)
 class _ProfileStatColumn extends StatelessWidget {
-  const _ProfileStatColumn({required this.value, required this.label});
+  const _ProfileStatColumn({required this.value, required this.label, this.onTap});
   final String value;
   final String label;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Column(
+    final column = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
@@ -419,6 +432,8 @@ class _ProfileStatColumn extends StatelessWidget {
         ),
       ],
     );
+    if (onTap == null) return column;
+    return GestureDetector(onTap: onTap, child: column);
   }
 }
 
