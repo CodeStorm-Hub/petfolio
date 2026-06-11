@@ -87,6 +87,17 @@ class CartScreen extends ConsumerWidget {
                           32 + MediaQuery.paddingOf(context).bottom,
                         ),
                         children: [
+                          // Multi-vendor summary banner (2+ shops only)
+                          if (groups.length > 1) ...[
+                            _MultiVendorSummaryBanner(
+                              shopCount: groups.length,
+                              totalFormatted: cart.totalFormatted,
+                              itemCount: cart.itemCount,
+                              isDark: isDark,
+                            ),
+                            const SizedBox(height: 10),
+                          ],
+
                           // Shared deliver-to card (once at top)
                           _DeliverToCard(isDark: isDark),
                           const SizedBox(height: 10),
@@ -831,6 +842,97 @@ class _VendorCheckoutSectionState
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Multi-vendor summary banner — shown at top when cart has items from 2+ shops
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _MultiVendorSummaryBanner extends StatelessWidget {
+  const _MultiVendorSummaryBanner({
+    required this.shopCount,
+    required this.totalFormatted,
+    required this.itemCount,
+    required this.isDark,
+  });
+
+  final int shopCount;
+  final String totalFormatted;
+  final int itemCount;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        gradient: LinearGradient(
+          colors: isDark
+              ? [const Color(0xFF2A1820), const Color(0xFF331825)]
+              : [AppColors.poppy.withAlpha(18), AppColors.tangerine.withAlpha(12)],
+        ),
+        border: Border.all(
+          color: AppColors.poppy.withAlpha(isDark ? 60 : 40),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.poppy.withAlpha(isDark ? 50 : 25),
+            ),
+            child: const Icon(
+              Icons.storefront_rounded,
+              size: 20,
+              color: AppColors.poppy,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Ordering from $shopCount shops',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.ink950,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '$itemCount item${itemCount == 1 ? '' : 's'} · Each shop ships separately',
+                  style: const TextStyle(fontSize: 12, color: AppColors.ink500),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                totalFormatted,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.poppy,
+                ),
+              ),
+              const Text(
+                'combined',
+                style: TextStyle(fontSize: 10, color: AppColors.ink500),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

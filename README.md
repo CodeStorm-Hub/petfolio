@@ -117,3 +117,22 @@ These suppress build failures today but will be removed in a future Flutter rele
    android.newDsl=true
    ```
 4. Run `flutter build apk --debug` to confirm a clean build.
+
+
+**WARNINGS**
+
+```
+WARNING: Your Android app project: app located at: J:\GitHub\petfolio\android\app\build.gradle.kts
+applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
+Please migrate your app to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers
+
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): add_2_calendar, flutter_image_compress_common, image_picker_android, in_app_review, package_info_plus, share_plus, shared_preferences_android, stripe_android, url_launcher_android
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+
+```

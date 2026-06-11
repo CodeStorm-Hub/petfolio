@@ -507,22 +507,43 @@ class _StoriesRow extends ConsumerWidget {
                 ),
 
               // Other Pet Story Items
-              ...otherStacks.map((stack) {
-                final initial = stack.petName.isNotEmpty ? stack.petName[0].toUpperCase() : '?';
-                return Padding(
-                  padding: const EdgeInsets.only(left: 12),
-                  child: _StoryItem(
-                    initial: initial,
-                    label: stack.petName,
-                    avatarUrl: stack.petAvatarUrl,
-                    ringColors: stack.hasUnviewed(userId)
-                        ? const [AppColors.sunset500, AppColors.coral500]
-                        : [pt.ink300, pt.ink300],
-                    animateRing: stack.hasUnviewed(userId),
-                    onTap: () => context.push('/social/stories?petId=${stack.petId}'),
+              if (otherStacks.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'No stories from the pack yet',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: pt.ink500),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Share yours to start the conversation!',
+                        style: TextStyle(fontSize: 11, color: pt.ink300),
+                      ),
+                    ],
                   ),
-                );
-              }),
+                )
+              else
+                ...otherStacks.map((stack) {
+                  final initial = stack.petName.isNotEmpty ? stack.petName[0].toUpperCase() : '?';
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: _StoryItem(
+                      initial: initial,
+                      label: stack.petName,
+                      avatarUrl: stack.petAvatarUrl,
+                      ringColors: stack.hasUnviewed(userId)
+                          ? const [AppColors.sunset500, AppColors.coral500]
+                          : [pt.ink300, pt.ink300],
+                      animateRing: stack.hasUnviewed(userId),
+                      onTap: () => context.push('/social/stories?petId=${stack.petId}'),
+                    ),
+                  );
+                }),
             ],
           ),
         );
