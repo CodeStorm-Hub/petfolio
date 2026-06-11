@@ -177,7 +177,7 @@ class WalkTrackingScreen extends ConsumerWidget {
           ),
           if (walk.error != null)
             Positioned(
-              bottom: 100,
+              bottom: MediaQuery.paddingOf(context).bottom + 116,
               left: 24,
               right: 24,
               child: Material(
@@ -191,7 +191,7 @@ class WalkTrackingScreen extends ConsumerWidget {
               ),
             ),
           Positioned(
-            bottom: 32,
+            bottom: MediaQuery.paddingOf(context).bottom + 96,
             left: 0,
             right: 0,
             child: Center(child: _WalkButton(walk: walk)),
