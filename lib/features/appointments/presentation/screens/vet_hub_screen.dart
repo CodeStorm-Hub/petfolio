@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -28,7 +30,6 @@ class _VetHubScreenState extends State<VetHubScreen> {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: pt.surface1,
@@ -55,52 +56,35 @@ class _VetHubScreenState extends State<VetHubScreen> {
           ],
         ),
       ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: const [
-          _ClinicsGridTab(),
-          _AppointmentsHistoryTab(),
-          _PlaceholderTab(
-            icon: Icons.favorite_rounded,
-            title: 'Favorites Coming Soon',
-            subtitle: 'Save your favourite vets and clinics here.',
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: const [
+                _ClinicsGridTab(),
+                _AppointmentsHistoryTab(),
+                _PlaceholderTab(
+                  icon: Icons.favorite_rounded,
+                  title: 'Favorites Coming Soon',
+                  subtitle: 'Save your favourite vets and clinics here.',
+                ),
+                _PlaceholderTab(
+                  icon: Icons.person_rounded,
+                  title: 'Vet Profile Coming Soon',
+                  subtitle: 'Your vet history and profile will appear here.',
+                ),
+              ],
+            ),
           ),
-          _PlaceholderTab(
-            icon: Icons.person_rounded,
-            title: 'Vet Profile Coming Soon',
-            subtitle: 'Your vet history and profile will appear here.',
-          ),
-        ],
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (i) {
-          HapticFeedback.selectionClick();
-          setState(() => _selectedIndex = i);
-        },
-        backgroundColor: isDark ? pt.surface2 : Colors.white,
-        indicatorColor: AppColors.sky.withAlpha(isDark ? 45 : 28),
-        surfaceTintColor: Colors.transparent,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.local_hospital_outlined),
-            selectedIcon: Icon(Icons.local_hospital_rounded, color: AppColors.sky),
-            label: 'Clinics',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.history),
-            selectedIcon: Icon(Icons.history, color: AppColors.sky),
-            label: 'History',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.favorite_border),
-            selectedIcon: Icon(Icons.favorite, color: AppColors.sky),
-            label: 'Favorites',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person, color: AppColors.sky),
-            label: 'Profile',
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 12 + MediaQuery.paddingOf(context).bottom,
+            child: _VetFloatingNav(
+              selectedIndex: _selectedIndex,
+              onSelect: (i) => setState(() => _selectedIndex = i),
+            ),
           ),
         ],
       ),
@@ -142,7 +126,7 @@ class _ClinicsGridTab extends ConsumerWidget {
               ),
               slivers: [
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   sliver: SliverGrid(
                     delegate: SliverChildBuilderDelegate(
                       (context, i) => _ClinicGridCard(
@@ -162,6 +146,11 @@ class _ClinicsGridTab extends ConsumerWidget {
                     ),
                   ),
                 ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 96 + MediaQuery.paddingOf(context).bottom,
+                  ),
+                ),
               ],
             ),
     );
@@ -169,7 +158,7 @@ class _ClinicsGridTab extends ConsumerWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Clinic Grid Card — image + name + specialty + city + rating
+// Clinic Grid Card — icon + name + specialty + city + rating
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ClinicGridCard extends StatefulWidget {
@@ -313,7 +302,7 @@ class _SkeletonGrid extends StatelessWidget {
     return CustomScrollView(
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
           sliver: SliverGrid(
             delegate: SliverChildBuilderDelegate(
               (_, _) => const SkeletonLoader(
@@ -330,6 +319,9 @@ class _SkeletonGrid extends StatelessWidget {
               childAspectRatio: 0.82,
             ),
           ),
+        ),
+        SliverToBoxAdapter(
+          child: SizedBox(height: 96 + MediaQuery.paddingOf(context).bottom),
         ),
       ],
     );
@@ -390,6 +382,7 @@ class _AppointmentsList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final bottomClearance = 96.0 + MediaQuery.paddingOf(context).bottom;
     final appointmentsAsync =
         ref.watch(past ? pastAppointmentsProvider : upcomingAppointmentsProvider);
 
@@ -403,7 +396,7 @@ class _AppointmentsList extends ConsumerWidget {
       },
       child: appointmentsAsync.when(
         loading: () => ListView.separated(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(16, 16, 16, bottomClearance),
           itemCount: 4,
           separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (_, _) => const SkeletonLoader(
@@ -444,7 +437,7 @@ class _AppointmentsList extends ConsumerWidget {
             );
           }
           return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+            padding: EdgeInsets.fromLTRB(16, 8, 16, bottomClearance),
             itemCount: appointments.length,
             physics: const AlwaysScrollableScrollPhysics(),
             separatorBuilder: (_, _) => const SizedBox(height: 12),
@@ -479,6 +472,222 @@ class _PlaceholderTab extends StatelessWidget {
         icon: icon,
         title: title,
         subtitle: subtitle,
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Vet Nav Destination — lightweight data class for the floating nav
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _VetNavDest {
+  const _VetNavDest({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.accent,
+  });
+
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final Color accent;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Floating Pill Nav — mirrors AppShell's _FloatingNav exactly
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _VetFloatingNav extends StatelessWidget {
+  const _VetFloatingNav({
+    required this.selectedIndex,
+    required this.onSelect,
+  });
+
+  final int selectedIndex;
+  final ValueChanged<int> onSelect;
+
+  static const _dests = [
+    _VetNavDest(
+      icon: Icons.local_hospital_outlined,
+      activeIcon: Icons.local_hospital_rounded,
+      label: 'Clinics',
+      accent: AppColors.sky,
+    ),
+    _VetNavDest(
+      icon: Icons.history,
+      activeIcon: Icons.history,
+      label: 'History',
+      accent: AppColors.mint,
+    ),
+    _VetNavDest(
+      icon: Icons.favorite_border,
+      activeIcon: Icons.favorite,
+      label: 'Favorites',
+      accent: AppColors.poppy,
+    ),
+    _VetNavDest(
+      icon: Icons.person_outline,
+      activeIcon: Icons.person,
+      label: 'Profile',
+      accent: AppColors.lilac,
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? AppColors.surface0D : AppColors.surface0;
+    final border = isDark ? AppColors.lineD : AppColors.line;
+    final shadowColor = isDark ? AppColors.shadowE3D : AppColors.shadowE3L;
+
+    return Container(
+      height: 68,
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(34),
+        border: Border.all(color: border),
+        boxShadow: [
+          BoxShadow(
+            color: shadowColor,
+            blurRadius: 24,
+            spreadRadius: -4,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          for (var i = 0; i < _dests.length; i++)
+            Expanded(
+              child: _VetNavTab(
+                dest: _dests[i],
+                isSelected: i == selectedIndex,
+                isDark: isDark,
+                onTap: () => onSelect(i),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Vet Nav Tab — spring animation identical to AppShell's _NavTab
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _VetNavTab extends StatefulWidget {
+  const _VetNavTab({
+    required this.dest,
+    required this.isSelected,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  final _VetNavDest dest;
+  final bool isSelected;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  @override
+  State<_VetNavTab> createState() => _VetNavTabState();
+}
+
+class _VetNavTabState extends State<_VetNavTab>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  static const _spring = SpringDescription(
+    mass: 1.0,
+    stiffness: 550,
+    damping: 32,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      value: widget.isSelected ? 1.0 : 0.0,
+    );
+  }
+
+  @override
+  void didUpdateWidget(_VetNavTab old) {
+    super.didUpdateWidget(old);
+    if (widget.isSelected == old.isSelected) return;
+    if (widget.isSelected) {
+      _ctrl.animateWith(SpringSimulation(_spring, _ctrl.value, 1.0, 0.0));
+    } else {
+      _ctrl.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final unselected = widget.isDark ? AppColors.ink500D : AppColors.ink500;
+
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        widget.onTap();
+      },
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedBuilder(
+        animation: _ctrl,
+        builder: (context, _) {
+          final t = _ctrl.value.clamp(0.0, 1.3);
+          final tC = t.clamp(0.0, 1.0);
+
+          final iconColor = Color.lerp(unselected, widget.dest.accent, tC)!;
+          final bgAlpha = (36 * tC).round();
+          final hPad = 8.0 + 6.0 * t;
+
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Transform.scale(
+                scale: 1.0 + 0.08 * t,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: widget.dest.accent.withAlpha(bgAlpha),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Icon(
+                    tC > 0.5 ? widget.dest.activeIcon : widget.dest.icon,
+                    color: iconColor,
+                    size: 22,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                widget.dest.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: tC > 0.5 ? FontWeight.w700 : FontWeight.w500,
+                  color: iconColor,
+                  height: 1.0,
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
