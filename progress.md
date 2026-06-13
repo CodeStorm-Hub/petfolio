@@ -1,5 +1,38 @@
 # Petfolio — Progress Log
 
+## 2026-06-11 — Vet Hub Screen Revamp ✅
+
+`flutter analyze` (full project) — **No issues found.**
+
+### Implemented
+
+**`lib/features/appointments/presentation/screens/vet_hub_screen.dart`** *(new file)*
+- `VetHubScreen` — `StatefulWidget` entry point; `Scaffold` with `NavigationBar` (4 tabs: Clinics, History, Favorites, Profile) + `IndexedStack` body
+- `_ClinicsGridTab` — reads `clinicListProvider`; renders `CustomScrollView` + `SliverGrid` (2-col, aspect 0.82); handles loading/error/empty states
+- `_ClinicGridCard` — press-animated card; shows hospital icon, name, tagline, city, rating, sky-accent chevron
+- `_SkeletonGrid` — 6-cell skeleton loading state for the grid
+- `_AppointmentsHistoryTab` — `DefaultTabController` wrapping Upcoming / Past `TabBarView`
+- `_AppointmentsList` — reads `upcomingAppointmentsProvider` / `pastAppointmentsProvider`; reuses public `AppointmentCardWidget` with pull-to-refresh
+- `_PlaceholderTab` — centred `PetfolioEmptyState`; used for Tabs 3 (Favorites) and 4 (Profile)
+
+**`lib/features/appointments/appointment_routes.dart`** *(updated)*
+- `/appointments` builder: `VetClinicsScreen` → `VetHubScreen`
+- `/:clinicId` null-fallback: `VetClinicsScreen` → `VetHubScreen`
+- `vet_clinics_screen.dart` import removed; replaced with `vet_hub_screen.dart`
+
+### Routing verification
+- All three `/appointments` push triggers in `hub_home_screen.dart` (Bento tile, Quick Actions, Spotlight) required **no changes** — they already push `/appointments`
+- `VetClinicsScreen` file untouched and intact; no longer the entry point but preserved
+
+### Data contracts unchanged
+- `clinicListProvider`, `clinicDetailProvider`, `clinicServicesProvider` — untouched
+- `upcomingAppointmentsProvider`, `pastAppointmentsProvider`, `appointmentControllerProvider` — untouched
+- All models, repositories, and domain logic — untouched
+
+Phase complete — please run (/remember) to save tokens before proceeding.
+
+---
+
 ## 2026-06-09 — Responsive UI/UX Audit: All Steps Complete ✅
 
 `flutter analyze` — **No issues found.**
