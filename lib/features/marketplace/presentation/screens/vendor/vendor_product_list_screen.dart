@@ -39,17 +39,19 @@ class VendorProductListScreen extends ConsumerWidget {
                     ),
                   ),
                   const Spacer(),
-                  GestureDetector(
-                    onTap: () => context.push('/seller/products/add'),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.ink950,
+                  Material(
+                    color: AppColors.ink950,
+                    shape: const CircleBorder(),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => context.push('/seller/products/add'),
+                      child: const SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: Icon(Icons.add_rounded,
+                            size: 20, color: Colors.white),
                       ),
-                      child: const Icon(Icons.add_rounded,
-                          size: 20, color: Colors.white),
                     ),
                   ),
                 ],
@@ -251,19 +253,20 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.surface0,
-          boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
-          ],
+    return Material(
+      color: AppColors.surface0,
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      shadowColor: AppColors.line,
+      elevation: 0.5,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: SizedBox(
+          width: 40,
+          height: 40,
+          child: Icon(icon, size: 18, color: AppColors.ink700),
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
       ),
     );
   }

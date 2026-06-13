@@ -10,6 +10,7 @@ class PetfolioNetworkImage extends StatelessWidget {
     required this.imageUrl,
     required this.fit,
     required this.errorFallback,
+    this.semanticLabel,
     this.memCacheWidth,
     this.maxWidthDiskCache,
     this.cacheManager,
@@ -19,6 +20,7 @@ class PetfolioNetworkImage extends StatelessWidget {
   final String imageUrl;
   final BoxFit fit;
   final Widget errorFallback;
+  final String? semanticLabel;
   final int? memCacheWidth;
   final int? maxWidthDiskCache;
   final CacheManager? cacheManager;
@@ -26,7 +28,7 @@ class PetfolioNetworkImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CachedNetworkImage(
+    final image = CachedNetworkImage(
       imageUrl: imageUrl,
       fit: fit,
       memCacheWidth: memCacheWidth,
@@ -38,6 +40,9 @@ class PetfolioNetworkImage extends StatelessWidget {
         return errorFallback;
       },
     );
+
+    if (semanticLabel == null) return image;
+    return Semantics(label: semanticLabel, image: true, child: image);
   }
 }
 

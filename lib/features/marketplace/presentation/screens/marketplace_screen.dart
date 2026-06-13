@@ -447,42 +447,50 @@ class _CategoryChips extends StatelessWidget {
         separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (_, i) {
           if (i == _cats.length) {
-            return GestureDetector(
-              onTap: () => context.push('/marketplace/categories'),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 240),
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(22),
-                      color: Color.lerp(pt.ink950, Theme.of(context).colorScheme.surface, 0.88),
-                      border: Border.all(color: pt.line, width: 1.5),
+            return Semantics(
+              label: 'All categories',
+              button: true,
+              child: InkWell(
+                onTap: () => context.push('/marketplace/categories'),
+                borderRadius: BorderRadius.circular(22),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 240),
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(22),
+                        color: Color.lerp(pt.ink950, Theme.of(context).colorScheme.surface, 0.88),
+                        border: Border.all(color: pt.line, width: 1.5),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.apps_rounded, size: 28),
                     ),
-                    alignment: Alignment.center,
-                    // Use a proper icon instead of the ⊞ math glyph (renders
-                    // inconsistently across fonts/platforms).
-                    child: const Icon(Icons.apps_rounded, size: 28),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'All',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: pt.ink950,
+                    const SizedBox(height: 6),
+                    Text(
+                      'All',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: pt.ink950,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           }
           final cat = _cats[i];
           final isActive = cat.id == selected;
-          return GestureDetector(
+          return Semantics(
+            label: '${cat.label} category${isActive ? ', selected' : ''}',
+            button: true,
+            selected: isActive,
+            child: InkWell(
             onTap: () => onSelected(isActive ? ProductCategory.all : cat.id),
+            borderRadius: BorderRadius.circular(22),
             child: AnimatedScale(
               scale: isActive ? 1.07 : 1.0,
               duration: const Duration(milliseconds: 340),
@@ -523,6 +531,7 @@ class _CategoryChips extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
             ),
           );
         },
@@ -590,15 +599,15 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: ResponsiveLayout.isDesktop(context) ? 4 : ResponsiveLayout.isTablet(context) ? 3 : 2,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 12,
                 childAspectRatio: 0.72,
               ),
               delegate: SliverChildBuilderDelegate(
                 (_, i) => SkeletonLoader.productCard(key: ValueKey('shop-skel-$i')),
-                childCount: 4,
+                childCount: ResponsiveLayout.isDesktop(context) ? 8 : ResponsiveLayout.isTablet(context) ? 6 : 4,
               ),
             ),
           ),

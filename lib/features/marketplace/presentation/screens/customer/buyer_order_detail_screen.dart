@@ -138,7 +138,7 @@ class _StatusCard extends StatelessWidget {
     final color = switch (order.status) {
       OrderStatus.pending    => AppColors.warning,
       OrderStatus.processing => AppColors.info,
-      OrderStatus.shipped    => AppColors.blue500,
+      OrderStatus.shipped    => AppColors.tangerine,
       OrderStatus.delivered  => AppColors.success,
       OrderStatus.cancelled  => AppColors.danger,
     };
@@ -323,7 +323,7 @@ class _LineItemsCard extends StatelessWidget {
                             'Subscribe · every ${item.frequencyWeeks}w',
                             style: const TextStyle(
                                 fontSize: 11,
-                                color: AppColors.meadow500),
+                                color: AppColors.mint),
                           ),
                       ],
                     ),

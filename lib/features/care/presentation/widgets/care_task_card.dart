@@ -260,9 +260,10 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
     Widget card = Semantics(
       button: true,
       label: taskLabel,
-      child: GestureDetector(
+      child: InkWell(
         onTap: _toggle,
         onLongPress: () => _showContextMenu(context),
+        borderRadius: BorderRadius.circular(16),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 240),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -444,41 +445,46 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
                     ),
                   ),
                   const SizedBox(width: 8),
-                  GestureDetector(
+                  Material(
                     key: ValueKey('care_task_check_${task.id}'),
-                    onTap: _toggle,
-                    behavior: HitTestBehavior.opaque,
-                    child: SizedBox(
-                      width: 44,
-                      height: 44,
-                      child: Center(
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: done ? color : cs.surface,
-                            border: Border.all(
-                              color: done ? color : pt.line,
-                              width: done ? 0 : 2,
+                    color: Colors.transparent,
+                    shape: const CircleBorder(),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: _toggle,
+                      child: SizedBox(
+                        width: 44,
+                        height: 44,
+                        child: Center(
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: done ? color : cs.surface,
+                              border: Border.all(
+                                color: done ? color : pt.line,
+                                width: done ? 0 : 2,
+                              ),
+                              boxShadow: done
+                                  ? [
+                                      BoxShadow(
+                                        color: color.withAlpha(80),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                        spreadRadius: -2,
+                                      )
+                                    ]
+                                  : null,
                             ),
-                            boxShadow: done
-                                ? [
-                                    BoxShadow(
-                                      color: color.withAlpha(80),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                      spreadRadius: -2,
-                                    )
-                                  ]
+                            alignment: Alignment.center,
+                            child: done
+                                ? const Icon(Icons.check_rounded,
+                                    color: Colors.white, size: 16)
                                 : null,
                           ),
-                          alignment: Alignment.center,
-                          child: done
-                              ? const Icon(Icons.check_rounded,
-                                  color: Colors.white, size: 16)
-                              : null,
                         ),
                       ),
                     ),

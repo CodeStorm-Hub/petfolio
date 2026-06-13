@@ -26,6 +26,7 @@ class PetSwitcherSheet extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         barrierColor: const Color(0x6B0B1220),
         useSafeArea: true,
+        constraints: const BoxConstraints(maxWidth: 480),
         builder: (_) => const PetSwitcherSheet(),
       );
 
@@ -375,7 +376,7 @@ class _AddPetButton extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         child: CustomPaint(
           painter: _DashedRoundedBorderPainter(
-            color: AppColors.blue400,
+            color: AppColors.tangerine,
             radius: 18,
             strokeWidth: 1.5,
           ),
@@ -383,7 +384,7 @@ class _AddPetButton extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             decoration: BoxDecoration(
-              color: AppColors.blue50,
+              color: AppColors.tangerineSoft,
               borderRadius: BorderRadius.circular(18),
             ),
             child: Row(
@@ -492,12 +493,12 @@ class _SignOutRow extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
         decoration: BoxDecoration(
-          color: AppColors.coral500.withAlpha(14),
+          color: AppColors.poppy.withAlpha(14),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
           children: [
-            Icon(Icons.logout_rounded, size: 18, color: AppColors.coral500),
+            Icon(Icons.logout_rounded, size: 18, color: AppColors.poppy),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -505,7 +506,7 @@ class _SignOutRow extends ConsumerWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: AppColors.coral500,
+                  color: AppColors.poppy,
                 ),
               ),
             ),
@@ -528,7 +529,7 @@ class _SignOutRow extends ConsumerWidget {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.coral500,
+              backgroundColor: AppColors.poppy,
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('Sign out'),

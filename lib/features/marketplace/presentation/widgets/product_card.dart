@@ -24,8 +24,9 @@ class ProductCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -68,8 +69,9 @@ class ProductCardCompact extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: SizedBox(
         width: 156,
         child: Column(
@@ -110,24 +112,20 @@ class _QuickAddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x1A0B1220),
-              blurRadius: 6,
-              offset: Offset(0, 2),
-            ),
-          ],
+    return Material(
+      color: Colors.white,
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      elevation: 2,
+      shadowColor: const Color(0x1A0B1220),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: SizedBox(
+          width: 30,
+          height: 30,
+          child: Icon(Icons.add_rounded, size: 18, color: Theme.of(context).colorScheme.onSurface),
         ),
-        child: Icon(Icons.add_rounded, size: 18, color: Theme.of(context).colorScheme.onSurface),
       ),
     );
   }
@@ -233,27 +231,23 @@ class _ProductTile extends StatelessWidget {
             Positioned(
               top: 8,
               right: 8,
-              child: GestureDetector(
-                onTap: () => AppSnackBar.show('Wishlist coming soon 💛'),
-                behavior: HitTestBehavior.opaque,
-                child: Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withAlpha(230),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x1A0B1220),
-                        blurRadius: 6,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.bookmark_outline_rounded,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.onSurface,
+              child: Material(
+                color: Colors.white.withAlpha(230),
+                shape: const CircleBorder(),
+                clipBehavior: Clip.antiAlias,
+                elevation: 2,
+                shadowColor: const Color(0x1A0B1220),
+                child: InkWell(
+                  onTap: () => AppSnackBar.show('Wishlist coming soon 💛'),
+                  customBorder: const CircleBorder(),
+                  child: SizedBox(
+                    width: 30,
+                    height: 30,
+                    child: Icon(
+                      Icons.bookmark_outline_rounded,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ),

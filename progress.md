@@ -1,5 +1,23 @@
 # Petfolio — Progress Log
 
+## 2026-06-14 — Material 3 Review Implementation ✅
+
+`flutter analyze` — **No issues found.**
+
+### Completed
+- **P0 (A11y)**: All nav tabs, back-to-home, pet-switcher, streak pill wrapped with `Semantics`; snackbar WCAG §2.2.1 (web persistent + dismiss); `petfolio_network_image` semantic label; TailWagLoader live region + M3 progress ring
+- **P1 (Important)**: Button state-layer overlays (filled/elevated/text/icon); `inputDecorationTheme` errorBorder; 19 files migrated from `ScaffoldMessenger` to `AppSnackBar`; GestureDetector→InkWell/Material+InkWell in product_card, care_task_card, cart_line_item, vendor list, post screens, create screens
+- **P2 (Polish)**: Removed `surfaceTintColor:transparent` overrides; FAB/progress/typography fixes; nav badge → M3 `Badge`; `AnimatedSwitcher` Semantics container; `glass_card.dart` fillColor → `surfaceContainerHigh`; backward-compat color aliases deleted (~100 usages in 33 files); `_CategoryChips` InkWell+Semantics; all social/marketplace/detail screen circular buttons → Material+InkWell
+- **P3 (Enhancement)**: GoogleFonts preload; emphasized type methods; bottom sheet `maxWidth:480` tablet constraint; GoRouter page transitions (`pushPage`/`modalPage`) in social, marketplace, matching routes; `lib/core/router/transitions.dart` created
+
+### Also Completed (same session, continued)
+- **Page transitions** (P3): `pet_profile_routes.dart`, `appointment_routes.dart`, `settings_routes.dart`, `admin_routes.dart`, `auth_routes.dart`, `offers_routes.dart` — all converted to `pageBuilder` with `pushPage`/`modalPage`
+- **Section 9.2 responsive grids**: `marketplace_screen.dart` (skeleton grid 4/3/2), `vet_hub_screen.dart` (data+skeleton 4/3/2), `social_profile_screen.dart` (photo grid 5/4/3), `create_story_screen.dart` (gallery picker 4/3)
+
+**Status: ALL MATERIAL3_REVIEW.md tasks complete. `flutter analyze lib/` — No issues found.**
+
+**Next step:** Commit all changes to `material3-implementations` branch and open PR to `main`.
+
 ## 2026-06-13 — Global Layout: PetfolioScaffold ✅
 
 `flutter analyze` — **No issues found.**

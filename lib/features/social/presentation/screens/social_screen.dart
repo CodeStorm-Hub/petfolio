@@ -472,7 +472,7 @@ class _StoriesRow extends ConsumerWidget {
                   label: 'Your story',
                   avatarUrl: pet.avatarUrl,
                   ringColors: activePetStack.hasUnviewed(userId)
-                      ? const [AppColors.sunset500, AppColors.coral500]
+                      ? const [AppColors.tangerine, AppColors.poppy]
                       : [pt.ink300, pt.ink300],
                   animateRing: activePetStack.hasUnviewed(userId),
                   onTap: () => context.push('/social/stories?petId=${pet.id}'),
@@ -483,7 +483,7 @@ class _StoriesRow extends ConsumerWidget {
                   initial: pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
                   label: 'Your story',
                   avatarUrl: pet.avatarUrl,
-                  ringColors: const [AppColors.sunset500, AppColors.coral500],
+                  ringColors: const [AppColors.tangerine, AppColors.poppy],
                   isAdd: true,
                   onTap: () {
                     ref.read(createPostControllerProvider.notifier).setIsStory(true);
@@ -522,7 +522,7 @@ class _StoriesRow extends ConsumerWidget {
                       label: stack.petName,
                       avatarUrl: stack.petAvatarUrl,
                       ringColors: stack.hasUnviewed(userId)
-                          ? const [AppColors.sunset500, AppColors.coral500]
+                          ? const [AppColors.tangerine, AppColors.poppy]
                           : [pt.ink300, pt.ink300],
                       animateRing: stack.hasUnviewed(userId),
                       onTap: () => context.push('/social/stories?petId=${stack.petId}'),
@@ -1361,9 +1361,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                     Expanded(child: _ActionBtn(
                       icon: Icons.bookmark_border_rounded,
                       label: 'Save',
-                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Saved posts coming soon'), duration: Duration(seconds: 2)),
-                      ),
+                      onTap: () => AppSnackBar.show('Saved posts coming soon'),
                     )),
                   ],
                 ),

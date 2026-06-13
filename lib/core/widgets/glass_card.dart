@@ -85,10 +85,11 @@ class _GlassBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final radius = BorderRadius.circular(borderRadius);
 
-    final fillColor = isDark ? AppColors.glassFillD : AppColors.glassFillL;
+    final fillColor = cs.surfaceContainerHigh.withAlpha(isDark ? 140 : 158);
     final topBorder = isDark ? AppColors.glassTopD : AppColors.glassTopL;
     final rimBorder = isDark ? AppColors.glassRimD : AppColors.glassRimL;
     final shineColor = isDark ? AppColors.glassShineD : AppColors.glassShineL;

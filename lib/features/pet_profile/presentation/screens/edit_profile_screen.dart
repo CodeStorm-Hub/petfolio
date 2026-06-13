@@ -104,7 +104,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
           colorScheme: Theme.of(context).colorScheme.copyWith(
-                primary: AppColors.blue500,
+                primary: AppColors.tangerine,
               ),
         ),
         child: child!,

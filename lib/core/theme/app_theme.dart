@@ -131,6 +131,25 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
   static const double btnHeightXl   = 60.0;
   static const double btnHeightWalk = 64.0;
 
+  // ── M3 Expressive emphasized type styles ─────────────────────────────────
+  // Use on hero numbers, streak counts, match %, and splash CTAs.
+  static TextStyle displayEmphasized(BuildContext context) =>
+      GoogleFonts.sora(
+        fontSize: 36,
+        fontWeight: FontWeight.w800,
+        fontStyle: FontStyle.italic,
+        letterSpacing: -0.5,
+        color: Theme.of(context).colorScheme.onSurface,
+      );
+
+  static TextStyle headlineEmphasized(BuildContext context) =>
+      GoogleFonts.sora(
+        fontSize: 24,
+        fontWeight: FontWeight.w800,
+        fontStyle: FontStyle.italic,
+        color: Theme.of(context).colorScheme.onSurface,
+      );
+
   // ── Pre-built instances ───────────────────────────────────────────────────────
   static const PetfolioThemeExtension light = PetfolioThemeExtension(
     ink950: AppColors.ink950,
@@ -361,7 +380,6 @@ abstract final class AppTheme {
         foregroundColor: isDark ? AppColors.ink950D : AppColors.ink950,
         elevation: 0,
         scrolledUnderElevation: 1,
-        surfaceTintColor: Colors.transparent,
         shadowColor: isDark ? AppColors.shadowE1D : AppColors.shadowE1L,
         titleTextStyle: GoogleFonts.sora(
           fontSize: 20,
@@ -380,7 +398,6 @@ abstract final class AppTheme {
         indicatorShape: RoundedSuperellipseBorder(
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusPill),
         ),
-        surfaceTintColor: Colors.transparent,
         overlayColor: WidgetStateProperty.all(Colors.transparent),
         elevation: 0,
         height: 72,
@@ -471,7 +488,6 @@ abstract final class AppTheme {
       // unlike ContinuousRectangleBorder which needs 2× the visual radius.
       cardTheme: CardThemeData(
         color: isDark ? AppColors.surface0D : AppColors.surface0,
-        surfaceTintColor: Colors.transparent,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedSuperellipseBorder(
@@ -501,6 +517,14 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusPill),
           borderSide: BorderSide(color: isDark ? AppColors.tangerineD : AppColors.tangerine, width: 2),
         ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusPill),
+          borderSide: BorderSide(color: isDark ? AppColors.dangerD : AppColors.danger, width: 1.5),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusPill),
+          borderSide: BorderSide(color: isDark ? AppColors.dangerD : AppColors.danger, width: 2),
+        ),
         hintStyle: GoogleFonts.inter(
           fontSize: 15, fontWeight: FontWeight.w400,
           color: isDark ? AppColors.ink300D : AppColors.ink300,
@@ -528,6 +552,13 @@ abstract final class AppTheme {
             return isDark ? AppColors.tangerineD : AppColors.tangerine;
           }),
           foregroundColor: WidgetStateProperty.all(Colors.white),
+          overlayColor: WidgetStateProperty.resolveWith((states) {
+            final base = isDark ? AppColors.tangerineD : AppColors.tangerine;
+            if (states.contains(WidgetState.pressed)) return base.withAlpha(26);
+            if (states.contains(WidgetState.focused)) return base.withAlpha(26);
+            if (states.contains(WidgetState.hovered)) return base.withAlpha(20);
+            return null;
+          }),
           minimumSize: const WidgetStatePropertyAll(Size(120, PetfolioThemeExtension.btnHeightLg)),
           padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 24)),
           shape: const WidgetStatePropertyAll(StadiumBorder()),
@@ -535,6 +566,36 @@ abstract final class AppTheme {
             GoogleFonts.sora(fontSize: 16, fontWeight: FontWeight.w700),
           ),
           elevation: const WidgetStatePropertyAll(0),
+        ),
+      ),
+
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return (isDark ? AppColors.surface1D : AppColors.surface1).withAlpha(102);
+            }
+            return isDark ? AppColors.surface1D : AppColors.surface1;
+          }),
+          foregroundColor: WidgetStateProperty.all(
+            isDark ? AppColors.tangerineD : AppColors.tangerine700,
+          ),
+          overlayColor: WidgetStateProperty.resolveWith((states) {
+            final base = isDark ? AppColors.tangerineD : AppColors.tangerine;
+            if (states.contains(WidgetState.pressed)) return base.withAlpha(26);
+            if (states.contains(WidgetState.focused)) return base.withAlpha(26);
+            if (states.contains(WidgetState.hovered)) return base.withAlpha(20);
+            return null;
+          }),
+          elevation: WidgetStateProperty.resolveWith((states) =>
+            states.contains(WidgetState.pressed) ? 2.0 : 1.0,
+          ),
+          minimumSize: const WidgetStatePropertyAll(Size(96, PetfolioThemeExtension.btnHeightMd)),
+          padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 20)),
+          shape: const WidgetStatePropertyAll(StadiumBorder()),
+          textStyle: WidgetStatePropertyAll(
+            GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
+          ),
         ),
       ),
 
@@ -573,20 +634,18 @@ abstract final class AppTheme {
 
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: isDark ? AppColors.surface1D : AppColors.surface1,
-        surfaceTintColor: Colors.transparent,
         showDragHandle: true,
         dragHandleColor: isDark ? AppColors.ink300D : AppColors.ink300,
         dragHandleSize: const Size(32, 4),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(PetfolioThemeExtension.radius3xl),
+        shape: RoundedSuperellipseBorder(
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(PetfolioThemeExtension.squircleContainer),
           ),
         ),
       ),
 
       dialogTheme: DialogThemeData(
         backgroundColor: isDark ? AppColors.surface0D : AppColors.surface0,
-        surfaceTintColor: Colors.transparent,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius2xl),
@@ -605,7 +664,7 @@ abstract final class AppTheme {
         color: isDark ? AppColors.tangerineD : AppColors.tangerine,
         linearTrackColor: isDark ? AppColors.tangerineSoftD : AppColors.tangerineSoft,
         circularTrackColor: isDark ? AppColors.tangerineSoftD : AppColors.tangerineSoft,
-        strokeWidth: 3.0,
+        strokeWidth: 4.0,
         linearMinHeight: 6.0,
       ),
 
@@ -631,9 +690,10 @@ abstract final class AppTheme {
           shape: const WidgetStatePropertyAll(StadiumBorder()),
           minimumSize: const WidgetStatePropertyAll(Size(64, 44)),
           overlayColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.pressed)) {
-              return (isDark ? AppColors.tangerineD : AppColors.tangerine).withAlpha(24);
-            }
+            final base = isDark ? AppColors.tangerineD : AppColors.tangerine;
+            if (states.contains(WidgetState.pressed)) return base.withAlpha(26);
+            if (states.contains(WidgetState.focused)) return base.withAlpha(26);
+            if (states.contains(WidgetState.hovered)) return base.withAlpha(20);
             return null;
           }),
         ),
@@ -645,9 +705,10 @@ abstract final class AppTheme {
             isDark ? AppColors.ink700D : AppColors.ink700,
           ),
           overlayColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.pressed)) {
-              return (isDark ? AppColors.tangerineD : AppColors.tangerine).withAlpha(24);
-            }
+            final base = isDark ? AppColors.tangerineD : AppColors.tangerine;
+            if (states.contains(WidgetState.pressed)) return base.withAlpha(26);
+            if (states.contains(WidgetState.focused)) return base.withAlpha(26);
+            if (states.contains(WidgetState.hovered)) return base.withAlpha(20);
             return null;
           }),
           shape: const WidgetStatePropertyAll(CircleBorder()),
@@ -658,8 +719,8 @@ abstract final class AppTheme {
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: isDark ? AppColors.tangerineD : AppColors.tangerine,
         foregroundColor: Colors.white,
-        elevation: 4,
-        highlightElevation: 6,
+        elevation: 3,
+        highlightElevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius2xl),
         ),
@@ -776,12 +837,12 @@ abstract final class AppTheme {
         height: 1.08, letterSpacing: -0.3, color: headColor,
       ),
       displaySmall: GoogleFonts.sora(
-        fontSize: 24, fontWeight: FontWeight.w600,
+        fontSize: 26, fontWeight: FontWeight.w600,
         height: 1.15, letterSpacing: -0.1, color: headColor,
       ),
       // ── Headline — Sora for section headers & screen headings ────────────────
       headlineLarge: GoogleFonts.sora(
-        fontSize: 24, fontWeight: FontWeight.w700,
+        fontSize: 22, fontWeight: FontWeight.w700,
         height: 1.15, letterSpacing: -0.1, color: headColor,
       ),
       headlineMedium: GoogleFonts.sora(

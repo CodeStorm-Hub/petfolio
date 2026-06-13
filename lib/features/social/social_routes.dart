@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/router/transitions.dart';
 import '../communities/data/models/community.dart';
 import '../communities/presentation/screens/community_detail_screen.dart';
 import 'data/models/feed_post.dart';
@@ -14,41 +15,60 @@ List<RouteBase> socialRoutes(GlobalKey<NavigatorState> rootKey) => [
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/social/create-post',
-    builder: (context, state) => const CreatePostScreen(),
+    pageBuilder: (context, state) => modalPage(
+      key: state.pageKey,
+      child: const CreatePostScreen(),
+    ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/social/create-story',
-    builder: (context, state) => const CreateStoryScreen(),
+    pageBuilder: (context, state) => modalPage(
+      key: state.pageKey,
+      child: const CreateStoryScreen(),
+    ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/social/post/:postId',
-    builder: (context, state) => PostDetailScreen(
-      postId: state.pathParameters['postId']!,
-      post: state.extra as FeedPost?,
-      autofocusComment: state.uri.queryParameters['focus'] == 'true',
+    pageBuilder: (context, state) => pushPage(
+      key: state.pageKey,
+      child: PostDetailScreen(
+        postId: state.pathParameters['postId']!,
+        post: state.extra as FeedPost?,
+        autofocusComment: state.uri.queryParameters['focus'] == 'true',
+      ),
     ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/social/notifications',
-    builder: (context, state) => const NotificationsScreen(),
+    pageBuilder: (context, state) => pushPage(
+      key: state.pageKey,
+      child: const NotificationsScreen(),
+    ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/social/profile/:petId',
-    builder: (context, state) => SocialProfileScreen(
-      petId: state.pathParameters['petId']!,
+    pageBuilder: (context, state) => pushPage(
+      key: state.pageKey,
+      child: SocialProfileScreen(
+        petId: state.pathParameters['petId']!,
+      ),
     ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/social/communities/:communityId',
-    builder: (context, state) {
+    pageBuilder: (context, state) {
       final extra = state.extra;
-      if (extra is Community) return CommunityDetailScreen(community: extra);
-      return const Scaffold(body: Center(child: Text('Community not found')));
+      return pushPage(
+        key: state.pageKey,
+        child: extra is Community
+            ? CommunityDetailScreen(community: extra)
+            : const Scaffold(body: Center(child: Text('Community not found'))),
+      );
     },
   ),
 ];

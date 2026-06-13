@@ -516,9 +516,9 @@ class _AddPetCallout extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
         decoration: BoxDecoration(
-          color: AppColors.blue50,
+          color: AppColors.tangerineSoft,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.blue400.withAlpha(80)),
+          border: Border.all(color: AppColors.tangerine.withAlpha(80)),
         ),
         child: Row(
           children: [
@@ -643,14 +643,14 @@ class _ShareAccessSheet extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.blue50,
+                color: AppColors.tangerineSoft,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.blue400.withAlpha(80)),
+                border: Border.all(color: AppColors.tangerine.withAlpha(80)),
               ),
               child: Row(
                 children: [
                   Icon(Icons.schedule_rounded,
-                      size: 18, color: AppColors.blue600),
+                      size: 18, color: AppColors.tangerine700),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(

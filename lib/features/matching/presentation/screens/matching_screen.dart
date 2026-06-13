@@ -224,12 +224,7 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
       swipeErrorProvider,
       (_, message) {
         if (message != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              duration: const Duration(seconds: 3),
-            ),
-          );
+          AppSnackBar.showError(message);
         }
       },
     );

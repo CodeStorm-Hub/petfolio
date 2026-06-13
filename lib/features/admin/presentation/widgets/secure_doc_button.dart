@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_snack_bar.dart';
 import '../controllers/kyc_review_controller.dart';
 
 class SecureDocButton extends ConsumerStatefulWidget {
@@ -41,13 +42,7 @@ class _SecureDocButtonState extends ConsumerState<SecureDocButton> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.danger,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    AppSnackBar.showError(message);
   }
 
   @override
@@ -65,7 +60,7 @@ class _SecureDocButtonState extends ConsumerState<SecureDocButton> {
       style: OutlinedButton.styleFrom(
         visualDensity: VisualDensity.compact,
         side: const BorderSide(color: AppColors.line),
-        foregroundColor: AppColors.blue500,
+        foregroundColor: AppColors.tangerine,
       ),
     );
   }

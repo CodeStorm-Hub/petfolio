@@ -636,7 +636,7 @@ class _MedicalRecordCard extends ConsumerWidget {
                           Icon(
                             Icons.attach_file_rounded,
                             size: 14,
-                            color: AppColors.blue500,
+                            color: AppColors.tangerine,
                           ),
                           SizedBox(width: 4),
                           Text(
@@ -644,7 +644,7 @@ class _MedicalRecordCard extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.blue500,
+                              color: AppColors.tangerine,
                             ),
                           ),
                         ],
@@ -726,14 +726,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
     if (_pickedFile != null) {
       final Uint8List bytes = await _pickedFile!.readAsBytes();
       if (bytes.length > _maxDocBytes) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('File too large. Maximum size is 10 MB.'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
+        AppSnackBar.showError('File too large. Maximum size is 10 MB.');
         setState(() => _saving = false);
         return;
       }
@@ -745,14 +738,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
           mimeType: _pickedFile!.mimeType ?? 'image/jpeg',
         );
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Document upload failed. Saving record without attachment.'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
+        AppSnackBar.show('Document upload failed. Saving record without attachment.');
       }
     }
 
@@ -786,12 +772,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
     if (ok) {
       Navigator.of(context).pop();
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not save record. Please try again.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      AppSnackBar.showError('Could not save record. Please try again.');
     }
   }
 

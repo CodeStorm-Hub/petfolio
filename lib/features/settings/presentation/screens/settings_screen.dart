@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -90,12 +91,7 @@ class SettingsScreen extends ConsumerWidget {
                     icon: Icons.card_giftcard_rounded,
                     label: 'Refer & Get Discounts',
                     trailing: _NewBadge(),
-                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Referrals coming soon!'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    ),
+                    onTap: () => AppSnackBar.show('Referrals coming soon!'),
                   ),
                 ],
               ),
@@ -115,12 +111,7 @@ class SettingsScreen extends ConsumerWidget {
                   _SettingsTile(
                     icon: Icons.dark_mode_outlined,
                     label: 'Appearance',
-                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Theme settings coming soon'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    ),
+                    onTap: () => AppSnackBar.show('Theme settings coming soon'),
                   ),
                 ],
               ),

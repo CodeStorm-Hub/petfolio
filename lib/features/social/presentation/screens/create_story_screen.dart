@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
+import '../../../../core/widgets/responsive_layout.dart';
 import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../controllers/create_post_controller.dart';
@@ -114,22 +115,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
     final success = await notifier.submit(pet.id);
 
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(
-            children: [
-              Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
-              SizedBox(width: 10),
-              Text('Story shared!'),
-            ],
-          ),
-          backgroundColor: AppColors.success,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      AppSnackBar.showSuccess('Story shared!');
       context.pop();
     }
   }
@@ -208,8 +194,8 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: ResponsiveLayout.isTablet(context) ? 4 : 3,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
                     childAspectRatio: 1,
@@ -252,7 +238,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const CircularProgressIndicator(
-                    color: AppColors.sunset500,
+                    color: AppColors.tangerine,
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -409,11 +395,11 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(30),
                     gradient: const LinearGradient(
-                      colors: [AppColors.sunset500, AppColors.coral500],
+                      colors: [AppColors.tangerine, AppColors.poppy],
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.sunset500.withAlpha(100),
+                        color: AppColors.tangerine.withAlpha(100),
                         blurRadius: 16,
                         offset: const Offset(0, 6),
                       ),
@@ -502,7 +488,7 @@ class _BrowseLibraryTile extends StatelessWidget {
               ),
               child: const Icon(
                 Icons.photo_library_rounded,
-                color: AppColors.sunset500,
+                color: AppColors.tangerine,
                 size: 18,
               ),
             ),
@@ -723,7 +709,7 @@ class _CameraViewfinderCardState extends State<_CameraViewfinderCard>
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.center_focus_weak_rounded, color: AppColors.sunset500, size: 14),
+                        const Icon(Icons.center_focus_weak_rounded, color: AppColors.tangerine, size: 14),
                         const SizedBox(width: 4),
                         Text(
                           'AF-S Auto',
@@ -870,7 +856,7 @@ class _UploadOverlay extends StatelessWidget {
               height: 48,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                color: AppColors.sunset500,
+                color: AppColors.tangerine,
               ),
             ),
             const SizedBox(height: 20),

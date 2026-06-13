@@ -245,8 +245,8 @@ class _NewMatchAvatar extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.coral500,
-                    AppColors.sunset500.withValues(alpha: 0.85),
+                    AppColors.poppy,
+                    AppColors.tangerine.withValues(alpha: 0.85),
                   ],
                 ),
               ),

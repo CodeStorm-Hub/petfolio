@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/widgets/app_snack_bar.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/vendor_products_controller.dart';
 import '../../../data/models/product.dart';
@@ -95,12 +96,7 @@ class _AddEditProductScreenState
     if (ok) {
       context.pop();
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to save product. Please try again.'),
-          backgroundColor: AppColors.danger,
-        ),
-      );
+      AppSnackBar.showError('Failed to save product. Please try again.');
     }
   }
 
@@ -260,7 +256,7 @@ class _AddEditProductScreenState
                             value: _subscribable,
                             onChanged: (v) =>
                                 setState(() => _subscribable = v),
-                            activeTrackColor: AppColors.blue500,
+                            activeTrackColor: AppColors.tangerine,
                           ),
                           const SizedBox(width: 10),
                           const Column(
@@ -322,7 +318,7 @@ class _AddEditProductScreenState
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.blue500, width: 1.5),
+        borderSide: const BorderSide(color: AppColors.tangerine, width: 1.5),
       ),
     );
   }
@@ -385,7 +381,7 @@ class _Field extends StatelessWidget {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide:
-              const BorderSide(color: AppColors.blue500, width: 1.5),
+              const BorderSide(color: AppColors.tangerine, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -404,19 +400,20 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.surface0,
-          boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
-          ],
+    return Material(
+      color: AppColors.surface0,
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      elevation: 0,
+      shadowColor: AppColors.line,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: SizedBox(
+          width: 40,
+          height: 40,
+          child: Icon(icon, size: 18, color: AppColors.ink700),
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
       ),
     );
   }

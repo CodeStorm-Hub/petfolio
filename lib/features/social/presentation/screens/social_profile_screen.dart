@@ -6,6 +6,8 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/widgets/app_snack_bar.dart';
+import '../../../../core/widgets/responsive_layout.dart';
 import '../../../care/data/models/pet_awards_summary.dart';
 import '../../../care/presentation/controllers/pet_awards_provider.dart';
 import '../../../matching/presentation/matching_navigation.dart';
@@ -178,8 +180,8 @@ class SocialProfileScreen extends ConsumerWidget {
                   return SliverPadding(
                     padding: const EdgeInsets.only(top: 1),
                     sliver: SliverGrid(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: ResponsiveLayout.isDesktop(context) ? 5 : ResponsiveLayout.isTablet(context) ? 4 : 3,
                         mainAxisSpacing: 1.5,
                         crossAxisSpacing: 1.5,
                       ),
@@ -310,16 +312,12 @@ class _ProfileHeader extends StatelessWidget {
                     _ProfileStatColumn(
                       value: followerCount?.toString() ?? '-',
                       label: 'Followers',
-                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Followers list coming soon'), duration: Duration(seconds: 2)),
-                      ),
+                      onTap: () => AppSnackBar.show('Followers list coming soon'),
                     ),
                     _ProfileStatColumn(
                       value: followingCount?.toString() ?? '-',
                       label: 'Following',
-                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Following list coming soon'), duration: Duration(seconds: 2)),
-                      ),
+                      onTap: () => AppSnackBar.show('Following list coming soon'),
                     ),
                   ],
                 ),

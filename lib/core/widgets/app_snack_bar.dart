@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../errors/app_exception.dart';
@@ -5,6 +6,12 @@ import '../theme/app_colors.dart';
 
 final GlobalKey<ScaffoldMessengerState> appSnackBarMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
+
+// On web, auto-dismissing snackbars are inaccessible for low-vision users
+// (WCAG 2.1 §2.2.1). Use a near-permanent duration with a manual dismiss action.
+const _kSnackDuration = kIsWeb
+    ? Duration(days: 1)
+    : Duration(seconds: 4);
 
 class AppSnackBar {
   AppSnackBar._();
@@ -15,8 +22,11 @@ class AppSnackBar {
     messenger.showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
+        duration: _kSnackDuration,
         content: Text(message),
-        action: action,
+        action: action ?? (kIsWeb
+            ? SnackBarAction(label: 'Dismiss', onPressed: () => messenger.hideCurrentSnackBar())
+            : null),
       ),
     );
   }
@@ -40,6 +50,7 @@ class AppSnackBar {
     messenger.showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
+        duration: _kSnackDuration,
         backgroundColor: AppColors.success,
         content: Row(
           children: [
@@ -64,6 +75,7 @@ class AppSnackBar {
     messenger.showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
+        duration: _kSnackDuration,
         content: Text(message),
         action: action,
       ),
@@ -90,6 +102,7 @@ class AppSnackBar {
     messenger.showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
+        duration: _kSnackDuration,
         backgroundColor: AppColors.danger,
         content: Row(
           children: [

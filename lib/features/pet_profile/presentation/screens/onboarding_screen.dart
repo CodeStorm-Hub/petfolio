@@ -58,7 +58,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        AppSnackBar.showError('Error: $e');
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);

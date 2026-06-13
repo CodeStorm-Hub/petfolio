@@ -174,7 +174,7 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
                   leading: Icon(
                     _tab == d.tab ? d.activeIcon : d.icon,
                     color: _tab == d.tab
-                        ? AppColors.blue500
+                        ? AppColors.tangerine
                         : AppColors.ink500,
                   ),
                   title: Text(
@@ -184,12 +184,12 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
                               ? FontWeight.w600
                               : FontWeight.w400,
                           color: _tab == d.tab
-                              ? AppColors.blue500
+                              ? AppColors.tangerine
                               : AppColors.ink700,
                         ),
                   ),
                   selected: _tab == d.tab,
-                  selectedTileColor: AppColors.blue500.withAlpha(12),
+                  selectedTileColor: AppColors.tangerine.withAlpha(12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(
                       PetfolioThemeExtension.radiusMd,
@@ -223,16 +223,16 @@ class _AdminBadge extends StatelessWidget {
             height: 36,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.blue500.withAlpha(20),
+              color: AppColors.tangerine.withAlpha(20),
             ),
             child: const Icon(Icons.admin_panel_settings_rounded,
-                size: 20, color: AppColors.blue500),
+                size: 20, color: AppColors.tangerine),
           ),
           const SizedBox(height: 4),
           Text(
             'Admin',
             style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                  color: AppColors.blue500,
+                  color: AppColors.tangerine,
                 ),
           ),
         ],

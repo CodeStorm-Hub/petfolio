@@ -180,24 +180,25 @@ class _StepBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 26,
-        height: 26,
-        decoration: const BoxDecoration(
-          color: AppColors.surface0,
-          shape: BoxShape.circle,
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-              color: AppColors.ink950,
-              height: 1.1,
+    return Material(
+      color: AppColors.surface0,
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: SizedBox(
+          width: 26,
+          height: 26,
+          child: Center(
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                color: AppColors.ink950,
+                height: 1.1,
+              ),
             ),
           ),
         ),

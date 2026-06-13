@@ -88,7 +88,9 @@ class _AppShellState extends ConsumerState<AppShell> {
     final subIndex = _currentSubIndex(module, context);
     final dests = destinationsFor(module);
     final accents = accentsFor(module);
-    final isWide = MediaQuery.sizeOf(context).width >= 600;
+    final width = MediaQuery.sizeOf(context).width;
+    final isCompact  = width < 600;   // phone portrait
+    final isExpanded = width >= 840;   // tablet landscape, desktop
 
     final cartCount = module == ShellModule.marketplace
         ? ref.watch(cartProvider).itemCount
@@ -99,6 +101,13 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     Widget floatingNav = AnimatedSwitcher(
       duration: const Duration(milliseconds: 220),
+      layoutBuilder: (currentChild, previousChildren) => Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          ...previousChildren,
+          ?currentChild,
+        ],
+      ),
       transitionBuilder: (child, anim) => FadeTransition(
         opacity: anim,
         child: SlideTransition(
@@ -109,19 +118,22 @@ class _AppShellState extends ConsumerState<AppShell> {
           child: child,
         ),
       ),
-      child: _FloatingNav(
+      child: Semantics(
         key: ValueKey(module),
-        destinations: dests,
-        selectedIndex: subIndex,
-        onSelect: (i) => context.go(dests[i].path),
-        accentColors: accents,
-        badgeCounts: badgeCounts,
+        container: true,
+        child: _FloatingNav(
+          destinations: dests,
+          selectedIndex: subIndex,
+          onSelect: (i) => context.go(dests[i].path),
+          accentColors: accents,
+          badgeCounts: badgeCounts,
+        ),
       ),
     );
 
     final showHeader = ref.watch(shellHeaderVisibleProvider);
 
-    if (isWide) {
+    if (!isCompact) {
       return _wrapWithTutorial(
         Scaffold(
           body: Row(
@@ -133,6 +145,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                 onSelect: (i) => context.go(dests[i].path),
                 module: module,
                 badgeCounts: badgeCounts,
+                extended: isExpanded,
               ),
               const VerticalDivider(thickness: 1, width: 1),
               Expanded(
@@ -232,24 +245,28 @@ class AppShellHeader extends ConsumerWidget {
                 orElse: () => 0,
               );
               if (streak == 0) return const SizedBox.shrink();
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Color.fromARGB(_kGlassOverlayAlpha, 255, 255, 255),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('🔥', style: TextStyle(fontSize: 13)),
-                    const SizedBox(width: 4),
-                    Text(
-                      '$streak',
-                      style: const TextStyle(
-                        fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white,
+              return Semantics(
+                liveRegion: true,
+                label: '$streak day streak',
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Color.fromARGB(_kGlassOverlayAlpha, 255, 255, 255),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('🔥', style: TextStyle(fontSize: 13)),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$streak',
+                        style: const TextStyle(
+                          fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             }),
@@ -389,84 +406,94 @@ class AppShellHeader extends ConsumerWidget {
 
     Widget leftWidget;
     if (module != ShellModule.global) {
-      leftWidget = GestureDetector(
-        onTap: () => context.go('/home'),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(10, 6, 14, 6),
-          decoration: BoxDecoration(
-            color: Colors.white.withAlpha(56),
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 14),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'HOME',
-                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 0.6),
-                  ),
-                  Text(
-                    eyebrow,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white),
-                  ),
-                ],
-              ),
-            ],
+      leftWidget = Semantics(
+        label: 'Back to Home',
+        button: true,
+        child: InkWell(
+          onTap: () => context.go('/home'),
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(10, 6, 14, 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withAlpha(56),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 14),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'HOME',
+                      style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 0.6),
+                    ),
+                    Text(
+                      eyebrow,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       );
     } else {
-      leftWidget = GestureDetector(
-        onTap: () => PetSwitcherSheet.show(context),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
-          decoration: BoxDecoration(
-            color: Colors.white.withAlpha(56),
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (activePet != null) ...[
-                PetAvatar(
-                  imageUrl: activePet.avatarUrl,
-                  species: activePet.speciesEnum,
-                  size: PetAvatarSize.sm,
-                  showRing: true,
-                ),
-                const SizedBox(width: 10),
-              ],
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    eyebrow,
-                    style: const TextStyle(
-                      fontSize: 9, fontWeight: FontWeight.w700,
-                      color: Colors.white, letterSpacing: 0.6,
-                    ),
+      leftWidget = Semantics(
+        label: activePet != null ? 'Switch pet: ${activePet.name}' : 'Switch pet',
+        button: true,
+        child: InkWell(
+          onTap: () => PetSwitcherSheet.show(context),
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withAlpha(56),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (activePet != null) ...[
+                  PetAvatar(
+                    imageUrl: activePet.avatarUrl,
+                    species: activePet.speciesEnum,
+                    size: PetAvatarSize.sm,
+                    showRing: true,
                   ),
-                  Row(children: [
+                  const SizedBox(width: 10),
+                ],
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     Text(
-                      activePet?.name ?? (subIndex == 4 ? 'Market' : 'PetFolio'),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      eyebrow,
                       style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white,
+                        fontSize: 9, fontWeight: FontWeight.w700,
+                        color: Colors.white, letterSpacing: 0.6,
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
-                  ]),
-                ],
-              ),
-            ],
+                    Row(children: [
+                      Text(
+                        activePet?.name ?? (subIndex == 4 ? 'Market' : 'PetFolio'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
+                    ]),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -526,8 +553,7 @@ class _HeaderIconBtn extends StatelessWidget {
       style: IconButton.styleFrom(
         backgroundColor: Colors.white.withAlpha(56),
         shape: const CircleBorder(),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
+        ),
     );
   }
 }
@@ -536,7 +562,6 @@ class _HeaderIconBtn extends StatelessWidget {
 
 class _FloatingNav extends StatelessWidget {
   const _FloatingNav({
-    super.key,
     required this.destinations,
     required this.accentColors,
     required this.selectedIndex,
@@ -643,83 +668,72 @@ class _NavTabState extends State<_NavTab> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final unselected = widget.isDark ? AppColors.ink500D : AppColors.ink500;
 
-    return GestureDetector(
+    return Semantics(
+      label: widget.destination.label,
+      selected: widget.isSelected,
+      button: true,
       onTap: () {
         HapticFeedback.selectionClick();
         widget.onTap();
       },
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedBuilder(
-        animation: _ctrl,
-        builder: (context, _) {
-          // Clamp to [0, 1.3] — allow slight overshoot without color math overflow.
-          final t = _ctrl.value.clamp(0.0, 1.3);
-          final tC = t.clamp(0.0, 1.0); // clamped for color lerp
+      child: ExcludeSemantics(
+        child: GestureDetector(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            widget.onTap();
+          },
+          behavior: HitTestBehavior.opaque,
+          child: AnimatedBuilder(
+            animation: _ctrl,
+            builder: (context, _) {
+              final t = _ctrl.value.clamp(0.0, 1.3);
+              final tC = t.clamp(0.0, 1.0);
 
-          final iconColor = Color.lerp(unselected, widget.accentColor, tC)!;
-          final bgAlpha = (36 * tC).round();
-          final hPad = 8.0 + 6.0 * t; // 8 → 14 dp
+              final iconColor = Color.lerp(unselected, widget.accentColor, tC)!;
+              final bgAlpha = (36 * tC).round();
+              final hPad = 8.0 + 6.0 * t;
 
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Stack(
-                clipBehavior: Clip.none,
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Transform.scale(
-                    scale: 1.0 + 0.08 * t,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: widget.accentColor.withAlpha(bgAlpha),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Icon(
-                        tC > 0.5
-                            ? widget.destination.activeIcon
-                            : widget.destination.icon,
-                        color: iconColor,
-                        size: 22,
+                  Badge(
+                    label: Text(widget.badgeCount > 99 ? '99+' : '${widget.badgeCount}'),
+                    isLabelVisible: widget.badgeCount > 0,
+                    child: Transform.scale(
+                      scale: 1.0 + 0.08 * t,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: widget.accentColor.withAlpha(bgAlpha),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Icon(
+                          tC > 0.5
+                              ? widget.destination.activeIcon
+                              : widget.destination.icon,
+                          color: iconColor,
+                          size: 22,
+                        ),
                       ),
                     ),
                   ),
-                  if (widget.badgeCount > 0)
-                    Positioned(
-                      top: -4,
-                      right: -4,
-                      child: Container(
-                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                        padding: const EdgeInsets.symmetric(horizontal: 3),
-                        decoration: BoxDecoration(
-                          color: AppColors.poppy,
-                          shape: widget.badgeCount > 9 ? BoxShape.rectangle : BoxShape.circle,
-                          borderRadius: widget.badgeCount > 9 ? BorderRadius.circular(8) : null,
-                          border: Border.all(color: widget.isDark ? AppColors.surface0D : AppColors.surface0, width: 1.5),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          widget.badgeCount > 99 ? '99+' : '${widget.badgeCount}',
-                          style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900, height: 1.2),
-                        ),
-                      ),
+                  const SizedBox(height: 2),
+                  Text(
+                    widget.destination.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: tC > 0.5 ? FontWeight.w700 : FontWeight.w500,
+                      color: iconColor,
+                      height: 1.0,
                     ),
+                  ),
                 ],
-              ),
-              const SizedBox(height: 2),
-              Text(
-                widget.destination.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: tC > 0.5 ? FontWeight.w700 : FontWeight.w500,
-                  color: iconColor,
-                  height: 1.0,
-                ),
-              ),
-            ],
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -735,6 +749,7 @@ class _WideNavRail extends StatelessWidget {
     required this.onSelect,
     required this.module,
     this.badgeCounts,
+    this.extended = false,
   });
 
   final List<AppShellDestination> destinations;
@@ -743,6 +758,7 @@ class _WideNavRail extends StatelessWidget {
   final ValueChanged<int> onSelect;
   final ShellModule module;
   final List<int>? badgeCounts;
+  final bool extended;
 
   @override
   Widget build(BuildContext context) {
@@ -751,7 +767,9 @@ class _WideNavRail extends StatelessWidget {
 
     final rail = NavigationRail(
       selectedIndex: selectedIndex,
-      labelType: NavigationRailLabelType.all,
+      extended: extended,
+      labelType: extended ? NavigationRailLabelType.none : NavigationRailLabelType.all,
+      minExtendedWidth: 180,
       backgroundColor: bg,
       onDestinationSelected: onSelect,
       destinations: [

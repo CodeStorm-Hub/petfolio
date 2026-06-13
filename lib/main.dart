@@ -93,6 +93,7 @@ Future<void> main() async {
   await PrefsSchema.migrate();
 
   GoogleFonts.config.allowRuntimeFetching = kIsWeb;
+  await GoogleFonts.pendingFonts([GoogleFonts.sora(), GoogleFonts.inter()]);
 
   if (!kIsWeb) {
     await ensureStripeReady(publishableKey: _stripePublishableKey);

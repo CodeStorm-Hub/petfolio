@@ -37,35 +37,48 @@ class _TailWagLoaderState extends State<TailWagLoader> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AnimatedBuilder(
-          animation: _ctrl,
-          builder: (context, _) {
-            return CustomPaint(
-              size: Size(widget.size, widget.size),
-              painter: _DogPainter(
-                // M3E spring curve — easeOutBack gives a wag overshoot
-                tailAngle: Curves.easeInOutBack.transform(_ctrl.value),
-                color: widget.color,
+    return Semantics(
+      label: widget.label ?? 'Loading',
+      liveRegion: true,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              CircularProgressIndicator(
+                strokeWidth: 4,
+                strokeCap: StrokeCap.round,
+                color: widget.color.withAlpha(60),
               ),
-            );
-          },
-        ),
-        if (widget.label != null) ...[
-          const SizedBox(height: 10),
-          Text(
-            widget.label!,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: widget.color,
-              letterSpacing: 0.3,
-            ),
+              AnimatedBuilder(
+                animation: _ctrl,
+                builder: (context, _) {
+                  return CustomPaint(
+                    size: Size(widget.size * 0.7, widget.size * 0.7),
+                    painter: _DogPainter(
+                      tailAngle: Curves.easeInOutBack.transform(_ctrl.value),
+                      color: widget.color,
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
+          if (widget.label != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              widget.label!,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: widget.color,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

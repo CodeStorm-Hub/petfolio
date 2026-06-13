@@ -111,14 +111,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       }
     } catch (_) {
       // M-2: surface send failures to the user
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Message failed to send. Please try again.'),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
+      AppSnackBar.showError('Message failed to send. Please try again.');
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -381,7 +374,7 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final bg = isMine ? AppColors.coral500 : pt.surface2;
+    final bg = isMine ? AppColors.poppy : pt.surface2;
     final fg = isMine ? Colors.white : pt.ink500;
     final align = isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start;
     final radius = BorderRadius.only(
@@ -510,7 +503,7 @@ class _Composer extends ConsumerWidget {
                 key: const ValueKey<String>('chat_send_button'),
                 onPressed: sending ? null : onSend,
                 style: IconButton.styleFrom(
-                  backgroundColor: AppColors.coral500,
+                  backgroundColor: AppColors.poppy,
                   foregroundColor: Colors.white,
                 ),
                 icon: sending

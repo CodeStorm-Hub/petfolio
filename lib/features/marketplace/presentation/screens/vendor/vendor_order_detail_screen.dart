@@ -410,7 +410,7 @@ class _StatusChip extends StatelessWidget {
   Color get _color => switch (status) {
         OrderStatus.pending    => AppColors.warning,
         OrderStatus.processing => AppColors.info,
-        OrderStatus.shipped    => AppColors.blue500,
+        OrderStatus.shipped    => AppColors.tangerine,
         OrderStatus.delivered  => AppColors.success,
         OrderStatus.cancelled  => AppColors.danger,
       };

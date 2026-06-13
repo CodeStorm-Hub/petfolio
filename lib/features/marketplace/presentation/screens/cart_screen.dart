@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../../core/widgets/petfolio_empty_state.dart';
 import '../../data/models/cart_item.dart';
 import '../../data/models/promo.dart';
@@ -40,15 +41,7 @@ class CartScreen extends ConsumerWidget {
         ref.read(checkoutProvider.notifier).reset();
       }
       if (next.status == CheckoutStatus.failure && next.errorMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.errorMessage!),
-            backgroundColor: AppColors.danger,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          ),
-        );
+        AppSnackBar.showError(next.errorMessage!);
         ref.read(checkoutProvider.notifier).reset();
       }
     });
@@ -333,7 +326,7 @@ class _VendorCheckoutSectionState
   Future<void> _applyPromo(int subtotalCents) async {
     final code = _promoCtrl.text.trim();
     if (code.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(_snack('Enter a promo code first', error: true));
+      AppSnackBar.showError('Enter a promo code first');
       return;
     }
     setState(() => _promoLoading = true);
@@ -341,30 +334,21 @@ class _VendorCheckoutSectionState
       final promo = await ref.read(promoRepositoryProvider).validateCode(code);
       if (!mounted) return;
       if (promo == null) {
-        ScaffoldMessenger.of(context).showSnackBar(_snack('Promo code not valid or expired', error: true));
+        AppSnackBar.showError('Promo code not valid or expired');
         setState(() { _promoLoading = false; _promoExpanded = false; });
       } else if (subtotalCents < promo.minOrderCents) {
         final min = '\$${(promo.minOrderCents / 100).toStringAsFixed(0)}';
-        ScaffoldMessenger.of(context).showSnackBar(_snack('Minimum order $min required for this code', error: true));
+        AppSnackBar.showError('Minimum order $min required for this code');
         setState(() { _promoLoading = false; _promoExpanded = false; });
       } else {
         HapticFeedback.mediumImpact();
-        ScaffoldMessenger.of(context).showSnackBar(_snack('${promo.discountLabel} applied!'));
+        AppSnackBar.showSuccess('${promo.discountLabel} applied!');
         setState(() { _appliedPromo = promo; _promoApplied = true; _promoLoading = false; _promoExpanded = false; });
       }
     } catch (_) {
       if (mounted) setState(() { _promoLoading = false; _promoExpanded = false; });
     }
   }
-
-  SnackBar _snack(String msg, {bool error = false}) => SnackBar(
-        content: Text(msg),
-        backgroundColor: error ? AppColors.danger : AppColors.mint700,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        duration: const Duration(seconds: 2),
-      );
 
   void _handleCheckout(int subtotalCents) {
     if (_method == PaymentMethod.cod) {

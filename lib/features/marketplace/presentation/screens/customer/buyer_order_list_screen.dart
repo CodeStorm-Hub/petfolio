@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/widgets/app_snack_bar.dart';
 import '../../controllers/buyer_orders_controller.dart';
 import '../../../data/models/marketplace_order.dart';
 
@@ -169,12 +170,7 @@ class _OrderTile extends StatelessWidget {
                       color: a.$3,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${a.$1} — coming soon'),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
+                        AppSnackBar.show('${a.$1} — coming soon');
                       },
                     ),
                   )).toList(),
@@ -205,7 +201,7 @@ class _OrderTile extends StatelessWidget {
   Color _statusColor(OrderStatus s) => switch (s) {
         OrderStatus.pending    => AppColors.warning,
         OrderStatus.processing => AppColors.info,
-        OrderStatus.shipped    => AppColors.blue500,
+        OrderStatus.shipped    => AppColors.tangerine,
         OrderStatus.delivered  => AppColors.success,
         OrderStatus.cancelled  => AppColors.danger,
       };
@@ -279,7 +275,7 @@ class _StatusChip extends StatelessWidget {
   Color get _color => switch (status) {
         OrderStatus.pending    => AppColors.warning,
         OrderStatus.processing => AppColors.info,
-        OrderStatus.shipped    => AppColors.blue500,
+        OrderStatus.shipped    => AppColors.tangerine,
         OrderStatus.delivered  => AppColors.success,
         OrderStatus.cancelled  => AppColors.danger,
       };

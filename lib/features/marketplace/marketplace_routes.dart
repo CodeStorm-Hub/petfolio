@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/router/transitions.dart';
 import 'data/models/marketplace_order.dart';
 import 'data/models/product.dart';
 import 'presentation/screens/cart_screen.dart';
@@ -26,122 +27,137 @@ List<RouteBase> marketplaceRoutes(GlobalKey<NavigatorState> rootKey) => [
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/intro',
-    builder: (_, _) => const ShopIntroScreen(),
+    pageBuilder: (_, state) => pushPage(key: state.pageKey, child: const ShopIntroScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/categories',
-    builder: (_, _) => const MarketplaceCategoriesScreen(),
+    pageBuilder: (_, state) => pushPage(key: state.pageKey, child: const MarketplaceCategoriesScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/product/:id',
-    builder: (context, state) => ProductDetailScreen(
-      productId: state.pathParameters['id']!,
-      product: state.extra as Product?,
+    pageBuilder: (context, state) => pushPage(
+      key: state.pageKey,
+      child: ProductDetailScreen(
+        productId: state.pathParameters['id']!,
+        product: state.extra as Product?,
+      ),
     ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/cart',
-    builder: (context, state) => const CartScreen(),
+    pageBuilder: (context, state) => modalPage(key: state.pageKey, child: const CartScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/order/:id',
-    builder: (context, state) => OrderConfirmationScreen(
-      orderId: state.pathParameters['id']!,
+    pageBuilder: (context, state) => modalPage(
+      key: state.pageKey,
+      child: OrderConfirmationScreen(orderId: state.pathParameters['id']!),
     ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/orders/:id',
-    builder: (context, state) => BuyerOrderDetailScreen(
-      orderId: state.pathParameters['id']!,
-      order: state.extra as MarketplaceOrder?,
+    pageBuilder: (context, state) => pushPage(
+      key: state.pageKey,
+      child: BuyerOrderDetailScreen(
+        orderId: state.pathParameters['id']!,
+        order: state.extra as MarketplaceOrder?,
+      ),
     ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/profile/orders',
-    builder: (context, state) => const BuyerOrderListScreen(),
+    pageBuilder: (context, state) => pushPage(key: state.pageKey, child: const BuyerOrderListScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/profile/orders/:id',
-    builder: (context, state) => BuyerOrderDetailScreen(
-      orderId: state.pathParameters['id']!,
-      order: state.extra as MarketplaceOrder?,
+    pageBuilder: (context, state) => pushPage(
+      key: state.pageKey,
+      child: BuyerOrderDetailScreen(
+        orderId: state.pathParameters['id']!,
+        order: state.extra as MarketplaceOrder?,
+      ),
     ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/shop/:id',
-    builder: (context, state) => ShopStorefrontRoute(
-      shopId: state.pathParameters['id']!,
+    pageBuilder: (context, state) => pushPage(
+      key: state.pageKey,
+      child: ShopStorefrontRoute(shopId: state.pathParameters['id']!),
     ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller',
-    builder: (context, state) => const SellerDashboardScreen(),
+    pageBuilder: (context, state) => pushPage(key: state.pageKey, child: const SellerDashboardScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/setup',
-    builder: (context, state) => const ShopSetupScreen(),
+    pageBuilder: (context, state) => modalPage(key: state.pageKey, child: const ShopSetupScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/onboarding',
-    builder: (context, state) {
+    pageBuilder: (context, state) {
       final url = state.uri.queryParameters['url'] ?? '';
-      return StripeOnboardingScreen(accountLinkUrl: url);
+      return pushPage(key: state.pageKey, child: StripeOnboardingScreen(accountLinkUrl: url));
     },
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/edit-shop',
-    builder: (context, state) => const EditShopScreen(),
+    pageBuilder: (context, state) => modalPage(key: state.pageKey, child: const EditShopScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/kyc',
-    builder: (context, state) => const ManualKycScreen(),
+    pageBuilder: (context, state) => modalPage(key: state.pageKey, child: const ManualKycScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/products',
-    builder: (context, state) => const VendorProductListScreen(),
+    pageBuilder: (context, state) => pushPage(key: state.pageKey, child: const VendorProductListScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/products/add',
-    builder: (context, state) => const AddEditProductScreen(),
+    pageBuilder: (context, state) => modalPage(key: state.pageKey, child: const AddEditProductScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/products/:id/edit',
-    builder: (context, state) => AddEditProductScreen(
-      product: state.extra as Product?,
+    pageBuilder: (context, state) => modalPage(
+      key: state.pageKey,
+      child: AddEditProductScreen(product: state.extra as Product?),
     ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/orders',
-    builder: (context, state) => const VendorOrderQueueScreen(),
+    pageBuilder: (context, state) => pushPage(key: state.pageKey, child: const VendorOrderQueueScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/orders/:id',
-    builder: (context, state) => VendorOrderDetailScreen(
-      orderId: state.pathParameters['id']!,
-      order: state.extra as MarketplaceOrder?,
+    pageBuilder: (context, state) => pushPage(
+      key: state.pageKey,
+      child: VendorOrderDetailScreen(
+        orderId: state.pathParameters['id']!,
+        order: state.extra as MarketplaceOrder?,
+      ),
     ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/earnings',
-    builder: (context, state) => const VendorEarningsScreen(),
+    pageBuilder: (context, state) => pushPage(key: state.pageKey, child: const VendorEarningsScreen()),
   ),
 ];

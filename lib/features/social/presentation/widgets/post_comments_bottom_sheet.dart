@@ -219,9 +219,13 @@ class _PostCommentsBottomSheetState extends ConsumerState<PostCommentsBottomShee
                             ),
                           ),
                         ),
-                        GestureDetector(
+                        InkWell(
                           onTap: () => setState(() => _replyingToComment = null),
-                          child: Icon(Icons.close_rounded, size: 16, color: pt.ink300),
+                          customBorder: const CircleBorder(),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: Icon(Icons.close_rounded, size: 16, color: pt.ink300),
+                          ),
                         ),
                       ],
                     ),
@@ -324,11 +328,11 @@ class _CommentTile extends ConsumerWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.delete_outline_rounded, color: AppColors.coral500),
+                leading: const Icon(Icons.delete_outline_rounded, color: AppColors.poppy),
                 title: Text(
                   'Delete Comment',
                   style: tt.bodyMedium?.copyWith(
-                    color: AppColors.coral500,
+                    color: AppColors.poppy,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -370,8 +374,7 @@ class _CommentTile extends ConsumerWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final tt = Theme.of(context).textTheme;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+    return InkWell(
       onLongPress: () => _showContextMenu(context, ref),
       child: Padding(
         padding: EdgeInsets.only(
@@ -383,24 +386,30 @@ class _CommentTile extends ConsumerWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GestureDetector(
-              onTap: () => context.push('/social/profile/${comment.petId}'),
-              child: CircleAvatar(
-                radius: isReply ? 12 : 16,
-                backgroundColor: AppColors.coral500.withAlpha(200),
-                backgroundImage: comment.avatarUrl != null
-                    ? CachedNetworkImageProvider(comment.avatarUrl!)
-                    : null,
-                child: comment.avatarUrl == null
-                    ? Text(
-                        comment.petName.isNotEmpty ? comment.petName[0].toUpperCase() : '?',
-                        style: tt.titleSmall?.copyWith(
-                          fontSize: isReply ? 9 : 12,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      )
-                    : null,
+            Material(
+              color: Colors.transparent,
+              shape: const CircleBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () => context.push('/social/profile/${comment.petId}'),
+                customBorder: const CircleBorder(),
+                child: CircleAvatar(
+                  radius: isReply ? 12 : 16,
+                  backgroundColor: AppColors.poppy.withAlpha(200),
+                  backgroundImage: comment.avatarUrl != null
+                      ? CachedNetworkImageProvider(comment.avatarUrl!)
+                      : null,
+                  child: comment.avatarUrl == null
+                      ? Text(
+                          comment.petName.isNotEmpty ? comment.petName[0].toUpperCase() : '?',
+                          style: tt.titleSmall?.copyWith(
+                            fontSize: isReply ? 9 : 12,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        )
+                      : null,
+                ),
               ),
             ),
             const SizedBox(width: 10),
@@ -412,8 +421,9 @@ class _CommentTile extends ConsumerWidget {
                     children: [
                       Flexible(
                         fit: FlexFit.loose,
-                        child: GestureDetector(
+                        child: InkWell(
                           onTap: () => context.push('/social/profile/${comment.petId}'),
+                          borderRadius: BorderRadius.circular(4),
                           child: Text(
                             comment.petName,
                             maxLines: 1,
@@ -460,8 +470,9 @@ class _CommentTile extends ConsumerWidget {
                         ),
                         const SizedBox(width: 12),
                       ],
-                      GestureDetector(
+                      InkWell(
                         onTap: () => onReplyTap?.call(comment),
+                        borderRadius: BorderRadius.circular(4),
                         child: Text(
                           'Reply',
                           style: tt.labelSmall?.copyWith(
@@ -479,7 +490,7 @@ class _CommentTile extends ConsumerWidget {
               icon: Icon(
                 comment.isLiked ? Icons.pets_rounded : Icons.pets_outlined,
                 size: 16,
-                color: comment.isLiked ? AppColors.coral500 : pt.ink300,
+                color: comment.isLiked ? AppColors.poppy : pt.ink300,
               ),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(
@@ -649,38 +660,44 @@ class _CommentInputBarState extends State<_CommentInputBar> {
                     child: Center(
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation(AppColors.coral500),
+                        valueColor: AlwaysStoppedAnimation(AppColors.poppy),
                       ),
                     ),
                   )
-                : GestureDetector(
+                : Material(
                     key: const ValueKey('send'),
-                    onTap: widget.onSend,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: widget.controller.text.trim().isNotEmpty
-                            ? primary
-                            : pt.surface2,
-                        shape: BoxShape.circle,
-                        boxShadow: widget.controller.text.trim().isNotEmpty
-                            ? [
-                                BoxShadow(
-                                  color: primary.withAlpha(50),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Icon(
-                        Icons.arrow_upward_rounded,
-                        color: widget.controller.text.trim().isNotEmpty
-                            ? Colors.white
-                            : pt.ink300,
-                        size: 20,
+                    color: Colors.transparent,
+                    shape: const CircleBorder(),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: widget.onSend,
+                      customBorder: const CircleBorder(),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: widget.controller.text.trim().isNotEmpty
+                              ? primary
+                              : pt.surface2,
+                          shape: BoxShape.circle,
+                          boxShadow: widget.controller.text.trim().isNotEmpty
+                              ? [
+                                  BoxShadow(
+                                    color: primary.withAlpha(50),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Icon(
+                          Icons.arrow_upward_rounded,
+                          color: widget.controller.text.trim().isNotEmpty
+                              ? Colors.white
+                              : pt.ink300,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ),
@@ -772,7 +789,7 @@ class _EditCommentSheetState extends ConsumerState<_EditCommentSheet> {
           const SizedBox(height: 16),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.coral500,
+              backgroundColor: AppColors.poppy,
               foregroundColor: Colors.white,
               minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(

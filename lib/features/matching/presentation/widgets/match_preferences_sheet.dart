@@ -16,6 +16,7 @@ class MatchPreferencesSheet extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         barrierColor: const Color(0x6B0B1220),
         useSafeArea: true,
+        constraints: const BoxConstraints(maxWidth: 480),
         builder: (_) => const MatchPreferencesSheet(),
       );
 
@@ -229,7 +230,7 @@ class _SectionLabel extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppColors.blue500,
+              color: AppColors.tangerine,
             ),
           ),
       ],

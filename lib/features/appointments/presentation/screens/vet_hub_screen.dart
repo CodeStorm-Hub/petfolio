@@ -138,8 +138,8 @@ class _ClinicsGridTab extends ConsumerWidget {
                       ),
                       childCount: clinics.length,
                     ),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: ResponsiveLayout.isDesktop(context) ? 4 : ResponsiveLayout.isTablet(context) ? 3 : 2,
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
                       childAspectRatio: 0.82,
@@ -312,8 +312,8 @@ class _SkeletonGrid extends StatelessWidget {
               ),
               childCount: 6,
             ),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: ResponsiveLayout.isDesktop(context) ? 4 : ResponsiveLayout.isTablet(context) ? 3 : 2,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
               childAspectRatio: 0.82,

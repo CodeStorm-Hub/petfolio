@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../../core/theme/theme.dart';
+import '../../../../core/widgets/app_snack_bar.dart';
 import '../../data/models/product.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/product_list_controller.dart';
@@ -73,16 +74,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) setState(() => _popping = false);
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Added to cart 🛒'),
-        backgroundColor: AppColors.mint,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    AppSnackBar.showSuccess('Added to cart 🛒');
   }
 
   // Buy Now — opens variant sheet, on confirm adds qty items and goes to cart
@@ -1062,17 +1054,18 @@ class _VariantSheetContentState extends State<_VariantSheetContent> {
                       ),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color: isDark ? pt.surface2 : const Color(0xFFF0F1F5),
-                        shape: BoxShape.circle,
+                  Material(
+                    color: isDark ? pt.surface2 : const Color(0xFFF0F1F5),
+                    shape: const CircleBorder(),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () => Navigator.of(context).pop(),
+                      customBorder: const CircleBorder(),
+                      child: SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: Icon(Icons.close_rounded, size: 16, color: pt.ink500),
                       ),
-                      alignment: Alignment.center,
-                      child: Icon(Icons.close_rounded, size: 16, color: pt.ink500),
                     ),
                   ),
                 ],
@@ -1332,31 +1325,28 @@ class _SheetStepperBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: isDark ? pt.surface1 : Colors.white,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(isDark ? 40 : 14),
-              blurRadius: 4,
-              offset: const Offset(0, 1),
+    return Material(
+      color: isDark ? pt.surface1 : Colors.white,
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      elevation: 0,
+      shadowColor: Colors.black.withAlpha(isDark ? 40 : 14),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: SizedBox(
+          width: 36,
+          height: 36,
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: pt.ink950,
+                height: 1.1,
+              ),
             ),
-          ],
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: pt.ink950,
-            height: 1.1,
           ),
         ),
       ),
@@ -1377,23 +1367,20 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: bg ?? AppColors.surface0,
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0F0B1220),
-              offset: Offset(0, 2),
-              blurRadius: 6,
-            ),
-          ],
+    return Material(
+      color: bg ?? AppColors.surface0,
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      elevation: 2,
+      shadowColor: const Color(0x0F0B1220),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: Icon(icon, size: 22, color: AppColors.ink700),
         ),
-        child: Icon(icon, size: 22, color: AppColors.ink700),
       ),
     );
   }
