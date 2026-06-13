@@ -34,7 +34,8 @@ class ProductRepository {
     var filterQuery = _client
         .from('products')
         .select('*, shops!inner(shop_name)')
-        .eq('active', true);
+        .eq('active', true)
+        .gte('inventory_count', 0);
 
     if (afterCreatedAt != null && afterId != null) {
       final ts = afterCreatedAt.toUtc().toIso8601String();
@@ -59,6 +60,7 @@ class ProductRepository {
         .select('*, shops!inner(shop_name)')
         .eq('shop_id', shopId)
         .eq('active', true)
+        .gte('inventory_count', 0)
         .order('created_at');
 
     return (rows as List)

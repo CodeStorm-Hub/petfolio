@@ -157,11 +157,13 @@ export async function sendFcmToUser(
     if (isChat) {
       messagePayload.android = { priority: "HIGH" };
       messagePayload.apns = {
+        headers: { "apns-priority": "10" },
         payload: {
           aps: {
             alert: { title, body },
             sound: apnsSound,
             badge: 1,
+            "content-available": 1,
           },
         },
       };

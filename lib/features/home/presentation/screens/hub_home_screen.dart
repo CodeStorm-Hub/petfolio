@@ -36,10 +36,11 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
   late final AnimationController _fadeCtrl;
   late final Animation<double> _fadeAnim;
   late final ScrollController _scrollCtrl;
+  late final _scrollProgressNotifier =
+      ref.read(homeScrollProgressProvider.notifier);
   int _selectedDealChip = 0;
 
   static const _dealChips = ['All', 'Food', 'Grooming', 'Health', 'Toys'];
-  // Scroll distance (px) over which the header transitions transparent → glass
   static const _kScrollThreshold = 90.0;
 
   @override
@@ -55,15 +56,14 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
 
   void _onScroll() {
     final progress = (_scrollCtrl.offset / _kScrollThreshold).clamp(0.0, 1.0);
-    ref.read(homeScrollProgressProvider.notifier).set(progress);
+    _scrollProgressNotifier.set(progress);
   }
 
   @override
   void dispose() {
     _fadeCtrl.dispose();
     _scrollCtrl.dispose();
-    // Reset header to transparent when leaving the screen
-    ref.read(homeScrollProgressProvider.notifier).set(0.0);
+    _scrollProgressNotifier.set(0.0);
     super.dispose();
   }
 
@@ -315,7 +315,7 @@ class _WaveHeroSection extends StatelessWidget {
                 ),
                 // Greeting content
                 Padding(
-                  padding: EdgeInsets.fromLTRB(20, topPad + 76.0 + 14, 120, 72),
+                  padding: EdgeInsets.fromLTRB(20, topPad + 76.0 + 14, 120, 50),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -743,7 +743,7 @@ class _BentoGrid extends StatelessWidget {
 // Care Tile — 2× tall white elevated card, live streak + progress
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _CareTile extends StatefulWidget {
+class _CareTile extends StatelessWidget {
   const _CareTile({
     required this.doneTasks,
     required this.totalTasks,
@@ -761,31 +761,22 @@ class _CareTile extends StatefulWidget {
   final VoidCallback onTap;
 
   @override
-  State<_CareTile> createState() => _CareTileState();
-}
-
-class _CareTileState extends State<_CareTile> {
-  bool _pressed = false;
-
-  @override
   Widget build(BuildContext context) {
-    final progress = widget.totalTasks == 0
+    final progress = totalTasks == 0
         ? 0.0
-        : (widget.doneTasks / widget.totalTasks).clamp(0.0, 1.0);
+        : (doneTasks / totalTasks).clamp(0.0, 1.0);
 
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTap: () {
-        HapticFeedback.selectionClick();
-        widget.onTap();
-      },
-      child: AnimatedScale(
-        scale: _pressed ? 0.97 : 1.0,
-        duration: const Duration(milliseconds: 130),
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
         child: Container(
-          decoration: _bentoCardDecoration(widget.isDark, widget.pt, glow: AppColors.sunny),
+          decoration: _bentoCardDecoration(isDark, pt, glow: AppColors.sunny),
           child: Stack(
             children: [
               // Emoji — vertically centered on the right, behind text
@@ -795,7 +786,7 @@ class _CareTileState extends State<_CareTile> {
                 right: 14,
                 child: Center(
                   child: Opacity(
-                    opacity: widget.isDark ? 0.28 : 0.82,
+                    opacity: isDark ? 0.28 : 0.82,
                     child: const Text('🔥', style: TextStyle(fontSize: 88)),
                   ),
                 ),
@@ -806,7 +797,7 @@ class _CareTileState extends State<_CareTile> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (widget.streak > 0)
+                    if (streak > 0)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
@@ -814,7 +805,7 @@ class _CareTileState extends State<_CareTile> {
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
-                          '🔥 ${widget.streak} day${widget.streak == 1 ? '' : 's'}',
+                          '🔥 $streak day${streak == 1 ? '' : 's'}',
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
@@ -844,22 +835,22 @@ class _CareTileState extends State<_CareTile> {
                       style: GoogleFonts.sora(
                         fontSize: 28,
                         fontWeight: FontWeight.w900,
-                        color: widget.pt.ink950,
+                        color: pt.ink950,
                         height: 1.0,
                       ),
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      widget.totalTasks > 0
-                          ? '${widget.doneTasks}/${widget.totalTasks} done today'
+                      totalTasks > 0
+                          ? '$doneTasks/$totalTasks done today'
                           : 'Daily routines',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: widget.pt.ink500,
+                        color: pt.ink500,
                       ),
                     ),
-                    if (widget.totalTasks > 0) ...[
+                    if (totalTasks > 0) ...[
                       const SizedBox(height: 10),
                       // Constrain width to leave room for emoji
                       FractionallySizedBox(
@@ -890,7 +881,7 @@ class _CareTileState extends State<_CareTile> {
 // Bento Tile — white elevated card with large emoji illustration
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _BentoTile extends StatefulWidget {
+class _BentoTile extends StatelessWidget {
   const _BentoTile({
     required this.label,
     required this.sub,
@@ -910,39 +901,28 @@ class _BentoTile extends StatefulWidget {
   final VoidCallback onTap;
 
   @override
-  State<_BentoTile> createState() => _BentoTileState();
-}
-
-class _BentoTileState extends State<_BentoTile> {
-  bool _pressed = false;
-
-  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTap: () {
-        HapticFeedback.selectionClick();
-        widget.onTap();
-      },
-      child: AnimatedScale(
-        scale: _pressed ? 0.96 : 1.0,
-        duration: const Duration(milliseconds: 130),
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
         child: Container(
-          decoration: _bentoCardDecoration(widget.isDark, widget.pt, glow: widget.accent),
+          decoration: _bentoCardDecoration(isDark, pt, glow: accent),
           child: Stack(
             children: [
-              // Emoji illustration — bottom-right, rendered first (behind text)
               Positioned(
                 bottom: 10,
                 right: 10,
                 child: Opacity(
-                  opacity: widget.isDark ? 0.28 : 0.82,
-                  child: Text(widget.emoji, style: const TextStyle(fontSize: 56)),
+                  opacity: isDark ? 0.28 : 0.82,
+                  child: Text(emoji, style: const TextStyle(fontSize: 56)),
                 ),
               ),
-              // Title + subtitle at top-left — full card width, no wrapping
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                 child: Column(
@@ -950,22 +930,22 @@ class _BentoTileState extends State<_BentoTile> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
-                      widget.label,
+                      label,
                       style: GoogleFonts.sora(
                         fontSize: 19,
                         fontWeight: FontWeight.w900,
-                        color: widget.pt.ink950,
+                        color: pt.ink950,
                         height: 1.0,
                         letterSpacing: -0.3,
                       ),
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      widget.sub,
+                      sub,
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: widget.pt.ink500,
+                        color: pt.ink500,
                       ),
                     ),
                   ],
@@ -983,42 +963,33 @@ class _BentoTileState extends State<_BentoTile> {
 // All Tile — full-width tangerine-tinted CTA to AllFeaturesSheet
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _AllTile extends StatefulWidget {
+class _AllTile extends StatelessWidget {
   const _AllTile({required this.isDark, required this.pt, required this.onTap});
   final bool isDark;
   final PetfolioThemeExtension pt;
   final VoidCallback onTap;
 
   @override
-  State<_AllTile> createState() => _AllTileState();
-}
-
-class _AllTileState extends State<_AllTile> {
-  bool _pressed = false;
-
-  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTap: () {
-        HapticFeedback.selectionClick();
-        widget.onTap();
-      },
-      child: AnimatedScale(
-        scale: _pressed ? 0.97 : 1.0,
-        duration: const Duration(milliseconds: 130),
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
         child: Container(
           height: 68,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           decoration: BoxDecoration(
-            color: widget.isDark
+            color: isDark
                 ? AppColors.tangerine.withAlpha(35)
                 : AppColors.tangerineSoft,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: AppColors.tangerine.withAlpha(widget.isDark ? 45 : 38),
+              color: AppColors.tangerine.withAlpha(isDark ? 45 : 38),
             ),
           ),
           child: Row(
@@ -1090,6 +1061,7 @@ class _QuickActionsRow extends StatelessWidget {
         color: AppColors.poppy,
         soft: isDark ? AppColors.poppySoftD : AppColors.poppySoft,
         route: '/social/create-post',
+        push: true,
       ),
       _QuickAction(
         icon: Icons.medical_services_rounded,
@@ -1098,6 +1070,7 @@ class _QuickActionsRow extends StatelessWidget {
         color: AppColors.sky,
         soft: isDark ? AppColors.skySoftD : AppColors.skySoft,
         route: '/appointments',
+        push: true,
       ),
       _QuickAction(
         icon: Icons.receipt_long_rounded,
@@ -1123,41 +1096,34 @@ class _QuickActionsRow extends StatelessWidget {
   }
 }
 
-class _QuickActionCard extends StatefulWidget {
+class _QuickActionCard extends StatelessWidget {
   const _QuickActionCard({required this.action});
   final _QuickAction action;
-
-  @override
-  State<_QuickActionCard> createState() => _QuickActionCardState();
-}
-
-class _QuickActionCardState extends State<_QuickActionCard> {
-  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTap: () {
-        HapticFeedback.selectionClick();
-        context.push(widget.action.route);
-      },
-      child: AnimatedScale(
-        scale: _pressed ? 0.96 : 1.0,
-        duration: const Duration(milliseconds: 120),
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          if (action.push) {
+            context.push(action.route);
+          } else {
+            context.go(action.route);
+          }
+        },
         child: Container(
           width: 175,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: widget.action.soft,
+            color: action.soft,
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: widget.action.color.withAlpha(40),
-            ),
+            border: Border.all(color: action.color.withAlpha(40)),
           ),
           child: Row(
             children: [
@@ -1165,11 +1131,11 @@ class _QuickActionCardState extends State<_QuickActionCard> {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: widget.action.color.withAlpha(40),
+                  color: action.color.withAlpha(40),
                   borderRadius: BorderRadius.circular(11),
                 ),
                 alignment: Alignment.center,
-                child: Icon(widget.action.icon, color: widget.action.color, size: 20),
+                child: Icon(action.icon, color: action.color, size: 20),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -1178,7 +1144,7 @@ class _QuickActionCardState extends State<_QuickActionCard> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      widget.action.label,
+                      action.label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -1189,7 +1155,7 @@ class _QuickActionCardState extends State<_QuickActionCard> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      widget.action.sub,
+                      action.sub,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -1217,6 +1183,7 @@ class _QuickAction {
     required this.color,
     required this.soft,
     required this.route,
+    this.push = false,
   });
   final IconData icon;
   final String label;
@@ -1224,6 +1191,7 @@ class _QuickAction {
   final Color color;
   final Color soft;
   final String route;
+  final bool push;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1282,7 +1250,7 @@ class _SpotlightCarousel extends StatelessWidget {
   }
 }
 
-class _SpotlightCard extends StatefulWidget {
+class _SpotlightCard extends StatelessWidget {
   const _SpotlightCard({
     required this.emoji,
     required this.title,
@@ -1298,37 +1266,28 @@ class _SpotlightCard extends StatefulWidget {
   final VoidCallback onTap;
 
   @override
-  State<_SpotlightCard> createState() => _SpotlightCardState();
-}
-
-class _SpotlightCardState extends State<_SpotlightCard> {
-  bool _pressed = false;
-
-  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTap: () {
-        HapticFeedback.selectionClick();
-        widget.onTap();
-      },
-      child: AnimatedScale(
-        scale: _pressed ? 0.97 : 1.0,
-        duration: const Duration(milliseconds: 130),
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
         child: Container(
           width: 155,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
-              colors: widget.gradient,
+              colors: gradient,
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             boxShadow: [
               BoxShadow(
-                color: widget.gradient.first.withAlpha(60),
+                color: gradient.first.withAlpha(60),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -1336,16 +1295,14 @@ class _SpotlightCardState extends State<_SpotlightCard> {
           ),
           child: Stack(
             children: [
-              // Large watermark emoji
               Positioned(
                 right: -8,
                 top: -8,
                 child: Opacity(
                   opacity: 0.25,
-                  child: Text(widget.emoji, style: const TextStyle(fontSize: 72)),
+                  child: Text(emoji, style: const TextStyle(fontSize: 72)),
                 ),
               ),
-              // Content
               Padding(
                 padding: const EdgeInsets.all(14),
                 child: Column(
@@ -1353,7 +1310,7 @@ class _SpotlightCardState extends State<_SpotlightCard> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      widget.title,
+                      title,
                       style: GoogleFonts.sora(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
@@ -1363,7 +1320,7 @@ class _SpotlightCardState extends State<_SpotlightCard> {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      widget.sub,
+                      sub,
                       style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,

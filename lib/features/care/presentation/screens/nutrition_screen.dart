@@ -10,7 +10,7 @@ import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/data/models/pet.dart';
 import 'package:petfolio/features/pet_profile/data/models/activity_level.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
-import '../../data/models/health_log.dart';
+import '../../data/models/weight_log.dart';
 import '../controllers/nutrition_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -45,7 +45,6 @@ class _NutritionBodyState extends ConsumerState<_NutritionBody> {
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
-      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _LogWeightSheet(petId: widget.pet.id),
     );
@@ -124,7 +123,7 @@ class _NutritionAppBar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'NUTRITION',
+            'WEIGHT & HEALTH',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w700,
               letterSpacing: 1.4,
@@ -158,7 +157,7 @@ class _WeightTrendCard extends StatelessWidget {
   });
 
   final PetfolioThemeExtension pt;
-  final AsyncValue<List<HealthLog>> history;
+  final AsyncValue<List<WeightLog>> history;
   final String petName;
   final VoidCallback onRetry;
 
@@ -192,7 +191,7 @@ class _WeightTrendCard extends StatelessWidget {
           const SizedBox(height: 4),
           history.when(
             data: (logs) {
-              final weights = logs.where((l) => l.weightKg != null).toList();
+              final weights = logs;
               if (weights.length < 2) {
                 return PetfolioEmptyState(
                   icon: Icons.show_chart_rounded,
@@ -236,17 +235,17 @@ class _WeightTrendCard extends StatelessWidget {
 class _WeightLineChart extends StatelessWidget {
   const _WeightLineChart({required this.logs, required this.pt});
 
-  final List<HealthLog> logs;
+  final List<WeightLog> logs;
   final PetfolioThemeExtension pt;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final baseMs = logs.first.occurredAt.millisecondsSinceEpoch.toDouble();
+    final baseMs = logs.first.recordedAt.millisecondsSinceEpoch.toDouble();
     const msPerDay = 86400000.0;
     final spots = logs.map((log) {
-      final x = (log.occurredAt.millisecondsSinceEpoch - baseMs) / msPerDay;
-      return FlSpot(x, log.weightKg!);
+      final x = (log.recordedAt.millisecondsSinceEpoch - baseMs) / msPerDay;
+      return FlSpot(x, log.weightKg);
     }).toList();
 
     final minY = spots.map((s) => s.y).reduce(math.min);
@@ -385,15 +384,15 @@ class _CalorieCard extends StatelessWidget {
 
   final PetfolioThemeExtension pt;
   final Pet pet;
-  final AsyncValue<List<HealthLog>> history;
+  final AsyncValue<List<WeightLog>> history;
 
-  static double? _latestLoggedWeightKg(AsyncValue<List<HealthLog>> history) {
+  static double? _latestLoggedWeightKg(AsyncValue<List<WeightLog>> history) {
     return history.maybeWhen(
       data: (list) {
-        final dated = list.where((l) => l.weightKg != null).toList()
-          ..sort((a, b) => b.occurredAt.compareTo(a.occurredAt));
-        if (dated.isEmpty) return null;
-        return dated.first.weightKg;
+        if (list.isEmpty) return null;
+        final sorted = list.toList()
+          ..sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+        return sorted.first.weightKg;
       },
       orElse: () => null,
     );
@@ -593,7 +592,7 @@ class _HistoryList extends ConsumerWidget {
   });
 
   final PetfolioThemeExtension pt;
-  final AsyncValue<List<HealthLog>> history;
+  final AsyncValue<List<WeightLog>> history;
   final String petId;
 
   @override
@@ -601,8 +600,9 @@ class _HistoryList extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     return history.when(
       data: (logs) {
-        final weights = logs.where((l) => l.weightKg != null).toList();
-        if (weights.isEmpty) return const SizedBox.shrink();
+        if (logs.isEmpty) return const SizedBox.shrink();
+        final sorted = logs.toList()
+          ..sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
         return Container(
           decoration: BoxDecoration(
             color: cs.surface,
@@ -632,8 +632,8 @@ class _HistoryList extends ConsumerWidget {
                 ),
               ),
               const Divider(height: 1),
-              for (var i = weights.length - 1; i >= 0; i--)
-                _HistoryTile(log: weights[i], pt: pt, isLast: i == 0),
+              for (var i = 0; i < sorted.length; i++)
+                _HistoryTile(log: sorted[i], pt: pt, isLast: i == sorted.length - 1),
             ],
           ),
         );
@@ -677,14 +677,14 @@ class _HistoryTile extends StatelessWidget {
     required this.isLast,
   });
 
-  final HealthLog log;
+  final WeightLog log;
   final PetfolioThemeExtension pt;
   final bool isLast;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final date = log.occurredAt;
+    final date = log.recordedAt;
     final dateStr =
         '${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
 
@@ -711,16 +711,16 @@ class _HistoryTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${log.weightKg!.toStringAsFixed(2)} kg',
+                      '${log.weightKg.toStringAsFixed(2)} kg',
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: cs.onSurface,
                       ),
                     ),
-                    if (log.description != null) ...[
+                    if (log.notes != null) ...[
                       const SizedBox(height: 2),
                       Text(
-                        log.description!,
+                        log.notes!,
                         style: TextStyle(
                           fontSize: 12,
                           color: pt.ink300,
@@ -825,7 +825,8 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final mq = MediaQuery.of(context);
+    final bottomPadding = mq.viewInsets.bottom + mq.padding.bottom + 24;
 
     return Container(
       decoration: BoxDecoration(
@@ -834,7 +835,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
           top: Radius.circular(PetfolioThemeExtension.radius2xl),
         ),
       ),
-      padding: EdgeInsets.fromLTRB(24, 0, 24, bottomInset + 24),
+      padding: EdgeInsets.fromLTRB(24, 0, 24, bottomPadding),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -872,6 +873,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
                   controller: _weightController,
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
+                  textInputAction: TextInputAction.next,
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(
                         RegExp(r'^\d*\.?\d{0,3}')),
@@ -896,6 +898,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
             controller: _notesController,
             maxLines: 2,
             textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _save(),
             decoration: const InputDecoration(
               labelText: 'Notes (optional)',
               hintText: 'e.g. After vet visit',

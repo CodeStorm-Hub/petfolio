@@ -183,6 +183,7 @@ class _MatchesInboxView extends ConsumerWidget {
                                   actorPetId: pet.id,
                                   otherPetId: item.otherPetId,
                                   otherPetName: item.otherPetName,
+                                  fromMatchInbox: true,
                                 )
                             : () => openMatchChat(
                                   context,
@@ -381,12 +382,12 @@ class _ConversationTile extends StatelessWidget {
     final now = DateTime.now();
     final local = dt.toLocal();
     final diff = now.difference(local);
-    if (diff.inDays == 0) {
-      final h = local.hour;
-      final m = local.minute.toString().padLeft(2, '0');
-      final period = h >= 12 ? 'PM' : 'AM';
-      final hour12 = h % 12 == 0 ? 12 : h % 12;
-      return '$hour12:$m $period';
+    if (diff.inSeconds < 60) return 'just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m';
+    if (diff.inHours < 24) return '${diff.inHours}h';
+    final yesterday = now.subtract(const Duration(days: 1));
+    if (local.year == yesterday.year && local.month == yesterday.month && local.day == yesterday.day) {
+      return 'Yesterday';
     }
     if (diff.inDays < 7) {
       const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

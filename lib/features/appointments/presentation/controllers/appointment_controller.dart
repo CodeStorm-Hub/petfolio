@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../features/pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/appointment.dart';
@@ -42,5 +43,59 @@ class AppointmentController extends AsyncNotifier<List<Appointment>> {
     await ref.read(appointmentRepositoryProvider).delete(id);
     final current = state.value ?? [];
     state = AsyncData(current.where((a) => a.id != id).toList());
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tabbed Appointments Notifiers
+// ─────────────────────────────────────────────────────────────────────────────
+
+final upcomingAppointmentsProvider =
+    AsyncNotifierProvider<UpcomingAppointmentsNotifier, List<Appointment>>(
+  UpcomingAppointmentsNotifier.new,
+);
+
+class UpcomingAppointmentsNotifier extends AsyncNotifier<List<Appointment>> {
+  @override
+  Future<List<Appointment>> build() async {
+    final client = Supabase.instance.client;
+    final userId = client.auth.currentUser?.id;
+    if (userId == null) return [];
+    return ref.read(appointmentRepositoryProvider).fetchAppointments(userId, past: false);
+  }
+
+  Future<void> refresh() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final client = Supabase.instance.client;
+      final userId = client.auth.currentUser?.id;
+      if (userId == null) return [];
+      return ref.read(appointmentRepositoryProvider).fetchAppointments(userId, past: false);
+    });
+  }
+}
+
+final pastAppointmentsProvider =
+    AsyncNotifierProvider<PastAppointmentsNotifier, List<Appointment>>(
+  PastAppointmentsNotifier.new,
+);
+
+class PastAppointmentsNotifier extends AsyncNotifier<List<Appointment>> {
+  @override
+  Future<List<Appointment>> build() async {
+    final client = Supabase.instance.client;
+    final userId = client.auth.currentUser?.id;
+    if (userId == null) return [];
+    return ref.read(appointmentRepositoryProvider).fetchAppointments(userId, past: true);
+  }
+
+  Future<void> refresh() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final client = Supabase.instance.client;
+      final userId = client.auth.currentUser?.id;
+      if (userId == null) return [];
+      return ref.read(appointmentRepositoryProvider).fetchAppointments(userId, past: true);
+    });
   }
 }

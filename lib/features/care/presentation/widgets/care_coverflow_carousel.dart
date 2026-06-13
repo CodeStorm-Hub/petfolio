@@ -310,7 +310,7 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
     return Column(
       children: [
         SizedBox(
-          height: 236,
+          height: 242,
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
             onHorizontalDragEnd: (d) {
@@ -450,7 +450,7 @@ class _CoverFlowCard extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 260),
             width: 198,
-            height: 214,
+            height: 220,
             decoration: BoxDecoration(
               color: done
                   ? Color.alphaBlend(color.withAlpha(22), cs.surface)

@@ -21,7 +21,6 @@ import 'core/firebase/fcm_background_handler.dart';
 import 'core/firebase/fcm_service.dart';
 import 'firebase_options.dart';
 import 'core/router.dart';
-import 'features/auth/presentation/controllers/auth_controller.dart';
 import 'core/platform/platform_notifications.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/prefs_schema.dart';
@@ -99,7 +98,7 @@ Future<void> main() async {
     await ensureStripeReady(publishableKey: _stripePublishableKey);
   }
 
-  await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
+  await Supabase.initialize(url: _supabaseUrl, publishableKey: _supabaseAnonKey);
 
   if (kIsWeb) {
     runApp(const ProviderScope(child: PetfolioApp()));
@@ -141,17 +140,6 @@ class PetfolioApp extends ConsumerWidget {
     final themeMode = ref.watch(themeProvider);
 
     FcmService.instance.updateRouter(router);
-    if (!kIsWeb) {
-      ref.listen(authStateProvider, (previous, next) {
-        next.whenData((state) async {
-          if (state.session != null) {
-            await FcmService.instance.syncToken();
-          } else {
-            await FcmService.instance.clearTokenForSignOut();
-          }
-        });
-      });
-    }
 
     return MaterialApp.router(
       title: 'PetFolio',

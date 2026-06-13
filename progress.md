@@ -1,5 +1,59 @@
 # Petfolio — Progress Log
 
+## 2026-06-11 — Vet Hub Screen Revamp ✅
+
+`flutter analyze` (full project) — **No issues found.**
+
+### Implemented
+
+**`lib/features/appointments/presentation/screens/vet_hub_screen.dart`** *(new file)*
+- `VetHubScreen` — `StatefulWidget` entry point; `Scaffold` with `NavigationBar` (4 tabs: Clinics, History, Favorites, Profile) + `IndexedStack` body
+- `_ClinicsGridTab` — reads `clinicListProvider`; renders `CustomScrollView` + `SliverGrid` (2-col, aspect 0.82); handles loading/error/empty states
+- `_ClinicGridCard` — press-animated card; shows hospital icon, name, tagline, city, rating, sky-accent chevron
+- `_SkeletonGrid` — 6-cell skeleton loading state for the grid
+- `_AppointmentsHistoryTab` — `DefaultTabController` wrapping Upcoming / Past `TabBarView`
+- `_AppointmentsList` — reads `upcomingAppointmentsProvider` / `pastAppointmentsProvider`; reuses public `AppointmentCardWidget` with pull-to-refresh
+- `_PlaceholderTab` — centred `PetfolioEmptyState`; used for Tabs 3 (Favorites) and 4 (Profile)
+
+**`lib/features/appointments/appointment_routes.dart`** *(updated)*
+- `/appointments` builder: `VetClinicsScreen` → `VetHubScreen`
+- `/:clinicId` null-fallback: `VetClinicsScreen` → `VetHubScreen`
+- `vet_clinics_screen.dart` import removed; replaced with `vet_hub_screen.dart`
+
+### Routing verification
+- All three `/appointments` push triggers in `hub_home_screen.dart` (Bento tile, Quick Actions, Spotlight) required **no changes** — they already push `/appointments`
+- `VetClinicsScreen` file untouched and intact; no longer the entry point but preserved
+
+### Data contracts unchanged
+- `clinicListProvider`, `clinicDetailProvider`, `clinicServicesProvider` — untouched
+- `upcomingAppointmentsProvider`, `pastAppointmentsProvider`, `appointmentControllerProvider` — untouched
+- All models, repositories, and domain logic — untouched
+
+Phase complete — please run (/remember) to save tokens before proceeding.
+
+---
+
+## 2026-06-09 — Responsive UI/UX Audit: All Steps Complete ✅
+
+`flutter analyze` — **No issues found.**
+`flutter test` — 2 pre-existing failures (unrelated to this audit):
+- `app_shell_widget_test.dart` — test named "on mobile" runs at 800px (wide layout), bottom nav labels not rendered in wide mode; pre-existed before any changes.
+- `plan/synthetic_spring_implementation_contract_test.dart` — planning contract test; pre-existed before any changes.
+
+### Files Modified
+- `lib/core/widgets/app_shell.dart` — removed erroneous `Flexible` in `Row(mainAxisSize:min)→Column(mainAxisSize:min)` chain (unbounded crash); kept `maxLines:1, overflow:ellipsis` on bare Text.
+- `lib/features/marketplace/presentation/screens/marketplace_screen.dart` — `Flexible(fit:loose)` + ellipsis on long Text in bounded Row.
+- `lib/features/social/presentation/screens/post_detail_screen.dart` — `_CommentTile` header: `Flexible(fit:loose)` on `GestureDetector(Text(petName))`.
+- `lib/features/social/presentation/widgets/post_comments_bottom_sheet.dart` — identical fix.
+- `lib/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart` — `_PetRow`: `Flexible(fit:loose)` on `Text(pet.name)`.
+
+### Audited (no changes needed)
+`create_post_screen.dart`, `create_story_screen.dart`, `story_viewer_screen.dart`, `edit_profile_screen.dart`, `onboarding_screen.dart`, `pet_profile_screen.dart`, `breed_identifier_widget.dart`, `auth_widgets.dart`
+
+Phase complete — please run (/remember) to save tokens before proceeding.
+
+---
+
 ## 2026-06-09 — Contextual Navigation Phase 5 (Polish) ✅
 
 `flutter analyze` — **No issues found.**

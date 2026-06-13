@@ -25,6 +25,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../widgets/product_glyph.dart';
 import '../widgets/web_checkout_resume_listener.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
+import '../widgets/address_sheet.dart';
 
 
 
@@ -628,18 +629,23 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      widget.selectedCat == ProductCategory.all
-                          ? 'Trending in your pack'
-                          : widget.selectedCat.label,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: Theme.of(context)
-                            .extension<PetfolioThemeExtension>()!
-                            .ink950,
+                    Flexible(
+                      child: Text(
+                        widget.selectedCat == ProductCategory.all
+                            ? 'Trending in your pack'
+                            : widget.selectedCat.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Theme.of(context)
+                              .extension<PetfolioThemeExtension>()!
+                              .ink950,
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
                       '${filtered.length}+ items',
                       style: TextStyle(
@@ -849,6 +855,10 @@ class _YoullLoveTile extends StatelessWidget {
                         fit: BoxFit.cover,
                         width: 140,
                         height: 110,
+                        placeholder: (_, _) =>
+                            ProductGlyph(glyphType: product.glyphType, size: 52),
+                        errorWidget: (_, _, _) =>
+                            ProductGlyph(glyphType: product.glyphType, size: 52),
                       )
                     : ProductGlyph(glyphType: product.glyphType, size: 52),
               ),
@@ -1386,12 +1396,14 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Your basket', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: ink950)),
-                    Text('${cart.itemCount} item${cart.itemCount == 1 ? '' : 's'} · ships to Brooklyn', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: ink500)),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Your basket', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: ink950)),
+                      Text('${cart.itemCount} item${cart.itemCount == 1 ? '' : 's'} · ships to Brooklyn', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: ink500)),
+                    ],
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close_rounded),
@@ -1599,7 +1611,7 @@ class _CartItemRow extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.product.name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: pt.ink950)),
+                Text(item.product.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: pt.ink950)),
                 Text(item.product.brand, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: pt.ink500)),
                 const SizedBox(height: 2),
                 Text('\$${((item.product.priceCents * item.quantity) / 100).toStringAsFixed(2)}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: pt.ink950)),
@@ -1666,7 +1678,7 @@ class _DeliveryStrip extends ConsumerWidget {
               ),
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () => AddressSheet.show(context),
               child: Text(
                 'Set address',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.tangerine),

@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:petfolio/core/models/pet.dart';
@@ -26,76 +24,13 @@ class CareRecommendationException implements Exception {
 class CareRecommendationService {
   final _uuid = const Uuid();
 
-  static const _apiKey = String.fromEnvironment('NVIDIA_API_KEY', defaultValue: '');
-  static const _url = 'https://integrate.api.nvidia.com/v1/chat/completions';
 
-  static const _guidedSchema = {
-    'type': 'array',
-    'items': {
-      'type': 'object',
-      'required': [
-        'taskType',
-        'title',
-        'frequency',
-        'scheduledTime',
-        'gamificationPoints',
-        'notes'
-      ],
-      'properties': {
-        'taskType': {
-          'type': 'string',
-          'enum': [
-            'feeding',
-            'walk',
-            'grooming',
-            'medication',
-            'vetVisit',
-            'training',
-            'playtime',
-            'dental',
-            'nailTrim',
-            'bath',
-            'other'
-          ]
-        },
-        'title': {'type': 'string'},
-        'frequency': {
-          'type': 'string',
-          'enum': [
-            'daily',
-            'twiceDaily',
-            'weekly',
-            'biweekly',
-            'monthly',
-            'asNeeded',
-            'once',
-          ]
-        },
-        'scheduledTime': {'type': ['string', 'null']},
-        'gamificationPoints': {'type': 'integer', 'minimum': 5, 'maximum': 30},
-        'notes': {'type': 'string'}
-      },
-      'additionalProperties': false
-    },
-    'minItems': 4,
-    'maxItems': 8
-  };
 
   /// Returns the AI-suggested tasks **and** the set of normalised existing
   /// task titles fetched from the DB. Callers use the existing-title set for
   /// duplicate detection against ALL pet tasks (not just today's view).
   Future<({List<CareTask> suggestions, Set<String> existingNormalised})>
       generateRecommendations(Pet pet) async {
-    // Guard before any network calls — avoids wasting Supabase round-trips
-    // on builds with no NVIDIA key. Web path uses Edge Function (no key needed
-    // client-side), but mobile requires the key to be compile-time injected.
-    if (!kIsWeb && _apiKey.isEmpty) {
-      throw const CareRecommendationException(
-        'AI routine suggestions require an NVIDIA API key. '
-        'Set NVIDIA_API_KEY in your .env file and rebuild.',
-        isConfigError: true,
-      );
-    }
 
     final supabase = Supabase.instance.client;
 
@@ -150,55 +85,19 @@ class CareRecommendationService {
     );
 
     try {
-      final Map<String, dynamic> body;
-
-      if (kIsWeb) {
-        // On web, proxy through the Supabase Edge Function to avoid CORS.
-        final fnResp = await Supabase.instance.client.functions
-            .invoke('recommend-care-tasks', body: {'prompt': prompt})
-            .timeout(const Duration(seconds: 60));
-        if (fnResp.status != 200) {
-          final detail = fnResp.data?.toString() ?? '';
-          throw CareRecommendationException(
-            'The suggestion service is unavailable right now. Please try again later.',
-            cause: 'Edge function ${fnResp.status}: ${detail.length > 300 ? detail.substring(0, 300) : detail}',
-          );
-        }
-        body = (fnResp.data is Map)
-            ? Map<String, dynamic>.from(fnResp.data as Map)
-            : jsonDecode(jsonEncode(fnResp.data)) as Map<String, dynamic>;
-      } else {
-        final response = await http.post(
-          Uri.parse(_url),
-          headers: {
-            'Authorization': 'Bearer $_apiKey',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: jsonEncode({
-            'model': 'google/gemma-3n-e4b-it',
-            'messages': [
-              {'role': 'user', 'content': prompt}
-            ],
-            'max_tokens': 1500,
-            'temperature': 0.25,
-            'top_p': 0.75,
-            'stream': false,
-            'nvext': {'guided_json': _guidedSchema},
-          }),
-        ).timeout(const Duration(seconds: 45));
-
-        if (response.statusCode != 200) {
-          final detail = response.body.length > 300
-              ? response.body.substring(0, 300)
-              : response.body;
-          throw CareRecommendationException(
-            'The suggestion service is unavailable right now. Please try again later.',
-            cause: 'HTTP ${response.statusCode}: $detail',
-          );
-        }
-        body = jsonDecode(response.body) as Map<String, dynamic>;
+      final fnResp = await Supabase.instance.client.functions
+          .invoke('recommend-care-tasks', body: {'prompt': prompt})
+          .timeout(const Duration(seconds: 60));
+      if (fnResp.status != 200) {
+        final detail = fnResp.data?.toString() ?? '';
+        throw CareRecommendationException(
+          'The suggestion service is unavailable right now. Please try again later.',
+          cause: 'Edge function ${fnResp.status}: ${detail.length > 300 ? detail.substring(0, 300) : detail}',
+        );
       }
+      final Map<String, dynamic> body = (fnResp.data is Map)
+          ? Map<String, dynamic>.from(fnResp.data as Map)
+          : jsonDecode(jsonEncode(fnResp.data)) as Map<String, dynamic>;
 
       final content = body['choices'][0]['message']['content'] as String;
 

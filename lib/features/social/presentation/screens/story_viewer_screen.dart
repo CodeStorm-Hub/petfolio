@@ -232,15 +232,18 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
   Widget build(BuildContext context) {
     final storiesAsync = ref.watch(storiesProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: storiesAsync.when(
-        loading: () => const Center(
+    return storiesAsync.when(
+      loading: () => const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
           child: CircularProgressIndicator.adaptive(
             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
           ),
         ),
-        error: (err, _) => Center(
+      ),
+      error: (err, _) => Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -258,22 +261,63 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
             ],
           ),
         ),
-        data: (stories) {
-          if (stories.isEmpty) {
-            WidgetsBinding.instance.addPostFrameCallback((_) => context.pop());
-            return const SizedBox.shrink();
-          }
+      ),
+      data: (stories) {
+        if (stories.isEmpty) {
+          return Scaffold(
+            body: SafeArea(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('🐾', style: TextStyle(fontSize: 56)),
+                      const SizedBox(height: 20),
+                      Text(
+                        'No stories yet',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Be the first to share a moment with the pack!',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 28),
+                      FilledButton.icon(
+                        onPressed: () => context.push('/social/create-story'),
+                        icon: const Icon(Icons.add_a_photo_outlined, size: 18),
+                        label: const Text('Share a Story'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
 
-          _setupStacks(stories);
+        _setupStacks(stories);
 
           if (_petStacks.isEmpty) {
-            return const SizedBox.shrink();
+            return const Scaffold(
+              backgroundColor: Colors.black,
+              body: Center(
+                child: CircularProgressIndicator.adaptive(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+            );
           }
 
           final activeStack = _petStacks[_currentPetIndex];
           final activeStory = activeStack.stories[_currentStoryIndex];
 
-          return SafeArea(
+          return Scaffold(
+            backgroundColor: Colors.black,
+            body: SafeArea(
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -565,10 +609,10 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                 ),
               ],
             ),
-          );
+          ),
+        );
         },
-      ),
-    );
+      );
   }
 }
 

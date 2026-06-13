@@ -18,6 +18,7 @@ import 'presentation/screens/vendor/seller_dashboard_screen.dart';
 import 'presentation/screens/vendor/shop_setup_screen.dart';
 import 'presentation/screens/vendor/stripe_onboarding_screen.dart';
 import 'presentation/screens/vendor/vendor_order_detail_screen.dart';
+import 'presentation/screens/vendor/vendor_earnings_screen.dart';
 import 'presentation/screens/vendor/vendor_order_queue_screen.dart';
 import 'presentation/screens/vendor/vendor_product_list_screen.dart';
 
@@ -137,5 +138,10 @@ List<RouteBase> marketplaceRoutes(GlobalKey<NavigatorState> rootKey) => [
       orderId: state.pathParameters['id']!,
       order: state.extra as MarketplaceOrder?,
     ),
+  ),
+  GoRoute(
+    parentNavigatorKey: rootKey,
+    path: '/seller/earnings',
+    builder: (context, state) => const VendorEarningsScreen(),
   ),
 ];

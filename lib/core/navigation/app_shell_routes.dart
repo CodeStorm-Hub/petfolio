@@ -8,9 +8,7 @@ import '../../features/care/presentation/screens/care_screen.dart';
 import '../../features/care/presentation/screens/medical_vault_screen.dart';
 import '../../features/care/presentation/screens/nutrition_screen.dart';
 import '../../features/care/presentation/screens/walk_tracking_screen.dart';
-import '../../features/communities/data/models/community.dart';
 import '../../features/communities/presentation/screens/communities_screen.dart';
-import '../../features/communities/presentation/screens/community_detail_screen.dart';
 import '../../features/marketplace/presentation/screens/marketplace_screen.dart';
 import '../../features/matching/presentation/screens/match_liked_screen.dart';
 import '../../features/matching/presentation/screens/matches_inbox_screen.dart';
@@ -90,21 +88,6 @@ ShellRoute appShellRoute() => ShellRoute(
           path: '/social/communities',
           pageBuilder: (context, state) =>
               const NoTransitionPage(child: CommunitiesScreen()),
-          routes: [
-            GoRoute(
-              path: ':communityId',
-              pageBuilder: (context, state) {
-                final extra = state.extra;
-                return NoTransitionPage(
-                  child: extra is Community
-                      ? CommunityDetailScreen(community: extra)
-                      : const Scaffold(
-                          body: Center(child: Text('Community not found')),
-                        ),
-                );
-              },
-            ),
-          ],
         ),
         GoRoute(
           path: '/social/profile/me',

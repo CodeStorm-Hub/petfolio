@@ -824,14 +824,19 @@ class _CommentTile extends ConsumerWidget {
                   Row(
                     children: [
                       // Tappable pet name → pet social profile
-                      GestureDetector(
-                        onTap: () =>
-                            context.push('/social/profile/${comment.petId}'),
-                        child: Text(
-                          comment.petName,
-                          style: tt.labelMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: Theme.of(context).colorScheme.onSurface,
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: GestureDetector(
+                          onTap: () =>
+                              context.push('/social/profile/${comment.petId}'),
+                          child: Text(
+                            comment.petName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: tt.labelMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
                         ),
                       ),

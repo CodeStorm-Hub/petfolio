@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/models/health_log.dart';
-import '../../data/repositories/health_repository.dart';
+import '../../data/models/weight_log.dart';
+import '../../data/repositories/vitals_repository.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // State
@@ -10,9 +10,9 @@ import '../../data/repositories/health_repository.dart';
 class NutritionState {
   const NutritionState({required this.history});
 
-  final AsyncValue<List<HealthLog>> history;
+  final AsyncValue<List<WeightLog>> history;
 
-  NutritionState copyWith({AsyncValue<List<HealthLog>>? history}) =>
+  NutritionState copyWith({AsyncValue<List<WeightLog>>? history}) =>
       NutritionState(history: history ?? this.history);
 }
 
@@ -39,11 +39,14 @@ class NutritionNotifier extends Notifier<NutritionState> {
     return const NutritionState(history: AsyncLoading());
   }
 
-  HealthRepository get _repo => ref.read(healthRepositoryProvider);
+  VitalsRepository get _repo => ref.read(vitalsRepositoryProvider);
 
   Future<void> _load(String petId) async {
     state = state.copyWith(
-      history: await AsyncValue.guard(() => _repo.fetchWeightHistory(petId)),
+      history: await AsyncValue.guard(() async {
+        final logs = await _repo.fetchWeightLogs(petId, limit: 90);
+        return logs.reversed.toList(); // ascending for chart
+      }),
     );
   }
 
@@ -54,21 +57,12 @@ class NutritionNotifier extends Notifier<NutritionState> {
     String? notes,
     DateTime? date,
   }) async {
-    final now = date ?? DateTime.now();
-    final trimmedNotes = notes?.trim();
-    final log = HealthLog(
-      id: '',
+    await _repo.addWeightLog(
       petId: arg,
-      recordedBy: '',
-      logType: HealthLogType.weight,
-      title: 'Weight log',
-      description: (trimmedNotes?.isEmpty ?? true) ? null : trimmedNotes,
       weightKg: kg,
-      occurredAt: now,
-      createdAt: now,
-      updatedAt: now,
+      recordedAt: date ?? DateTime.now(),
+      notes: notes?.trim().isEmpty == true ? null : notes?.trim(),
     );
-    await _repo.createLog(log);
     await _load(arg);
   }
 }
