@@ -561,6 +561,8 @@ abstract final class AppTheme {
           fontSize: 14, fontWeight: FontWeight.w500,
           color: isDark ? AppColors.ink950D : AppColors.surface0,
         ),
+        // Brand decision: 12dp radius (radiusMd) instead of M3's 4dp default.
+        // This matches the app's rounded card aesthetic. Intentional deviation.
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radiusMd),
         ),

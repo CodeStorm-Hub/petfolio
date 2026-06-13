@@ -129,17 +129,11 @@ class _SocialViewState extends ConsumerState<_SocialView> {
       }
     }
 
-    final headerHeight = MediaQuery.paddingOf(context).top + 92.0;
-
-    Widget content = Stack(
-      children: [
-        // Feed scrolls from y=0; top padding reserves space below the wave header.
-        feedAsync.when(
-          skipLoadingOnReload: true,
-          loading: () => CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(child: SizedBox(height: headerHeight)),
+    Widget content = feedAsync.when(
+      skipLoadingOnReload: true,
+      loading: () => CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 sliver: SliverList(
@@ -157,9 +151,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
             ],
           ),
           error: (_, _) => Center(
-            child: Padding(
-              padding: EdgeInsets.only(top: headerHeight),
-              child: Column(
+            child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
@@ -172,7 +164,6 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                     label: const Text('Retry'),
                   ),
                 ],
-              ),
             ),
           ),
           data: (feedState) => RefreshIndicator.adaptive(
@@ -184,10 +175,6 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                  // Push content below the wave header — no white gap.
-                  SliverToBoxAdapter(
-                    child: SizedBox(height: headerHeight),
-                  ),
                   const SliverToBoxAdapter(
                     child: RepaintBoundary(
                       child: _StoriesRow(),
@@ -216,7 +203,6 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                   else
                     _SocialPostListSliver(
                       petId: widget.petId,
-                      headerHeight: headerHeight,
                       onLike: notifier.toggleLike,
                     ),
                   _LoadMoreSliver(petId: widget.petId),
@@ -235,22 +221,6 @@ class _SocialViewState extends ConsumerState<_SocialView> {
               ),
             ),
           ),
-        ),
-
-        // Wave header floats on top — waveColor: transparent so the WavePainter
-        // draws nothing below the curve; content scrolls through underneath.
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: WaveHeader(
-            color: headerColor,
-            waveColor: Colors.transparent,
-            height: MediaQuery.paddingOf(context).top + 100.0,
-            child: const SizedBox.shrink(),
-          ),
-        ),
-      ],
     );
 
     if (isWide) {
@@ -263,9 +233,21 @@ class _SocialViewState extends ConsumerState<_SocialView> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: pt.surface1,
-      body: content,
+    return PetfolioScaffold.withBody(
+      accentColor: headerColor,
+      leading: PfModuleLeading(label: 'PAWSFEED', onTap: () => context.go('/home')),
+      actions: [
+        PfAppBarIconBtn(
+          icon: Icons.groups_rounded,
+          onTap: () => context.go('/social/communities'),
+          tooltip: 'Communities',
+        ),
+        PfAppBarIconBtn(
+          icon: Icons.send_rounded,
+          onTap: () => context.go('/matching/inbox'),
+          tooltip: 'Messages',
+        ),
+      ],
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           ref.read(createPostControllerProvider.notifier).setIsStory(false);
@@ -280,29 +262,34 @@ class _SocialViewState extends ConsumerState<_SocialView> {
           style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white),
         ),
       ),
+      body: content,
     );
   }
 }
 
+
+
+
+/// Compact circular icon button used in post-card headers.
+/// Uses [IconButton] to satisfy the M3 48×48 dp minimum touch-target requirement.
 class _IconBtn extends StatelessWidget {
   const _IconBtn({required this.icon, required this.onTap});
   final IconData icon;
   final VoidCallback onTap;
-  
+
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final defaultBg = pt.surface2;
-    final defaultColor = pt.ink950;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(color: defaultBg, shape: BoxShape.circle),
-        alignment: Alignment.center,
-        child: Icon(icon, size: 20, color: defaultColor),
+    return IconButton(
+      icon: Icon(icon, size: 20, color: pt.ink950),
+      onPressed: onTap,
+      // Explicit 48dp constraints satisfy M3 minimum touch-target requirement.
+      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+      padding: EdgeInsets.zero,
+      style: IconButton.styleFrom(
+        backgroundColor: pt.surface2,
+        shape: const CircleBorder(),
+        tapTargetSize: MaterialTapTargetSize.padded,
       ),
     );
   }
@@ -313,12 +300,10 @@ class _IconBtn extends StatelessWidget {
 class _SocialPostListSliver extends ConsumerWidget {
   const _SocialPostListSliver({
     required this.petId,
-    required this.headerHeight,
     required this.onLike,
   });
 
   final String petId;
-  final double headerHeight;
   final Future<void> Function(String postId) onLike;
 
   @override
@@ -657,11 +642,15 @@ class _StoryItemState extends State<_StoryItem>
   void didUpdateWidget(covariant _StoryItem oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.animateRing && !widget.isAdd) {
+      // Lazily create or resume — does not double-create because of ??= guard.
       _ringCtrl ??= AnimationController(
         vsync: this,
         duration: const Duration(seconds: 3),
-      )..repeat();
+      );
+      if (!_ringCtrl!.isAnimating) _ringCtrl!.repeat();
     } else {
+      // Stop before dispose so any in-flight tick resolves cleanly.
+      _ringCtrl?.stop();
       _ringCtrl?.dispose();
       _ringCtrl = null;
     }
@@ -669,6 +658,8 @@ class _StoryItemState extends State<_StoryItem>
 
   @override
   void dispose() {
+    // Guard: null-safe dispose; controller may already be null if animateRing
+    // transitioned to false in a prior didUpdateWidget call.
     _ringCtrl?.dispose();
     super.dispose();
   }

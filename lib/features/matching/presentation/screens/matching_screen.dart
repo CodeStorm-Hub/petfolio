@@ -28,6 +28,7 @@ import '../controllers/discovery_controller.dart';
 import '../controllers/mutual_match_realtime_provider.dart';
 import '../matching_navigation.dart';
 import '../widgets/match_celebration_overlay.dart';
+import '../widgets/match_preferences_sheet.dart';
 
 
 
@@ -115,7 +116,17 @@ class MatchingScreen extends ConsumerWidget {
               ),
             ],
           ),
-          data: (_) => const TailWagLoader(),
+          // Pets loaded but none selected: prompt user to add a pet.
+          data: (pets) => pets.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: PetfolioEmptyState(
+                    icon: Icons.pets_rounded,
+                    title: 'Add a pet to find matches',
+                    subtitle: 'Create a pet profile to discover playmates, companions, and nearby friends.',
+                  ),
+                )
+              : const TailWagLoader(),
         ),
       ),
     );
@@ -328,24 +339,6 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
 
     Widget mainContent = Column(
       children: [
-        SizedBox(
-          height: MediaQuery.paddingOf(context).top + 92.0,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: WaveHeader(
-                  color: headerColor,
-                  height: MediaQuery.paddingOf(context).top + 100.0,
-                  child: const SizedBox.shrink(),
-                ),
-              ),
-            ],
-          ),
-        ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
@@ -383,8 +376,21 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
       );
     }
 
-    return Scaffold(
-      backgroundColor: pt.surface1,
+    return PetfolioScaffold.withBody(
+      accentColor: headerColor,
+      leading: PfModuleLeading(label: 'MATCH', onTap: () {}),
+      actions: [
+        PfAppBarIconBtn(
+          icon: Icons.chat_bubble_outline_rounded,
+          onTap: () => openMatchesInbox(context),
+          tooltip: 'Matches',
+        ),
+        PfAppBarIconBtn(
+          icon: Icons.tune_rounded,
+          onTap: () => MatchPreferencesSheet.show(context),
+          tooltip: 'Preferences',
+        ),
+      ],
       body: Stack(
         children: [
           mainContent,
@@ -787,7 +793,8 @@ class _SwipeCardState extends State<_SwipeCard> {
                     opacity: matchOpacity,
                     child: _SwipeLabel(
                       label: 'MATCH',
-                      color: AppColors.poppy,
+                      // Use Match pillar color (lilac), not Social/danger poppy.
+                      color: AppColors.lilac,
                     ),
                   ),
                 ),

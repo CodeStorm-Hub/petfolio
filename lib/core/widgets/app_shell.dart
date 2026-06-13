@@ -11,6 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:petfolio/core/navigation/shell_destinations.dart';
 import 'package:petfolio/core/navigation/shell_module_provider.dart';
 import 'package:petfolio/features/social/presentation/controllers/notification_controller.dart';
+import 'package:petfolio/core/providers/shell_scroll_provider.dart';
 import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/pet_avatar.dart';
 import 'package:petfolio/core/widgets/app_tutorial_overlay.dart';
@@ -19,9 +20,14 @@ import 'package:petfolio/features/marketplace/presentation/screens/marketplace_s
 import 'package:petfolio/features/matching/presentation/matching_navigation.dart';
 import 'package:petfolio/features/matching/presentation/widgets/match_preferences_sheet.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
-import 'package:petfolio/core/providers/shell_scroll_provider.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_streak_stream_provider.dart';
 import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
+
+// ── Design constants ─────────────────────────────────────────────────────────
+
+/// Semi-transparent white overlay alpha used on colored app-bar backgrounds
+/// (streak pill, icon button glass tint). Aligns with [PfAppBarIconBtn] alpha.
+const _kGlassOverlayAlpha = 0x38; // ≈ 22% opacity
 
 // ── App shell ─────────────────────────────────────────────────────────────────
 
@@ -113,6 +119,8 @@ class _AppShellState extends ConsumerState<AppShell> {
       ),
     );
 
+    final showHeader = ref.watch(shellHeaderVisibleProvider);
+
     if (isWide) {
       return _wrapWithTutorial(
         Scaffold(
@@ -131,10 +139,11 @@ class _AppShellState extends ConsumerState<AppShell> {
                 child: Stack(
                   children: [
                     Positioned.fill(child: widget.child),
-                    Positioned(
-                      top: 0, left: 0, right: 0,
-                      child: AppShellHeader(module: module, subIndex: subIndex),
-                    ),
+                    if (showHeader)
+                      Positioned(
+                        top: 0, left: 0, right: 0,
+                        child: AppShellHeader(module: module, subIndex: subIndex),
+                      ),
                   ],
                 ),
               ),
@@ -151,10 +160,11 @@ class _AppShellState extends ConsumerState<AppShell> {
           body: Stack(
             children: [
               Positioned.fill(child: widget.child),
-              Positioned(
-                top: 0, left: 0, right: 0,
-                child: AppShellHeader(module: module, subIndex: subIndex),
-              ),
+              if (showHeader)
+                Positioned(
+                  top: 0, left: 0, right: 0,
+                  child: AppShellHeader(module: module, subIndex: subIndex),
+                ),
             ],
           ),
           bottomNavigationBar: SafeArea(
@@ -174,10 +184,11 @@ class _AppShellState extends ConsumerState<AppShell> {
         body: Stack(
           children: [
             Positioned.fill(child: widget.child),
-            Positioned(
-              top: 0, left: 0, right: 0,
-              child: AppShellHeader(module: module, subIndex: subIndex),
-            ),
+            if (showHeader)
+              Positioned(
+                top: 0, left: 0, right: 0,
+                child: AppShellHeader(module: module, subIndex: subIndex),
+              ),
             Positioned(
               left: 16,
               right: 16,
@@ -224,7 +235,7 @@ class AppShellHeader extends ConsumerWidget {
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0x38FFFFFF),
+                  color: Color.fromARGB(_kGlassOverlayAlpha, 255, 255, 255),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Row(
@@ -315,46 +326,38 @@ class AppShellHeader extends ConsumerWidget {
       case ShellModule.marketplace:
         return Consumer(builder: (context, ref, _) {
           final cart = ref.watch(cartProvider);
-          return GestureDetector(
+          return Material(
             key: const ValueKey<String>('market_action_cart'),
-            onTap: () => showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              useRootNavigator: true,
-              backgroundColor: Colors.transparent,
-              constraints: const BoxConstraints(maxWidth: 560),
-              builder: (_) => const CartDrawer(),
-            ),
-            child: Container(
-              width: 44, height: 44,
-              decoration: const BoxDecoration(
-                color: AppColors.tangerine,
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: AppColors.tangerine700, offset: Offset(0, 4))],
+            color: AppColors.tangerine,
+            shape: const CircleBorder(),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                useRootNavigator: true,
+                backgroundColor: Colors.transparent,
+                constraints: const BoxConstraints(maxWidth: 560),
+                builder: (_) => const CartDrawer(),
               ),
-              alignment: Alignment.center,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 20),
-                  if (cart.itemCount > 0)
-                    Positioned(
-                      top: -6, right: -8,
-                      child: Container(
-                        width: 20, height: 20,
-                        decoration: BoxDecoration(
-                          color: AppColors.poppy,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.cream, width: 2),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          cart.itemCount.toString(),
-                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900),
+              child: SizedBox(
+                width: 48, height: 48,
+                child: Stack(
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.none,
+                  children: [
+                    const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 20),
+                    if (cart.itemCount > 0)
+                      Positioned(
+                        top: 6, right: 6,
+                        child: Badge(
+                          label: Text(
+                            cart.itemCount > 99 ? '99+' : '${cart.itemCount}',
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
@@ -514,22 +517,18 @@ class _HeaderIconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final btn = GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36, height: 36,
-        decoration: const BoxDecoration(
-          color: Color(0x38FFFFFF),
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: Icon(icon, color: Colors.white, size: 18),
+    return IconButton(
+      icon: Icon(icon, color: Colors.white, size: 20),
+      onPressed: onTap,
+      tooltip: tooltip,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+      style: IconButton.styleFrom(
+        backgroundColor: Colors.white.withAlpha(56),
+        shape: const CircleBorder(),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
     );
-    if (tooltip != null) {
-      return Tooltip(message: tooltip!, child: btn);
-    }
-    return btn;
   }
 }
 

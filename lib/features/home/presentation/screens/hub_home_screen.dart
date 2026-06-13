@@ -13,6 +13,7 @@ import 'package:petfolio/features/care/presentation/controllers/care_streak_stre
 import 'package:petfolio/features/care/presentation/controllers/pet_awards_provider.dart';
 import 'package:petfolio/features/pet_profile/data/models/pet.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 
 import 'package:petfolio/core/providers/shell_scroll_provider.dart';
 
@@ -71,7 +72,6 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
   Widget build(BuildContext context) {
     final activePet = ref.watch(activePetControllerProvider);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final isWide = MediaQuery.sizeOf(context).width >= 600;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (activePet == null) {
@@ -97,152 +97,224 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
     final doneTasks = todayTasks.where((t) => t.isCompleted).length;
     final totalTasks = todayTasks.length;
 
-    Widget body = CustomScrollView(
-      controller: _scrollCtrl,
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
-      slivers: [
-        // ── Wave hero — greeting + floating pet card ─────────────────────
-        SliverToBoxAdapter(
-          child: _WaveHeroSection(
-            pet: activePet,
-            streak: streak,
-            doneTasks: doneTasks,
-            totalTasks: totalTasks,
-            isDark: isDark,
-            pt: pt,
-          ),
+    final waveColor = activePet.speciesEnum.resolvedAccent(isDark);
+
+    return FadeTransition(
+      opacity: _fadeAnim,
+      child: PetfolioScaffold(
+        accentColor: waveColor,
+        // expandedHeight excludes the device status bar — SliverAppBar adds it.
+        // Breakdown: toolbar (76) + greeting area (140) + pet card overlap (38) + shadow clearance (24).
+        expandedHeight: kPetfolioToolbarHeight + 140.0 + 38.0 + 24.0,
+        heroContent: _HeroFlexContent(
+          pet: activePet,
+          streak: streak,
+          doneTasks: doneTasks,
+          totalTasks: totalTasks,
+          isDark: isDark,
+          pt: pt,
         ),
+        leading: _HomeLeading(pet: activePet),
+        actions: [
+          if (streak > 0) _StreakBtn(streak: streak, onTap: () => context.go('/care')),
+          PfAppBarIconBtn(
+            icon: Icons.notifications_rounded,
+            onTap: () => context.go('/notifications'),
+            tooltip: 'Alerts',
+          ),
+          PfAppBarIconBtn(
+            icon: Icons.manage_accounts_rounded,
+            onTap: () => context.go('/me'),
+            tooltip: 'Account',
+          ),
+        ],
+        scrollController: _scrollCtrl,
+        slivers: [
 
-        const SliverToBoxAdapter(child: SizedBox(height: 4)),
-
-        // ── Services section ─────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _SectionHeader(
-            pt: pt,
-            title: 'Services',
-            trailing: GestureDetector(
-              onTap: () => AllFeaturesSheet.show(context),
-              child: Text(
-                'All ›',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tangerine,
+          // ── Services ──────────────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: _SectionHeader(
+              pt: pt,
+              title: 'Services',
+              trailing: TextButton(
+                onPressed: () => AllFeaturesSheet.show(context),
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(48, 48),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+                child: Text(
+                  'All ›',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tangerine,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
 
-        // ── Bento grid ───────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _BentoGrid(
-            doneTasks: doneTasks,
-            totalTasks: totalTasks,
-            streak: streak,
-            isDark: isDark,
-            pt: pt,
+          SliverToBoxAdapter(
+            child: _BentoGrid(
+              doneTasks: doneTasks,
+              totalTasks: totalTasks,
+              streak: streak,
+              isDark: isDark,
+              pt: pt,
+            ),
           ),
-        ),
 
-        const SliverToBoxAdapter(child: SizedBox(height: 20)),
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
-        // ── Quick Actions ────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _SectionHeader(pt: pt, title: 'Quick Actions'),
-        ),
-        SliverToBoxAdapter(
-          child: _QuickActionsRow(pet: activePet),
-        ),
+          // ── Quick Actions ─────────────────────────────────────────────
+          SliverToBoxAdapter(child: _SectionHeader(pt: pt, title: 'Quick Actions')),
+          SliverToBoxAdapter(child: _QuickActionsRow(pet: activePet)),
 
-        const SliverToBoxAdapter(child: SizedBox(height: 20)),
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
-        // ── Pet Spotlight ────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _SectionHeader(
-            pt: pt,
-            title: 'Pet Spotlight',
-            trailing: GestureDetector(
-              onTap: () => context.go('/social'),
-              child: Text(
-                'See All ›',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tangerine,
+          // ── Pet Spotlight ─────────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: _SectionHeader(
+              pt: pt,
+              title: 'Pet Spotlight',
+              trailing: TextButton(
+                onPressed: () => context.go('/social'),
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(48, 48),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+                child: Text(
+                  'See All ›',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tangerine,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: _SpotlightCarousel(isDark: isDark, pt: pt),
-        ),
+          SliverToBoxAdapter(child: _SpotlightCarousel(isDark: isDark, pt: pt)),
 
-        const SliverToBoxAdapter(child: SizedBox(height: 20)),
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
-        // ── Exclusive Deals ──────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _SectionHeader(
-            pt: pt,
-            title: 'Exclusive Deals',
-            trailing: GestureDetector(
+          // ── Exclusive Deals ───────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: _SectionHeader(
+              pt: pt,
+              title: 'Exclusive Deals',
+              trailing: TextButton(
+                onPressed: () => context.go('/marketplace'),
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(48, 48),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+                child: Text(
+                  'See All ›',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tangerine,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: _DealsSection(
+              chips: _dealChips,
+              selectedIndex: _selectedDealChip,
+              onChipTap: (i) => setState(() => _selectedDealChip = i),
+              isDark: isDark,
+              pt: pt,
               onTap: () => context.go('/marketplace'),
-              child: Text(
-                'See All ›',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tangerine,
-                ),
-              ),
             ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: _DealsSection(
-            chips: _dealChips,
-            selectedIndex: _selectedDealChip,
-            onChipTap: (i) => setState(() => _selectedDealChip = i),
-            isDark: isDark,
-            pt: pt,
-            onTap: () => context.go('/marketplace'),
-          ),
-        ),
-
-        // ── Bottom nav clearance ─────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: SizedBox(height: 100 + MediaQuery.paddingOf(context).bottom),
-        ),
-      ],
-    );
-
-    return Scaffold(
-      backgroundColor: pt.surface1,
-      body: FadeTransition(
-        opacity: _fadeAnim,
-        child: isWide
-            ? Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 640),
-                  child: body,
-                ),
-              )
-            : body,
+        ],
       ),
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Wave Hero Section — species-colored wave + greeting + floating pet card
+// _HomeLeading — pet avatar pill shown in the SliverAppBar toolbar
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _WaveHeroSection extends StatelessWidget {
-  const _WaveHeroSection({
+class _HomeLeading extends StatelessWidget {
+  const _HomeLeading({required this.pet});
+  final Pet pet;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => PetSwitcherSheet.show(context),
+      borderRadius: BorderRadius.circular(24),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            PetAvatar(
+              imageUrl: pet.avatarUrl,
+              species: pet.speciesEnum,
+              size: PetAvatarSize.sm,
+              showRing: true,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'HOME',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          pet.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// _HeroFlexContent — FlexibleSpaceBar background for the hub home SliverAppBar
+// Fills the full expanded area: wave background + emoji watermark + greeting
+// text + floating pet hero card at the bottom edge.
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _HeroFlexContent extends StatelessWidget {
+  const _HeroFlexContent({
     required this.pet,
     required this.streak,
     required this.doneTasks,
@@ -281,89 +353,97 @@ class _WaveHeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // FlexibleSpaceBar.background renders from the very top of the SliverAppBar,
+    // which includes the device status bar. Use topPad to offset content.
     final topPad = MediaQuery.paddingOf(context).top;
     final waveColor = pet.speciesEnum.resolvedAccent(isDark);
-    // pet emoji watermark in top-right of wave
     final speciesEmoji = pet.speciesEnum.emoji;
 
     const cardH = 84.0;
-    const cardOverlap = 38.0; // how much card bleeds below wave
-    final waveH = topPad + 76.0 + 140.0; // header clearance + greeting area
+    const cardOverlap = 38.0;
+    // Wave covers: status bar + toolbar + greeting area (excludes card overlap).
+    final waveH = topPad + kPetfolioToolbarHeight + 140.0;
 
-    return SizedBox(
-      height: waveH + cardOverlap,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // ── Species-colored wave background ────────────────────────────
-          WaveHeader(
-            color: waveColor,
-            height: waveH,
-            child: Stack(
-              children: [
-                // Watermark emoji
-                Positioned(
-                  right: 16,
-                  top: topPad + 76.0 + 4,
-                  child: Opacity(
-                    opacity: 0.18,
-                    child: Text(
-                      speciesEmoji,
-                      style: const TextStyle(fontSize: 96),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // ── Species-colored wave background ──────────────────────────────
+        WaveHeader(
+          color: waveColor,
+          height: waveH,
+          child: Stack(
+            children: [
+              // Species mascot — decorative illustration on the wave BG
+              Positioned(
+                right: 12,
+                top: topPad + kPetfolioToolbarHeight - 6,
+                child: Opacity(
+                  opacity: 0.85,
+                  child: Text(speciesEmoji, style: const TextStyle(fontSize: 104)),
+                ),
+              ),
+              // Greeting text — starts below the toolbar row
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(
+                  20, topPad + kPetfolioToolbarHeight + 14, 120, 50,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _greeting(),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withAlpha(210),
+                        letterSpacing: -0.1,
+                      ),
                     ),
-                  ),
-                ),
-                // Greeting content
-                Padding(
-                  padding: EdgeInsets.fromLTRB(20, topPad + 76.0 + 14, 120, 50),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _greeting(),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white.withAlpha(210),
-                          letterSpacing: -0.1,
-                        ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _moodLine(),
+                      style: GoogleFonts.sora(
+                        fontSize: 19,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        fontStyle: FontStyle.italic,
+                        height: 1.2,
+                        letterSpacing: -0.3,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _moodLine(),
-                        style: GoogleFonts.sora(
-                          fontSize: 19,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          fontStyle: FontStyle.italic,
-                          height: 1.2,
-                          letterSpacing: -0.3,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          // ── Floating pet card — straddles the wave boundary ────────────
-          Positioned(
-            top: waveH - cardH + cardOverlap,
-            left: 16,
-            right: 16,
-            child: _PetHeroCard(
-              pet: pet,
-              streak: streak,
-              doneTasks: doneTasks,
-              totalTasks: totalTasks,
-              isDark: isDark,
-              pt: pt,
-              accentColor: waveColor,
-            ),
+        ),
+        // ── Surface fill — covers the card-overlap gap below the wave ────
+        // The SliverAppBar backgroundColor (accent/red) bleeds through on the
+        // side gutters of the hero card without this fill.
+        Positioned(
+          top: waveH - 1,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: ColoredBox(color: pt.surface1),
+        ),
+        // ── Floating pet card — straddles the wave / body boundary ───────
+        Positioned(
+          top: waveH - cardH + cardOverlap,
+          left: 16,
+          right: 16,
+          child: _PetHeroCard(
+            pet: pet,
+            streak: streak,
+            doneTasks: doneTasks,
+            totalTasks: totalTasks,
+            isDark: isDark,
+            pt: pt,
+            accentColor: waveColor,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -467,34 +547,8 @@ class _PetHeroCard extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              // Streak pill (primary) or task progress (fallback)
-              if (streak > 0)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.sunnySoftD : AppColors.sunnySoft,
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: AppColors.sunny.withAlpha(isDark ? 80 : 55),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text('🔥', style: TextStyle(fontSize: 12)),
-                      const SizedBox(width: 3),
-                      Text(
-                        '$streak',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.sunny700,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else if (totalTasks > 0)
+              // Task progress pill — streak shown in AppBar, avoid duplication
+              if (totalTasks > 0)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
@@ -555,6 +609,7 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Row(
@@ -562,8 +617,8 @@ class _SectionHeader extends StatelessWidget {
         children: [
           Text(
             title.toUpperCase(),
-            style: TextStyle(
-              fontSize: 12,
+            // Use M3 labelSmall role for section headers, preserving visual weight.
+            style: tt.labelSmall?.copyWith(
               fontWeight: FontWeight.w800,
               color: pt.ink500,
               letterSpacing: 0.8,
@@ -639,102 +694,110 @@ class _BentoGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const gap = 12.0;
-    const rowH = 148.0;
-    const careH = rowH * 2 + gap;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            height: careH,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: _CareTile(
-                    doneTasks: doneTasks,
-                    totalTasks: totalTasks,
-                    streak: streak,
-                    isDark: isDark,
-                    pt: pt,
-                    onTap: () => context.go('/care'),
-                  ),
-                ),
-                const SizedBox(width: gap),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: _BentoTile(
-                          label: 'PawsFeed',
-                          sub: 'Social & stories',
-                          emoji: '🐾',
-                          accent: AppColors.poppy,
-                          isDark: isDark,
-                          pt: pt,
-                          onTap: () => context.go('/social'),
-                        ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Derive row height from available content width so the grid scales
+        // gracefully on small phones (SE) and wide tablets. Clamped to prevent
+        // extreme values.
+        final rowH = (constraints.maxWidth * 0.40).clamp(130.0, 180.0);
+        final careH = rowH * 2 + gap;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: careH,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: _CareTile(
+                        doneTasks: doneTasks,
+                        totalTasks: totalTasks,
+                        streak: streak,
+                        isDark: isDark,
+                        pt: pt,
+                        onTap: () => context.go('/care'),
                       ),
-                      const SizedBox(height: gap),
-                      Expanded(
-                        child: _BentoTile(
-                          label: 'Match',
-                          sub: 'Find playmates',
-                          emoji: '💛',
-                          accent: AppColors.lilac,
-                          isDark: isDark,
-                          pt: pt,
-                          onTap: () => context.go('/matching'),
-                        ),
+                    ),
+                    const SizedBox(width: gap),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: _BentoTile(
+                              label: 'PawsFeed',
+                              sub: 'Social & stories',
+                              emoji: '🐾',
+                              accent: AppColors.poppy,
+                              isDark: isDark,
+                              pt: pt,
+                              onTap: () => context.go('/social'),
+                            ),
+                          ),
+                          const SizedBox(height: gap),
+                          Expanded(
+                            child: _BentoTile(
+                              label: 'Match',
+                              sub: 'Find playmates',
+                              emoji: '💛',
+                              accent: AppColors.lilac,
+                              isDark: isDark,
+                              pt: pt,
+                              onTap: () => context.go('/matching'),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: gap),
-          SizedBox(
-            height: rowH,
-            child: Row(
-              children: [
-                Expanded(
-                  child: _BentoTile(
-                    label: 'Market',
-                    sub: 'Shop for pets',
-                    emoji: '🛍️',
-                    accent: AppColors.mint,
-                    isDark: isDark,
-                    pt: pt,
-                    onTap: () => context.go('/marketplace'),
-                  ),
+              ),
+              const SizedBox(height: gap),
+              SizedBox(
+                height: rowH,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _BentoTile(
+                        label: 'Market',
+                        sub: 'Shop for pets',
+                        emoji: '🛍️',
+                        accent: AppColors.mint,
+                        isDark: isDark,
+                        pt: pt,
+                        onTap: () => context.go('/marketplace'),
+                      ),
+                    ),
+                    const SizedBox(width: gap),
+                    Expanded(
+                      child: _BentoTile(
+                        label: 'Vet',
+                        sub: 'Book a vet',
+                        emoji: '🩺',
+                        accent: AppColors.sky,
+                        isDark: isDark,
+                        pt: pt,
+                        onTap: () => context.push('/appointments'),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: gap),
-                Expanded(
-                  child: _BentoTile(
-                    label: 'Vet',
-                    sub: 'Book a vet',
-                    emoji: '🩺',
-                    accent: AppColors.sky,
-                    isDark: isDark,
-                    pt: pt,
-                    onTap: () => context.push('/appointments'),
-                  ),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: gap),
+              _AllTile(
+                isDark: isDark,
+                pt: pt,
+                onTap: () => AllFeaturesSheet.show(context),
+              ),
+            ],
           ),
-          const SizedBox(height: gap),
-          _AllTile(
-            isDark: isDark,
-            pt: pt,
-            onTap: () => AllFeaturesSheet.show(context),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -1366,7 +1429,7 @@ class _DealsSection extends StatelessWidget {
       children: [
         // ── Filter chips ───────────────────────────────────────────────
         SizedBox(
-          height: 36,
+          height: 48,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1384,73 +1447,121 @@ class _DealsSection extends StatelessWidget {
         const SizedBox(height: 12),
 
         // ── Promo deal banner ──────────────────────────────────────────
-        GestureDetector(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              height: 100,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(22),
-                gradient: const LinearGradient(
-                  colors: [AppColors.tangerine, AppColors.lilac],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.tangerine.withAlpha(60),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(22),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(22),
+              onTap: () {
+                HapticFeedback.selectionClick();
+                onTap();
+              },
+              child: Ink(
+                height: 100,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  gradient: const LinearGradient(
+                    colors: [AppColors.tangerine, AppColors.lilac],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                ],
-              ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned(
-                    right: -12,
-                    top: -12,
-                    child: Opacity(
-                      opacity: 0.2,
-                      child: Text(
-                        '🎁',
-                        style: const TextStyle(fontSize: 100),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.tangerine.withAlpha(60),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned(
+                      right: -12,
+                      top: -12,
+                      child: Opacity(
+                        opacity: 0.2,
+                        child: Text(
+                          '🎁',
+                          style: const TextStyle(fontSize: 100),
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Limited Time Offer',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white70,
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Limited Time Offer',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white70,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '30% OFF Pet Food & Treats 🎉',
-                          style: GoogleFonts.sora(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
+                          const SizedBox(height: 4),
+                          Text(
+                            '30% OFF Pet Food & Treats 🎉',
+                            style: GoogleFonts.sora(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Streak AppBar button — circular, matches PfAppBarIconBtn shape/style
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _StreakBtn extends StatelessWidget {
+  const _StreakBtn({required this.streak, required this.onTap});
+  final int streak;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: onTap,
+      tooltip: '$streak day streak',
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+      style: IconButton.styleFrom(
+        backgroundColor: Colors.white.withAlpha(48),
+        shape: const CircleBorder(),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      icon: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('🔥', style: TextStyle(fontSize: 12, height: 1.1)),
+          Text(
+            '$streak',
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              height: 1.1,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1468,29 +1579,37 @@ class _DealChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        onTap();
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.tangerine : Colors.transparent,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color: selected
-                ? AppColors.tangerine
-                : AppColors.ink300.withAlpha(100),
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(999),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          constraints: const BoxConstraints(minHeight: 48),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.tangerine : Colors.transparent,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: selected
+                  ? AppColors.tangerine
+                  : AppColors.ink300.withAlpha(100),
+            ),
           ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: selected ? Colors.white : AppColors.ink500,
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: selected ? Colors.white : AppColors.ink500,
+              ),
+            ),
           ),
         ),
       ),

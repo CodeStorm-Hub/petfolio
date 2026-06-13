@@ -1,5 +1,38 @@
 # Petfolio — Progress Log
 
+## 2026-06-13 — Global Layout: PetfolioScaffold ✅
+
+`flutter analyze` — **No issues found.**
+
+### Implemented
+
+**New: `lib/core/widgets/petfolio_scaffold.dart`**
+- `kPetfolioToolbarHeight = 76.0`, `kPetfolioNavClearance = 92.0`
+- `PetfolioScaffold` dual-mode widget: slivers (`SliverAppBar` M3, pinned, `scrolledUnderElevation: 3`) and body (`AppBar`)
+- `initState`/`dispose` toggle `shellHeaderVisibleProvider` — hides `AppShellHeader` in `AppShell` while mounted
+- `PfModuleLeading` (HOME breadcrumb), `PfAppBarIconBtn` (48dp M3 icon button with optional Badge)
+
+**Modified: `lib/core/providers/shell_scroll_provider.dart`**
+- `shellHeaderVisibleProvider` as `NotifierProvider<_ShellHeaderVisibleNotifier, bool>`
+
+**Modified: `lib/core/widgets/app_shell.dart`**
+- `AppShellHeader` Positioned widgets wrapped in `if (showHeader)` watching `shellHeaderVisibleProvider`
+- `_HeaderIconBtn` → 48dp M3 `IconButton`; duplicate import removed
+
+**Migrated 5 screens to PetfolioScaffold:**
+- `hub_home_screen.dart` — slivers mode; `_WaveHeroSection` → `_HeroFlexContent`; `_HomeLeading` added; `kPetfolioToolbarHeight` constant used
+- `care_screen.dart` — withBody; `accentColor: AppColors.sunny`; add-task action
+- `social_screen.dart` — withBody; `accentColor: headerColor`; communities + messages actions; floating WaveHeader + headerHeight spacers removed; `_SocialPostListSliver.headerHeight` dead field removed
+- `matching_screen.dart` — withBody; `accentColor: headerColor`; inbox + preferences actions; WaveHeader spacer removed
+- `marketplace_screen.dart` — withBody; `accentColor: AppColors.sunny`; cart badge action; `_MarketHeader` topPad spacer removed
+
+### Next step
+- Test on device: confirm each module screen shows `PetfolioScaffold` AppBar with no double header
+
+Phase complete — please run (/remember) to save tokens before proceeding to the next phase.
+
+---
+
 ## 2026-06-11 — Vet Hub Screen Revamp ✅
 
 `flutter analyze` (full project) — **No issues found.**

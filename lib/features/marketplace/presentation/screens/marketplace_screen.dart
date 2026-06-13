@@ -122,7 +122,6 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
 
   @override
   Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isWide = screenWidth >= ResponsiveLayout.mobileMax;
     final selectedCat = ref.watch(selectedCategoryProvider);
@@ -156,19 +155,33 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
     }
 
     return WebCheckoutResumeListener(
-      child: Scaffold(
-        backgroundColor: pt.surface1,
-        body: Stack(
-          children: [
-            bodyContent,
-            ..._flyingItems.map((item) {
-              return _FlyToCartAnim(
-                key: ValueKey(item.id),
-                item: item,
-              );
-            }),
-          ],
-        ),
+      child: Consumer(
+        builder: (context, ref, _) {
+          final cartCount = ref.watch(cartProvider).items.fold(0, (n, i) => n + i.quantity);
+          return PetfolioScaffold.withBody(
+            accentColor: AppColors.sunny,
+            leading: PfModuleLeading(label: 'MARKET', onTap: () => context.go('/home')),
+            actions: [
+              PfAppBarIconBtn(
+                icon: Icons.shopping_bag_outlined,
+                onTap: _openCart,
+                tooltip: 'Cart',
+                badge: cartCount,
+              ),
+            ],
+            body: Stack(
+              children: [
+                bodyContent,
+                ..._flyingItems.map((item) {
+                  return _FlyToCartAnim(
+                    key: ValueKey(item.id),
+                    item: item,
+                  );
+                }),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -322,10 +335,8 @@ class _MarketHeader extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
         child: Column(
           children: [
-            // Spacer for fixed AppShell status header
-            SizedBox(height: MediaQuery.paddingOf(context).top + 76.0),
             _SearchBar(),
-            const SizedBox(height: 32), // Spacing adjusted to prevent wave overlap
+            const SizedBox(height: 32),
           ],
         ),
       ),
@@ -451,7 +462,9 @@ class _CategoryChips extends StatelessWidget {
                       border: Border.all(color: pt.line, width: 1.5),
                     ),
                     alignment: Alignment.center,
-                    child: const Text('⊞', style: TextStyle(fontSize: 26)),
+                    // Use a proper icon instead of the ⊞ math glyph (renders
+                    // inconsistently across fonts/platforms).
+                    child: const Icon(Icons.apps_rounded, size: 28),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -772,9 +785,8 @@ class _YoullLoveSection extends StatelessWidget {
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                     ),
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    // Keep visual padding zero for layout but preserve 48dp tap target.
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   ),
                   child: const Text('Browse all ›'),
                 ),

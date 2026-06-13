@@ -38,7 +38,7 @@ Build more usable and engaging products with emotion-driven UX. M3 Expressive ad
 \\
 ![](https://lh3.googleusercontent.com/R0qmyzn6w3LFJMZZ0aPl79rV6EamtB6OENbTrBI2vI6_26olXbA5dbBoXUDe4tgcS2CtK4Ept9RSFRy6RWbn1AFhukWAdki0_o8jkzNb594AUrTh2s-F=w960)](https://m3.material.io/styles/shape/overview-principles?utm_source=homepage&utm_medium=referral&utm_campaign=IO25)[Blog: Guide to our latest updateGet a full introduction to the latest evolution of Material, including new components and style updates\\
 \\
-![](https://lh3.googleusercontent.com/gNDGDt355kn5TXsOM1xXsWE1a6g0ej6JMBlLKytnev53DMXprTlQ8OfCmIAKPE_ohfFvRBjy2rIEgJsYmZAmZKNJ5VeNnz0WRozAd2rWKF8UmtmVNfas=w960)](https://m3.material.io/blog/building-with-m3-expressive?utm_source=homepage&utm_medium=referral&utm_campaign=IO25)[Google Design: Making Google Sans FlexHow seven design problems shaped Google’s iconic typeface — from inception to going open-source\\
+![](https://lh3.googleusercontent.com/gNDGDt355kn5TXsOM1xXsWE1a6g0ej6JMBlLKytnev53DMXprTlQ8OfCmIAKPE_ohfFvRBjy2rIEgJsYmZAmZKNJ5VeNnz0WRozAd2rWKF8UmtmVNfas=w960)](https://m3.material.io/blog/building-with-m3-expressive?utm_source=homepage&utm_medium=referral&utm_campaign=IO25)[Google Design:Making Google Sans FlexHow seven design problems shaped Google’s iconic typeface — from inception to going open-source\\
 \\
 ![](https://lh3.googleusercontent.com/xjMNBdKWsiur-nfkZJv6KokPwg8I3J16piFKvv8qddJ4DRrYlziLTzsIE9-CBZwSjVmezZfVcokq40tZO6AUHS9t_BHoSnTgVfQcV43wElDy0Jw-gGaM=w960)](https://design.google/library/google-sans-flex-font)
 
@@ -6995,9 +6995,9 @@ Copy linkLink copied
 
 When dividing a screen into layout panes, consider the breakpoint:
 
-- Compact and medium breakpoints:  A single pane works best
+- Compact and medium breakpoints: A single pane works best
 
-- Expanded and large breakpoints:  Two panes are recommended
+- Expanded and large breakpoints: Two panes are recommended
 
 - Extra-large breakpoints: Consider using three panes
 
@@ -19718,7 +19718,7 @@ Copy linkLink copied
 
 **Information density**
 
-- Information density can be achieved through layout and design decisions without using component scaling
+- Information density can be achieved through layoutand design decisions without using componentscaling
 
 - Some people may not benefit from increased density
 
@@ -20134,7 +20134,7 @@ link
 
 Copy linkLink copied
 
-![4 elements of a standard side sheet.  ](https://firebasestorage.googleapis.com/v0/b/design-spec/o/projects%2Fgoogle-material-3%2Fimages%2Fmeqrqfpt-06.png?alt=media&token=b39ae6aa-ee8b-45cb-9d9b-c3aab1f16a67)
+![4 elements of a standard side sheet. ](https://firebasestorage.googleapis.com/v0/b/design-spec/o/projects%2Fgoogle-material-3%2Fimages%2Fmeqrqfpt-06.png?alt=media&token=b39ae6aa-ee8b-45cb-9d9b-c3aab1f16a67)
 
 1. Divider (optional)
 2. Headline

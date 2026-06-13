@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -65,9 +65,8 @@ class _CareScreenState extends ConsumerState<CareScreen> {
       final msg = (name != null && name.isNotEmpty)
           ? 'Pet setup complete — welcome! Start tracking daily care for $name here.'
           : 'Pet setup complete — welcome! Start tracking daily care here.';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
-      );
+      // Use global AppSnackBar so the message appears above the shell navigator.
+      AppSnackBar.showSuccess(msg);
       if (!mounted) return;
       if (GoRouterState.of(context).uri.queryParameters['onboardingComplete'] == '1') {
         // Mark that we should pre-warm AI as soon as the pet is available.
@@ -106,12 +105,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
     final aiState = ref.read(aiRoutineProvider);
     if (aiState.isConfigError) return;
     if (aiState.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(aiState.error ?? 'Could not generate suggestions.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      AppSnackBar.showError(aiState.error ?? 'Could not generate suggestions.');
       return;
     }
     if (aiState.hasResults) {
@@ -131,12 +125,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
     final aiState = ref.read(aiRoutineProvider);
     if (aiState.isConfigError) return;
     if (aiState.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(aiState.error ?? 'Could not generate suggestions.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      AppSnackBar.showError(aiState.error ?? 'Could not generate suggestions.');
       return;
     }
     if (aiState.hasResults) {
@@ -221,11 +210,14 @@ class _CareScreenState extends ConsumerState<CareScreen> {
           ),
         );
 
-    return Scaffold(
-      backgroundColor: pt.surface1,
+    return PetfolioScaffold.withBody(
+      accentColor: AppColors.sunny,
+      leading: PfModuleLeading(label: 'CARE', onTap: () => context.go('/home')),
+      // FAB is the primary add action per M3 — no duplicate AppBar button needed.
       floatingActionButton: FloatingActionButton(
         key: const ValueKey<String>('care_fab_add_task'),
         onPressed: openAddSheet,
+        tooltip: 'Add task',
         child: const Icon(Icons.add_rounded),
       ),
       body: LayoutBuilder(
@@ -261,40 +253,47 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                 scrollDirection: Axis.horizontal,
                                 children: _filterChips.map((chip) {
                                   final active = _careFilter == chip.$1;
+                                  // Use Care's pillar color (sunny) for selected state.
+                                  const activeColor = AppColors.sunny;
                                   return Padding(
                                     padding: const EdgeInsets.only(right: 8),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        HapticFeedback.selectionClick();
-                                        setState(() => _careFilter = chip.$1);
-                                      },
-                                      child: AnimatedContainer(
-                                        duration: const Duration(milliseconds: 160),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14, vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: active ? AppColors.poppy : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(999),
-                                          border: Border.all(
-                                            color: active ? AppColors.poppy : pt.line,
+                                    child: Semantics(
+                                      button: true,
+                                      label: '${chip.$2} filter',
+                                      selected: active,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          HapticFeedback.selectionClick();
+                                          setState(() => _careFilter = chip.$1);
+                                        },
+                                        child: AnimatedContainer(
+                                          duration: const Duration(milliseconds: 160),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 14, vertical: 6,
                                           ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(chip.$3, style: const TextStyle(fontSize: 13)),
-                                            const SizedBox(width: 5),
-                                            Text(
-                                              chip.$2,
-                                              overflow: TextOverflow.visible,
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w700,
-                                                color: active ? Colors.white : pt.ink950,
-                                              ),
+                                          decoration: BoxDecoration(
+                                            color: active ? activeColor : Colors.transparent,
+                                            borderRadius: BorderRadius.circular(999),
+                                            border: Border.all(
+                                              color: active ? activeColor : pt.line,
                                             ),
-                                          ],
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(chip.$3, style: const TextStyle(fontSize: 13)),
+                                              const SizedBox(width: 5),
+                                              Text(
+                                                chip.$2,
+                                                overflow: TextOverflow.visible,
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: active ? Colors.white : pt.ink950,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -311,8 +310,9 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                 children: [
                                   Text(
                                     "Today's Quests",
-                                    style: TextStyle(
-                                      fontSize: 13,
+                                    // M3 labelMedium for section sub-headers,
+                                    // matching hub_home_screen _SectionHeader scale.
+                                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
                                       fontWeight: FontWeight.w700,
                                       letterSpacing: 0.2,
                                       color: pt.ink500,
@@ -490,7 +490,8 @@ class _AiRoutineBanner extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: hasResults ? AppColors.lilac : AppColors.lilac,
+                  // Differentiate ready (mint = success) vs generating/idle (lilac = AI).
+                  color: hasResults ? AppColors.mint : AppColors.lilac,
                   shape: BoxShape.circle,
                 ),
                 child: isGenerating
