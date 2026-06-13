@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/widgets/app_snack_bar.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/buyer_orders_controller.dart'
     show buyerOrdersProvider, orderByIdProvider;
 import '../../../data/models/marketplace_order.dart';
+import '../../../data/repositories/order_repository.dart';
 
 class BuyerOrderDetailScreen extends ConsumerWidget {
   const BuyerOrderDetailScreen({
@@ -111,6 +113,11 @@ class BuyerOrderDetailScreen extends ConsumerWidget {
             if (resolved.hasTracking)
               SliverToBoxAdapter(
                 child: _TrackingCard(order: resolved),
+              ),
+
+            if (resolved.status == OrderStatus.pending)
+              SliverToBoxAdapter(
+                child: _CancelOrderButton(orderId: resolved.id),
               ),
 
             const SliverToBoxAdapter(child: SizedBox(height: 120)),
@@ -462,3 +469,65 @@ class _IconBtn extends StatelessWidget {
     );
   }
 }
+
+class _CancelOrderButton extends ConsumerStatefulWidget {
+  const _CancelOrderButton({required this.orderId});
+  final String orderId;
+
+  @override
+  ConsumerState<_CancelOrderButton> createState() => _CancelOrderButtonState();
+}
+
+class _CancelOrderButtonState extends ConsumerState<_CancelOrderButton> {
+  bool _loading = false;
+
+  Future<void> _cancel() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Cancel order?'),
+        content: const Text('This will release your items and cancel the order. This cannot be undone.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Keep order')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Cancel order', style: TextStyle(color: AppColors.danger)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _loading = true);
+    try {
+      await ref.read(orderRepositoryProvider).cancelOrder(widget.orderId);
+      if (!mounted) return;
+      ref.invalidate(buyerOrdersProvider);
+      if (context.canPop()) context.pop();
+    } catch (_) {
+      if (mounted) {
+        setState(() => _loading = false);
+        AppSnackBar.show('Failed to cancel order. Please try again.');
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: OutlinedButton(
+        onPressed: _loading ? null : _cancel,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.danger,
+          side: const BorderSide(color: AppColors.danger),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+        ),
+        child: _loading
+            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+            : const Text('Cancel Order', style: TextStyle(fontWeight: FontWeight.w700)),
+      ),
+    );
+  }
+}
+

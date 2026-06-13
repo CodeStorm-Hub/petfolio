@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -103,15 +104,18 @@ class _ClinicCardState extends State<_ClinicCard> {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: AppColors.sky.withAlpha(30),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                alignment: Alignment.center,
-                child: const Text('🏥', style: TextStyle(fontSize: 26)),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: widget.clinic.avatarUrl != null
+                    ? CachedNetworkImage(
+                        imageUrl: widget.clinic.avatarUrl!,
+                        width: 52,
+                        height: 52,
+                        fit: BoxFit.cover,
+                        placeholder: (_, _) => _ClinicAvatarPlaceholder(size: 52),
+                        errorWidget: (_, _, _) => _ClinicAvatarPlaceholder(size: 52),
+                      )
+                    : _ClinicAvatarPlaceholder(size: 52),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -186,6 +190,24 @@ class _ClinicCardState extends State<_ClinicCard> {
           ),
         ),
       ),
+    );
+  }
+}
+
+// ─── Clinic avatar placeholder ────────────────────────────────────────────────
+
+class _ClinicAvatarPlaceholder extends StatelessWidget {
+  const _ClinicAvatarPlaceholder({required this.size});
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      color: AppColors.sky.withAlpha(30),
+      alignment: Alignment.center,
+      child: Text('🏥', style: TextStyle(fontSize: size * 0.5)),
     );
   }
 }

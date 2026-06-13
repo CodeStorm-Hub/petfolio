@@ -7,6 +7,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-fcm-dispatch-secret",
 };
 
+const MAX_RETRIES = 3;
+
 function assertDispatchAuth(req: Request): boolean {
   const expected = Deno.env.get("FCM_DISPATCH_SECRET");
   if (!expected) return false;
@@ -33,8 +35,10 @@ Deno.serve(async (req) => {
 
     const { data: rows, error } = await supabase
       .from("fcm_push_outbox")
-      .select("id, user_id, title, body, data")
+      .select("id, user_id, title, body, data, retry_count")
       .is("processed_at", null)
+      .is("failed_at", null)
+      .lt("retry_count", MAX_RETRIES)
       .order("created_at", { ascending: true })
       .limit(40);
 
@@ -42,6 +46,7 @@ Deno.serve(async (req) => {
 
     let processed = 0;
     let sentTotal = 0;
+    let deadLettered = 0;
 
     for (const row of rows ?? []) {
       const raw = (row.data ?? {}) as Record<string, unknown>;
@@ -63,12 +68,22 @@ Deno.serve(async (req) => {
           .update({ processed_at: new Date().toISOString() })
           .eq("id", row.id);
         processed += 1;
-      } catch (_) {
-        continue;
+      } catch (err) {
+        const newCount = (row.retry_count as number) + 1;
+        const isDeadLetter = newCount >= MAX_RETRIES;
+        await supabase
+          .from("fcm_push_outbox")
+          .update({
+            retry_count: newCount,
+            last_error: String(err),
+            ...(isDeadLetter ? { failed_at: new Date().toISOString() } : {}),
+          })
+          .eq("id", row.id);
+        if (isDeadLetter) deadLettered += 1;
       }
     }
 
-    return new Response(JSON.stringify({ processed, sentTotal }), {
+    return new Response(JSON.stringify({ processed, sentTotal, deadLettered }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

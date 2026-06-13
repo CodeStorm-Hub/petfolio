@@ -293,7 +293,7 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
           final deck = buf.candidates;
           final visible = state.isExiting && state.exitingCard != null;
           if (deck.isEmpty && !visible) {
-            return _EmptyDeck(
+            return _EmptyDeck.fromLocationReady(
               locationReady: locationAccess == LocationAccessState.granted,
             );
           }
@@ -471,7 +471,7 @@ class _DiscoveryStack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasFlying = state.isExiting && state.exitingCard != null;
-    if (!hasFlying && buffer.isEmpty) return const _EmptyDeck();
+    if (!hasFlying && buffer.isEmpty) return const _EmptyDeck(reason: _EmptyReason.deckExhausted);
 
     final dragProgress =
         (state.dragOffset.dx.abs().clamp(0.0, 90.0)) / 90.0;
@@ -514,7 +514,7 @@ class _DiscoveryStack extends StatelessWidget {
         ),
     ];
 
-    if (layers.isEmpty) return const _EmptyDeck(locationReady: true);
+    if (layers.isEmpty) return const _EmptyDeck(reason: _EmptyReason.deckExhausted);
 
     return Stack(
       alignment: Alignment.center,
@@ -595,30 +595,46 @@ class _LocationAccessEmpty extends StatelessWidget {
   }
 }
 
-class _EmptyDeck extends StatelessWidget {
-  const _EmptyDeck({this.locationReady = false});
+enum _EmptyReason { noLocation, deckExhausted, noPeersInArea }
 
-  final bool locationReady;
+class _EmptyDeck extends StatelessWidget {
+  const _EmptyDeck({this.reason = _EmptyReason.deckExhausted});
+  // Kept for backwards-compatible callers that pass locationReady.
+  const _EmptyDeck.fromLocationReady({required bool locationReady})
+      : reason = locationReady ? _EmptyReason.deckExhausted : _EmptyReason.noLocation;
+
+  final _EmptyReason reason;
 
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final tt = Theme.of(context).textTheme;
-    final title = locationReady
-        ? 'No pets nearby yet'
-        : 'No more profiles nearby';
-    final subtitle = locationReady
-        ? 'Turn on Match Discovery for your pet and ask nearby owners to do the same. '
-            'Pets also need a saved location—open Match after allowing location access.'
-        : 'Check back soon!';
+
+    final (IconData icon, String title, String subtitle) = switch (reason) {
+      _EmptyReason.noLocation => (
+          Icons.location_off_rounded,
+          'Enable location to find nearby pets',
+          'Allow location access and make sure your pet has a saved location so Match can find compatible companions.',
+        ),
+      _EmptyReason.deckExhausted => (
+          Icons.auto_awesome_rounded,
+          "You've seen everyone nearby!",
+          'Check back later — new pets join every day. In the meantime, invite friends to add their pets to PetFolio.',
+        ),
+      _EmptyReason.noPeersInArea => (
+          Icons.pets_rounded,
+          'No pets in your area yet',
+          'Be a pioneer! Invite nearby pet owners to join PetFolio so you can start matching.',
+        ),
+    };
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.pets_rounded, size: 64, color: pt.ink300),
+            Icon(icon, size: 64, color: pt.ink300),
             const SizedBox(height: 16),
             Text(
               title,

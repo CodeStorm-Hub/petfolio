@@ -154,6 +154,17 @@ class VetBookingController extends Notifier<VetBookingState> {
         // Silently catch local notification trigger errors if platform is unsupported
       }
 
+      // Schedule a local 1-hour-before reminder on the device.
+      try {
+        final reminderId =
+            '${state.petId}_${state.selectedSlot!.millisecondsSinceEpoch}';
+        await NotificationService.instance.scheduleAppointmentReminder(
+          appointmentId: reminderId,
+          serviceName: state.service!.name,
+          scheduledAt: state.selectedSlot!,
+        );
+      } catch (_) {}
+
       // Refresh the existing appointments calendar so the new booking appears.
       ref.invalidate(appointmentControllerProvider);
       state = state.copyWith(status: VetBookingStatus.success);

@@ -25,6 +25,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../widgets/product_glyph.dart';
 import '../widgets/web_checkout_resume_listener.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
+import '../widgets/address_sheet.dart';
 
 
 
@@ -854,6 +855,10 @@ class _YoullLoveTile extends StatelessWidget {
                         fit: BoxFit.cover,
                         width: 140,
                         height: 110,
+                        placeholder: (_, _) =>
+                            ProductGlyph(glyphType: product.glyphType, size: 52),
+                        errorWidget: (_, _, _) =>
+                            ProductGlyph(glyphType: product.glyphType, size: 52),
                       )
                     : ProductGlyph(glyphType: product.glyphType, size: 52),
               ),
@@ -1673,7 +1678,7 @@ class _DeliveryStrip extends ConsumerWidget {
               ),
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () => AddressSheet.show(context),
               child: Text(
                 'Set address',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.tangerine),

@@ -41,13 +41,15 @@ class ChatScreen extends ConsumerStatefulWidget {
     this.matchId,
     this.otherPetId,
     required this.otherPetName,
+    this.fromMatchInbox = false,
   });
 
   final String threadId;
   final String actorPetId;
   final String? matchId;
-  final String? otherPetId; // non-null for social DMs, null for match chats
+  final String? otherPetId;
   final String otherPetName;
+  final bool fromMatchInbox;
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -134,7 +136,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         child: Column(
           children: [
             AppHeader(
-              eyebrow: widget.otherPetId != null ? 'Social · Chat' : 'Match · Chat',
+              eyebrow: (widget.matchId != null || widget.fromMatchInbox)
+                  ? 'Match · Chat'
+                  : 'Social · Chat',
               onOpenSwitcher: () => PetSwitcherSheet.show(context),
               onBack: () => popOrGo(context, '/matching/inbox'),
               dense: true,

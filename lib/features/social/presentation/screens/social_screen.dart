@@ -7,6 +7,7 @@ import 'package:video_player/video_player.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:share_plus/share_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/platform/web_image_cache.dart';
@@ -506,22 +507,43 @@ class _StoriesRow extends ConsumerWidget {
                 ),
 
               // Other Pet Story Items
-              ...otherStacks.map((stack) {
-                final initial = stack.petName.isNotEmpty ? stack.petName[0].toUpperCase() : '?';
-                return Padding(
-                  padding: const EdgeInsets.only(left: 12),
-                  child: _StoryItem(
-                    initial: initial,
-                    label: stack.petName,
-                    avatarUrl: stack.petAvatarUrl,
-                    ringColors: stack.hasUnviewed(userId)
-                        ? const [AppColors.sunset500, AppColors.coral500]
-                        : [pt.ink300, pt.ink300],
-                    animateRing: stack.hasUnviewed(userId),
-                    onTap: () => context.push('/social/stories?petId=${stack.petId}'),
+              if (otherStacks.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'No stories from the pack yet',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: pt.ink500),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Share yours to start the conversation!',
+                        style: TextStyle(fontSize: 11, color: pt.ink300),
+                      ),
+                    ],
                   ),
-                );
-              }),
+                )
+              else
+                ...otherStacks.map((stack) {
+                  final initial = stack.petName.isNotEmpty ? stack.petName[0].toUpperCase() : '?';
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: _StoryItem(
+                      initial: initial,
+                      label: stack.petName,
+                      avatarUrl: stack.petAvatarUrl,
+                      ringColors: stack.hasUnviewed(userId)
+                          ? const [AppColors.sunset500, AppColors.coral500]
+                          : [pt.ink300, pt.ink300],
+                      animateRing: stack.hasUnviewed(userId),
+                      onTap: () => context.push('/social/stories?petId=${stack.petId}'),
+                    ),
+                  );
+                }),
             ],
           ),
         );
@@ -1337,8 +1359,21 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                         },
                       ),
                     ),
-                    Expanded(child: const _ActionBtn(icon: Icons.ios_share_rounded, label: 'Share')),
-                    Expanded(child: const _ActionBtn(icon: Icons.bookmark_border_rounded, label: 'Save')),
+                    Expanded(child: _ActionBtn(
+                      icon: Icons.ios_share_rounded,
+                      label: 'Share',
+                      onTap: () {
+                        final caption = widget.post.caption.isNotEmpty ? widget.post.caption : 'Check out this post on PetFolio!';
+                        SharePlus.instance.share(ShareParams(text: caption));
+                      },
+                    )),
+                    Expanded(child: _ActionBtn(
+                      icon: Icons.bookmark_border_rounded,
+                      label: 'Save',
+                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Saved posts coming soon'), duration: Duration(seconds: 2)),
+                      ),
+                    )),
                   ],
                 ),
               ),

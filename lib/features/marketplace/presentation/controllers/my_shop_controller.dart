@@ -6,8 +6,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/models/shop.dart';
 import '../../data/repositories/kyc_repository.dart';
 import '../../data/repositories/shop_repository.dart';
-import 'deletion_request_controller.dart';
-
 part 'my_shop_controller.g.dart';
 
 @Riverpod(keepAlive: true)
@@ -108,7 +106,6 @@ class MyShop extends _$MyShop {
       try {
         final shop = await _repo.fetchMyShop();
         state = AsyncValue.data(shop);
-        ref.invalidate(deletionRequestProvider);
         return;
       } catch (e, st) {
         if (attempt < maxAttempts - 1) continue;
