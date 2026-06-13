@@ -732,7 +732,7 @@ class _BentoGrid extends StatelessWidget {
                             child: _BentoTile(
                               label: 'PawsFeed',
                               sub: 'Social & stories',
-                              emoji: '🐾',
+                              icon: Icons.dynamic_feed_rounded,
                               accent: AppColors.poppy,
                               isDark: isDark,
                               pt: pt,
@@ -744,7 +744,7 @@ class _BentoGrid extends StatelessWidget {
                             child: _BentoTile(
                               label: 'Match',
                               sub: 'Find playmates',
-                              emoji: '💛',
+                              icon: Icons.favorite_rounded,
                               accent: AppColors.lilac,
                               isDark: isDark,
                               pt: pt,
@@ -766,7 +766,7 @@ class _BentoGrid extends StatelessWidget {
                       child: _BentoTile(
                         label: 'Market',
                         sub: 'Shop for pets',
-                        emoji: '🛍️',
+                        icon: Icons.storefront_rounded,
                         accent: AppColors.mint,
                         isDark: isDark,
                         pt: pt,
@@ -778,7 +778,7 @@ class _BentoGrid extends StatelessWidget {
                       child: _BentoTile(
                         label: 'Vet',
                         sub: 'Book a vet',
-                        emoji: '🩺',
+                        icon: Icons.medical_services_rounded,
                         accent: AppColors.sky,
                         isDark: isDark,
                         pt: pt,
@@ -842,19 +842,20 @@ class _CareTile extends StatelessWidget {
           decoration: _bentoCardDecoration(isDark, pt, glow: AppColors.sunny),
           child: Stack(
             children: [
-              // Emoji — vertically centered on the right, behind text
               Positioned(
-                top: 0,
-                bottom: 0,
-                right: 14,
-                child: Center(
-                  child: Opacity(
-                    opacity: isDark ? 0.28 : 0.82,
-                    child: const Text('🔥', style: TextStyle(fontSize: 88)),
+                top: 12,
+                right: 12,
+                child: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: AppColors.sunny.withAlpha(isDark ? 45 : 35),
+                    borderRadius: BorderRadius.circular(13),
                   ),
+                  child: const Icon(Icons.local_fire_department_rounded,
+                      color: AppColors.sunny, size: 22),
                 ),
               ),
-              // Content — badge top, title+data bottom
               Padding(
                 padding: const EdgeInsets.all(18),
                 child: Column(
@@ -948,7 +949,7 @@ class _BentoTile extends StatelessWidget {
   const _BentoTile({
     required this.label,
     required this.sub,
-    required this.emoji,
+    required this.icon,
     required this.accent,
     required this.isDark,
     required this.pt,
@@ -957,7 +958,7 @@ class _BentoTile extends StatelessWidget {
 
   final String label;
   final String sub;
-  final String emoji;
+  final IconData icon;
   final Color accent;
   final bool isDark;
   final PetfolioThemeExtension pt;
@@ -979,18 +980,23 @@ class _BentoTile extends StatelessWidget {
           child: Stack(
             children: [
               Positioned(
-                bottom: 10,
-                right: 10,
-                child: Opacity(
-                  opacity: isDark ? 0.28 : 0.82,
-                  child: Text(emoji, style: const TextStyle(fontSize: 56)),
+                top: 12,
+                right: 12,
+                child: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: accent.withAlpha(isDark ? 45 : 35),
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: Icon(icon, color: accent, size: 22),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
                       label,

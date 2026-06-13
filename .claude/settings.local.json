@@ -193,7 +193,8 @@
       "Bash(cd /mnt/f/workspace/petfolio && flutter analyze lib/features/appointments/ 2>&1)",
       "mcp__material3-kb__list_m3_categories",
       "mcp__material3-kb__search_m3_guidelines",
-      "mcp__material3-kb__get_flutter_theme_mapping"
+      "mcp__material3-kb__get_flutter_theme_mapping",
+      "mcp__visualize__show_widget"
     ]
   }
 }
