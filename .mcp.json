@@ -1,10 +1,14 @@
 {
   "mcpServers": {
-    "patrol-mcp": {
-      "type": "stdio",
-      "command": "J:/GitHub/petfolio/run-patrol-mcp.bat",
-      "args": [],
-      "env": {}
-    }
+
   }
 }
+
+
+
+    // "patrol-mcp": {
+    //   "type": "stdio",
+    //   "command": "J:/GitHub/petfolio/run-patrol-mcp.bat",
+    //   "args": [],
+    //   "env": {}
+    // }
