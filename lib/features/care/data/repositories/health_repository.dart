@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../models/health_log.dart';
 import '../models/medical_record.dart';
+import '../models/medication_log.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Providers
@@ -17,6 +18,10 @@ final healthRepositoryProvider = Provider<HealthRepository>(
 
 final medicalVaultRepositoryProvider = Provider<MedicalVaultRepository>(
   (_) => MedicalVaultRepository(Supabase.instance.client),
+);
+
+final medicationLogRepositoryProvider = Provider<MedicationLogRepository>(
+  (_) => MedicationLogRepository(Supabase.instance.client),
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -317,6 +322,98 @@ class MedicalVaultRepository {
       rethrow;
     } on PostgrestException catch (e) {
       if (e.code == 'PGRST116') throw const NotFoundException();
+      throw DatabaseException.fromPostgrest(e);
+    } catch (e) {
+      throw NetworkException(message: e.toString());
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MedicationLogRepository — medication_logs table
+//
+// Per-dose adherence ledger for medical_vault medication records.
+// ─────────────────────────────────────────────────────────────────────────────
+
+class MedicationLogRepository {
+  const MedicationLogRepository(this._client);
+
+  final SupabaseClient _client;
+
+  String _requireUserId() {
+    final id = _client.auth.currentUser?.id;
+    if (id == null) throw const NotAuthenticatedException();
+    return id;
+  }
+
+  Future<List<MedicationLog>> fetchTodayLogs(String petId) async {
+    try {
+      _requireUserId();
+      final now = DateTime.now();
+      final start = DateTime(now.year, now.month, now.day).toUtc();
+      final rows = await _client
+          .from('medication_logs')
+          .select()
+          .eq('pet_id', petId)
+          .gte('given_at', start.toIso8601String())
+          .order('given_at', ascending: false);
+      return rows.map(MedicationLog.fromJson).toList();
+    } on AppException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
+    } catch (e) {
+      throw NetworkException(message: e.toString());
+    }
+  }
+
+  // Records a dose. Guards against accidental double-logging within a short
+  // window to avoid over-recording (overdose-prevention per spec).
+  Future<MedicationLog> logDose({
+    required String medicalRecordId,
+    required String petId,
+    Duration window = const Duration(minutes: 30),
+  }) async {
+    try {
+      final userId = _requireUserId();
+      final since = DateTime.now().toUtc().subtract(window);
+      final recent = await _client
+          .from('medication_logs')
+          .select('id')
+          .eq('medical_record_id', medicalRecordId)
+          .gte('given_at', since.toIso8601String())
+          .limit(1);
+      if ((recent as List).isNotEmpty) {
+        throw const ValidationException(
+          message: 'This dose was already logged moments ago.',
+        );
+      }
+      final row = await _client
+          .from('medication_logs')
+          .insert({
+            'medical_record_id': medicalRecordId,
+            'pet_id': petId,
+            'given_by': userId,
+          })
+          .select()
+          .single();
+      return MedicationLog.fromJson(row);
+    } on AppException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
+    } catch (e) {
+      throw NetworkException(message: e.toString());
+    }
+  }
+
+  Future<void> deleteLog(String logId) async {
+    try {
+      _requireUserId();
+      await _client.from('medication_logs').delete().eq('id', logId);
+    } on AppException {
+      rethrow;
+    } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     } catch (e) {
       throw NetworkException(message: e.toString());

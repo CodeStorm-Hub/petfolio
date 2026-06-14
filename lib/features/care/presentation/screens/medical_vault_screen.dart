@@ -232,6 +232,9 @@ class _MedicalVaultBody extends ConsumerWidget {
                         records: vet,
                         emptyLabel: 'No vet visit or clinical notes yet.',
                       ),
+                      const SizedBox(height: 20),
+                      const _HealthToolsRow(),
+                      const SizedBox(height: 20),
                       _ShareWithVetCard(petName: petName, records: records),
                     ]),
                   );
@@ -300,6 +303,35 @@ class _HealthSummaryPills extends StatelessWidget {
   static String _shortMonth(int m) => const [
     'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'
   ][m - 1];
+}
+
+// ── Health tools row ─────────────────────────────────────────────────────────
+
+class _HealthToolsRow extends StatelessWidget {
+  const _HealthToolsRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => context.push('/care/medications'),
+            icon: const Icon(Icons.medication_liquid_outlined, size: 18),
+            label: const Text('Medications'),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => context.push('/care/symptoms'),
+            icon: const Icon(Icons.health_and_safety_outlined, size: 18),
+            label: const Text('Symptom check'),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 // ── Share with vet card ───────────────────────────────────────────────────────
