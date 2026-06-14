@@ -221,210 +221,186 @@ class _CareScreenState extends ConsumerState<CareScreen> {
           ),
         );
 
-    return Scaffold(
-      backgroundColor: pt.surface1,
+    return PfModuleScaffold(
       floatingActionButton: FloatingActionButton(
         key: const ValueKey<String>('care_fab_add_task'),
         onPressed: openAddSheet,
         child: const Icon(Icons.add_rounded),
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final wide = constraints.maxWidth >= 600;
-          final list = ListView(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 120),
-            children: [
-              CareGamifiedHeader(
-                activePet: activePet,
-                dashboard: dashboard,
-              ),
-              const WebPushEnableBanner(),
-              Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // ── Space for floating hero card overlap (card at bottom:-28) ──
-                            const SizedBox(height: 44.0),
-                            // ── Date picker ────────────────────────────────
-                            CareDatePicker(
-                              selectedDate: dashboard.selectedDate,
-                              onDateSelected: (d) => ref
-                                  .read(careDashboardProvider.notifier)
-                                  .selectDate(d),
-                            ),
-                            const SizedBox(height: 16.0),
-                            // ── Category filter chips ──────────────────────
-                            SizedBox(
-                              height: 40,
-                              child: ListView(
-                                scrollDirection: Axis.horizontal,
-                                children: _filterChips.map((chip) {
-                                  final active = _careFilter == chip.$1;
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 8),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        HapticFeedback.selectionClick();
-                                        setState(() => _careFilter = chip.$1);
-                                      },
-                                      child: AnimatedContainer(
-                                        duration: const Duration(milliseconds: 160),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14, vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: active ? AppColors.poppy : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(999),
-                                          border: Border.all(
-                                            color: active ? AppColors.poppy : pt.line,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(chip.$3, style: const TextStyle(fontSize: 13)),
-                                            const SizedBox(width: 5),
-                                            Text(
-                                              chip.$2,
-                                              overflow: TextOverflow.visible,
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w700,
-                                                color: active ? Colors.white : pt.ink950,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
+      slivers: [
+        // ── Wave hero (intrinsic height — placed as a body sliver) ───────
+        SliverToBoxAdapter(
+          child: CareGamifiedHeader(
+            activePet: activePet,
+            dashboard: dashboard,
+          ),
+        ),
+        SliverToBoxAdapter(child: const WebPushEnableBanner()),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Space for the floating hero card that bleeds below the wave.
+                const SizedBox(height: 44.0),
+                CareDatePicker(
+                  selectedDate: dashboard.selectedDate,
+                  onDateSelected: (d) =>
+                      ref.read(careDashboardProvider.notifier).selectDate(d),
+                ),
+                const SizedBox(height: 16.0),
+                // ── Category filter chips ──────────────────────────────
+                SizedBox(
+                  height: 40,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: _filterChips.map((chip) {
+                      final active = _careFilter == chip.$1;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: GestureDetector(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() => _careFilter = chip.$1);
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 160),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: active ? AppColors.sunny : Colors.transparent,
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: active ? AppColors.sunny : pt.line,
                               ),
                             ),
-                            const SizedBox(height: 16.0),
-                            // ── TODAY'S QUESTS header with AI refresh ──────
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "Today's Quests",
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 0.2,
-                                      color: pt.ink500,
-                                    ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(chip.$3,
+                                    style: const TextStyle(fontSize: 13)),
+                                const SizedBox(width: 5),
+                                Text(
+                                  chip.$2,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: active ? Colors.white : pt.ink950,
                                   ),
-                                  const Spacer(),
-                                  _DoneCounter(tasks: dashboard.tasks.value ?? []),
-                                  const SizedBox(width: 6),
-                                  // AI Routine refresh — 44×44 accessible touch target
-                                  Tooltip(
-                                    message: aiState.isLoading
-                                        ? 'Generating AI Routine…'
-                                        : 'Refresh AI Routine',
-                                    child: InkWell(
-                                      onTap: aiState.isLoading
-                                          ? null
-                                          : () => _forceRefreshRoutine(activePet),
-                                      borderRadius: BorderRadius.circular(22),
-                                      child: AnimatedContainer(
-                                        duration: PetfolioThemeExtension.durationSm,
-                                        width: 44,
-                                        height: 44,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.lilacSoft,
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: AppColors.lilac.withAlpha(50),
-                                            width: 1,
-                                          ),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: aiState.isLoading
-                                            ? const SizedBox(
-                                                width: 18,
-                                                height: 18,
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                  color: AppColors.lilac,
-                                                ),
-                                              )
-                                            : const Icon(
-                                                Icons.auto_awesome_rounded,
-                                                size: 18,
-                                                color: AppColors.lilac,
-                                              ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+                // ── Today's Quests header with AI refresh ─────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Today's Quests",
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.2,
+                          color: pt.ink500,
+                        ),
+                      ),
+                      const Spacer(),
+                      _DoneCounter(tasks: dashboard.tasks.value ?? []),
+                      const SizedBox(width: 6),
+                      Tooltip(
+                        message: aiState.isLoading
+                            ? 'Generating AI Routine…'
+                            : 'Refresh AI Routine',
+                        child: InkWell(
+                          onTap: aiState.isLoading
+                              ? null
+                              : () => _forceRefreshRoutine(activePet),
+                          borderRadius: BorderRadius.circular(22),
+                          child: AnimatedContainer(
+                            duration: PetfolioThemeExtension.durationSm,
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: AppColors.lilacSoft,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.lilac.withAlpha(50),
                               ),
                             ),
-                            // ── Config error — persistent banner ──────────
-                            if (aiState.isConfigError)
-                              _AiConfigErrorBanner(),
-                            // ── AI empty-state full banner ─────────────────
-                            if (dashboard.tasks.value?.isEmpty == true &&
-                                !aiState.isConfigError)
-                              _AiRoutineBanner(
-                                activePetId: activePet.id,
-                                hasNoTasks: true,
-                                isGenerating: aiState.isLoading,
-                                hasResults: aiState.hasResults,
-                                onTap: () => _generateRoutine(activePet),
-                              ),
-                            DailyTasksDashboard(
-                              state: dashboard,
-                              petId: activePet.id,
-                              petName: activePet.name,
-                              species: species,
-                              onAddTask: openAddSheet,
-                              categoryFilter: _careFilter,
-                            ),
-                            const SizedBox(height: 28),
-                            PfSectionTitle(
-                              title: 'This week',
-                              accent: AppColors.mint,
-                            ),
-                            const SizedBox(height: 8),
-                            CareGamifiedWeeklyChart(
-                              selectedDay: dashboard.selectedDate,
-                              weekHits: dashboard.weekGoalHit.value ?? List.filled(7, false),
-                              progressPercent: () {
-                                final all = dashboard.tasks.value;
-                                if (all == null || all.isEmpty) return 0.0;
-                                final planned = all.where((t) =>
-                                    !t.isLogDerived &&
-                                    t.frequency != dbtask.CareFrequency.asNeeded).toList();
-                                if (planned.isEmpty) return 0.0;
-                                return planned.where((t) => t.isCompleted).length / planned.length;
-                              }(),
-                            ),
-                            const SizedBox(height: 28),
-                            CareUtilityBanner(pt: pt),
-                            const SizedBox(height: 12),
-                            CareExploreRow(pt: pt),
-                            const SizedBox(height: 12),
-                            CareAppointmentsBanner(pt: pt),
-                          ],
+                            alignment: Alignment.center,
+                            child: aiState.isLoading
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColors.lilac),
+                                  )
+                                : const Icon(Icons.auto_awesome_rounded,
+                                    size: 18, color: AppColors.lilac),
+                          ),
                         ),
                       ),
                     ],
-                  );
-                  if (!wide) return list;
-                  return Align(
-                    alignment: Alignment.topCenter,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 560),
-                      child: list,
-                    ),
-                  );
-                },
-              ),
+                  ),
+                ),
+                if (aiState.isConfigError) const _AiConfigErrorBanner(),
+                if (dashboard.tasks.value?.isEmpty == true &&
+                    !aiState.isConfigError)
+                  _AiRoutineBanner(
+                    activePetId: activePet.id,
+                    hasNoTasks: true,
+                    isGenerating: aiState.isLoading,
+                    hasResults: aiState.hasResults,
+                    onTap: () => _generateRoutine(activePet),
+                  ),
+                DailyTasksDashboard(
+                  state: dashboard,
+                  petId: activePet.id,
+                  petName: activePet.name,
+                  species: species,
+                  onAddTask: openAddSheet,
+                  categoryFilter: _careFilter,
+                ),
+                const SizedBox(height: 28),
+                PfSectionTitle(title: 'This week', accent: AppColors.mint),
+                const SizedBox(height: 8),
+                CareGamifiedWeeklyChart(
+                  selectedDay: dashboard.selectedDate,
+                  weekHits:
+                      dashboard.weekGoalHit.value ?? List.filled(7, false),
+                  progressPercent: () {
+                    final all = dashboard.tasks.value;
+                    if (all == null || all.isEmpty) return 0.0;
+                    final planned = all
+                        .where((t) =>
+                            !t.isLogDerived &&
+                            t.frequency != dbtask.CareFrequency.asNeeded)
+                        .toList();
+                    if (planned.isEmpty) return 0.0;
+                    return planned.where((t) => t.isCompleted).length /
+                        planned.length;
+                  }(),
+                ),
+                const SizedBox(height: 28),
+                CareUtilityBanner(pt: pt),
+                const SizedBox(height: 12),
+                CareExploreRow(pt: pt),
+                const SizedBox(height: 12),
+                CareAppointmentsBanner(pt: pt),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

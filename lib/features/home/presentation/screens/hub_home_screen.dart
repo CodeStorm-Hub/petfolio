@@ -14,8 +14,6 @@ import 'package:petfolio/features/care/presentation/controllers/pet_awards_provi
 import 'package:petfolio/features/pet_profile/data/models/pet.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
 
-import 'package:petfolio/core/providers/shell_scroll_provider.dart';
-
 import '../widgets/all_features_sheet.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -35,13 +33,12 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _fadeCtrl;
   late final Animation<double> _fadeAnim;
-  late final ScrollController _scrollCtrl;
-  late final _scrollProgressNotifier =
-      ref.read(homeScrollProgressProvider.notifier);
   int _selectedDealChip = 0;
 
   static const _dealChips = ['All', 'Food', 'Grooming', 'Health', 'Toys'];
-  static const _kScrollThreshold = 90.0;
+
+  // Hero: 140dp greeting area + 38dp pet-card bleed below wave.
+  static const _heroContentHeight = 140.0 + 38.0;
 
   @override
   void initState() {
@@ -51,19 +48,11 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
       duration: const Duration(milliseconds: 480),
     )..forward();
     _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
-    _scrollCtrl = ScrollController()..addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    final progress = (_scrollCtrl.offset / _kScrollThreshold).clamp(0.0, 1.0);
-    _scrollProgressNotifier.set(progress);
   }
 
   @override
   void dispose() {
     _fadeCtrl.dispose();
-    _scrollCtrl.dispose();
-    _scrollProgressNotifier.set(0.0);
     super.dispose();
   }
 
@@ -71,7 +60,6 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
   Widget build(BuildContext context) {
     final activePet = ref.watch(activePetControllerProvider);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final isWide = MediaQuery.sizeOf(context).width >= 600;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (activePet == null) {
@@ -97,141 +85,97 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
     final doneTasks = todayTasks.where((t) => t.isCompleted).length;
     final totalTasks = todayTasks.length;
 
-    Widget body = CustomScrollView(
-      controller: _scrollCtrl,
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
-      slivers: [
-        // ── Wave hero — greeting + floating pet card ─────────────────────
-        SliverToBoxAdapter(
-          child: _WaveHeroSection(
-            pet: activePet,
-            streak: streak,
-            doneTasks: doneTasks,
-            totalTasks: totalTasks,
-            isDark: isDark,
-            pt: pt,
-          ),
+    return FadeTransition(
+      opacity: _fadeAnim,
+      child: PfModuleScaffold(
+        expandedHeight: pfHeroHeight(context, _heroContentHeight),
+        heroContent: _WaveHeroSection(
+          pet: activePet,
+          streak: streak,
+          doneTasks: doneTasks,
+          totalTasks: totalTasks,
+          isDark: isDark,
+          pt: pt,
         ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 4)),
-
-        // ── Services section ─────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _SectionHeader(
-            pt: pt,
-            title: 'Services',
-            trailing: GestureDetector(
-              onTap: () => AllFeaturesSheet.show(context),
-              child: Text(
-                'All ›',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tangerine,
+        slivers: [
+          const SliverToBoxAdapter(child: SizedBox(height: 4)),
+          SliverToBoxAdapter(
+            child: _SectionHeader(
+              pt: pt,
+              title: 'Services',
+              trailing: GestureDetector(
+                onTap: () => AllFeaturesSheet.show(context),
+                child: Text(
+                  'All ›',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tangerine,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-
-        // ── Bento grid ───────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _BentoGrid(
-            doneTasks: doneTasks,
-            totalTasks: totalTasks,
-            streak: streak,
-            isDark: isDark,
-            pt: pt,
+          SliverToBoxAdapter(
+            child: _BentoGrid(
+              doneTasks: doneTasks,
+              totalTasks: totalTasks,
+              streak: streak,
+              isDark: isDark,
+              pt: pt,
+            ),
           ),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-        // ── Quick Actions ────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _SectionHeader(pt: pt, title: 'Quick Actions'),
-        ),
-        SliverToBoxAdapter(
-          child: _QuickActionsRow(pet: activePet),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-        // ── Pet Spotlight ────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _SectionHeader(
-            pt: pt,
-            title: 'Pet Spotlight',
-            trailing: GestureDetector(
-              onTap: () => context.go('/social'),
-              child: Text(
-                'See All ›',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tangerine,
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+          SliverToBoxAdapter(child: _SectionHeader(pt: pt, title: 'Quick Actions')),
+          SliverToBoxAdapter(child: _QuickActionsRow(pet: activePet)),
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+          SliverToBoxAdapter(
+            child: _SectionHeader(
+              pt: pt,
+              title: 'Pet Spotlight',
+              trailing: GestureDetector(
+                onTap: () => context.go('/social'),
+                child: Text(
+                  'See All ›',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tangerine,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: _SpotlightCarousel(isDark: isDark, pt: pt),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-        // ── Exclusive Deals ──────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _SectionHeader(
-            pt: pt,
-            title: 'Exclusive Deals',
-            trailing: GestureDetector(
+          SliverToBoxAdapter(child: _SpotlightCarousel(isDark: isDark, pt: pt)),
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+          SliverToBoxAdapter(
+            child: _SectionHeader(
+              pt: pt,
+              title: 'Exclusive Deals',
+              trailing: GestureDetector(
+                onTap: () => context.go('/marketplace'),
+                child: Text(
+                  'See All ›',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tangerine,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: _DealsSection(
+              chips: _dealChips,
+              selectedIndex: _selectedDealChip,
+              onChipTap: (i) => setState(() => _selectedDealChip = i),
+              isDark: isDark,
+              pt: pt,
               onTap: () => context.go('/marketplace'),
-              child: Text(
-                'See All ›',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tangerine,
-                ),
-              ),
             ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: _DealsSection(
-            chips: _dealChips,
-            selectedIndex: _selectedDealChip,
-            onChipTap: (i) => setState(() => _selectedDealChip = i),
-            isDark: isDark,
-            pt: pt,
-            onTap: () => context.go('/marketplace'),
-          ),
-        ),
-
-        // ── Bottom nav clearance ─────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: SizedBox(height: 100 + MediaQuery.paddingOf(context).bottom),
-        ),
-      ],
-    );
-
-    return Scaffold(
-      backgroundColor: pt.surface1,
-      body: FadeTransition(
-        opacity: _fadeAnim,
-        child: isWide
-            ? Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 640),
-                  child: body,
-                ),
-              )
-            : body,
+        ],
       ),
     );
   }
@@ -287,8 +231,8 @@ class _WaveHeroSection extends StatelessWidget {
     final speciesEmoji = pet.speciesEnum.emoji;
 
     const cardH = 84.0;
-    const cardOverlap = 38.0; // how much card bleeds below wave
-    final waveH = topPad + 76.0 + 140.0; // header clearance + greeting area
+    const cardOverlap = 38.0;
+    final waveH = topPad + kShellHeaderHeight + 140.0;
 
     return SizedBox(
       height: waveH + cardOverlap,
@@ -304,7 +248,7 @@ class _WaveHeroSection extends StatelessWidget {
                 // Watermark emoji
                 Positioned(
                   right: 16,
-                  top: topPad + 76.0 + 4,
+                  top: topPad + kShellHeaderHeight + 4,
                   child: Opacity(
                     opacity: 0.18,
                     child: Text(
@@ -315,7 +259,7 @@ class _WaveHeroSection extends StatelessWidget {
                 ),
                 // Greeting content
                 Padding(
-                  padding: EdgeInsets.fromLTRB(20, topPad + 76.0 + 14, 120, 50),
+                  padding: EdgeInsets.fromLTRB(20, topPad + kShellHeaderHeight + 14, 120, 50),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,

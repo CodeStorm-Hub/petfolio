@@ -1,5 +1,39 @@
-# Petfolio — Progress Log
+﻿# Petfolio — Progress Log
 
+## 2026-06-14 — Global Layout: PfModuleScaffold + Scroll Progress ✅
+
+`flutter analyze` (full project) — **No issues found.**
+
+### Implemented
+
+**Phase 1 — `lib/core/widgets/pf_module_scaffold.dart`** *(new file)*
+- `kShellHeaderHeight = 76.0` — shared constant for the AppShellHeader overlay height
+- `pfHeroHeight(context, contentHeight)` — computes full SliverAppBar.expandedHeight (status bar + header + content)
+- `PfModuleScaffold` — ConsumerStatefulWidget: collapsing SliverAppBar hero (optional), sticky SliverPersistentHeader, body slivers, responsive max-width (640dp medium / 960dp expanded), automatic homeScrollProgressProvider write on every scroll frame
+- `_StickyBarDelegate` — SliverPersistentHeaderDelegate for pinned tab bars / filter chip rows
+- Exported from `lib/core/widgets/widgets.dart`
+
+**Phase 2 — hub_home_screen.dart** *(migrated to PfModuleScaffold)*
+- Removed manual ScrollController, _onScroll, _kScrollThreshold, responsive ConstrainedBox, CustomScrollView
+- All hardcoded 76.0 changed to kShellHeaderHeight
+
+**Phase 3 — care_screen.dart** *(migrated to PfModuleScaffold)*
+- Scaffold + LayoutBuilder + ListView replaced by PfModuleScaffold (no heroContent; CareGamifiedHeader placed as first body sliver)
+
+**Phase 4 — social_screen.dart** *(scroll progress wired)*
+- Stack+WaveHeader overlay kept; _onScroll writes homeScrollProgressProvider at 90dp threshold; dispose resets to 0.0
+
+**Phase 5 — marketplace_screen.dart** *(scroll progress wired)*
+- _MarketHeader: hardcoded 76.0 changed to kShellHeaderHeight; _ShopBodyState._onScroll writes homeScrollProgressProvider; dispose resets to 0.0
+
+**Phase 6 — Matching** — Non-scrollable swipe UI, no changes needed.
+
+**Phase 7 — VetHub** — Secondary sub-route with its own AppBar, not a module home, no changes needed.
+
+### Next step
+Phase complete — please run (/remember) to save tokens before proceeding.
+
+---
 ## 2026-06-11 — Vet Hub Screen Revamp ✅
 
 `flutter analyze` (full project) — **No issues found.**

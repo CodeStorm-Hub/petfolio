@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/platform/web_image_cache.dart';
+import '../../../../core/providers/shell_scroll_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'shop_intro_screen.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -322,8 +323,7 @@ class _MarketHeader extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
         child: Column(
           children: [
-            // Spacer for fixed AppShell status header
-            SizedBox(height: MediaQuery.paddingOf(context).top + 76.0),
+            SizedBox(height: MediaQuery.paddingOf(context).top + kShellHeaderHeight),
             _SearchBar(),
             const SizedBox(height: 32), // Spacing adjusted to prevent wave overlap
           ],
@@ -550,12 +550,15 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
   @override
   void dispose() {
     _scrollController.dispose();
+    ref.read(homeScrollProgressProvider.notifier).set(0.0);
     super.dispose();
   }
 
   Future<void> _onScroll() async {
     if (!_scrollController.hasClients || _loadingMore) return;
     final pos = _scrollController.position;
+    final progress = (pos.pixels / 90.0).clamp(0.0, 1.0);
+    ref.read(homeScrollProgressProvider.notifier).set(progress);
     if (pos.maxScrollExtent <= 0) return;
     if (pos.pixels < pos.maxScrollExtent - 400) return;
 

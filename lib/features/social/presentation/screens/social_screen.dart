@@ -11,6 +11,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/platform/web_image_cache.dart';
+import '../../../../core/providers/shell_scroll_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/petfolio_network_image.dart';
@@ -96,12 +97,15 @@ class _SocialViewState extends ConsumerState<_SocialView> {
   @override
   void dispose() {
     _scrollController.dispose();
+    ref.read(homeScrollProgressProvider.notifier).set(0.0);
     super.dispose();
   }
 
   void _onScroll() {
     if (!_scrollController.hasClients) return;
     final pos = _scrollController.position;
+    final progress = (pos.pixels / 90.0).clamp(0.0, 1.0);
+    ref.read(homeScrollProgressProvider.notifier).set(progress);
     if (pos.maxScrollExtent <= 0) return;
     if (pos.pixels >= pos.maxScrollExtent - 300) {
       ref
