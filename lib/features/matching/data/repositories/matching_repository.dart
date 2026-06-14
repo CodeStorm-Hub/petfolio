@@ -12,6 +12,8 @@ import '../models/match_mode.dart';
 import '../models/match_profile.dart';
 import '../models/pet_health_cert.dart';
 import '../models/pet_pedigree.dart';
+import '../models/playdate.dart';
+import '../models/verification.dart';
 import '../models/matching_discovery_row.dart';
 import '../models/pet_mutual_match.dart';
 import '../models/pet_swipe.dart';
@@ -246,4 +248,29 @@ class MatchingRepository {
 
   Future<String> signedCertUrl(String filePath) =>
       _dataSource.signedCertUrl(filePath);
+
+  Future<List<Playdate>> fetchPlaydates(String matchId) =>
+      _dataSource.fetchPlaydates(matchId);
+
+  Future<Playdate> proposePlaydate({
+    required String matchId,
+    required String proposedByPetId,
+    required DateTime scheduledAt,
+    String? locationName,
+  }) =>
+      _dataSource.proposePlaydate(
+        matchId: matchId,
+        proposedByPetId: proposedByPetId,
+        scheduledAt: scheduledAt,
+        locationName: locationName,
+      );
+
+  Future<void> updatePlaydateStatus(String id, PlaydateStatus status) =>
+      _dataSource.updatePlaydateStatus(id, status.dbValue);
+
+  Future<List<Verification>> fetchVerifications() =>
+      _dataSource.fetchVerifications();
+
+  Future<void> requestVerification(VerificationType type) =>
+      _dataSource.requestVerification(type.dbValue);
 }

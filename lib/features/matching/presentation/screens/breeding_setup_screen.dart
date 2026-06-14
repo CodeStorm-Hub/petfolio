@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/platform/media_picker.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -190,6 +191,12 @@ class _BreedingSetupViewState extends ConsumerState<_BreedingSetupView> {
                 isFullWidth: true,
                 isLoading: _saving,
                 onPressed: _saving ? null : _save,
+              ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: () => context.push('/matching/verification'),
+                icon: const Icon(Icons.verified_user_outlined, size: 18),
+                label: const Text('Verification center'),
               ),
             ],
           );

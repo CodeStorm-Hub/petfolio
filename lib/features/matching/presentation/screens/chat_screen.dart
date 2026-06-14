@@ -9,6 +9,7 @@ import '../../data/models/chat_message.dart';
 import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../controllers/chat_conversation_controller.dart';
 import '../matching_navigation.dart';
+import '../widgets/playdate_scheduler_sheet.dart';
 
 // ---------------------------------------------------------------------------
 // Chat item hierarchy for date-grouped rendering (L-2)
@@ -142,7 +143,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               onOpenSwitcher: () => PetSwitcherSheet.show(context),
               onBack: () => popOrGo(context, '/matching/inbox'),
               dense: true,
-              actions: const [],
+              actions: [
+                if (widget.matchId != null)
+                  AppHeaderAction(
+                    tooltip: 'Plan playdate',
+                    icon: Icons.event_available_outlined,
+                    onTap: () => PlaydateSchedulerSheet.show(
+                      context,
+                      args: _args,
+                      matchId: widget.matchId!,
+                      actorPetId: widget.actorPetId,
+                      otherPetName: widget.otherPetName,
+                    ),
+                  ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),

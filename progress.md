@@ -28,13 +28,17 @@ Dart:
 - `breeding_setup_screen.dart`: listing toggle, pedigree form, cert upload (image_picker→compress), status banner. Route `/matching/breeding-setup`; "Breeding setup" CTA shows on `matching_screen` when breeding mode selected.
 - analyze clean, matching tests pass. Breeding deck now fillable once a pet has active breeding profile + an admin-verified vaccination cert.
 
-### Phase 1 — REMAINING (next session)
-1. Playdate scheduler (writes `playdates`; reuse `flutter_map`) from match chat (`chat_screen.dart`).
-2. Verification center screen → `verifications`.
-3. Cert verification is admin-side (owner can insert but not set `verified`); admin verify RPC = Phase 6. Until a cert is verified, breeding gating keeps that pet out of discovery.
+### Phase 1 — Playdate scheduler + Verification center ✅ (this session)
+- Models: `playdate.dart` (PlaydateStatus), `verification.dart` (VerificationType/Status).
+- Datasource/repo: fetch/propose/updateStatus playdates; fetch/request verifications.
+- Playdate: `playdate_scheduler_sheet.dart` opened from chat header `AppHeaderAction` (only when `matchId != null`); date/time pickers + location chips → inserts `playdates` row + posts a "📅 Playdate proposed…" chat message via `chatConversationController.send`.
+- Verification: `verification_controller.dart` + `verification_center_screen.dart`, route `/matching/verification`, reached via CTA in breeding setup. Owner requests phone/id/photo → inserts `verifications` (status pending; admin approval = Phase 6).
+
+### Phase 1 — COMPLETE
+analyze: only 1 spurious info lint (`main.dart` `anonKey` deprecation — package 2.12.4 has no `publishableKey`; was an outright error at session start, now compiles). Matching tests pass.
 
 ### Immediate next step
-Phase 1 items 1–2 above, then Phase 2 (Health meds/vaccines/reminders/summaries).
+Phase 2: Health — medications/medication_logs, vaccinations, reminders, symptom checker, shareable summary, streak-freeze. Repos: `health_repository.dart`, `pet_care_repository.dart`.
 
 ---
 

@@ -9,6 +9,7 @@ import '../models/matching_discovery_row.dart';
 import '../models/pet_health_cert.dart';
 import '../models/pet_pedigree.dart';
 import '../models/playdate.dart';
+import '../models/verification.dart';
 import '../models/match_inbox_item.dart';
 import '../models/pet_mutual_match.dart';
 import '../models/pet_swipe.dart';
@@ -422,6 +423,29 @@ class MatchingSupabaseDataSource {
         .from('playdates')
         .update({'status': status})
         .eq('id', id);
+  }
+
+  Future<List<Verification>> fetchVerifications() async {
+    final uid = currentUserId;
+    if (uid == null) return [];
+    final rows = await _client
+        .from('verifications')
+        .select()
+        .eq('user_id', uid)
+        .order('created_at', ascending: false);
+    return (rows as List)
+        .cast<Map<String, dynamic>>()
+        .map(Verification.fromJson)
+        .toList(growable: false);
+  }
+
+  Future<void> requestVerification(String type) async {
+    final uid = currentUserId;
+    if (uid == null) throw StateError('Not authenticated');
+    await _client.from('verifications').insert({
+      'user_id': uid,
+      'type': type,
+    });
   }
 
   Future<void> markMessagesAsRead(String threadId) async {
