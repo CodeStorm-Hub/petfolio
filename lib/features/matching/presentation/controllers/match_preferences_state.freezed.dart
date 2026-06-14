@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MatchPreferencesState {
 
- List<String> get selectedSpecies; double get maxDistanceMeters; int get ageMinYears; int get ageMaxYears;
+ MatchMode get mode; List<String> get selectedSpecies; double get maxDistanceMeters; int get ageMinYears; int get ageMaxYears;
 /// Create a copy of MatchPreferencesState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $MatchPreferencesStateCopyWith<MatchPreferencesState> get copyWith => _$MatchPre
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MatchPreferencesState&&const DeepCollectionEquality().equals(other.selectedSpecies, selectedSpecies)&&(identical(other.maxDistanceMeters, maxDistanceMeters) || other.maxDistanceMeters == maxDistanceMeters)&&(identical(other.ageMinYears, ageMinYears) || other.ageMinYears == ageMinYears)&&(identical(other.ageMaxYears, ageMaxYears) || other.ageMaxYears == ageMaxYears));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MatchPreferencesState&&(identical(other.mode, mode) || other.mode == mode)&&const DeepCollectionEquality().equals(other.selectedSpecies, selectedSpecies)&&(identical(other.maxDistanceMeters, maxDistanceMeters) || other.maxDistanceMeters == maxDistanceMeters)&&(identical(other.ageMinYears, ageMinYears) || other.ageMinYears == ageMinYears)&&(identical(other.ageMaxYears, ageMaxYears) || other.ageMaxYears == ageMaxYears));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(selectedSpecies),maxDistanceMeters,ageMinYears,ageMaxYears);
+int get hashCode => Object.hash(runtimeType,mode,const DeepCollectionEquality().hash(selectedSpecies),maxDistanceMeters,ageMinYears,ageMaxYears);
 
 @override
 String toString() {
-  return 'MatchPreferencesState(selectedSpecies: $selectedSpecies, maxDistanceMeters: $maxDistanceMeters, ageMinYears: $ageMinYears, ageMaxYears: $ageMaxYears)';
+  return 'MatchPreferencesState(mode: $mode, selectedSpecies: $selectedSpecies, maxDistanceMeters: $maxDistanceMeters, ageMinYears: $ageMinYears, ageMaxYears: $ageMaxYears)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $MatchPreferencesStateCopyWith<$Res>  {
   factory $MatchPreferencesStateCopyWith(MatchPreferencesState value, $Res Function(MatchPreferencesState) _then) = _$MatchPreferencesStateCopyWithImpl;
 @useResult
 $Res call({
- List<String> selectedSpecies, double maxDistanceMeters, int ageMinYears, int ageMaxYears
+ MatchMode mode, List<String> selectedSpecies, double maxDistanceMeters, int ageMinYears, int ageMaxYears
 });
 
 
@@ -62,9 +62,10 @@ class _$MatchPreferencesStateCopyWithImpl<$Res>
 
 /// Create a copy of MatchPreferencesState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? selectedSpecies = null,Object? maxDistanceMeters = null,Object? ageMinYears = null,Object? ageMaxYears = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? mode = null,Object? selectedSpecies = null,Object? maxDistanceMeters = null,Object? ageMinYears = null,Object? ageMaxYears = null,}) {
   return _then(_self.copyWith(
-selectedSpecies: null == selectedSpecies ? _self.selectedSpecies : selectedSpecies // ignore: cast_nullable_to_non_nullable
+mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
+as MatchMode,selectedSpecies: null == selectedSpecies ? _self.selectedSpecies : selectedSpecies // ignore: cast_nullable_to_non_nullable
 as List<String>,maxDistanceMeters: null == maxDistanceMeters ? _self.maxDistanceMeters : maxDistanceMeters // ignore: cast_nullable_to_non_nullable
 as double,ageMinYears: null == ageMinYears ? _self.ageMinYears : ageMinYears // ignore: cast_nullable_to_non_nullable
 as int,ageMaxYears: null == ageMaxYears ? _self.ageMaxYears : ageMaxYears // ignore: cast_nullable_to_non_nullable
@@ -153,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<String> selectedSpecies,  double maxDistanceMeters,  int ageMinYears,  int ageMaxYears)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( MatchMode mode,  List<String> selectedSpecies,  double maxDistanceMeters,  int ageMinYears,  int ageMaxYears)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MatchPreferencesState() when $default != null:
-return $default(_that.selectedSpecies,_that.maxDistanceMeters,_that.ageMinYears,_that.ageMaxYears);case _:
+return $default(_that.mode,_that.selectedSpecies,_that.maxDistanceMeters,_that.ageMinYears,_that.ageMaxYears);case _:
   return orElse();
 
 }
@@ -174,10 +175,10 @@ return $default(_that.selectedSpecies,_that.maxDistanceMeters,_that.ageMinYears,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<String> selectedSpecies,  double maxDistanceMeters,  int ageMinYears,  int ageMaxYears)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( MatchMode mode,  List<String> selectedSpecies,  double maxDistanceMeters,  int ageMinYears,  int ageMaxYears)  $default,) {final _that = this;
 switch (_that) {
 case _MatchPreferencesState():
-return $default(_that.selectedSpecies,_that.maxDistanceMeters,_that.ageMinYears,_that.ageMaxYears);case _:
+return $default(_that.mode,_that.selectedSpecies,_that.maxDistanceMeters,_that.ageMinYears,_that.ageMaxYears);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -194,10 +195,10 @@ return $default(_that.selectedSpecies,_that.maxDistanceMeters,_that.ageMinYears,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<String> selectedSpecies,  double maxDistanceMeters,  int ageMinYears,  int ageMaxYears)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( MatchMode mode,  List<String> selectedSpecies,  double maxDistanceMeters,  int ageMinYears,  int ageMaxYears)?  $default,) {final _that = this;
 switch (_that) {
 case _MatchPreferencesState() when $default != null:
-return $default(_that.selectedSpecies,_that.maxDistanceMeters,_that.ageMinYears,_that.ageMaxYears);case _:
+return $default(_that.mode,_that.selectedSpecies,_that.maxDistanceMeters,_that.ageMinYears,_that.ageMaxYears);case _:
   return null;
 
 }
@@ -209,9 +210,10 @@ return $default(_that.selectedSpecies,_that.maxDistanceMeters,_that.ageMinYears,
 
 
 class _MatchPreferencesState implements MatchPreferencesState {
-  const _MatchPreferencesState({final  List<String> selectedSpecies = const <String>[], this.maxDistanceMeters = 80467.0, this.ageMinYears = 0, this.ageMaxYears = 30}): _selectedSpecies = selectedSpecies;
+  const _MatchPreferencesState({this.mode = MatchMode.playdate, final  List<String> selectedSpecies = const <String>[], this.maxDistanceMeters = 80467.0, this.ageMinYears = 0, this.ageMaxYears = 30}): _selectedSpecies = selectedSpecies;
   
 
+@override@JsonKey() final  MatchMode mode;
  final  List<String> _selectedSpecies;
 @override@JsonKey() List<String> get selectedSpecies {
   if (_selectedSpecies is EqualUnmodifiableListView) return _selectedSpecies;
@@ -233,16 +235,16 @@ _$MatchPreferencesStateCopyWith<_MatchPreferencesState> get copyWith => __$Match
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MatchPreferencesState&&const DeepCollectionEquality().equals(other._selectedSpecies, _selectedSpecies)&&(identical(other.maxDistanceMeters, maxDistanceMeters) || other.maxDistanceMeters == maxDistanceMeters)&&(identical(other.ageMinYears, ageMinYears) || other.ageMinYears == ageMinYears)&&(identical(other.ageMaxYears, ageMaxYears) || other.ageMaxYears == ageMaxYears));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MatchPreferencesState&&(identical(other.mode, mode) || other.mode == mode)&&const DeepCollectionEquality().equals(other._selectedSpecies, _selectedSpecies)&&(identical(other.maxDistanceMeters, maxDistanceMeters) || other.maxDistanceMeters == maxDistanceMeters)&&(identical(other.ageMinYears, ageMinYears) || other.ageMinYears == ageMinYears)&&(identical(other.ageMaxYears, ageMaxYears) || other.ageMaxYears == ageMaxYears));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_selectedSpecies),maxDistanceMeters,ageMinYears,ageMaxYears);
+int get hashCode => Object.hash(runtimeType,mode,const DeepCollectionEquality().hash(_selectedSpecies),maxDistanceMeters,ageMinYears,ageMaxYears);
 
 @override
 String toString() {
-  return 'MatchPreferencesState(selectedSpecies: $selectedSpecies, maxDistanceMeters: $maxDistanceMeters, ageMinYears: $ageMinYears, ageMaxYears: $ageMaxYears)';
+  return 'MatchPreferencesState(mode: $mode, selectedSpecies: $selectedSpecies, maxDistanceMeters: $maxDistanceMeters, ageMinYears: $ageMinYears, ageMaxYears: $ageMaxYears)';
 }
 
 
@@ -253,7 +255,7 @@ abstract mixin class _$MatchPreferencesStateCopyWith<$Res> implements $MatchPref
   factory _$MatchPreferencesStateCopyWith(_MatchPreferencesState value, $Res Function(_MatchPreferencesState) _then) = __$MatchPreferencesStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<String> selectedSpecies, double maxDistanceMeters, int ageMinYears, int ageMaxYears
+ MatchMode mode, List<String> selectedSpecies, double maxDistanceMeters, int ageMinYears, int ageMaxYears
 });
 
 
@@ -270,9 +272,10 @@ class __$MatchPreferencesStateCopyWithImpl<$Res>
 
 /// Create a copy of MatchPreferencesState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? selectedSpecies = null,Object? maxDistanceMeters = null,Object? ageMinYears = null,Object? ageMaxYears = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? mode = null,Object? selectedSpecies = null,Object? maxDistanceMeters = null,Object? ageMinYears = null,Object? ageMaxYears = null,}) {
   return _then(_MatchPreferencesState(
-selectedSpecies: null == selectedSpecies ? _self._selectedSpecies : selectedSpecies // ignore: cast_nullable_to_non_nullable
+mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
+as MatchMode,selectedSpecies: null == selectedSpecies ? _self._selectedSpecies : selectedSpecies // ignore: cast_nullable_to_non_nullable
 as List<String>,maxDistanceMeters: null == maxDistanceMeters ? _self.maxDistanceMeters : maxDistanceMeters // ignore: cast_nullable_to_non_nullable
 as double,ageMinYears: null == ageMinYears ? _self.ageMinYears : ageMinYears // ignore: cast_nullable_to_non_nullable
 as int,ageMaxYears: null == ageMaxYears ? _self.ageMaxYears : ageMaxYears // ignore: cast_nullable_to_non_nullable

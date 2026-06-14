@@ -1,8 +1,14 @@
 import 'package:petfolio/core/errors/app_exception.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'dart:typed_data';
+
 import '../models/chat_message.dart';
+import '../models/match_profile.dart';
 import '../models/matching_discovery_row.dart';
+import '../models/pet_health_cert.dart';
+import '../models/pet_pedigree.dart';
+import '../models/playdate.dart';
 import '../models/match_inbox_item.dart';
 import '../models/pet_mutual_match.dart';
 import '../models/pet_swipe.dart';
@@ -37,6 +43,7 @@ class MatchingSupabaseDataSource {
     List<String>? speciesFilters,
     int? minAgeYears,
     int? maxAgeYears,
+    String mode = 'playdate',
   }) async {
     final uid = currentUserId;
     if (uid == null) return [];
@@ -56,6 +63,7 @@ class MatchingSupabaseDataSource {
               : null,
           'p_min_age_years': minAgeYears,
           'p_max_age_years': maxAgeYears,
+          'p_mode': mode,
         },
       );
       if (response == null) return [];
@@ -76,24 +84,31 @@ class MatchingSupabaseDataSource {
     required String actorPetId,
     required String targetPetId,
     required SwipeTableAction action,
+    String mode = 'playdate',
   }) async {
     await _client.from('swipes').upsert(
       {
         'actor_id': actorPetId,
         'target_id': targetPetId,
         'action': action.dbValue,
+        'mode': mode,
       },
-      onConflict: 'actor_id,target_id',
+      onConflict: 'actor_id,target_id,mode',
     );
   }
 
-  Future<List<PetMutualMatch>> fetchMatchesForPet(String petId) async {
-    final rows = await _client
+  Future<List<PetMutualMatch>> fetchMatchesForPet(
+    String petId, {
+    String? mode,
+  }) async {
+    var query = _client
         .from('matches')
         .select()
-        .or('pet_a_id.eq.$petId,pet_b_id.eq.$petId')
-        .order('created_at', ascending: false)
-        .limit(100);
+        .or('pet_a_id.eq.$petId,pet_b_id.eq.$petId');
+    if (mode != null) {
+      query = query.eq('mode', mode);
+    }
+    final rows = await query.order('created_at', ascending: false).limit(100);
 
     return (rows as List)
         .cast<Map<String, dynamic>>()
@@ -296,6 +311,117 @@ class MatchingSupabaseDataSource {
         .single();
 
     return ChatMessage.fromJson(Map<String, dynamic>.from(row));
+  }
+
+  Future<MatchProfile?> fetchMatchProfile(String petId, String mode) async {
+    final row = await _client
+        .from('match_profiles')
+        .select()
+        .eq('pet_id', petId)
+        .eq('mode', mode)
+        .maybeSingle();
+    return row == null
+        ? null
+        : MatchProfile.fromJson(Map<String, dynamic>.from(row));
+  }
+
+  Future<void> upsertMatchProfile(Map<String, dynamic> values) async {
+    await _client
+        .from('match_profiles')
+        .upsert(values, onConflict: 'pet_id,mode');
+  }
+
+  Future<PetPedigree?> fetchPedigree(String petId) async {
+    final row = await _client
+        .from('pet_pedigree')
+        .select()
+        .eq('pet_id', petId)
+        .maybeSingle();
+    return row == null
+        ? null
+        : PetPedigree.fromJson(Map<String, dynamic>.from(row));
+  }
+
+  Future<void> upsertPedigree(Map<String, dynamic> values) async {
+    await _client.from('pet_pedigree').upsert(values, onConflict: 'pet_id');
+  }
+
+  Future<List<PetHealthCert>> fetchHealthCerts(String petId) async {
+    final rows = await _client
+        .from('pet_health_certs')
+        .select()
+        .eq('pet_id', petId)
+        .order('created_at', ascending: false);
+    return (rows as List)
+        .cast<Map<String, dynamic>>()
+        .map(PetHealthCert.fromJson)
+        .toList(growable: false);
+  }
+
+  Future<String> uploadHealthCertFile({
+    required String petId,
+    required Uint8List bytes,
+    required String certType,
+    required String ext,
+    required String contentType,
+  }) async {
+    final path = '$petId/${certType}_${DateTime.now().millisecondsSinceEpoch}.$ext';
+    await _client.storage.from('health-certs').uploadBinary(
+          path,
+          bytes,
+          fileOptions: FileOptions(contentType: contentType, upsert: true),
+        );
+    return path;
+  }
+
+  Future<void> insertHealthCert(Map<String, dynamic> values) async {
+    await _client.from('pet_health_certs').insert(values);
+  }
+
+  Future<void> deleteHealthCert(String id) async {
+    await _client.from('pet_health_certs').delete().eq('id', id);
+  }
+
+  Future<String> signedCertUrl(String filePath) async {
+    return _client.storage.from('health-certs').createSignedUrl(filePath, 3600);
+  }
+
+  Future<List<Playdate>> fetchPlaydates(String matchId) async {
+    final rows = await _client
+        .from('playdates')
+        .select()
+        .eq('match_id', matchId)
+        .order('scheduled_at', ascending: true);
+    return (rows as List)
+        .cast<Map<String, dynamic>>()
+        .map(Playdate.fromJson)
+        .toList(growable: false);
+  }
+
+  Future<Playdate> proposePlaydate({
+    required String matchId,
+    required String proposedByPetId,
+    required DateTime scheduledAt,
+    String? locationName,
+  }) async {
+    final row = await _client
+        .from('playdates')
+        .insert({
+          'match_id': matchId,
+          'proposed_by_pet_id': proposedByPetId,
+          'scheduled_at': scheduledAt.toUtc().toIso8601String(),
+          'location_name': locationName,
+        })
+        .select()
+        .single();
+    return Playdate.fromJson(Map<String, dynamic>.from(row));
+  }
+
+  Future<void> updatePlaydateStatus(String id, String status) async {
+    await _client
+        .from('playdates')
+        .update({'status': status})
+        .eq('id', id);
   }
 
   Future<void> markMessagesAsRead(String threadId) async {

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/errors/app_exception.dart';
@@ -22,9 +23,11 @@ import '../../../pet_profile/presentation/controllers/edit_profile_controller.da
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
 
 import '../../data/models/discovery_candidate.dart';
+import '../../data/models/match_mode.dart';
 import '../../data/models/pet_mutual_match.dart';
 import '../controllers/discovery_candidates_controller.dart';
 import '../controllers/discovery_controller.dart';
+import '../controllers/match_preference_controller.dart';
 import '../controllers/mutual_match_realtime_provider.dart';
 import '../matching_navigation.dart';
 import '../widgets/match_celebration_overlay.dart';
@@ -346,6 +349,32 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
             ],
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+          child: _MatchModeToggle(
+            mode: ref.watch(
+              matchPreferenceControllerProvider.select((p) => p.mode),
+            ),
+            onChanged: (m) => ref
+                .read(matchPreferenceControllerProvider.notifier)
+                .setMode(m),
+          ),
+        ),
+        if (ref.watch(
+              matchPreferenceControllerProvider.select((p) => p.mode),
+            ) ==
+            MatchMode.breeding)
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: TextButton.icon(
+                onPressed: () => context.push('/matching/breeding-setup'),
+                icon: const Icon(Icons.tune, size: 18),
+                label: const Text('Breeding setup'),
+              ),
+            ),
+          ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
@@ -1281,3 +1310,34 @@ class _SwipeLabel extends StatelessWidget {
   }
 }
 
+
+class _MatchModeToggle extends StatelessWidget {
+  const _MatchModeToggle({required this.mode, required this.onChanged});
+
+  final MatchMode mode;
+  final ValueChanged<MatchMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: SegmentedButton<MatchMode>(
+        segments: const [
+          ButtonSegment(
+            value: MatchMode.playdate,
+            icon: Icon(Icons.sports_baseball_outlined),
+            label: Text('Playdate'),
+          ),
+          ButtonSegment(
+            value: MatchMode.breeding,
+            icon: Icon(Icons.favorite_outline),
+            label: Text('Breeding'),
+          ),
+        ],
+        selected: {mode},
+        showSelectedIcon: false,
+        onSelectionChanged: (set) => onChanged(set.first),
+      ),
+    );
+  }
+}

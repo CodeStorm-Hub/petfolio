@@ -8,6 +8,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../datasources/matching_supabase_data_source.dart';
 import '../models/chat_message.dart';
+import '../models/match_mode.dart';
+import '../models/match_profile.dart';
+import '../models/pet_health_cert.dart';
+import '../models/pet_pedigree.dart';
 import '../models/matching_discovery_row.dart';
 import '../models/pet_mutual_match.dart';
 import '../models/pet_swipe.dart';
@@ -73,6 +77,7 @@ class MatchingRepository {
     List<String>? speciesFilters,
     int? minAgeYears,
     int? maxAgeYears,
+    MatchMode mode = MatchMode.playdate,
   }) async {
     final uid = _dataSource.currentUserId;
     if (uid == null) return [];
@@ -96,6 +101,7 @@ class MatchingRepository {
       speciesFilters: species,
       minAgeYears: minAgeYears,
       maxAgeYears: maxAgeYears,
+      mode: mode.dbValue,
     );
   }
 
@@ -104,6 +110,7 @@ class MatchingRepository {
     required String swipedPetId,
     required String swipedOwnerUserId,
     required String action,
+    MatchMode mode = MatchMode.playdate,
   }) async {
     if (_dataSource.currentUserId == null) return;
     if (swipedPetId.startsWith('demo-')) return;
@@ -120,6 +127,7 @@ class MatchingRepository {
         actorPetId: swiperPetId,
         targetPetId: swipedPetId,
         action: swipeAction,
+        mode: mode.dbValue,
       );
     } catch (e) {
       debugPrint('[MatchingRepository] recordSwipe failed: $e');
@@ -127,8 +135,11 @@ class MatchingRepository {
     }
   }
 
-  Future<List<PetMutualMatch>> fetchMutualMatches(String petId) =>
-      _dataSource.fetchMatchesForPet(petId);
+  Future<List<PetMutualMatch>> fetchMutualMatches(
+    String petId, {
+    MatchMode? mode,
+  }) =>
+      _dataSource.fetchMatchesForPet(petId, mode: mode?.dbValue);
 
   Future<List<PetSwipe>> fetchSwipesByActor(String actorPetId) =>
       _dataSource.fetchSwipesByActor(actorPetId);
@@ -190,4 +201,49 @@ class MatchingRepository {
 
   Future<void> markMessagesAsRead(String threadId) =>
       _dataSource.markMessagesAsRead(threadId);
+
+  Future<MatchProfile?> fetchMatchProfile(String petId, MatchMode mode) =>
+      _dataSource.fetchMatchProfile(petId, mode.dbValue);
+
+  Future<void> saveMatchProfile(MatchProfile profile) =>
+      _dataSource.upsertMatchProfile(profile.toUpsert());
+
+  Future<PetPedigree?> fetchPedigree(String petId) =>
+      _dataSource.fetchPedigree(petId);
+
+  Future<void> savePedigree(PetPedigree pedigree) =>
+      _dataSource.upsertPedigree(pedigree.toUpsert());
+
+  Future<List<PetHealthCert>> fetchHealthCerts(String petId) =>
+      _dataSource.fetchHealthCerts(petId);
+
+  Future<void> addHealthCert({
+    required String petId,
+    required HealthCertType certType,
+    required Uint8List bytes,
+    required String ext,
+    required String contentType,
+    DateTime? expiresAt,
+  }) async {
+    final path = await _dataSource.uploadHealthCertFile(
+      petId: petId,
+      bytes: bytes,
+      certType: certType.dbValue,
+      ext: ext,
+      contentType: contentType,
+    );
+    await _dataSource.insertHealthCert({
+      'pet_id': petId,
+      'cert_type': certType.dbValue,
+      'file_path': path,
+      if (expiresAt != null)
+        'expires_at': expiresAt.toIso8601String().split('T').first,
+    });
+  }
+
+  Future<void> deleteHealthCert(String id) =>
+      _dataSource.deleteHealthCert(id);
+
+  Future<String> signedCertUrl(String filePath) =>
+      _dataSource.signedCertUrl(filePath);
 }

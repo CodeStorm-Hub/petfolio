@@ -32,7 +32,7 @@ final class MyShopProvider extends $AsyncNotifierProvider<MyShop, Shop?> {
   MyShop create() => MyShop();
 }
 
-String _$myShopHash() => r'fac92bbca66b9a3d53a8fcc0d58b0f579d07609b';
+String _$myShopHash() => r'42ad8cf4a6a68f22cf2cc2ba7f74ab9b5e395050';
 
 abstract class _$MyShop extends $AsyncNotifier<Shop?> {
   FutureOr<Shop?> build();

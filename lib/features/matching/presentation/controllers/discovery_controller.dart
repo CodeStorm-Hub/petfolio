@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/discovery_candidate.dart';
 import '../../data/repositories/matching_repository.dart';
 import 'discovery_candidates_controller.dart';
+import 'match_preference_controller.dart';
 
 enum SwipeAction { pass, greet, match, superPaw }
 
@@ -111,6 +112,7 @@ class DiscoveryNotifier extends Notifier<DiscoveryState> {
           swipedPetId: top.petId,
           swipedOwnerUserId: top.ownerUserId ?? '',
           action: action.name,
+          mode: ref.read(matchPreferenceControllerProvider).mode,
         )
         .catchError((Object e) {
           debugPrint('[DiscoveryNotifier] swipe record failed: $e');

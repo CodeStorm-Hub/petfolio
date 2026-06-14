@@ -98,7 +98,7 @@ Future<void> main() async {
     await ensureStripeReady(publishableKey: _stripePublishableKey);
   }
 
-  await Supabase.initialize(url: _supabaseUrl, publishableKey: _supabaseAnonKey);
+  await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
 
   if (kIsWeb) {
     runApp(const ProviderScope(child: PetfolioApp()));
