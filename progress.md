@@ -177,6 +177,29 @@ Dart (analyze clean except known `anonKey` info lint; care tests pass):
 
 ---
 
+## 2026-06-15 — SSLCommerz Flutter SDK Integration ✅
+
+Replaced the Phase 5 URL-launcher (external browser) approach with the official `flutter_sslcommerz` SDK (in-app WebView).
+
+**Dependencies:**
+- `flutter_sslcommerz: ^3.0.2` added to `pubspec.yaml`.
+- Supabase secrets set: `SSLCOMMERZ_STORE_ID`, `SSLCOMMERZ_STORE_PASSWD`, `SSLCOMMERZ_API_BASE` (sandbox).
+- Both edge functions redeployed: `create-sslcommerz-session` + `sslcommerz-webhook` now carry the secrets.
+
+**Dart:**
+- New `lib/core/services/sslcommerz_service.dart`: wraps `Sslcommerz.payNow()` with correct model imports (`SSLCommerzInitialization`, `SSLCSdkType.TESTBOX`, `SSLCurrencyType.BDT`, `SSLCCustomerInfoInitializer`, `SSLCShipmentInfoInitializer`). Returns `SslPayResult { success, cancelled, failed }`.
+- `OrderRepository.setPaymentMethod()`: stamps `payment_method` on the pending order before the SDK opens.
+- `CheckoutNotifier.startSslcommerzCheckoutForShop()`: now `idle → loadingIntent → awaitingSheet → success | failure | idle`. Calls `SslcommerzService.pay()` (in-app WebView), awaits `SslPayResult`; cancelled → cancel order + reset; failed → cancel order + show error; success → `_finalizePaidCheckout` (polls IPN confirmation).
+- IPN flow unchanged: `sslcommerz-webhook` fires when SSLCommerz posts the IPN, calls `confirm_order_inventory`, marks order `paid/processing`.
+
+**No UI changes needed** — cart screen bKash/Nagad chips + `_handleCheckout` dispatch already correct.
+
+`flutter analyze`: 1 pre-existing `anonKey` info lint only. `flutter test`: 112 pass / 5 pre-existing failures unchanged.
+
+**To run:** `flutter run --dart-define-from-file=.env` — SSLCommerz credentials are already in `.env`.
+
+---
+
 ## 2026-06-11 — Vet Hub Screen Revamp ✅
 
 `flutter analyze` (full project) — **No issues found.**

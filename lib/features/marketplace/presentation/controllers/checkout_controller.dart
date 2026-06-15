@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/platform/platform_payments.dart';
 import '../../../../core/platform/web_app_url.dart';
+import '../../../../core/services/sslcommerz_service.dart';
 import '../../../../core/services/stripe_init_service.dart';
 import '../../data/models/marketplace_order.dart' show PaymentMethod;
 import '../../data/repositories/order_repository.dart'
@@ -300,10 +301,10 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
     }
   }
 
-  /// SSLCommerz checkout — opens external browser for bKash/Nagad payment.
+  /// SSLCommerz checkout — shows in-app WebView via the flutter_sslcommerz SDK.
   ///
-  /// Flow: idle → loadingIntent → awaitingRedirect
-  /// Finalization happens in [resumeWebCheckoutIfNeeded] when the app resumes.
+  /// Flow: idle → loadingIntent → awaitingSheet → success | failure | idle (cancel)
+  /// IPN webhook confirms the order server-side; Flutter polls for confirmation.
   Future<void> startSslcommerzCheckoutForShop(
     String shopId,
     PaymentMethod method,
@@ -338,49 +339,55 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
       );
       state = state.copyWith(orderId: orderId);
 
-      final result = await _repo.createSslcommerzSession(
-        orderId:       orderId,
-        paymentMethod: method,
-        successUrl: petfolioAppUrl(
-          '/marketplace/order/$orderId',
-          queryParameters: const {'ssl': 'success'},
-        ),
-        failUrl: petfolioAppUrl(
-          '/marketplace',
-          queryParameters: const {'ssl': 'fail'},
-        ),
-        cancelUrl: petfolioAppUrl(
-          '/marketplace',
-          queryParameters: const {'ssl': 'cancel'},
-        ),
+      await _repo.setPaymentMethod(orderId, method);
+
+      final order = await _repo.fetchOrder(orderId);
+      final amountBdt = order.amountCents / 100.0;
+
+      state = state.copyWith(status: CheckoutStatus.awaitingSheet);
+
+      final result = await SslcommerzService.pay(
+        orderId:           orderId,
+        amountBdt:         amountBdt,
+        paymentMethodName: method.name,
+        customerEmail:     user.email ?? 'customer@petfolio.app',
+        customerName:      user.email?.split('@')[0] ?? 'Customer',
       );
 
-      state = state.copyWith(status: CheckoutStatus.awaitingRedirect);
+      switch (result) {
+        case SslPayResult.cancelled:
+          unawaited(_repo.cancelOrder(orderId));
+          state = const CheckoutState(status: CheckoutStatus.idle);
 
-      final launched = await launchUrl(
-        Uri.parse(result.gatewayUrl),
-        mode: LaunchMode.externalApplication,
-      );
-      if (!launched) throw Exception('Could not open payment gateway.');
-      return;
+        case SslPayResult.failed:
+          unawaited(_repo.cancelOrder(orderId));
+          state = CheckoutState(
+            status:       CheckoutStatus.failure,
+            activeShopId: shopId,
+            errorMessage: 'Payment was declined. Please try again.',
+          );
+
+        case SslPayResult.success:
+          await _finalizePaidCheckout(shopId: shopId, orderId: orderId);
+      }
     } on ShopNotVerifiedException catch (e) {
       if (orderId != null) unawaited(_repo.cancelOrder(orderId));
       state = CheckoutState(
-        status: CheckoutStatus.failure,
+        status:       CheckoutStatus.failure,
         activeShopId: shopId,
         errorMessage: e.toString(),
       );
     } on ShopInactiveException catch (e) {
       if (orderId != null) unawaited(_repo.cancelOrder(orderId));
       state = CheckoutState(
-        status: CheckoutStatus.failure,
+        status:       CheckoutStatus.failure,
         activeShopId: shopId,
         errorMessage: e.toString(),
       );
     } catch (e) {
       if (orderId != null) unawaited(_repo.cancelOrder(orderId));
       state = CheckoutState(
-        status: CheckoutStatus.failure,
+        status:       CheckoutStatus.failure,
         activeShopId: shopId,
         errorMessage: e.toString(),
       );

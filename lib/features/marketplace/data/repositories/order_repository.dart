@@ -89,6 +89,14 @@ class OrderRepository {
     return checkoutUrl;
   }
 
+  Future<void> setPaymentMethod(String orderId, PaymentMethod method) async {
+    await _client
+        .from('marketplace_orders')
+        .update({'payment_method': method.name})
+        .eq('id', orderId)
+        .eq('status', 'pending');
+  }
+
   /// Validate a CoD order via the Edge Function (inventory check, shop active
   /// guard) and stamp payment_method='cod' on the row server-side.
   /// Returns the confirmed orderId on success.

@@ -47,8 +47,9 @@ function isAllowedRedirectUrl(url: string): boolean {
 }
 
 const PAYMENT_OPTIONS: Record<string, string> = {
-  bkash: 'bKash',
-  nagad: 'Nagad',
+  bkash:      'bKash',
+  nagad:      'Nagad',
+  sslcommerz: '',     // empty = show all SSLCommerz options (cards, MFS, etc.)
 };
 
 serve(async (req) => {
@@ -79,8 +80,8 @@ serve(async (req) => {
     const { orderId, payment_method, success_url, fail_url, cancel_url } = body;
 
     if (!orderId) return json({ error: 'orderId is required' }, 400);
-    if (!payment_method || !PAYMENT_OPTIONS[payment_method]) {
-      return json({ error: 'payment_method must be "bkash" or "nagad"' }, 400);
+    if (!payment_method || !(payment_method in PAYMENT_OPTIONS)) {
+      return json({ error: 'payment_method must be "bkash", "nagad", or "sslcommerz"' }, 400);
     }
     if (!success_url || !fail_url || !cancel_url) {
       return json({ error: 'success_url, fail_url, and cancel_url are required' }, 400);

@@ -317,7 +317,7 @@ class _VendorCheckoutSection extends ConsumerStatefulWidget {
 
 class _VendorCheckoutSectionState
     extends ConsumerState<_VendorCheckoutSection> {
-  PaymentMethod _method = PaymentMethod.stripe;
+  PaymentMethod _method = PaymentMethod.sslcommerz;
   final _promoCtrl = TextEditingController();
   bool _promoExpanded = false;
   bool _promoApplied = false;
@@ -383,7 +383,9 @@ class _VendorCheckoutSectionState
           },
         ),
       );
-    } else if (_method == PaymentMethod.bkash || _method == PaymentMethod.nagad) {
+    } else if (_method == PaymentMethod.bkash ||
+               _method == PaymentMethod.nagad ||
+               _method == PaymentMethod.sslcommerz) {
       ref.read(checkoutProvider.notifier).startSslcommerzCheckoutForShop(widget.shopId, _method);
     } else {
       ref.read(checkoutProvider.notifier).startCheckoutForShop(widget.shopId);
@@ -661,19 +663,19 @@ class _VendorCheckoutSectionState
                       children: [
                         Expanded(
                           child: _PaymentChip(
-                            label: 'Credit Card',
+                            label: 'Card (BD)',
                             icon: Icons.credit_card_rounded,
-                            selected: _method == PaymentMethod.stripe,
-                            onTap: () => setState(() => _method = PaymentMethod.stripe),
+                            selected: _method == PaymentMethod.sslcommerz,
+                            onTap: () => setState(() => _method = PaymentMethod.sslcommerz),
                           ),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: _PaymentChip(
-                            label: 'bKash',
-                            icon: Icons.phone_android_rounded,
-                            selected: _method == PaymentMethod.bkash,
-                            onTap: () => setState(() => _method = PaymentMethod.bkash),
+                            label: "Int'l Card",
+                            icon: Icons.language_rounded,
+                            selected: _method == PaymentMethod.stripe,
+                            onTap: () => setState(() => _method = PaymentMethod.stripe),
                           ),
                         ),
                       ],
@@ -683,13 +685,26 @@ class _VendorCheckoutSectionState
                       children: [
                         Expanded(
                           child: _PaymentChip(
+                            label: 'bKash',
+                            icon: Icons.phone_android_rounded,
+                            selected: _method == PaymentMethod.bkash,
+                            onTap: () => setState(() => _method = PaymentMethod.bkash),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _PaymentChip(
                             label: 'Nagad',
                             icon: Icons.phone_android_rounded,
                             selected: _method == PaymentMethod.nagad,
                             onTap: () => setState(() => _method = PaymentMethod.nagad),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
                         Expanded(
                           child: _PaymentChip(
                             label: 'Cash on Delivery',
@@ -855,20 +870,22 @@ class _VendorCheckoutSectionState
                     children: [
                       Icon(
                         switch (_method) {
-                          PaymentMethod.cod   => Icons.payments_outlined,
+                          PaymentMethod.cod        => Icons.payments_outlined,
                           PaymentMethod.bkash ||
-                          PaymentMethod.nagad => Icons.phone_android_rounded,
-                          _                   => Icons.lock_outline_rounded,
+                          PaymentMethod.nagad      => Icons.phone_android_rounded,
+                          PaymentMethod.sslcommerz => Icons.credit_card_rounded,
+                          _                        => Icons.lock_outline_rounded,
                         },
                         size: 18,
                       ),
                       const SizedBox(width: 10),
                       Text(
                         switch (_method) {
-                          PaymentMethod.cod   => 'Place Order (COD)',
-                          PaymentMethod.bkash => 'Pay with bKash',
-                          PaymentMethod.nagad => 'Pay with Nagad',
-                          _                   => 'Place Order · \$${(totalCents / 100).toStringAsFixed(2)}',
+                          PaymentMethod.cod        => 'Place Order (COD)',
+                          PaymentMethod.bkash      => 'Pay with bKash',
+                          PaymentMethod.nagad      => 'Pay with Nagad',
+                          PaymentMethod.sslcommerz => 'Pay with Card (BD)',
+                          _                        => 'Pay · \$${(totalCents / 100).toStringAsFixed(2)}',
                         },
                       ),
                     ],
