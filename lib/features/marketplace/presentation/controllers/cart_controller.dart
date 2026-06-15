@@ -82,18 +82,25 @@ class CartNotifier extends Notifier<CartState> {
     Product product, {
     bool subscribe = false,
     int frequencyWeeks = 4,
+    String? variantId,
+    int? overridePriceCents,
   }) {
     final items = List<CartItem>.from(state.items);
     final idx = items.indexWhere(
-      (i) => i.product.id == product.id && i.isSubscribed == subscribe,
+      (i) =>
+          i.product.id == product.id &&
+          i.isSubscribed == subscribe &&
+          i.variantId == variantId,
     );
 
     if (idx == -1) {
       items.add(CartItem(
-        product: product,
-        quantity: 1,
-        isSubscribed: subscribe && product.subscribable,
-        frequencyWeeks: frequencyWeeks,
+        product:            product,
+        quantity:           1,
+        isSubscribed:       subscribe && product.subscribable,
+        frequencyWeeks:     frequencyWeeks,
+        variantId:          variantId,
+        overridePriceCents: overridePriceCents,
       ));
     } else {
       items[idx] = items[idx].copyWith(quantity: items[idx].quantity + 1);

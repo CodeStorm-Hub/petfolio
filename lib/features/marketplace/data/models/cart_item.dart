@@ -10,24 +10,29 @@ class CartItem {
     required this.quantity,
     required this.isSubscribed,
     required this.frequencyWeeks,
+    this.variantId,
+    this.overridePriceCents,
   });
 
   final Product product;
-
-  /// Number of units (≥ 1).
   final int quantity;
-
-  /// Whether this line uses subscribe-and-save pricing.
   final bool isSubscribed;
-
-  /// Delivery frequency in weeks (2, 4, 6, or 8).  Meaningful only when
-  /// [isSubscribed] is true and [product.subscribable] is true.
   final int frequencyWeeks;
+  final String? variantId;
+  final int? overridePriceCents;
 
   // ── Computed ───────────────────────────────────────────────────────────────
 
-  int get unitCents =>
-      isSubscribed && product.subscribable ? product.subPriceCents : product.priceCents;
+  int get unitCents {
+    if (overridePriceCents != null) {
+      return isSubscribed && product.subscribable
+          ? (overridePriceCents! * 0.88).round()
+          : overridePriceCents!;
+    }
+    return isSubscribed && product.subscribable
+        ? product.subPriceCents
+        : product.priceCents;
+  }
 
   int get lineTotalCents => unitCents * quantity;
 
@@ -42,12 +47,16 @@ class CartItem {
     int? quantity,
     bool? isSubscribed,
     int? frequencyWeeks,
+    String? variantId,
+    int? overridePriceCents,
   }) =>
       CartItem(
-        product:        product,
-        quantity:       quantity        ?? this.quantity,
-        isSubscribed:   isSubscribed    ?? this.isSubscribed,
-        frequencyWeeks: frequencyWeeks  ?? this.frequencyWeeks,
+        product:             product,
+        quantity:            quantity            ?? this.quantity,
+        isSubscribed:        isSubscribed        ?? this.isSubscribed,
+        frequencyWeeks:      frequencyWeeks      ?? this.frequencyWeeks,
+        variantId:           variantId           ?? this.variantId,
+        overridePriceCents:  overridePriceCents  ?? this.overridePriceCents,
       );
 
   // ── JSON (for persisting to Supabase line_items column) ───────────────────
@@ -61,31 +70,35 @@ class CartItem {
         'line_total_cents': lineTotalCents,
         'is_subscribed':    isSubscribed,
         'frequency_weeks':  frequencyWeeks,
+        if (variantId != null) 'variant_id': variantId,
       };
 
-  /// Minimal payload for the process_checkout RPC.
-  /// Excludes client-computed price fields — the server derives prices from DB.
   Map<String, dynamic> rpcJson() => {
         'product_id':      product.id,
         'quantity':        quantity,
         'is_subscribed':   isSubscribed,
         'frequency_weeks': frequencyWeeks,
+        if (variantId != null) 'variant_id': variantId,
       };
 
   // ── JSON (for local SharedPreferences persistence — full round-trip) ───────
 
   Map<String, dynamic> toStorageJson() => {
-        'product':         product.toStorageJson(),
-        'quantity':        quantity,
-        'is_subscribed':   isSubscribed,
-        'frequency_weeks': frequencyWeeks,
+        'product':              product.toStorageJson(),
+        'quantity':             quantity,
+        'is_subscribed':        isSubscribed,
+        'frequency_weeks':      frequencyWeeks,
+        if (variantId != null) 'variant_id': variantId,
+        if (overridePriceCents != null) 'override_price_cents': overridePriceCents,
       };
 
   factory CartItem.fromStorageJson(Map<String, dynamic> json) => CartItem(
-        product:        Product.fromStorageJson(json['product'] as Map<String, dynamic>),
-        quantity:       json['quantity'] as int,
-        isSubscribed:   json['is_subscribed'] as bool,
-        frequencyWeeks: json['frequency_weeks'] as int,
+        product:             Product.fromStorageJson(json['product'] as Map<String, dynamic>),
+        quantity:            json['quantity'] as int,
+        isSubscribed:        json['is_subscribed'] as bool,
+        frequencyWeeks:      json['frequency_weeks'] as int,
+        variantId:           json['variant_id'] as String?,
+        overridePriceCents:  json['override_price_cents'] as int?,
       );
 }
 

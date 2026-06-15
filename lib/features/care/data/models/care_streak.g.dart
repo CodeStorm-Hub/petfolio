@@ -11,6 +11,7 @@ _CareStreak _$CareStreakFromJson(Map<String, dynamic> json) => _CareStreak(
   currentStreak: (json['current_streak'] as num).toInt(),
   lastCompletionDate: _lastCompletionFromJson(json['last_completion_date']),
   bestStreak: (json['best_streak'] as num).toInt(),
+  freezesAvailable: (json['freezes_available'] as num?)?.toInt() ?? 2,
 );
 
 Map<String, dynamic> _$CareStreakToJson(
@@ -20,4 +21,5 @@ Map<String, dynamic> _$CareStreakToJson(
   'current_streak': instance.currentStreak,
   'last_completion_date': _lastCompletionToJson(instance.lastCompletionDate),
   'best_streak': instance.bestStreak,
+  'freezes_available': instance.freezesAvailable,
 };

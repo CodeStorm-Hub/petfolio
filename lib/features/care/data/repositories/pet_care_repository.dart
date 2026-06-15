@@ -254,6 +254,29 @@ class PetCareRepository {
     }
   }
 
+  Future<CareStreak> useStreakFreeze(String petId) async {
+    try {
+      _requireAuth();
+      final current = await getPetStreak(petId);
+      if (current.freezesAvailable <= 0) {
+        throw const ValidationException(message: 'No streak freezes remaining.');
+      }
+      final row = await _client
+          .from('care_streaks')
+          .update({'freezes_available': current.freezesAvailable - 1})
+          .eq('pet_id', petId)
+          .select()
+          .single();
+      return CareStreak.fromJson(row);
+    } on AppException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
+    } catch (e) {
+      throw NetworkException(message: e.toString());
+    }
+  }
+
   Future<CareTask> createTask(CareTask task) async {
     try {
       _requireAuth();

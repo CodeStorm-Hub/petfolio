@@ -64,6 +64,7 @@ class Product {
     this.rating,
     this.reviewCount,
     this.createdAt,
+    this.isRx = false,
   });
 
   final String          id;
@@ -87,17 +88,11 @@ class Product {
   final List<String> imageUrls;
   final int          inventoryCount;
 
-  /// Vendor-set subscription price. Null = fall back to the computed 12%-off value.
   final int? subPriceCentsDb;
-
-  /// Average star rating (0.0 – 5.0). Null = not yet rated.
   final double? rating;
-
-  /// Total number of reviews. Null = no reviews yet.
   final int? reviewCount;
-
-  /// Row creation timestamp — used as keyset cursor for pagination.
   final DateTime? createdAt;
+  final bool isRx;
 
   // ── Computed ───────────────────────────────────────────────────────────────
 
@@ -136,6 +131,7 @@ class Product {
         createdAt:        json['created_at'] != null
             ? DateTime.tryParse(json['created_at'] as String)
             : null,
+        isRx:             (json['is_rx'] as bool?) ?? false,
       );
 
   static ProductGlyphType _parseGlyph(String s) => switch (s) {
@@ -169,6 +165,7 @@ class Product {
         if (subPriceCentsDb != null) 'sub_price_cents': subPriceCentsDb,
         if (rating != null) 'rating': rating,
         if (reviewCount != null) 'review_count': reviewCount,
+        'is_rx': isRx,
       };
 
   factory Product.fromStorageJson(Map<String, dynamic> json) => Product(
@@ -190,6 +187,7 @@ class Product {
         subPriceCentsDb: json['sub_price_cents'] as int?,
         rating:          (json['rating'] as num?)?.toDouble(),
         reviewCount:     json['review_count'] as int?,
+        isRx:            (json['is_rx'] as bool?) ?? false,
       );
 
   static Color _hexColor(String hex) {

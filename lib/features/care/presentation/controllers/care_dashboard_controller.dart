@@ -3,6 +3,7 @@ import 'package:in_app_review/in_app_review.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/errors/app_exception.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/care_streak.dart';
@@ -338,6 +339,22 @@ class CareDashboard extends _$CareDashboard {
         state = _routine;
         AppSnackBar.showError(e);
       }
+    }
+  }
+
+  Future<bool> useFreeze() async {
+    final petId = ref.read(activePetIdProvider);
+    if (petId == null) return false;
+    try {
+      await _repo.useStreakFreeze(petId);
+      AppSnackBar.show('Streak freeze used — your streak is protected!');
+      return true;
+    } on ValidationException catch (e) {
+      AppSnackBar.show(e.message);
+      return false;
+    } catch (_) {
+      AppSnackBar.show('Could not use freeze. Try again.');
+      return false;
     }
   }
 

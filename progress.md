@@ -51,13 +51,84 @@ Dart (analyze clean except known `anonKey` info lint; care tests pass):
 - `symptom_checker_screen.dart` (route `/care/symptoms`): multi-step, non-diagnostic disclaimer, emergency fast-path, saves to `health_logs` (logType symptom).
 - Entry points added to `medical_vault_screen.dart` (`_HealthToolsRow`: Medications + Symptom check).
 
-### Phase 2 — REMAINING
-1. Reminders: schedule from `medical_vault.reminderEnabled`/`nextDueAt` via `NotificationService.scheduleTaskReminder` + FCM (device-local; verify on device).
-2. Streak-freeze consumption: column exists; needs integration with streak computation in `get_care_dashboard_snapshot` RPC (deferred — risk of breaking existing streak logic). Surface `freezes_available` in `CareStreak` model + "use freeze" UI.
-3. Shareable summary already exists in vault — could enrich with vitals/weight if desired.
+### Phase 2 — COMPLETE ✅ (this session)
+
+**Streak-freeze:**
+- `CareStreak.freezesAvailable` field added (maps to `care_streaks.freezes_available`).
+- `PetCareRepository.useStreakFreeze(petId)` — decrements column, throws `ValidationException` if 0.
+- `CareDashboard.useFreeze()` controller method — calls repo, shows snack.
+- `_StreakFreezeRow` widget in `care_screen.dart` — shows a tappable 🧊 chip when `freezesAvailable > 0`.
+
+**Medication reminders (device-local):**
+- `NotificationService.scheduleMedicationDueReminder(recordId, name, nextDue)` — one-shot zonedSchedule at 9 AM on `nextDue` date.
+- `NotificationService.cancelMedicationReminder(recordId)`.
+- `HealthVaultController.build()` calls `_syncMedicationReminders(records)` on every stream emission — schedules/cancels based on `reminderEnabled` + `nextDueAt`.
+
+---
+
+## 2026-06-15 — Phase 3: Social hashtags, DMs, Saves ✅
+
+**DB migration** `phase3_social_hashtags_dms_saves`:
+- `hashtags` (tag PK, post_count, created_at) + `pg_trgm` GIN index on `tag` — RLS: public read, auth insert/update.
+- `post_hashtags` (post_id FK → posts, tag FK → hashtags, PK) — RLS: public read, auth insert, owner delete.
+- `saved_posts` (id, user_id FK → auth.users, post_id FK → posts, unique user+post) — RLS: owner-scoped.
+- `get_or_create_social_thread(p_other_user_id uuid)` RPC (SECURITY DEFINER) — canonical ordering, returns existing or new `chat_threads` row with null match/mutual ids (social DM).
+
+**Dart** (analyze: 1 info lint only — known `anonKey`; 112 tests pass, 5 pre-existing failures unchanged):
+- `Hashtag` + `SavedPost` Freezed models.
+- `SocialRepository` extended: `searchHashtags`, `fetchPostsForHashtag`, `attachHashtagsToPost` (+ wired into `createPost`), `isPostSaved`, `savePost`, `unsavePost`, `fetchSavedPosts`, `getOrCreateSocialThread`.
+- `SocialDmRepository` — wraps `chat_threads`/`chat_messages` for non-match threads.
+- Controllers: `HashtagSearch` + `HashtagFeed`, `SavedPosts` + `isPostSaved`, `SocialDmConversation`.
+- Screens: `HashtagScreen` (grid), `SavedPostsScreen` (grid with long-press unsave), `SocialDmScreen` (real-time conversation).
+- Routes: `/social/hashtag/:tag`, `/social/saved`, `/social/dm/:userId`.
+- **Entry points:**
+  - `PostDetailScreen._Caption` → tappable hashtag spans (tap navigates to `/social/hashtag/tag`).
+  - `_BookmarkButton` in stats bar → `savePost`/`unsavePost` with `isPostSavedProvider` state.
+
+---
+
+## 2026-06-15 — Phase 4: Commerce (variants, wishlist, prescriptions, shipments) ✅
+
+**DB migration** `phase4_commerce_variants_wishlist_rx_shipments`:
+- `products.is_rx` bool column.
+- `product_variants` (id, product_id, sku, attributes jsonb, price_cents, stock, is_active) + RLS.
+- `inventory_reservations.variant_id` + two partial unique indexes (one for `variant_id IS NULL`, one for `IS NOT NULL`) replacing old single index — needed because NULLs aren't equal in UNIQUE.
+- Full `process_checkout` replacement: variant-aware pricing/stock, two ON CONFLICT branches.
+- `confirm_order_inventory` replacement: decrements variant stock.
+- `wishlists`/`wishlist_items` + `get_or_create_wishlist()` SECURITY DEFINER RPC.
+- `prescriptions` (order_id, buyer_id, status pending/approved/rejected, file_path, vet_name) + RLS (buyer insert/select, vendor select).
+- `shipments` (order_id, status, courier, tracking_id, tracking_url, estimated_delivery_at) + RLS (buyer/vendor select) + `vendor_upsert_shipment` RPC.
+- `vendor_update_order` extended to call `vendor_upsert_shipment` when tracking info provided.
+- Private `prescriptions` bucket + policies.
+
+**Dart models:**
+- `ProductVariant` (Freezed) + `ProductVariantX` extension (`priceFormatted`, `attributeLabel`).
+- `WishlistItem` (Freezed); `WishlistProduct` bundle class in repository.
+- `Prescription` (Freezed) + `PrescriptionStatus` enum with custom `_rxStatusFromJson`/`_rxStatusToJson`.
+- `Shipment` (Freezed) + `ShipmentStatus` enum with `@JsonEnum(fieldRename: FieldRename.snake)`.
+- `Product.isRx` added; `LineItem.variantId`/`isRx` + `MarketplaceOrder.hasRxItems` getter.
+- `CartItem.variantId`/`overridePriceCents`; `unitCents` uses override price + 12% sub discount.
+
+**Dart repositories/controllers:**
+- `ProductRepository.fetchVariants(productId)`.
+- `WishlistRepository`: `get_or_create_wishlist()` RPC, fetch/toggle with `WishlistProduct` join.
+- `PrescriptionRepository`: fetch/upload (Storage + DB row), signed URL.
+- `ShipmentRepository.fetchShipment(orderId)`.
+- `CartController.add()` extended with `variantId`/`overridePriceCents`.
+- New controllers: `WishlistItems` + `isWishlisted` family, `productVariants` family, `PrescriptionUpload` family AsyncNotifier, `shipment` family.
+
+**UI:**
+- `WishlistScreen` — grid of wishlisted products, inline remove via heart tap.
+- `PrescriptionUploadScreen` — image_picker (camera/gallery), vet name field, resubmit-aware, status banner.
+- `ShipmentTrackingScreen` — animated 5-step timeline, status card, courier details, "Track on Courier Website" deeplink.
+- `product_detail_screen.dart`: bookmark → wishlist heart (filled/outline), `_VariantChipsSection` (DB-driven chips between price + reviews), `_VariantSheetContent` → ConsumerStatefulWidget with selectable DB variant rows + prices, `_SheetResult` record passed to cart.
+- `buyer_order_detail_screen.dart`: `_PrescriptionCard` (Rx CTA → upload screen), `_ShipmentCard` Consumer (rich status badge + "Track Shipment" button → tracking screen; falls back to old order fields).
+- Routes: `/marketplace/wishlist`, `/marketplace/orders/:id/prescription`, `/marketplace/orders/:id/tracking`.
+
+`flutter analyze` clean (1 pre-existing `anonKey` info lint). 112 tests pass; 5 pre-existing failures unchanged.
 
 ### Immediate next step
-Finish Phase 2 remaining (reminders + streak-freeze), then Phase 3 (Social hashtags/DMs/saves).
+Phase 5 — Payments: bKash/Nagad/COD via SSLCommerz.
 
 ---
 

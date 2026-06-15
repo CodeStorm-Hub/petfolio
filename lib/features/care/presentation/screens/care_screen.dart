@@ -246,6 +246,8 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                           children: [
                             // ── Space for floating hero card overlap (card at bottom:-28) ──
                             const SizedBox(height: 44.0),
+                            // ── Streak freeze chip ─────────────────────────
+                            _StreakFreezeRow(dashboard: dashboard),
                             // ── Date picker ────────────────────────────────
                             CareDatePicker(
                               selectedDate: dashboard.selectedDate,
@@ -615,6 +617,67 @@ class _DoneCounter extends StatelessWidget {
             fontSize: 11,
             fontWeight: FontWeight.w800,
             color: allDone ? AppColors.mint700 : AppColors.sunny700,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Streak Freeze chip ──────────────────────────────────────────────────────
+
+class _StreakFreezeRow extends ConsumerWidget {
+  const _StreakFreezeRow({required this.dashboard});
+
+  final DailyRoutineState dashboard;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final freezes = dashboard.streak.maybeWhen(
+      data: (s) => s.freezesAvailable,
+      orElse: () => 0,
+    );
+    if (freezes <= 0) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GestureDetector(
+        onTap: () =>
+            ref.read(careDashboardProvider.notifier).useFreeze(),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A3A6B).withAlpha(12),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFF4A90D9).withAlpha(60)),
+          ),
+          child: Row(
+            children: [
+              const Text('🧊', style: TextStyle(fontSize: 20)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Streak Freeze available',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      '$freezes freeze${freezes == 1 ? '' : 's'} remaining — tap to protect your streak',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.shield_outlined,
+                size: 18,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ],
           ),
         ),
       ),

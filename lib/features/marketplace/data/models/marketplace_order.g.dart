@@ -14,6 +14,8 @@ _LineItem _$LineItemFromJson(Map<String, dynamic> json) => _LineItem(
   lineTotalCents: (json['line_total_cents'] as num).toInt(),
   isSubscribed: json['is_subscribed'] as bool,
   frequencyWeeks: (json['frequency_weeks'] as num).toInt(),
+  variantId: json['variant_id'] as String?,
+  isRx: json['is_rx'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$LineItemToJson(_LineItem instance) => <String, dynamic>{
@@ -24,6 +26,8 @@ Map<String, dynamic> _$LineItemToJson(_LineItem instance) => <String, dynamic>{
   'line_total_cents': instance.lineTotalCents,
   'is_subscribed': instance.isSubscribed,
   'frequency_weeks': instance.frequencyWeeks,
+  'variant_id': instance.variantId,
+  'is_rx': instance.isRx,
 };
 
 _MarketplaceOrder _$MarketplaceOrderFromJson(Map<String, dynamic> json) =>

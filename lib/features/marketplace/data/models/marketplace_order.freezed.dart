@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$LineItem {
 
- String get productId; String get productName; int get quantity; int get unitCents; int get lineTotalCents; bool get isSubscribed; int get frequencyWeeks;
+ String get productId; String get productName; int get quantity; int get unitCents; int get lineTotalCents; bool get isSubscribed; int get frequencyWeeks; String? get variantId; bool get isRx;
 /// Create a copy of LineItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $LineItemCopyWith<LineItem> get copyWith => _$LineItemCopyWithImpl<LineItem>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LineItem&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.productName, productName) || other.productName == productName)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unitCents, unitCents) || other.unitCents == unitCents)&&(identical(other.lineTotalCents, lineTotalCents) || other.lineTotalCents == lineTotalCents)&&(identical(other.isSubscribed, isSubscribed) || other.isSubscribed == isSubscribed)&&(identical(other.frequencyWeeks, frequencyWeeks) || other.frequencyWeeks == frequencyWeeks));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LineItem&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.productName, productName) || other.productName == productName)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unitCents, unitCents) || other.unitCents == unitCents)&&(identical(other.lineTotalCents, lineTotalCents) || other.lineTotalCents == lineTotalCents)&&(identical(other.isSubscribed, isSubscribed) || other.isSubscribed == isSubscribed)&&(identical(other.frequencyWeeks, frequencyWeeks) || other.frequencyWeeks == frequencyWeeks)&&(identical(other.variantId, variantId) || other.variantId == variantId)&&(identical(other.isRx, isRx) || other.isRx == isRx));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,productId,productName,quantity,unitCents,lineTotalCents,isSubscribed,frequencyWeeks);
+int get hashCode => Object.hash(runtimeType,productId,productName,quantity,unitCents,lineTotalCents,isSubscribed,frequencyWeeks,variantId,isRx);
 
 @override
 String toString() {
-  return 'LineItem(productId: $productId, productName: $productName, quantity: $quantity, unitCents: $unitCents, lineTotalCents: $lineTotalCents, isSubscribed: $isSubscribed, frequencyWeeks: $frequencyWeeks)';
+  return 'LineItem(productId: $productId, productName: $productName, quantity: $quantity, unitCents: $unitCents, lineTotalCents: $lineTotalCents, isSubscribed: $isSubscribed, frequencyWeeks: $frequencyWeeks, variantId: $variantId, isRx: $isRx)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $LineItemCopyWith<$Res>  {
   factory $LineItemCopyWith(LineItem value, $Res Function(LineItem) _then) = _$LineItemCopyWithImpl;
 @useResult
 $Res call({
- String productId, String productName, int quantity, int unitCents, int lineTotalCents, bool isSubscribed, int frequencyWeeks
+ String productId, String productName, int quantity, int unitCents, int lineTotalCents, bool isSubscribed, int frequencyWeeks, String? variantId, bool isRx
 });
 
 
@@ -65,7 +65,7 @@ class _$LineItemCopyWithImpl<$Res>
 
 /// Create a copy of LineItem
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? productId = null,Object? productName = null,Object? quantity = null,Object? unitCents = null,Object? lineTotalCents = null,Object? isSubscribed = null,Object? frequencyWeeks = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? productId = null,Object? productName = null,Object? quantity = null,Object? unitCents = null,Object? lineTotalCents = null,Object? isSubscribed = null,Object? frequencyWeeks = null,Object? variantId = freezed,Object? isRx = null,}) {
   return _then(_self.copyWith(
 productId: null == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
 as String,productName: null == productName ? _self.productName : productName // ignore: cast_nullable_to_non_nullable
@@ -74,7 +74,9 @@ as int,unitCents: null == unitCents ? _self.unitCents : unitCents // ignore: cas
 as int,lineTotalCents: null == lineTotalCents ? _self.lineTotalCents : lineTotalCents // ignore: cast_nullable_to_non_nullable
 as int,isSubscribed: null == isSubscribed ? _self.isSubscribed : isSubscribed // ignore: cast_nullable_to_non_nullable
 as bool,frequencyWeeks: null == frequencyWeeks ? _self.frequencyWeeks : frequencyWeeks // ignore: cast_nullable_to_non_nullable
-as int,
+as int,variantId: freezed == variantId ? _self.variantId : variantId // ignore: cast_nullable_to_non_nullable
+as String?,isRx: null == isRx ? _self.isRx : isRx // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -159,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String productId,  String productName,  int quantity,  int unitCents,  int lineTotalCents,  bool isSubscribed,  int frequencyWeeks)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String productId,  String productName,  int quantity,  int unitCents,  int lineTotalCents,  bool isSubscribed,  int frequencyWeeks,  String? variantId,  bool isRx)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LineItem() when $default != null:
-return $default(_that.productId,_that.productName,_that.quantity,_that.unitCents,_that.lineTotalCents,_that.isSubscribed,_that.frequencyWeeks);case _:
+return $default(_that.productId,_that.productName,_that.quantity,_that.unitCents,_that.lineTotalCents,_that.isSubscribed,_that.frequencyWeeks,_that.variantId,_that.isRx);case _:
   return orElse();
 
 }
@@ -180,10 +182,10 @@ return $default(_that.productId,_that.productName,_that.quantity,_that.unitCents
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String productId,  String productName,  int quantity,  int unitCents,  int lineTotalCents,  bool isSubscribed,  int frequencyWeeks)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String productId,  String productName,  int quantity,  int unitCents,  int lineTotalCents,  bool isSubscribed,  int frequencyWeeks,  String? variantId,  bool isRx)  $default,) {final _that = this;
 switch (_that) {
 case _LineItem():
-return $default(_that.productId,_that.productName,_that.quantity,_that.unitCents,_that.lineTotalCents,_that.isSubscribed,_that.frequencyWeeks);case _:
+return $default(_that.productId,_that.productName,_that.quantity,_that.unitCents,_that.lineTotalCents,_that.isSubscribed,_that.frequencyWeeks,_that.variantId,_that.isRx);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +202,10 @@ return $default(_that.productId,_that.productName,_that.quantity,_that.unitCents
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String productId,  String productName,  int quantity,  int unitCents,  int lineTotalCents,  bool isSubscribed,  int frequencyWeeks)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String productId,  String productName,  int quantity,  int unitCents,  int lineTotalCents,  bool isSubscribed,  int frequencyWeeks,  String? variantId,  bool isRx)?  $default,) {final _that = this;
 switch (_that) {
 case _LineItem() when $default != null:
-return $default(_that.productId,_that.productName,_that.quantity,_that.unitCents,_that.lineTotalCents,_that.isSubscribed,_that.frequencyWeeks);case _:
+return $default(_that.productId,_that.productName,_that.quantity,_that.unitCents,_that.lineTotalCents,_that.isSubscribed,_that.frequencyWeeks,_that.variantId,_that.isRx);case _:
   return null;
 
 }
@@ -215,7 +217,7 @@ return $default(_that.productId,_that.productName,_that.quantity,_that.unitCents
 @JsonSerializable()
 
 class _LineItem implements LineItem {
-  const _LineItem({required this.productId, required this.productName, required this.quantity, required this.unitCents, required this.lineTotalCents, required this.isSubscribed, required this.frequencyWeeks});
+  const _LineItem({required this.productId, required this.productName, required this.quantity, required this.unitCents, required this.lineTotalCents, required this.isSubscribed, required this.frequencyWeeks, this.variantId, this.isRx = false});
   factory _LineItem.fromJson(Map<String, dynamic> json) => _$LineItemFromJson(json);
 
 @override final  String productId;
@@ -225,6 +227,8 @@ class _LineItem implements LineItem {
 @override final  int lineTotalCents;
 @override final  bool isSubscribed;
 @override final  int frequencyWeeks;
+@override final  String? variantId;
+@override@JsonKey() final  bool isRx;
 
 /// Create a copy of LineItem
 /// with the given fields replaced by the non-null parameter values.
@@ -239,16 +243,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LineItem&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.productName, productName) || other.productName == productName)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unitCents, unitCents) || other.unitCents == unitCents)&&(identical(other.lineTotalCents, lineTotalCents) || other.lineTotalCents == lineTotalCents)&&(identical(other.isSubscribed, isSubscribed) || other.isSubscribed == isSubscribed)&&(identical(other.frequencyWeeks, frequencyWeeks) || other.frequencyWeeks == frequencyWeeks));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LineItem&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.productName, productName) || other.productName == productName)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unitCents, unitCents) || other.unitCents == unitCents)&&(identical(other.lineTotalCents, lineTotalCents) || other.lineTotalCents == lineTotalCents)&&(identical(other.isSubscribed, isSubscribed) || other.isSubscribed == isSubscribed)&&(identical(other.frequencyWeeks, frequencyWeeks) || other.frequencyWeeks == frequencyWeeks)&&(identical(other.variantId, variantId) || other.variantId == variantId)&&(identical(other.isRx, isRx) || other.isRx == isRx));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,productId,productName,quantity,unitCents,lineTotalCents,isSubscribed,frequencyWeeks);
+int get hashCode => Object.hash(runtimeType,productId,productName,quantity,unitCents,lineTotalCents,isSubscribed,frequencyWeeks,variantId,isRx);
 
 @override
 String toString() {
-  return 'LineItem(productId: $productId, productName: $productName, quantity: $quantity, unitCents: $unitCents, lineTotalCents: $lineTotalCents, isSubscribed: $isSubscribed, frequencyWeeks: $frequencyWeeks)';
+  return 'LineItem(productId: $productId, productName: $productName, quantity: $quantity, unitCents: $unitCents, lineTotalCents: $lineTotalCents, isSubscribed: $isSubscribed, frequencyWeeks: $frequencyWeeks, variantId: $variantId, isRx: $isRx)';
 }
 
 
@@ -259,7 +263,7 @@ abstract mixin class _$LineItemCopyWith<$Res> implements $LineItemCopyWith<$Res>
   factory _$LineItemCopyWith(_LineItem value, $Res Function(_LineItem) _then) = __$LineItemCopyWithImpl;
 @override @useResult
 $Res call({
- String productId, String productName, int quantity, int unitCents, int lineTotalCents, bool isSubscribed, int frequencyWeeks
+ String productId, String productName, int quantity, int unitCents, int lineTotalCents, bool isSubscribed, int frequencyWeeks, String? variantId, bool isRx
 });
 
 
@@ -276,7 +280,7 @@ class __$LineItemCopyWithImpl<$Res>
 
 /// Create a copy of LineItem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? productId = null,Object? productName = null,Object? quantity = null,Object? unitCents = null,Object? lineTotalCents = null,Object? isSubscribed = null,Object? frequencyWeeks = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? productId = null,Object? productName = null,Object? quantity = null,Object? unitCents = null,Object? lineTotalCents = null,Object? isSubscribed = null,Object? frequencyWeeks = null,Object? variantId = freezed,Object? isRx = null,}) {
   return _then(_LineItem(
 productId: null == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
 as String,productName: null == productName ? _self.productName : productName // ignore: cast_nullable_to_non_nullable
@@ -285,7 +289,9 @@ as int,unitCents: null == unitCents ? _self.unitCents : unitCents // ignore: cas
 as int,lineTotalCents: null == lineTotalCents ? _self.lineTotalCents : lineTotalCents // ignore: cast_nullable_to_non_nullable
 as int,isSubscribed: null == isSubscribed ? _self.isSubscribed : isSubscribed // ignore: cast_nullable_to_non_nullable
 as bool,frequencyWeeks: null == frequencyWeeks ? _self.frequencyWeeks : frequencyWeeks // ignore: cast_nullable_to_non_nullable
-as int,
+as int,variantId: freezed == variantId ? _self.variantId : variantId // ignore: cast_nullable_to_non_nullable
+as String?,isRx: null == isRx ? _self.isRx : isRx // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

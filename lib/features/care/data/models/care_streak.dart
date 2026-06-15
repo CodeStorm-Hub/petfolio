@@ -25,6 +25,7 @@ abstract class CareStreak with _$CareStreak {
     )
     DateTime? lastCompletionDate,
     @JsonKey(name: 'best_streak') required int bestStreak,
+    @JsonKey(name: 'freezes_available') @Default(2) int freezesAvailable,
   }) = _CareStreak;
 
   factory CareStreak.fromJson(Map<String, dynamic> json) =>

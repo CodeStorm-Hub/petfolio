@@ -39,6 +39,8 @@ abstract class LineItem with _$LineItem {
     required int lineTotalCents,
     required bool isSubscribed,
     required int frequencyWeeks,
+    String? variantId,
+    @Default(false) bool isRx,
   }) = _LineItem;
 
   factory LineItem.fromJson(Map<String, dynamic> json) =>
@@ -79,4 +81,6 @@ abstract class MarketplaceOrder with _$MarketplaceOrder {
       shippingTrackingNumber != null && shippingTrackingNumber!.isNotEmpty;
 
   bool get isCod => paymentMethod == PaymentMethod.cod;
+
+  bool get hasRxItems => lineItems.any((i) => i.isRx);
 }

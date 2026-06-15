@@ -247,6 +247,42 @@ class NotificationService {
     );
   }
 
+  Future<void> scheduleMedicationDueReminder({
+    required String recordId,
+    required String medicationName,
+    required DateTime nextDue,
+  }) async {
+    await _plugin.cancel(id: _idFor('med_$recordId'));
+    final reminderTime = DateTime(nextDue.year, nextDue.month, nextDue.day, 9, 0);
+    if (reminderTime.isBefore(DateTime.now())) return;
+    final tzScheduled = tz.TZDateTime.from(reminderTime, tz.local);
+    final androidDetails = AndroidNotificationDetails(
+      _channelId,
+      _channelName,
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+    await _plugin.zonedSchedule(
+      id: _idFor('med_$recordId'),
+      title: 'Medication due today',
+      body: medicationName,
+      scheduledDate: tzScheduled,
+      notificationDetails: NotificationDetails(
+        android: androidDetails,
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
+  }
+
+  Future<void> cancelMedicationReminder(String recordId) async {
+    await _plugin.cancel(id: _idFor('med_$recordId'));
+  }
+
   Future<void> cancelAppointmentReminder(String appointmentId) async {
     await _plugin.cancel(id: _idFor(appointmentId));
   }

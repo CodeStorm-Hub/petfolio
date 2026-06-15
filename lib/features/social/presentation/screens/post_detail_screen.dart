@@ -14,6 +14,7 @@ import '../../data/models/comment.dart';
 import '../../data/models/feed_post.dart';
 import '../../data/repositories/social_repository.dart';
 import '../controllers/comment_controller.dart';
+import '../controllers/saved_posts_controller.dart';
 import '../controllers/social_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -480,17 +481,91 @@ class _Caption extends StatelessWidget {
   final FeedPost post;
   final PetfolioThemeExtension pt;
 
+  static final _hashtagPattern = RegExp(r'#([a-zA-Z0-9_]+)');
+
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
+    final baseStyle = tt.bodySmall?.copyWith(fontSize: 14, height: 1.5);
+    final caption = post.caption;
+    final matches = _hashtagPattern.allMatches(caption).toList();
+
+    if (matches.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
+        child: Text(caption, style: baseStyle),
+      );
+    }
+
+    final spans = <InlineSpan>[];
+    int cursor = 0;
+    for (final m in matches) {
+      if (m.start > cursor) {
+        spans.add(TextSpan(text: caption.substring(cursor, m.start)));
+      }
+      final tag = m.group(0)!;
+      spans.add(TextSpan(
+        text: tag,
+        style: baseStyle?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
+        recognizer: null, // tap handled via GestureDetector below
+      ));
+      cursor = m.end;
+    }
+    if (cursor < caption.length) {
+      spans.add(TextSpan(text: caption.substring(cursor)));
+    }
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
-      child: Text(
-        post.caption,
-        style: tt.bodySmall?.copyWith(
-          fontSize: 14,
-          height: 1.5,
-        ),
+      child: _TappableHashtagText(
+        spans: spans,
+        caption: caption,
+        baseStyle: baseStyle,
+        hashtagPattern: _hashtagPattern,
+      ),
+    );
+  }
+}
+
+class _TappableHashtagText extends StatelessWidget {
+  const _TappableHashtagText({
+    required this.spans,
+    required this.caption,
+    required this.baseStyle,
+    required this.hashtagPattern,
+  });
+
+  final List<InlineSpan> spans;
+  final String caption;
+  final TextStyle? baseStyle;
+  final RegExp hashtagPattern;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapUp: (details) {
+        final renderBox = context.findRenderObject() as RenderBox?;
+        if (renderBox == null) return;
+        final localPos = renderBox.globalToLocal(details.globalPosition);
+        final tp = TextPainter(
+          text: TextSpan(children: spans, style: baseStyle),
+          textDirection: TextDirection.ltr,
+        )..layout(maxWidth: renderBox.size.width);
+        final textPos = tp.getPositionForOffset(localPos);
+        final offset = textPos.offset.clamp(0, caption.length - 1);
+        for (final m in hashtagPattern.allMatches(caption)) {
+          if (offset >= m.start && offset < m.end) {
+            final tag = m.group(1)!.toLowerCase();
+            context.push('/social/hashtag/$tag');
+            return;
+          }
+        }
+      },
+      child: RichText(
+        text: TextSpan(children: spans, style: baseStyle),
       ),
     );
   }
@@ -544,9 +619,37 @@ class _StatsBar extends ConsumerWidget {
             post.timeAgo,
             style: tt.labelSmall?.copyWith(color: pt.ink500),
           ),
-          const SizedBox(width: 8),
+          _BookmarkButton(postId: postId, pt: pt),
         ],
       ),
+    );
+  }
+}
+
+class _BookmarkButton extends ConsumerWidget {
+  const _BookmarkButton({required this.postId, required this.pt});
+
+  final String postId;
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final savedAsync = ref.watch(isPostSavedProvider(postId));
+    final isSaved = savedAsync.asData?.value ?? false;
+    return IconButton(
+      icon: Icon(
+        isSaved ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
+        color: isSaved ? AppColors.poppy : pt.ink500,
+      ),
+      onPressed: () async {
+        final repo = ref.read(socialRepositoryProvider);
+        if (isSaved) {
+          await repo.unsavePost(postId);
+        } else {
+          await repo.savePost(postId);
+        }
+        ref.invalidate(isPostSavedProvider(postId));
+      },
     );
   }
 }

@@ -8,16 +8,21 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../../core/theme/theme.dart';
 import '../../data/models/product.dart';
+import '../../data/models/product_variant.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/product_list_controller.dart';
+import '../controllers/product_variant_controller.dart';
+import '../controllers/wishlist_controller.dart';
 import '../widgets/product_glyph.dart';
 import '../widgets/product_reviews_section.dart';
 import '../widgets/subscription_toggle.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ProductDetailScreen — Phase 3: seller row, image carousel,
-// dual sticky CTA (Add to Cart + Buy Now), variant customize sheet.
-// ─────────────────────────────────────────────────────────────────────────────
+class _SheetResult {
+  const _SheetResult(this.qty, {this.variantId, this.variantPrice});
+  final int qty;
+  final String? variantId;
+  final int? variantPrice;
+}
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
   const ProductDetailScreen({
@@ -40,6 +45,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   bool _popping = false;
   late final PageController _pageCtrl;
   int _pageIndex = 0;
+  String? _selectedVariantId;
+  int? _selectedVariantPrice;
 
   Product? get _product =>
       widget.product ??
@@ -63,13 +70,18 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     super.dispose();
   }
 
-  // Add to cart inline — no navigation, shows snackbar
   void _handleAddToCart() {
     final p = _product;
     if (p == null) return;
     HapticFeedback.selectionClick();
     setState(() => _popping = true);
-    ref.read(cartProvider.notifier).add(p, subscribe: false, frequencyWeeks: _frequencyWeeks);
+    ref.read(cartProvider.notifier).add(
+      p,
+      subscribe: false,
+      frequencyWeeks: _frequencyWeeks,
+      variantId: _selectedVariantId,
+      overridePriceCents: _selectedVariantPrice,
+    );
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) setState(() => _popping = false);
     });
@@ -85,11 +97,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     );
   }
 
-  // Buy Now — opens variant sheet, on confirm adds qty items and goes to cart
   void _handleBuyNow() {
     final p = _product;
     if (p == null) return;
-    showModalBottomSheet<int?>(
+    showModalBottomSheet<_SheetResult?>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -99,15 +110,17 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         subscribe: _subscribe,
         frequencyWeeks: _frequencyWeeks,
       ),
-    ).then((qty) {
-      if (qty == null || qty <= 0 || !mounted) return;
+    ).then((result) {
+      if (result == null || result.qty <= 0 || !mounted) return;
       setState(() => _popping = true);
-      for (var i = 0; i < qty; i++) {
+      for (var i = 0; i < result.qty; i++) {
         Future.delayed(Duration(milliseconds: i * 90), () {
           ref.read(cartProvider.notifier).add(
             p,
             subscribe: _subscribe,
             frequencyWeeks: _frequencyWeeks,
+            variantId: result.variantId,
+            overridePriceCents: result.variantPrice,
           );
         });
       }
@@ -128,6 +141,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     }
 
     final cartItemCount = ref.watch(cartProvider.select((c) => c.itemCount));
+    final isWishlisted = ref.watch(isWishlistedProvider(product.id)).value ?? false;
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -148,6 +162,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   onPageChanged: (i) => setState(() => _pageIndex = i),
                   isDark: isDark,
                   pt: pt,
+                  isWishlisted: isWishlisted,
+                  onWishlistTap: () =>
+                      ref.read(wishlistItemsProvider.notifier).toggle(product.id),
                 ),
               ),
 
@@ -164,6 +181,21 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: _ProductInfo(product: product, subscribe: _subscribe, pt: pt),
+                ),
+              ),
+
+              // ── Variant chips ─────────────────────────────────────────────
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: _VariantChipsSection(
+                    productId: product.id,
+                    selectedVariantId: _selectedVariantId,
+                    onSelected: (id, price) => setState(() {
+                      _selectedVariantId = id;
+                      _selectedVariantPrice = price;
+                    }),
+                  ),
                 ),
               ),
 
@@ -233,6 +265,8 @@ class _ProductHeroCarousel extends StatelessWidget {
     required this.onPageChanged,
     required this.isDark,
     required this.pt,
+    required this.isWishlisted,
+    required this.onWishlistTap,
   });
 
   final Product product;
@@ -243,6 +277,8 @@ class _ProductHeroCarousel extends StatelessWidget {
   final ValueChanged<int> onPageChanged;
   final bool isDark;
   final PetfolioThemeExtension pt;
+  final bool isWishlisted;
+  final VoidCallback onWishlistTap;
 
   @override
   Widget build(BuildContext context) {
@@ -358,9 +394,12 @@ class _ProductHeroCarousel extends StatelessWidget {
                 Row(
                   children: [
                     _IconBtn(
-                      icon: Icons.bookmark_outline_rounded,
+                      icon: isWishlisted
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
                       bg: Colors.white.withAlpha(235),
-                      onTap: () {},
+                      iconColor: isWishlisted ? AppColors.poppy : null,
+                      onTap: onWishlistTap,
                     ),
                     const SizedBox(width: 8),
                     Stack(
@@ -988,11 +1027,103 @@ class _DualCtaBar extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Variant sheet — "Customize as per your choice" Pathao-style bottom sheet
-// ─────────────────────────────────────────────────────────────────────────────
+class _VariantChipsSection extends ConsumerWidget {
+  const _VariantChipsSection({
+    required this.productId,
+    required this.selectedVariantId,
+    required this.onSelected,
+  });
 
-class _VariantSheetContent extends StatefulWidget {
+  final String productId;
+  final String? selectedVariantId;
+  final void Function(String variantId, int priceCents) onSelected;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(productVariantsProvider(productId));
+    return async.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (variants) {
+        if (variants.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'VARIANTS',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.88,
+                color: AppColors.ink500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: variants.map((v) {
+                  final selected = v.id == selectedVariantId;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: GestureDetector(
+                      onTap: () => onSelected(v.id, v.priceCents),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 160),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: selected
+                              ? AppColors.mint.withAlpha(30)
+                              : AppColors.surface0,
+                          border: Border.all(
+                            color: selected ? AppColors.mint : AppColors.line,
+                            width: selected ? 1.5 : 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              v.attributeLabel,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: selected
+                                    ? AppColors.mint700
+                                    : AppColors.ink700,
+                              ),
+                            ),
+                            Text(
+                              v.priceFormatted,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: selected
+                                    ? AppColors.mint700
+                                    : AppColors.ink500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _VariantSheetContent extends ConsumerStatefulWidget {
   const _VariantSheetContent({
     required this.product,
     required this.subscribe,
@@ -1004,15 +1135,25 @@ class _VariantSheetContent extends StatefulWidget {
   final int frequencyWeeks;
 
   @override
-  State<_VariantSheetContent> createState() => _VariantSheetContentState();
+  ConsumerState<_VariantSheetContent> createState() =>
+      _VariantSheetContentState();
 }
 
-class _VariantSheetContentState extends State<_VariantSheetContent> {
+class _VariantSheetContentState extends ConsumerState<_VariantSheetContent> {
   int _qty = 1;
+  String? _selectedVariantId;
+  int? _selectedVariantPrice;
 
-  int get _unitCents => widget.subscribe && widget.product.subscribable
-      ? widget.product.subPriceCents
-      : widget.product.priceCents;
+  int get _unitCents {
+    if (_selectedVariantPrice != null) {
+      return widget.subscribe && widget.product.subscribable
+          ? (_selectedVariantPrice! * 0.88).round()
+          : _selectedVariantPrice!;
+    }
+    return widget.subscribe && widget.product.subscribable
+        ? widget.product.subPriceCents
+        : widget.product.priceCents;
+  }
 
   int get _totalCents => _unitCents * _qty;
 
@@ -1022,7 +1163,7 @@ class _VariantSheetContentState extends State<_VariantSheetContent> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final product = widget.product;
     final showDiscount = widget.subscribe && product.subscribable;
-    final variantLabel = product.variant.isNotEmpty ? product.variant : 'Standard';
+    final variantsAsync = ref.watch(productVariantsProvider(product.id));
 
     return Container(
       decoration: BoxDecoration(
@@ -1081,114 +1222,158 @@ class _VariantSheetContentState extends State<_VariantSheetContent> {
 
             Divider(height: 1, color: pt.line),
 
-            // ── Choose variant section ─────────────────────────────────────
+            // ── Variant rows ──────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+              child: variantsAsync.when(
+                loading: () => const SizedBox(
+                  height: 60,
+                  child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                ),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (variants) {
+                  final options = variants.isEmpty
+                      ? <_VariantOption>[
+                          _VariantOption(
+                            id: null,
+                            label: product.variant.isNotEmpty
+                                ? product.variant
+                                : 'Standard',
+                            priceCents: widget.subscribe && product.subscribable
+                                ? product.subPriceCents
+                                : product.priceCents,
+                          ),
+                        ]
+                      : variants
+                          .map((v) => _VariantOption(
+                                id: v.id,
+                                label: v.attributeLabel,
+                                priceCents: v.priceCents,
+                              ))
+                          .toList();
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Choose one',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: pt.ink500,
-                        ),
-                      ),
-                      const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.mint.withAlpha(30),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text(
-                          'COMPLETE',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.mint700,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  // Auto-selected variant row
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    decoration: BoxDecoration(
-                      color: isDark ? pt.surface2 : const Color(0xFFF6F7FA),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: AppColors.mint.withAlpha(isDark ? 70 : 60),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        // Radio indicator — auto-selected
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.mint, width: 2),
-                          ),
-                          child: Center(
-                            child: Container(
-                              width: 10,
-                              height: 10,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppColors.mint,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            variantLabel,
+                      Row(
+                        children: [
+                          Text(
+                            'Choose one',
                             style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: pt.ink950,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isDark ? pt.surface1 : const Color(0xFFECEDF1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            'Auto',
-                            style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: pt.ink500,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.mint.withAlpha(30),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              'COMPLETE',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.mint700,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      ...options.map((opt) {
+                        final isSelected = _selectedVariantId == null
+                            ? opt.id == null
+                            : _selectedVariantId == opt.id;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: GestureDetector(
+                            onTap: () => setState(() {
+                              _selectedVariantId = opt.id;
+                              _selectedVariantPrice =
+                                  opt.id != null ? opt.priceCents : null;
+                            }),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? pt.surface2
+                                    : const Color(0xFFF6F7FA),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? AppColors.mint
+                                      : pt.line,
+                                  width: isSelected ? 1.5 : 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 20,
+                                    height: 20,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? AppColors.mint
+                                            : pt.line2,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: isSelected
+                                        ? Center(
+                                            child: Container(
+                                              width: 10,
+                                              height: 10,
+                                              decoration: const BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: AppColors.mint,
+                                              ),
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      opt.label,
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        color: pt.ink950,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    '\$${(opt.priceCents / 100).toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: isSelected
+                                          ? AppColors.mint700
+                                          : pt.ink500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
+                  );
+                },
               ),
             ),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 8),
             Divider(height: 1, color: pt.line),
 
             // ── Quantity stepper ──────────────────────────────────────────
@@ -1261,7 +1446,13 @@ class _VariantSheetContentState extends State<_VariantSheetContent> {
                 child: FilledButton(
                   onPressed: () {
                     HapticFeedback.mediumImpact();
-                    Navigator.of(context).pop(_qty);
+                    Navigator.of(context).pop(
+                      _SheetResult(
+                        _qty,
+                        variantId: _selectedVariantId,
+                        variantPrice: _selectedVariantPrice,
+                      ),
+                    );
                   },
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.poppy,
@@ -1311,6 +1502,17 @@ class _VariantSheetContentState extends State<_VariantSheetContent> {
       ),
     );
   }
+}
+
+class _VariantOption {
+  const _VariantOption({
+    required this.id,
+    required this.label,
+    required this.priceCents,
+  });
+  final String? id;
+  final String label;
+  final int priceCents;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1369,11 +1571,12 @@ class _SheetStepperBtn extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _IconBtn extends StatelessWidget {
-  const _IconBtn({required this.icon, required this.onTap, this.bg});
+  const _IconBtn({required this.icon, required this.onTap, this.bg, this.iconColor});
 
   final IconData icon;
   final VoidCallback onTap;
   final Color? bg;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -1393,7 +1596,7 @@ class _IconBtn extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(icon, size: 22, color: AppColors.ink700),
+        child: Icon(icon, size: 22, color: iconColor ?? AppColors.ink700),
       ),
     );
   }

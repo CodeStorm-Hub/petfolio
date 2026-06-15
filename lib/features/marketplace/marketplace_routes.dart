@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'data/models/marketplace_order.dart';
 import 'data/models/product.dart';
 import 'presentation/screens/cart_screen.dart';
+import 'presentation/screens/prescription_upload_screen.dart';
+import 'presentation/screens/shipment_tracking_screen.dart';
+import 'presentation/screens/wishlist_screen.dart';
 import 'presentation/screens/shop_intro_screen.dart';
 import 'presentation/screens/customer/buyer_order_detail_screen.dart';
 import 'presentation/screens/customer/buyer_order_list_screen.dart';
@@ -143,5 +146,24 @@ List<RouteBase> marketplaceRoutes(GlobalKey<NavigatorState> rootKey) => [
     parentNavigatorKey: rootKey,
     path: '/seller/earnings',
     builder: (context, state) => const VendorEarningsScreen(),
+  ),
+  GoRoute(
+    parentNavigatorKey: rootKey,
+    path: '/marketplace/wishlist',
+    builder: (_, _) => const WishlistScreen(),
+  ),
+  GoRoute(
+    parentNavigatorKey: rootKey,
+    path: '/marketplace/orders/:id/prescription',
+    builder: (context, state) => PrescriptionUploadScreen(
+      orderId: state.pathParameters['id']!,
+    ),
+  ),
+  GoRoute(
+    parentNavigatorKey: rootKey,
+    path: '/marketplace/orders/:id/tracking',
+    builder: (context, state) => ShipmentTrackingScreen(
+      orderId: state.pathParameters['id']!,
+    ),
   ),
 ];
