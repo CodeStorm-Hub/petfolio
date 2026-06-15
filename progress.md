@@ -200,6 +200,55 @@ Replaced the Phase 5 URL-launcher (external browser) approach with the official 
 
 ---
 
+## 2026-06-15 — Consolidation Plan Phase 9: Code Gen & Final Verification ✅
+
+- `dart run build_runner build --delete-conflicting-outputs` → 102 outputs written, clean
+- `flutter analyze` → 1 pre-existing `anonKey` info lint only
+- `flutter test` → **112 pass / 5 pre-existing failures** (golden, AppShell, Appointment model, Synthetic Spring contract — unchanged throughout all phases)
+
+**Manual checklist (needs device/emulator — cannot auto-verify here):**
+- [ ] `/me` + `/settings` → `/account`, `/social/create-story` → `?mode=story`
+- [ ] MatchHubScreen Inbox | Liked tabs, WaveHeader visible
+- [ ] CommunitiesScreen WaveHeader replaces AppBar
+- [ ] ShopIntroSheet / MarketplaceCategoriesSheet as bottom sheets
+- [ ] OrderSuccessSheet animates on checkout
+- [ ] StripeOnboardingDialog appears (not push nav)
+- [ ] AdminLayout gate: non-admin sees lock, admin sees full layout
+- [ ] Tablet (≥600dp): MarketplaceScreen 3-col, CommunitiesScreen 2-col grid, AccountScreen constrained
+
+### All 9 Consolidation Phases COMPLETE ✅
+
+---
+
+## 2026-06-15 — Consolidation Plan Phase 8: Accessibility Hardening ✅
+
+`flutter analyze` — 1 pre-existing `anonKey` info lint only. Clean.
+
+- **Swipe card Semantics** (`matching_screen.dart`): `Semantics(label: '${top.name}, ${top.breed}, ${top.age}', hint: 'Swipe right to like, swipe left to pass', button: true)` wrapping `GestureDetector` in `_buildDraggable`
+- **ExcludeSemantics** on decorative painters: `wave_header.dart` WavePainter, `tail_wag_loader.dart` animated dog CustomPaint
+- **TailWagLoader liveRegion**: `Semantics(label: widget.label ?? 'Loading', liveRegion: true)` wrapping the Column
+- **PostCard React button** (`social_screen.dart`): `Semantics(label: '...', hint: 'Hold to pick a reaction', button: true)` on the Listener; `Semantics(label: kind, button: true)` on each `_ReactPickerBtn`
+- **FocusTraversalGroup** on `ShopProfileScreen` setup form (`OrderedTraversalPolicy`)
+
+---
+
+## 2026-06-15 — Consolidation Plan Phase 7: Animation & Micro-interaction Polish ✅
+
+`flutter analyze` — 1 pre-existing `anonKey` info lint only. Clean.
+
+- **TailWagLoader** replacing bare `CircularProgressIndicator` in 9 files:
+  - Admin tabs: `admin_dashboard_tab`, `financial_ledger_tab`, `moderation_tab`, `kyc_approvals_tab`, `orders_tab`, `shops_tab` (full-screen loading states)
+  - `seller_dashboard_screen` (full-screen loading state)
+  - `shop_profile_screen` (full-screen loading state)
+  - `social_profile_screen` (full-screen + post-grid loading states)
+- **WaveHeader(compact)** added to:
+  - `MatchHubScreen` — `WaveHeader(color: pt.pillarMatch)` wrapping `AppHeader` with `SafeArea(bottom: false)` inside; outer `SafeArea` removed
+  - `CommunitiesScreen` — `WaveHeader(color: pt.pillarSocial)` with Communities title replaces `AppBar`; body wrapped in `Column([WaveHeader, Expanded(state.when(...))])`
+- AnimatedSwitcher skipped: both VetHub and MatchHub use `TabBarView` (not `IndexedStack`), so no IndexedStack-based crossfade applies
+- Hero tags skipped: PetAvatar in social feed uses raw `CachedNetworkImage` in post cards — adding Hero requires modifying both source + destination simultaneously; deferred
+
+---
+
 ## 2026-06-11 — Vet Hub Screen Revamp ✅
 
 `flutter analyze` (full project) — **No issues found.**

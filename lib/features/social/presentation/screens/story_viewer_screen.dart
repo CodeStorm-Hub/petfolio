@@ -287,7 +287,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                       ),
                       const SizedBox(height: 28),
                       FilledButton.icon(
-                        onPressed: () => context.push('/social/create-story'),
+                        onPressed: () => context.push('/social/create-post?mode=story'),
                         icon: const Icon(Icons.add_a_photo_outlined, size: 18),
                         label: const Text('Share a Story'),
                       ),

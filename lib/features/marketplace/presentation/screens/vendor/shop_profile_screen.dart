@@ -8,6 +8,7 @@ import '../../../../../core/platform/media_picker.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_theme.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
+import '../../../../../core/widgets/tail_wag_loader.dart';
 import '../../controllers/edit_shop_controller.dart';
 import '../../controllers/my_shop_controller.dart';
 import '../../../data/models/shop.dart';
@@ -266,7 +267,9 @@ class _ShopProfileScreenState extends ConsumerState<ShopProfileScreen>
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-                child: Form(
+                child: FocusTraversalGroup(
+                  policy: OrderedTraversalPolicy(),
+                  child: Form(
                   key: _setupFormKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,6 +329,7 @@ class _ShopProfileScreenState extends ConsumerState<ShopProfileScreen>
                 ),
               ),
             ),
+          ),
           ],
         ),
       ),
@@ -354,7 +358,7 @@ class _ShopProfileScreenState extends ConsumerState<ShopProfileScreen>
 
     return shopAsync.when(
       loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator.adaptive()),
+        body: Center(child: TailWagLoader()),
       ),
       error: (e, _) =>
           Scaffold(body: Center(child: Text(e.toString()))),

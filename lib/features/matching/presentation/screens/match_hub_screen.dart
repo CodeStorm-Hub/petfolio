@@ -52,22 +52,28 @@ class _MatchHubScreenState extends ConsumerState<MatchHubScreen>
 
     return Scaffold(
       backgroundColor: pt.surface1,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AppHeader(
-              eyebrow: 'Match · Hub',
-              onOpenSwitcher: () => PetSwitcherSheet.show(context),
-              onBack: () => popOrGo(context, '/matching'),
-              actions: [
-                AppHeaderAction(
-                  icon: Icons.style_rounded,
-                  tooltip: 'Discover',
-                  onTap: () => popOrGo(context, '/matching'),
-                ),
-              ],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          WaveHeader(
+            size: WaveHeaderSize.compact,
+            color: pt.pillarMatch,
+            child: SafeArea(
+              bottom: false,
+              child: AppHeader(
+                eyebrow: 'Match · Hub',
+                onOpenSwitcher: () => PetSwitcherSheet.show(context),
+                onBack: () => popOrGo(context, '/matching'),
+                actions: [
+                  AppHeaderAction(
+                    icon: Icons.style_rounded,
+                    tooltip: 'Discover',
+                    onTap: () => popOrGo(context, '/matching'),
+                  ),
+                ],
+              ),
             ),
+          ),
             Material(
               color: Theme.of(context).colorScheme.surface,
               child: TabBar(
@@ -95,7 +101,6 @@ class _MatchHubScreenState extends ConsumerState<MatchHubScreen>
             ),
           ],
         ),
-      ),
     );
   }
 }

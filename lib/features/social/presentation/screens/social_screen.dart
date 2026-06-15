@@ -502,7 +502,7 @@ class _StoriesRow extends ConsumerWidget {
                   isAdd: true,
                   onTap: () {
                     ref.read(createPostControllerProvider.notifier).setIsStory(true);
-                    context.push('/social/create-story');
+                    context.push('/social/create-post?mode=story');
                   },
                 ),
 
@@ -603,7 +603,7 @@ class _OwnStoryOptionsSheet extends ConsumerWidget {
               onTap: () {
                 Navigator.pop(context);
                 ref.read(createPostControllerProvider.notifier).setIsStory(true);
-                context.push('/social/create-story');
+                context.push('/social/create-post?mode=story');
               },
             ),
           ],
@@ -1309,7 +1309,11 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 child: Row(
                   children: [
                     Expanded(
-                      child: Listener(
+                      child: Semantics(
+                        label: _reacted != null ? 'Reacted: $_reacted' : 'React to post',
+                        hint: 'Hold to pick a reaction',
+                        button: true,
+                        child: Listener(
                         onPointerDown: _onPointerDown,
                         onPointerMove: _onPointerMove,
                         onPointerUp: _onPointerUp,
@@ -1341,6 +1345,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                           ),
                         ),
                       ),
+                    ),
                     ),
                     Expanded(
                       child: _ActionBtn(
@@ -1501,7 +1506,10 @@ class _ReactPickerBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    return GestureDetector(
+    return Semantics(
+      label: kind,
+      button: true,
+      child: GestureDetector(
       onTapDown: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
@@ -1520,6 +1528,7 @@ class _ReactPickerBtn extends StatelessWidget {
           child: Text(emoji, style: const TextStyle(fontSize: 24)),
         ),
       ),
+    ),
     );
   }
 }

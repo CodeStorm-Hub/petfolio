@@ -6,7 +6,9 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_theme.dart';
 import '../../../../../core/widgets/app_snack_bar.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
+import '../../../../../core/widgets/tail_wag_loader.dart';
 import '../../controllers/deletion_request_controller.dart';
+import 'stripe_onboarding_screen.dart';
 import '../../controllers/my_shop_controller.dart';
 import '../../controllers/vendor_orders_controller.dart';
 import '../../controllers/vendor_products_controller.dart';
@@ -57,7 +59,7 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen>
         bottom: false,
         child: shopAsync.when(
           loading: () =>
-              const Center(child: CircularProgressIndicator.adaptive()),
+              const Center(child: TailWagLoader()),
           error: (e, _) => Center(child: Text(e.toString())),
           data: (shop) {
             if (shop == null) {
@@ -384,9 +386,7 @@ class _OnboardingBanner extends ConsumerWidget {
                   final url =
                       await ref.read(myShopProvider.notifier).startOnboarding();
                   if (!context.mounted) return;
-                  context.push(
-                    '/seller/onboarding?url=${Uri.encodeComponent(url)}',
-                  );
+                  await StripeOnboardingDialog.show(context, url);
                 } catch (e) {
                   if (context.mounted) AppSnackBar.showError(e);
                 }

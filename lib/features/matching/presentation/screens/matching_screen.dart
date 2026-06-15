@@ -786,7 +786,11 @@ class _SwipeCardState extends State<_SwipeCard> {
       child: Transform.rotate(
         angle: angle,
         alignment: Alignment.bottomCenter,
-        child: GestureDetector(
+        child: Semantics(
+          label: '${top.name}, ${top.breed}, ${top.age}',
+          hint: 'Swipe right to like, swipe left to pass',
+          button: true,
+          child: GestureDetector(
           onPanUpdate: (d) {
             widget.notifier.onDragUpdate(d.delta);
             _checkHaptic(widget.state.dragOffset + d.delta);
@@ -851,6 +855,7 @@ class _SwipeCardState extends State<_SwipeCard> {
           ),
         ),
       ),
+    ),
     );
   }
 

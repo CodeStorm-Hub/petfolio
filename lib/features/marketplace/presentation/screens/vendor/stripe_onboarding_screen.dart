@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/my_shop_controller.dart';
 
-class StripeOnboardingScreen extends ConsumerStatefulWidget {
-  const StripeOnboardingScreen({super.key, required this.accountLinkUrl});
+class StripeOnboardingDialog extends ConsumerStatefulWidget {
+  const StripeOnboardingDialog({super.key, required this.accountLinkUrl});
 
   final String accountLinkUrl;
 
+  static Future<void> show(BuildContext context, String accountLinkUrl) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => StripeOnboardingDialog(accountLinkUrl: accountLinkUrl),
+    );
+  }
+
   @override
-  ConsumerState<StripeOnboardingScreen> createState() =>
-      _StripeOnboardingScreenState();
+  ConsumerState<StripeOnboardingDialog> createState() => _StripeOnboardingDialogState();
 }
 
-class _StripeOnboardingScreenState extends ConsumerState<StripeOnboardingScreen>
+class _StripeOnboardingDialogState extends ConsumerState<StripeOnboardingDialog>
     with WidgetsBindingObserver {
   bool _launching = false;
 
@@ -51,68 +57,62 @@ class _StripeOnboardingScreenState extends ConsumerState<StripeOnboardingScreen>
 
   @override
   Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      contentPadding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 64, height: 64,
+            decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.surface2),
+            child: const Icon(Icons.account_balance_outlined, size: 32, color: AppColors.ink500),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Stripe setup',
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20, color: AppColors.ink950),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Complete identity verification in your browser to start receiving payouts. '
+            'Return here once done — we will automatically update your shop status.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: AppColors.ink500, height: 1.5),
+          ),
+          const SizedBox(height: 28),
+          PrimaryPillButton(
+            label: 'Proceed to Stripe',
+            isFullWidth: true,
+            size: PillButtonSize.lg,
+            isLoading: _launching,
+            onPressed: _launching ? null : _openBrowser,
+          ),
+          const SizedBox(height: 10),
+          PrimaryPillButton(
+            label: 'Close',
+            isFullWidth: true,
+            size: PillButtonSize.lg,
+            variant: PillButtonVariant.secondary,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Backward-compat alias — existing router/call-sites still compile.
+class StripeOnboardingScreen extends StatelessWidget {
+  const StripeOnboardingScreen({super.key, required this.accountLinkUrl});
+  final String accountLinkUrl;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface1,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                      size: 20, color: AppColors.ink700),
-                  onPressed: () => context.pop(),
-                ),
-              ),
-              const Spacer(),
-              Container(
-                width: 72,
-                height: 72,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.surface2,
-                ),
-                child: const Icon(Icons.account_balance_outlined,
-                    size: 36, color: AppColors.ink500),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Stripe setup',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 22,
-                  color: AppColors.ink950,
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Complete identity verification in your browser to start receiving payouts. '
-                'Return here once done — we will automatically update your shop status.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: AppColors.ink500),
-              ),
-              const Spacer(),
-              PrimaryPillButton(
-                label: 'Proceed to Stripe to verify your identity',
-                isFullWidth: true,
-                size: PillButtonSize.lg,
-                isLoading: _launching,
-                onPressed: _launching ? null : _openBrowser,
-              ),
-              const SizedBox(height: 12),
-              PrimaryPillButton(
-                label: 'Back to dashboard',
-                isFullWidth: true,
-                size: PillButtonSize.lg,
-                variant: PillButtonVariant.secondary,
-                onPressed: () => context.pop(),
-              ),
-            ],
-          ),
-        ),
-      ),
+      body: SafeArea(child: Center(child: StripeOnboardingDialog(accountLinkUrl: accountLinkUrl))),
     );
   }
 }

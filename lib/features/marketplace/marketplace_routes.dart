@@ -7,7 +7,6 @@ import 'presentation/screens/cart_screen.dart';
 import 'presentation/screens/prescription_upload_screen.dart';
 import 'presentation/screens/shipment_tracking_screen.dart';
 import 'presentation/screens/wishlist_screen.dart';
-import 'presentation/screens/shop_intro_screen.dart';
 import 'presentation/screens/customer/buyer_order_detail_screen.dart';
 import 'presentation/screens/customer/buyer_order_list_screen.dart';
 import 'presentation/screens/customer/shop_storefront_screen.dart';
@@ -19,18 +18,12 @@ import 'presentation/screens/vendor/edit_shop_screen.dart';
 import 'presentation/screens/vendor/manual_kyc_screen.dart';
 import 'presentation/screens/vendor/seller_dashboard_screen.dart';
 import 'presentation/screens/vendor/shop_setup_screen.dart';
-import 'presentation/screens/vendor/stripe_onboarding_screen.dart';
 import 'presentation/screens/vendor/vendor_order_detail_screen.dart';
 import 'presentation/screens/vendor/vendor_earnings_screen.dart';
 import 'presentation/screens/vendor/vendor_order_queue_screen.dart';
 import 'presentation/screens/vendor/vendor_product_list_screen.dart';
 
 List<RouteBase> marketplaceRoutes(GlobalKey<NavigatorState> rootKey) => [
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/marketplace/intro',
-    builder: (_, _) => const ShopIntroScreen(),
-  ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/categories',
@@ -93,14 +86,6 @@ List<RouteBase> marketplaceRoutes(GlobalKey<NavigatorState> rootKey) => [
     parentNavigatorKey: rootKey,
     path: '/seller/setup',
     builder: (context, state) => const ShopSetupScreen(),
-  ),
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/seller/onboarding',
-    builder: (context, state) {
-      final url = state.uri.queryParameters['url'] ?? '';
-      return StripeOnboardingScreen(accountLinkUrl: url);
-    },
   ),
   GoRoute(
     parentNavigatorKey: rootKey,

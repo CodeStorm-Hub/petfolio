@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/tail_wag_loader.dart';
 import '../../../marketplace/data/models/shop.dart';
 import '../controllers/kyc_review_controller.dart';
 import 'admin_shared_widgets.dart';
@@ -20,7 +21,7 @@ class KycApprovalsTab extends ConsumerWidget {
       title: 'KYC Approvals',
       onRefresh: () => ref.read(kycReviewProvider.notifier).refresh(),
       child: kycAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: TailWagLoader()),
         error: (e, _) => AdminErrorState(message: e.toString()),
         data: (shops) {
           if (shops.isEmpty) {

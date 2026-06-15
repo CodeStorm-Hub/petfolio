@@ -27,7 +27,10 @@ class AccountScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: bg,
-      body: CustomScrollView(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 600;
+          Widget scrollView = CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: WaveHeader(
@@ -152,6 +155,17 @@ class AccountScreen extends ConsumerWidget {
 
           SliverToBoxAdapter(child: SizedBox(height: bottomPad + 100)),
         ],
+          );
+          if (isWide) {
+            scrollView = Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 640),
+                child: scrollView,
+              ),
+            );
+          }
+          return scrollView;
+        },
       ),
     );
   }

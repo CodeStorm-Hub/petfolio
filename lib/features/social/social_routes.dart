@@ -16,12 +16,12 @@ List<RouteBase> socialRoutes(GlobalKey<NavigatorState> rootKey) => [
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/social/create-post',
-    builder: (context, state) => const CreateContentScreen(initialMode: ContentMode.post),
-  ),
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/social/create-story',
-    builder: (context, state) => const CreateContentScreen(initialMode: ContentMode.story),
+    builder: (context, state) {
+      final mode = state.uri.queryParameters['mode'] == 'story'
+          ? ContentMode.story
+          : ContentMode.post;
+      return CreateContentScreen(initialMode: mode);
+    },
   ),
   GoRoute(
     parentNavigatorKey: rootKey,

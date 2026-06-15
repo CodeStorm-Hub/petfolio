@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/widgets/tail_wag_loader.dart';
 import '../../../care/data/models/pet_awards_summary.dart';
 import '../../../care/presentation/controllers/pet_awards_provider.dart';
 import '../../../matching/presentation/matching_navigation.dart';
@@ -39,7 +40,7 @@ class SocialProfileScreen extends ConsumerWidget {
       loading: () => Scaffold(
         backgroundColor: pt.surface1,
         appBar: AppBar(backgroundColor: cs.surface, leading: BackButton(color: cs.onSurface)),
-        body: const Center(child: CircularProgressIndicator.adaptive()),
+        body: const Center(child: TailWagLoader()),
       ),
       error: (e, st) => Scaffold(
         backgroundColor: pt.surface1,
@@ -152,7 +153,7 @@ class SocialProfileScreen extends ConsumerWidget {
               // ── Posts grid ────────────────────────────────────────────
               postsAsync.when(
                 loading: () => const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator.adaptive()),
+                  child: Center(child: TailWagLoader()),
                 ),
                 error: (e, st) => SliverFillRemaining(
                   child: Center(child: Text('Failed to load posts', style: TextStyle(color: pt.ink500))),

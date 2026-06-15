@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/petfolio_empty_state.dart';
+import '../../../../core/widgets/wave_header.dart';
 import '../../../../core/widgets/primary_pill_button.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
 import '../widgets/create_community_sheet.dart';
@@ -19,14 +20,9 @@ class CommunitiesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(communitiesControllerProvider);
-    final cs = Theme.of(context).colorScheme;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Communities'),
-        backgroundColor: cs.surface,
-        surfaceTintColor: Colors.transparent,
-      ),
       floatingActionButton: state.maybeWhen(
         data: (communities) => communities.isEmpty
             ? null
@@ -37,13 +33,48 @@ class CommunitiesScreen extends ConsumerWidget {
               ),
         orElse: () => null,
       ),
-      body: state.when(
-        loading: () => ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: 6,
-          separatorBuilder: (_, _) => const SizedBox(height: 12),
-          itemBuilder: (_, _) =>
-              const SkeletonLoader(width: double.infinity, height: 88),
+      body: Column(
+        children: [
+          WaveHeader(
+            size: WaveHeaderSize.compact,
+            color: pt.pillarSocial,
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                child: Text(
+                  'Communities',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: state.when(
+        loading: () => LayoutBuilder(
+          builder: (_, constraints) => constraints.maxWidth >= 600
+              ? GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 400,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 3.5,
+                  ),
+                  itemCount: 6,
+                  itemBuilder: (_, _) =>
+                      const SkeletonLoader(width: double.infinity, height: 88),
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: 6,
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
+                  itemBuilder: (_, _) =>
+                      const SkeletonLoader(width: double.infinity, height: 88),
+                ),
         ),
         error: (e, _) => PetfolioEmptyState(
           icon: Icons.error_outline_rounded,
@@ -68,14 +99,41 @@ class CommunitiesScreen extends ConsumerWidget {
               ),
             );
           }
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: communities.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 12),
-            itemBuilder: (context, i) =>
-                _CommunityCard(community: communities[i]),
+          return LayoutBuilder(
+            builder: (_, constraints) {
+              final isWide = constraints.maxWidth >= 600;
+              if (isWide) {
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 840),
+                    child: GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 400,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 3.2,
+                      ),
+                      itemCount: communities.length,
+                      itemBuilder: (context, i) =>
+                          _CommunityCard(community: communities[i]),
+                    ),
+                  ),
+                );
+              }
+              return ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: communities.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
+                itemBuilder: (context, i) =>
+                    _CommunityCard(community: communities[i]),
+              );
+            },
           );
         },
+          ),
+          ),
+        ],
       ),
     );
   }

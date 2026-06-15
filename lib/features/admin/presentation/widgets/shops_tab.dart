@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
+import '../../../../core/widgets/tail_wag_loader.dart';
 import '../../data/models/shop_deletion_request.dart';
 import '../controllers/shop_deletion_controller.dart';
 import 'admin_shared_widgets.dart';
@@ -19,7 +20,7 @@ class ShopsTab extends ConsumerWidget {
       title: 'Shop Deletion Requests',
       onRefresh: () => ref.read(shopDeletionRequestsProvider.notifier).refresh(),
       child: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: TailWagLoader()),
         error: (e, _) => AdminErrorState(message: e.toString()),
         data: (requests) {
           if (requests.isEmpty) {

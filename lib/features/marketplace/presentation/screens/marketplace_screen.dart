@@ -11,6 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'marketplace_categories_screen.dart';
 import 'shop_intro_screen.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -71,7 +72,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
     if (!mounted) return;
     final should = await ShopIntroScreen.shouldShow();
     if (should && mounted) {
-      context.push('/marketplace/intro');
+      await ShopIntroSheet.show(context);
     }
   }
 
@@ -123,44 +124,46 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final isWide = screenWidth >= ResponsiveLayout.mobileMax;
     final selectedCat = ref.watch(selectedCategoryProvider);
-
-    Widget bodyContent = Column(
-      children: [
-        _MarketHeader(onCart: _openCart),
-        _CategoryChips(
-          selected: selectedCat,
-          onSelected: (cat) =>
-              ref.read(selectedCategoryProvider.notifier).select(cat),
-        ),
-        Expanded(
-          child: _ShopBody(
-            selectedCat: selectedCat,
-            onProductTap: (p) => context.push('/marketplace/product/${p.id}', extra: p),
-            onAdd: _addToCart,
-          ),
-        ),
-      ],
-    );
-
-    if (isWide) {
-      bodyContent = Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: bodyContent,
-        ),
-      );
-    }
 
     return WebCheckoutResumeListener(
       child: Scaffold(
         backgroundColor: pt.surface1,
         body: Stack(
           children: [
-            bodyContent,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= ResponsiveLayout.mobileMax;
+                Widget body = Column(
+                  children: [
+                    _MarketHeader(onCart: _openCart),
+                    _CategoryChips(
+                      selected: selectedCat,
+                      onSelected: (cat) =>
+                          ref.read(selectedCategoryProvider.notifier).select(cat),
+                    ),
+                    Expanded(
+                      child: _ShopBody(
+                        selectedCat: selectedCat,
+                        onProductTap: (p) =>
+                            context.push('/marketplace/product/${p.id}', extra: p),
+                        onAdd: _addToCart,
+                      ),
+                    ),
+                  ],
+                );
+                if (isWide) {
+                  body = Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 840),
+                      child: body,
+                    ),
+                  );
+                }
+                return body;
+              },
+            ),
             ..._flyingItems.map((item) {
               return _FlyToCartAnim(
                 key: ValueKey(item.id),
@@ -437,7 +440,7 @@ class _CategoryChips extends StatelessWidget {
         itemBuilder: (_, i) {
           if (i == _cats.length) {
             return GestureDetector(
-              onTap: () => context.push('/marketplace/categories'),
+              onTap: () => MarketplaceCategoriesSheet.show(context),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -567,9 +570,22 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
     if (mounted) setState(() => _loadingMore = false);
   }
 
+  int _crossAxisCount(double maxWidth) {
+    if (maxWidth >= ResponsiveLayout.tabletMax) return 4;
+    if (maxWidth >= ResponsiveLayout.mobileMax) return 3;
+    return 2;
+  }
+
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) => _buildBody(context, constraints.maxWidth),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, double maxWidth) {
     final productsAsync = ref.watch(productListProvider);
+    final cols = _crossAxisCount(maxWidth);
 
     return productsAsync.when(
       loading: () => CustomScrollView(
@@ -577,8 +593,8 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: cols,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 12,
                 childAspectRatio: 0.72,
@@ -665,12 +681,7 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
               sliver: SliverGrid.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount:
-                      MediaQuery.sizeOf(context).width >= ResponsiveLayout.tabletMax
-                          ? 4
-                          : MediaQuery.sizeOf(context).width >= ResponsiveLayout.mobileMax
-                              ? 3
-                              : 2,
+                  crossAxisCount: cols,
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                   childAspectRatio: 0.64,
@@ -765,7 +776,7 @@ class _YoullLoveSection extends StatelessWidget {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => context.push('/marketplace/categories'),
+                  onPressed: () => MarketplaceCategoriesSheet.show(context),
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.poppy,
                     textStyle: const TextStyle(
