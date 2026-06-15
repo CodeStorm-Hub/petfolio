@@ -57,6 +57,14 @@ class SkeletonLoader extends StatefulWidget {
   factory SkeletonLoader.productCard({Key? key}) =>
       _SkeletonProductCard(key: key);
 
+  /// Settings/account list-tile skeleton (icon circle + label + chevron).
+  factory SkeletonLoader.settingsTile({Key? key}) =>
+      _SkeletonSettingsTile(key: key);
+
+  /// Chat bubble skeleton, aligned by sender side.
+  factory SkeletonLoader.chatBubble({Key? key, bool isMine = false}) =>
+      _SkeletonChatBubble(key: key, isMine: isMine);
+
   final double width;
   final double height;
 
@@ -204,6 +212,84 @@ class _SkeletonProductCardState extends State<SkeletonLoader> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SkeletonSettingsTile extends SkeletonLoader {
+  const _SkeletonSettingsTile({super.key})
+      : super(width: 0, height: 0, borderRadius: 0);
+
+  @override
+  State<SkeletonLoader> createState() => _SkeletonSettingsTileState();
+}
+
+class _SkeletonSettingsTileState extends State<SkeletonLoader> {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 56,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            const SkeletonLoader.circle(size: 20),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SkeletonLoader(width: double.infinity, height: 13),
+                  const SizedBox(height: 4),
+                  SkeletonLoader(width: 100, height: 11),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            const SkeletonLoader(width: 16, height: 16, borderRadius: 4),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SkeletonChatBubble extends SkeletonLoader {
+  const _SkeletonChatBubble({super.key, required this.isMine})
+      : super(width: 0, height: 0, borderRadius: 0);
+
+  final bool isMine;
+
+  @override
+  State<SkeletonLoader> createState() => _SkeletonChatBubbleState();
+}
+
+class _SkeletonChatBubbleState extends State<_SkeletonChatBubble> {
+  @override
+  Widget build(BuildContext context) {
+    final isMine = widget.isMine;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Row(
+        mainAxisAlignment:
+            isMine ? MainAxisAlignment.end : MainAxisAlignment.start,
+        children: [
+          if (!isMine) ...[
+            const SkeletonLoader.circle(size: 28),
+            const SizedBox(width: 8),
+          ],
+          SkeletonLoader(
+            width: 180,
+            height: 40,
+            borderRadius: PetfolioThemeExtension.radiusLg,
+          ),
+          if (isMine) ...[
+            const SizedBox(width: 8),
+            const SkeletonLoader.circle(size: 28),
+          ],
+        ],
+      ),
     );
   }
 }

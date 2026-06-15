@@ -131,6 +131,22 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
   static const double btnHeightXl   = 60.0;
   static const double btnHeightWalk = 64.0;
 
+  // ── Content spacing tokens (outer padding / section gaps) ────────────────────
+  static const double spaceXs  =  4.0;
+  static const double spaceSm  =  8.0;
+  static const double spaceMd  = 16.0;
+  static const double spaceLg  = 24.0;
+  static const double spaceXl  = 32.0;
+
+  // ── Accessibility: WCAG-compliant section-header label style ─────────────────
+  /// 11px / Inter Bold / tracked / ink500 — use for all-caps section headers.
+  TextStyle get labelCapsStyle => GoogleFonts.inter(
+    fontSize: 11,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0.8,
+    color: ink500,
+  );
+
   // ── Pre-built instances ───────────────────────────────────────────────────────
   static const PetfolioThemeExtension light = PetfolioThemeExtension(
     ink950: AppColors.ink950,

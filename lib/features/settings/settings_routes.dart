@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../marketplace/presentation/controllers/address_controller.dart';
 import '../marketplace/presentation/widgets/address_sheet.dart';
-import 'presentation/screens/settings_screen.dart';
+import '../profile/presentation/screens/account_screen.dart';
 import '../marketplace/data/models/user_address.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
@@ -15,7 +15,7 @@ List<GoRoute> settingsRoutes(GlobalKey<NavigatorState> rootKey) => [
       GoRoute(
         path: '/settings',
         parentNavigatorKey: rootKey,
-        builder: (_, _) => const SettingsScreen(),
+        builder: (_, _) => const AccountScreen(),
       ),
       GoRoute(
         path: '/settings/addresses',

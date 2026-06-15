@@ -1,4 +1,6 @@
 export 'app_bottom_sheet.dart';
+export 'post_grid.dart';
+export 'section_header.dart';
 export 'pf_achievement_tile.dart';
 export 'app_header.dart';
 export 'app_snack_bar.dart';

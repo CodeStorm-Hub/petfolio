@@ -4,8 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../communities/data/models/community.dart';
 import '../communities/presentation/screens/community_detail_screen.dart';
 import 'data/models/feed_post.dart';
-import 'presentation/screens/create_post_screen.dart';
-import 'presentation/screens/create_story_screen.dart';
+import 'presentation/screens/create_content_screen.dart';
 import 'presentation/screens/hashtag_screen.dart';
 import 'presentation/screens/notifications_screen.dart';
 import 'presentation/screens/post_detail_screen.dart';
@@ -17,12 +16,12 @@ List<RouteBase> socialRoutes(GlobalKey<NavigatorState> rootKey) => [
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/social/create-post',
-    builder: (context, state) => const CreatePostScreen(),
+    builder: (context, state) => const CreateContentScreen(initialMode: ContentMode.post),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/social/create-story',
-    builder: (context, state) => const CreateStoryScreen(),
+    builder: (context, state) => const CreateContentScreen(initialMode: ContentMode.story),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,

@@ -68,6 +68,17 @@ class WavePainter extends CustomPainter {
   bool shouldRepaint(WavePainter old) => old.color != color;
 }
 
+// ─── WaveHeader size tokens ───────────────────────────────────────────────────
+
+enum WaveHeaderSize {
+  compact(80),
+  regular(140),
+  hero(220);
+
+  const WaveHeaderSize(this.dp);
+  final double dp;
+}
+
 // ─── WaveHeader widget ────────────────────────────────────────────────────────
 
 class WaveHeader extends StatelessWidget {
@@ -75,6 +86,7 @@ class WaveHeader extends StatelessWidget {
     super.key,
     required this.color,
     required this.child,
+    this.size = WaveHeaderSize.regular,
     this.waveColor,
     this.height,
     this.clipWave = true,
@@ -82,6 +94,7 @@ class WaveHeader extends StatelessWidget {
 
   final Color color;
   final Widget child;
+  final WaveHeaderSize size;
   final Color? waveColor;
   final double? height;
   final bool clipWave;
@@ -93,6 +106,8 @@ class WaveHeader extends StatelessWidget {
     final pageColor = waveColor ?? (isDark ? (pt?.surface1 ?? AppColors.creamD) : (pt?.surface1 ?? AppColors.cream));
 
 
+    final resolvedHeight = height ?? size.dp;
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -102,7 +117,7 @@ class WaveHeader extends StatelessWidget {
             clipper: _WaveClipper(),
             child: Container(
               color: color,
-              height: height,
+              height: resolvedHeight,
               width: double.infinity,
               child: child,
             ),
@@ -110,7 +125,7 @@ class WaveHeader extends StatelessWidget {
         else
           Container(
             color: color,
-            height: height,
+            height: resolvedHeight,
             width: double.infinity,
             child: child,
           ),
