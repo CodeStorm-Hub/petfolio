@@ -117,6 +117,41 @@ class OrderRepository {
     return data['orderId'] as String? ?? orderId;
   }
 
+  /// Create an SSLCommerz payment session for bKash / Nagad checkout.
+  /// Returns the gateway URL to open in an external browser.
+  Future<SslcommerzSessionResult> createSslcommerzSession({
+    required String orderId,
+    required PaymentMethod paymentMethod,
+    required String successUrl,
+    required String failUrl,
+    required String cancelUrl,
+  }) async {
+    final response = await _client.functions.invoke(
+      'create-sslcommerz-session',
+      body: {
+        'orderId':        orderId,
+        'payment_method': paymentMethod.name,
+        'success_url':    successUrl,
+        'fail_url':       failUrl,
+        'cancel_url':     cancelUrl,
+      },
+    );
+
+    if (response.status != 200) {
+      final data = response.data as Map<String, dynamic>?;
+      final code = data?['code'] as String?;
+      if (code == 'SHOP_NOT_VERIFIED') throw const ShopNotVerifiedException();
+      if (code == 'SHOP_INACTIVE')     throw const ShopInactiveException();
+      throw Exception('SSLCommerz session error ${response.status}: ${response.data}');
+    }
+
+    final data = response.data as Map<String, dynamic>;
+    return SslcommerzSessionResult(
+      gatewayUrl:    data['gatewayUrl']    as String,
+      transactionId: data['transactionId'] as String,
+    );
+  }
+
   /// No-op — the stripe-webhook Edge Function transitions pending → processing
   /// when payment_intent.succeeded fires. Kept so the existing checkout
   /// controller compiles until Phase 5 removes the call.
@@ -230,6 +265,16 @@ class OrderRepository {
     }
     throw const PaymentTimeoutException();
   }
+}
+
+class SslcommerzSessionResult {
+  const SslcommerzSessionResult({
+    required this.gatewayUrl,
+    required this.transactionId,
+  });
+
+  final String gatewayUrl;
+  final String transactionId;
 }
 
 /// Stripe confirmed the payment but the backend webhook has not updated the

@@ -3,13 +3,14 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:flutter_stripe/flutter_stripe.dart' hide PaymentMethod;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/platform/platform_payments.dart';
 import '../../../../core/platform/web_app_url.dart';
 import '../../../../core/services/stripe_init_service.dart';
+import '../../data/models/marketplace_order.dart' show PaymentMethod;
 import '../../data/repositories/order_repository.dart'
     show
         InsufficientStockException,
@@ -299,9 +300,94 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
     }
   }
 
-  Future<void> resumeWebCheckoutIfNeeded() async {
-    if (!kIsWeb) return;
+  /// SSLCommerz checkout — opens external browser for bKash/Nagad payment.
+  ///
+  /// Flow: idle → loadingIntent → awaitingRedirect
+  /// Finalization happens in [resumeWebCheckoutIfNeeded] when the app resumes.
+  Future<void> startSslcommerzCheckoutForShop(
+    String shopId,
+    PaymentMethod method,
+  ) async {
+    if (isLoading) return;
 
+    final cart = ref.read(cartProvider);
+    final shopItems = cart.itemsByShop[shopId] ?? [];
+    if (shopItems.isEmpty) return;
+
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      state = const CheckoutState(
+        status: CheckoutStatus.failure,
+        errorMessage: 'You must be logged in to checkout.',
+      );
+      return;
+    }
+
+    state = CheckoutState(
+      status: CheckoutStatus.loadingIntent,
+      activeShopId: shopId,
+    );
+
+    String? orderId;
+
+    try {
+      orderId = await _repo.insertPendingOrder(
+        buyerId: user.id,
+        shopId:  shopId,
+        cart:    cart,
+      );
+      state = state.copyWith(orderId: orderId);
+
+      final result = await _repo.createSslcommerzSession(
+        orderId:       orderId,
+        paymentMethod: method,
+        successUrl: petfolioAppUrl(
+          '/marketplace/order/$orderId',
+          queryParameters: const {'ssl': 'success'},
+        ),
+        failUrl: petfolioAppUrl(
+          '/marketplace',
+          queryParameters: const {'ssl': 'fail'},
+        ),
+        cancelUrl: petfolioAppUrl(
+          '/marketplace',
+          queryParameters: const {'ssl': 'cancel'},
+        ),
+      );
+
+      state = state.copyWith(status: CheckoutStatus.awaitingRedirect);
+
+      final launched = await launchUrl(
+        Uri.parse(result.gatewayUrl),
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) throw Exception('Could not open payment gateway.');
+      return;
+    } on ShopNotVerifiedException catch (e) {
+      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
+      state = CheckoutState(
+        status: CheckoutStatus.failure,
+        activeShopId: shopId,
+        errorMessage: e.toString(),
+      );
+    } on ShopInactiveException catch (e) {
+      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
+      state = CheckoutState(
+        status: CheckoutStatus.failure,
+        activeShopId: shopId,
+        errorMessage: e.toString(),
+      );
+    } catch (e) {
+      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
+      state = CheckoutState(
+        status: CheckoutStatus.failure,
+        activeShopId: shopId,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+  Future<void> resumeWebCheckoutIfNeeded() async {
     final orderId = state.orderId;
     final shopId = state.activeShopId;
     if (state.status != CheckoutStatus.awaitingRedirect ||

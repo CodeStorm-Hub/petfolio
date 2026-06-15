@@ -127,8 +127,53 @@ Dart (analyze clean except known `anonKey` info lint; care tests pass):
 
 `flutter analyze` clean (1 pre-existing `anonKey` info lint). 112 tests pass; 5 pre-existing failures unchanged.
 
-### Immediate next step
-Phase 5 — Payments: bKash/Nagad/COD via SSLCommerz.
+---
+
+## 2026-06-15 — Phase 5: bKash/Nagad payments via SSLCommerz ✅
+
+**DB migration** `phase5_sslcommerz_payment`:
+- `ALTER TYPE payment_method_enum ADD VALUE` for `bkash`, `nagad`, `sslcommerz` (was a PG enum, not a CHECK constraint).
+- `sslcommerz_transaction_id text` column added to `marketplace_orders`.
+
+**Edge Functions** (both deployed to `jqyjvhwlcqcsuwcqgcwf`):
+- `create-sslcommerz-session`: Auth + ownership + reservation guard → POSTs to SSLCommerz init API → stores `sessionkey` as `sslcommerz_transaction_id` + stamps `payment_method` on order → returns `{ gatewayUrl, transactionId }`. Idempotent (re-uses live session if exists). Env: `SSLCOMMERZ_STORE_ID`, `SSLCOMMERZ_STORE_PASSWD`, `SSLCOMMERZ_API_BASE` (default = sandbox).
+- `sslcommerz-webhook`: IPN handler (JWT disabled — receives form POST from SSLCommerz). Validates via SSLCommerz validation API, checks `tran_id` ownership + idempotency, calls `confirm_order_inventory` RPC, sets `payment_status='paid'` + `status='processing'`.
+
+**Dart** (analyze: 1 pre-existing `anonKey` info lint; 112 tests pass, 5 pre-existing failures unchanged):
+- `PaymentMethod` enum extended: `bkash, nagad, sslcommerz` + `isSslcommerz` getter.
+- `MarketplaceOrder.sslcommerzTransactionId` + `isSslcommerz` getter.
+- `SslcommerzSessionResult` + `OrderRepository.createSslcommerzSession()`.
+- `CheckoutNotifier.startSslcommerzCheckoutForShop(shopId, method)`: inserts pending order → calls Edge Function → opens `GatewayPageURL` via `launchUrl(externalApplication)` → `awaitingRedirect` state.
+- `resumeWebCheckoutIfNeeded()`: removed `kIsWeb` guard — now works on mobile for SSLCommerz lifecycle polling.
+- `WebCheckoutResumeListener`: registers `WidgetsBindingObserver` unconditionally (not just on web); handles `ssl=cancel` / `ssl=fail` query params alongside existing `stripe=cancel`.
+- Cart screen: 2×2 payment chip grid (Credit Card, bKash, Nagad, Cash on Delivery); `_handleCheckout` dispatches to `startSslcommerzCheckoutForShop` for bKash/Nagad; Place Order button label + icon update for each method.
+- `flutter_stripe` `PaymentMethod` conflict resolved: `hide PaymentMethod` on the Stripe import.
+
+---
+
+## 2026-06-15 — Phase 6: Security Hardening ✅
+
+**DB migrations** applied to `jqyjvhwlcqcsuwcqgcwf`:
+- `phase6_security_hardening` + `phase6b_fcm_push_outbox_rls`.
+- `private.fcm_data_to_text_map` recreated with `SET search_path = ''` (fixes mutable search_path WARN).
+- `fcm_push_outbox`: RLS re-enabled + `USING (false)` deny-all policy (service_role bypasses RLS; anon/authenticated see no rows).
+- `appointment-media`: dropped broad `public read` SELECT policy (public buckets serve objects by URL; listing no longer allowed).
+- REVOKE `anon` EXECUTE from 11 SECURITY DEFINER RPCs that require authentication (`dec/inc_community_*_count`, `get_care_dashboard_snapshot`, `get_or_create_social_thread`, `get_or_create_wishlist`, `matching_discovery_candidates`, `refresh_product_rating_stats`, `toggle_care_task`, `vendor_upsert_shipment`).
+- REVOKE `authenticated` EXECUTE from admin/service-role-only RPCs: `approve_vendor_kyc`, `reject_vendor_kyc`, `resolve_reported_post`, `resolve_shop_deletion`, `confirm_order_inventory`, `refresh_product_rating_stats`, `dec/inc_community_*_count`, `vendor_upsert_shipment`.
+- Dropped dead `hashtags_auth_update` policy (no code path updated hashtags directly).
+- Tightened `post_hashtags_auth_insert`: now requires `author_id = auth.uid()` match on `posts` (prevents tagging other users' posts).
+- Added `private.manage_hashtag_post_count` SECURITY DEFINER trigger on `post_hashtags` (INSERT → increments `hashtags.post_count`, DELETE → decrements with floor 0). `post_count` was always 0 before (bug fix).
+
+**Remaining acceptable WARNs** (all intentional):
+- `authenticated_security_definer_function_executable` for user-facing RPCs (`process_checkout`, `toggle_care_task`, `get_care_dashboard_snapshot`, `vendor_update_order`, etc.) — these must be callable by signed-in users.
+- `hashtags_auth_upsert` INSERT `WITH CHECK (true)` — intentional; any authenticated user can create a new hashtag.
+- `auth_leaked_password_protection` — **must be enabled manually** in Supabase Dashboard → Auth → Settings → Password Security.
+
+**ACL verification** (via `aclexplode`) confirms revocations took effect; advisor results above were stale cached.
+
+`flutter test`: 112 pass / 5 pre-existing failures unchanged. No Dart changes needed.
+
+### All 6 Phases COMPLETE ✅
 
 ---
 

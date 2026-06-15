@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,25 +20,36 @@ class _WebCheckoutResumeListenerState extends ConsumerState<WebCheckoutResumeLis
   @override
   void initState() {
     super.initState();
-    if (kIsWeb) WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    if (kIsWeb) WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) return;
-    _handleStripeReturn();
+    _handlePaymentReturn();
     ref.read(checkoutProvider.notifier).resumeWebCheckoutIfNeeded();
   }
 
-  void _handleStripeReturn() {
+  void _handlePaymentReturn() {
     final params = GoRouterState.of(context).uri.queryParameters;
+
     if (params['stripe'] == 'cancel') {
+      final orderId = ref.read(checkoutProvider).orderId;
+      if (orderId != null) {
+        ref.read(orderRepositoryProvider).cancelOrder(orderId).ignore();
+      }
+      ref.read(checkoutProvider.notifier).reset();
+      if (mounted) context.go('/marketplace');
+      return;
+    }
+
+    if (params['ssl'] == 'cancel' || params['ssl'] == 'fail') {
       final orderId = ref.read(checkoutProvider).orderId;
       if (orderId != null) {
         ref.read(orderRepositoryProvider).cancelOrder(orderId).ignore();
