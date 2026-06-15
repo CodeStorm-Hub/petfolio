@@ -1,5 +1,20 @@
 # Petfolio — Progress Log
 
+## 2026-06-16 — Phase 2 Navigation: StatefulShellRoute + Golden Updates ✅
+
+- **StatefulShellRoute.indexedStack** with 5 branches (global/care/social/matching/marketplace) — each branch has its own `navigatorKey`; module widget trees survive tab switches via `IndexedStack` (scroll/form state preserved)
+- **AppShell**: `child: Widget` → `navigationShell: StatefulNavigationShell`; renders `navigationShell` directly
+- **PopScope** added at shell level (`canPop: false`, pops via `context.canPop() ? context.pop() : null`) for Android back handling
+- **Duplicate route removed**: `/social/notifications` in `social_routes.dart` (router_notifier already redirects to `/notifications`)
+- **Golden tests updated**: `app_theme_light.png` + `app_theme_dark.png` now match Phase 1 token changes
+- **app_shell_widget_test fixed**: migrated to `StatefulShellRoute` — now passes (was pre-existing failure)
+- `flutter analyze`: 1 pre-existing `anonKey` info lint. `flutter test`: **115 pass / 2 pre-existing failures** (vs 112/5 before)
+- PR: https://github.com/CodeStorm-Hub/petfolio/pull/22
+
+**All tasks from review-the-whole-flutter-iridescent-salamander.md are COMPLETE.**
+
+---
+
 ## 2026-06-15 — UI/UX Remediation Phases 0-3: ALL COMPLETE ✅
 
 ### Phase 0 — Accessibility & Gesture Blockers ✅
