@@ -1475,3 +1475,87 @@ Me → Settings → `/settings` → tap tiles → navigate to sub-pages; Sign Ou
 | `pet_verifications` | Verification Center |
 | `pet_health_certs` | Breeding Setup |
 | `user_addresses` | Cart |
+
+
+
+---
+
+Here's the full breakdown of every consolidation opportunity:
+
+---
+
+## Category 1 — Merge (−9 screens)
+
+**`me_screen` + `settings_screen` → `AccountScreen`**
+Both are navigation hubs with a profile card, account tiles, offers link, sign-out, and identical `_ProfileCard` widget. The only unique content is `settings_screen` has an "Account" group and `me_screen` has a "Pets" group — these become two groups inside one screen.
+
+**`create_post_screen` + `create_story_screen` → `CreateContentScreen`**
+Both: pick an image, preview it, add text/caption, tap publish. The only difference is the destination (`feed_posts` vs `stories`). A `mode: post | story` param and a `SegmentedButton` toggle handles both. The UI is structurally identical.
+
+**`hashtag_screen` + `saved_posts_screen` → `PostGridScreen(source)`**
+Both are literally the same widget — 3-column `GridView.builder` with `TailWagLoader`, `PetfolioEmptyState`, and infinite scroll. The only difference is the data source. A `source: hashtag | saved` param with the appropriate provider routes the data. Zero UI difference.
+
+**`social_dm_screen` + `chat_screen` → `ChatScreen(threadId, mode)`**
+They share `chat_threads` and `chat_messages` tables, a reverse `ListView`, `_MessageBubble`, and a text `_InputBar`. `chat_screen` has date separators and typing indicator that `social_dm_screen` is missing — merge both into one screen where those features are always present. Entry point (`socialDmThreadProvider` vs direct `threadId`) becomes a constructor param.
+
+**`matches_inbox_screen` + `match_liked_screen` → `MatchHubScreen`**
+Both are pet-list screens under the Matching nav. Inbox is a list of mutual matches; Liked is a grid of inbound swipes. They're already accessed from the same tab bar. Make them explicit `TabBar` tabs inside one `MatchHubScreen` (same pattern as `VetHubScreen`).
+
+**`breeding_setup_screen` + `verification_center_screen` → `MatchProfileSettings`**
+Both configure trust/identity for the Matching feature. Breeding setup = breeding credentials. Verification center = badge requests. Both are settings-style forms with no list/detail sub-navigation. Two tabs in a single "Match Profile Settings" screen.
+
+**`shop_setup_screen` + `edit_shop_screen` → `ShopProfileScreen`**
+`shop_setup` creates the shop (name, slug, description, payout). `edit_shop` edits branding/contact/policies. The setup form is a strict subset of the edit form. One screen with `isNew` flag — shows only the basic fields on creation, unlocks the full 3-tab form post-creation. Eliminates the need to navigate away after creating a shop.
+
+**`admin_screen` → fold into `AdminLayout`**
+`admin_screen` is a 40-line file that checks `isAdminProvider` and renders `AdminLayout` or a lock widget. Move the `isAdminProvider` check into `AdminLayout.build()` directly. No separate route needed.
+
+---
+
+## Category 2 — Convert to Sheet/Dialog (−4 screens)
+
+**`shop_intro_screen` → `BottomSheet`**
+It's a one-time splash with 3 bullet points and a "Start Shopping" button. `SharedPreferences` flag already works the same way; just call `showModalBottomSheet` instead of `context.push('/marketplace/intro')`.
+
+**`marketplace_categories_screen` → modal sheet from Marketplace header**
+Eight category cards in a `Column`. This fits perfectly in a `showModalBottomSheet`. The current full-screen route adds a navigation entry just to show 8 tiles.
+
+**`order_confirmation_screen` → success `BottomSheet`**
+An animated checkmark + 2 buttons. The `AnimationController` works the same inside a sheet. Removes a dedicated route from the order flow.
+
+**`stripe_onboarding_screen` → `AlertDialog`**
+It's a single explanatory card + one "Open Stripe" button + `WidgetsBindingObserver`. The observer can live in the seller dashboard instead. The screen itself is a full route for one button.
+
+---
+
+## Category 3 — Remove (−4 screens)
+
+**`buyer_order_list_screen`**
+`activity_screen` already shows all `marketplace_orders` + `appointments` in a unified date-sorted timeline with filter chips. `buyer_order_list_screen` is a strict subset — just orders. Any entry point (`Settings → My Orders`) can route to `activity_screen` with the `_Filter.orders` pre-selected via a constructor param.
+
+**`vet_clinics_screen` (standalone)**
+`vet_hub_screen` already embeds `_ClinicsGridTab` as its first tab. The standalone `VetClinicsScreen` is only reachable from legacy routes. Remove it — `VetHubScreen` covers it.
+
+**`appointments_screen` (standalone)**
+Same situation — `VetHubScreen` tab 2 is `_AppointmentsHistoryTab`. The standalone `AppointmentsScreen` is redundant.
+
+**Notifications "Promotions" tab**
+`offers_screen` already shows all promos with category filtering, copy-to-clipboard, and animations. The Promotions tab in `notifications_screen` duplicates this. Remove the tab from `notifications_screen` and add a deep link from the bell to `offers_screen` for promo notifications.
+
+---
+
+## Feature Duplication (no screen removal, but worth noting)
+
+| Duplicated Feature | Appears In |
+|---|---|
+| Add to Cart | `marketplace_screen`, `product_detail_screen`, `wishlist_screen`, `shop_storefront_screen` |
+| Promo code display | `notifications_screen` (tab), `offers_screen`, `hub_home_screen` (deals section) |
+| Pet avatar + species chip | `social_profile`, `pet_profile`, `care_screen`, `matching_screen`, `chat_screen` — all re-derive species theming independently |
+| Empty state pattern | Each screen defines its own `_EmptyState` widget; a single `PetfolioEmptyState` with consistent params exists but isn't always used |
+| `PetSwitcherSheet` trigger | `matches_inbox_screen`, `match_liked_screen`, `chat_screen`, `me_screen` — four separate trigger points |
+
+---
+
+**Net result: 63 → ~46 screens.** The biggest wins by effort-to-impact ratio are the `social_dm + chat` merge (they already share DB tables but maintain two separate implementations) and removing `buyer_order_list_screen` entirely (Activity already does it better).
+
+[Duplicated](Duplicated.png)
