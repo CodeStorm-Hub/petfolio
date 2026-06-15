@@ -150,3 +150,9 @@ tmp_home/
 .vercel/output/
 .vercel/*.json
 !.vercel/project.json
+test/core/theme/failures/app_theme_dark_isolatedDiff.png
+test/core/theme/failures/app_theme_dark_maskedDiff.png
+test/core/theme/failures/app_theme_dark_testImage.png
+test/core/theme/failures/app_theme_light_isolatedDiff.png
+test/core/theme/failures/app_theme_light_maskedDiff.png
+test/core/theme/failures/app_theme_light_testImage.png
