@@ -244,6 +244,7 @@ class VisibilityToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
+      tooltip: obscure ? 'Show password' : 'Hide password',
       icon: Icon(
         obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
         size: 20,

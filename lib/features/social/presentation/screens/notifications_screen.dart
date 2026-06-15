@@ -75,6 +75,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                 child: Row(
                   children: [
                     IconButton(
+                      tooltip: 'Back',
                       icon: const Icon(Icons.arrow_back_rounded),
                       color: AppColors.ink950,
                       onPressed: () => context.pop(),

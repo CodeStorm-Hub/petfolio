@@ -38,6 +38,7 @@ class VendorOrderQueueScreen extends ConsumerWidget {
                   ),
                   const Spacer(),
                   IconButton(
+                    tooltip: 'Refresh',
                     icon: const Icon(Icons.refresh_rounded,
                         size: 22, color: AppColors.ink500),
                     onPressed: () =>

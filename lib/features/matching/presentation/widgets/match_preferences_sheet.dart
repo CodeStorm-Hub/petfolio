@@ -86,6 +86,7 @@ class MatchPreferencesSheet extends ConsumerWidget {
                   ),
                   IconButton(
                     key: const ValueKey<String>('match_prefs_close'),
+                    tooltip: 'Close',
                     onPressed: () => Navigator.of(context).pop(),
                     icon: Icon(Icons.close_rounded, color: pt.ink500),
                   ),

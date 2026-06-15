@@ -427,8 +427,11 @@ class _CertTile extends StatelessWidget {
         cert.verified ? 'Verified' : 'Pending verification',
         style: tt.bodySmall?.copyWith(color: pt.ink500),
       ),
-      trailing:
-          IconButton(icon: const Icon(Icons.delete_outline), onPressed: onDelete),
+      trailing: IconButton(
+        tooltip: 'Delete',
+        icon: const Icon(Icons.delete_outline),
+        onPressed: onDelete,
+      ),
     );
   }
 }

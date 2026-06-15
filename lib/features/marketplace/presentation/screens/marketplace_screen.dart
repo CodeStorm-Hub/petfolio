@@ -1417,6 +1417,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                   ),
                 ),
                 IconButton(
+                  tooltip: 'Close',
                   icon: const Icon(Icons.close_rounded),
                   onPressed: () => Navigator.pop(context),
                   style: IconButton.styleFrom(backgroundColor: surface),

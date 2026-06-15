@@ -70,6 +70,7 @@ class _CommunityDetailScreenState
         surfaceTintColor: Colors.transparent,
         actions: [
           IconButton(
+            tooltip: 'New post',
             icon: Icon(
               Icons.add_rounded,
               color: AppColors.lilac,

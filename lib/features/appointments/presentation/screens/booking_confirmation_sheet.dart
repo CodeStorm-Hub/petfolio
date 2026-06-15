@@ -295,6 +295,7 @@ class _BookingConfirmationSheetState
                       ),
                     ),
                     IconButton(
+                      tooltip: 'Clear',
                       icon: const Icon(Icons.close_rounded, size: 18),
                       color: pt.ink500,
                       onPressed: () {

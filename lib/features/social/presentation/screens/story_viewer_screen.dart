@@ -599,6 +599,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                             ),
                           ),
                           IconButton(
+                            tooltip: 'Close',
                             icon: const Icon(Icons.close_rounded, color: Colors.white, size: 24),
                             onPressed: () => context.pop(),
                           ),

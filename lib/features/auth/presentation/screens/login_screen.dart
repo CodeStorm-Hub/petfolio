@@ -73,6 +73,7 @@ class _ForgotPasswordSheetState extends ConsumerState<_ForgotPasswordSheet> {
                 ),
               ),
               IconButton(
+                tooltip: 'Close',
                 icon: const Icon(Icons.close_rounded),
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -119,6 +120,7 @@ class _ForgotPasswordSheetState extends ConsumerState<_ForgotPasswordSheet> {
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.done,
                 autocorrect: false,
+                autofillHints: const [AutofillHints.email],
                 onSubmitted: (_) => _submit(),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return 'Email is required';

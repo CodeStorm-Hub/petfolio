@@ -116,6 +116,7 @@ class _NutritionAppBar extends StatelessWidget {
       surfaceTintColor: Colors.transparent,
       shadowColor: pt.shadowE1.first.color,
       leading: IconButton(
+        tooltip: 'Back',
         icon: const Icon(Icons.arrow_back),
         onPressed: () => Navigator.of(context).pop(),
       ),

@@ -134,6 +134,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
           elevation: 0,
           scrolledUnderElevation: 0,
           leading: IconButton(
+            tooltip: 'Back',
             icon: Icon(Icons.arrow_back_rounded,
                 color: Theme.of(context).colorScheme.onSurface),
             onPressed: () => context.pop(),
@@ -152,6 +153,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           leading: IconButton(
+            tooltip: 'Back',
             icon: Icon(Icons.arrow_back_rounded,
                 color: Theme.of(context).colorScheme.onSurface),
             onPressed: () => context.pop(),
@@ -170,6 +172,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
+          tooltip: 'Back',
           icon: Icon(Icons.arrow_back_rounded,
               color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => context.pop(),
@@ -207,6 +210,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
         centerTitle: true,
         actions: [
           IconButton(
+            tooltip: 'More options',
             icon: Icon(Icons.more_horiz_rounded, color: pt.ink500),
             onPressed: () => _showPostOptions(context, post),
           ),
@@ -591,6 +595,7 @@ class _StatsBar extends ConsumerWidget {
         children: [
           // Like button
           IconButton(
+            tooltip: post.isLiked ? 'Unlike' : 'Like',
             icon: Icon(
               post.isLiked ? Icons.pets_rounded : Icons.pets_outlined,
               color: post.isLiked ? AppColors.coral500 : pt.ink500,
@@ -637,6 +642,7 @@ class _BookmarkButton extends ConsumerWidget {
     final savedAsync = ref.watch(isPostSavedProvider(postId));
     final isSaved = savedAsync.asData?.value ?? false;
     return IconButton(
+      tooltip: isSaved ? 'Remove from saved' : 'Save post',
       icon: Icon(
         isSaved ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
         color: isSaved ? AppColors.poppy : pt.ink500,
@@ -997,6 +1003,7 @@ class _CommentTile extends ConsumerWidget {
             ),
             // Like button (paw icon) on the right
             IconButton(
+              tooltip: comment.isLiked ? 'Unlike comment' : 'Like comment',
               icon: Icon(
                 comment.isLiked ? Icons.pets_rounded : Icons.pets_outlined,
                 size: 16,

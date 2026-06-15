@@ -175,11 +175,13 @@ class _ProductTile extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
+              tooltip: 'Edit product',
               icon: const Icon(Icons.edit_outlined,
                   size: 18, color: AppColors.ink500),
               onPressed: onEdit,
             ),
             IconButton(
+              tooltip: 'Delete product',
               icon: const Icon(Icons.delete_outline_rounded,
                   size: 18, color: AppColors.danger),
               onPressed: onDelete,

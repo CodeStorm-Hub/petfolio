@@ -65,6 +65,7 @@ class SocialProfileScreen extends ConsumerWidget {
             elevation: 0,
             scrolledUnderElevation: 0,
             leading: IconButton(
+              tooltip: 'Back',
               icon: Icon(Icons.arrow_back_rounded, color: cs.onSurface),
               onPressed: () => context.pop(),
             ),

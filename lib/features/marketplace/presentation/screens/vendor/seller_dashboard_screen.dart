@@ -263,6 +263,7 @@ class _DashboardBody extends ConsumerWidget {
                 ),
                 const Spacer(),
                 IconButton(
+                  tooltip: 'Edit shop',
                   icon: const Icon(Icons.edit_outlined,
                       size: 20, color: AppColors.ink500),
                   onPressed: () => context.push('/seller/edit-shop'),

@@ -65,6 +65,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                 child: Row(
                   children: [
                     IconButton(
+                      tooltip: 'Back',
                       icon: const Icon(
                         Icons.arrow_back_rounded,
                         color: AppColors.ink950,

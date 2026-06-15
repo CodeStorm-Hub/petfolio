@@ -1,5 +1,25 @@
 # Petfolio — Progress Log
 
+## 2026-06-15 — UI/UX Remediation Phase 0: Accessibility & Gesture Blockers (in progress)
+
+Full plan: `/home/syed/.claude/plans/review-the-whole-flutter-iridescent-salamander.md`
+
+`flutter analyze` — 1 pre-existing `anonKey` info lint only. `flutter test` — 5 pre-existing failures unchanged (theme goldens ×2, app_shell nav labels, appointment toInsertJson, synthetic_spring router contract); my changes add 0 new failures (verified via git stash baseline).
+
+Done:
+- **Tooltips on all 32 bare `IconButton`s** across 18 files (back/close/more/refresh/edit/delete/like/save/menu/visibility). Verified 0 remaining via grep. Files incl. `post_detail_screen`, `post_comments_bottom_sheet`, `social_profile_screen`, `activity_screen`, `notifications_screen`, `marketplace_screen`, vendor screens, `admin_layout`, `nutrition_screen`, `auth_widgets`, `settings`, etc.
+- **Form autofill/input** — `login_screen` email + `registration_screen` (newUsername/email, newPassword ×2) autofill hints added; `AuthField` shared widget already wires keyboardType/textInputAction/obscureText/validator.
+- **Product card a11y** — `ProductCard` + `ProductCardCompact` wrapped in `Semantics(button: true, label: product.name)` so screen readers announce them as buttons (image-dominant cards, ripple N/A).
+
+Remaining in Phase 0 (benefit from running-app visual verification):
+- Broader `GestureDetector`→`InkWell`/`Semantics(button)` pass on remaining high-traffic tappables (social feed rows, care/home tiles) — ~170 sites, triage by visibility.
+- 48dp min touch-target audit on small `IconButton(iconSize:)`/custom tappables.
+- Async submit double-tap guards where missing.
+
+Next: continue Phase 0 gesture pass, then Phase 1 (dark-mode color tokens).
+
+---
+
 ## 2026-06-15 — Phase 1: Matching Breeding + Playdate Modes (core) ✅
 
 Full plan: `/home/syed/.claude/plans/read-the-whole-petfolio-product-specific-unified-lynx.md`

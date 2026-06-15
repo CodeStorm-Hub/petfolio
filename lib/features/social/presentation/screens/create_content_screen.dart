@@ -442,6 +442,7 @@ class _CreateContentScreenState extends ConsumerState<CreateContentScreen>
             child: Container(
               decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.black.withAlpha(100)),
               child: IconButton(
+                tooltip: 'Remove image',
                 icon: const Icon(Icons.close_rounded, color: Colors.white, size: 24),
                 onPressed: () {
                   ref.read(createPostControllerProvider.notifier).removeImage();

@@ -120,6 +120,7 @@ class _PostCommentsBottomSheetState extends ConsumerState<PostCommentsBottomShee
                     style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                   ),
                   IconButton(
+                    tooltip: 'Close',
                     icon: const Icon(Icons.close_rounded),
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -476,6 +477,7 @@ class _CommentTile extends ConsumerWidget {
               ),
             ),
             IconButton(
+              tooltip: comment.isLiked ? 'Unlike comment' : 'Like comment',
               icon: Icon(
                 comment.isLiked ? Icons.pets_rounded : Icons.pets_outlined,
                 size: 16,

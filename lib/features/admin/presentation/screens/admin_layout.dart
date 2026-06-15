@@ -175,6 +175,7 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
         title: Text(_destinations[_selectedIndex].label),
         leading: Builder(
           builder: (ctx) => IconButton(
+            tooltip: 'Open menu',
             icon: const Icon(Icons.menu_rounded),
             onPressed: () => Scaffold.of(ctx).openDrawer(),
           ),

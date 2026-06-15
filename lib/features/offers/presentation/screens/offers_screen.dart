@@ -41,6 +41,7 @@ class OffersScreen extends ConsumerWidget {
               child: Row(
                 children: [
                   IconButton(
+                    tooltip: 'Back',
                     icon: const Icon(Icons.arrow_back_rounded),
                     color: pt.ink950,
                     onPressed: () => context.pop(),
