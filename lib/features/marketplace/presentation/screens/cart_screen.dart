@@ -55,7 +55,7 @@ class CartScreen extends ConsumerWidget {
 
     final groups = cart.itemsByShop.entries.toList();
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1A1014) : const Color(0xFFF2F3F7);
+    final bg = isDark ? AppColors.surface1D : AppColors.surface3;
 
     return WebCheckoutResumeListener(
       child: Scaffold(
@@ -476,7 +476,7 @@ class _VendorCheckoutSectionState
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      color: const Color(0xFFFFF3CD),
+                      color: AppColors.warningSoft,
                     ),
                     child: const Row(
                       children: [
@@ -922,7 +922,7 @@ class _MultiVendorSummaryBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         gradient: LinearGradient(
           colors: isDark
-              ? [const Color(0xFF2A1820), const Color(0xFF331825)]
+              ? [AppColors.surface0D, AppColors.surface2D]
               : [AppColors.poppy.withAlpha(18), AppColors.tangerine.withAlpha(12)],
         ),
         border: Border.all(
@@ -1002,7 +1002,7 @@ class _SectionCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
-        color: isDark ? const Color(0xFF2A1820) : Colors.white,
+        color: isDark ? AppColors.surface0D : Colors.white,
         boxShadow: isDark
             ? null
             : [
@@ -1152,7 +1152,7 @@ class _CodConfirmSheet extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2A1820) : Colors.white,
+        color: isDark ? AppColors.surface0D : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: SafeArea(
@@ -1238,7 +1238,7 @@ class _CodConfirmSheet extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: const Color(0xFFFFF3CD),
+                  color: AppColors.warningSoft,
                 ),
                 child: const Row(
                   children: [
@@ -1305,7 +1305,7 @@ class _IconBtn extends StatelessWidget {
           boxShadow: const [
             BoxShadow(color: AppColors.line, spreadRadius: 0.5),
             BoxShadow(
-              color: Color(0x0A0B1220),
+              color: AppColors.shadowE1L,
               offset: Offset(0, 1),
               blurRadius: 2,
             ),

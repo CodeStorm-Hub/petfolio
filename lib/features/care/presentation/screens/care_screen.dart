@@ -265,38 +265,44 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                   final active = _careFilter == chip.$1;
                                   return Padding(
                                     padding: const EdgeInsets.only(right: 8),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        HapticFeedback.selectionClick();
-                                        setState(() => _careFilter = chip.$1);
-                                      },
-                                      child: AnimatedContainer(
-                                        duration: const Duration(milliseconds: 160),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14, vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: active ? AppColors.poppy : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(999),
-                                          border: Border.all(
-                                            color: active ? AppColors.poppy : pt.line,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(chip.$3, style: const TextStyle(fontSize: 13)),
-                                            const SizedBox(width: 5),
-                                            Text(
-                                              chip.$2,
-                                              overflow: TextOverflow.visible,
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w700,
-                                                color: active ? Colors.white : pt.ink950,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(999),
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          onTap: () {
+                                            HapticFeedback.selectionClick();
+                                            setState(() => _careFilter = chip.$1);
+                                          },
+                                          child: AnimatedContainer(
+                                            duration: const Duration(milliseconds: 160),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 14, vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: active ? AppColors.poppy : Colors.transparent,
+                                              borderRadius: BorderRadius.circular(999),
+                                              border: Border.all(
+                                                color: active ? AppColors.poppy : pt.line,
                                               ),
                                             ),
-                                          ],
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(chip.$3, style: const TextStyle(fontSize: 13)),
+                                                const SizedBox(width: 5),
+                                                Text(
+                                                  chip.$2,
+                                                  overflow: TextOverflow.visible,
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: active ? Colors.white : pt.ink950,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -641,43 +647,48 @@ class _StreakFreezeRow extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: GestureDetector(
-        onTap: () =>
-            ref.read(careDashboardProvider.notifier).useFreeze(),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A3A6B).withAlpha(12),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFF4A90D9).withAlpha(60)),
-          ),
-          child: Row(
-            children: [
-              const Text('🧊', style: TextStyle(fontSize: 20)),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Streak Freeze available',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Text(
-                      '$freezes freeze${freezes == 1 ? '' : 's'} remaining — tap to protect your streak',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => ref.read(careDashboardProvider.notifier).useFreeze(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A3A6B).withAlpha(12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF4A90D9).withAlpha(60)),
               ),
-              Icon(
-                Icons.shield_outlined,
-                size: 18,
-                color: Theme.of(context).colorScheme.primary,
+              child: Row(
+                children: [
+                  const Text('🧊', style: TextStyle(fontSize: 20)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Streak Freeze available',
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Text(
+                          '$freezes freeze${freezes == 1 ? '' : 's'} remaining — tap to protect your streak',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.shield_outlined,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

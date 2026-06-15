@@ -51,7 +51,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     final topPad = MediaQuery.paddingOf(context).top;
 
     return Scaffold(
-      backgroundColor: isDark ? pt.surface1 : const Color(0xFFF2F3F7),
+      backgroundColor: isDark ? pt.surface1 : AppColors.surface3,
       body: SafeArea(
         top: widget.showHeader,
         bottom: false,
@@ -390,7 +390,7 @@ class _ActivityCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
-        color: isDark ? const Color(0xFF2A1820) : Colors.white,
+        color: isDark ? AppColors.surface0D : Colors.white,
         boxShadow: isDark
             ? null
             : [
@@ -437,7 +437,7 @@ class _ActivityCard extends StatelessWidget {
                           color: item.statusColor,
                           border: Border.all(
                             color: isDark
-                                ? const Color(0xFF2A1820)
+                                ? AppColors.surface0D
                                 : Colors.white,
                             width: 1.5,
                           ),
@@ -584,7 +584,7 @@ class _FilterChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           color: active
               ? AppColors.poppy
-              : (isDark ? const Color(0xFF2A1820) : Colors.white),
+              : (isDark ? AppColors.surface0D : Colors.white),
           border: Border.all(
             color: active
                 ? AppColors.poppy

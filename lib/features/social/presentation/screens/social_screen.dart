@@ -295,14 +295,23 @@ class _IconBtn extends StatelessWidget {
     final defaultBg = pt.surface2;
     final defaultColor = pt.ink950;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(color: defaultBg, shape: BoxShape.circle),
-        alignment: Alignment.center,
-        child: Icon(icon, size: 20, color: defaultColor),
+    return Semantics(
+      button: true,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: SizedBox.square(
+          dimension: 48,
+          child: Center(
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(color: defaultBg, shape: BoxShape.circle),
+              alignment: Alignment.center,
+              child: Icon(icon, size: 20, color: defaultColor),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -1078,9 +1087,9 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
+                    InkWell(
                       onTap: () => context.push('/social/profile/${widget.post.petId}'),
+                      customBorder: const CircleBorder(),
                       child: Container(
                         width: 50,
                         height: 50,
@@ -1122,9 +1131,9 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
+                      child: InkWell(
                         onTap: () => context.push('/social/profile/${widget.post.petId}'),
+                        borderRadius: BorderRadius.circular(8),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -1466,11 +1475,11 @@ class _ActionBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final style = Theme.of(context).textTheme.labelLarge?.copyWith(color: pt.ink700);
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
-      child: Container(
-        height: 44,
-        color: Colors.transparent,
+      borderRadius: BorderRadius.circular(8),
+      child: SizedBox(
+        height: 48,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1622,18 +1631,19 @@ class _VideoPostPlayerState extends State<_VideoPostPlayer> {
         ),
         Padding(
           padding: const EdgeInsets.all(8),
-          child: GestureDetector(
-            onTap: _toggleMute,
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Icon(
-                _muted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
-                color: Colors.white,
-                size: 16,
+          child: ClipOval(
+            child: Material(
+              color: Colors.black54,
+              child: InkWell(
+                onTap: _toggleMute,
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Icon(
+                    _muted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
               ),
             ),
           ),

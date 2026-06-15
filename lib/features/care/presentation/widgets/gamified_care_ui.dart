@@ -208,23 +208,23 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFFFF2E2E),
-                  Color(0xFFFF5830),
+                  AppColors.poppy,
+                  AppColors.tangerine700,
                   AppColors.tangerine,
                 ],
                 stops: [0.0, 0.48, 1.0],
               ),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
-                  color: Color(0x60FF3D3D),
+                  color: AppColors.poppy.withAlpha(0x60),
                   blurRadius: 32,
-                  offset: Offset(0, 16),
+                  offset: const Offset(0, 16),
                   spreadRadius: -12,
                 ),
                 BoxShadow(
-                  color: Color(0x20000000),
+                  color: AppColors.shadowE1L,
                   blurRadius: 8,
-                  offset: Offset(0, 4),
+                  offset: const Offset(0, 4),
                   spreadRadius: -2,
                 ),
               ],
@@ -357,8 +357,8 @@ class _StreakCoin extends StatelessWidget {
                   center: Alignment(-0.28, -0.42),
                   radius: 0.88,
                   colors: [
-                    Color(0xFFFFF0B0),
-                    Color(0xFFFFD234),
+                    AppColors.sunnySoft,
+                    AppColors.sunny,
                     AppColors.tangerine,
                     AppColors.tangerine700,
                   ],
@@ -428,7 +428,7 @@ class _StreakCoin extends StatelessWidget {
                           height: 1.0,
                           shadows: [
                             Shadow(
-                              color: Color(0x80961400),
+                              color: Color(0x80C41818),
                               blurRadius: 6,
                               offset: Offset(0, 2),
                             ),
@@ -558,7 +558,7 @@ class _HeroLevelContent extends StatelessWidget {
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Color(0xFFFFE08A),
+                          AppColors.sunnySoft,
                           AppColors.sunny,
                           AppColors.tangerine,
                         ],
@@ -574,7 +574,7 @@ class _HeroLevelContent extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Color(0x99FFFFFF), Colors.transparent],
+                        colors: [AppColors.glassTopL, Colors.transparent],
                         stops: [0.0, 0.55],
                       ),
                     ),
@@ -1205,10 +1205,10 @@ class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin 
 
     final bgTop = owned
         ? Color.lerp(badge.color, Colors.white, isDark ? 0.50 : 0.82)!
-        : (isDark ? const Color(0xFF252020) : const Color(0xFFF9F6F2));
+        : (isDark ? AppColors.surface3D : const Color(0xFFF9F6F2));
     final bgBottom = owned
         ? Color.lerp(badge.color, Colors.white, isDark ? 0.24 : 0.52)!
-        : (isDark ? const Color(0xFF1C1818) : pt.line.withAlpha(130));
+        : (isDark ? AppColors.surface1D : pt.line.withAlpha(130));
 
     return GestureDetector(
       onTap: widget.onTap,
@@ -1258,7 +1258,7 @@ class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin 
                             end: Alignment.bottomRight,
                             colors: [
                               Colors.transparent,
-                              Color(0x50FFFFFF),
+                              AppColors.glassShineL,
                               Colors.transparent,
                             ],
                           ),

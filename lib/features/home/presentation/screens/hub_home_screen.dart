@@ -122,14 +122,18 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
           child: _SectionHeader(
             pt: pt,
             title: 'Services',
-            trailing: GestureDetector(
+            trailing: InkWell(
               onTap: () => AllFeaturesSheet.show(context),
-              child: Text(
-                'All ›',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tangerine,
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: Text(
+                  'All ›',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tangerine,
+                  ),
                 ),
               ),
             ),
@@ -164,14 +168,18 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
           child: _SectionHeader(
             pt: pt,
             title: 'Pet Spotlight',
-            trailing: GestureDetector(
+            trailing: InkWell(
               onTap: () => context.go('/social'),
-              child: Text(
-                'See All ›',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tangerine,
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: Text(
+                  'See All ›',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tangerine,
+                  ),
                 ),
               ),
             ),
@@ -188,14 +196,18 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
           child: _SectionHeader(
             pt: pt,
             title: 'Exclusive Deals',
-            trailing: GestureDetector(
+            trailing: InkWell(
               onTap: () => context.go('/marketplace'),
-              child: Text(
-                'See All ›',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tangerine,
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: Text(
+                  'See All ›',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tangerine,
+                  ),
                 ),
               ),
             ),
@@ -1384,11 +1396,15 @@ class _DealsSection extends StatelessWidget {
         const SizedBox(height: 12),
 
         // ── Promo deal banner ──────────────────────────────────────────
-        GestureDetector(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(22),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                child: Container(
               height: 100,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(22),
@@ -1450,6 +1466,8 @@ class _DealsSection extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    ),
       ],
     );
   }
@@ -1468,29 +1486,35 @@ class _DealChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        onTap();
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.tangerine : Colors.transparent,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color: selected
-                ? AppColors.tangerine
-                : AppColors.ink300.withAlpha(100),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: selected ? Colors.white : AppColors.ink500,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(999),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: selected ? AppColors.tangerine : Colors.transparent,
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: selected
+                    ? AppColors.tangerine
+                    : AppColors.ink300.withAlpha(100),
+              ),
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: selected ? Colors.white : AppColors.ink500,
+              ),
+            ),
           ),
         ),
       ),

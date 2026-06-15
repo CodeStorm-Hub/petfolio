@@ -380,7 +380,7 @@ class _ProfileAvatar extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: hasImage
             ? const LinearGradient(
-                colors: [Color(0xFFFF6B35), Color(0xFFFF9800), Color(0xFF7B61FF)],
+                colors: [AppColors.tangerine, AppColors.badgeAmber, AppColors.badgeViolet],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               )
@@ -487,8 +487,8 @@ class _AwardsSection extends StatelessWidget {
                 Expanded(
                   child: _CareStatCard(
                     icon: Icons.local_fire_department_rounded,
-                    iconColor: const Color(0xFFFF6B35),
-                    bgColor: const Color(0xFFFF6B35),
+                    iconColor: AppColors.tangerine,
+                    bgColor: AppColors.tangerine,
                     value: '${awards.currentStreak}',
                     label: 'Day streak',
                   ),
@@ -497,8 +497,8 @@ class _AwardsSection extends StatelessWidget {
                 Expanded(
                   child: _CareStatCard(
                     icon: Icons.star_rounded,
-                    iconColor: const Color(0xFFFFB300),
-                    bgColor: const Color(0xFFFFB300),
+                    iconColor: AppColors.badgeAmber,
+                    bgColor: AppColors.badgeAmber,
                     value: '${awards.totalXp}',
                     label: 'XP earned',
                   ),
@@ -507,8 +507,8 @@ class _AwardsSection extends StatelessWidget {
                 Expanded(
                   child: _CareStatCard(
                     icon: Icons.checklist_rounded,
-                    iconColor: const Color(0xFF7B61FF),
-                    bgColor: const Color(0xFF7B61FF),
+                    iconColor: AppColors.badgeViolet,
+                    bgColor: AppColors.badgeViolet,
                     value: '${awards.logsCount}',
                     label: 'Care logs',
                   ),
@@ -607,12 +607,12 @@ class _BadgeHighlight extends StatelessWidget {
   final String badgeType;
 
   static const _catalog = <String, (String, IconData, Color)>{
-    'first_log':      ('First Log',      Icons.flag_rounded,               Color(0xFF4CAF50)),
-    '3_day_streak':   ('3-Day',          Icons.local_fire_department_rounded, Color(0xFFFF9800)),
-    '7_day_hero':     ('7-Day Hero',     Icons.bolt_rounded,               Color(0xFFFFCC00)),
-    'routine_master': ('Routine',        Icons.checklist_rounded,          Color(0xFF2196F3)),
-    '30_day_legend':  ('Legend',         Icons.workspace_premium_rounded,  Color(0xFF9C27B0)),
-    'care_champion':  ('Champion',       Icons.military_tech_rounded,      Color(0xFFE91E63)),
+    'first_log':      ('First Log',      Icons.flag_rounded,               AppColors.badgeGreen),
+    '3_day_streak':   ('3-Day',          Icons.local_fire_department_rounded, AppColors.badgeAmber),
+    '7_day_hero':     ('7-Day Hero',     Icons.bolt_rounded,               AppColors.badgeGold),
+    'routine_master': ('Routine',        Icons.checklist_rounded,          AppColors.badgeBlue),
+    '30_day_legend':  ('Legend',         Icons.workspace_premium_rounded,  AppColors.badgePurple),
+    'care_champion':  ('Champion',       Icons.military_tech_rounded,      AppColors.badgePink),
   };
 
   @override
@@ -620,7 +620,7 @@ class _BadgeHighlight extends StatelessWidget {
     final info = _catalog[badgeType];
     final label = info?.$1 ?? badgeType;
     final icon = info?.$2 ?? Icons.emoji_events_rounded;
-    final color = info?.$3 ?? const Color(0xFF7B61FF);
+    final color = info?.$3 ?? AppColors.badgeViolet;
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 

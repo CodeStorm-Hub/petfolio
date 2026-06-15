@@ -1,6 +1,45 @@
 # Petfolio — Progress Log
 
-## 2026-06-15 — UI/UX Remediation Phase 0: Accessibility & Gesture Blockers (in progress)
+## 2026-06-15 — UI/UX Remediation Phases 0-3: ALL COMPLETE ✅
+
+### Phase 0 — Accessibility & Gesture Blockers ✅
+(Previously done: 32 IconButton tooltips, form autofill, ProductCard semantics)
+This session:
+- **GestureDetector→InkWell** on 8 high-traffic tappables: `_IconBtn` (social), post header avatar + info row, `_ActionBtn`, video mute toggle, care filter chips, streak freeze chip, hub_home "All/See All ›" links, promo deal banner, `_DealChip`
+- Used `ClipRRect + Material(color: transparent) + InkWell` pattern for colored-container ripple in chip/banner widgets
+- `_IconBtn` expanded hit target from 36→48dp with centered visual
+- **Double-tap guard** in `PrimaryPillButton._up`: `_isFiring` bool + `Future.microtask` reset prevents simultaneous submissions
+- **app_shell.dart** back button: GestureDetector→ClipRRect/Material/InkWell, now uses `context.canPop() ? context.pop() : context.go('/home')` for history-aware back; same for pet-switcher pill
+
+### Phase 1 — Theme / Dark-Mode Color Correctness ✅
+New tokens added to `app_colors.dart`:
+- `surface3 / surface3D` — neutral cool surfaces replacing 0xFFF2F3F7 / 0xFF252020
+- `warningSoft / warningSoftD` — light yellow warning fill (0xFFFFF3CD)
+- `badgeGreen/Amber/Gold/Blue/Purple/Pink/Violet` — named achievement badge palette
+- `premiumGold / premiumGoldSoft` — gold gradient for premium badges
+
+Replacements (27 hardcoded Color literals eliminated):
+- `gamified_care_ui.dart`: streak gradient → poppy+tangerine tokens; gold gradient → sunnySoft+sunny; shadow overlay → shadowE1L; glass shine → glassTopL/glassShineL; dark surfaces → surface3D/surface1D
+- `social_profile_screen.dart`: avatar ring → tangerine+badgeAmber+badgeViolet; stat cards → named tokens; badge catalog → AppColors.badge* constants
+- `cart_screen.dart`: bg → surface1D/surface3; dark surfaces → surface0D/surface2D; warning fills → warningSoft; shadow → shadowE1L
+- `activity_screen.dart`: bg + cards → surface3 / surface0D
+- `settings_screen.dart`: bg → surface3; gold badge gradient → premiumGold/premiumGoldSoft
+
+### Phase 2 — Navigation (minor items) ✅
+- `app_shell.dart` back/pet-switcher pills: GestureDetector → InkWell (covered in Phase 0 pass)
+- `StatefulShellRoute` migration deferred (ShellRoute adequate for current architecture; low user impact vs. blast radius)
+- No dead-route or pushReplacement fixes needed (pushReplacement on checkout flows is correct)
+
+### Phase 3 — Text Scaling / Polish ✅
+- Added `builder:` to `MaterialApp.router` in `main.dart` clamping `textScaler` to `[0.85, 1.3]` to prevent layout overflow at system-level 200% text scale
+
+`flutter analyze` — 1 pre-existing `anonKey` info lint only. `flutter test` — 112 pass / 5 pre-existing failures unchanged.
+
+**Phase complete — please run `/remember` to save tokens before next phase.**
+
+---
+
+## 2026-06-15 — UI/UX Remediation Phase 0: Accessibility & Gesture Blockers (superseded above)
 
 Full plan: `/home/syed/.claude/plans/review-the-whole-flutter-iridescent-salamander.md`
 

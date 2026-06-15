@@ -16,7 +16,7 @@ class SettingsScreen extends ConsumerWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final User? user = Supabase.instance.client.auth.currentUser;
-    final bg = isDark ? pt.surface1 : const Color(0xFFF2F3F7);
+    final bg = isDark ? pt.surface1 : AppColors.surface3;
 
     return Scaffold(
       backgroundColor: bg,
@@ -244,7 +244,7 @@ class _ProfileCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFFD4AF37), Color(0xFFF5D56E)],
+                          colors: [AppColors.premiumGold, AppColors.premiumGoldSoft],
                         ),
                         borderRadius: BorderRadius.circular(999),
                       ),

@@ -386,84 +386,96 @@ class AppShellHeader extends ConsumerWidget {
 
     Widget leftWidget;
     if (module != ShellModule.global) {
-      leftWidget = GestureDetector(
-        onTap: () => context.go('/home'),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(10, 6, 14, 6),
-          decoration: BoxDecoration(
+      leftWidget = Semantics(
+        button: true,
+        label: 'Back to Home',
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: Material(
             color: Colors.white.withAlpha(56),
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 14),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'HOME',
-                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 0.6),
-                  ),
-                  Text(
-                    eyebrow,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white),
-                  ),
-                ],
+            child: InkWell(
+              onTap: () => context.canPop() ? context.pop() : context.go('/home'),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(10, 6, 14, 6),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 14),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'HOME',
+                          style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 0.6),
+                        ),
+                        Text(
+                          eyebrow,
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         ),
       );
     } else {
-      leftWidget = GestureDetector(
-        onTap: () => PetSwitcherSheet.show(context),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
-          decoration: BoxDecoration(
+      leftWidget = Semantics(
+        button: true,
+        label: 'Switch active pet',
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: Material(
             color: Colors.white.withAlpha(56),
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (activePet != null) ...[
-                PetAvatar(
-                  imageUrl: activePet.avatarUrl,
-                  species: activePet.speciesEnum,
-                  size: PetAvatarSize.sm,
-                  showRing: true,
-                ),
-                const SizedBox(width: 10),
-              ],
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    eyebrow,
-                    style: const TextStyle(
-                      fontSize: 9, fontWeight: FontWeight.w700,
-                      color: Colors.white, letterSpacing: 0.6,
-                    ),
-                  ),
-                  Row(children: [
-                    Text(
-                      activePet?.name ?? (subIndex == 4 ? 'Market' : 'PetFolio'),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white,
+            child: InkWell(
+              onTap: () => PetSwitcherSheet.show(context),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (activePet != null) ...[
+                      PetAvatar(
+                        imageUrl: activePet.avatarUrl,
+                        species: activePet.speciesEnum,
+                        size: PetAvatarSize.sm,
+                        showRing: true,
                       ),
+                      const SizedBox(width: 10),
+                    ],
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          eyebrow,
+                          style: const TextStyle(
+                            fontSize: 9, fontWeight: FontWeight.w700,
+                            color: Colors.white, letterSpacing: 0.6,
+                          ),
+                        ),
+                        Row(children: [
+                          Text(
+                            activePet?.name ?? (subIndex == 4 ? 'Market' : 'PetFolio'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
+                        ]),
+                      ],
                     ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
-                  ]),
-                ],
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         ),
       );
