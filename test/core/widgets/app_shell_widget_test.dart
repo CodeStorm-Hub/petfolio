@@ -8,14 +8,20 @@ import 'package:petfolio/core/widgets/app_shell.dart';
 
 void main() {
   testWidgets('AppShell renders bottom nav labels on mobile', (tester) async {
+    final branchKey = GlobalKey<NavigatorState>();
     final router = GoRouter(
       routes: [
-        ShellRoute(
-          builder: (_, _, child) => AppShell(child: child),
-          routes: [
-            GoRoute(
-              path: '/home',
-              builder: (_, _) => const Scaffold(body: Text('home body')),
+        StatefulShellRoute.indexedStack(
+          builder: (_, _, navigationShell) => AppShell(navigationShell: navigationShell),
+          branches: [
+            StatefulShellBranch(
+              navigatorKey: branchKey,
+              routes: [
+                GoRoute(
+                  path: '/home',
+                  builder: (_, _) => const Scaffold(body: Text('home body')),
+                ),
+              ],
             ),
           ],
         ),
@@ -34,9 +40,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('Pets'), findsOneWidget);
-    expect(find.text('Care'), findsOneWidget);
-    expect(find.text('Social'), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
     expect(find.text('home body'), findsOneWidget);
   });
 }

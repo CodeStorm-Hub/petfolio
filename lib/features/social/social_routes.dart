@@ -6,7 +6,6 @@ import '../communities/presentation/screens/community_detail_screen.dart';
 import 'data/models/feed_post.dart';
 import 'presentation/screens/create_content_screen.dart';
 import 'presentation/screens/hashtag_screen.dart';
-import 'presentation/screens/notifications_screen.dart';
 import 'presentation/screens/post_detail_screen.dart';
 import 'presentation/screens/saved_posts_screen.dart';
 import 'presentation/screens/social_dm_screen.dart';
@@ -31,11 +30,6 @@ List<RouteBase> socialRoutes(GlobalKey<NavigatorState> rootKey) => [
       post: state.extra as FeedPost?,
       autofocusComment: state.uri.queryParameters['focus'] == 'true',
     ),
-  ),
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/social/notifications',
-    builder: (context, state) => const NotificationsScreen(),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,

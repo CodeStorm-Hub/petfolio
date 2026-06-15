@@ -26,9 +26,9 @@ import 'package:petfolio/features/pet_profile/presentation/widgets/pet_switcher_
 // ── App shell ─────────────────────────────────────────────────────────────────
 
 class AppShell extends ConsumerStatefulWidget {
-  const AppShell({super.key, required this.child});
+  const AppShell({super.key, required this.navigationShell});
 
-  final Widget child;
+  final StatefulNavigationShell navigationShell;
 
   @override
   ConsumerState<AppShell> createState() => _AppShellState();
@@ -113,32 +113,41 @@ class _AppShellState extends ConsumerState<AppShell> {
       ),
     );
 
+    final shell = widget.navigationShell;
+
     if (isWide) {
       return _wrapWithTutorial(
-        Scaffold(
-          body: Row(
-            children: [
-              _WideNavRail(
-                destinations: dests,
-                accentColors: accents,
-                selectedIndex: subIndex,
-                onSelect: (i) => context.go(dests[i].path),
-                module: module,
-                badgeCounts: badgeCounts,
-              ),
-              const VerticalDivider(thickness: 1, width: 1),
-              Expanded(
-                child: Stack(
-                  children: [
-                    Positioned.fill(child: widget.child),
-                    Positioned(
-                      top: 0, left: 0, right: 0,
-                      child: AppShellHeader(module: module, subIndex: subIndex),
-                    ),
-                  ],
+        PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) return;
+            if (context.canPop()) context.pop();
+          },
+          child: Scaffold(
+            body: Row(
+              children: [
+                _WideNavRail(
+                  destinations: dests,
+                  accentColors: accents,
+                  selectedIndex: subIndex,
+                  onSelect: (i) => context.go(dests[i].path),
+                  module: module,
+                  badgeCounts: badgeCounts,
                 ),
-              ),
-            ],
+                const VerticalDivider(thickness: 1, width: 1),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      Positioned.fill(child: shell),
+                      Positioned(
+                        top: 0, left: 0, right: 0,
+                        child: AppShellHeader(module: module, subIndex: subIndex),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -146,22 +155,29 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     if (kIsWeb) {
       return _wrapWithTutorial(
-        Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          body: Stack(
-            children: [
-              Positioned.fill(child: widget.child),
-              Positioned(
-                top: 0, left: 0, right: 0,
-                child: AppShellHeader(module: module, subIndex: subIndex),
+        PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) return;
+            if (context.canPop()) context.pop();
+          },
+          child: Scaffold(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            body: Stack(
+              children: [
+                Positioned.fill(child: shell),
+                Positioned(
+                  top: 0, left: 0, right: 0,
+                  child: AppShellHeader(module: module, subIndex: subIndex),
+                ),
+              ],
+            ),
+            bottomNavigationBar: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: floatingNav,
               ),
-            ],
-          ),
-          bottomNavigationBar: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: floatingNav,
             ),
           ),
         ),
@@ -169,22 +185,29 @@ class _AppShellState extends ConsumerState<AppShell> {
     }
 
     return _wrapWithTutorial(
-      Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Stack(
-          children: [
-            Positioned.fill(child: widget.child),
-            Positioned(
-              top: 0, left: 0, right: 0,
-              child: AppShellHeader(module: module, subIndex: subIndex),
-            ),
-            Positioned(
-              left: 16,
-              right: 16,
-              bottom: 12 + MediaQuery.paddingOf(context).bottom,
-              child: floatingNav,
-            ),
-          ],
+      PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (context.canPop()) context.pop();
+        },
+        child: Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: Stack(
+            children: [
+              Positioned.fill(child: shell),
+              Positioned(
+                top: 0, left: 0, right: 0,
+                child: AppShellHeader(module: module, subIndex: subIndex),
+              ),
+              Positioned(
+                left: 16,
+                right: 16,
+                bottom: 12 + MediaQuery.paddingOf(context).bottom,
+                child: floatingNav,
+              ),
+            ],
+          ),
         ),
       ),
     );
