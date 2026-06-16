@@ -1090,7 +1090,7 @@ class _QuickActionsRow extends StatelessWidget {
         sub: 'Orders & appointments',
         color: AppColors.tangerine,
         soft: isDark ? AppColors.tangerineSoftD : AppColors.tangerineSoft,
-        route: '/activity',
+        route: '/home/activity',
       ),
     ];
 

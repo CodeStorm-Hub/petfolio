@@ -34,21 +34,23 @@ StatefulShellRoute appShellRoute() => StatefulShellRoute.indexedStack(
               path: '/home',
               pageBuilder: (context, state) =>
                   const NoTransitionPage(child: HubHomeScreen()),
-            ),
-            GoRoute(
-              path: '/notifications',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: NotificationsScreen(showHeader: false)),
-            ),
-            GoRoute(
-              path: '/activity',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: ActivityScreen(showHeader: false)),
-            ),
-            GoRoute(
-              path: '/me',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: MeScreen()),
+              routes: [
+                GoRoute(
+                  path: 'notifications',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: NotificationsScreen(showHeader: false)),
+                ),
+                GoRoute(
+                  path: 'activity',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: ActivityScreen(showHeader: false)),
+                ),
+                GoRoute(
+                  path: 'me',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: MeScreen()),
+                ),
+              ],
             ),
           ],
         ),

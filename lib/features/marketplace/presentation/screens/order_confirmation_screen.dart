@@ -26,7 +26,7 @@ class OrderSuccessSheet extends ConsumerStatefulWidget {
       backgroundColor: AppColors.surface0,
       builder: (_) => OrderSuccessSheet(orderId: orderId, confirmStripePayment: confirmStripePayment),
     ).then((_) {
-      if (context.mounted) context.go('/activity');
+      if (context.mounted) context.go('/home/activity');
     });
   }
 

@@ -266,9 +266,9 @@ class AppShellHeader extends ConsumerWidget {
               );
             }),
             const SizedBox(width: 8),
-            _HeaderIconBtn(icon: Icons.notifications_rounded, tooltip: 'Alerts', onTap: () => context.go('/notifications')),
+            _HeaderIconBtn(icon: Icons.notifications_rounded, tooltip: 'Alerts', onTap: () => context.go('/home/notifications')),
             const SizedBox(width: 8),
-            _HeaderIconBtn(icon: Icons.manage_accounts_rounded, tooltip: 'Account', onTap: () => context.go('/me')),
+            _HeaderIconBtn(icon: Icons.manage_accounts_rounded, tooltip: 'Account', onTap: () => context.go('/home/me')),
           ]);
         case 1: // Alerts
           return Consumer(builder: (context, ref, _) {
