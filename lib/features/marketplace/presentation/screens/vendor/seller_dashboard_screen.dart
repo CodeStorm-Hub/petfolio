@@ -667,7 +667,10 @@ class _ActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: label,
+      button: true,
+      child: GestureDetector(
       onTap: () => context.push(route),
       child: Container(
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
@@ -697,6 +700,7 @@ class _ActionRow extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

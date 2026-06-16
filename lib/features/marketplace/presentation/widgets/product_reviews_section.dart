@@ -41,7 +41,7 @@ class ProductReviewsSection extends ConsumerWidget {
                 rating: product.rating!,
                 size: 16,
                 semanticLabel:
-                    '${product.rating!.toStringAsFixed(1)} average from ${product.reviewCount ?? 0} reviews',
+                    '${product.rating!.toStringAsFixed(1)} average from ${product.reviewCount ?? 0} ${(product.reviewCount ?? 0) == 1 ? 'review' : 'reviews'}',
               ),
           ],
         ),

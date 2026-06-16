@@ -428,12 +428,14 @@ class _NotificationTile extends StatelessWidget {
           : AppColors.poppy.withAlpha(12),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        leading: CircleAvatar(
-          radius: 22,
-          backgroundColor: _iconColor(notification.type).withAlpha(30),
-          child: Text(
-            _emoji(notification.type),
-            style: const TextStyle(fontSize: 20),
+        leading: ExcludeSemantics(
+          child: CircleAvatar(
+            radius: 22,
+            backgroundColor: _iconColor(notification.type).withAlpha(30),
+            child: Text(
+              _emoji(notification.type),
+              style: const TextStyle(fontSize: 20),
+            ),
           ),
         ),
         title: Text(

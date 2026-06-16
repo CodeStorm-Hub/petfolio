@@ -139,17 +139,13 @@ class AccountScreen extends ConsumerWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-              child: Semantics(
-                label: 'Sign out',
-                button: true,
-                child: _AccountTile(
+              child: _AccountTile(
                   icon: Icons.logout_rounded,
                   label: 'Sign Out',
                   labelColor: AppColors.danger,
                   onTap: () async =>
                       ref.read(authRepositoryProvider).signOut(),
                 ),
-              ),
             ),
           ),
 
@@ -329,24 +325,20 @@ class _AccountTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    return Semantics(
-      label: label,
-      button: true,
-      child: ListTile(
-        onTap: onTap,
-        leading: Icon(icon, size: 22, color: iconColor ?? labelColor ?? pt.ink500),
-        title: Text(
-          label,
-          style: TextStyle(
-            fontSize: 14, fontWeight: FontWeight.w600,
-            color: labelColor ?? pt.ink950,
-          ),
+    return ListTile(
+      onTap: onTap,
+      leading: Icon(icon, size: 22, color: iconColor ?? labelColor ?? pt.ink500),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontSize: 14, fontWeight: FontWeight.w600,
+          color: labelColor ?? pt.ink950,
         ),
-        trailing: trailing ?? Icon(Icons.chevron_right_rounded, size: 18, color: pt.ink500),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-        minLeadingWidth: 24,
-        minTileHeight: 56,
       ),
+      trailing: trailing ?? Icon(Icons.chevron_right_rounded, size: 18, color: pt.ink500),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      minLeadingWidth: 24,
+      minTileHeight: 56,
     );
   }
 }
@@ -362,29 +354,29 @@ class _ThemeToggleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    return Semantics(
-      label: isDark ? 'Switch to light mode' : 'Switch to dark mode',
-      button: true,
-      child: ListTile(
-        leading: Icon(
-          isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-          size: 22, color: pt.ink500,
+    return ListTile(
+      leading: Icon(
+        isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+        size: 22, color: pt.ink500,
+      ),
+      title: Text(
+        isDark ? 'Light Mode' : 'Dark Mode',
+        style: TextStyle(
+          fontSize: 14, fontWeight: FontWeight.w600, color: pt.ink950,
         ),
-        title: Text(
-          isDark ? 'Light Mode' : 'Dark Mode',
-          style: TextStyle(
-            fontSize: 14, fontWeight: FontWeight.w600, color: pt.ink950,
-          ),
-        ),
-        trailing: Switch(
+      ),
+      trailing: Semantics(
+        label: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+        excludeSemantics: true,
+        child: Switch(
           value: isDark,
           onChanged: (_) => ref.read(themeProvider.notifier).toggleTheme(),
         ),
-        onTap: () => ref.read(themeProvider.notifier).toggleTheme(),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-        minLeadingWidth: 24,
-        minTileHeight: 56,
       ),
+      onTap: () => ref.read(themeProvider.notifier).toggleTheme(),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      minLeadingWidth: 24,
+      minTileHeight: 56,
     );
   }
 }

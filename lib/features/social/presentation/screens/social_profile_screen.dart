@@ -624,7 +624,10 @@ class _BadgeHighlight extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Column(
+    return Semantics(
+      label: '$label badge',
+      excludeSemantics: true,
+      child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
@@ -647,7 +650,7 @@ class _BadgeHighlight extends StatelessWidget {
           child: Text(
             label,
             textAlign: TextAlign.center,
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 10,
@@ -657,6 +660,7 @@ class _BadgeHighlight extends StatelessWidget {
           ),
         ),
       ],
+      ),
     );
   }
 }

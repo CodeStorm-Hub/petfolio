@@ -121,9 +121,33 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                   ? const Center(child: TailWagLoader())
                   : hasError
                       ? Center(
-                          child: Text(
-                            'Failed to load activity',
-                            style: TextStyle(color: pt.ink500),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.error_outline_rounded,
+                                size: 48,
+                                color: pt.ink300,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Failed to load activity',
+                                style: TextStyle(color: pt.ink500),
+                              ),
+                              const SizedBox(height: 16),
+                              FilledButton.icon(
+                                onPressed: () {
+                                  ref.invalidate(buyerOrdersProvider);
+                                  ref.invalidate(
+                                      appointmentControllerProvider);
+                                },
+                                icon: const Icon(
+                                  Icons.refresh_rounded,
+                                  size: 16,
+                                ),
+                                label: const Text('Retry'),
+                              ),
+                            ],
                           ),
                         )
                       : filtered.isEmpty

@@ -608,16 +608,24 @@ class _StatsBar extends ConsumerWidget {
                   .toggleLike(postId);
             },
           ),
-          Text(
-            '${post.likes}',
-            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+          Semantics(
+            label: '${post.likes} ${post.likes == 1 ? 'like' : 'likes'}',
+            child: Text(
+              '${post.likes}',
+              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+            ),
           ),
           const SizedBox(width: 16),
-          Icon(Icons.chat_bubble_outline_rounded, size: 22, color: pt.ink500),
+          ExcludeSemantics(
+            child: Icon(Icons.chat_bubble_outline_rounded, size: 22, color: pt.ink500),
+          ),
           const SizedBox(width: 6),
-          Text(
-            '${post.comments}',
-            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+          Semantics(
+            label: '${post.comments} ${post.comments == 1 ? 'comment' : 'comments'}',
+            child: Text(
+              '${post.comments}',
+              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+            ),
           ),
           const Spacer(),
           Text(

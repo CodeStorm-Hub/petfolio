@@ -183,28 +183,32 @@ class _CommunityCard extends ConsumerWidget {
                     ),
                   ],
                   const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Icon(Icons.group_rounded, size: 14, color: pt.ink500),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${community.memberCount}',
-                        style: tt.labelSmall?.copyWith(
-                          color: pt.ink500,
-                          fontWeight: FontWeight.w600,
+                  Semantics(
+                    label: '${community.memberCount} ${community.memberCount == 1 ? 'member' : 'members'}, ${community.postCount} ${community.postCount == 1 ? 'post' : 'posts'}',
+                    excludeSemantics: true,
+                    child: Row(
+                      children: [
+                        Icon(Icons.group_rounded, size: 14, color: pt.ink500),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${community.memberCount}',
+                          style: tt.labelSmall?.copyWith(
+                            color: pt.ink500,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Icon(Icons.article_rounded, size: 14, color: pt.ink500),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${community.postCount}',
-                        style: tt.labelSmall?.copyWith(
-                          color: pt.ink500,
-                          fontWeight: FontWeight.w600,
+                        const SizedBox(width: 12),
+                        Icon(Icons.article_rounded, size: 14, color: pt.ink500),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${community.postCount}',
+                          style: tt.labelSmall?.copyWith(
+                            color: pt.ink500,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),

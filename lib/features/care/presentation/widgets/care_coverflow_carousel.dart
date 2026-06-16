@@ -98,6 +98,7 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
   late Animation<double> _anim;
   late List<dbtask.CareTask> _ordered;
   double _page = 0;
+  double _dragDelta = 0;
   String? _xpBurstId;
 
   @override
@@ -309,15 +310,21 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
 
     return Column(
       children: [
-        SizedBox(
+        Semantics(
+          hint: 'Swipe left or right to browse tasks',
+          child: SizedBox(
           height: 242,
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
+            onHorizontalDragUpdate: (d) => _dragDelta += d.delta.dx,
             onHorizontalDragEnd: (d) {
               final v = d.primaryVelocity ?? 0;
-              if (v < -260) _goTo(_currentIdx + 1);
-              if (v > 260)  _goTo(_currentIdx - 1);
+              final dx = _dragDelta;
+              _dragDelta = 0;
+              if (v < -100 || dx < -40) _goTo(_currentIdx + 1);
+              if (v > 100 || dx > 40)  _goTo(_currentIdx - 1);
             },
+            onHorizontalDragCancel: () => _dragDelta = 0,
             child: Stack(
               clipBehavior: Clip.none,
               alignment: Alignment.center,
@@ -347,7 +354,10 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
                         transform: Matrix4.identity()
                           ..setEntry(3, 2, 0.0012)
                           ..rotateY(rotY),
-                        child: GestureDetector(
+                        child: Semantics(
+                          label: '${task.title}${task.isCompleted ? ", completed" : ""}',
+                          button: abs < 0.35,
+                          child: GestureDetector(
                           onTap: abs > 0.35 ? () => _goTo(i) : null,
                           child: _CoverFlowCard(
                             task: task,
@@ -355,6 +365,7 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
                             xpBurstId: _xpBurstId,
                             onToggle: () => _onToggle(i),
                             onLongPress: () => _showContextMenu(context, task),
+                          ),
                           ),
                         ),
                       ),
@@ -364,6 +375,7 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
               }).toList(),
             ),
           ),
+        ),
         ),
 
         Padding(
@@ -704,12 +716,16 @@ class _NavArrow extends StatelessWidget {
     final cs     = Theme.of(context).colorScheme;
     final pt     = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final active = onTap != null;
-    return GestureDetector(
+    return Semantics(
+      label: icon == Icons.chevron_left_rounded ? 'Previous task' : 'Next task',
+      button: true,
+      enabled: active,
+      child: GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        width: 38,
-        height: 38,
+        width: 48,
+        height: 48,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: active ? cs.primary.withAlpha(22) : Colors.transparent,
@@ -724,6 +740,7 @@ class _NavArrow extends StatelessWidget {
           color: active ? cs.primary : pt.ink300,
         ),
       ),
+    ),
     );
   }
 }

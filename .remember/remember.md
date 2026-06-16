@@ -1,15 +1,13 @@
 # Handoff
 
 ## State
-Android accessibility + touch-gesture audit completed across all major screens (Home, Care, Social, Matching, Marketplace, Alerts, Activity, Me, Seller Dashboard). 39 issues found and documented in session output. Branch: `accessibility-fix`. PR #22 open against main (StatefulShellRoute.indexedStack migration, goldens updated).
+Branch `accessibility-fix`, PR #22 open. Android a11y audit (39 issues) ALL DONE. `flutter analyze` clean (1 pre-existing lint), 115 pass / 2 pre-existing failures.
 
 ## Next
-1. Implement the 39 audit findings — start with P0s: ACTIVITY-001 (retry button), ME-001 (duplicate semantic tree rows), MATCH-001 (swipe button labels), CARE-006 (carousel swipe gesture), CHAT-001/MARKET-002 (unlabeled Send/AddToCart buttons).
-2. Re-run `flutter analyze` and `flutter test` after each fix batch.
-3. Update `progress.md` after each phase.
+1. Push branch + request review on PR #22
+2. Deferred P3 items confirmed as non-actionable: SOCIAL-001/LIKED-001 (test data), HOME-001 (already has 100dp spacer), SOCIAL-003 (already had Semantics)
 
 ## Context
-- Audit report is in the previous session transcript — 4 P0, 9 P1, 18 P2, 8 P3 issues.
-- Product images are all broken (Supabase storage URLs returning empty) — separate infra issue, not a code bug.
-- Activity screen returns "Failed to load activity" consistently — likely a Supabase RPC or RLS issue.
-- Test data has inappropriate content: "Kutta" match card uses a photo of two humans; post image is a Minecraft screenshot.
+- Phase 4 files touched: `match_hub_screen.dart` (LIKED-003: 24→100dp bottom), `appointments_screen.dart` (VETS-002: added bottom spacer), `care_coverflow_carousel.dart` (CARE-002: added Semantics hint), `wave_header.dart` (MATCH-MSG-001: ClipRect on wave painter)
+- Full audit report in `android-mcp-automation.md`
+- All phases: P0 Critical (Phase 1), P1 High (Phase 2), P2 Medium (Phase 3), P3 Low (Phase 4) complete

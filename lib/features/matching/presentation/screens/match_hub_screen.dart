@@ -189,7 +189,10 @@ class _InboxTab extends ConsumerWidget {
         }
 
         final newMatches = snapshot.newMatches;
-        final conversations = snapshot.conversations;
+        final seenKeys = <String>{};
+        final conversations = snapshot.conversations.where((item) {
+          return seenKeys.add(item.matchId ?? item.otherPetId);
+        }).toList();
         final List<Widget> header = [];
 
         if (newMatches.isNotEmpty) {
@@ -404,7 +407,7 @@ class _LikedContent extends ConsumerWidget {
             ),
           ),
         ],
-        const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
+        const SliverPadding(padding: EdgeInsets.only(bottom: 100)),
       ],
     );
   }
@@ -564,22 +567,24 @@ class _ConversationTile extends StatelessWidget {
                                 ),
                                 if (item.isDm) ...[
                                   const SizedBox(width: 6),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.poppy.withAlpha(20),
-                                      borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(
-                                          color: AppColors.poppy.withAlpha(60)),
-                                    ),
-                                    child: const Text(
-                                      'DM',
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.poppy,
-                                        letterSpacing: 0.4,
+                                  ExcludeSemantics(
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.poppy.withAlpha(20),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(
+                                            color: AppColors.poppy.withAlpha(60)),
+                                      ),
+                                      child: const Text(
+                                        'DM',
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.poppy,
+                                          letterSpacing: 0.4,
+                                        ),
                                       ),
                                     ),
                                   ),

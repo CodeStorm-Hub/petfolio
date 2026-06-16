@@ -1200,6 +1200,7 @@ class _ActionDock extends StatelessWidget {
             color: AppColors.ink500,
             bgColor: Theme.of(context).colorScheme.surface,
             label: '✕',
+            semanticLabel: 'Pass',
             fontSize: 22,
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.pass),
           ),
@@ -1209,6 +1210,7 @@ class _ActionDock extends StatelessWidget {
             color: Colors.white,
             bgColor: AppColors.lilac,
             label: '⭐',
+            semanticLabel: 'Super Like',
             fontSize: 19,
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.superPaw),
           ),
@@ -1218,6 +1220,7 @@ class _ActionDock extends StatelessWidget {
             color: Colors.white,
             bgColor: AppColors.poppy,
             label: '🐾',
+            semanticLabel: 'Like',
             fontSize: 32,
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.match),
           ),
@@ -1234,6 +1237,7 @@ class _DockButton extends StatelessWidget {
     required this.color,
     required this.bgColor,
     required this.label,
+    required this.semanticLabel,
     required this.fontSize,
     required this.onTap,
   });
@@ -1241,6 +1245,7 @@ class _DockButton extends StatelessWidget {
   final Color color;
   final Color bgColor;
   final String label;
+  final String semanticLabel;
   final double fontSize;
   final VoidCallback? onTap;
 
@@ -1248,7 +1253,11 @@ class _DockButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDisabled = onTap == null;
 
-    return GestureDetector(
+    return Semantics(
+      label: semanticLabel,
+      button: true,
+      enabled: !isDisabled,
+      child: GestureDetector(
       onTap: onTap,
       child: AnimatedOpacity(
         duration: PetfolioThemeExtension.durationSm,
@@ -1283,6 +1292,7 @@ class _DockButton extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

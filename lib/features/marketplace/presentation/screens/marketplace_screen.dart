@@ -439,7 +439,10 @@ class _CategoryChips extends StatelessWidget {
         separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (_, i) {
           if (i == _cats.length) {
-            return GestureDetector(
+            return Semantics(
+              label: 'All categories',
+              button: true,
+              child: GestureDetector(
               onTap: () => MarketplaceCategoriesSheet.show(context),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -467,11 +470,15 @@ class _CategoryChips extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
             );
           }
           final cat = _cats[i];
           final isActive = cat.id == selected;
-          return GestureDetector(
+          return Semantics(
+            label: '${cat.label}${isActive ? ", selected" : ""}',
+            button: true,
+            child: GestureDetector(
             onTap: () => onSelected(isActive ? ProductCategory.all : cat.id),
             child: AnimatedScale(
               scale: isActive ? 1.07 : 1.0,
@@ -513,6 +520,7 @@ class _CategoryChips extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
             ),
           );
         },
@@ -902,17 +910,21 @@ class _YoullLoveTile extends StatelessWidget {
                           color: AppColors.poppy,
                         ),
                       ),
-                      GestureDetector(
+                      Semantics(
+                        label: 'Add ${product.name} to cart',
+                        button: true,
+                        child: GestureDetector(
                         onTap: () => onAdd(product, null),
                         child: Container(
-                          width: 26,
-                          height: 26,
+                          width: 32,
+                          height: 32,
                           decoration: BoxDecoration(
                             color: AppColors.poppy,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           alignment: Alignment.center,
                           child: const Icon(Icons.add_rounded, size: 16, color: Colors.white),
+                        ),
                         ),
                       ),
                     ],

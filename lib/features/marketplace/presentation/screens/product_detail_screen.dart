@@ -325,8 +325,10 @@ class _ProductHeroCarousel extends StatelessWidget {
                         placeholder: (_, _) => Center(
                           child: ProductGlyph(glyphType: product.glyphType, size: 160),
                         ),
-                        errorWidget: (_, _, _) =>
-                            Center(child: ProductGlyph(glyphType: product.glyphType, size: 160)),
+                        errorWidget: (_, _, _) => Semantics(
+                            label: 'Product image unavailable',
+                            child: Center(child: ProductGlyph(glyphType: product.glyphType, size: 160)),
+                          ),
                       ),
                     ),
                   )
@@ -388,6 +390,7 @@ class _ProductHeroCarousel extends StatelessWidget {
               children: [
                 _IconBtn(
                   icon: Icons.arrow_back_rounded,
+                  tooltip: 'Back',
                   bg: Colors.white.withAlpha(235),
                   onTap: () => context.pop(),
                 ),
@@ -397,6 +400,7 @@ class _ProductHeroCarousel extends StatelessWidget {
                       icon: isWishlisted
                           ? Icons.favorite_rounded
                           : Icons.favorite_border_rounded,
+                      tooltip: isWishlisted ? 'Remove from wishlist' : 'Add to wishlist',
                       bg: Colors.white.withAlpha(235),
                       iconColor: isWishlisted ? AppColors.poppy : null,
                       onTap: onWishlistTap,
@@ -407,6 +411,7 @@ class _ProductHeroCarousel extends StatelessWidget {
                       children: [
                         _IconBtn(
                           icon: Icons.shopping_cart_outlined,
+                          tooltip: 'View cart',
                           bg: Colors.white.withAlpha(235),
                           onTap: () => context.push('/marketplace/cart'),
                         ),
@@ -1571,32 +1576,43 @@ class _SheetStepperBtn extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _IconBtn extends StatelessWidget {
-  const _IconBtn({required this.icon, required this.onTap, this.bg, this.iconColor});
+  const _IconBtn({
+    required this.icon,
+    required this.onTap,
+    required this.tooltip,
+    this.bg,
+    this.iconColor,
+  });
 
   final IconData icon;
   final VoidCallback onTap;
+  final String tooltip;
   final Color? bg;
   final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: bg ?? AppColors.surface0,
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0F0B1220),
-              offset: Offset(0, 2),
-              blurRadius: 6,
-            ),
-          ],
+    return Semantics(
+      label: tooltip,
+      button: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: bg ?? AppColors.surface0,
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0F0B1220),
+                offset: Offset(0, 2),
+                blurRadius: 6,
+              ),
+            ],
+          ),
+          child: Icon(icon, size: 22, color: iconColor ?? AppColors.ink700),
         ),
-        child: Icon(icon, size: 22, color: iconColor ?? AppColors.ink700),
       ),
     );
   }

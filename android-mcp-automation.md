@@ -180,3 +180,50 @@ Dark mode toggle on Me screen functioned correctly. The semantic label updates (
 5. Fix `CHAT-001` / `MARKET-002` — add semantic labels to Send and Add-to-Cart buttons
 
 Phase complete — please run `/remember` to save tokens before proceeding to the next phase.
+
+---
+
+## Back Gesture / App Exit Analysis
+
+### How many times did the app exit during testing?
+
+**Total app exits recorded: 1**
+
+| # | Where it happened | Expected? | Details |
+|---|-------------------|-----------|---------|
+| 1 | `HubHomeScreen` (`/home`) — very first back-press during testing | ✅ Yes | Line 13 of log: *"Back pressed sent us to Android home screen — that's the expected PopScope behavior."* App was relaunched via ADB to continue. |
+
+### Expected Behaviour (per `app_shell.dart` `PopScope` + `hub_home_screen.dart`)
+
+The `AppShell` wraps all content in:
+```dart
+PopScope(
+  canPop: false,
+  onPopInvokedWithResult: (didPop, _) {
+    if (didPop) return;
+    if (context.canPop()) context.pop();
+  },
+  child: ...,
+)
+```
+
+This means:
+
+| Location when back is pressed | Expected result |
+|-------------------------------|-----------------|
+| `HubHomeScreen` (`/home`) — nothing to pop | **App exits** to Android launcher ✅ Correct |
+| Any Care sub-tab (Nutrition / Health / Walk / Vets) | Returns to `/care` dashboard ✅ |
+| Any Social sub-tab (Stories / Community / My Pet) | Returns to `/social` feed ✅ |
+| Post Detail, Chat, Product Detail (pushed on root navigator) | Returns to previous screen ✅ |
+| Matching sub-screens (Messages / Liked / Chat) | Returns to `/matching` discover ✅ |
+| Any module root tapped via bento tile (e.g. `/care`, `/social`) | Back → `HubHomeScreen` → exits app ✅ |
+
+### Findings
+
+- **No unexpected exits were detected.** The single exit occurred at the correct place: the shell root (`/home`) with nothing on the back stack, exactly as `PopScope(canPop: false)` intends.
+- Pressing the Android back button from **any non-root screen** correctly navigated to the previous screen or the module's home screen throughout all 63 screens tested.
+- The breadcrumb "HOME ← MODULE" back button (e.g. `Back to Home` in Care/Social/Match/Market headers) also navigated correctly to `HubHomeScreen` in all tested cases.
+
+### Recommendation
+
+The back-gesture behaviour is **correct and complete** — no fixes needed. However, consider adding a **"Press back again to exit"** snackbar/toast on the first back press from `HubHomeScreen`, which is a common UX convention on Android to prevent accidental exits.

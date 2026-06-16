@@ -271,11 +271,15 @@ class _ActionButton extends StatelessWidget {
 
     return Tooltip(
       message: action.tooltip,
-      child: _CircleChip(
-        key: action.iconKey,
-        onTap: action.onTap,
-        filled: isFilled,
-        child: icon,
+      child: Semantics(
+        label: action.tooltip,
+        button: true,
+        child: _CircleChip(
+          key: action.iconKey,
+          onTap: action.onTap,
+          filled: isFilled,
+          child: icon,
+        ),
       ),
     );
   }

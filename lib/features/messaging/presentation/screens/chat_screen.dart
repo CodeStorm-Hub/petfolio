@@ -167,12 +167,15 @@ class _UnifiedChatScreenState extends ConsumerState<UnifiedChatScreen> {
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  widget.otherDisplayName,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.3,
-                      ),
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    widget.otherDisplayName,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.3,
+                        ),
+                  ),
                 ),
               ),
             ),
@@ -480,6 +483,7 @@ class _Composer extends ConsumerWidget {
               const SizedBox(width: 8),
               IconButton.filled(
                 key: const ValueKey<String>('chat_send_button'),
+                tooltip: 'Send message',
                 onPressed: sending ? null : onSend,
                 style: IconButton.styleFrom(
                   backgroundColor: AppColors.coral500,

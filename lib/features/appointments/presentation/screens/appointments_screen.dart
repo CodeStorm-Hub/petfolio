@@ -148,6 +148,7 @@ class _AppointmentsTabList extends ConsumerWidget {
                       ? 'Your completed or cancelled visits will show up here.'
                       : 'Tap + to book a new appointment.',
                 ),
+                SizedBox(height: MediaQuery.sizeOf(context).height * 0.2),
               ],
             );
           }

@@ -265,7 +265,11 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                   final active = _careFilter == chip.$1;
                                   return Padding(
                                     padding: const EdgeInsets.only(right: 8),
-                                    child: ClipRRect(
+                                    child: Semantics(
+                                      label: '${chip.$2} filter',
+                                      button: true,
+                                      selected: active,
+                                      child: ClipRRect(
                                       borderRadius: BorderRadius.circular(999),
                                       child: Material(
                                         color: Colors.transparent,
@@ -305,6 +309,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                           ),
                                         ),
                                       ),
+                                      ),
                                     ),
                                   );
                                 }).toList(),
@@ -341,8 +346,8 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                       borderRadius: BorderRadius.circular(22),
                                       child: AnimatedContainer(
                                         duration: PetfolioThemeExtension.durationSm,
-                                        width: 44,
-                                        height: 44,
+                                        width: 48,
+                                        height: 48,
                                         decoration: BoxDecoration(
                                           color: AppColors.lilacSoft,
                                           shape: BoxShape.circle,

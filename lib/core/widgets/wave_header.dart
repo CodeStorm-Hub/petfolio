@@ -135,10 +135,12 @@ class WaveHeader extends StatelessWidget {
           right: 0,
           bottom: 0,
           child: ExcludeSemantics(
-            child: SizedBox(
-              height: 60,
-              child: CustomPaint(
-                painter: WavePainter(color: pageColor),
+            child: ClipRect(
+              child: SizedBox(
+                height: 60,
+                child: CustomPaint(
+                  painter: WavePainter(color: pageColor),
+                ),
               ),
             ),
           ),

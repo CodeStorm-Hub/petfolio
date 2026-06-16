@@ -266,9 +266,9 @@ class AppShellHeader extends ConsumerWidget {
               );
             }),
             const SizedBox(width: 8),
-            _HeaderIconBtn(icon: Icons.notifications_rounded, onTap: () => context.go('/notifications')),
+            _HeaderIconBtn(icon: Icons.notifications_rounded, tooltip: 'Alerts', onTap: () => context.go('/notifications')),
             const SizedBox(width: 8),
-            _HeaderIconBtn(icon: Icons.manage_accounts_rounded, onTap: () => context.go('/me')),
+            _HeaderIconBtn(icon: Icons.manage_accounts_rounded, tooltip: 'Account', onTap: () => context.go('/me')),
           ]);
         case 1: // Alerts
           return Consumer(builder: (context, ref, _) {
@@ -325,15 +325,15 @@ class AppShellHeader extends ConsumerWidget {
             onTap: () => context.go('/social/communities'),
           ),
           const SizedBox(width: 8),
-          _HeaderIconBtn(icon: Icons.search, onTap: () {}),
+          _HeaderIconBtn(icon: Icons.search, tooltip: 'Search', onTap: () {}),
           const SizedBox(width: 8),
-          _HeaderIconBtn(icon: Icons.send_rounded, onTap: () => context.go('/matching/inbox')),
+          _HeaderIconBtn(icon: Icons.send_rounded, tooltip: 'Direct messages', onTap: () => context.go('/matching/inbox')),
         ]);
       case ShellModule.matching:
         return Row(children: [
-          _HeaderIconBtn(icon: Icons.chat_bubble_outline_rounded, onTap: () => openMatchesInbox(context)),
+          _HeaderIconBtn(icon: Icons.chat_bubble_outline_rounded, tooltip: 'Messages', onTap: () => openMatchesInbox(context)),
           const SizedBox(width: 8),
-          _HeaderIconBtn(icon: Icons.tune_rounded, onTap: () => MatchPreferencesSheet.show(context)),
+          _HeaderIconBtn(icon: Icons.tune_rounded, tooltip: 'Match preferences', onTap: () => MatchPreferencesSheet.show(context)),
         ]);
       case ShellModule.marketplace:
         return Consumer(builder: (context, ref, _) {
@@ -549,16 +549,24 @@ class _HeaderIconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final btn = GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36, height: 36,
-        decoration: const BoxDecoration(
-          color: Color(0x38FFFFFF),
-          shape: BoxShape.circle,
+    final btn = Semantics(
+      label: tooltip,
+      button: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 44, height: 44,
+          alignment: Alignment.center,
+          child: Container(
+            width: 36, height: 36,
+            decoration: const BoxDecoration(
+              color: Color(0x38FFFFFF),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, color: Colors.white, size: 18),
+          ),
         ),
-        alignment: Alignment.center,
-        child: Icon(icon, color: Colors.white, size: 18),
       ),
     );
     if (tooltip != null) {

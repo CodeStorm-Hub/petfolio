@@ -285,7 +285,7 @@ class _WaveHeroSection extends StatelessWidget {
     if (totalTasks > 0 && remaining == 0) return '${pet.name} is well cared for ✨';
     if (streak >= 30) return '${pet.name} is legendary! 🏆';
     if (streak >= 7) return '${pet.name} is on a winning streak 🔥';
-    if (streak > 0 && remaining > 0) return '${pet.name} has $remaining tasks left 🎯';
+    if (streak > 0 && remaining > 0) return '${pet.name} has $remaining tasks left 📋';
     if (streak > 0) return '${pet.name} is thriving today 🌟';
     if (remaining > 0) return '${pet.name} has $remaining tasks today 📋';
     return '${pet.name} is ready for a new day 🌱';
@@ -1168,7 +1168,7 @@ class _QuickActionCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       action.sub,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 11,
