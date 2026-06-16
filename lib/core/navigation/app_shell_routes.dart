@@ -59,26 +59,28 @@ StatefulShellRoute appShellRoute() => StatefulShellRoute.indexedStack(
               path: '/care',
               pageBuilder: (context, state) =>
                   const NoTransitionPage(child: CareScreen()),
-            ),
-            GoRoute(
-              path: '/care/nutrition',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: NutritionScreen()),
-            ),
-            GoRoute(
-              path: '/care/health',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: MedicalVaultScreen()),
-            ),
-            GoRoute(
-              path: '/care/walk',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: WalkTrackingScreen()),
-            ),
-            GoRoute(
-              path: '/care/appointments',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: AppointmentsScreen()),
+              routes: [
+                GoRoute(
+                  path: 'nutrition',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: NutritionScreen()),
+                ),
+                GoRoute(
+                  path: 'health',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: MedicalVaultScreen()),
+                ),
+                GoRoute(
+                  path: 'walk',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: WalkTrackingScreen()),
+                ),
+                GoRoute(
+                  path: 'appointments',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: AppointmentsScreen()),
+                ),
+              ],
             ),
           ],
         ),
@@ -89,23 +91,25 @@ StatefulShellRoute appShellRoute() => StatefulShellRoute.indexedStack(
               path: '/social',
               pageBuilder: (context, state) =>
                   const NoTransitionPage(child: SocialScreen()),
-            ),
-            GoRoute(
-              path: '/social/stories',
-              pageBuilder: (context, state) {
-                final petId = state.uri.queryParameters['petId'] ?? '';
-                return NoTransitionPage(child: StoryViewerScreen(initialPetId: petId));
-              },
-            ),
-            GoRoute(
-              path: '/social/communities',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: CommunitiesScreen()),
-            ),
-            GoRoute(
-              path: '/social/profile/me',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: _MePetProfileTab()),
+              routes: [
+                GoRoute(
+                  path: 'stories',
+                  pageBuilder: (context, state) {
+                    final petId = state.uri.queryParameters['petId'] ?? '';
+                    return NoTransitionPage(child: StoryViewerScreen(initialPetId: petId));
+                  },
+                ),
+                GoRoute(
+                  path: 'communities',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: CommunitiesScreen()),
+                ),
+                GoRoute(
+                  path: 'profile/me',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: _MePetProfileTab()),
+                ),
+              ],
             ),
           ],
         ),
@@ -116,16 +120,18 @@ StatefulShellRoute appShellRoute() => StatefulShellRoute.indexedStack(
               path: '/matching',
               pageBuilder: (context, state) =>
                   const NoTransitionPage(child: MatchingScreen()),
-            ),
-            GoRoute(
-              path: '/matching/inbox',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: MatchesInboxScreen()),
-            ),
-            GoRoute(
-              path: '/matching/liked',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: MatchLikedScreen()),
+              routes: [
+                GoRoute(
+                  path: 'inbox',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: MatchesInboxScreen()),
+                ),
+                GoRoute(
+                  path: 'liked',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: MatchLikedScreen()),
+                ),
+              ],
             ),
           ],
         ),
