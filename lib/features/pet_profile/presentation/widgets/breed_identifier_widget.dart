@@ -189,7 +189,10 @@ class _PickerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    return GestureDetector(
+    return Semantics(
+      label: label,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -208,6 +211,7 @@ class _PickerButton extends StatelessWidget {
               style: tt.labelSmall?.copyWith(color: pt.ink500)),
         ],
       ),
+    ),
     );
   }
 }

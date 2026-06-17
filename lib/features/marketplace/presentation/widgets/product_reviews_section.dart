@@ -31,7 +31,7 @@ class ProductReviewsSection extends ConsumerWidget {
               'Reviews',
               style: TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 color: pt.ink950,
               ),
             ),
@@ -180,7 +180,7 @@ class _ReviewSheetState extends ConsumerState<_ReviewSheet> {
             'Rate this product',
             style: TextStyle(
               fontSize: 20,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: pt.ink950,
             ),
           ),

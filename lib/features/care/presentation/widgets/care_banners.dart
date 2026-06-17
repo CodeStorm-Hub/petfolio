@@ -92,7 +92,7 @@ class _ExploreTile extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: pt.ink950,
                   ),
                 ),
@@ -215,7 +215,7 @@ class _UtilityHalf extends StatelessWidget {
                     title,
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: pt.ink950,
                       height: 1.15,
                     ),
@@ -258,7 +258,10 @@ class CareAppointmentsBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
+    return Semantics(
+      label: 'Appointments, Schedule and track vet visits',
+      button: true,
+      child: GestureDetector(
       onTap: () => context.go('/care/appointments'),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
@@ -299,6 +302,7 @@ class CareAppointmentsBanner extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

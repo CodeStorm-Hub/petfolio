@@ -23,7 +23,7 @@ class AccountScreen extends ConsumerWidget {
     final bottomPad = MediaQuery.paddingOf(context).bottom;
     final user = Supabase.instance.client.auth.currentUser;
     final activePet = ref.watch(activePetControllerProvider);
-    final bg = isDark ? pt.surface1 : const Color(0xFFF2F3F7);
+    final bg = isDark ? pt.surface1 : pt.surface2;
 
     return Scaffold(
       backgroundColor: bg,
@@ -251,7 +251,7 @@ class _ProfileHeroCard extends StatelessWidget {
                   child: Text(
                     initials,
                     style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white,
+                      fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white,
                     ),
                   ),
                 ),
@@ -265,7 +265,7 @@ class _ProfileHeroCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w800, color: pt.ink950,
+                        fontSize: 15, fontWeight: FontWeight.w700, color: pt.ink950,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -287,7 +287,7 @@ class _ProfileHeroCard extends StatelessWidget {
                       child: const Text(
                         '⭐ Gold Member',
                         style: TextStyle(
-                          fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white,
+                          fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white,
                         ),
                       ),
                     ),
@@ -398,7 +398,7 @@ class _NewBadge extends StatelessWidget {
           child: const Text(
             'NEW',
             style: TextStyle(
-              fontSize: 10, fontWeight: FontWeight.w900,
+              fontSize: 10, fontWeight: FontWeight.w700,
               color: Colors.white, letterSpacing: 0.5,
             ),
           ),

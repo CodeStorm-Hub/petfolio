@@ -117,9 +117,12 @@ class _Header extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: onBack,
-            child: Container(
+          Semantics(
+            label: 'Back',
+            button: true,
+            child: GestureDetector(
+              onTap: onBack,
+              child: Container(
               width: 40,
               height: 40,
               decoration: BoxDecoration(
@@ -128,6 +131,7 @@ class _Header extends StatelessWidget {
                 boxShadow: const [BoxShadow(color: AppColors.line, spreadRadius: 0.5)],
               ),
               child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.ink700),
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -284,7 +288,10 @@ class _DocPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: hasFile ? '$label image selected, tap to replace' : 'Upload $label',
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -341,6 +348,7 @@ class _DocPicker extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

@@ -251,6 +251,7 @@ class _ShopProfileScreenState extends ConsumerState<ShopProfileScreen>
                 children: [
                   _IconBtn(
                     icon: Icons.arrow_back_ios_new_rounded,
+                    label: 'Back',
                     onTap: () => context.pop(),
                   ),
                   const SizedBox(width: 12),
@@ -455,7 +456,10 @@ class _LocationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: '$title${selected ? ", selected" : ""}',
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
@@ -510,6 +514,7 @@ class _LocationTile extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -571,13 +576,17 @@ class _SetupField extends StatelessWidget {
 }
 
 class _IconBtn extends StatelessWidget {
-  const _IconBtn({required this.icon, required this.onTap});
+  const _IconBtn({required this.icon, required this.onTap, required this.label});
   final IconData icon;
   final VoidCallback onTap;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: label,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         width: 40, height: 40,
@@ -590,6 +599,7 @@ class _IconBtn extends StatelessWidget {
         ),
         child: Icon(icon, size: 18, color: AppColors.ink700),
       ),
+    ),
     );
   }
 }
@@ -655,7 +665,10 @@ class _BannerPicker extends StatelessWidget {
     } else {
       child = _placeholder(context);
     }
-    return GestureDetector(
+    return Semantics(
+      label: bytes != null || existingUrl != null ? 'Change shop banner' : 'Upload shop banner',
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         height: 140, width: double.infinity,
@@ -690,7 +703,8 @@ class _BannerPicker extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _placeholder(BuildContext context) => Container(
@@ -716,7 +730,10 @@ class _LogoPicker extends StatelessWidget {
     } else {
       image = const Icon(Icons.storefront_outlined, size: 28, color: AppColors.blue500);
     }
-    return GestureDetector(
+    return Semantics(
+      label: bytes != null || existingUrl != null ? 'Change shop logo' : 'Upload shop logo',
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         width: 80, height: 80,
@@ -741,6 +758,7 @@ class _LogoPicker extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

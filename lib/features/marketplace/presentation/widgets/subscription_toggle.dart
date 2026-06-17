@@ -18,7 +18,10 @@ class SubscriptionToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: value ? 'Subscribe and save, on. Tap to turn off' : 'Subscribe and save, off. Tap to turn on',
+      button: true,
+      child: GestureDetector(
       onTap: () => onChanged(!value),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -42,13 +45,14 @@ class SubscriptionToggle extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: Colors.white,
                 boxShadow: [
-                  BoxShadow(color: Color(0x22000000), blurRadius: 4, offset: Offset(0, 1)),
+                  BoxShadow(color: AppColors.shadowE2L, blurRadius: 4, offset: Offset(0, 1)),
                 ],
               ),
             ),
           ),
         ),
       ),
+    ),
     );
   }
 }
@@ -102,7 +106,10 @@ class _FreqChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: '$weeks week delivery frequency${selected ? ", selected" : ""}',
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
@@ -145,6 +152,7 @@ class _FreqChip extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

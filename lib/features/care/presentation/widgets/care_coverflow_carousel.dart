@@ -457,7 +457,10 @@ class _CoverFlowCard extends StatelessWidget {
       clipBehavior: Clip.none,
       alignment: Alignment.topCenter,
       children: [
-        GestureDetector(
+        Semantics(
+          label: task.title,
+          button: true,
+          child: GestureDetector(
           onLongPress: onLongPress,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 260),
@@ -553,7 +556,7 @@ class _CoverFlowCard extends StatelessWidget {
                   duration: const Duration(milliseconds: 200),
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: done ? pt.ink500 : cs.onSurface,
                     decoration: done
                         ? TextDecoration.lineThrough
@@ -606,7 +609,7 @@ class _CoverFlowCard extends StatelessWidget {
                             '+${task.gamificationPoints}',
                             style: TextStyle(
                               fontSize: 11,
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.w700,
                               color: done
                                   ? AppColors.mint700
                                   : AppColors.sunny700,
@@ -632,6 +635,7 @@ class _CoverFlowCard extends StatelessWidget {
               ],
             ),
           ),
+        ),
         ),
         if (xpBurstId == task.id)
           const Positioned(
@@ -689,7 +693,7 @@ class _XpBurstState extends State<_XpBurst>
             '+XP ⭐',
             style: TextStyle(
               fontSize: 15,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               color: AppColors.sunny700,
               shadows: [
                 Shadow(
@@ -794,7 +798,10 @@ class _SpringCheckButtonState extends State<_SpringCheckButton>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: widget.done ? 'Mark incomplete' : 'Mark complete',
+      button: true,
+      child: GestureDetector(
       onTapDown: (_) => _ctrl.forward(),
       onTapUp: (_) {
         _ctrl.reverse();
@@ -831,6 +838,7 @@ class _SpringCheckButtonState extends State<_SpringCheckButton>
               : null,
         ),
       ),
+    ),
     );
   }
 }

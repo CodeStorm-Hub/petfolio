@@ -367,7 +367,7 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
                               _frequencyPill(task.frequency),
                               style: const TextStyle(
                                 fontSize: 9,
-                                fontWeight: FontWeight.w900,
+                                fontWeight: FontWeight.w700,
                                 letterSpacing: 0.3,
                                 color: AppColors.lilac700,
                                 height: 1.2,
@@ -432,7 +432,7 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
                           '+${task.gamificationPoints}',
                           style: TextStyle(
                             fontSize: 11,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w700,
                             letterSpacing: 0.2,
                             color: done ? AppColors.mint700 : AppColors.sunny700,
                             height: 1,
@@ -444,7 +444,10 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
                     ),
                   ),
                   const SizedBox(width: 8),
-                  GestureDetector(
+                  Semantics(
+                    label: done ? 'Mark ${task.title} incomplete' : 'Mark ${task.title} complete',
+                    button: true,
+                    child: GestureDetector(
                     key: ValueKey('care_task_check_${task.id}'),
                     onTap: _toggle,
                     behavior: HitTestBehavior.opaque,
@@ -483,6 +486,7 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
                       ),
                     ),
                   ),
+                  ),
                 ],
               ),
             ],
@@ -509,7 +513,7 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
                     '+${task.gamificationPoints} XP ⭐',
                     style: const TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       color: AppColors.sunny700,
                       shadows: [
                         Shadow(
@@ -606,7 +610,7 @@ class CareTaskContextMenu extends StatelessWidget {
           Text(taskTitle,
               style: TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   color: cs.onSurface)),
           const SizedBox(height: 12),
           if (onAddPlan != null)

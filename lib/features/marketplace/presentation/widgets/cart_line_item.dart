@@ -61,7 +61,7 @@ class CartLineItem extends ConsumerWidget {
                   Text(
                     p.name,
                     style: const TextStyle(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       fontSize: 14,
                       color: AppColors.ink950,
                     ),
@@ -80,7 +80,7 @@ class CartLineItem extends ConsumerWidget {
                   Text(
                     '\$${(item.lineTotalCents / 100).toStringAsFixed(2)}',
                     style: const TextStyle(
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       fontSize: 16,
                       color: AppColors.ink950,
                     ),
@@ -152,20 +152,20 @@ class _Stepper extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _StepBtn(label: '−', onTap: onDecrement),
+          _StepBtn(label: '−', semanticsLabel: 'Decrease quantity', onTap: onDecrement),
           Container(
             constraints: const BoxConstraints(minWidth: 18),
             child: Text(
               '$quantity',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
                 fontSize: 13,
                 color: AppColors.ink950,
               ),
             ),
           ),
-          _StepBtn(label: '+', onTap: onIncrement),
+          _StepBtn(label: '+', semanticsLabel: 'Increase quantity', onTap: onIncrement),
         ],
       ),
     );
@@ -173,14 +173,18 @@ class _Stepper extends StatelessWidget {
 }
 
 class _StepBtn extends StatelessWidget {
-  const _StepBtn({required this.label, required this.onTap});
+  const _StepBtn({required this.label, required this.semanticsLabel, required this.onTap});
 
   final String label;
+  final String semanticsLabel;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: semanticsLabel,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -195,13 +199,14 @@ class _StepBtn extends StatelessWidget {
             label,
             style: const TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               color: AppColors.ink950,
               height: 1.1,
             ),
           ),
         ),
       ),
+    ),
     );
   }
 }

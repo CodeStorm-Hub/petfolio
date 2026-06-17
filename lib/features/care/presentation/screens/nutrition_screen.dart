@@ -907,7 +907,10 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
             ),
           ),
           const SizedBox(height: 12),
-          GestureDetector(
+          Semantics(
+            label: 'Log date, tap to change',
+            button: true,
+            child: GestureDetector(
             onTap: _pickDate,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -931,6 +934,7 @@ class _LogWeightSheetState extends ConsumerState<_LogWeightSheet> {
                   ),
                 ],
               ),
+            ),
             ),
           ),
           if (_error != null) ...[
@@ -980,7 +984,10 @@ class _UnitToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
+    return Semantics(
+      label: useLbs ? 'Weight unit: lbs, tap to switch to kg' : 'Weight unit: kg, tap to switch to lbs',
+      button: true,
+      child: GestureDetector(
       onTap: onToggle,
       child: Container(
         height: 52,
@@ -1002,6 +1009,7 @@ class _UnitToggle extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

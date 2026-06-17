@@ -58,7 +58,7 @@ class MarketplaceCategoriesSheet extends ConsumerWidget {
       builder: (ctx, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: isDark ? pt.surface1 : const Color(0xFFF2F3F7),
+            color: isDark ? pt.surface1 : pt.surface2,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
@@ -77,7 +77,7 @@ class MarketplaceCategoriesSheet extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
                 child: Text(
                   'Browse Categories',
-                  style: GoogleFonts.sora(fontWeight: FontWeight.w800, fontSize: 20, color: pt.ink950),
+                  style: GoogleFonts.sora(fontWeight: FontWeight.w700, fontSize: 20, color: pt.ink950),
                 ),
               ),
               const SizedBox(height: 8),
@@ -138,7 +138,10 @@ class _CategoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: '${cat.label}${isActive ? ", selected" : ""}',
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -152,7 +155,7 @@ class _CategoryTile extends StatelessWidget {
           border: Border.all(color: isActive ? cat.color : pt.line, width: isActive ? 2.0 : 1.0),
           boxShadow: isActive
               ? [BoxShadow(color: cat.color.withAlpha(60), blurRadius: 16, offset: const Offset(0, 6), spreadRadius: -4)]
-              : const [BoxShadow(color: Color(0x08000000), blurRadius: 8, offset: Offset(0, 2))],
+              : const [BoxShadow(color: AppColors.shadowE1L, blurRadius: 8, offset: Offset(0, 2))],
         ),
         child: Row(
           children: [
@@ -171,7 +174,7 @@ class _CategoryTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(cat.label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: isActive ? cat.color : pt.ink950)),
+                  Text(cat.label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: isActive ? cat.color : pt.ink950)),
                   const SizedBox(height: 3),
                   Text(count > 0 ? '$count items' : 'Browse', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: pt.ink500)),
                 ],
@@ -181,6 +184,7 @@ class _CategoryTile extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

@@ -346,7 +346,7 @@ class _WaveHeroSection extends StatelessWidget {
                         _moodLine(),
                         style: GoogleFonts.sora(
                           fontSize: 19,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
                           fontStyle: FontStyle.italic,
                           height: 1.2,
@@ -457,7 +457,7 @@ class _PetHeroCard extends ConsumerWidget {
                   pet.name,
                   style: GoogleFonts.sora(
                     fontSize: 16,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: pt.ink950,
                     height: 1.1,
                   ),
@@ -499,7 +499,7 @@ class _PetHeroCard extends ConsumerWidget {
                         '$streak',
                         style: const TextStyle(
                           fontSize: 12,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.sunny700,
                         ),
                       ),
@@ -517,7 +517,7 @@ class _PetHeroCard extends ConsumerWidget {
                     '$doneTasks/$totalTasks',
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: accentColor,
                     ),
                   ),
@@ -536,7 +536,7 @@ class _PetHeroCard extends ConsumerWidget {
                     'Lv ${petLevel.level} · ${petLevel.currentXp} XP',
                     style: const TextStyle(
                       fontSize: 11,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: Colors.white,
                     ),
                   ),
@@ -576,7 +576,7 @@ class _SectionHeader extends StatelessWidget {
             title.toUpperCase(),
             style: TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: pt.ink500,
               letterSpacing: 0.8,
             ),
@@ -820,7 +820,7 @@ class _CareTile extends StatelessWidget {
                           '🔥 $streak day${streak == 1 ? '' : 's'}',
                           style: const TextStyle(
                             fontSize: 11,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             color: Colors.white,
                           ),
                         ),
@@ -846,7 +846,7 @@ class _CareTile extends StatelessWidget {
                       'Care',
                       style: GoogleFonts.sora(
                         fontSize: 28,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink950,
                         height: 1.0,
                       ),
@@ -945,7 +945,7 @@ class _BentoTile extends StatelessWidget {
                       label,
                       style: GoogleFonts.sora(
                         fontSize: 19,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink950,
                         height: 1.0,
                         letterSpacing: -0.3,
@@ -1010,7 +1010,7 @@ class _AllTile extends StatelessWidget {
                 'All Features',
                 style: GoogleFonts.sora(
                   fontSize: 16,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.tangerine,
                 ),
               ),
@@ -1161,7 +1161,7 @@ class _QuickActionCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink950,
                       ),
                     ),
@@ -1325,7 +1325,7 @@ class _SpotlightCard extends StatelessWidget {
                       title,
                       style: GoogleFonts.sora(
                         fontSize: 14,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: Colors.white,
                         height: 1.2,
                       ),
@@ -1454,7 +1454,7 @@ class _DealsSection extends StatelessWidget {
                           '30% OFF Pet Food & Treats 🎉',
                           style: GoogleFonts.sora(
                             fontSize: 16,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             color: Colors.white,
                           ),
                         ),

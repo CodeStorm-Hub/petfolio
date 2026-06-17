@@ -24,7 +24,7 @@ class PetSwitcherSheet extends ConsumerWidget {
         isScrollControlled: true,
         useRootNavigator: true,
         backgroundColor: Colors.transparent,
-        barrierColor: const Color(0x6B0B1220),
+        barrierColor: const Color(0x6B000000),
         useSafeArea: true,
         builder: (_) => const PetSwitcherSheet(),
       );
@@ -104,7 +104,10 @@ class PetSwitcherSheet extends ConsumerWidget {
                       ),
                     ),
                     // Close button
-                    GestureDetector(
+                    Semantics(
+                      label: 'Close',
+                      button: true,
+                      child: GestureDetector(
                       onTap: () => Navigator.of(context).pop(),
                       child: Container(
                         width: 36,
@@ -114,6 +117,7 @@ class PetSwitcherSheet extends ConsumerWidget {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(Icons.close, size: 16, color: cs.onSurfaceVariant),
+                      ),
                       ),
                     ),
                   ],
@@ -241,7 +245,11 @@ class _PetRow extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: GestureDetector(
+      child: Semantics(
+        label: '${pet.name}${isActive ? ", active pet" : ""}',
+        selected: isActive,
+        button: true,
+        child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
           duration: PetfolioThemeExtension.durationSm,
@@ -349,6 +357,7 @@ class _PetRow extends StatelessWidget {
             ],
           ),
         ),
+        ),
       ),
     );
   }
@@ -440,7 +449,10 @@ class _ManageRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
+    return Semantics(
+      label: 'Manage pets',
+      button: true,
+      child: GestureDetector(
       key: const ValueKey<String>('pet_switcher_manage'),
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -473,6 +485,7 @@ class _ManageRow extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -485,7 +498,10 @@ class _SignOutRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return GestureDetector(
+    return Semantics(
+      label: 'Sign out',
+      button: true,
+      child: GestureDetector(
       key: const ValueKey<String>('pet_switcher_sign_out'),
       behavior: HitTestBehavior.opaque,
       onTap: () => _confirmSignOut(context, ref),
@@ -512,6 +528,7 @@ class _SignOutRow extends ConsumerWidget {
           ],
         ),
       ),
+    ),
     );
   }
 

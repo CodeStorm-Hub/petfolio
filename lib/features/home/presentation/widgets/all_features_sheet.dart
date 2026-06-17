@@ -145,13 +145,16 @@ class _AllFeaturesSheetContent extends StatelessWidget {
                   'All Features',
                   style: TextStyle(
                     fontSize: 20,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: pt.ink950,
                     letterSpacing: -0.3,
                   ),
                 ),
                 const Spacer(),
-                GestureDetector(
+                Semantics(
+                  label: 'Close',
+                  button: true,
+                  child: GestureDetector(
                   onTap: () => Navigator.of(context).pop(),
                   child: Container(
                     width: 32,
@@ -163,6 +166,7 @@ class _AllFeaturesSheetContent extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Icon(Icons.close_rounded, size: 18, color: pt.ink500),
                   ),
+                ),
                 ),
               ],
             ),
@@ -226,7 +230,10 @@ class _FeatureCardState extends State<_FeatureCard> {
         ? widget.item.color.withAlpha(28)
         : widget.item.soft;
 
-    return GestureDetector(
+    return Semantics(
+      label: '${widget.item.label}, ${widget.item.sub}',
+      button: true,
+      child: GestureDetector(
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) => setState(() => _pressed = false),
       onTapCancel: () => setState(() => _pressed = false),
@@ -272,7 +279,7 @@ class _FeatureCardState extends State<_FeatureCard> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 13,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: widget.pt.ink950,
                       ),
                     ),
@@ -293,6 +300,7 @@ class _FeatureCardState extends State<_FeatureCard> {
           ),
         ),
       ),
+    ),
     );
   }
 }

@@ -14,7 +14,7 @@ class MatchPreferencesSheet extends ConsumerWidget {
         isScrollControlled: true,
         useRootNavigator: true,
         backgroundColor: Colors.transparent,
-        barrierColor: const Color(0x6B0B1220),
+        barrierColor: const Color(0x6B000000),
         useSafeArea: true,
         builder: (_) => const MatchPreferencesSheet(),
       );

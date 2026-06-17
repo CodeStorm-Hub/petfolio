@@ -246,7 +246,10 @@ class _PostCard extends ConsumerWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              GestureDetector(
+              Semantics(
+                label: post.isLiked ? 'Unlike post' : 'Like post',
+                button: true,
+                child: GestureDetector(
                 onTap: () => ref
                     .read(communityPostsProvider.notifier)
                     .toggleLike(post),
@@ -267,6 +270,7 @@ class _PostCard extends ConsumerWidget {
                     ),
                   ],
                 ),
+              ),
               ),
             ],
           ),

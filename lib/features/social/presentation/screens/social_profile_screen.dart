@@ -235,9 +235,13 @@ class SocialProfileScreen extends ConsumerWidget {
                             );
                           }
 
-                          return GestureDetector(
-                            onTap: () => context.push('/social/post/${post.id}', extra: post),
-                            child: child,
+                          return Semantics(
+                            label: post.caption.isNotEmpty ? post.caption : 'View post',
+                            button: true,
+                            child: GestureDetector(
+                              onTap: () => context.push('/social/post/${post.id}', extra: post),
+                              child: child,
+                            ),
                           );
                         },
                         childCount: posts.length,
@@ -425,7 +429,7 @@ class _ProfileStatColumn extends StatelessWidget {
       children: [
         Text(
           value,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: cs.onSurface, height: 1.1),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: cs.onSurface, height: 1.1),
         ),
         const SizedBox(height: 3),
         Text(
@@ -435,7 +439,11 @@ class _ProfileStatColumn extends StatelessWidget {
       ],
     );
     if (onTap == null) return column;
-    return GestureDetector(onTap: onTap, child: column);
+    return Semantics(
+      label: '$value $label',
+      button: true,
+      child: GestureDetector(onTap: onTap, child: column),
+    );
   }
 }
 
@@ -581,7 +589,7 @@ class _CareStatCard extends StatelessWidget {
             value,
             style: TextStyle(
               fontSize: 22,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: cs.onSurface,
               height: 1,
             ),

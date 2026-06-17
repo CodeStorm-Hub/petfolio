@@ -183,7 +183,7 @@ class MatchCelebrationOverlay extends StatelessWidget {
                               'Send a tail wag 🐾',
                               style: TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.w800,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
@@ -194,7 +194,7 @@ class MatchCelebrationOverlay extends StatelessWidget {
                               foregroundColor: Colors.white,
                               textStyle: const TextStyle(
                                 fontSize: 14,
-                                fontWeight: FontWeight.w800,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                             child: const Text('Keep swiping'),

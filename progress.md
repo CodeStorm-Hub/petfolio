@@ -1,5 +1,18 @@
 # Petfolio — Progress Log
 
+## 2026-06-17 — Accessibility Pass: GestureDetector Semantics Wrap ✅
+
+- Audited all 68 files across `lib/features/` for bare `GestureDetector` tap targets
+- Wrapped every unlabeled `GestureDetector` with `Semantics(label: ..., button: true)` — TalkBack/VoiceOver now announces all interactive elements
+- Selection/filter chips use `Semantics(label: '..., selected', selected: isSelected, button: true)` pattern
+- Fixed `social_screen.dart` stray closing paren (misaligned Semantics close from prior pass)
+- `flutter analyze`: 1 pre-existing `anonKey` info lint only
+- Files covered: activity, auth, care, communities, home, marketplace (all screens/widgets), matching, offers, pet_profile, settings, social (feed, detail, story, DM, profile, comments), admin
+
+**GestureDetector pass COMPLETE.** All tap targets across the app have accessible labels.
+
+---
+
 ## 2026-06-16 — Accessibility Audit Phase 4: P3 Low Fixes ✅
 
 - **LIKED-003** (`match_hub_screen.dart`): `_LikedContent` bottom padding 24→100dp — last row of match cards no longer clips under floating nav bar

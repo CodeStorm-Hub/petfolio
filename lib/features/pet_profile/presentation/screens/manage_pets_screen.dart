@@ -191,7 +191,10 @@ class _ManageHeader extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(12, 10, 16, 10),
         child: Row(
           children: [
-            GestureDetector(
+            Semantics(
+              label: 'Back',
+              button: true,
+              child: GestureDetector(
               key: const ValueKey<String>('manage_pets_back'),
               onTap: onBack,
               behavior: HitTestBehavior.opaque,
@@ -220,6 +223,7 @@ class _ManageHeader extends StatelessWidget {
                   color: cs.onSurfaceVariant,
                 ),
               ),
+            ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -510,7 +514,10 @@ class _AddPetCallout extends StatelessWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
-    return GestureDetector(
+    return Semantics(
+      label: 'Add a new pet',
+      button: true,
+      child: GestureDetector(
       key: const ValueKey<String>('manage_pets_add_button'),
       onTap: onTap,
       child: Container(
@@ -556,6 +563,7 @@ class _AddPetCallout extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

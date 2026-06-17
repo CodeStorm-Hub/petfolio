@@ -84,7 +84,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                     Text(
                       'Notifications',
                       style: GoogleFonts.sora(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 20,
                         color: AppColors.ink950,
                       ),
@@ -132,7 +132,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                 labelColor: AppColors.poppy,
                 unselectedLabelColor: AppColors.ink500,
                 labelStyle: const TextStyle(
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   fontSize: 14,
                 ),
                 unselectedLabelStyle: const TextStyle(
@@ -161,7 +161,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 11,
-                                fontWeight: FontWeight.w900,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
@@ -337,7 +337,7 @@ class _PromoNotifCard extends StatelessWidget {
                   promo.code,
                   style: GoogleFonts.sora(
                     fontSize: 15,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                     color: pt.ink950,
                     letterSpacing: 0.5,
                   ),
@@ -353,7 +353,7 @@ class _PromoNotifCard extends StatelessWidget {
                   promo.discountLabel,
                   style: const TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.tangerine,
                   ),
                 ),
@@ -379,20 +379,25 @@ class _PromoNotifCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              GestureDetector(
-                onTap: () => HapticFeedback.selectionClick(),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: AppColors.poppy,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Text(
-                    'Copy code',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
+              Semantics(
+                label: 'Copy referral code',
+                button: true,
+                child: InkWell(
+                  onTap: () => HapticFeedback.selectionClick(),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: AppColors.poppy,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Text(
+                      'Copy code',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),

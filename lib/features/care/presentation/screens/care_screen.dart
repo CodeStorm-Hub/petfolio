@@ -634,7 +634,7 @@ class _DoneCounter extends StatelessWidget {
           allDone ? 'All done! 🎉' : '$done/$total done',
           style: TextStyle(
             fontSize: 11,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             color: allDone ? AppColors.mint700 : AppColors.sunny700,
           ),
         ),
@@ -669,9 +669,9 @@ class _StreakFreezeRow extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFF1A3A6B).withAlpha(12),
+                color: AppColors.info.withAlpha(12),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF4A90D9).withAlpha(60)),
+                border: Border.all(color: AppColors.info.withAlpha(60)),
               ),
               child: Row(
                 children: [

@@ -577,7 +577,10 @@ class _ImageWell extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          GestureDetector(
+          Semantics(
+            label: image != null ? 'Change photo' : 'Add photo',
+            button: true,
+            child: GestureDetector(
             onTap: isSubmitting ? null : onTap,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
@@ -591,6 +594,7 @@ class _ImageWell extends StatelessWidget {
               ),
               child: image == null ? _EmptyImagePlaceholder(pt: pt) : null,
             ),
+          ),
           ),
           if (image != null && !isSubmitting) ...[
             Positioned(
@@ -624,7 +628,10 @@ class _ImageWell extends StatelessWidget {
             Positioned(
               bottom: 12, left: 0, right: 0,
               child: Center(
-                child: GestureDetector(
+                child: Semantics(
+                  label: 'Change photo',
+                  button: true,
+                  child: GestureDetector(
                   onTap: onTap,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
@@ -638,6 +645,7 @@ class _ImageWell extends StatelessWidget {
                       ],
                     ),
                   ),
+                ),
                 ),
               ),
             ),

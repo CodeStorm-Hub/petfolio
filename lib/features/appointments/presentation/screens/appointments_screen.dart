@@ -43,7 +43,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
               ),
               Text(
                 'Appointments',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: pt.ink950),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: pt.ink950),
               ),
             ],
           ),
@@ -51,7 +51,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
             labelColor: AppColors.mint,
             unselectedLabelColor: pt.ink500,
             indicatorColor: AppColors.mint,
-            labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+            labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
             unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             indicatorWeight: 3,
             tabs: const [
@@ -233,7 +233,7 @@ class AppointmentCardWidget extends ConsumerWidget {
                       appointment.title,
                       style: TextStyle(
                         fontSize: 15,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink950,
                       ),
                     ),
@@ -249,7 +249,7 @@ class AppointmentCardWidget extends ConsumerWidget {
                       appointment.status.toUpperCase(),
                       style: TextStyle(
                         fontSize: 9,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: badgeText,
                         letterSpacing: 0.5,
                       ),
@@ -334,7 +334,7 @@ class AppointmentCardWidget extends ConsumerWidget {
                 'Appointment Actions',
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   color: pt.ink950,
                 ),
               ),
@@ -456,7 +456,7 @@ class AppointmentCardWidget extends ConsumerWidget {
                     'Select Time Slot',
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: pt.ink950,
                     ),
                   ),
@@ -586,7 +586,7 @@ class AppointmentCardWidget extends ConsumerWidget {
           backgroundColor: pt.surface1,
           title: Text(
             'Cancel Appointment?',
-            style: TextStyle(fontWeight: FontWeight.w800, color: pt.ink950),
+            style: TextStyle(fontWeight: FontWeight.w700, color: pt.ink950),
           ),
           content: Text(
             'Are you sure you want to cancel this appointment?\n\n'
@@ -744,7 +744,7 @@ class _AddAppointmentSheetState extends ConsumerState<_AddAppointmentSheet> {
               'New Appointment',
               style: TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 color: pt.ink950,
               ),
             ),

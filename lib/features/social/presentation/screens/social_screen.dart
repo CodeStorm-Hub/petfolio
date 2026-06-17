@@ -698,7 +698,10 @@ class _StoryItemState extends State<_StoryItem>
     final ink950 = Theme.of(context).extension<PetfolioThemeExtension>()!.ink950;
 
     if (widget.isAdd) {
-      return GestureDetector(
+      return Semantics(
+        label: 'Add story',
+        button: true,
+        child: GestureDetector(
         onTap: widget.onTap,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -743,6 +746,7 @@ class _StoryItemState extends State<_StoryItem>
             Text(widget.label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ink950)),
           ],
         ),
+      ),
       );
     }
 
@@ -782,7 +786,10 @@ class _StoryItemState extends State<_StoryItem>
       return body;
     }
 
-    return GestureDetector(
+    return Semantics(
+      label: '${widget.label}\'s story',
+      button: true,
+      child: GestureDetector(
       onTap: widget.onTap,
       onLongPress: widget.onLongPress,
       child: Column(
@@ -820,6 +827,7 @@ class _StoryItemState extends State<_StoryItem>
           ),
         ],
       ),
+    ),
     );
   }
 }
@@ -1178,7 +1186,11 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
               ),
               
               // Photo
-              GestureDetector(
+              Semantics(
+                label: 'View post',
+                hint: 'Double tap to like',
+                button: true,
+                child: GestureDetector(
                 onTap: widget.onTapPost,
                 onDoubleTapDown: (details) {
                   _doubleTapPosition = details;
@@ -1275,7 +1287,8 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   ),
                 ),
               ),
-              
+              ),
+
               // Caption with hashtag highlighting
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -1288,7 +1301,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   ),
                 ),
               ),
-              
+
               // Reaction stack visualizer
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -1420,7 +1433,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                       color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(999),
                       boxShadow: [
-                        BoxShadow(color: Color(0x4D783C14), blurRadius: 32, spreadRadius: -10, offset: const Offset(0, 16)),
+                        BoxShadow(color: AppColors.shadowGlassL, blurRadius: 32, spreadRadius: -10, offset: const Offset(0, 16)),
                         BorderSide(color: Theme.of(context).extension<PetfolioThemeExtension>()!.line).toBoxShadow()
                       ],
                     ),

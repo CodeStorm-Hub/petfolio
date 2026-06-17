@@ -39,7 +39,7 @@ class SettingsScreen extends ConsumerWidget {
                     Text(
                       'Account & Settings',
                       style: GoogleFonts.sora(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 20,
                         color: pt.ink950,
                       ),
@@ -215,7 +215,7 @@ class _ProfileCard extends StatelessWidget {
               initials,
               style: const TextStyle(
                 fontSize: 22,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
                 color: Colors.white,
               ),
             ),
@@ -231,7 +231,7 @@ class _ProfileCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: pt.ink950,
                   ),
                 ),
@@ -252,7 +252,7 @@ class _ProfileCard extends StatelessWidget {
                         '⭐ Gold Member',
                         style: TextStyle(
                           fontSize: 11,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
                         ),
                       ),
@@ -295,7 +295,7 @@ class _SettingsGroup extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 11,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 color: pt.ink500,
                 letterSpacing: 0.8,
               ),
@@ -382,7 +382,7 @@ class _NewBadge extends StatelessWidget {
             'NEW',
             style: TextStyle(
               fontSize: 10,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               color: Colors.white,
               letterSpacing: 0.5,
             ),

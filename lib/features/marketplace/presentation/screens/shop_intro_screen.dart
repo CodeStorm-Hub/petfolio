@@ -82,7 +82,7 @@ class ShopIntroSheet extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.sora(
                         fontSize: 26,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink950,
                         height: 1.15,
                       ),
@@ -115,7 +115,7 @@ class ShopIntroSheet extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(f.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: pt.ink950)),
+                                  Text(f.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: pt.ink950)),
                                   const SizedBox(height: 3),
                                   Text(f.sub, style: TextStyle(fontSize: 12, color: pt.ink500, height: 1.4)),
                                 ],
@@ -144,7 +144,7 @@ class ShopIntroSheet extends StatelessWidget {
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    textStyle: GoogleFonts.sora(fontWeight: FontWeight.w800, fontSize: 16),
+                    textStyle: GoogleFonts.sora(fontWeight: FontWeight.w700, fontSize: 16),
                   ),
                   child: const Text("Let's explore"),
                 ),

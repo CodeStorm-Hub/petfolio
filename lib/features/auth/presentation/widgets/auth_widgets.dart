@@ -43,7 +43,7 @@ class AuthBrand extends StatelessWidget {
           'PetFolio',
           style: tt.displaySmall?.copyWith(
             color: cs.primary,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             letterSpacing: -0.5,
           ),
         ),
@@ -320,7 +320,10 @@ class AuthToggleLink extends StatelessWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
-    return GestureDetector(
+    return Semantics(
+      label: actionLabel,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
@@ -343,6 +346,7 @@ class AuthToggleLink extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

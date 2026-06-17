@@ -87,7 +87,10 @@ class _MedicalVaultBody extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        GestureDetector(
+                        Semantics(
+                          label: 'Back',
+                          button: true,
+                          child: GestureDetector(
                           onTap: () => context.pop(),
                           child: Container(
                             width: 40,
@@ -98,6 +101,7 @@ class _MedicalVaultBody extends ConsumerWidget {
                             ),
                             child: const Icon(Icons.arrow_back_ios_new_rounded, size: 22, color: AppColors.ink700),
                           ),
+                          ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -105,13 +109,16 @@ class _MedicalVaultBody extends ConsumerWidget {
                             '${petName.toUpperCase()} · MEDICAL VAULT',
                             style: const TextStyle(
                               fontSize: 10,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                               letterSpacing: 0.8,
                               color: AppColors.mint700,
                             ),
                           ),
                         ),
-                        GestureDetector(
+                        Semantics(
+                          label: 'Add record',
+                          button: true,
+                          child: GestureDetector(
                           onTap: () => _openAddSheet(context),
                           child: Container(
                             width: 40,
@@ -123,6 +130,7 @@ class _MedicalVaultBody extends ConsumerWidget {
                             ),
                             child: const Icon(Icons.add_rounded, size: 22, color: Colors.white),
                           ),
+                          ),
                         ),
                       ],
                     ),
@@ -131,7 +139,7 @@ class _MedicalVaultBody extends ConsumerWidget {
                       text: const TextSpan(
                         style: TextStyle(
                           fontSize: 36,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           height: 1.05,
                           color: AppColors.ink950,
                         ),
@@ -359,7 +367,10 @@ class _ShareWithVetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: 'Share medical records',
+      button: true,
+      child: GestureDetector(
       onTap: _share,
       child: CustomPaint(
         painter: DashedRectPainter(
@@ -388,7 +399,7 @@ class _ShareWithVetCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Share with your vet', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.ink950)),
+                    Text('Share with your vet', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.ink950)),
                     Text('Share a summary of all active records', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.ink500)),
                   ],
                 ),
@@ -405,6 +416,7 @@ class _ShareWithVetCard extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }
@@ -429,8 +441,8 @@ class _HealthPill extends StatelessWidget {
         children: [
           Text(icon, style: const TextStyle(fontSize: 18, height: 1)),
           const SizedBox(height: 2),
-          Text(label.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.4, color: AppColors.ink500)),
-          Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.ink950)),
+          Text(label.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.4, color: AppColors.ink500)),
+          Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.ink950)),
         ],
       ),
     );
@@ -475,7 +487,7 @@ class _VaultSection extends StatelessWidget {
                 title,
                 style: const TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.ink950,
                 ),
               ),
@@ -490,7 +502,7 @@ class _VaultSection extends StatelessWidget {
                   '${records.length}',
                   style: const TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.ink700,
                   ),
                 ),
@@ -616,7 +628,7 @@ class _MedicalRecordCard extends ConsumerWidget {
                           record.name,
                           style: const TextStyle(
                             fontSize: 15,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             color: AppColors.ink950,
                           ),
                         ),
@@ -631,7 +643,7 @@ class _MedicalRecordCard extends ConsumerWidget {
                           statusLabel,
                           style: TextStyle(
                             fontSize: 11,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w700,
                             color: statusColor,
                           ),
                         ),
@@ -660,7 +672,10 @@ class _MedicalRecordCard extends ConsumerWidget {
                   ],
                   if (record.documentUrl != null) ...[
                     const SizedBox(height: 8),
-                    GestureDetector(
+                    Semantics(
+                      label: 'View document',
+                      button: true,
+                      child: GestureDetector(
                       onTap: () => _openDocument(context, ref),
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
@@ -680,6 +695,7 @@ class _MedicalRecordCard extends ConsumerWidget {
                             ),
                           ),
                         ],
+                      ),
                       ),
                     ),
                   ],
@@ -877,7 +893,11 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
               runSpacing: 8,
               children: MedicalRecordType.values.map((t) {
                 final selected = t == _type;
-                return GestureDetector(
+                return Semantics(
+                  label: _typeLabel(t),
+                  selected: selected,
+                  button: true,
+                  child: GestureDetector(
                   onTap: () => setState(() => _type = t),
                   child: AnimatedContainer(
                     duration: PetfolioThemeExtension.durationSm,
@@ -898,6 +918,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                         color: selected ? Colors.white : pt.ink500,
                       ),
                     ),
+                  ),
                   ),
                 );
               }).toList(),
@@ -1064,7 +1085,10 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
               ),
             ),
             const SizedBox(height: 8),
-            GestureDetector(
+            Semantics(
+              label: _pickedFile == null ? 'Attach image, optional' : 'Attached: ${_pickedFile!.name}',
+              button: _pickedFile == null,
+              child: GestureDetector(
               onTap: _pickedFile == null ? _pickDocument : null,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -1090,14 +1114,19 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                       ),
                     ),
                     if (_pickedFile != null)
-                      GestureDetector(
-                        onTap: () => setState(() => _pickedFile = null),
-                        child: Icon(Icons.close_rounded, size: 18, color: pt.ink300),
+                      Semantics(
+                        label: 'Clear attachment',
+                        button: true,
+                        child: GestureDetector(
+                          onTap: () => setState(() => _pickedFile = null),
+                          child: Icon(Icons.close_rounded, size: 18, color: pt.ink300),
+                        ),
                       )
                     else
                       Icon(Icons.chevron_right_rounded, size: 18, color: pt.ink300),
                   ],
                 ),
+              ),
               ),
             ),
             const SizedBox(height: 12),
@@ -1185,7 +1214,10 @@ class _DateRow extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        GestureDetector(
+        Semantics(
+          label: value == null ? '$label, tap to set' : '$label, $text',
+          button: true,
+          child: GestureDetector(
           onTap: onTap,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -1208,14 +1240,19 @@ class _DateRow extends StatelessWidget {
                   ),
                 ),
                 if (value != null)
-                  GestureDetector(
-                    onTap: onClear,
-                    child: Icon(Icons.close_rounded, size: 18, color: pt.ink300),
+                  Semantics(
+                    label: 'Clear $label',
+                    button: true,
+                    child: GestureDetector(
+                      onTap: onClear,
+                      child: Icon(Icons.close_rounded, size: 18, color: pt.ink300),
+                    ),
                   )
                 else
                   Icon(Icons.chevron_right_rounded, size: 18, color: pt.ink300),
               ],
             ),
+          ),
           ),
         ),
       ],

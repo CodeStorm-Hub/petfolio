@@ -96,27 +96,31 @@ class _PrescriptionUploadScreenState
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () => context.pop(),
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.surface0,
-                          boxShadow: const [
-                            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
-                          ],
+                    Semantics(
+                      label: 'Back',
+                      button: true,
+                      child: GestureDetector(
+                        onTap: () => context.pop(),
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.surface0,
+                            boxShadow: const [
+                              BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+                            ],
+                          ),
+                          child: const Icon(Icons.arrow_back_ios_new_rounded,
+                              size: 18, color: AppColors.ink700),
                         ),
-                        child: const Icon(Icons.arrow_back_ios_new_rounded,
-                            size: 18, color: AppColors.ink700),
                       ),
                     ),
                     const SizedBox(width: 12),
                     const Text(
                       'Upload Prescription',
                       style: TextStyle(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 20,
                         color: AppColors.ink950,
                       ),
@@ -157,7 +161,10 @@ class _PrescriptionUploadScreenState
                       ),
                     ),
                     const SizedBox(height: 20),
-                    GestureDetector(
+                    Semantics(
+                      label: _pickedFile != null ? 'Change prescription image' : 'Upload prescription image',
+                      button: true,
+                      child: GestureDetector(
                       onTap: _pick,
                       child: Container(
                         height: 180,
@@ -203,6 +210,7 @@ class _PrescriptionUploadScreenState
                                 ],
                               ),
                       ),
+                    ),
                     ),
                     const SizedBox(height: 20),
                     TextField(

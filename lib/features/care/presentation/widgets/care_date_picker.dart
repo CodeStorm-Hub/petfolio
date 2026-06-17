@@ -76,7 +76,12 @@ class _CareDatePickerState extends State<CareDatePicker> {
                 return Padding(
                   padding: EdgeInsets.only(
                       right: i < _totalDays - 1 ? _chipGap : 0),
-                  child: GestureDetector(
+                  child: Semantics(
+                    label: isToday ? 'Today, ${date.day}' : '${_dayLetters[date.weekday - 1]}, ${date.day}',
+                    selected: isSelected,
+                    enabled: !isFuture,
+                    button: true,
+                    child: GestureDetector(
                     key: ValueKey<String>('care_date_$ymd'),
                     onTap: isFuture ? null : () => widget.onDateSelected(date),
                     child: AnimatedContainer(
@@ -141,6 +146,7 @@ class _CareDatePickerState extends State<CareDatePicker> {
                         ],
                       ),
                     ),
+                  ),
                   ),
                 );
               },

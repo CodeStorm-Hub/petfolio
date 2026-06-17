@@ -76,7 +76,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                     Text(
                       'Activity',
                       style: GoogleFonts.sora(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 20,
                         color: AppColors.ink950,
                       ),
@@ -379,7 +379,7 @@ class _DateGroup extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               letterSpacing: 0.5,
               color: pt.ink500,
             ),
@@ -510,7 +510,7 @@ class _ActivityCard extends StatelessWidget {
                     Text(
                       item.trailingValue,
                       style: TextStyle(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 14,
                         color: pt.ink950,
                       ),
@@ -529,7 +529,7 @@ class _ActivityCard extends StatelessWidget {
                         item.statusLabel,
                         style: TextStyle(
                           fontSize: 10,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: item.statusColor,
                         ),
                       ),
@@ -562,7 +562,7 @@ class _ActivityCard extends StatelessWidget {
                     ),
                     textStyle: const TextStyle(
                       fontSize: 13,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                     ),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     minimumSize: Size.zero,
@@ -599,7 +599,11 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: '$label${active ? ", selected" : ""}',
+      selected: active,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
@@ -643,6 +647,7 @@ class _FilterChip extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

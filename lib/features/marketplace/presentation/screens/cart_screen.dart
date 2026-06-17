@@ -149,12 +149,12 @@ class _CartHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
       child: Row(
         children: [
-          _IconBtn(icon: Icons.arrow_back_ios_new_rounded, onTap: onBack),
+          _IconBtn(icon: Icons.arrow_back_ios_new_rounded, label: 'Back', onTap: onBack),
           const SizedBox(width: 12),
           Text(
             'Your Cart',
             style: GoogleFonts.sora(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               fontSize: 20,
               color: AppColors.ink950,
             ),
@@ -242,7 +242,7 @@ class _DeliverToCard extends ConsumerWidget {
                           'DELIVER TO',
                           style: TextStyle(
                             fontSize: 10,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             letterSpacing: 0.7,
                             color: pt.ink500,
                           ),
@@ -435,7 +435,7 @@ class _VendorCheckoutSectionState
                             : 'S',
                         style: const TextStyle(
                           fontSize: 15,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.tangerine,
                         ),
                       ),
@@ -448,7 +448,7 @@ class _VendorCheckoutSectionState
                           Text(
                             widget.shopName,
                             style: const TextStyle(
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                               fontSize: 15,
                               color: AppColors.ink950,
                             ),
@@ -608,7 +608,7 @@ class _VendorCheckoutSectionState
                         horizontal: 16, vertical: 10,
                       ),
                       textStyle: const TextStyle(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 14,
                       ),
                     ),
@@ -650,7 +650,7 @@ class _VendorCheckoutSectionState
                       'Pay via',
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.ink950,
                       ),
                     ),
@@ -736,7 +736,7 @@ class _VendorCheckoutSectionState
                   'Receipt',
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.ink950,
                   ),
                 ),
@@ -853,7 +853,7 @@ class _VendorCheckoutSectionState
               ),
               textStyle: const TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
             child: isLoading
@@ -953,7 +953,7 @@ class _MultiVendorSummaryBanner extends StatelessWidget {
                   'Ordering from $shopCount shops',
                   style: const TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.ink950,
                   ),
                 ),
@@ -972,7 +972,7 @@ class _MultiVendorSummaryBanner extends StatelessWidget {
                 totalFormatted,
                 style: const TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.poppy,
                 ),
               ),
@@ -1057,7 +1057,7 @@ class _SumRow extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            fontWeight: bold ? FontWeight.w900 : FontWeight.w700,
+            fontWeight: bold ? FontWeight.w700 : FontWeight.w700,
             fontSize: valueFontSize,
             color: valueColor ?? (bold ? AppColors.ink950 : AppColors.ink700),
           ),
@@ -1086,7 +1086,10 @@ class _PaymentChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: '$label${selected ? ", selected" : ""}',
+      button: true,
+      child: GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
         onTap();
@@ -1125,6 +1128,7 @@ class _PaymentChip extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -1177,7 +1181,7 @@ class _CodConfirmSheet extends StatelessWidget {
               const Text(
                 'Confirm Order',
                 style: TextStyle(
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   fontSize: 18,
                   color: AppColors.ink950,
                 ),
@@ -1218,7 +1222,7 @@ class _CodConfirmSheet extends StatelessWidget {
                   const Text(
                     'Total',
                     style: TextStyle(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       fontSize: 15,
                       color: AppColors.ink950,
                     ),
@@ -1226,7 +1230,7 @@ class _CodConfirmSheet extends StatelessWidget {
                   Text(
                     '\$${(subtotalCents / 100).toStringAsFixed(2)}',
                     style: const TextStyle(
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       fontSize: 17,
                       color: AppColors.ink950,
                     ),
@@ -1269,7 +1273,7 @@ class _CodConfirmSheet extends StatelessWidget {
                         borderRadius: BorderRadius.circular(18)),
                     textStyle: const TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -1287,14 +1291,18 @@ class _CodConfirmSheet extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _IconBtn extends StatelessWidget {
-  const _IconBtn({required this.icon, required this.onTap});
+  const _IconBtn({required this.icon, required this.onTap, required this.label});
 
   final IconData icon;
   final VoidCallback onTap;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: label,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         width: 40,
@@ -1313,6 +1321,7 @@ class _IconBtn extends StatelessWidget {
         ),
         child: Icon(icon, size: 18, color: AppColors.ink700),
       ),
+    ),
     );
   }
 }

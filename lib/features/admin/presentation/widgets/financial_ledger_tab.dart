@@ -101,7 +101,10 @@ class _PayoutCardState extends ConsumerState<_PayoutCard> {
           ),
           if (bank != null) ...[
             const SizedBox(height: 10),
-            GestureDetector(
+            Semantics(
+              label: _expanded ? 'Hide bank details' : 'Show bank details',
+              button: true,
+              child: GestureDetector(
               onTap: () => setState(() => _expanded = !_expanded),
               child: Row(
                 children: [
@@ -119,6 +122,7 @@ class _PayoutCardState extends ConsumerState<_PayoutCard> {
                   ),
                 ],
               ),
+            ),
             ),
             if (_expanded) ...[
               const SizedBox(height: 8),

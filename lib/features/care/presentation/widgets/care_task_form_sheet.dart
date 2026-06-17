@@ -179,7 +179,11 @@ class _CareTaskFormSheetState extends ConsumerState<CareTaskFormSheet> {
               itemBuilder: (_, i) {
                 final t = dbtask.CareTaskType.values[i];
                 final selected = t == _type;
-                return GestureDetector(
+                return Semantics(
+                  label: _typeLabel(t),
+                  selected: selected,
+                  button: true,
+                  child: GestureDetector(
                   onTap: () => _onTypeSelected(t),
                   child: AnimatedContainer(
                     duration: PetfolioThemeExtension.durationSm,
@@ -211,6 +215,7 @@ class _CareTaskFormSheetState extends ConsumerState<CareTaskFormSheet> {
                       ],
                     ),
                   ),
+                ),
                 );
               },
             ),
@@ -259,7 +264,11 @@ class _CareTaskFormSheetState extends ConsumerState<CareTaskFormSheet> {
                   final selected = f == _frequency;
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
-                    child: GestureDetector(
+                    child: Semantics(
+                      label: _freqLabel(f),
+                      selected: selected,
+                      button: true,
+                      child: GestureDetector(
                       onTap: () => setState(() => _frequency = f),
                       child: AnimatedContainer(
                         duration: PetfolioThemeExtension.durationSm,
@@ -282,6 +291,7 @@ class _CareTaskFormSheetState extends ConsumerState<CareTaskFormSheet> {
                         ),
                       ),
                     ),
+                    ),
                   );
                 }).toList(),
               ),
@@ -290,7 +300,10 @@ class _CareTaskFormSheetState extends ConsumerState<CareTaskFormSheet> {
 
             _SheetLabel('Time (optional)', pt),
             const SizedBox(height: 10),
-            GestureDetector(
+            Semantics(
+              label: _time != null ? 'Time set to ${_time!.format(context)}, tap to change' : 'Set task time',
+              button: true,
+              child: GestureDetector(
               onTap: () async {
                 final picked = await showTimePicker(
                   context: context,
@@ -318,15 +331,20 @@ class _CareTaskFormSheetState extends ConsumerState<CareTaskFormSheet> {
                     ),
                     const Spacer(),
                     if (_time != null)
-                      GestureDetector(
-                        onTap: () => setState(() => _time = null),
-                        child: Icon(Icons.close_rounded, size: 16, color: pt.ink300),
+                      Semantics(
+                        label: 'Clear time',
+                        button: true,
+                        child: GestureDetector(
+                          onTap: () => setState(() => _time = null),
+                          child: Icon(Icons.close_rounded, size: 16, color: pt.ink300),
+                        ),
                       )
                     else
                       Icon(Icons.chevron_right_rounded, size: 18, color: pt.ink300),
                   ],
                 ),
               ),
+            ),
             ),
             const SizedBox(height: 28),
 

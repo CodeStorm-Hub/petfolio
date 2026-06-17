@@ -115,7 +115,10 @@ class _QuickAddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: 'Add to cart',
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -126,7 +129,7 @@ class _QuickAddButton extends StatelessWidget {
           color: Colors.white,
           boxShadow: const [
             BoxShadow(
-              color: Color(0x1A0B1220),
+              color: AppColors.shadowE2L,
               blurRadius: 6,
               offset: Offset(0, 2),
             ),
@@ -138,6 +141,7 @@ class _QuickAddButton extends StatelessWidget {
           color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
+    ),
     );
   }
 }
@@ -250,7 +254,10 @@ class _ProductTile extends StatelessWidget {
           Positioned(
             top: 8,
             right: 8,
-            child: GestureDetector(
+            child: Semantics(
+              label: 'Save to wishlist',
+              button: true,
+              child: GestureDetector(
               onTap: () => AppSnackBar.show('Wishlist coming soon 💛'),
               behavior: HitTestBehavior.opaque,
               child: Container(
@@ -261,7 +268,7 @@ class _ProductTile extends StatelessWidget {
                   color: Colors.white.withAlpha(230),
                   boxShadow: const [
                     BoxShadow(
-                      color: Color(0x1A0B1220),
+                      color: AppColors.shadowE2L,
                       blurRadius: 6,
                       offset: Offset(0, 2),
                     ),
@@ -275,6 +282,7 @@ class _ProductTile extends StatelessWidget {
               ),
             ),
           ),
+        ),
         ],
       ),
     );

@@ -177,7 +177,10 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
               color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
-        title: GestureDetector(
+        title: Semantics(
+          label: 'View ${post.petName}\'s profile',
+          button: true,
+          child: GestureDetector(
           onTap: () => context.push('/social/profile/${post.petId}'),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -206,6 +209,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
               ),
             ],
           ),
+        ),
         ),
         centerTitle: true,
         actions: [
@@ -349,9 +353,13 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                           ),
                         ),
                       ),
-                      GestureDetector(
+                      Semantics(
+                        label: 'Dismiss reply',
+                        button: true,
+                        child: GestureDetector(
                         onTap: () => setState(() => _replyingToComment = null),
                         child: Icon(Icons.close_rounded, size: 16, color: pt.ink300),
+                        ),
                       ),
                     ],
                   ),
@@ -549,7 +557,9 @@ class _TappableHashtagText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: caption,
+      child: GestureDetector(
       onTapUp: (details) {
         final renderBox = context.findRenderObject() as RenderBox?;
         if (renderBox == null) return;
@@ -571,6 +581,7 @@ class _TappableHashtagText extends StatelessWidget {
       child: RichText(
         text: TextSpan(children: spans, style: baseStyle),
       ),
+    ),
     );
   }
 }
@@ -896,7 +907,10 @@ class _CommentTile extends ConsumerWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final tt = Theme.of(context).textTheme;
 
-    return GestureDetector(
+    return Semantics(
+      label: 'Comment by ${comment.petName}: ${comment.content}',
+      button: true,
+      child: GestureDetector(
       behavior: HitTestBehavior.opaque,
       onLongPress: () => _showContextMenu(context, ref),
       child: Padding(
@@ -910,7 +924,10 @@ class _CommentTile extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Tappable avatar → pet social profile
-            GestureDetector(
+            Semantics(
+              label: 'View ${comment.petName}\'s profile',
+              button: true,
+              child: GestureDetector(
               onTap: () => context.push('/social/profile/${comment.petId}'),
               child: CircleAvatar(
                 radius: isReply ? 12 : 16,
@@ -932,6 +949,7 @@ class _CommentTile extends ConsumerWidget {
                     : null,
               ),
             ),
+            ),
             const SizedBox(width: 10),
             // Content
             Expanded(
@@ -943,7 +961,10 @@ class _CommentTile extends ConsumerWidget {
                       // Tappable pet name → pet social profile
                       Flexible(
                         fit: FlexFit.loose,
-                        child: GestureDetector(
+                        child: Semantics(
+                          label: comment.petName,
+                          button: true,
+                          child: GestureDetector(
                           onTap: () =>
                               context.push('/social/profile/${comment.petId}'),
                           child: Text(
@@ -955,6 +976,7 @@ class _CommentTile extends ConsumerWidget {
                               color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
+                        ),
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -994,7 +1016,10 @@ class _CommentTile extends ConsumerWidget {
                         ),
                         const SizedBox(width: 12),
                       ],
-                      GestureDetector(
+                      Semantics(
+                        label: 'Reply',
+                        button: true,
+                        child: GestureDetector(
                         onTap: () => onReplyTap?.call(comment),
                         child: Text(
                           'Reply',
@@ -1003,6 +1028,7 @@ class _CommentTile extends ConsumerWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
+                      ),
                       ),
                     ],
                   ),
@@ -1031,6 +1057,7 @@ class _CommentTile extends ConsumerWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -1206,7 +1233,10 @@ class _CommentInputBarState extends State<_CommentInputBar> {
                       ),
                     ),
                   )
-                : GestureDetector(
+                : Semantics(
+                    label: 'Send',
+                    button: true,
+                    child: GestureDetector(
                     key: const ValueKey('send'),
                     onTap: widget.onSend,
                     child: AnimatedContainer(
@@ -1236,6 +1266,7 @@ class _CommentInputBarState extends State<_CommentInputBar> {
                         size: 20,
                       ),
                     ),
+                  ),
                   ),
           ),
         ],

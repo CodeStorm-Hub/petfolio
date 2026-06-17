@@ -469,7 +469,10 @@ class _NewMatchAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: 'New match: ${item.otherPetName}',
+      button: true,
+      child: GestureDetector(
       key: ValueKey<String>('new_match_${item.matchId}'),
       onTap: onTap,
       child: SizedBox(
@@ -508,6 +511,7 @@ class _NewMatchAvatar extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -796,7 +800,7 @@ class _AvatarPlaceholder extends StatelessWidget {
       child: Text(
         initials,
         style: TextStyle(
-            fontSize: 40, fontWeight: FontWeight.w800, color: color),
+            fontSize: 40, fontWeight: FontWeight.w700, color: color),
       ),
     );
   }

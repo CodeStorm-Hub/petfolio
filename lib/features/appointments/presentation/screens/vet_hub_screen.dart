@@ -49,7 +49,7 @@ class _VetHubScreenState extends State<VetHubScreen> {
               'Vet Hub',
               style: TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 color: pt.ink950,
               ),
             ),
@@ -179,7 +179,11 @@ class _ClinicGridCardState extends State<_ClinicGridCard> {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return GestureDetector(
+    return Semantics(
+      label: widget.clinic.name,
+      hint: 'View clinic details',
+      button: true,
+      child: GestureDetector(
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) => setState(() => _pressed = false),
       onTapCancel: () => setState(() => _pressed = false),
@@ -221,7 +225,7 @@ class _ClinicGridCardState extends State<_ClinicGridCard> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   color: pt.ink950,
                   height: 1.3,
                 ),
@@ -266,7 +270,7 @@ class _ClinicGridCardState extends State<_ClinicGridCard> {
                     widget.clinic.rating.toStringAsFixed(1),
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: pt.ink950,
                     ),
                   ),
@@ -286,6 +290,7 @@ class _ClinicGridCardState extends State<_ClinicGridCard> {
           ),
         ),
       ),
+    ),
     );
   }
 }
@@ -347,7 +352,7 @@ class _AppointmentsHistoryTab extends StatelessWidget {
             labelColor: AppColors.sky,
             unselectedLabelColor: pt.ink500,
             indicatorColor: AppColors.sky,
-            labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+            labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
             unselectedLabelStyle:
                 const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             indicatorWeight: 3,
@@ -639,7 +644,11 @@ class _VetNavTabState extends State<_VetNavTab>
   Widget build(BuildContext context) {
     final unselected = widget.isDark ? AppColors.ink500D : AppColors.ink500;
 
-    return GestureDetector(
+    return Semantics(
+      label: widget.dest.label,
+      selected: widget.isSelected,
+      button: true,
+      child: GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
         widget.onTap();
@@ -689,6 +698,7 @@ class _VetNavTabState extends State<_VetNavTab>
           );
         },
       ),
+    ),
     );
   }
 }

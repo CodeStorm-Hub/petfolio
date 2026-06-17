@@ -638,7 +638,10 @@ class _AvatarEditor extends StatelessWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
-    return GestureDetector(
+    return Semantics(
+      label: 'Change pet photo',
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Stack(
         children: [
@@ -690,6 +693,7 @@ class _AvatarEditor extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

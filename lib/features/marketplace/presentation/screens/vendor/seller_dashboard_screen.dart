@@ -250,6 +250,7 @@ class _DashboardBody extends ConsumerWidget {
               children: [
                 _IconBtn(
                   icon: Icons.arrow_back_ios_new_rounded,
+                  label: 'Back',
                   onTap: () => context.pop(),
                 ),
                 const SizedBox(width: 12),
@@ -367,7 +368,7 @@ class _OnboardingBanner extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: const Color(0xFFFFF3CD),
+          color: AppColors.warningSoft,
         ),
         child: Row(
           children: [
@@ -381,23 +382,27 @@ class _OnboardingBanner extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 8),
-            GestureDetector(
-              onTap: () async {
-                try {
-                  final url =
-                      await ref.read(myShopProvider.notifier).startOnboarding();
-                  if (!context.mounted) return;
-                  await StripeOnboardingDialog.show(context, url);
-                } catch (e) {
-                  if (context.mounted) AppSnackBar.showError(e);
-                }
-              },
-              child: const Text(
-                'Setup',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                  color: AppColors.warning,
+            Semantics(
+              label: 'Set up Stripe payments',
+              button: true,
+              child: GestureDetector(
+                onTap: () async {
+                  try {
+                    final url =
+                        await ref.read(myShopProvider.notifier).startOnboarding();
+                    if (!context.mounted) return;
+                    await StripeOnboardingDialog.show(context, url);
+                  } catch (e) {
+                    if (context.mounted) AppSnackBar.showError(e);
+                  }
+                },
+                child: const Text(
+                  'Setup',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: AppColors.warning,
+                  ),
                 ),
               ),
             ),
@@ -514,9 +519,13 @@ class _ShopStatusChip extends StatelessWidget {
 
     if (!tappable) return chip;
 
-    return GestureDetector(
-      onTap: () => context.push('/seller/kyc'),
-      child: chip,
+    return Semantics(
+      label: 'Complete KYC verification',
+      button: true,
+      child: GestureDetector(
+        onTap: () => context.push('/seller/kyc'),
+        child: chip,
+      ),
     );
   }
 
@@ -567,7 +576,10 @@ class _StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: '$label: $value',
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -606,6 +618,7 @@ class _StatTile extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -716,7 +729,7 @@ class _KycPendingBanner extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: const Color(0xFFFFF3CD),
+          color: AppColors.warningSoft,
         ),
         child: const Row(
           children: [
@@ -775,14 +788,18 @@ class _KycRejectedBanner extends StatelessWidget {
                     ),
                   ],
                   const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: () => context.push('/seller/kyc'),
-                    child: const Text(
-                      'Resubmit documents',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.danger,
+                  Semantics(
+                    label: 'Resubmit KYC documents',
+                    button: true,
+                    child: GestureDetector(
+                      onTap: () => context.push('/seller/kyc'),
+                      child: const Text(
+                        'Resubmit documents',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.danger,
+                        ),
                       ),
                     ),
                   ),
@@ -847,7 +864,10 @@ class _DeleteTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: 'Request shop deletion',
+      button: true,
+      child: GestureDetector(
       onTap: () => showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -891,6 +911,7 @@ class _DeleteTile extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -987,19 +1008,23 @@ class _RejectedBanner extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 10),
-          GestureDetector(
-            onTap: () => showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (_) => _DeleteShopRequestSheet(shop: shop),
-            ),
-            child: const Text(
-              'Submit new request →',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.danger,
+          Semantics(
+            label: 'Submit new shop deletion request',
+            button: true,
+            child: GestureDetector(
+              onTap: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => _DeleteShopRequestSheet(shop: shop),
+              ),
+              child: const Text(
+                'Submit new request →',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.danger,
+                ),
               ),
             ),
           ),
@@ -1200,14 +1225,18 @@ class _ConsequenceItem extends StatelessWidget {
 }
 
 class _IconBtn extends StatelessWidget {
-  const _IconBtn({required this.icon, required this.onTap});
+  const _IconBtn({required this.icon, required this.onTap, required this.label});
 
   final IconData icon;
+  final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: label,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         width: 40,
@@ -1221,6 +1250,7 @@ class _IconBtn extends StatelessWidget {
         ),
         child: Icon(icon, size: 18, color: AppColors.ink700),
       ),
+    ),
     );
   }
 }

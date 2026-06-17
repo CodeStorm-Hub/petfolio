@@ -28,7 +28,7 @@ class VetClinicsScreen extends ConsumerWidget {
             Text('VETS', style: TextStyle(fontSize: 10, color: pt.ink500, letterSpacing: 1)),
             Text(
               'Find a Vet',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: pt.ink950),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: pt.ink950),
             ),
           ],
         ),
@@ -86,7 +86,11 @@ class _ClinicCardState extends State<_ClinicCard> {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return GestureDetector(
+    return Semantics(
+      label: widget.clinic.name,
+      hint: 'View clinic details',
+      button: true,
+      child: GestureDetector(
       onTap: widget.onTap,
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) => setState(() => _pressed = false),
@@ -126,7 +130,7 @@ class _ClinicCardState extends State<_ClinicCard> {
                       widget.clinic.name,
                       style: TextStyle(
                         fontSize: 15,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink950,
                         height: 1.2,
                       ),
@@ -171,7 +175,7 @@ class _ClinicCardState extends State<_ClinicCard> {
                         widget.clinic.rating.toStringAsFixed(1),
                         style: TextStyle(
                           fontSize: 13,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: pt.ink950,
                         ),
                       ),
@@ -190,6 +194,7 @@ class _ClinicCardState extends State<_ClinicCard> {
           ),
         ),
       ),
+    ),
     );
   }
 }

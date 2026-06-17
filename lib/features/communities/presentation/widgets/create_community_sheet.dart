@@ -101,7 +101,7 @@ class _CreateCommunitySheetState extends ConsumerState<_CreateCommunitySheet> {
             'Create community',
             style: TextStyle(
               fontSize: 20,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: pt.ink950,
             ),
           ),

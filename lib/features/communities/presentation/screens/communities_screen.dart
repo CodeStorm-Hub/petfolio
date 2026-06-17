@@ -46,7 +46,7 @@ class CommunitiesScreen extends ConsumerWidget {
                   'Communities',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     color: Colors.white,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),

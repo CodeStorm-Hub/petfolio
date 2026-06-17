@@ -364,7 +364,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
           color: isDark ? pt.line : pt.line.withAlpha(160),
           width: 1.2,
         ),
-        boxShadow: const [BoxShadow(color: Color(0x08000000), blurRadius: 8, offset: Offset(0, 2))],
+        boxShadow: const [BoxShadow(color: AppColors.shadowE1L, blurRadius: 8, offset: Offset(0, 2))],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
@@ -390,12 +390,16 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
             ),
           ),
           if (hasText)
-            GestureDetector(
-              onTap: () {
-                _controller.clear();
-                ref.read(marketplaceSearchQueryProvider.notifier).clear();
-              },
-              child: Icon(Icons.close_rounded, size: 18, color: pt.ink500),
+            Semantics(
+              label: 'Clear search',
+              button: true,
+              child: GestureDetector(
+                onTap: () {
+                  _controller.clear();
+                  ref.read(marketplaceSearchQueryProvider.notifier).clear();
+                },
+                child: Icon(Icons.close_rounded, size: 18, color: pt.ink500),
+              ),
             ),
         ],
       ),
@@ -468,7 +472,7 @@ class _CategoryChips extends StatelessWidget {
                     'All',
                     style: TextStyle(
                       fontSize: 11,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: pt.ink950,
                     ),
                   ),
@@ -507,7 +511,7 @@ class _CategoryChips extends StatelessWidget {
                       ),
                       boxShadow: isActive
                           ? [BoxShadow(color: cat.color.withAlpha(55), blurRadius: 14, offset: const Offset(0, 5), spreadRadius: -3)]
-                          : const [BoxShadow(color: Color(0x0C000000), blurRadius: 8, offset: Offset(0, 2))],
+                          : const [BoxShadow(color: AppColors.shadowE1L, blurRadius: 8, offset: Offset(0, 2))],
                     ),
                     alignment: Alignment.center,
                     child: Text(cat.emoji, style: const TextStyle(fontSize: 30)),
@@ -517,7 +521,7 @@ class _CategoryChips extends StatelessWidget {
                     duration: const Duration(milliseconds: 200),
                     style: TextStyle(
                       fontSize: 11,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: isActive ? cat.color : pt.ink950,
                     ),
                     child: Text(cat.label),
@@ -666,7 +670,7 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: Theme.of(context)
                               .extension<PetfolioThemeExtension>()!
                               .ink950,
@@ -776,7 +780,7 @@ class _YoullLoveSection extends StatelessWidget {
                         'Products you\'ll love',
                         style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: pt.ink950,
                         ),
                       ),
@@ -842,7 +846,11 @@ class _YoullLoveTile extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final price = '\$${(product.priceCents / 100).toStringAsFixed(2)}';
 
-    return GestureDetector(
+    return Semantics(
+      label: product.name,
+      hint: 'View product',
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         width: 140,
@@ -850,7 +858,7 @@ class _YoullLoveTile extends StatelessWidget {
           color: isDark ? pt.surface2 : Colors.white,
           borderRadius: BorderRadius.circular(18),
           boxShadow: const [
-            BoxShadow(color: Color(0x0A000000), blurRadius: 10, offset: Offset(0, 3)),
+            BoxShadow(color: AppColors.shadowE1L, blurRadius: 10, offset: Offset(0, 3)),
           ],
         ),
         child: Column(
@@ -910,7 +918,7 @@ class _YoullLoveTile extends StatelessWidget {
                         price,
                         style: const TextStyle(
                           fontSize: 13,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.poppy,
                         ),
                       ),
@@ -939,6 +947,7 @@ class _YoullLoveTile extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -1111,7 +1120,7 @@ class _PromoCard extends StatelessWidget {
                   slide.eyebrow,
                   style: const TextStyle(
                     fontSize: 10,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: Colors.white70,
                     letterSpacing: 1.0,
                   ),
@@ -1121,7 +1130,7 @@ class _PromoCard extends StatelessWidget {
                   slide.title,
                   style: GoogleFonts.sora(
                     fontSize: 19,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                     color: Colors.white,
                     height: 1.2,
                   ),
@@ -1137,7 +1146,7 @@ class _PromoCard extends StatelessWidget {
                     'Shop Now →',
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: slide.gradStart,
                     ),
                   ),
@@ -1258,7 +1267,7 @@ class _NewProductTileState extends State<_NewProductTile> {
                               const SizedBox(width: 3),
                               Text(
                                 widget.product.rating != null ? widget.product.rating!.toStringAsFixed(1) : '—',
-                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: pt.ink950),
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: pt.ink950),
                               ),
                             ],
                           ),
@@ -1277,7 +1286,7 @@ class _NewProductTileState extends State<_NewProductTile> {
                             ),
                             child: const Text(
                               '🔥 HOT',
-                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.white),
+                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white),
                             ),
                           ),
                         ),
@@ -1295,7 +1304,7 @@ class _NewProductTileState extends State<_NewProductTile> {
                     children: [
                       Text(
                         widget.product.name,
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: pt.ink950, height: 1.25),
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: pt.ink950, height: 1.25),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1312,10 +1321,13 @@ class _NewProductTileState extends State<_NewProductTile> {
                         children: [
                           Text(
                             '\$${(widget.product.priceCents / 100).toStringAsFixed(2)}',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: pt.ink950),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: pt.ink950),
                           ),
                           const Spacer(),
-                          GestureDetector(
+                          Semantics(
+                            label: 'Add ${widget.product.name} to cart',
+                            button: true,
+                            child: GestureDetector(
                             key: ValueKey<String>('marketplace_add_${widget.product.id}'),
                             onTap: _handleAdd,
                             child: AnimatedScale(
@@ -1342,6 +1354,7 @@ class _NewProductTileState extends State<_NewProductTile> {
                                 child: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
                               ),
                             ),
+                          ),
                           ),
                         ],
                       ),
@@ -1412,7 +1425,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
-        boxShadow: const [BoxShadow(color: Color(0x40000000), blurRadius: 40, offset: Offset(0, -20), spreadRadius: -10)],
+        boxShadow: const [BoxShadow(color: AppColors.shadowGlassL, blurRadius: 40, offset: Offset(0, -20), spreadRadius: -10)],
       ),
       constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.88),
       child: Column(
@@ -1427,7 +1440,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Your basket', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: ink950)),
+                      Text('Your basket', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: ink950)),
                       Text('${cart.itemCount} item${cart.itemCount == 1 ? '' : 's'} · ships to Brooklyn', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: ink500)),
                     ],
                   ),
@@ -1450,7 +1463,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                     children: [
                       const Text('🛒', style: TextStyle(fontSize: 60)),
                       const SizedBox(height: 10),
-                      Text('Cart is empty', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: ink950)),
+                      Text('Cart is empty', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: ink950)),
                       Text('Tap a paw + to add treats', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: ink500)),
                     ],
                   ),
@@ -1477,7 +1490,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Add a treat for \$4 more', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: ink950)),
+                                Text('Add a treat for \$4 more', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: ink950)),
                                 Text('Unlock free shipping', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: ink500)),
                               ],
                             ),
@@ -1579,8 +1592,8 @@ class _SummaryRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: TextStyle(fontSize: big ? 16 : 13, fontWeight: big ? FontWeight.w800 : FontWeight.w700, color: big ? pt.ink950 : pt.ink700)),
-        Text(value, style: TextStyle(fontSize: big ? 18 : 13, fontWeight: big ? FontWeight.w900 : FontWeight.w700, color: big ? pt.ink950 : pt.ink700)),
+        Text(label, style: TextStyle(fontSize: big ? 16 : 13, fontWeight: big ? FontWeight.w700 : FontWeight.w700, color: big ? pt.ink950 : pt.ink700)),
+        Text(value, style: TextStyle(fontSize: big ? 18 : 13, fontWeight: big ? FontWeight.w700 : FontWeight.w700, color: big ? pt.ink950 : pt.ink700)),
       ],
     );
   }
@@ -1639,10 +1652,10 @@ class _CartItemRow extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.product.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: pt.ink950)),
+                Text(item.product.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: pt.ink950)),
                 Text(item.product.brand, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: pt.ink500)),
                 const SizedBox(height: 2),
-                Text('\$${((item.product.priceCents * item.quantity) / 100).toStringAsFixed(2)}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: pt.ink950)),
+                Text('\$${((item.product.priceCents * item.quantity) / 100).toStringAsFixed(2)}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: pt.ink950)),
               ],
             ),
           ),
@@ -1651,18 +1664,26 @@ class _CartItemRow extends ConsumerWidget {
             decoration: BoxDecoration(color: pt.surface2, borderRadius: BorderRadius.circular(999)),
             child: Row(
               children: [
-                GestureDetector(
-                  onTap: () => ref.read(cartProvider.notifier).decrement(item.product.id),
-                  child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: const Text('−', style: TextStyle(fontWeight: FontWeight.w900))),
+                Semantics(
+                  label: 'Decrease quantity',
+                  button: true,
+                  child: GestureDetector(
+                    onTap: () => ref.read(cartProvider.notifier).decrement(item.product.id),
+                    child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: const Text('−', style: TextStyle(fontWeight: FontWeight.w700))),
+                  ),
                 ),
                 Container(
                   constraints: const BoxConstraints(minWidth: 18),
                   alignment: Alignment.center,
-                  child: Text(item.quantity.toString(), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900)),
+                  child: Text(item.quantity.toString(), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
                 ),
-                GestureDetector(
-                  onTap: () => ref.read(cartProvider.notifier).add(item.product),
-                  child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: const Text('+', style: TextStyle(fontWeight: FontWeight.w900))),
+                Semantics(
+                  label: 'Increase quantity',
+                  button: true,
+                  child: GestureDetector(
+                    onTap: () => ref.read(cartProvider.notifier).add(item.product),
+                    child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: const Text('+', style: TextStyle(fontWeight: FontWeight.w700))),
+                  ),
                 ),
               ],
             ),
@@ -1702,14 +1723,18 @@ class _DeliveryStrip extends ConsumerWidget {
             Expanded(
               child: Text(
                 'SHIP TO ${name.toUpperCase()}\'S ADDRESS',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: pt.ink950, letterSpacing: 0.3),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: pt.ink950, letterSpacing: 0.3),
               ),
             ),
-            GestureDetector(
-              onTap: () => AddressSheet.show(context),
-              child: Text(
-                'Set address',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.tangerine),
+            Semantics(
+              label: 'Set delivery address',
+              button: true,
+              child: GestureDetector(
+                onTap: () => AddressSheet.show(context),
+                child: Text(
+                  'Set address',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.tangerine),
+                ),
               ),
             ),
           ],

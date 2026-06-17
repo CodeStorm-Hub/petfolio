@@ -146,7 +146,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? pt.surface1 : const Color(0xFFF6F7FA),
+      backgroundColor: isDark ? pt.surface1 : pt.surface2,
       body: Stack(
         children: [
           CustomScrollView(
@@ -430,7 +430,7 @@ class _ProductHeroCarousel extends StatelessWidget {
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 11,
-                                  fontWeight: FontWeight.w900,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),
@@ -452,7 +452,7 @@ class _ProductHeroCarousel extends StatelessWidget {
               height: 40,
               child: CustomPaint(
                 painter: _WavePainter(
-                  color: isDark ? pt.surface1 : const Color(0xFFF6F7FA),
+                  color: isDark ? pt.surface1 : pt.surface2,
                 ),
               ),
             ),
@@ -557,7 +557,7 @@ class _SellerRow extends StatelessWidget {
                   initial,
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                     color: product.gradientStart,
                   ),
                 ),
@@ -573,7 +573,7 @@ class _SellerRow extends StatelessWidget {
                       shopName,
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink950,
                       ),
                     ),
@@ -641,7 +641,7 @@ class _ProductInfo extends StatelessWidget {
                         : '—',
                     style: const TextStyle(
                       color: AppColors.sunny700,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       fontSize: 11,
                     ),
                   ),
@@ -650,7 +650,7 @@ class _ProductInfo extends StatelessWidget {
                       ' · ${product.reviewCount} review${product.reviewCount == 1 ? '' : 's'}',
                       style: const TextStyle(
                         color: AppColors.sunny700,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 11,
                       ),
                     ),
@@ -668,7 +668,7 @@ class _ProductInfo extends StatelessWidget {
                 'Free delivery',
                 style: TextStyle(
                   color: AppColors.mint700,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   fontSize: 11,
                 ),
               ),
@@ -683,7 +683,7 @@ class _ProductInfo extends StatelessWidget {
           product.brand.toUpperCase(),
           style: TextStyle(
             fontSize: 12,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
             color: pt.ink500,
           ),
@@ -694,7 +694,7 @@ class _ProductInfo extends StatelessWidget {
         Text(
           product.name,
           style: TextStyle(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             fontSize: 22,
             height: 1.2,
             color: pt.ink950,
@@ -723,7 +723,7 @@ class _ProductInfo extends StatelessWidget {
             Text(
               displayFormatted,
               style: TextStyle(
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
                 fontSize: 28,
                 color: pt.ink950,
                 letterSpacing: -0.3,
@@ -752,7 +752,7 @@ class _ProductInfo extends StatelessWidget {
                   '-12%',
                   style: TextStyle(
                     fontSize: 11,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),
                 ),
@@ -787,21 +787,17 @@ class _SubscribeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final savingsCents = product.priceCents - product.subPriceCents;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final cs = Theme.of(context).colorScheme;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        color: subscribe ? const Color(0xFFEDF7F2) : AppColors.surface0,
-        border: Border.all(color: subscribe ? const Color(0xFFC3E8D6) : AppColors.line),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x060B1220),
-            offset: Offset(0, 4),
-            blurRadius: 12,
-          ),
-        ],
+        color: subscribe ? pt.mintSoft : cs.surface,
+        border: Border.all(color: subscribe ? pt.success : pt.line),
+        boxShadow: pt.shadowE1,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -814,12 +810,12 @@ class _SubscribeCard extends StatelessWidget {
                 height: 44,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  color: subscribe ? AppColors.mint : AppColors.surface2,
+                  color: subscribe ? pt.success : pt.surface2,
                 ),
                 child: Icon(
                   Icons.autorenew_rounded,
                   size: 24,
-                  color: subscribe ? Colors.white : AppColors.ink500,
+                  color: subscribe ? Colors.white : pt.ink500,
                 ),
               ),
               const SizedBox(width: 14),
@@ -829,12 +825,12 @@ class _SubscribeCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Text(
+                        Text(
                           'Subscribe & Save',
                           style: TextStyle(
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             fontSize: 16,
-                            color: AppColors.ink950,
+                            color: pt.ink950,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -842,14 +838,14 @@ class _SubscribeCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(6),
-                            color: AppColors.success.withAlpha(26),
+                            color: pt.success.withAlpha(26),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Save 12%',
                             style: TextStyle(
                               fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.success,
+                              fontWeight: FontWeight.w700,
+                              color: pt.success,
                             ),
                           ),
                         ),
@@ -860,10 +856,10 @@ class _SubscribeCard extends StatelessWidget {
                       subscribe
                           ? 'Auto-delivers every $frequencyWeeks weeks · save \$${(savingsCents / 100).toStringAsFixed(2)}'
                           : 'Save 12% on every refill · cancel anytime',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.ink500,
+                        color: pt.ink500,
                       ),
                     ),
                   ],
@@ -886,13 +882,13 @@ class _SubscribeCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'DELIVERY FREQUENCY',
                     style: TextStyle(
                       fontSize: 11,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       letterSpacing: 0.88,
-                      color: AppColors.ink500,
+                      color: pt.ink500,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -983,7 +979,7 @@ class _DualCtaBar extends StatelessWidget {
                   ),
                   textStyle: const TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -1005,7 +1001,7 @@ class _DualCtaBar extends StatelessWidget {
                   ),
                   textStyle: const TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 child: Row(
@@ -1051,16 +1047,18 @@ class _VariantChipsSection extends ConsumerWidget {
       error: (_, _) => const SizedBox.shrink(),
       data: (variants) {
         if (variants.isEmpty) return const SizedBox.shrink();
+        final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+        final cs = Theme.of(context).colorScheme;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'VARIANTS',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.88,
-                color: AppColors.ink500,
+                color: pt.ink500,
               ),
             ),
             const SizedBox(height: 8),
@@ -1071,7 +1069,11 @@ class _VariantChipsSection extends ConsumerWidget {
                   final selected = v.id == selectedVariantId;
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
-                    child: GestureDetector(
+                    child: Semantics(
+                      label: '${v.attributeLabel}, ${v.priceFormatted}',
+                      selected: selected,
+                      button: true,
+                      child: GestureDetector(
                       onTap: () => onSelected(v.id, v.priceCents),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 160),
@@ -1082,10 +1084,10 @@ class _VariantChipsSection extends ConsumerWidget {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           color: selected
-                              ? AppColors.mint.withAlpha(30)
-                              : AppColors.surface0,
+                              ? pt.success.withAlpha(30)
+                              : cs.surface,
                           border: Border.all(
-                            color: selected ? AppColors.mint : AppColors.line,
+                            color: selected ? pt.success : pt.line,
                             width: selected ? 1.5 : 1,
                           ),
                         ),
@@ -1099,8 +1101,8 @@ class _VariantChipsSection extends ConsumerWidget {
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 color: selected
-                                    ? AppColors.mint700
-                                    : AppColors.ink700,
+                                    ? pt.success
+                                    : pt.ink700,
                               ),
                             ),
                             Text(
@@ -1109,14 +1111,15 @@ class _VariantChipsSection extends ConsumerWidget {
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
                                 color: selected
-                                    ? AppColors.mint700
-                                    : AppColors.ink500,
+                                    ? pt.success
+                                    : pt.ink500,
                               ),
                             ),
                           ],
                         ),
                       ),
                     ),
+                  ),
                   );
                 }).toList(),
               ),
@@ -1203,23 +1206,27 @@ class _VariantSheetContentState extends ConsumerState<_VariantSheetContent> {
                       'Customize as per your choice',
                       style: GoogleFonts.sora(
                         fontSize: 16,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink950,
                       ),
                     ),
                   ),
-                  GestureDetector(
+                  Semantics(
+                    label: 'Close',
+                    button: true,
+                    child: GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
                     child: Container(
                       width: 30,
                       height: 30,
                       decoration: BoxDecoration(
-                        color: isDark ? pt.surface2 : const Color(0xFFF0F1F5),
+                        color: isDark ? pt.surface2 : pt.surface1,
                         shape: BoxShape.circle,
                       ),
                       alignment: Alignment.center,
                       child: Icon(Icons.close_rounded, size: 16, color: pt.ink500),
                     ),
+                  ),
                   ),
                 ],
               ),
@@ -1282,7 +1289,7 @@ class _VariantSheetContentState extends ConsumerState<_VariantSheetContent> {
                               'COMPLETE',
                               style: TextStyle(
                                 fontSize: 10,
-                                fontWeight: FontWeight.w900,
+                                fontWeight: FontWeight.w700,
                                 color: AppColors.mint700,
                                 letterSpacing: 0.5,
                               ),
@@ -1297,7 +1304,11 @@ class _VariantSheetContentState extends ConsumerState<_VariantSheetContent> {
                             : _selectedVariantId == opt.id;
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 8),
-                          child: GestureDetector(
+                          child: Semantics(
+                            label: opt.label,
+                            selected: isSelected,
+                            button: true,
+                            child: GestureDetector(
                             onTap: () => setState(() {
                               _selectedVariantId = opt.id;
                               _selectedVariantPrice =
@@ -1309,7 +1320,7 @@ class _VariantSheetContentState extends ConsumerState<_VariantSheetContent> {
                               decoration: BoxDecoration(
                                 color: isDark
                                     ? pt.surface2
-                                    : const Color(0xFFF6F7FA),
+                                    : pt.surface1,
                                 borderRadius: BorderRadius.circular(14),
                                 border: Border.all(
                                   color: isSelected
@@ -1370,6 +1381,7 @@ class _VariantSheetContentState extends ConsumerState<_VariantSheetContent> {
                               ),
                             ),
                           ),
+                          ),
                         );
                       }),
                     ],
@@ -1390,7 +1402,7 @@ class _VariantSheetContentState extends ConsumerState<_VariantSheetContent> {
                     'Quantity',
                     style: TextStyle(
                       fontSize: 15,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: pt.ink950,
                     ),
                   ),
@@ -1400,7 +1412,7 @@ class _VariantSheetContentState extends ConsumerState<_VariantSheetContent> {
                     padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),
-                      color: isDark ? pt.surface2 : const Color(0xFFF0F1F5),
+                      color: isDark ? pt.surface2 : pt.surface1,
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -1420,7 +1432,7 @@ class _VariantSheetContentState extends ConsumerState<_VariantSheetContent> {
                             '$_qty',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.w700,
                               fontSize: 16,
                               color: pt.ink950,
                             ),
@@ -1474,7 +1486,7 @@ class _VariantSheetContentState extends ConsumerState<_VariantSheetContent> {
                         '\$${(_totalCents / 100).toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 17,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       if (showDiscount) ...[
@@ -1493,7 +1505,7 @@ class _VariantSheetContentState extends ConsumerState<_VariantSheetContent> {
                       const SizedBox(width: 10),
                       const Text(
                         'Confirm',
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(width: 4),
                       const Icon(Icons.arrow_forward_rounded, size: 18),
@@ -1539,7 +1551,10 @@ class _SheetStepperBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: label,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -1561,12 +1576,13 @@ class _SheetStepperBtn extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 20,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             color: pt.ink950,
             height: 1.1,
           ),
         ),
       ),
+    ),
     );
   }
 }
@@ -1605,7 +1621,7 @@ class _IconBtn extends StatelessWidget {
             color: bg ?? AppColors.surface0,
             boxShadow: const [
               BoxShadow(
-                color: Color(0x0F0B1220),
+                color: AppColors.shadowE2L,
                 offset: Offset(0, 2),
                 blurRadius: 6,
               ),

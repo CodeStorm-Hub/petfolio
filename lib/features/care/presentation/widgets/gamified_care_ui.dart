@@ -150,7 +150,7 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                         ],
                       ),
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: Colors.white,
                         height: 1.05,
                         letterSpacing: -0.3,
@@ -423,7 +423,7 @@ class _StreakCoin extends StatelessWidget {
                         '$streak',
                         style: const TextStyle(
                           fontSize: 22,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
                           height: 1.0,
                           shadows: [
@@ -439,7 +439,7 @@ class _StreakCoin extends StatelessWidget {
                         'DAY STREAK',
                         style: TextStyle(
                           fontSize: 6.5,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
                           letterSpacing: 0.4,
                           height: 1.3,
@@ -490,7 +490,7 @@ class _HeroLevelContent extends StatelessWidget {
                   Text(
                     'Lv ${lv.level}',
                     style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       color: Colors.white,
                       height: 1.0,
                       fontSize: 26,
@@ -529,7 +529,7 @@ class _HeroLevelContent extends StatelessWidget {
                     allDone ? 'All done! 🎉' : '$doneToday/$totalToday tasks',
                     style: TextStyle(
                       fontSize: 10.5,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       color: allDone ? Colors.white : AppColors.poppy700,
                       height: 1,
                     ),
@@ -681,7 +681,7 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
                     '$hitsCount 🔥 day${hitsCount == 1 ? '' : 's'}',
                     style: const TextStyle(
                       fontSize: 11,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: AppColors.mint700,
                     ),
                   ),
@@ -791,7 +791,7 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
                         _dayLetters[dayDate.weekday - 1],
                         style: TextStyle(
                           fontSize: 10,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: isToday
                               ? _colors[i]
                               : (isFuture ? pt.ink300 : pt.ink500),
@@ -869,7 +869,7 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
               '$ownedCount / ${kBadgeCatalog.length} earned',
               style: TextStyle(
                 fontSize: 11,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 color: ownedCount > 0 ? AppColors.mint700 : pt.ink300,
               ),
             ),
@@ -968,7 +968,7 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
               badge.label,
               style: TextStyle(
                 fontSize: 22,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 color: owned
                     ? badge.color
                     : Theme.of(context).colorScheme.onSurface,
@@ -1010,7 +1010,7 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
                             : 'Keep logging care'),
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: owned ? badge.color : pt.ink500,
                     ),
                   ),
@@ -1205,12 +1205,15 @@ class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin 
 
     final bgTop = owned
         ? Color.lerp(badge.color, Colors.white, isDark ? 0.50 : 0.82)!
-        : (isDark ? AppColors.surface3D : const Color(0xFFF9F6F2));
+        : (isDark ? AppColors.surface3D : AppColors.surface2);
     final bgBottom = owned
         ? Color.lerp(badge.color, Colors.white, isDark ? 0.24 : 0.52)!
         : (isDark ? AppColors.surface1D : pt.line.withAlpha(130));
 
-    return GestureDetector(
+    return Semantics(
+      label: '${widget.badge.label} badge, ${widget.owned ? 'earned' : widget.progressHint}',
+      button: true,
+      child: GestureDetector(
       onTap: widget.onTap,
       child: Container(
         decoration: BoxDecoration(
@@ -1295,7 +1298,7 @@ class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin 
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 11,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         height: 1.2,
                         color: owned
                             ? (isDark
@@ -1383,6 +1386,7 @@ class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin 
           ),
         ),
       ),
+    ),
     );
   }
 }

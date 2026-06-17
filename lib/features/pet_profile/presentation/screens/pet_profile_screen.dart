@@ -82,7 +82,7 @@ class PetProfileScreen extends ConsumerWidget {
                     onPressed: () => context.push('/care'),
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.tangerine700,
-                      textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                      textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
                       padding: EdgeInsets.zero,
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -102,7 +102,7 @@ class PetProfileScreen extends ConsumerWidget {
                     onPressed: () => AppSnackBar.show('Photo gallery coming soon 📸'),
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.poppy700,
-                      textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                      textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
                       padding: EdgeInsets.zero,
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -239,7 +239,7 @@ class _HeroGamifiedBanner extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(pet.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: pt.ink950)),
+                      Text(pet.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: pt.ink950)),
                       Text('${pet.breed ?? sp.label} · ${pet.ageLabel}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: pt.ink500)),
                     ],
                   ),
@@ -247,7 +247,7 @@ class _HeroGamifiedBanner extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFEF3C7), // Pale yellow background
+                    color: AppColors.sunnySoft,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Row(
@@ -259,8 +259,8 @@ class _HeroGamifiedBanner extends ConsumerWidget {
                         streakLabel,
                         style: const TextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFFD97706), // Orange text
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.sunny700,
                         ),
                       ),
                     ],
@@ -323,7 +323,7 @@ class _StatTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(margin: const EdgeInsets.only(bottom: 2), child: icon),
-          Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950, height: 1)),
+          Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Theme.of(context).extension<PetfolioThemeExtension>()!.ink950, height: 1)),
           Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: textColor)),
         ],
       ),
@@ -443,7 +443,7 @@ class _DailyQuestRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: ink950, decoration: done ? TextDecoration.lineThrough : TextDecoration.none).copyWith(color: done ? ink950.withAlpha(140) : ink950)),
+                Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: ink950, decoration: done ? TextDecoration.lineThrough : TextDecoration.none).copyWith(color: done ? ink950.withAlpha(140) : ink950)),
                 Text(time, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: due ? AppColors.poppy700 : ink500)),
               ],
             ),
@@ -456,7 +456,7 @@ class _DailyQuestRow extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Text('+$xp ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: done ? AppColors.mint700 : AppColors.sunny700)),
+                Text('+$xp ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: done ? AppColors.mint700 : AppColors.sunny700)),
                 Icon(Icons.star_rounded, size: 12, color: done ? AppColors.mint700 : AppColors.sunny700),
               ],
             ),
@@ -608,7 +608,7 @@ class _FloatingToolbarState extends State<_FloatingToolbar>
           borderRadius: BorderRadius.circular(999),
           boxShadow: const [
             BoxShadow(
-              color: Color(0x28000000),
+              color: AppColors.shadowE3L,
               blurRadius: 28,
               offset: Offset(0, 8),
               spreadRadius: -4,
@@ -659,7 +659,10 @@ class _ToolbarBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: label,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -679,6 +682,7 @@ class _ToolbarBtn extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

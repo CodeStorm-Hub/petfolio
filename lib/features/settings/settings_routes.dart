@@ -29,7 +29,7 @@ class _AddressManagementScreen extends ConsumerWidget {
     final selected = ref.watch(selectedAddressProvider);
 
     return Scaffold(
-      backgroundColor: isDark ? pt.surface1 : const Color(0xFFF2F3F7),
+      backgroundColor: isDark ? pt.surface1 : pt.surface2,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -48,7 +48,7 @@ class _AddressManagementScreen extends ConsumerWidget {
                   Text(
                     'Saved Addresses',
                     style: GoogleFonts.sora(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       fontSize: 20,
                       color: pt.ink950,
                     ),
@@ -85,7 +85,7 @@ class _AddressManagementScreen extends ConsumerWidget {
                             'No saved addresses',
                             style: GoogleFonts.sora(
                               fontSize: 17,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                               color: pt.ink950,
                             ),
                           ),
@@ -187,7 +187,7 @@ class _AddressCard extends StatelessWidget {
                       address.labelName,
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink950,
                       ),
                     ),
@@ -205,7 +205,7 @@ class _AddressCard extends StatelessWidget {
                           'Default',
                           style: TextStyle(
                             fontSize: 10,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             color: AppColors.mint700,
                           ),
                         ),

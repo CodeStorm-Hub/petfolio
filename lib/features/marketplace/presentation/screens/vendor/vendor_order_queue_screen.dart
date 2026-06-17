@@ -25,6 +25,7 @@ class VendorOrderQueueScreen extends ConsumerWidget {
                 children: [
                   _IconBtn(
                     icon: Icons.arrow_back_ios_new_rounded,
+                    label: 'Back',
                     onTap: () => context.pop(),
                   ),
                   const SizedBox(width: 12),
@@ -90,7 +91,10 @@ class _OrderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: 'Order: ${order.title}',
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -153,6 +157,7 @@ class _OrderTile extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -245,14 +250,18 @@ class _EmptyOrders extends StatelessWidget {
 }
 
 class _IconBtn extends StatelessWidget {
-  const _IconBtn({required this.icon, required this.onTap});
+  const _IconBtn({required this.icon, required this.onTap, required this.label});
 
   final IconData icon;
   final VoidCallback onTap;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: label,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         width: 40,
@@ -266,6 +275,7 @@ class _IconBtn extends StatelessWidget {
         ),
         child: Icon(icon, size: 18, color: AppColors.ink700),
       ),
+    ),
     );
   }
 }
