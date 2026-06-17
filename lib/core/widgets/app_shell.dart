@@ -34,14 +34,35 @@ class AppShell extends ConsumerStatefulWidget {
   ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends ConsumerState<AppShell> {
+class _AppShellState extends ConsumerState<AppShell>
+    with WidgetsBindingObserver {
   bool _showTutorial = false;
   bool _tutorialChecked = false;
+
+  static const _branchRoots = {'/care', '/social', '/matching', '/marketplace'};
 
   @override
   void initState() {
     super.initState();
     _loadTutorialFlag();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Future<bool> didPopRoute() async {
+    if (!mounted) return false;
+    final location = GoRouterState.of(context).matchedLocation;
+    if (_branchRoots.contains(location)) {
+      context.go('/home');
+      return true;
+    }
+    return false;
   }
 
   Future<void> _loadTutorialFlag() async {
@@ -51,6 +72,13 @@ class _AppShellState extends ConsumerState<AppShell> {
         _showTutorial = show;
         _tutorialChecked = true;
       });
+    }
+  }
+
+  void _onBranchPop(BuildContext context, [Object? result]) {
+    final loc = GoRouterState.of(context).matchedLocation;
+    if (_branchRoots.contains(loc)) {
+      context.go('/home');
     }
   }
 
@@ -119,10 +147,6 @@ class _AppShellState extends ConsumerState<AppShell> {
       return _wrapWithTutorial(
         PopScope(
           canPop: false,
-          onPopInvokedWithResult: (didPop, _) {
-            if (didPop) return;
-            if (context.canPop()) context.pop();
-          },
           child: Scaffold(
             body: Row(
               children: [
@@ -138,7 +162,12 @@ class _AppShellState extends ConsumerState<AppShell> {
                 Expanded(
                   child: Stack(
                     children: [
-                      Positioned.fill(child: shell),
+                      Positioned.fill(
+                        child: NavigatorPopHandler(
+                          onPopWithResult: (r) => _onBranchPop(context, r),
+                          child: shell,
+                        ),
+                      ),
                       Positioned(
                         top: 0, left: 0, right: 0,
                         child: AppShellHeader(module: module, subIndex: subIndex),
@@ -157,15 +186,16 @@ class _AppShellState extends ConsumerState<AppShell> {
       return _wrapWithTutorial(
         PopScope(
           canPop: false,
-          onPopInvokedWithResult: (didPop, _) {
-            if (didPop) return;
-            if (context.canPop()) context.pop();
-          },
           child: Scaffold(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             body: Stack(
               children: [
-                Positioned.fill(child: shell),
+                Positioned.fill(
+                  child: NavigatorPopHandler(
+                    onPopWithResult: (r) => _onBranchPop(context, r),
+                    child: shell,
+                  ),
+                ),
                 Positioned(
                   top: 0, left: 0, right: 0,
                   child: AppShellHeader(module: module, subIndex: subIndex),
@@ -187,15 +217,16 @@ class _AppShellState extends ConsumerState<AppShell> {
     return _wrapWithTutorial(
       PopScope(
         canPop: false,
-        onPopInvokedWithResult: (didPop, _) {
-          if (didPop) return;
-          if (context.canPop()) context.pop();
-        },
         child: Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: Stack(
             children: [
-              Positioned.fill(child: shell),
+              Positioned.fill(
+                child: NavigatorPopHandler(
+                  onPopWithResult: (r) => _onBranchPop(context, r),
+                  child: shell,
+                ),
+              ),
               Positioned(
                 top: 0, left: 0, right: 0,
                 child: AppShellHeader(module: module, subIndex: subIndex),

@@ -193,7 +193,11 @@ class _CareScreenState extends ConsumerState<CareScreen> {
               )
             : const TailWagLoader(),
       );
-      return Scaffold(backgroundColor: pt.surface1, body: Center(child: body));
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (_, _) => context.go('/home'),
+        child: Scaffold(backgroundColor: pt.surface1, body: Center(child: body)),
+      );
     }
 
     final dashboard = ref.watch(careDashboardProvider);
@@ -221,7 +225,10 @@ class _CareScreenState extends ConsumerState<CareScreen> {
           ),
         );
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (_, _) => context.go('/home'),
+      child: Scaffold(
       backgroundColor: pt.surface1,
       floatingActionButton: FloatingActionButton(
         key: const ValueKey<String>('care_fab_add_task'),
@@ -438,6 +445,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                   );
                 },
               ),
+      ),
     );
   }
 }

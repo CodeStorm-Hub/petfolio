@@ -93,32 +93,42 @@ class MatchingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pet = ref.watch(activePetControllerProvider);
-    if (pet != null) return _DiscoveryView(petId: pet.id);
+    if (pet != null) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (_, _) => context.go('/home'),
+        child: _DiscoveryView(petId: pet.id),
+      );
+    }
 
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final petsAsync = ref.watch(petListProvider);
-    return Scaffold(
-      backgroundColor: pt.surface1,
-      body: Center(
-        child: petsAsync.when(
-          skipLoadingOnReload: true,
-          loading: () => const TailWagLoader(),
-          error: (_, _) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
-              const SizedBox(height: 12),
-              Text('Connection error',
-                  style: TextStyle(fontSize: 15, color: pt.ink500)),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: () => ref.invalidate(petListProvider),
-                icon: const Icon(Icons.refresh_rounded, size: 16),
-                label: const Text('Retry'),
-              ),
-            ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (_, _) => context.go('/home'),
+      child: Scaffold(
+        backgroundColor: pt.surface1,
+        body: Center(
+          child: petsAsync.when(
+            skipLoadingOnReload: true,
+            loading: () => const TailWagLoader(),
+            error: (_, _) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
+                const SizedBox(height: 12),
+                Text('Connection error',
+                    style: TextStyle(fontSize: 15, color: pt.ink500)),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: () => ref.invalidate(petListProvider),
+                  icon: const Icon(Icons.refresh_rounded, size: 16),
+                  label: const Text('Retry'),
+                ),
+              ],
+            ),
+            data: (_) => const TailWagLoader(),
           ),
-          data: (_) => const TailWagLoader(),
         ),
       ),
     );

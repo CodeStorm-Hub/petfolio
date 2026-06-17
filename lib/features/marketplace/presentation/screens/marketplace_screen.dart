@@ -126,7 +126,10 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final selectedCat = ref.watch(selectedCategoryProvider);
 
-    return WebCheckoutResumeListener(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (_, _) => context.go('/home'),
+      child: WebCheckoutResumeListener(
       child: Scaffold(
         backgroundColor: pt.surface1,
         body: Stack(
@@ -172,6 +175,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
             }),
           ],
         ),
+      ),
       ),
     );
   }
