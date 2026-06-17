@@ -307,6 +307,7 @@ class AppShellHeader extends ConsumerWidget {
           _HeaderIconBtn(icon: Icons.send_rounded, onTap: () => context.go('/matching/inbox')),
         ]);
       case ShellModule.matching:
+        // Only the Discover tab (subIndex 0) reaches here; inbox/liked return early.
         return Row(children: [
           _HeaderIconBtn(icon: Icons.chat_bubble_outline_rounded, onTap: () => openMatchesInbox(context)),
           const SizedBox(width: 8),
@@ -366,8 +367,16 @@ class AppShellHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activePet = ref.watch(activePetControllerProvider);
     final topPadding = MediaQuery.paddingOf(context).top;
+
+    // Inbox (subIndex 1) and Liked (subIndex 2) tabs own their full header via
+    // AppHeader; the shell header would double-stack on top of them. Yield to
+    // the screen and only reserve status-bar height so SafeArea still works.
+    if (module == ShellModule.matching && subIndex > 0) {
+      return SizedBox(height: topPadding);
+    }
+
+    final activePet = ref.watch(activePetControllerProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final isHome = module == ShellModule.global && subIndex == 0;
