@@ -55,11 +55,14 @@ class _NutritionBodyState extends ConsumerState<_NutritionBody> {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final nutrition = ref.watch(nutritionProvider(widget.pet.id));
 
+    final topInset = MediaQuery.paddingOf(context).top + 76.0;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
-          _NutritionAppBar(pet: widget.pet, pt: pt),
+          SliverToBoxAdapter(child: SizedBox(height: topInset)),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
             sliver: SliverList(
@@ -97,53 +100,6 @@ class _NutritionBodyState extends ConsumerState<_NutritionBody> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// App Bar
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _NutritionAppBar extends StatelessWidget {
-  const _NutritionAppBar({required this.pet, required this.pt});
-
-  final Pet pet;
-  final PetfolioThemeExtension pt;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return SliverAppBar(
-      pinned: true,
-      backgroundColor: cs.surface,
-      surfaceTintColor: Colors.transparent,
-      shadowColor: pt.shadowE1.first.color,
-      leading: IconButton(
-        tooltip: 'Back',
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'WEIGHT & HEALTH',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.4,
-              color: pt.pillarHealth,
-            ),
-          ),
-          Text(
-            pet.name,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: cs.onSurface,
-              height: 1.1,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Weight Trend Card

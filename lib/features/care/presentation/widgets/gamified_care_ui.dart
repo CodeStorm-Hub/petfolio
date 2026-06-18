@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
-import 'package:petfolio/core/widgets/widgets.dart';
 
 import '../../../../core/models/pet.dart';
 import '../../data/models/care_task.dart' show CareFrequency;
@@ -109,24 +108,18 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
     final totalToday = planned.length;
     final pct = lv.progress.clamp(0.0, 1.0);
 
-    // ── WaveHeader pattern (matches Home/Pets screen architecture) ──────────
-    // AppShellHeader overlays at Positioned(top:0) with height = topPad + 76.
-    // We reserve that space at top, then show greeting, then let the hero
-    // card float at the wave boundary — exactly how PetProfileScreen works.
     return Stack(
-      clipBehavior: Clip.none,
       children: [
-        WaveHeader(
+        Container(
           color: AppColors.tangerine,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Clear AppShellHeader ───────────────────────────────────
               SizedBox(height: topPad + 76),
+              const SizedBox(height: 16),
 
-              // ── Care greeting — unique copy, never duplicates hero card ──
               Padding(
-                padding: const EdgeInsets.fromLTRB(22, 10, 22, 0),
+                padding: const EdgeInsets.fromLTRB(22, 10, 22, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -145,9 +138,7 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                         text: streak > 1
                             ? '$streak days strong!'
                             : 'Let\'s crush today!',
-                        children: const [
-                          TextSpan(text: ' 🔥'),
-                        ],
+                        children: const [TextSpan(text: ' 🔥')],
                       ),
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w700,
@@ -161,11 +152,90 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                 ),
               ),
 
-              // ── Breathing room: greeting height (~44px) + 33px gap + card top
-              // card_top = waveHeight + 28 - 115 must be > greetingEnd
-              // waveHeight = topPad + 76 + 44(greeting) + SizedBox
-              // SizedBox = 120 → gap ≈ 33px on all device topPad values
-              const SizedBox(height: 120),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.poppy,
+                        AppColors.tangerine700,
+                        AppColors.tangerine,
+                      ],
+                      stops: [0.0, 0.48, 1.0],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.poppy.withAlpha(0x60),
+                        blurRadius: 32,
+                        offset: const Offset(0, 16),
+                        spreadRadius: -12,
+                      ),
+                      BoxShadow(
+                        color: AppColors.shadowE1L,
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                        spreadRadius: -2,
+                      ),
+                    ],
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        right: -6,
+                        top: -8,
+                        child: Opacity(
+                          opacity: 0.16,
+                          child: Transform.rotate(
+                            angle: 18 * math.pi / 180,
+                            child: const Icon(Icons.pets_rounded, size: 96, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 15, 16, 16),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            _StreakCoin(
+                              streak: streak,
+                              coinCtrl: _coinCtrl,
+                              pulseCtrl: _pulseCtrl,
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: awardsAsync.when(
+                                loading: () => _HeroLevelContent(
+                                  lv: PetLevel.fromXp(0),
+                                  pct: 0,
+                                  doneToday: 0,
+                                  totalToday: totalToday,
+                                ),
+                                error: (_, _) => _HeroLevelContent(
+                                  lv: PetLevel.fromXp(0),
+                                  pct: 0,
+                                  doneToday: doneToday,
+                                  totalToday: totalToday,
+                                ),
+                                data: (_) => _HeroLevelContent(
+                                  lv: lv,
+                                  pct: pct,
+                                  doneToday: doneToday,
+                                  totalToday: totalToday,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -190,97 +260,6 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                 AppColors.lilac,
               ],
               shouldLoop: false,
-            ),
-          ),
-        ),
-
-        // ── Floating hero card (streak coin + XP bar) ─────────────────────
-        // Positioned at bottom:-28 so it straddles the wave edge, matching
-        // the same floating-card pattern used in PetProfileScreen.
-        Positioned(
-          left: 16,
-          right: 16,
-          bottom: -28,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.poppy,
-                  AppColors.tangerine700,
-                  AppColors.tangerine,
-                ],
-                stops: [0.0, 0.48, 1.0],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.poppy.withAlpha(0x60),
-                  blurRadius: 32,
-                  offset: const Offset(0, 16),
-                  spreadRadius: -12,
-                ),
-                BoxShadow(
-                  color: AppColors.shadowE1L,
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                  spreadRadius: -2,
-                ),
-              ],
-            ),
-            clipBehavior: Clip.hardEdge,
-            child: Stack(
-              children: [
-                // Decorative paw watermark
-                Positioned(
-                  right: -6,
-                  top: -8,
-                  child: Opacity(
-                    opacity: 0.16,
-                    child: Transform.rotate(
-                      angle: 18 * math.pi / 180,
-                      child: const Icon(Icons.pets_rounded, size: 96, color: Colors.white),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 15, 16, 16),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _StreakCoin(
-                        streak: streak,
-                        coinCtrl: _coinCtrl,
-                        pulseCtrl: _pulseCtrl,
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: awardsAsync.when(
-                          loading: () => _HeroLevelContent(
-                            lv: PetLevel.fromXp(0),
-                            pct: 0,
-                            doneToday: 0,
-                            totalToday: totalToday,
-                          ),
-                          error: (_, _) => _HeroLevelContent(
-                            lv: PetLevel.fromXp(0),
-                            pct: 0,
-                            doneToday: doneToday,
-                            totalToday: totalToday,
-                          ),
-                          data: (_) => _HeroLevelContent(
-                            lv: lv,
-                            pct: pct,
-                            doneToday: doneToday,
-                            totalToday: totalToday,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ),
         ),

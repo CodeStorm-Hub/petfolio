@@ -251,8 +251,6 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // ── Space for floating hero card overlap (card at bottom:-28) ──
-                            const SizedBox(height: 44.0),
                             // ── Streak freeze chip ─────────────────────────
                             _StreakFreezeRow(dashboard: dashboard),
                             // ── Date picker ────────────────────────────────
@@ -304,7 +302,6 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                                 const SizedBox(width: 5),
                                                 Text(
                                                   chip.$2,
-                                                  overflow: TextOverflow.visible,
                                                   style: TextStyle(
                                                     fontSize: 13,
                                                     fontWeight: FontWeight.w700,

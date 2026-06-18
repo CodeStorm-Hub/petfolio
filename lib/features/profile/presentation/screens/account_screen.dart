@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/theme_notifier.dart';
-import '../../../../core/widgets/pet_avatar.dart';
-import '../../../../core/widgets/wave_header.dart';
 import '../../../../core/widgets/section_header.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 
 class AccountScreen extends ConsumerWidget {
@@ -21,8 +17,6 @@ class AccountScreen extends ConsumerWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottomPad = MediaQuery.paddingOf(context).bottom;
-    final user = Supabase.instance.client.auth.currentUser;
-    final activePet = ref.watch(activePetControllerProvider);
     final bg = isDark ? pt.surface1 : pt.surface2;
 
     return Scaffold(
@@ -33,23 +27,7 @@ class AccountScreen extends ConsumerWidget {
           Widget scrollView = CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: WaveHeader(
-              size: WaveHeaderSize.compact,
-              color: pt.pillarPets,
-              child: SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-                  child: _ProfileHeroCard(
-                    user: user,
-                    activePet: activePet,
-                    pt: pt,
-                    isDark: isDark,
-                    onTap: () => PetSwitcherSheet.show(context),
-                  ),
-                ),
-              ),
-            ),
+            child: SizedBox(height: MediaQuery.paddingOf(context).top + 76.0 + 16),
           ),
 
           _sectionHeader(context, 'MY PETS'),
@@ -190,117 +168,6 @@ class AccountScreen extends ConsumerWidget {
           ),
         ),
       );
-}
-
-// ── Profile hero card ─────────────────────────────────────────────────────────
-
-class _ProfileHeroCard extends StatelessWidget {
-  const _ProfileHeroCard({
-    required this.user,
-    required this.activePet,
-    required this.pt,
-    required this.isDark,
-    required this.onTap,
-  });
-
-  final dynamic user;
-  final dynamic activePet;
-  final PetfolioThemeExtension pt;
-  final bool isDark;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final email = user?.email as String? ?? '';
-    final initials = email.isNotEmpty ? email[0].toUpperCase() : '?';
-
-    return Semantics(
-      label: 'Profile card, tap to switch pet',
-      button: true,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withAlpha(230),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            children: [
-              if (activePet != null)
-                PetAvatar(
-                  imageUrl: activePet!.avatarUrl as String?,
-                  species: activePet!.speciesEnum,
-                  size: PetAvatarSize.lg,
-                  showRing: true,
-                  semanticLabel: activePet!.name as String,
-                  heroTag: 'pet-avatar-${activePet!.id}',
-                )
-              else
-                Container(
-                  width: 48, height: 48,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppColors.poppy, AppColors.tangerine],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    initials,
-                    style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white,
-                    ),
-                  ),
-                ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      activePet?.name as String? ?? (email.isNotEmpty ? email : 'Petfolio User'),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w700, color: pt.ink950,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      email,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12, color: pt.ink500),
-                    ),
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFD4AF37), Color(0xFFF5D56E)],
-                        ),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: const Text(
-                        '⭐ Gold Member',
-                        style: TextStyle(
-                          fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: pt.ink500),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 // ── Account tile ──────────────────────────────────────────────────────────────

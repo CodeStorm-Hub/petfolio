@@ -331,6 +331,7 @@ class _MarketHeader extends ConsumerWidget {
           children: [
             // Spacer for fixed AppShell status header
             SizedBox(height: MediaQuery.paddingOf(context).top + 76.0),
+            const SizedBox(height: 16),
             _SearchBar(),
             const SizedBox(height: 32), // Spacing adjusted to prevent wave overlap
           ],

@@ -442,58 +442,10 @@ class _ProductHeroCarousel extends StatelessWidget {
               ],
             ),
           ),
-
-          // ── Wave transition into page background ──────────────────────────
-          Positioned(
-            bottom: -1,
-            left: 0,
-            right: 0,
-            child: SizedBox(
-              height: 40,
-              child: CustomPaint(
-                painter: _WavePainter(
-                  color: isDark ? pt.surface1 : pt.surface2,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
   }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Wave painter — smooth bottom-of-hero transition
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _WavePainter extends CustomPainter {
-  _WavePainter({required this.color});
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    final path = Path()
-      ..moveTo(0, size.height * 0.66)
-      ..cubicTo(
-        size.width * (90 / 412), size.height * (10 / 60),
-        size.width * (160 / 412), size.height * (70 / 60),
-        size.width * (220 / 412), size.height * (40 / 60),
-      )
-      ..cubicTo(
-        size.width * (280 / 412), size.height * (15 / 60),
-        size.width * (340 / 412), size.height * (60 / 60),
-        size.width, size.height * (30 / 60),
-      )
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

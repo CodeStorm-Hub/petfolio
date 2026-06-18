@@ -8,7 +8,6 @@ import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
-import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
 import '../../data/models/match_inbox_item.dart';
 import '../controllers/match_liked_controller.dart';
 import '../controllers/matches_inbox_controller.dart';
@@ -50,31 +49,16 @@ class _MatchHubScreenState extends ConsumerState<MatchHubScreen>
 
     if (pet == null) return _PetGuard(pt: pt);
 
+    final topInset = MediaQuery.paddingOf(context).top + 76.0;
+
     return Scaffold(
       backgroundColor: pt.surface1,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          WaveHeader(
-            size: WaveHeaderSize.compact,
-            color: pt.pillarMatch,
-            child: SafeArea(
-              bottom: false,
-              child: AppHeader(
-                eyebrow: 'Match · Hub',
-                onOpenSwitcher: () => PetSwitcherSheet.show(context),
-                onBack: () => popOrGo(context, '/matching'),
-                actions: [
-                  AppHeaderAction(
-                    icon: Icons.style_rounded,
-                    tooltip: 'Discover',
-                    onTap: () => popOrGo(context, '/matching'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-            Material(
+          SizedBox(height: topInset),
+          const SizedBox(height: 16),
+          Material(
               color: Theme.of(context).colorScheme.surface,
               child: TabBar(
                 controller: _tabController,

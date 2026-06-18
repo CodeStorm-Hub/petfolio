@@ -20,8 +20,9 @@ import '../controllers/social_profile_controller.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 
 class SocialProfileScreen extends ConsumerWidget {
-  const SocialProfileScreen({super.key, required this.petId});
+  const SocialProfileScreen({super.key, required this.petId, this.showAppBar = true});
   final String petId;
+  final bool showAppBar;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,16 +37,26 @@ class SocialProfileScreen extends ConsumerWidget {
 
     final isOwnProfile = activePet?.id == petId;
 
+    final topInset = showAppBar ? 0.0 : MediaQuery.paddingOf(context).top + 76.0;
+
     return petAsync.when(
       loading: () => Scaffold(
         backgroundColor: pt.surface1,
-        appBar: AppBar(backgroundColor: cs.surface, leading: BackButton(color: cs.onSurface)),
-        body: const Center(child: TailWagLoader()),
+        appBar: showAppBar
+            ? AppBar(backgroundColor: cs.surface, leading: BackButton(color: cs.onSurface))
+            : null,
+        body: showAppBar
+            ? const Center(child: TailWagLoader())
+            : Column(children: [SizedBox(height: topInset), const SizedBox(height: 16), const Expanded(child: Center(child: TailWagLoader()))]),
       ),
-      error: (e, st) => Scaffold(
+      error: (e, _) => Scaffold(
         backgroundColor: pt.surface1,
-        appBar: AppBar(backgroundColor: cs.surface, leading: BackButton(color: cs.onSurface)),
-        body: Center(child: Text('Could not load profile', style: TextStyle(color: pt.ink500))),
+        appBar: showAppBar
+            ? AppBar(backgroundColor: cs.surface, leading: BackButton(color: cs.onSurface))
+            : null,
+        body: showAppBar
+            ? Center(child: Text('Could not load profile', style: TextStyle(color: pt.ink500)))
+            : Column(children: [SizedBox(height: topInset), const SizedBox(height: 16), Expanded(child: Center(child: Text('Could not load profile', style: TextStyle(color: pt.ink500))))]),
       ),
       data: (pet) {
         final resolvedPet = pet ?? (isOwnProfile ? activePet : null);
@@ -60,23 +71,29 @@ class SocialProfileScreen extends ConsumerWidget {
 
         return Scaffold(
           backgroundColor: pt.surface1,
-          appBar: AppBar(
-            backgroundColor: cs.surface,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            leading: IconButton(
-              tooltip: 'Back',
-              icon: Icon(Icons.arrow_back_rounded, color: cs.onSurface),
-              onPressed: () => context.pop(),
-            ),
-            title: Text(
-              petName,
-              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: cs.onSurface),
-            ),
-            centerTitle: true,
-          ),
+          appBar: showAppBar
+              ? AppBar(
+                  backgroundColor: cs.surface,
+                  elevation: 0,
+                  scrolledUnderElevation: 0,
+                  leading: IconButton(
+                    tooltip: 'Back',
+                    icon: Icon(Icons.arrow_back_rounded, color: cs.onSurface),
+                    onPressed: () => context.pop(),
+                  ),
+                  title: Text(
+                    petName,
+                    style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: cs.onSurface),
+                  ),
+                  centerTitle: true,
+                )
+              : null,
           body: CustomScrollView(
             slivers: [
+              if (!showAppBar) ...[
+                SliverToBoxAdapter(child: SizedBox(height: topInset)),
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+              ],
               // ── Profile header card ───────────────────────────────────
               SliverToBoxAdapter(
                 child: _ProfileHeader(

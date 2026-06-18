@@ -38,6 +38,7 @@ class _AppShellState extends ConsumerState<AppShell>
     with WidgetsBindingObserver {
   bool _showTutorial = false;
   bool _tutorialChecked = false;
+  GoRouterDelegate? _delegate;
 
   static const _branchRoots = {'/care', '/social', '/matching', '/marketplace'};
 
@@ -49,7 +50,23 @@ class _AppShellState extends ConsumerState<AppShell>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final newDelegate = GoRouter.of(context).routerDelegate;
+    if (_delegate != newDelegate) {
+      _delegate?.removeListener(_onRouteChange);
+      _delegate = newDelegate;
+      _delegate!.addListener(_onRouteChange);
+    }
+  }
+
+  void _onRouteChange() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    _delegate?.removeListener(_onRouteChange);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -82,13 +99,15 @@ class _AppShellState extends ConsumerState<AppShell>
     }
   }
 
-  ShellModule _currentModule(BuildContext context) =>
-      moduleFromPath(GoRouterState.of(context).matchedLocation);
+  String _currentLocation() =>
+      _delegate?.currentConfiguration.uri.path ??
+      GoRouterState.of(context).matchedLocation;
 
-  int _currentSubIndex(ShellModule module, BuildContext context) {
-    final location = GoRouterState.of(context).matchedLocation;
-    return selectedSubIndex(destinationsFor(module), location);
-  }
+  ShellModule _currentModule(BuildContext context) =>
+      moduleFromPath(_currentLocation());
+
+  int _currentSubIndex(ShellModule module, BuildContext context) =>
+      selectedSubIndex(destinationsFor(module), _currentLocation());
 
   Widget _wrapWithTutorial(Widget shell) {
     if (!_tutorialChecked || !_showTutorial) return shell;
@@ -253,11 +272,11 @@ class AppShellHeader extends ConsumerWidget {
   final ShellModule module;
   final int subIndex;
 
-  static const _globalEyebrows = ['HOME', 'ALERTS', 'ACTIVITY', 'ME'];
+  static const _globalEyebrows   = ['HOME', 'ALERTS', 'ACTIVITY', 'ME'];
+  static const _socialEyebrows   = ['PAWSFEED', 'STORIES', 'COMMUNITY', 'MY PET'];
+  static const _matchingEyebrows = ['MATCH · NEARBY', 'MATCH · MESSAGES', 'MATCH · LIKED'];
   static const _moduleEyebrows = {
     ShellModule.care:        'CARE',
-    ShellModule.social:      'PAWSFEED',
-    ShellModule.matching:    'MATCH · NEARBY',
     ShellModule.marketplace: 'MARKET',
   };
 
@@ -362,8 +381,10 @@ class AppShellHeader extends ConsumerWidget {
         ]);
       case ShellModule.matching:
         return Row(children: [
-          _HeaderIconBtn(icon: Icons.chat_bubble_outline_rounded, tooltip: 'Messages', onTap: () => openMatchesInbox(context)),
-          const SizedBox(width: 8),
+          if (subIndex == 0) ...[
+            _HeaderIconBtn(icon: Icons.chat_bubble_outline_rounded, tooltip: 'Messages', onTap: () => openMatchesInbox(context)),
+            const SizedBox(width: 8),
+          ],
           _HeaderIconBtn(icon: Icons.tune_rounded, tooltip: 'Match preferences', onTap: () => MatchPreferencesSheet.show(context)),
         ]);
       case ShellModule.marketplace:
@@ -430,52 +451,102 @@ class AppShellHeader extends ConsumerWidget {
     final bgColor = Color.lerp(
       Colors.transparent,
       waveColor.withAlpha(238),
-      scrollProgress,
+      isHome ? scrollProgress : 1.0,
     )!;
     final blurSigma = 24.0 * scrollProgress;
 
-    final eyebrow = module == ShellModule.global
-        ? _globalEyebrows[subIndex.clamp(0, _globalEyebrows.length - 1)]
-        : _moduleEyebrows[module] ?? '';
+    final eyebrow = switch (module) {
+      ShellModule.global   => _globalEyebrows[subIndex.clamp(0, _globalEyebrows.length - 1)],
+      ShellModule.social   => _socialEyebrows[subIndex.clamp(0, _socialEyebrows.length - 1)],
+      ShellModule.matching => _matchingEyebrows[subIndex.clamp(0, _matchingEyebrows.length - 1)],
+      _                    => _moduleEyebrows[module] ?? '',
+    };
 
     Widget leftWidget;
     if (module != ShellModule.global) {
-      leftWidget = Semantics(
-        button: true,
-        label: 'Back to Home',
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(999),
-          child: Material(
-            color: Colors.white.withAlpha(56),
-            child: InkWell(
-              onTap: () => context.canPop() ? context.pop() : context.go('/home'),
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(10, 6, 14, 6),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 14),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'HOME',
-                          style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 0.6),
-                        ),
-                        Text(
-                          eyebrow,
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ],
+      leftWidget = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Semantics(
+            button: true,
+            label: 'Back to Home',
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: Material(
+                color: Colors.white.withAlpha(56),
+                child: InkWell(
+                  onTap: () => context.canPop() ? context.pop() : context.go('/home'),
+                  child: const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 14),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Semantics(
+              button: true,
+              label: 'Switch active pet',
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: Material(
+                  color: Colors.white.withAlpha(56),
+                  child: InkWell(
+                    onTap: () => PetSwitcherSheet.show(context),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (activePet != null) ...[
+                            PetAvatar(
+                              imageUrl: activePet.avatarUrl,
+                              species: activePet.speciesEnum,
+                              size: PetAvatarSize.sm,
+                              showRing: true,
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  eyebrow,
+                                  style: const TextStyle(
+                                    fontSize: 9, fontWeight: FontWeight.w700,
+                                    color: Colors.white, letterSpacing: 0.6,
+                                  ),
+                                ),
+                                Row(children: [
+                                  Flexible(
+                                    child: Text(
+                                      activePet?.name ?? 'PetFolio',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
+                                ]),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       );
     } else {
       leftWidget = Semantics(

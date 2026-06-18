@@ -255,8 +255,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
           right: 0,
           child: WaveHeader(
             color: headerColor,
-            waveColor: Colors.transparent,
-            height: MediaQuery.paddingOf(context).top + 100.0,
+            height: MediaQuery.paddingOf(context).top + 76.0,
             child: const SizedBox.shrink(),
           ),
         ),

@@ -352,7 +352,7 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
                 right: 0,
                 child: WaveHeader(
                   color: headerColor,
-                  height: MediaQuery.paddingOf(context).top + 100.0,
+                  height: MediaQuery.paddingOf(context).top + 76.0,
                   child: const SizedBox.shrink(),
                 ),
               ),

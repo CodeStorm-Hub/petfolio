@@ -68,9 +68,7 @@ class _MedicalVaultBody extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.cream,
-      body: SafeArea(
-        bottom: false,
-        child: CustomScrollView(
+      body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
               child: Container(
@@ -81,29 +79,12 @@ class _MedicalVaultBody extends ConsumerWidget {
                     colors: [AppColors.mintSoft, AppColors.cream],
                   ),
                 ),
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
+                padding: EdgeInsets.fromLTRB(16, MediaQuery.paddingOf(context).top + 76.0, 16, 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Semantics(
-                          label: 'Back',
-                          button: true,
-                          child: GestureDetector(
-                          onTap: () => context.pop(),
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: const BoxDecoration(
-                              color: AppColors.surface0,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.arrow_back_ios_new_rounded, size: 22, color: AppColors.ink700),
-                          ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             '${petName.toUpperCase()} · MEDICAL VAULT',
@@ -251,7 +232,6 @@ class _MedicalVaultBody extends ConsumerWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }

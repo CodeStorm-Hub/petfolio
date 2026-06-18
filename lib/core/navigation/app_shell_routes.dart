@@ -161,6 +161,6 @@ class _MePetProfileTab extends ConsumerWidget {
         body: Center(child: CircularProgressIndicator.adaptive()),
       );
     }
-    return SocialProfileScreen(petId: pet.id);
+    return SocialProfileScreen(petId: pet.id, showAppBar: false);
   }
 }

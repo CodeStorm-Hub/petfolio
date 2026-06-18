@@ -180,7 +180,8 @@ class _HeroGamifiedBanner extends ConsumerWidget {
             children: [
               // Spacer for fixed AppShell status header
               SizedBox(height: MediaQuery.paddingOf(context).top + 76.0),
-              
+              const SizedBox(height: 16),
+
               // Big hero greeting
               Padding(
                 padding: const EdgeInsets.fromLTRB(22, 8, 22, 0),

@@ -108,6 +108,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
               )
             else
               SizedBox(height: topPad + 76),
+            const SizedBox(height: 16),
 
             // ── Pathao-style flat tab bar ──────────────────────────────────
             Container(

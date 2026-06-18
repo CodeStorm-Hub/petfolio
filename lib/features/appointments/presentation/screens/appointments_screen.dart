@@ -26,44 +26,39 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final petId = ref.watch(activePetIdProvider) ?? '';
 
+    final topInset = MediaQuery.paddingOf(context).top + 76.0;
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         backgroundColor: pt.surface1,
-        appBar: AppBar(
-          backgroundColor: pt.surface1,
-          surfaceTintColor: Colors.transparent,
-          leading: BackButton(color: pt.ink950),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'CARE · CALENDAR',
-                style: TextStyle(fontSize: 10, color: pt.ink500, letterSpacing: 1),
-              ),
-              Text(
-                'Appointments',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: pt.ink950),
-              ),
-            ],
-          ),
-          bottom: TabBar(
-            labelColor: AppColors.mint,
-            unselectedLabelColor: pt.ink500,
-            indicatorColor: AppColors.mint,
-            labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-            indicatorWeight: 3,
-            tabs: const [
-              Tab(text: 'Upcoming'),
-              Tab(text: 'Past'),
-            ],
-          ),
-        ),
-        body: const TabBarView(
+        body: Column(
           children: [
-            _AppointmentsTabList(past: false),
-            _AppointmentsTabList(past: true),
+            SizedBox(height: topInset),
+            const SizedBox(height: 16),
+            ColoredBox(
+              color: pt.surface1,
+              child: TabBar(
+                labelColor: AppColors.mint,
+                unselectedLabelColor: pt.ink500,
+                indicatorColor: AppColors.mint,
+                labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                indicatorWeight: 3,
+                tabs: const [
+                  Tab(text: 'Upcoming'),
+                  Tab(text: 'Past'),
+                ],
+              ),
+            ),
+            const Expanded(
+              child: TabBarView(
+                children: [
+                  _AppointmentsTabList(past: false),
+                  _AppointmentsTabList(past: true),
+                ],
+              ),
+            ),
           ],
         ),
         floatingActionButton: petId.isEmpty

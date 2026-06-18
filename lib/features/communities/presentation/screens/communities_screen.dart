@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/petfolio_empty_state.dart';
-import '../../../../core/widgets/wave_header.dart';
 import '../../../../core/widgets/primary_pill_button.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
 import '../widgets/create_community_sheet.dart';
@@ -20,7 +19,6 @@ class CommunitiesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(communitiesControllerProvider);
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     return Scaffold(
       floatingActionButton: state.maybeWhen(
@@ -35,23 +33,8 @@ class CommunitiesScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          WaveHeader(
-            size: WaveHeaderSize.compact,
-            color: pt.pillarSocial,
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                child: Text(
-                  'Communities',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          SizedBox(height: MediaQuery.paddingOf(context).top + 76.0),
+          const SizedBox(height: 16),
           Expanded(
             child: state.when(
         loading: () => LayoutBuilder(

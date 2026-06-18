@@ -86,6 +86,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
               )
             else
               SizedBox(height: topPad + 76),
+            const SizedBox(height: 16),
 
             // ── Filter chips ──────────────────────────────────────────────
             Padding(
