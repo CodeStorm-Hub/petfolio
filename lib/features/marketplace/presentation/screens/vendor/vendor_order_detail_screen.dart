@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
 import '../../../../../core/widgets/app_bottom_sheet.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/vendor_orders_controller.dart';
@@ -20,6 +21,7 @@ class VendorOrderDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final ordersAsync = ref.watch(vendorOrdersProvider);
     final resolved = ordersAsync.value?.firstWhere(
           (o) => o.id == orderId,
@@ -34,8 +36,8 @@ class VendorOrderDetailScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Order not found',
-                    style: TextStyle(color: AppColors.ink500)),
+                Text('Order not found',
+                    style: TextStyle(color: pt.ink500)),
                 const SizedBox(height: 12),
                 TextButton(
                     onPressed: () => context.pop(),
@@ -64,12 +66,12 @@ class VendorOrderDetailScreen extends ConsumerWidget {
                       onTap: () => context.pop(),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Order Detail',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 20,
-                        color: AppColors.ink950,
+                        color: pt.ink950,
                       ),
                     ),
                   ],
@@ -105,6 +107,7 @@ class _OrderSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
@@ -124,10 +127,10 @@ class _OrderSummaryCard extends StatelessWidget {
               children: [
                 Text(
                   'Order #${order.id.substring(0, 8)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
-                    color: AppColors.ink950,
+                    color: pt.ink950,
                   ),
                 ),
                 _StatusChip(status: order.status),
@@ -175,6 +178,7 @@ class _LineItemsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
@@ -189,13 +193,13 @@ class _LineItemsCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'ITEMS',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.88,
-                color: AppColors.ink500,
+                color: pt.ink500,
               ),
             ),
             const SizedBox(height: 10),
@@ -209,23 +213,23 @@ class _LineItemsCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                       color: AppColors.surface2,
                     ),
-                    child: const Icon(Icons.shopping_bag_outlined,
-                        size: 18, color: AppColors.ink300),
+                    child: Icon(Icons.shopping_bag_outlined,
+                        size: 18, color: pt.ink300),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       item.productName,
-                      style: const TextStyle(
-                          fontSize: 13, color: AppColors.ink950),
+                      style: TextStyle(
+                          fontSize: 13, color: pt.ink950),
                     ),
                   ),
                   Text(
                     '×${item.quantity}  \$${(item.lineTotalCents / 100).toStringAsFixed(2)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                 ],
@@ -293,6 +297,7 @@ class _ActionButtons extends ConsumerWidget {
 
   Future<void> _showTrackingSheet(
       BuildContext context, WidgetRef ref) async {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final trackingCtrl = TextEditingController();
     final carrierCtrl = TextEditingController();
     final urlCtrl = TextEditingController();
@@ -307,12 +312,12 @@ class _ActionButtons extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Add tracking info',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
-                color: AppColors.ink950,
+                color: pt.ink950,
               ),
             ),
             const SizedBox(height: 16),
@@ -387,16 +392,17 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label,
-            style: const TextStyle(fontSize: 13, color: AppColors.ink500)),
+            style: TextStyle(fontSize: 13, color: pt.ink500)),
         Text(value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppColors.ink950,
+              color: pt.ink950,
             )),
       ],
     );
@@ -445,6 +451,7 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: label,
       button: true,
@@ -453,14 +460,14 @@ class _IconBtn extends StatelessWidget {
       child: Container(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.surface0,
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: pt.ink700),
       ),
     ),
     );

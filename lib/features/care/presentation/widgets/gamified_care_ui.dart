@@ -174,10 +174,10 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                         offset: const Offset(0, 16),
                         spreadRadius: -12,
                       ),
-                      BoxShadow(
+                      const BoxShadow(
                         color: AppColors.shadowE1L,
                         blurRadius: 8,
-                        offset: const Offset(0, 4),
+                        offset: Offset(0, 4),
                         spreadRadius: -2,
                       ),
                     ],
@@ -201,10 +201,12 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            _StreakCoin(
-                              streak: streak,
-                              coinCtrl: _coinCtrl,
-                              pulseCtrl: _pulseCtrl,
+                            RepaintBoundary(
+                              child: _StreakCoin(
+                                streak: streak,
+                                coinCtrl: _coinCtrl,
+                                pulseCtrl: _pulseCtrl,
+                              ),
                             ),
                             const SizedBox(width: 14),
                             Expanded(
@@ -247,19 +249,21 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
           right: 0,
           child: Align(
             alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiCtrl,
-              blastDirectionality: BlastDirectionality.explosive,
-              numberOfParticles: 30,
-              gravity: 0.3,
-              colors: const [
-                AppColors.tangerine,
-                AppColors.sunny,
-                AppColors.poppy,
-                AppColors.mint,
-                AppColors.lilac,
-              ],
-              shouldLoop: false,
+            child: RepaintBoundary(
+              child: ConfettiWidget(
+                confettiController: _confettiCtrl,
+                blastDirectionality: BlastDirectionality.explosive,
+                numberOfParticles: 30,
+                gravity: 0.3,
+                colors: const [
+                  AppColors.tangerine,
+                  AppColors.sunny,
+                  AppColors.poppy,
+                  AppColors.mint,
+                  AppColors.lilac,
+                ],
+                shouldLoop: false,
+              ),
             ),
           ),
         ),
@@ -289,30 +293,29 @@ class _StreakCoin extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Expanding pulse ring
+          // Expanding pulse ring — Container is const child, only Transform/Opacity change per frame
           AnimatedBuilder(
             animation: pulseCtrl,
-            builder: (_, _) {
+            builder: (_, child) {
               final scale = 1.0 + pulseCtrl.value * 0.90;
               final opacity = ((1.0 - pulseCtrl.value) * 0.50).clamp(0.0, 0.50);
               return Transform.scale(
                 scale: scale,
-                child: Opacity(
-                  opacity: opacity,
-                  child: Container(
-                    width: 84,
-                    height: 84,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withAlpha(160),
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                ),
+                child: Opacity(opacity: opacity, child: child),
               );
             },
+            child: const SizedBox(
+              width: 84,
+              height: 84,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.fromBorderSide(
+                    BorderSide(color: Color(0xA0FFFFFF), width: 2),
+                  ),
+                ),
+              ),
+            ),
           ),
           // 3D Y-rotation coin
           AnimatedBuilder(

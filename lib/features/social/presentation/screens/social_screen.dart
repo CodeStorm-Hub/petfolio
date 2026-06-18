@@ -1110,12 +1110,12 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                       child: Container(
                         width: 50,
                         height: 50,
-                        decoration: ShapeDecoration(
-                          shape: const CircleBorder(),
+                        decoration: const ShapeDecoration(
+                          shape: CircleBorder(),
                           gradient: SweepGradient(
                             startAngle: 3.84,
                             endAngle: 3.84 + math.pi * 2,
-                            colors: const [
+                            colors: [
                               AppColors.tangerine,
                               AppColors.poppy,
                               AppColors.sunny,
@@ -1307,15 +1307,15 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 child: Row(
                   children: [
                     // Overlapping emoji circles — fixed width prevents overflow
-                    SizedBox(
+                    const SizedBox(
                       width: 24 + 18 + 18, // 3 circles × 24px, overlapping by 6px each
                       height: 24,
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          const Positioned(left: 0,  child: _EmojiCircle(emoji: '🐾', color: AppColors.tangerine, index: 0)),
-                          const Positioned(left: 18, child: _EmojiCircle(emoji: '❤️', color: AppColors.poppy,     index: 0)),
-                          const Positioned(left: 36, child: _EmojiCircle(emoji: '🦴', color: AppColors.sunny,     index: 0)),
+                          Positioned(left: 0,  child: _EmojiCircle(emoji: '🐾', color: AppColors.tangerine, index: 0)),
+                          Positioned(left: 18, child: _EmojiCircle(emoji: '❤️', color: AppColors.poppy,     index: 0)),
+                          Positioned(left: 36, child: _EmojiCircle(emoji: '🦴', color: AppColors.sunny,     index: 0)),
                         ],
                       ),
                     ),
@@ -1432,7 +1432,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                       color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(999),
                       boxShadow: [
-                        BoxShadow(color: AppColors.shadowGlassL, blurRadius: 32, spreadRadius: -10, offset: const Offset(0, 16)),
+                        const BoxShadow(color: AppColors.shadowGlassL, blurRadius: 32, spreadRadius: -10, offset: Offset(0, 16)),
                         BorderSide(color: Theme.of(context).extension<PetfolioThemeExtension>()!.line).toBoxShadow()
                       ],
                     ),

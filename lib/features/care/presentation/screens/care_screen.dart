@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -383,7 +383,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                             ),
                             // ── Config error — persistent banner ──────────
                             if (aiState.isConfigError)
-                              _AiConfigErrorBanner(),
+                              const _AiConfigErrorBanner(),
                             // ── AI empty-state full banner ─────────────────
                             if (dashboard.tasks.value?.isEmpty == true &&
                                 !aiState.isConfigError)
@@ -403,7 +403,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                               categoryFilter: _careFilter,
                             ),
                             const SizedBox(height: 28),
-                            PfSectionTitle(
+                            const PfSectionTitle(
                               title: 'This week',
                               accent: AppColors.mint,
                             ),

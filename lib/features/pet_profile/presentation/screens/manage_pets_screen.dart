@@ -386,8 +386,8 @@ class _PetRow extends StatelessWidget {
             color: isActive ? species.accent : pt.line,
             width: isActive ? 1.5 : 0.5,
           ),
-          boxShadow: [
-            const BoxShadow(
+          boxShadow: const [
+            BoxShadow(
               color: AppColors.shadowE1L,
               blurRadius: 2,
               offset: Offset(0, 1),
@@ -657,7 +657,7 @@ class _ShareAccessSheet extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.schedule_rounded,
+                  const Icon(Icons.schedule_rounded,
                       size: 18, color: AppColors.blue600),
                   const SizedBox(width: 10),
                   Expanded(

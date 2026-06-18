@@ -48,11 +48,11 @@ class MatchPreferencesSheet extends ConsumerWidget {
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(PetfolioThemeExtension.radius2xl),
             ),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: AppColors.shadowE4L,
                 blurRadius: 60,
-                offset: const Offset(0, -20),
+                offset: Offset(0, -20),
               ),
             ],
           ),
@@ -101,7 +101,7 @@ class MatchPreferencesSheet extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              _SectionLabel(title: 'Species'),
+              const _SectionLabel(title: 'Species'),
               const SizedBox(height: 10),
               Wrap(
                 spacing: 8,

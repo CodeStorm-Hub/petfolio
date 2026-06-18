@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
 import '../../../../core/widgets/primary_pill_button.dart';
 import '../../data/repositories/order_repository.dart';
 
@@ -73,6 +74,7 @@ class _OrderSuccessSheetState extends ConsumerState<OrderSuccessSheet>
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return SingleChildScrollView(
       physics: const ClampingScrollPhysics(),
       child: Padding(
@@ -93,9 +95,9 @@ class _OrderSuccessSheetState extends ConsumerState<OrderSuccessSheet>
               opacity: _fadeAnim,
               child: Column(
                 children: [
-                  const Text(
+                  Text(
                     'Order placed!',
-                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 28, letterSpacing: -0.28, color: AppColors.ink950),
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 28, letterSpacing: -0.28, color: pt.ink950),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -103,7 +105,7 @@ class _OrderSuccessSheetState extends ConsumerState<OrderSuccessSheet>
                         ? 'Confirming your payment…'
                         : 'Your order is confirmed and will\narrive within 3–5 business days.',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 15, height: 1.5, color: AppColors.ink500),
+                    style: TextStyle(fontSize: 15, height: 1.5, color: pt.ink500),
                   ),
                   const SizedBox(height: 24),
                   Container(
@@ -112,18 +114,18 @@ class _OrderSuccessSheetState extends ConsumerState<OrderSuccessSheet>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.receipt_long_outlined, size: 16, color: AppColors.ink500),
+                        Icon(Icons.receipt_long_outlined, size: 16, color: pt.ink500),
                         const SizedBox(width: 8),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'ORDER REFERENCE',
-                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: AppColors.ink500),
+                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: pt.ink500),
                             ),
                             Text(
                               widget.orderId.substring(0, 8).toUpperCase(),
-                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.ink950),
+                              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: pt.ink950),
                             ),
                           ],
                         ),
@@ -156,7 +158,7 @@ class _OrderSuccessSheetState extends ConsumerState<OrderSuccessSheet>
                       context.pop();
                       context.go('/home');
                     },
-                    child: const Text('Back to home', style: TextStyle(fontSize: 14, color: AppColors.ink500)),
+                    child: Text('Back to home', style: TextStyle(fontSize: 14, color: pt.ink500)),
                   ),
                 ],
               ),

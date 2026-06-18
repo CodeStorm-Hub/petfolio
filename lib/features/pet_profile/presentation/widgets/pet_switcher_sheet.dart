@@ -49,11 +49,11 @@ class PetSwitcherSheet extends ConsumerWidget {
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(PetfolioThemeExtension.radius2xl),
             ),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: AppColors.shadowE4L,
                 blurRadius: 60,
-                offset: const Offset(0, -20),
+                offset: Offset(0, -20),
               ),
             ],
           ),
@@ -383,7 +383,7 @@ class _AddPetButton extends StatelessWidget {
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: CustomPaint(
-          painter: _DashedRoundedBorderPainter(
+          painter: const _DashedRoundedBorderPainter(
             color: AppColors.blue400,
             radius: 18,
             strokeWidth: 1.5,
@@ -511,10 +511,10 @@ class _SignOutRow extends ConsumerWidget {
           color: AppColors.coral500.withAlpha(14),
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Row(
+        child: const Row(
           children: [
             Icon(Icons.logout_rounded, size: 18, color: AppColors.coral500),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Text(
                 'Sign out',

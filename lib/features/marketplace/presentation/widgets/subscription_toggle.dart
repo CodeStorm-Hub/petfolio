@@ -120,7 +120,7 @@ class _FreqChip extends StatelessWidget {
           boxShadow: selected
               ? null
               : [
-                  BoxShadow(
+                  const BoxShadow(
                     color: AppColors.line,
                     blurRadius: 0,
                     spreadRadius: 0.5,

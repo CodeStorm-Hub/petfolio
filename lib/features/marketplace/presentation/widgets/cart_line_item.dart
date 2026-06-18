@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
 import '../../data/models/cart_item.dart';
 import '../controllers/cart_controller.dart';
 import 'product_glyph.dart';
@@ -17,6 +18,7 @@ class CartLineItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cart = ref.read(cartProvider.notifier);
     final p = item.product;
 
@@ -60,29 +62,29 @@ class CartLineItem extends ConsumerWidget {
                 children: [
                   Text(
                     p.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     p.brand,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
-                      color: AppColors.ink500,
+                      color: pt.ink500,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     '\$${(item.lineTotalCents / 100).toStringAsFixed(2)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                   if (item.isSubscribed) ...[
@@ -143,6 +145,7 @@ class _Stepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
@@ -158,10 +161,10 @@ class _Stepper extends StatelessWidget {
             child: Text(
               '$quantity',
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 13,
-                color: AppColors.ink950,
+                color: pt.ink950,
               ),
             ),
           ),
@@ -181,6 +184,7 @@ class _StepBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: semanticsLabel,
       button: true,
@@ -197,10 +201,10 @@ class _StepBtn extends StatelessWidget {
         child: Center(
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: AppColors.ink950,
+              color: pt.ink950,
               height: 1.1,
             ),
           ),

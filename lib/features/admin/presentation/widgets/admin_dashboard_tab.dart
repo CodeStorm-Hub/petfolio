@@ -66,7 +66,7 @@ class _MetricsBanner extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius2xl),
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           // ink950 → blue600 — both from AppColors

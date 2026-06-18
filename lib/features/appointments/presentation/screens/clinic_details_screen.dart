@@ -105,9 +105,9 @@ class _ClinicDetailsScreenState extends ConsumerState<ClinicDetailsScreen> {
                 child: Column(
                   children: List.generate(
                     3,
-                    (_) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: const SkeletonLoader(width: double.infinity, height: 72, borderRadius: 16),
+                    (_) => const Padding(
+                      padding: EdgeInsets.only(bottom: 10),
+                      child: SkeletonLoader(width: double.infinity, height: 72, borderRadius: 16),
                     ),
                   ),
                 ),
@@ -189,7 +189,7 @@ class _ClinicHeroCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             colors: [AppColors.sky, AppColors.mint],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -449,7 +449,7 @@ class _ServiceTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(11),
               ),
               alignment: Alignment.center,
-              child: Icon(
+              child: const Icon(
                 Icons.medical_services_rounded,
                 color: AppColors.sky,
                 size: 20,

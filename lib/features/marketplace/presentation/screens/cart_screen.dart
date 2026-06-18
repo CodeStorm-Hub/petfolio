@@ -145,6 +145,7 @@ class _CartHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
       child: Row(
@@ -156,7 +157,7 @@ class _CartHeader extends StatelessWidget {
             style: GoogleFonts.sora(
               fontWeight: FontWeight.w700,
               fontSize: 20,
-              color: AppColors.ink950,
+              color: pt.ink950,
             ),
           ),
           if (itemCount > 0) ...[
@@ -394,6 +395,7 @@ class _VendorCheckoutSectionState
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cart = ref.watch(cartProvider);
     final checkout = ref.watch(checkoutProvider);
     final subtotalCents = cart.totalCentsForShop(widget.shopId);
@@ -447,22 +449,22 @@ class _VendorCheckoutSectionState
                         children: [
                           Text(
                             widget.shopName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
-                              color: AppColors.ink950,
+                              color: pt.ink950,
                             ),
                           ),
-                          const Text(
+                          Text(
                             'Est. delivery: 2-3 business days',
-                            style: TextStyle(fontSize: 12, color: AppColors.ink500),
+                            style: TextStyle(fontSize: 12, color: pt.ink500),
                           ),
                         ],
                       ),
                     ),
                     Text(
                       '${shopItems.fold<int>(0, (s, i) => s + i.quantity)} items',
-                      style: const TextStyle(fontSize: 12, color: AppColors.ink500),
+                      style: TextStyle(fontSize: 12, color: pt.ink500),
                     ),
                   ],
                 ),
@@ -478,7 +480,7 @@ class _VendorCheckoutSectionState
                       borderRadius: BorderRadius.circular(12),
                       color: AppColors.warningSoft,
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
                         Icon(Icons.info_outline_rounded,
                             size: 16, color: AppColors.warning),
@@ -486,7 +488,7 @@ class _VendorCheckoutSectionState
                         Expanded(
                           child: Text(
                             'This shop is not ready to accept payments yet.',
-                            style: TextStyle(fontSize: 12, color: AppColors.ink700),
+                            style: TextStyle(fontSize: 12, color: pt.ink700),
                           ),
                         ),
                       ],
@@ -569,9 +571,9 @@ class _VendorCheckoutSectionState
                       textCapitalization: TextCapitalization.characters,
                       decoration: InputDecoration(
                         hintText: 'Enter promo code',
-                        hintStyle: const TextStyle(
+                        hintStyle: TextStyle(
                           fontSize: 14,
-                          color: AppColors.ink500,
+                          color: pt.ink500,
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 10,
@@ -646,12 +648,12 @@ class _VendorCheckoutSectionState
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Pay via',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.ink950,
+                        color: pt.ink950,
                       ),
                     ),
                   ],
@@ -732,12 +734,12 @@ class _VendorCheckoutSectionState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Receipt',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.ink950,
+                    color: pt.ink950,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -916,6 +918,7 @@ class _MultiVendorSummaryBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
@@ -951,16 +954,16 @@ class _MultiVendorSummaryBanner extends StatelessWidget {
               children: [
                 Text(
                   'Ordering from $shopCount shops',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.ink950,
+                    color: pt.ink950,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '$itemCount item${itemCount == 1 ? '' : 's'} · Each shop ships separately',
-                  style: const TextStyle(fontSize: 12, color: AppColors.ink500),
+                  style: TextStyle(fontSize: 12, color: pt.ink500),
                 ),
               ],
             ),
@@ -976,9 +979,9 @@ class _MultiVendorSummaryBanner extends StatelessWidget {
                   color: AppColors.poppy,
                 ),
               ),
-              const Text(
+              Text(
                 'combined',
-                style: TextStyle(fontSize: 10, color: AppColors.ink500),
+                style: TextStyle(fontSize: 10, color: pt.ink500),
               ),
             ],
           ),
@@ -1006,10 +1009,10 @@ class _SectionCard extends StatelessWidget {
         boxShadow: isDark
             ? null
             : [
-                BoxShadow(
+                const BoxShadow(
                   color: AppColors.shadowE3L,
                   blurRadius: 18,
-                  offset: const Offset(0, 4),
+                  offset: Offset(0, 4),
                   spreadRadius: -2,
                 ),
               ],
@@ -1152,6 +1155,7 @@ class _CodConfirmSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -1178,18 +1182,18 @@ class _CodConfirmSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Confirm Order',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 18,
-                  color: AppColors.ink950,
+                  color: pt.ink950,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 shopName,
-                style: const TextStyle(fontSize: 13, color: AppColors.ink500),
+                style: TextStyle(fontSize: 13, color: pt.ink500),
               ),
               const SizedBox(height: 16),
               for (final item in items)
@@ -1200,16 +1204,16 @@ class _CodConfirmSheet extends StatelessWidget {
                       Expanded(
                         child: Text(
                           '${item.product.name} × ${item.quantity}',
-                          style: const TextStyle(
-                              fontSize: 13, color: AppColors.ink700),
+                          style: TextStyle(
+                              fontSize: 13, color: pt.ink700),
                         ),
                       ),
                       Text(
                         '\$${((item.product.priceCents * item.quantity) / 100).toStringAsFixed(2)}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.ink950,
+                          color: pt.ink950,
                         ),
                       ),
                     ],
@@ -1219,20 +1223,20 @@ class _CodConfirmSheet extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Total',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 15,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                   Text(
                     '\$${(subtotalCents / 100).toStringAsFixed(2)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 17,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                 ],
@@ -1244,7 +1248,7 @@ class _CodConfirmSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   color: AppColors.warningSoft,
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     Icon(Icons.payments_outlined,
                         size: 16, color: AppColors.warning),
@@ -1252,7 +1256,7 @@ class _CodConfirmSheet extends StatelessWidget {
                     Expanded(
                       child: Text(
                         'Pay when you receive your order.',
-                        style: TextStyle(fontSize: 12, color: AppColors.ink700),
+                        style: TextStyle(fontSize: 12, color: pt.ink700),
                       ),
                     ),
                   ],
@@ -1299,6 +1303,7 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: label,
       button: true,
@@ -1307,10 +1312,10 @@ class _IconBtn extends StatelessWidget {
       child: Container(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.surface0,
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(color: AppColors.line, spreadRadius: 0.5),
             BoxShadow(
               color: AppColors.shadowE1L,
@@ -1319,7 +1324,7 @@ class _IconBtn extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: pt.ink700),
       ),
     ),
     );

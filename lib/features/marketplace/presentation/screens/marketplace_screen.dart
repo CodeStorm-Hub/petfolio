@@ -601,6 +601,7 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
   }
 
   Widget _buildBody(BuildContext context, double maxWidth) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final productsAsync = ref.watch(productListProvider);
     final cols = _crossAxisCount(maxWidth);
 
@@ -628,7 +629,7 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Could not load products', style: TextStyle(color: AppColors.ink500)),
+            Text('Could not load products', style: TextStyle(color: pt.ink500)),
             TextButton(onPressed: () => ref.invalidate(productListProvider), child: const Text('Retry')),
           ],
         ),
@@ -1205,7 +1206,7 @@ class _NewProductTileState extends State<_NewProductTile> {
             boxShadow: isDark
                 ? [BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 14, offset: const Offset(0, 4), spreadRadius: -2)]
                 : [
-                    BoxShadow(color: AppColors.shadowE3L, blurRadius: 18, offset: const Offset(0, 6), spreadRadius: -3),
+                    const BoxShadow(color: AppColors.shadowE3L, blurRadius: 18, offset: Offset(0, 6), spreadRadius: -3),
                     BoxShadow(color: widget.product.gradientStart.withAlpha(18), blurRadius: 10, offset: const Offset(0, 3)),
                   ],
           ),
@@ -1431,7 +1432,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
       constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.88),
       child: Column(
         children: [
-          Container(width: 48, height: 5, margin: const EdgeInsets.only(top: 12), decoration: BoxDecoration(color: pt.line, borderRadius: BorderRadius.circular(3))),
+          Container(width: 48, height: 5, margin: EdgeInsets.only(top: 12), decoration: BoxDecoration(color: pt.line, borderRadius: BorderRadius.circular(3))),
           Padding(
             padding: const EdgeInsets.fromLTRB(22, 12, 22, 14),
             child: Row(
@@ -1670,7 +1671,7 @@ class _CartItemRow extends ConsumerWidget {
                   button: true,
                   child: GestureDetector(
                     onTap: () => ref.read(cartProvider.notifier).decrement(item.product.id),
-                    child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: const Text('−', style: TextStyle(fontWeight: FontWeight.w700))),
+                    child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: Text('−', style: TextStyle(fontWeight: FontWeight.w700))),
                   ),
                 ),
                 Container(
@@ -1683,7 +1684,7 @@ class _CartItemRow extends ConsumerWidget {
                   button: true,
                   child: GestureDetector(
                     onTap: () => ref.read(cartProvider.notifier).add(item.product),
-                    child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: const Text('+', style: TextStyle(fontWeight: FontWeight.w700))),
+                    child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: Text('+', style: TextStyle(fontWeight: FontWeight.w700))),
                   ),
                 ),
               ],
@@ -1732,7 +1733,7 @@ class _DeliveryStrip extends ConsumerWidget {
               button: true,
               child: GestureDetector(
                 onTap: () => AddressSheet.show(context),
-                child: Text(
+                child: const Text(
                   'Set address',
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.tangerine),
                 ),

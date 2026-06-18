@@ -93,6 +93,7 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isAdmin = ref.watch(isAdminProvider);
     if (!isAdmin) {
       return Scaffold(
@@ -100,8 +101,8 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.lock_outline_rounded,
-                  size: 48, color: AppColors.ink300),
+              Icon(Icons.lock_outline_rounded,
+                  size: 48, color: pt.ink300),
               const SizedBox(height: 16),
               Text(
                 'Admin access required',

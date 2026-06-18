@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,7 @@ class ShopStorefrontRoute extends ConsumerWidget {
     final shopAsync = ref.watch(shopByIdProvider(shopId));
 
     return shopAsync.when(
-      loading: () => Scaffold(
+      loading: () => const Scaffold(
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.all(16),
@@ -134,9 +135,10 @@ class ShopStorefrontScreen extends ConsumerWidget {
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: shop.bannerUrl != null
-                  ? Image.network(
-                      shop.bannerUrl!,
+                  ? CachedNetworkImage(
+                      imageUrl: shop.bannerUrl!,
                       fit: BoxFit.cover,
+                      errorWidget: (_, _, _) => const SizedBox.shrink(),
                     )
                   : Container(
                       decoration: const BoxDecoration(
@@ -167,8 +169,11 @@ class ShopStorefrontScreen extends ConsumerWidget {
                     child: shop.logoUrl != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.network(shop.logoUrl!,
-                                fit: BoxFit.cover),
+                            child: CachedNetworkImage(
+                              imageUrl: shop.logoUrl!,
+                              fit: BoxFit.cover,
+                              errorWidget: (_, _, _) => const SizedBox.shrink(),
+                            ),
                           )
                         : Icon(Icons.storefront_outlined,
                             color: pt.ink300, size: 28),

@@ -125,8 +125,8 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
             trailing: InkWell(
               onTap: () => AllFeaturesSheet.show(context),
               borderRadius: BorderRadius.circular(4),
-              child: Padding(
-                padding: const EdgeInsets.all(4),
+              child: const Padding(
+                padding: EdgeInsets.all(4),
                 child: Text(
                   'All ›',
                   style: TextStyle(
@@ -171,8 +171,8 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
             trailing: InkWell(
               onTap: () => context.go('/social'),
               borderRadius: BorderRadius.circular(4),
-              child: Padding(
-                padding: const EdgeInsets.all(4),
+              child: const Padding(
+                padding: EdgeInsets.all(4),
                 child: Text(
                   'See All ›',
                   style: TextStyle(
@@ -199,8 +199,8 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
             trailing: InkWell(
               onTap: () => context.go('/marketplace'),
               borderRadius: BorderRadius.circular(4),
-              child: Padding(
-                padding: const EdgeInsets.all(4),
+              child: const Padding(
+                padding: EdgeInsets.all(4),
                 child: Text(
                   'See All ›',
                   style: TextStyle(
@@ -611,10 +611,10 @@ BoxDecoration _bentoCardDecoration(
               ),
             ]
           : [
-              BoxShadow(
+              const BoxShadow(
                 color: AppColors.shadowE3L,
                 blurRadius: 24,
-                offset: const Offset(0, 8),
+                offset: Offset(0, 8),
                 spreadRadius: -4,
               ),
               if (glow != null)
@@ -1222,28 +1222,28 @@ class _SpotlightCarousel extends StatelessWidget {
         emoji: '🐕',
         title: 'Nearby Matches',
         sub: 'Find playmates today',
-        gradient: [AppColors.lilac, AppColors.sky],
+        gradient: const [AppColors.lilac, AppColors.sky],
         onTap: () => context.go('/matching'),
       ),
       _SpotlightCard(
         emoji: '🛍️',
         title: 'Pet Food Sale',
         sub: 'Up to 30% off brands',
-        gradient: [AppColors.tangerine, AppColors.sunny],
+        gradient: const [AppColors.tangerine, AppColors.sunny],
         onTap: () => context.go('/marketplace'),
       ),
       _SpotlightCard(
         emoji: '🐾',
         title: 'Trending Posts',
         sub: 'See what\'s popular',
-        gradient: [AppColors.poppy, AppColors.lilac],
+        gradient: const [AppColors.poppy, AppColors.lilac],
         onTap: () => context.go('/social'),
       ),
       _SpotlightCard(
         emoji: '🏥',
         title: 'Book a Vet',
         sub: 'Clinics near you',
-        gradient: [AppColors.mint, AppColors.sky],
+        gradient: const [AppColors.mint, AppColors.sky],
         onTap: () => context.push('/appointments'),
       ),
     ];
@@ -1424,14 +1424,14 @@ class _DealsSection extends StatelessWidget {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Positioned(
+                  const Positioned(
                     right: -12,
                     top: -12,
                     child: Opacity(
                       opacity: 0.2,
                       child: Text(
                         '🎁',
-                        style: const TextStyle(fontSize: 100),
+                        style: TextStyle(fontSize: 100),
                       ),
                     ),
                   ),

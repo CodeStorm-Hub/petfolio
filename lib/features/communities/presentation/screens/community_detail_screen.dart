@@ -71,7 +71,7 @@ class _CommunityDetailScreenState
         actions: [
           IconButton(
             tooltip: 'New post',
-            icon: Icon(
+            icon: const Icon(
               Icons.add_rounded,
               color: AppColors.lilac,
             ),
@@ -303,7 +303,7 @@ class _PetAvatar extends StatelessWidget {
         color: AppColors.lilac.withValues(alpha: 0.2),
         shape: BoxShape.circle,
       ),
-      child: Icon(Icons.pets_rounded,
+      child: const Icon(Icons.pets_rounded,
           size: 16, color: AppColors.lilac),
     );
   }

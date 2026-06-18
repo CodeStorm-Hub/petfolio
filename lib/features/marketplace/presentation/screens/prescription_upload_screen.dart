@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../../core/widgets/primary_pill_button.dart';
 import '../../data/models/prescription.dart';
@@ -83,6 +84,7 @@ class _PrescriptionUploadScreenState
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final rxAsync = ref.watch(prescriptionUploadProvider(widget.orderId));
     final existing = rxAsync.asData?.value;
 
@@ -104,25 +106,25 @@ class _PrescriptionUploadScreenState
                         child: Container(
                           width: 40,
                           height: 40,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             shape: BoxShape.circle,
                             color: AppColors.surface0,
-                            boxShadow: const [
+                            boxShadow: [
                               BoxShadow(color: AppColors.line, spreadRadius: 0.5),
                             ],
                           ),
-                          child: const Icon(Icons.arrow_back_ios_new_rounded,
-                              size: 18, color: AppColors.ink700),
+                          child: Icon(Icons.arrow_back_ios_new_rounded,
+                              size: 18, color: pt.ink700),
                         ),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Upload Prescription',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 20,
-                        color: AppColors.ink950,
+                        color: pt.ink950,
                       ),
                     ),
                   ],
@@ -145,7 +147,7 @@ class _PrescriptionUploadScreenState
                         color: AppColors.info.withAlpha(20),
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
                           Icon(Icons.info_outline_rounded,
                               size: 18, color: AppColors.info),
@@ -154,7 +156,7 @@ class _PrescriptionUploadScreenState
                             child: Text(
                               'Please upload a clear photo or scan of your veterinarian\'s prescription.',
                               style: TextStyle(
-                                  fontSize: 13, color: AppColors.ink700),
+                                  fontSize: 13, color: pt.ink700),
                             ),
                           ),
                         ],
@@ -189,14 +191,14 @@ class _PrescriptionUploadScreenState
                             : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.upload_file_outlined,
-                                      size: 40, color: AppColors.ink300),
+                                  Icon(Icons.upload_file_outlined,
+                                      size: 40, color: pt.ink300),
                                   const SizedBox(height: 10),
-                                  const Text(
+                                  Text(
                                     'Tap to upload prescription',
                                     style: TextStyle(
                                         fontSize: 14,
-                                        color: AppColors.ink500,
+                                        color: pt.ink500,
                                         fontWeight: FontWeight.w600),
                                   ),
                                   const SizedBox(height: 4),

@@ -537,12 +537,12 @@ class _PetIdentityRow extends StatelessWidget {
               color: AppColors.sunset500.withAlpha(26),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.public_rounded, size: 12, color: AppColors.sunset500),
-                const SizedBox(width: 4),
-                const Text('Public', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.sunset500)),
+                Icon(Icons.public_rounded, size: 12, color: AppColors.sunset500),
+                SizedBox(width: 4),
+                Text('Public', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.sunset500)),
               ],
             ),
           ),
@@ -601,8 +601,8 @@ class _ImageWell extends StatelessWidget {
               top: 0, left: 0, right: 0,
               child: Container(
                 height: 80,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   gradient: LinearGradient(
                     begin: Alignment.topCenter, end: Alignment.bottomCenter,
                     colors: [Colors.black45, Colors.transparent],
@@ -687,10 +687,10 @@ class _EmptyImagePlaceholder extends StatelessWidget {
           Container(
             decoration: BoxDecoration(color: pt.surface2, border: Border(top: BorderSide(color: pt.line))),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            child: Row(
+            child: const Row(
               children: [
                 _SourceChip(icon: Icons.photo_library_outlined, label: 'Gallery', color: AppColors.blue500),
-                const SizedBox(width: 10),
+                SizedBox(width: 10),
                 _SourceChip(icon: Icons.camera_alt_outlined, label: 'Camera', color: AppColors.meadow500),
               ],
             ),

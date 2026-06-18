@@ -301,6 +301,14 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
     final total = _ordered.length;
     if (total == 0) return const SizedBox.shrink();
 
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final cardWidth = (screenWidth * 0.46).clamp(160.0, 200.0);
+    // 182 is the minimum height that fits the card content without overflow
+    final cardHeight = cardWidth.clamp(182.0, 205.0);
+    final outerHeight = cardHeight + 18.0;
+    final txStep = cardWidth * 0.43;
+    final maxTx = screenWidth * 0.60;
+
     final entries = _ordered.asMap().entries.toList()
       ..sort((a, b) {
         final ad = (a.key.toDouble() - _page).abs();
@@ -313,7 +321,7 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
         Semantics(
           hint: 'Swipe left or right to browse tasks',
           child: SizedBox(
-          height: 242,
+          height: outerHeight,
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
             onHorizontalDragUpdate: (d) => _dragDelta += d.delta.dx,
@@ -341,7 +349,7 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
                 final rotY    = sign * (abs * 0.88).clamp(0.0, 1.12);
                 final tx      = abs < 0.02
                     ? 0.0
-                    : sign * (abs * 78.0).clamp(0.0, 220.0);
+                    : sign * (abs * txStep).clamp(0.0, maxTx);
 
                 return Opacity(
                   opacity: opacity,
@@ -363,6 +371,8 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
                             task: task,
                             isCenter: abs < 0.35,
                             xpBurstId: _xpBurstId,
+                            cardWidth: cardWidth,
+                            cardHeight: cardHeight,
                             onToggle: () => _onToggle(i),
                             onLongPress: () => _showContextMenu(context, task),
                           ),
@@ -379,7 +389,7 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
         ),
 
         Padding(
-          padding: const EdgeInsets.only(top: 10, bottom: 4),
+          padding: const EdgeInsets.only(top: 6, bottom: 4),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -435,6 +445,8 @@ class _CoverFlowCard extends StatelessWidget {
     required this.task,
     required this.isCenter,
     required this.xpBurstId,
+    required this.cardWidth,
+    required this.cardHeight,
     required this.onToggle,
     required this.onLongPress,
   });
@@ -442,6 +454,8 @@ class _CoverFlowCard extends StatelessWidget {
   final dbtask.CareTask task;
   final bool isCenter;
   final String? xpBurstId;
+  final double cardWidth;
+  final double cardHeight;
   final VoidCallback onToggle;
   final VoidCallback onLongPress;
 
@@ -453,7 +467,13 @@ class _CoverFlowCard extends StatelessWidget {
     final due   = !done && task.isDueToday && task.scheduledTime != null;
     final color = _cfColor(task.taskType);
 
-    return Stack(
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: TextScaler.linear(
+          MediaQuery.textScalerOf(context).scale(1.0).clamp(0.85, 1.15),
+        ),
+      ),
+      child: Stack(
       clipBehavior: Clip.none,
       alignment: Alignment.topCenter,
       children: [
@@ -464,8 +484,8 @@ class _CoverFlowCard extends StatelessWidget {
           onLongPress: onLongPress,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 260),
-            width: 198,
-            height: 220,
+            width: cardWidth,
+            height: cardHeight,
             decoration: BoxDecoration(
               color: done
                   ? Color.alphaBlend(color.withAlpha(22), cs.surface)
@@ -492,7 +512,7 @@ class _CoverFlowCard extends StatelessWidget {
                     ]
                   : pt.shadowE2,
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -501,8 +521,8 @@ class _CoverFlowCard extends StatelessWidget {
                   children: [
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 260),
-                      width: 64,
-                      height: 64,
+                      width: 52,
+                      height: 52,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: done ? color : color.withAlpha(40),
@@ -525,13 +545,13 @@ class _CoverFlowCard extends StatelessWidget {
                         child: done
                             ? const Icon(Icons.check_rounded,
                                 color: Colors.white,
-                                size: 30,
+                                size: 24,
                                 key: ValueKey('c'))
                             : Text(
                                 _cfEmoji(task.taskType),
                                 key: const ValueKey('e'),
                                 style: const TextStyle(
-                                    fontSize: 30, height: 1.0),
+                                    fontSize: 24, height: 1.0),
                               ),
                       ),
                     ),
@@ -551,7 +571,7 @@ class _CoverFlowCard extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 AnimatedDefaultTextStyle(
                   duration: const Duration(milliseconds: 200),
                   style: TextStyle(
@@ -572,7 +592,7 @@ class _CoverFlowCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
                   _cfSublabel(task),
                   style: TextStyle(
@@ -585,7 +605,7 @@ class _CoverFlowCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
@@ -623,12 +643,14 @@ class _CoverFlowCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    _SpringCheckButton(
-                      done: done,
-                      color: color,
-                      line: pt.line,
-                      surface: cs.surface,
-                      onTap: onToggle,
+                    RepaintBoundary(
+                      child: _SpringCheckButton(
+                        done: done,
+                        color: color,
+                        line: pt.line,
+                        surface: cs.surface,
+                        onTap: onToggle,
+                      ),
                     ),
                   ],
                 ),
@@ -640,9 +662,12 @@ class _CoverFlowCard extends StatelessWidget {
         if (xpBurstId == task.id)
           const Positioned(
             top: -22,
-            child: _XpBurst(),
+            child: RepaintBoundary(
+              child: _XpBurst(),
+            ),
           ),
       ],
+    ),
     );
   }
 }
@@ -812,8 +837,8 @@ class _SpringCheckButtonState extends State<_SpringCheckButton>
         scale: _scale,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 230),
-          width: 38,
-          height: 38,
+          width: 32,
+          height: 32,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: widget.done ? widget.color : widget.surface,

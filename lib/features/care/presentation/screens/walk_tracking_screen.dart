@@ -59,7 +59,7 @@ class _WalkNotifier extends Notifier<_WalkState> {
       return;
     }
 
-    state = _WalkState(isTracking: true);
+    state = const _WalkState(isTracking: true);
 
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       state = state.copyWith(elapsedSeconds: state.elapsedSeconds + 1);

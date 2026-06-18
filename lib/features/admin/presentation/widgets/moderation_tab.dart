@@ -98,7 +98,7 @@ class _ReportCardState extends ConsumerState<_ReportCard> {
                     ),
               ),
               const Spacer(),
-              AdminStatusChip(
+              const AdminStatusChip(
                 label: 'Pending',
                 color: AppColors.warning,
               ),

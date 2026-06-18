@@ -110,12 +110,12 @@ class PetProfileScreen extends ConsumerWidget {
                     child: const Text('Gallery →'),
                   ),
                 ),
-                Row(
+                const Row(
                   children: [
                     Expanded(child: _MomentPlaceholder(label: 'bath day', color: AppColors.poppy, soft: AppColors.poppySoft, emoji: '🛁')),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Expanded(child: _MomentPlaceholder(label: 'napping', color: AppColors.lilac, soft: AppColors.lilacSoft, emoji: '💤')),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Expanded(child: _MomentPlaceholder(label: 'park run', color: AppColors.mint, soft: AppColors.mintSoft, emoji: '🌳')),
                   ],
                 ),
@@ -492,12 +492,12 @@ class _MomentPlaceholder extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           // Subtle paw watermark in the bottom right corner
-          Positioned(
+          const Positioned(
             right: 10,
             bottom: 10,
             child: Opacity(
               opacity: 0.15,
-              child: const Icon(Icons.pets_rounded, size: 28, color: Colors.white),
+              child: Icon(Icons.pets_rounded, size: 28, color: Colors.white),
             ),
           ),
           // Centered emoji icon
@@ -715,7 +715,7 @@ class _PetProfileHeaderSkeleton extends StatelessWidget {
                           Expanded(
                             child: Padding(
                               padding: EdgeInsets.only(left: i == 0 ? 0 : 8),
-                              child: SkeletonLoader(
+                              child: const SkeletonLoader(
                                 width: double.infinity,
                                 height: 72,
                                 borderRadius: PetfolioThemeExtension.radiusMd,

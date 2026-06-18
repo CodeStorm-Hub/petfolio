@@ -283,7 +283,7 @@ class _ClinicGridCardState extends State<_ClinicGridCard> {
                       style: TextStyle(fontSize: 10, color: pt.ink300),
                     ),
                   ),
-                  Icon(Icons.chevron_right_rounded, size: 16, color: AppColors.sky),
+                  const Icon(Icons.chevron_right_rounded, size: 16, color: AppColors.sky),
                 ],
               ),
             ],
@@ -364,8 +364,8 @@ class _AppointmentsHistoryTab extends StatelessWidget {
           const Expanded(
             child: TabBarView(
               children: [
-                _AppointmentsList(past: false),
-                _AppointmentsList(past: true),
+                KeepAliveTab(child: _AppointmentsList(past: false)),
+                KeepAliveTab(child: _AppointmentsList(past: true)),
               ],
             ),
           ),

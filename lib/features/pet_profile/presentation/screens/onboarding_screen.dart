@@ -231,8 +231,8 @@ class _OnboardingHeader extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(color: AppColors.shadowE1L, blurRadius: 2, offset: const Offset(0, 1)),
+                  boxShadow: const [
+                    BoxShadow(color: AppColors.shadowE1L, blurRadius: 2, offset: Offset(0, 1)),
                   ],
                 ),
                 alignment: Alignment.center,

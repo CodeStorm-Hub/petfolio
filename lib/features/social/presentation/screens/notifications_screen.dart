@@ -77,7 +77,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                     IconButton(
                       tooltip: 'Back',
                       icon: const Icon(Icons.arrow_back_rounded),
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                       onPressed: () => context.pop(),
                     ),
                     const SizedBox(width: 4),
@@ -86,7 +86,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                       style: GoogleFonts.sora(
                         fontWeight: FontWeight.w700,
                         fontSize: 20,
-                        color: AppColors.ink950,
+                        color: pt.ink950,
                       ),
                     ),
                     const Spacer(),
@@ -94,7 +94,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                       TextButton(
                         onPressed: () =>
                             ref.read(notificationsProvider.notifier).markAllRead(),
-                        child: Text(
+                        child: const Text(
                           'Mark all read',
                           style: TextStyle(
                             fontSize: 13,
@@ -188,8 +188,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                 data: (_) => TabBarView(
                   controller: _tabCtrl,
                   children: [
-                    _UpdatesTab(notifications: updates, pt: pt),
-                    _PromotionsTab(pt: pt),
+                    KeepAliveTab(child: _UpdatesTab(notifications: updates, pt: pt)),
+                    KeepAliveTab(child: _PromotionsTab(pt: pt)),
                   ],
                 ),
               ),

@@ -21,6 +21,7 @@ class PostGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return postsAsync.when(
       loading: () => SliverGrid.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -33,7 +34,7 @@ class PostGrid extends ConsumerWidget {
       ),
       error: (e, _) => SliverFillRemaining(
         child: Center(
-          child: Text('$e', style: TextStyle(color: AppColors.ink500)),
+          child: Text('$e', style: TextStyle(color: pt.ink500)),
         ),
       ),
       data: (posts) {
@@ -87,7 +88,7 @@ class _PostThumbnail extends StatelessWidget {
             else
               _GradientFallback(post: post),
             if (post.isCarousel)
-              Positioned(
+              const Positioned(
                 top: 6,
                 right: 6,
                 child: ExcludeSemantics(

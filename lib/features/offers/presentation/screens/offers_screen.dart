@@ -213,10 +213,10 @@ class _PromoCard extends StatelessWidget {
             children: [
               Text(
                 promo.validUntilFormatted,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.ink500,
+                  color: pt.ink500,
                 ),
               ),
               const Spacer(),

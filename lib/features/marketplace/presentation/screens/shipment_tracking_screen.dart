@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
 import '../../../../core/widgets/primary_pill_button.dart';
 import '../../data/models/shipment.dart';
 import '../controllers/shipment_controller.dart';
@@ -15,6 +16,7 @@ class ShipmentTrackingScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final async = ref.watch(shipmentProvider(orderId));
 
     return Scaffold(
@@ -36,25 +38,25 @@ class ShipmentTrackingScreen extends ConsumerWidget {
                         child: Container(
                           width: 40,
                           height: 40,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             shape: BoxShape.circle,
                             color: AppColors.surface0,
-                            boxShadow: const [
+                            boxShadow: [
                               BoxShadow(color: AppColors.line, spreadRadius: 0.5),
                             ],
                           ),
-                          child: const Icon(Icons.arrow_back_ios_new_rounded,
-                              size: 18, color: AppColors.ink700),
+                          child: Icon(Icons.arrow_back_ios_new_rounded,
+                              size: 18, color: pt.ink700),
                         ),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Track Shipment',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 20,
-                        color: AppColors.ink950,
+                        color: pt.ink950,
                       ),
                     ),
                   ],
@@ -70,12 +72,12 @@ class ShipmentTrackingScreen extends ConsumerWidget {
               ),
               data: (shipment) {
                 if (shipment == null) {
-                  return const SliverFillRemaining(
+                  return SliverFillRemaining(
                     child: Center(
                       child: Text(
                         'No shipment info yet.\nCheck back once your order ships.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: AppColors.ink500),
+                        style: TextStyle(color: pt.ink500),
                       ),
                     ),
                   );
@@ -128,6 +130,7 @@ class _ShipmentStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final color = switch (shipment.status) {
       ShipmentStatus.pending        => AppColors.warning,
       ShipmentStatus.pickedUp       => AppColors.info,
@@ -177,8 +180,8 @@ class _ShipmentStatusCard extends StatelessWidget {
                 if (shipment.estimatedDeliveryAt != null)
                   Text(
                     'Est. delivery: ${_formatDate(shipment.estimatedDeliveryAt!)}',
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.ink500),
+                    style: TextStyle(
+                        fontSize: 12, color: pt.ink500),
                   ),
               ],
             ),
@@ -284,6 +287,7 @@ class _TrackingDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -296,13 +300,13 @@ class _TrackingDetails extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'TRACKING DETAILS',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.88,
-              color: AppColors.ink500,
+              color: pt.ink500,
             ),
           ),
           const SizedBox(height: 12),
@@ -326,17 +330,18 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label,
             style:
-                const TextStyle(fontSize: 13, color: AppColors.ink500)),
+                TextStyle(fontSize: 13, color: pt.ink500)),
         Text(value,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: AppColors.ink950)),
+                color: pt.ink950)),
       ],
     );
   }

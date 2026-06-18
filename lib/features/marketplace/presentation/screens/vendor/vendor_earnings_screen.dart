@@ -46,12 +46,12 @@ class VendorEarningsScreen extends ConsumerWidget {
                         child: Container(
                           width: 40,
                           height: 40,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             shape: BoxShape.circle,
                             color: AppColors.surface0,
-                            boxShadow: const [BoxShadow(color: AppColors.line, spreadRadius: 0.5)],
+                            boxShadow: [BoxShadow(color: AppColors.line, spreadRadius: 0.5)],
                           ),
-                          child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.ink700),
+                          child: Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: pt.ink700),
                         ),
                       ),
                     ),

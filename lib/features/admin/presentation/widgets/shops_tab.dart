@@ -173,7 +173,7 @@ class _DeletionRequestCardState extends ConsumerState<_DeletionRequestCard> {
                   ),
                 ),
               ),
-              AdminStatusChip(label: 'Pending', color: AppColors.warning),
+              const AdminStatusChip(label: 'Pending', color: AppColors.warning),
             ],
           ),
           const SizedBox(height: 4),

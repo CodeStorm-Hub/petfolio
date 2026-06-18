@@ -64,6 +64,7 @@ class _MedicalVaultBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final asyncRecords = ref.watch(healthVaultControllerProvider);
 
     return Scaffold(
@@ -117,12 +118,12 @@ class _MedicalVaultBody extends ConsumerWidget {
                     ),
                     const SizedBox(height: 16),
                     RichText(
-                      text: const TextSpan(
+                      text: TextSpan(
                         style: TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.w700,
                           height: 1.05,
-                          color: AppColors.ink950,
+                          color: pt.ink950,
                         ),
                         children: [
                           TextSpan(text: 'Everything '),
@@ -134,10 +135,10 @@ class _MedicalVaultBody extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Text(
                       'Vaccines, meds, and vet visits — synced live from $petName\'s clinic.',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.ink700,
+                        color: pt.ink700,
                       ),
                     ),
                     const SizedBox(height: 18),
@@ -159,8 +160,8 @@ class _MedicalVaultBody extends ConsumerWidget {
                   delegate: SliverChildListDelegate([
                     ...List.generate(
                       4,
-                      (_) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
+                      (_) => const Padding(
+                        padding: EdgeInsets.only(bottom: 10),
                         child: SkeletonLoader(
                           width: double.infinity,
                           height: 88,
@@ -175,11 +176,11 @@ class _MedicalVaultBody extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(vertical: 48),
                     child: Column(
                       children: [
-                        const Icon(Icons.cloud_off_rounded, size: 44, color: AppColors.ink300),
+                        Icon(Icons.cloud_off_rounded, size: 44, color: pt.ink300),
                         const SizedBox(height: 12),
-                        const Text(
+                        Text(
                           'Could not load medical records',
-                          style: TextStyle(fontSize: 15, color: AppColors.ink500),
+                          style: TextStyle(fontSize: 15, color: pt.ink500),
                         ),
                         const SizedBox(height: 16),
                         FilledButton.icon(
@@ -347,6 +348,7 @@ class _ShareWithVetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: 'Share medical records',
       button: true,
@@ -375,12 +377,12 @@ class _ShareWithVetCard extends StatelessWidget {
             children: [
               const Text('🩺', style: TextStyle(fontSize: 36)),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Share with your vet', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.ink950)),
-                    Text('Share a summary of all active records', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.ink500)),
+                    Text('Share with your vet', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: pt.ink950)),
+                    Text('Share a summary of all active records', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: pt.ink500)),
                   ],
                 ),
               ),
@@ -408,6 +410,7 @@ class _HealthPill extends StatelessWidget {
   final String value;
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
@@ -421,8 +424,8 @@ class _HealthPill extends StatelessWidget {
         children: [
           Text(icon, style: const TextStyle(fontSize: 18, height: 1)),
           const SizedBox(height: 2),
-          Text(label.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.4, color: AppColors.ink500)),
-          Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.ink950)),
+          Text(label.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.4, color: pt.ink500)),
+          Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: pt.ink950)),
         ],
       ),
     );
@@ -446,6 +449,7 @@ class _VaultSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -465,10 +469,10 @@ class _VaultSection extends StatelessWidget {
               const SizedBox(width: 10),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.ink950,
+                  color: pt.ink950,
                 ),
               ),
               const SizedBox(width: 8),
@@ -480,10 +484,10 @@ class _VaultSection extends StatelessWidget {
                 ),
                 child: Text(
                   '${records.length}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.ink700,
+                    color: pt.ink700,
                   ),
                 ),
               ),
@@ -562,6 +566,7 @@ class _MedicalRecordCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final warn = record.isExpiringSoon;
     final statusBg = warn ? AppColors.sunnySoft : Color.lerp(accent, AppColors.surface0, 0.85)!;
     final statusColor = warn ? AppColors.sunny700 : Color.lerp(accent, AppColors.ink950, 0.5)!;
@@ -606,10 +611,10 @@ class _MedicalRecordCard extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           record.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.ink950,
+                            color: pt.ink950,
                           ),
                         ),
                       ),
@@ -633,20 +638,20 @@ class _MedicalRecordCard extends ConsumerWidget {
                   const SizedBox(height: 2),
                   Text(
                     _dateLine(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.ink500,
+                      color: pt.ink500,
                     ),
                   ),
                   if (record.notes != null && record.notes!.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
                       record.notes!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'monospace',
                         fontSize: 12,
-                        color: AppColors.ink700,
+                        color: pt.ink700,
                       ),
                     ),
                   ],
@@ -1177,6 +1182,7 @@ class _DateRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final text = value == null
         ? 'Tap to set'
         : '${value!.year}-${value!.month.toString().padLeft(2, '0')}-${value!.day.toString().padLeft(2, '0')}';

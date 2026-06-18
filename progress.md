@@ -1,5 +1,152 @@
 # Petfolio — Progress Log
 
+---
+
+## 2026-06-18 — AppBar/Header Unification + Performance Optimisation ✅ (in progress)
+
+### Branch: `accessibility-fix`
+
+---
+
+### KEY ARCHITECTURAL PATTERN: Shell Header System
+
+Every screen in the app uses a shared shell header (`AppShellHeader`) rendered via `Positioned(top: 0)` inside the shell. **Every screen body must reserve space at the top equal to:**
+
+```dart
+final topInset = MediaQuery.paddingOf(context).top + 76.0;
+```
+
+- Non-sliver screens: `SizedBox(height: topInset)` as first child, then `const SizedBox(height: 16)` gap
+- Sliver screens: `SliverToBoxAdapter(child: SizedBox(height: topInset))` then `SliverToBoxAdapter(child: const SizedBox(height: 16))`
+- Screens must NOT have their own `AppBar` — use the shell header only
+
+Shell header file: `lib/core/widgets/app_shell.dart`
+- Non-home screens: header is always fully opaque (`isHome ? scrollProgress : 1.0`)
+- Home screen: header fades in as user scrolls (`scrollProgress` from scroll controller)
+
+---
+
+### AppBar Overlap Fixes (this session)
+
+**`medical_vault_screen.dart`** — Removed orphaned `)` from `SafeArea` removal (parse error fix).
+
+**`walk_tracking_screen.dart`** — Removed own `AppBar`. Added `topInset` reservation. Updated `Positioned(top: 16)` → `Positioned(top: topInset + 16)` for `_StatsCard`.
+
+**`appointments_screen.dart`** — Removed `AppBar` with `TabBar` bottom. Restructured body as `Column([SizedBox(topInset), SizedBox(16), ColoredBox(TabBar), Expanded(TabBarView)])`.
+
+**`app_shell.dart`** — Fixed light theme: header was transparent (invisible) on light theme because `scrollProgress=0` for non-home screens. Fix: `isHome ? scrollProgress : 1.0`.
+
+---
+
+### WaveHeader Refactor (this session)
+
+**Removed curved wave** — `_WaveClipper` and `WavePainter` classes deleted from `wave_header.dart`. `WaveHeader` is now a flat `Container(color, height, width, child)`.
+
+Removed params: `waveColor`, `clipWave`.
+Kept: `color`, `child`, `size` (WaveHeaderSize enum), `height`.
+
+**Header height standardised** — All screens now use `MediaQuery.paddingOf(context).top + 76.0`. Previously some used `+100`.
+
+Files updated: `social_screen.dart`, `matching_screen.dart`, `product_detail_screen.dart` (removed `_WavePainter`).
+
+**`CareGamifiedHeader`** — Removed `Stack(clipBehavior: Clip.none)` + `Positioned(bottom: -28)` floating hero card pattern (was causing debug overflow indicator). Hero card is now inline inside the Column inside the Container. No more negative positioning.
+
+**`account_screen.dart` (Me screen)** — Removed `WaveHeader` + `_ProfileHeroCard` (was hidden under shell header at 80dp, shell is ~120dp). Replaced with `SliverToBoxAdapter(child: SizedBox(height: topPad + 76 + 16))`. Removed ~100 lines of dead code.
+
+---
+
+### `SizedBox(height: 16)` Gap Added After Header
+
+Added breathing room gap after the topInset reservation on ALL screens:
+
+- `activity_screen.dart`
+- `nutrition_screen.dart` (sliver)
+- `gamified_care_ui.dart`
+- `communities_screen.dart`
+- `match_hub_screen.dart`
+- `notifications_screen.dart`
+- `marketplace_screen.dart`
+- `pet_profile_screen.dart`
+- `social_screen.dart`
+- `social_profile_screen.dart` (loading + error + data paths)
+- `account_screen.dart` (combined into single SizedBox: topPad + 76 + 16)
+
+---
+
+### Performance Optimisation — All 5 Phases ✅
+
+#### Phase 1 — RepaintBoundary around animated widgets
+**`gamified_care_ui.dart`**:
+- `_StreakCoin` (coin spin + pulse ring at 60fps) wrapped in `RepaintBoundary`
+- `ConfettiWidget` wrapped in `RepaintBoundary`
+
+**`care_coverflow_carousel.dart`**:
+- `_SpringCheckButton` (ScaleTransition + AnimatedContainer) wrapped in `RepaintBoundary`
+- `_XpBurst` (float animation on task completion) wrapped in `RepaintBoundary`
+
+Social feed `PostCard` was already wrapped — no change needed.
+
+#### Phase 2 — Tab KeepAlive
+Created `lib/core/widgets/keep_alive_tab.dart` — shared `StatefulWidget` with `AutomaticKeepAliveClientMixin`. Exported from `widgets.dart`.
+
+Applied `KeepAliveTab(child: ...)` wrapper to `TabBarView` children in:
+- `appointments_screen.dart` (Upcoming / Past)
+- `vet_hub_screen.dart` (Upcoming / Past)
+- `notifications_screen.dart` (Updates / Promotions)
+- `match_hub_screen.dart` (Inbox / Liked)
+
+Effect: tab switches no longer tear down widget trees or re-fire Supabase providers.
+
+#### Phase 3 — Static decorations / move Tweens out of build()
+
+**`gamified_care_ui.dart` — `_StreakCoin` pulse ring**:
+- `Container` moved from `AnimatedBuilder.builder` callback → `AnimatedBuilder.child` parameter
+- Container is now `const SizedBox + const DecoratedBox` with `const Color(0xA0FFFFFF)` border
+- Eliminates `BoxDecoration + Border.all + Color` allocation on every frame at 60fps
+
+**`care_task_card.dart`**:
+- `yAnim` and `opacityAnim` (Tween + CurvedAnimation + TweenSequence) moved from `build()` → `initState()` as `late Animation<double> _yAnim, _opacityAnim`
+- Frequency pill `BoxDecoration` made `const` using `BorderRadius.all(Radius.circular(999))`
+
+#### Phase 4 — Replace Image.network with CachedNetworkImage
+Package was already in `pubspec.yaml`. 6 call sites updated:
+- `kyc_approvals_tab.dart` (logo)
+- `shop_storefront_screen.dart` (banner + logo)
+- `shop_profile_screen.dart` (banner picker + logo picker)
+- `seller_dashboard_screen.dart` (shop logo)
+
+#### Phase 5 — prefer_const_constructors dart fix
+Enabled `prefer_const_constructors: true` and `prefer_const_literals_to_create_immutables: true` in `analysis_options.yaml`. Ran `dart fix --apply lib/` → **116 fixes across 56 files**.
+
+Final `flutter analyze`: 1 pre-existing `anonKey` deprecation in `main.dart` (package limitation, not fixable). Everything else clean.
+
+---
+
+### PENDING: Carousel Compactness
+
+User requested "Today's Quests" section be more compact. Plan approved, not yet implemented.
+
+**File:** `lib/features/care/presentation/widgets/care_coverflow_carousel.dart`
+
+Exact changes to make:
+| Property | Current | New |
+|----------|---------|-----|
+| Outer `SizedBox` height | `242` | `196` |
+| Card `height` | `220` | `176` |
+| Card `width` | `198` | `180` |
+| Card vertical padding | `18` | `12` |
+| Icon circle `width/height` | `64` | `52` |
+| Emoji/icon size | `30` | `24` |
+| `SizedBox` after icon | `10` | `8` |
+| `SizedBox` after title | `4` | `3` |
+| `SizedBox` before bottom row | `12` | `8` |
+| `_SpringCheckButton` size | `38×38` | `32×32` |
+| Dots padding top | `10` | `6` |
+
+Math verified: inner available = 176 − 24 = 152px; content = 52+8+35+3+14+8+32 = 152px ✓
+
+---
+
 ## 2026-06-17 — Accessibility Pass: GestureDetector Semantics Wrap ✅
 
 - Audited all 68 files across `lib/features/` for bare `GestureDetector` tap targets

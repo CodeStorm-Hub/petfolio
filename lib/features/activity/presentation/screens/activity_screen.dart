@@ -66,9 +66,9 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                   children: [
                     IconButton(
                       tooltip: 'Back',
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back_rounded,
-                        color: AppColors.ink950,
+                        color: pt.ink950,
                       ),
                       onPressed: () => context.pop(),
                     ),
@@ -78,7 +78,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                       style: GoogleFonts.sora(
                         fontWeight: FontWeight.w700,
                         fontSize: 20,
-                        color: AppColors.ink950,
+                        color: pt.ink950,
                       ),
                     ),
                   ],
@@ -419,10 +419,10 @@ class _ActivityCard extends StatelessWidget {
         boxShadow: isDark
             ? null
             : [
-                BoxShadow(
+                const BoxShadow(
                   color: AppColors.shadowE3L,
                   blurRadius: 14,
-                  offset: const Offset(0, 3),
+                  offset: Offset(0, 3),
                   spreadRadius: -2,
                 ),
               ],
@@ -623,10 +623,10 @@ class _FilterChip extends StatelessWidget {
           boxShadow: active || isDark
               ? null
               : [
-                  BoxShadow(
+                  const BoxShadow(
                     color: AppColors.shadowE3L,
                     blurRadius: 8,
-                    offset: const Offset(0, 2),
+                    offset: Offset(0, 2),
                   ),
                 ],
         ),

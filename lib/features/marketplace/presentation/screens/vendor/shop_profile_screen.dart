@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -239,6 +240,7 @@ class _ShopProfileScreenState extends ConsumerState<ShopProfileScreen>
   }
 
   Widget _buildSetup(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Scaffold(
       backgroundColor: AppColors.surface1,
       body: SafeArea(
@@ -255,12 +257,12 @@ class _ShopProfileScreenState extends ConsumerState<ShopProfileScreen>
                     onTap: () => context.pop(),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
+                  Text(
                     'Create Shop',
                     style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 20,
-                        color: AppColors.ink950),
+                        color: pt.ink950),
                   ),
                 ],
               ),
@@ -456,6 +458,7 @@ class _LocationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: '$title${selected ? ", selected" : ""}',
       button: true,
@@ -500,7 +503,7 @@ class _LocationTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(subtitle,
-                      style: const TextStyle(fontSize: 12, color: AppColors.ink500)),
+                      style: TextStyle(fontSize: 12, color: pt.ink500)),
                 ],
               ),
             ),
@@ -525,10 +528,11 @@ class _Label extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Text(
       text,
-      style: const TextStyle(
-          fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.ink700),
+      style: TextStyle(
+          fontSize: 13, fontWeight: FontWeight.w600, color: pt.ink700),
     );
   }
 }
@@ -583,6 +587,7 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: label,
       button: true,
@@ -590,14 +595,14 @@ class _IconBtn extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 40, height: 40,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.surface0,
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: pt.ink700),
       ),
     ),
     );
@@ -629,11 +634,11 @@ class _BrandingTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _SectionLabel('Banner'),
+          const _SectionLabel('Banner'),
           const SizedBox(height: 8),
           _BannerPicker(bytes: bannerBytes, existingUrl: existingBannerUrl, onTap: onPickBanner),
           const SizedBox(height: 20),
-          _SectionLabel('Shop Logo'),
+          const _SectionLabel('Shop Logo'),
           const SizedBox(height: 8),
           _LogoPicker(bytes: logoBytes, existingUrl: existingLogoUrl, onTap: onPickLogo),
           const SizedBox(height: 24),
@@ -660,8 +665,12 @@ class _BannerPicker extends StatelessWidget {
     if (bytes != null) {
       child = Image.memory(bytes!, fit: BoxFit.cover, width: double.infinity);
     } else if (existingUrl != null) {
-      child = Image.network(existingUrl!, fit: BoxFit.cover, width: double.infinity,
-          errorBuilder: (c, _, _) => _placeholder(c));
+      child = CachedNetworkImage(
+        imageUrl: existingUrl!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorWidget: (c, _, _) => _placeholder(c),
+      );
     } else {
       child = _placeholder(context);
     }
@@ -681,7 +690,7 @@ class _BannerPicker extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             child,
-            Container(decoration: BoxDecoration(color: AppColors.ink950.withAlpha(60))),
+            Container(decoration: BoxDecoration(color: pt.ink950.withAlpha(60))),
             Center(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -725,8 +734,11 @@ class _LogoPicker extends StatelessWidget {
     if (bytes != null) {
       image = Image.memory(bytes!, fit: BoxFit.cover);
     } else if (existingUrl != null) {
-      image = Image.network(existingUrl!, fit: BoxFit.cover,
-          errorBuilder: (_, _, _) => const Icon(Icons.storefront_outlined, size: 28, color: AppColors.blue500));
+      image = CachedNetworkImage(
+        imageUrl: existingUrl!,
+        fit: BoxFit.cover,
+        errorWidget: (_, _, _) => const Icon(Icons.storefront_outlined, size: 28, color: AppColors.blue500),
+      );
     } else {
       image = const Icon(Icons.storefront_outlined, size: 28, color: AppColors.blue500);
     }
@@ -847,9 +859,10 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Text(
       text.toUpperCase(),
-      style: Theme.of(context).textTheme.labelSmall!.copyWith(color: AppColors.ink500, letterSpacing: 0.8),
+      style: Theme.of(context).textTheme.labelSmall!.copyWith(color: pt.ink500, letterSpacing: 0.8),
     );
   }
 }
@@ -867,6 +880,7 @@ class _FormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     return Column(
@@ -881,7 +895,7 @@ class _FormField extends StatelessWidget {
           style: tt.bodyMedium,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: tt.bodyMedium!.copyWith(color: AppColors.ink300),
+            hintStyle: tt.bodyMedium!.copyWith(color: pt.ink300),
             filled: true,
             fillColor: cs.surface,
             contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: maxLines > 1 ? 12 : 0),

@@ -105,7 +105,7 @@ class _GlyphPainter extends CustomPainter {
       ..moveTo(22, 14)
       ..lineTo(28, 14)
       ..lineTo(28, 17)
-      ..arcToPoint(const Offset(22, 17), radius: Radius.circular(3))
+      ..arcToPoint(const Offset(22, 17), radius: const Radius.circular(3))
       ..close();
     canvas.drawPath(path, _paint);
   }
@@ -113,12 +113,12 @@ class _GlyphPainter extends CustomPainter {
   void _drawBone(Canvas canvas) {
     final path = Path()
       ..moveTo(8, 14)
-      ..arcToPoint(const Offset(15, 17), radius: Radius.circular(4))
+      ..arcToPoint(const Offset(15, 17), radius: const Radius.circular(4))
       ..lineTo(31, 27)
-      ..arcToPoint(const Offset(32, 31), radius: Radius.circular(4))
-      ..arcToPoint(const Offset(29, 32), radius: Radius.circular(2))
+      ..arcToPoint(const Offset(32, 31), radius: const Radius.circular(4))
+      ..arcToPoint(const Offset(29, 32), radius: const Radius.circular(2))
       ..lineTo(13, 22)
-      ..arcToPoint(const Offset(8, 19), radius: Radius.circular(4))
+      ..arcToPoint(const Offset(8, 19), radius: const Radius.circular(4))
       ..close();
     canvas.drawPath(path, _paint);
   }

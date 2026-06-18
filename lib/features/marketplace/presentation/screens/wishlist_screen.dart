@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../data/models/product.dart';
 import '../controllers/wishlist_controller.dart';
@@ -13,6 +14,7 @@ class WishlistScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final async = ref.watch(wishlistItemsProvider);
 
     return Scaffold(
@@ -32,12 +34,12 @@ class WishlistScreen extends ConsumerWidget {
                       onTap: () => context.pop(),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Wishlist',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 20,
-                        color: AppColors.ink950,
+                        color: pt.ink950,
                       ),
                     ),
                   ],
@@ -150,25 +152,26 @@ class _EmptyWishlist extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(Icons.favorite_border_rounded,
-            size: 56, color: AppColors.ink300),
+        Icon(Icons.favorite_border_rounded,
+            size: 56, color: pt.ink300),
         const SizedBox(height: 16),
-        const Text(
+        Text(
           'Your wishlist is empty',
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 18,
-            color: AppColors.ink950,
+            color: pt.ink950,
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
+        Text(
           'Tap the heart on any product\nto save it here.',
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 14, color: AppColors.ink500),
+          style: TextStyle(fontSize: 14, color: pt.ink500),
         ),
         const SizedBox(height: 24),
         FilledButton(
@@ -197,6 +200,7 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: label,
       button: true,
@@ -205,14 +209,14 @@ class _IconBtn extends StatelessWidget {
       child: Container(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.surface0,
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: pt.ink700),
       ),
     ),
     );

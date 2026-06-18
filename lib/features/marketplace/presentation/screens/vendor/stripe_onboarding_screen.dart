@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/my_shop_controller.dart';
 
@@ -57,6 +58,7 @@ class _StripeOnboardingDialogState extends ConsumerState<StripeOnboardingDialog>
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       contentPadding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
@@ -66,20 +68,20 @@ class _StripeOnboardingDialogState extends ConsumerState<StripeOnboardingDialog>
           Container(
             width: 64, height: 64,
             decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.surface2),
-            child: const Icon(Icons.account_balance_outlined, size: 32, color: AppColors.ink500),
+            child: Icon(Icons.account_balance_outlined, size: 32, color: pt.ink500),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Stripe setup',
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20, color: AppColors.ink950),
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20, color: pt.ink950),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 10),
-          const Text(
+          Text(
             'Complete identity verification in your browser to start receiving payouts. '
             'Return here once done — we will automatically update your shop status.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: AppColors.ink500, height: 1.5),
+            style: TextStyle(fontSize: 14, color: pt.ink500, height: 1.5),
           ),
           const SizedBox(height: 28),
           PrimaryPillButton(

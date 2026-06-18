@@ -493,7 +493,7 @@ class _BookingSummary extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       state.service!.formattedPrice,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: AppColors.sky,

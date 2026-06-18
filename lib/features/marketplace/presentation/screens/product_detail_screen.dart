@@ -486,10 +486,10 @@ class _SellerRow extends StatelessWidget {
             boxShadow: isDark
                 ? null
                 : [
-                    BoxShadow(
+                    const BoxShadow(
                       color: AppColors.shadowE3L,
                       blurRadius: 16,
-                      offset: const Offset(0, 4),
+                      offset: Offset(0, 4),
                       spreadRadius: -2,
                     ),
                   ],

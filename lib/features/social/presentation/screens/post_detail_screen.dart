@@ -1304,8 +1304,8 @@ class PostOptionsSheet extends ConsumerWidget {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.delete_outline, color: AppColors.coral500),
-                title: Text('Delete Post',
+                leading: const Icon(Icons.delete_outline, color: AppColors.coral500),
+                title: const Text('Delete Post',
                     style: TextStyle(color: AppColors.coral500)),
                 onTap: () {
                   Navigator.pop(context);

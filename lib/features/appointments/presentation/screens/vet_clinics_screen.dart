@@ -116,10 +116,10 @@ class _ClinicCardState extends State<_ClinicCard> {
                         width: 52,
                         height: 52,
                         fit: BoxFit.cover,
-                        placeholder: (_, _) => _ClinicAvatarPlaceholder(size: 52),
-                        errorWidget: (_, _, _) => _ClinicAvatarPlaceholder(size: 52),
+                        placeholder: (_, _) => const _ClinicAvatarPlaceholder(size: 52),
+                        errorWidget: (_, _, _) => const _ClinicAvatarPlaceholder(size: 52),
                       )
-                    : _ClinicAvatarPlaceholder(size: 52),
+                    : const _ClinicAvatarPlaceholder(size: 52),
               ),
               const SizedBox(width: 14),
               Expanded(

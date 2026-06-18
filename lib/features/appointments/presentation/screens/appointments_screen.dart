@@ -54,8 +54,8 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
             const Expanded(
               child: TabBarView(
                 children: [
-                  _AppointmentsTabList(past: false),
-                  _AppointmentsTabList(past: true),
+                  KeepAliveTab(child: _AppointmentsTabList(past: false)),
+                  KeepAliveTab(child: _AppointmentsTabList(past: true)),
                 ],
               ),
             ),

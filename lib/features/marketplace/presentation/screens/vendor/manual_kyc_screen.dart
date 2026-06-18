@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/manual_kyc_controller.dart';
 
@@ -113,6 +114,7 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Row(
@@ -125,22 +127,22 @@ class _Header extends StatelessWidget {
               child: Container(
               width: 40,
               height: 40,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.surface0,
-                boxShadow: const [BoxShadow(color: AppColors.line, spreadRadius: 0.5)],
+                boxShadow: [BoxShadow(color: AppColors.line, spreadRadius: 0.5)],
               ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.ink700),
+              child: Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: pt.ink700),
               ),
             ),
           ),
           const SizedBox(width: 12),
           Text(
             _titles[step],
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 20,
-              color: AppColors.ink950,
+              color: pt.ink950,
             ),
           ),
         ],
@@ -239,12 +241,13 @@ class _Step2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Upload at least one of the following documents. Both are accepted.',
-          style: TextStyle(fontSize: 13, color: AppColors.ink500),
+          style: TextStyle(fontSize: 13, color: pt.ink500),
         ),
         const SizedBox(height: 20),
         _DocPicker(
@@ -288,6 +291,7 @@ class _DocPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: hasFile ? '$label image selected, tap to replace' : 'Upload $label',
       button: true,
@@ -327,15 +331,15 @@ class _DocPicker extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                   Text(
                     hasFile ? 'Image selected — tap to replace' : 'Tap to pick from gallery',
-                    style: const TextStyle(fontSize: 12, color: AppColors.ink500),
+                    style: TextStyle(fontSize: 12, color: pt.ink500),
                   ),
                 ],
               ),
@@ -405,12 +409,13 @@ class _Label extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: AppColors.ink700,
+        color: pt.ink700,
       ),
     );
   }

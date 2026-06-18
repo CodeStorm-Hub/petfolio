@@ -189,7 +189,7 @@ class NotificationService {
       scheduled = scheduled.add(const Duration(days: 1));
     }
 
-    final androidDetails = AndroidNotificationDetails(
+    final androidDetails = const AndroidNotificationDetails(
       _channelId,
       _channelName,
       importance: Importance.high,
@@ -223,7 +223,7 @@ class NotificationService {
     if (reminderTime.isBefore(DateTime.now())) return;
 
     final tzScheduled = tz.TZDateTime.from(reminderTime, tz.local);
-    final androidDetails = AndroidNotificationDetails(
+    final androidDetails = const AndroidNotificationDetails(
       _channelId,
       _channelName,
       importance: Importance.high,
@@ -256,7 +256,7 @@ class NotificationService {
     final reminderTime = DateTime(nextDue.year, nextDue.month, nextDue.day, 9, 0);
     if (reminderTime.isBefore(DateTime.now())) return;
     final tzScheduled = tz.TZDateTime.from(reminderTime, tz.local);
-    final androidDetails = AndroidNotificationDetails(
+    final androidDetails = const AndroidNotificationDetails(
       _channelId,
       _channelName,
       importance: Importance.high,

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -404,10 +405,10 @@ class _ShopAvatar extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: logoUrl != null
-          ? Image.network(
-              logoUrl!,
+          ? CachedNetworkImage(
+              imageUrl: logoUrl!,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stack) => _fallback,
+              errorWidget: (context, _, _) => _fallback,
             )
           : _fallback,
     );
@@ -434,13 +435,14 @@ class _BankDetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     if (value == null || value!.isEmpty) return const SizedBox.shrink();
     final tt = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(icon, size: 14, color: AppColors.ink500),
+          Icon(icon, size: 14, color: pt.ink500),
           const SizedBox(width: 8),
           SizedBox(
             width: 88,

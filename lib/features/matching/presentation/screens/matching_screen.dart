@@ -783,6 +783,7 @@ class _SwipeCardState extends State<_SwipeCard> {
     Size size,
     double layoutWidth,
   ) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final dxNorm = widget.state.dragOffset.dx / (layoutWidth * 0.75);
     final dyTilt = widget.state.dragOffset.dy / (size.height * 1.2);
     final angle = (dxNorm + dyTilt * 0.12).clamp(-0.44, 0.44);
@@ -828,7 +829,7 @@ class _SwipeCardState extends State<_SwipeCard> {
                   left: 20,
                   child: Opacity(
                     opacity: matchOpacity,
-                    child: _SwipeLabel(
+                    child: const _SwipeLabel(
                       label: 'MATCH',
                       color: AppColors.poppy,
                     ),
@@ -842,7 +843,7 @@ class _SwipeCardState extends State<_SwipeCard> {
                     opacity: passOpacity,
                     child: _SwipeLabel(
                       label: 'PASS',
-                      color: AppColors.ink500,
+                      color: pt.ink500,
                     ),
                   ),
                 ),
@@ -854,7 +855,7 @@ class _SwipeCardState extends State<_SwipeCard> {
                   child: Center(
                     child: Opacity(
                       opacity: greetOpacity,
-                      child: _SwipeLabel(
+                      child: const _SwipeLabel(
                         label: 'WAVE  👋',
                         color: AppColors.lilac,
                       ),
@@ -1196,6 +1197,7 @@ class _ActionDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final deck = bufferAsync.asData?.value.candidates ?? const <DiscoveryCandidate>[];
     final disabled = state.isExiting || deck.isEmpty;
 
@@ -1207,7 +1209,7 @@ class _ActionDock extends StatelessWidget {
         children: [
           _DockButton(
             size: 56,
-            color: AppColors.ink500,
+            color: pt.ink500,
             bgColor: Theme.of(context).colorScheme.surface,
             label: '✕',
             semanticLabel: 'Pass',

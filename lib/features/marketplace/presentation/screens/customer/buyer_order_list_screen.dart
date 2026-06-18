@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
 import '../../controllers/buyer_orders_controller.dart';
 import '../../../data/models/marketplace_order.dart';
 
@@ -12,6 +13,7 @@ class BuyerOrderListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final ordersAsync = ref.watch(buyerOrdersProvider);
 
     return Scaffold(
@@ -30,19 +32,19 @@ class BuyerOrderListScreen extends ConsumerWidget {
                     onTap: () => context.pop(),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
+                  Text(
                     'My Orders',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                   const Spacer(),
                   IconButton(
                     tooltip: 'Refresh',
-                    icon: const Icon(Icons.refresh_rounded,
-                        size: 22, color: AppColors.ink500),
+                    icon: Icon(Icons.refresh_rounded,
+                        size: 22, color: pt.ink500),
                     onPressed: () =>
                         ref.read(buyerOrdersProvider.notifier).refresh(),
                   ),
@@ -90,6 +92,7 @@ class _OrderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final actions = _actionsFor(order.status);
 
     return Semantics(
@@ -133,17 +136,17 @@ class _OrderTile extends StatelessWidget {
                           order.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
-                            color: AppColors.ink950,
+                            color: pt.ink950,
                           ),
                         ),
                         const SizedBox(height: 3),
                         Text(
                           '${_formatDate(order.createdAt)}  ·  ${order.amountFormatted}',
-                          style: const TextStyle(
-                              fontSize: 12, color: AppColors.ink500),
+                          style: TextStyle(
+                              fontSize: 12, color: pt.ink500),
                         ),
                       ],
                     ),
@@ -154,15 +157,15 @@ class _OrderTile extends StatelessWidget {
                     children: [
                       _StatusChip(status: order.status),
                       const SizedBox(height: 4),
-                      const Icon(Icons.chevron_right_rounded,
-                          size: 18, color: AppColors.ink300),
+                      Icon(Icons.chevron_right_rounded,
+                          size: 18, color: pt.ink300),
                     ],
                   ),
                 ],
               ),
             ),
             if (actions.isNotEmpty) ...[
-              Divider(height: 1, color: AppColors.line),
+              const Divider(height: 1, color: AppColors.line),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: Row(
@@ -319,27 +322,28 @@ class _EmptyOrders extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    return Center(
       child: Padding(
         padding: EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.receipt_long_outlined,
-                size: 48, color: AppColors.ink300),
+                size: 48, color: pt.ink300),
             SizedBox(height: 16),
             Text(
               'No orders yet',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
-                color: AppColors.ink950,
+                color: pt.ink950,
               ),
             ),
             SizedBox(height: 8),
             Text(
               'Your order history will appear here.',
-              style: TextStyle(fontSize: 14, color: AppColors.ink500),
+              style: TextStyle(fontSize: 14, color: pt.ink500),
             ),
           ],
         ),
@@ -357,6 +361,7 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: label,
       button: true,
@@ -365,14 +370,14 @@ class _IconBtn extends StatelessWidget {
       child: Container(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.surface0,
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: pt.ink700),
       ),
     ),
     );

@@ -124,10 +124,10 @@ class _QuickAddButton extends StatelessWidget {
       child: Container(
         width: 30,
         height: 30,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.white,
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
               color: AppColors.shadowE2L,
               blurRadius: 6,
@@ -211,7 +211,7 @@ class _ProductTile extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.star_rounded,
                       size: 12,
                       color: AppColors.sunny700,

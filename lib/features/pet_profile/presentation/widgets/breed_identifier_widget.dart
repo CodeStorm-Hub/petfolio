@@ -249,7 +249,7 @@ class _ResultCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.auto_awesome_rounded,
+              const Icon(Icons.auto_awesome_rounded,
                   color: AppColors.mint, size: 18),
               const SizedBox(width: 6),
               Text('Breed identified',

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -88,6 +89,7 @@ class _NoShopView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -101,23 +103,23 @@ class _NoShopView extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: AppColors.surface2,
               ),
-              child: const Icon(Icons.storefront_outlined,
-                  size: 36, color: AppColors.ink300),
+              child: Icon(Icons.storefront_outlined,
+                  size: 36, color: pt.ink300),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Open your shop',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 22,
-                color: AppColors.ink950,
+                color: pt.ink950,
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
+            Text(
               'Create a storefront to sell pet products\nto the PetFolio community.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: AppColors.ink500),
+              style: TextStyle(fontSize: 14, color: pt.ink500),
             ),
             const SizedBox(height: 28),
             PrimaryPillButton(
@@ -155,6 +157,7 @@ class _ShopDeactivatedViewState extends State<_ShopDeactivatedView> {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -172,19 +175,19 @@ class _ShopDeactivatedViewState extends State<_ShopDeactivatedView> {
                   size: 36, color: AppColors.danger),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Shop Closed',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 22,
-                color: AppColors.ink950,
+                color: pt.ink950,
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
+            Text(
               'Your deletion request was approved.\nThis shop and all its products have been deactivated.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: AppColors.ink500, height: 1.5),
+              style: TextStyle(fontSize: 14, color: pt.ink500, height: 1.5),
             ),
             const SizedBox(height: 28),
             PrimaryPillButton(
@@ -232,6 +235,7 @@ class _DashboardBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final productsAsync = ref.watch(vendorProductsProvider);
     final ordersAsync = ref.watch(vendorOrdersProvider);
 
@@ -254,19 +258,19 @@ class _DashboardBody extends ConsumerWidget {
                   onTap: () => context.pop(),
                 ),
                 const SizedBox(width: 12),
-                const Text(
+                Text(
                   'Seller Dashboard',
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 20,
-                    color: AppColors.ink950,
+                    color: pt.ink950,
                   ),
                 ),
                 const Spacer(),
                 IconButton(
                   tooltip: 'Edit shop',
-                  icon: const Icon(Icons.edit_outlined,
-                      size: 20, color: AppColors.ink500),
+                  icon: Icon(Icons.edit_outlined,
+                      size: 20, color: pt.ink500),
                   onPressed: () => context.push('/seller/edit-shop'),
                 ),
               ],
@@ -328,14 +332,14 @@ class _DashboardBody extends ConsumerWidget {
         // Quick actions
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-            child: const Text(
+            padding: EdgeInsets.fromLTRB(16, 20, 16, 8),
+            child: Text(
               'QUICK ACTIONS',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.88,
-                color: AppColors.ink500,
+                color: pt.ink500,
               ),
             ),
           ),
@@ -362,6 +366,7 @@ class _OnboardingBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
@@ -375,10 +380,10 @@ class _OnboardingBanner extends ConsumerWidget {
             const Icon(Icons.warning_amber_rounded,
                 color: AppColors.warning, size: 22),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Text(
                 'Complete your Stripe setup to start receiving payments.',
-                style: TextStyle(fontSize: 13, color: AppColors.ink700),
+                style: TextStyle(fontSize: 13, color: pt.ink700),
               ),
             ),
             const SizedBox(width: 8),
@@ -420,6 +425,7 @@ class _ShopCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
@@ -443,10 +449,14 @@ class _ShopCard extends StatelessWidget {
               child: shop.logoUrl != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.network(shop.logoUrl!, fit: BoxFit.cover),
+                      child: CachedNetworkImage(
+                        imageUrl: shop.logoUrl!,
+                        fit: BoxFit.cover,
+                        errorWidget: (_, _, _) => const SizedBox.shrink(),
+                      ),
                     )
-                  : const Icon(Icons.storefront_outlined,
-                      color: AppColors.ink300),
+                  : Icon(Icons.storefront_outlined,
+                      color: pt.ink300),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -455,10 +465,10 @@ class _ShopCard extends StatelessWidget {
                 children: [
                   Text(
                     shop.shopName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -466,8 +476,8 @@ class _ShopCard extends StatelessWidget {
                     shop.description ?? 'No description yet',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.ink500),
+                    style: TextStyle(
+                        fontSize: 12, color: pt.ink500),
                   ),
                 ],
               ),
@@ -576,6 +586,7 @@ class _StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: '$label: $value',
       button: true,
@@ -605,16 +616,16 @@ class _StatTile extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 24,
-                color: AppColors.ink950,
+                color: pt.ink950,
               ),
             ),
             const SizedBox(height: 2),
             Text(label,
                 style:
-                    const TextStyle(fontSize: 12, color: AppColors.ink500)),
+                    TextStyle(fontSize: 12, color: pt.ink500)),
           ],
         ),
       ),
@@ -680,6 +691,7 @@ class _ActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: label,
       button: true,
@@ -697,19 +709,19 @@ class _ActionRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: AppColors.ink500),
+            Icon(icon, size: 20, color: pt.ink500),
             const SizedBox(width: 14),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: AppColors.ink950,
+                color: pt.ink950,
               ),
             ),
             const Spacer(),
-            const Icon(Icons.chevron_right_rounded,
-                size: 20, color: AppColors.ink300),
+            Icon(Icons.chevron_right_rounded,
+                size: 20, color: pt.ink300),
           ],
         ),
       ),
@@ -723,6 +735,7 @@ class _KycPendingBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
@@ -731,14 +744,14 @@ class _KycPendingBanner extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           color: AppColors.warningSoft,
         ),
-        child: const Row(
+        child: Row(
           children: [
             Icon(Icons.hourglass_top_rounded, color: AppColors.warning, size: 22),
             SizedBox(width: 12),
             Expanded(
               child: Text(
                 'Documents under review. We\'ll notify you once verified.',
-                style: TextStyle(fontSize: 13, color: AppColors.ink700),
+                style: TextStyle(fontSize: 13, color: pt.ink700),
               ),
             ),
           ],
@@ -755,6 +768,7 @@ class _KycRejectedBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
@@ -784,7 +798,7 @@ class _KycRejectedBanner extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       reason!,
-                      style: const TextStyle(fontSize: 13, color: AppColors.ink700),
+                      style: TextStyle(fontSize: 13, color: pt.ink700),
                     ),
                   ],
                   const SizedBox(height: 8),
@@ -864,6 +878,7 @@ class _DeleteTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: 'Request shop deletion',
       button: true,
@@ -883,10 +898,10 @@ class _DeleteTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.delete_forever_rounded,
+            Icon(Icons.delete_forever_rounded,
                 size: 20, color: AppColors.danger),
-            const SizedBox(width: 14),
-            const Expanded(
+            SizedBox(width: 14),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -901,13 +916,13 @@ class _DeleteTile extends StatelessWidget {
                   SizedBox(height: 2),
                   Text(
                     'Requires admin review',
-                    style: TextStyle(fontSize: 12, color: AppColors.ink500),
+                    style: TextStyle(fontSize: 12, color: pt.ink500),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
-                size: 18, color: AppColors.ink300),
+            Icon(Icons.chevron_right_rounded,
+                size: 18, color: pt.ink300),
           ],
         ),
       ),
@@ -923,6 +938,7 @@ class _PendingBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final months = ['Jan','Feb','Mar','Apr','May','Jun',
                     'Jul','Aug','Sep','Oct','Nov','Dec'];
     final date =
@@ -956,8 +972,8 @@ class _PendingBanner extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Admin review in progress · Submitted $date',
-                  style: const TextStyle(
-                      fontSize: 12, color: AppColors.ink500),
+                  style: TextStyle(
+                      fontSize: 12, color: pt.ink500),
                 ),
               ],
             ),
@@ -976,6 +992,7 @@ class _RejectedBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1004,7 +1021,7 @@ class _RejectedBanner extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               rejectionNote!,
-              style: const TextStyle(fontSize: 13, color: AppColors.ink700),
+              style: TextStyle(fontSize: 13, color: pt.ink700),
             ),
           ],
           const SizedBox(height: 10),
@@ -1103,24 +1120,24 @@ class _DeleteShopRequestSheetState
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Request Shop Deletion',
             style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 18,
-              color: AppColors.ink950,
+              color: pt.ink950,
             ),
           ),
           const SizedBox(height: 16),
-          _ConsequenceItem(
+          const _ConsequenceItem(
               icon: Icons.visibility_off_outlined,
               text: 'Shop hidden from all buyers immediately on approval'),
           const SizedBox(height: 8),
-          _ConsequenceItem(
+          const _ConsequenceItem(
               icon: Icons.inventory_2_outlined,
               text: 'All products will be unlisted'),
           const SizedBox(height: 8),
-          _ConsequenceItem(
+          const _ConsequenceItem(
               icon: Icons.warning_amber_rounded,
               text: 'Cannot be undone without contacting support'),
           const SizedBox(height: 16),
@@ -1130,7 +1147,7 @@ class _DeleteShopRequestSheetState
               color: AppColors.warning.withAlpha(20),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Row(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(Icons.info_outline_rounded,
@@ -1140,7 +1157,7 @@ class _DeleteShopRequestSheetState
                   child: Text(
                     'PetFolio reviews requests within 2–3 business days. You\'ll be notified of the outcome.',
                     style:
-                        TextStyle(fontSize: 12, color: AppColors.ink700),
+                        TextStyle(fontSize: 12, color: pt.ink700),
                   ),
                 ),
               ],
@@ -1208,15 +1225,16 @@ class _ConsequenceItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: AppColors.ink500),
+        Icon(icon, size: 16, color: pt.ink500),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(fontSize: 13, color: AppColors.ink700),
+            style: TextStyle(fontSize: 13, color: pt.ink700),
           ),
         ),
       ],
@@ -1233,6 +1251,7 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: label,
       button: true,
@@ -1241,14 +1260,14 @@ class _IconBtn extends StatelessWidget {
       child: Container(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.surface0,
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: pt.ink700),
       ),
     ),
     );

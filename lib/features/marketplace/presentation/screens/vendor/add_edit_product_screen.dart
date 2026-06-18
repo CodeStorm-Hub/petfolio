@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/vendor_products_controller.dart';
 import '../../../data/models/product.dart';
@@ -106,6 +107,7 @@ class _AddEditProductScreenState
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     const categories = [
       'food',
       'gear',
@@ -133,10 +135,10 @@ class _AddEditProductScreenState
                   const SizedBox(width: 12),
                   Text(
                     _isEdit ? 'Edit Product' : 'Add Product',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                 ],
@@ -150,7 +152,7 @@ class _AddEditProductScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _Label('Product name'),
+                      const _Label('Product name'),
                       const SizedBox(height: 6),
                       _Field(
                         controller: _nameCtrl,
@@ -159,7 +161,7 @@ class _AddEditProductScreenState
                             v == null || v.trim().isEmpty ? 'Required' : null,
                       ),
                       const SizedBox(height: 16),
-                      _Label('Brand'),
+                      const _Label('Brand'),
                       const SizedBox(height: 6),
                       _Field(
                         controller: _brandCtrl,
@@ -168,7 +170,7 @@ class _AddEditProductScreenState
                             v == null || v.trim().isEmpty ? 'Required' : null,
                       ),
                       const SizedBox(height: 16),
-                      _Label('Variant'),
+                      const _Label('Variant'),
                       const SizedBox(height: 6),
                       _Field(
                         controller: _variantCtrl,
@@ -177,7 +179,7 @@ class _AddEditProductScreenState
                             v == null || v.trim().isEmpty ? 'Required' : null,
                       ),
                       const SizedBox(height: 16),
-                      _Label('Category'),
+                      const _Label('Category'),
                       const SizedBox(height: 6),
                       DropdownButtonFormField<String>(
                         key: ValueKey(_category),
@@ -202,7 +204,7 @@ class _AddEditProductScreenState
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _Label('Price (USD)'),
+                                const _Label('Price (USD)'),
                                 const SizedBox(height: 6),
                                 _Field(
                                   controller: _priceCtrl,
@@ -233,7 +235,7 @@ class _AddEditProductScreenState
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _Label('Stock qty'),
+                                const _Label('Stock qty'),
                                 const SizedBox(height: 6),
                                 _Field(
                                   controller: _inventoryCtrl,
@@ -264,7 +266,7 @@ class _AddEditProductScreenState
                             activeTrackColor: AppColors.blue500,
                           ),
                           const SizedBox(width: 10),
-                          const Column(
+                          Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
@@ -272,13 +274,13 @@ class _AddEditProductScreenState
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 14,
-                                  color: AppColors.ink950,
+                                  color: pt.ink950,
                                 ),
                               ),
                               Text(
                                 'Allow recurring subscription orders',
                                 style: TextStyle(
-                                    fontSize: 12, color: AppColors.ink500),
+                                    fontSize: 12, color: pt.ink500),
                               ),
                             ],
                           ),
@@ -335,12 +337,13 @@ class _Label extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: AppColors.ink700,
+        color: pt.ink700,
       ),
     );
   }
@@ -406,6 +409,7 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: label,
       button: true,
@@ -414,14 +418,14 @@ class _IconBtn extends StatelessWidget {
       child: Container(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.surface0,
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: pt.ink700),
       ),
     ),
     );

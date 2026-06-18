@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/vendor_products_controller.dart';
 import '../../../data/models/product.dart';
@@ -13,6 +14,7 @@ class VendorProductListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final productsAsync = ref.watch(vendorProductsProvider);
 
     return Scaffold(
@@ -31,12 +33,12 @@ class VendorProductListScreen extends ConsumerWidget {
                     onTap: () => context.pop(),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
+                  Text(
                     'My Products',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                   const Spacer(),
@@ -48,9 +50,9 @@ class VendorProductListScreen extends ConsumerWidget {
                       child: Container(
                         width: 40,
                         height: 40,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppColors.ink950,
+                          color: pt.ink950,
                         ),
                         child: const Icon(Icons.add_rounded,
                             size: 20, color: Colors.white),
@@ -138,6 +140,7 @@ class _ProductTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -166,23 +169,23 @@ class _ProductTile extends StatelessWidget {
         ),
         title: Text(
           product.name,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 14,
-            color: AppColors.ink950,
+            color: pt.ink950,
           ),
         ),
         subtitle: Text(
           '${product.priceFormatted}  ·  ${product.inventoryCount} in stock',
-          style: const TextStyle(fontSize: 12, color: AppColors.ink500),
+          style: TextStyle(fontSize: 12, color: pt.ink500),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
               tooltip: 'Edit product',
-              icon: const Icon(Icons.edit_outlined,
-                  size: 18, color: AppColors.ink500),
+              icon: Icon(Icons.edit_outlined,
+                  size: 18, color: pt.ink500),
               onPressed: onEdit,
             ),
             IconButton(
@@ -205,6 +208,7 @@ class _EmptyProducts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -218,22 +222,22 @@ class _EmptyProducts extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: AppColors.surface2,
               ),
-              child: const Icon(Icons.inventory_2_outlined,
-                  size: 36, color: AppColors.ink300),
+              child: Icon(Icons.inventory_2_outlined,
+                  size: 36, color: pt.ink300),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'No products yet',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
-                color: AppColors.ink950,
+                color: pt.ink950,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Add your first product to start selling.',
-              style: TextStyle(fontSize: 14, color: AppColors.ink500),
+              style: TextStyle(fontSize: 14, color: pt.ink500),
             ),
             const SizedBox(height: 24),
             PrimaryPillButton(
@@ -259,6 +263,7 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: label,
       button: true,
@@ -267,14 +272,14 @@ class _IconBtn extends StatelessWidget {
       child: Container(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.surface0,
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: pt.ink700),
       ),
     ),
     );

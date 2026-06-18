@@ -78,8 +78,8 @@ class _MatchHubScreenState extends ConsumerState<MatchHubScreen>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _InboxTab(pet: pet),
-                  _LikedTab(petId: pet.id),
+                  KeepAliveTab(child: _InboxTab(pet: pet)),
+                  KeepAliveTab(child: _LikedTab(petId: pet.id)),
                 ],
               ),
             ),
@@ -165,7 +165,7 @@ class _InboxTab extends ConsumerWidget {
       data: (snapshot) {
         final empty = snapshot.newMatches.isEmpty && snapshot.conversations.isEmpty;
         if (empty) {
-          return PetfolioEmptyState(
+          return const PetfolioEmptyState(
             icon: Icons.favorite_rounded,
             title: 'No matches yet',
             subtitle: 'When you and another pet like each other, they will show up here.',
@@ -287,7 +287,7 @@ class _LikedTab extends ConsumerWidget {
       ),
       data: (snapshot) {
         if (snapshot.isEmpty) {
-          return PetfolioEmptyState(
+          return const PetfolioEmptyState(
             icon: Icons.favorite_border_rounded,
             title: 'No likes yet',
             subtitle: "Swipe right on pets you like — they'll show up here.",
@@ -318,8 +318,8 @@ class _LikedContent extends ConsumerWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         if (hasMutual) ...[
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          const SliverPadding(
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
             sliver: SliverToBoxAdapter(
               child: _SectionHeader(
                 label: 'Mutual Matches',
@@ -360,8 +360,8 @@ class _LikedContent extends ConsumerWidget {
         if (hasMutual && hasPending)
           const SliverPadding(padding: EdgeInsets.only(top: 24)),
         if (hasPending) ...[
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          const SliverPadding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
             sliver: SliverToBoxAdapter(
               child: _SectionHeader(
                 label: 'You Liked',
