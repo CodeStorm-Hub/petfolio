@@ -125,7 +125,7 @@ class _MedicalVaultBody extends ConsumerWidget {
                           height: 1.05,
                           color: pt.ink950,
                         ),
-                        children: [
+                        children: const [
                           TextSpan(text: 'Everything '),
                           TextSpan(text: 'healthy', style: TextStyle(color: AppColors.mint700)),
                           TextSpan(text: ',\nin one cozy spot.'),

@@ -332,7 +332,7 @@ class _DashboardBody extends ConsumerWidget {
         // Quick actions
         SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(16, 20, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
             child: Text(
               'QUICK ACTIONS',
               style: TextStyle(
@@ -746,8 +746,8 @@ class _KycPendingBanner extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.hourglass_top_rounded, color: AppColors.warning, size: 22),
-            SizedBox(width: 12),
+            const Icon(Icons.hourglass_top_rounded, color: AppColors.warning, size: 22),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 'Documents under review. We\'ll notify you once verified.',
@@ -898,14 +898,14 @@ class _DeleteTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.delete_forever_rounded,
+            const Icon(Icons.delete_forever_rounded,
                 size: 20, color: AppColors.danger),
-            SizedBox(width: 14),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Request shop deletion',
                     style: TextStyle(
                       fontSize: 14,
@@ -913,7 +913,7 @@ class _DeleteTile extends StatelessWidget {
                       color: AppColors.danger,
                     ),
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
                     'Requires admin review',
                     style: TextStyle(fontSize: 12, color: pt.ink500),
@@ -1150,9 +1150,9 @@ class _DeleteShopRequestSheetState
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.info_outline_rounded,
+                const Icon(Icons.info_outline_rounded,
                     size: 16, color: AppColors.warning),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'PetFolio reviews requests within 2–3 business days. You\'ll be notified of the outcome.',

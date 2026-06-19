@@ -149,9 +149,9 @@ class _PrescriptionUploadScreenState
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.info_outline_rounded,
+                          const Icon(Icons.info_outline_rounded,
                               size: 18, color: AppColors.info),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               'Please upload a clear photo or scan of your veterinarian\'s prescription.',

@@ -482,9 +482,9 @@ class _VendorCheckoutSectionState
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.info_outline_rounded,
+                        const Icon(Icons.info_outline_rounded,
                             size: 16, color: AppColors.warning),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'This shop is not ready to accept payments yet.',
@@ -1250,9 +1250,9 @@ class _CodConfirmSheet extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.payments_outlined,
+                    const Icon(Icons.payments_outlined,
                         size: 16, color: AppColors.warning),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Pay when you receive your order.',

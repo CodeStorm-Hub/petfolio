@@ -1432,7 +1432,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
       constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.88),
       child: Column(
         children: [
-          Container(width: 48, height: 5, margin: EdgeInsets.only(top: 12), decoration: BoxDecoration(color: pt.line, borderRadius: BorderRadius.circular(3))),
+          Container(width: 48, height: 5, margin: const EdgeInsets.only(top: 12), decoration: BoxDecoration(color: pt.line, borderRadius: BorderRadius.circular(3))),
           Padding(
             padding: const EdgeInsets.fromLTRB(22, 12, 22, 14),
             child: Row(
@@ -1671,7 +1671,7 @@ class _CartItemRow extends ConsumerWidget {
                   button: true,
                   child: GestureDetector(
                     onTap: () => ref.read(cartProvider.notifier).decrement(item.product.id),
-                    child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: Text('−', style: TextStyle(fontWeight: FontWeight.w700))),
+                    child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: const Text('−', style: TextStyle(fontWeight: FontWeight.w700))),
                   ),
                 ),
                 Container(
@@ -1684,7 +1684,7 @@ class _CartItemRow extends ConsumerWidget {
                   button: true,
                   child: GestureDetector(
                     onTap: () => ref.read(cartProvider.notifier).add(item.product),
-                    child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: Text('+', style: TextStyle(fontWeight: FontWeight.w700))),
+                    child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: const Text('+', style: TextStyle(fontWeight: FontWeight.w700))),
                   ),
                 ),
               ],
