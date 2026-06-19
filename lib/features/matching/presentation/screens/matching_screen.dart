@@ -953,7 +953,7 @@ class _CardSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = candidate.gradientColors;
-    final softColor = colors.isNotEmpty ? colors.first.withAlpha(120) : AppColors.tangerine.withAlpha(120);
+    final softColor = colors.isNotEmpty ? colors.first : AppColors.tangerine;
     final mainColor = colors.isNotEmpty ? colors.last : AppColors.tangerine;
 
     final emoji = switch (candidate.species) {

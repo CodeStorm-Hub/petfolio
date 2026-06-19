@@ -294,24 +294,33 @@ class AppShellHeader extends ConsumerWidget {
                 orElse: () => 0,
               );
               if (streak == 0) return const SizedBox.shrink();
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              return DecoratedBox(
                 decoration: BoxDecoration(
-                  color: const Color(0x38FFFFFF),
                   borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: Colors.white.withAlpha(55), width: 0.5),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('🔥', style: TextStyle(fontSize: 13)),
-                    const SizedBox(width: 4),
-                    Text(
-                      '$streak',
-                      style: const TextStyle(
-                        fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      color: Colors.white.withAlpha(45),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('🔥', style: TextStyle(fontSize: 13)),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$streak',
+                            style: const TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               );
             }),
@@ -390,46 +399,64 @@ class AppShellHeader extends ConsumerWidget {
       case ShellModule.marketplace:
         return Consumer(builder: (context, ref, _) {
           final cart = ref.watch(cartProvider);
-          return GestureDetector(
+          return Semantics(
             key: const ValueKey<String>('market_action_cart'),
-            onTap: () => showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              useRootNavigator: true,
-              backgroundColor: Colors.transparent,
-              constraints: const BoxConstraints(maxWidth: 560),
-              builder: (_) => const CartDrawer(),
-            ),
-            child: Container(
-              width: 44, height: 44,
-              decoration: const BoxDecoration(
-                color: AppColors.tangerine,
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: AppColors.tangerine700, offset: Offset(0, 4))],
+            label: 'Cart${cart.itemCount > 0 ? ", ${cart.itemCount} items" : ""}',
+            button: true,
+            child: GestureDetector(
+              onTap: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                useRootNavigator: true,
+                backgroundColor: Colors.transparent,
+                constraints: const BoxConstraints(maxWidth: 560),
+                builder: (_) => const CartDrawer(),
               ),
-              alignment: Alignment.center,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 20),
-                  if (cart.itemCount > 0)
-                    Positioned(
-                      top: -6, right: -8,
-                      child: Container(
-                        width: 20, height: 20,
-                        decoration: BoxDecoration(
-                          color: AppColors.poppy,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.cream, width: 2),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          cart.itemCount.toString(),
-                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900),
+              child: SizedBox(
+                width: 44,
+                height: 44,
+                child: Center(
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      ClipOval(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withAlpha(45),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white.withAlpha(55), width: 0.5),
+                            ),
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 18),
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                      if (cart.itemCount > 0)
+                        Positioned(
+                          top: -4, right: -6,
+                          child: Container(
+                            constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 3),
+                            decoration: BoxDecoration(
+                              color: AppColors.tangerine,
+                              shape: cart.itemCount > 9 ? BoxShape.rectangle : BoxShape.circle,
+                              borderRadius: cart.itemCount > 9 ? BorderRadius.circular(8) : null,
+                              border: Border.all(color: Colors.white.withAlpha(80), width: 1.5),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              cart.itemCount > 99 ? '99+' : '${cart.itemCount}',
+                              style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900, height: 1.2),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
             ),
           );
@@ -470,15 +497,24 @@ class AppShellHeader extends ConsumerWidget {
           Semantics(
             button: true,
             label: 'Back to Home',
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: Material(
-                color: Colors.white.withAlpha(56),
-                child: InkWell(
-                  onTap: () => context.canPop() ? context.pop() : context.go('/home'),
-                  child: const Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 14),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: Colors.white.withAlpha(55), width: 0.5),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Material(
+                    color: Colors.white.withAlpha(45),
+                    child: InkWell(
+                      onTap: () => context.canPop() ? context.pop() : context.go('/home'),
+                      child: const Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 14),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -486,123 +522,23 @@ class AppShellHeader extends ConsumerWidget {
           ),
           const SizedBox(width: 8),
           Flexible(
-            child: Semantics(
-              button: true,
-              label: 'Switch active pet',
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: Material(
-                  color: Colors.white.withAlpha(56),
-                  child: InkWell(
-                    onTap: () => PetSwitcherSheet.show(context),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (activePet != null) ...[
-                            PetAvatar(
-                              imageUrl: activePet.avatarUrl,
-                              species: activePet.speciesEnum,
-                              size: PetAvatarSize.sm,
-                              showRing: true,
-                            ),
-                            const SizedBox(width: 8),
-                          ],
-                          Flexible(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  eyebrow,
-                                  style: const TextStyle(
-                                    fontSize: 9, fontWeight: FontWeight.w700,
-                                    color: Colors.white, letterSpacing: 0.6,
-                                  ),
-                                ),
-                                Row(children: [
-                                  Flexible(
-                                    child: Text(
-                                      activePet?.name ?? 'PetFolio',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
-                                ]),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            child: _PetSwitcherPill(
+              eyebrow: eyebrow,
+              petName: activePet?.name,
+              avatarUrl: activePet?.avatarUrl,
+              species: activePet?.speciesEnum,
+              onTap: () => PetSwitcherSheet.show(context),
             ),
           ),
         ],
       );
     } else {
-      leftWidget = Semantics(
-        button: true,
-        label: 'Switch active pet',
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(999),
-          child: Material(
-            color: Colors.white.withAlpha(56),
-            child: InkWell(
-              onTap: () => PetSwitcherSheet.show(context),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (activePet != null) ...[
-                      PetAvatar(
-                        imageUrl: activePet.avatarUrl,
-                        species: activePet.speciesEnum,
-                        size: PetAvatarSize.sm,
-                        showRing: true,
-                      ),
-                      const SizedBox(width: 10),
-                    ],
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          eyebrow,
-                          style: const TextStyle(
-                            fontSize: 9, fontWeight: FontWeight.w700,
-                            color: Colors.white, letterSpacing: 0.6,
-                          ),
-                        ),
-                        Row(children: [
-                          Text(
-                            activePet?.name ?? (subIndex == 4 ? 'Market' : 'PetFolio'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
-                        ]),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+      leftWidget = _PetSwitcherPill(
+        eyebrow: eyebrow,
+        petName: activePet?.name ?? (subIndex == 4 ? 'Market' : null),
+        avatarUrl: activePet?.avatarUrl,
+        species: activePet?.speciesEnum,
+        onTap: () => PetSwitcherSheet.show(context),
       );
     }
 
@@ -618,8 +554,15 @@ class AppShellHeader extends ConsumerWidget {
     );
 
     Widget header = Container(
-      color: bgColor,
       height: topPadding + 76.0,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [bgColor, bgColor.withAlpha(0)],
+          stops: const [0.65, 1.0],
+        ),
+      ),
       child: innerContent,
     );
 
@@ -656,17 +599,26 @@ class _HeaderIconBtn extends StatelessWidget {
       button: true,
       child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          width: 44, height: 44,
-          alignment: Alignment.center,
-          child: Container(
-            width: 36, height: 36,
-            decoration: const BoxDecoration(
-              color: Color(0x38FFFFFF),
-              shape: BoxShape.circle,
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: Center(
+            child: ClipOval(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: const Color(0x33FFFFFF),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white.withAlpha(55), width: 0.5),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(icon, color: Colors.white, size: 18),
+                ),
+              ),
             ),
-            alignment: Alignment.center,
-            child: Icon(icon, color: Colors.white, size: 18),
           ),
         ),
       ),
@@ -675,6 +627,107 @@ class _HeaderIconBtn extends StatelessWidget {
       return Tooltip(message: tooltip!, child: btn);
     }
     return btn;
+  }
+}
+
+// ── Pet switcher pill ─────────────────────────────────────────────────────────
+
+class _PetSwitcherPill extends StatelessWidget {
+  const _PetSwitcherPill({
+    required this.eyebrow,
+    required this.onTap,
+    this.petName,
+    this.avatarUrl,
+    this.species,
+  });
+
+  final String eyebrow;
+  final VoidCallback onTap;
+  final String? petName;
+  final String? avatarUrl;
+  final PetSpecies? species;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Switch active pet',
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: Colors.white.withAlpha(55), width: 0.5),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Material(
+              color: Colors.white.withAlpha(45),
+              child: InkWell(
+                onTap: onTap,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (avatarUrl != null || species != null) ...[
+                        PetAvatar(
+                          imageUrl: avatarUrl,
+                          species: species ?? PetSpecies.dog,
+                          size: PetAvatarSize.sm,
+                          showRing: true,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              eyebrow,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    petName ?? 'PetFolio',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.sora(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                const Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: Colors.white,
+                                  size: 14,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

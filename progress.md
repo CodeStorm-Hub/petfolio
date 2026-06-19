@@ -2,6 +2,135 @@
 
 ---
 
+## 2026-06-18 (Session 2) — Carousel Compactness, Responsiveness, Adaptive Colors, Header Polish ✅
+
+### Branch: `accessibility-fix`
+
+---
+
+### Carousel Compactness ✅
+
+**File:** `lib/features/care/presentation/widgets/care_coverflow_carousel.dart`
+
+Implemented the approved compactness plan — "Today's Quests" section now 46px shorter:
+
+| Property | Before | After |
+|----------|---------|-------|
+| Outer `SizedBox` height | 242 | 196 (then made responsive — see below) |
+| Card `width × height` | 198 × 220 | 180 × 176 (then responsive) |
+| Card vertical padding | 18 | 12 |
+| Icon circle size | 64 × 64 | 52 × 52 |
+| Emoji / check icon size | 30 | 24 |
+| Gap after icon | 10 | 8 |
+| Gap after title | 4 | 3 |
+| Gap before bottom row | 12 | 8 |
+| `_SpringCheckButton` size | 38 × 38 | 32 × 32 |
+| Dots padding top | 10 | 6 |
+
+---
+
+### Carousel Overflow Fix + Responsive Sizing + Text Scale Guard ✅
+
+**File:** `lib/features/care/presentation/widgets/care_coverflow_carousel.dart`
+
+Fixed "BOTTOM OVERFLOWED BY 3.0 PIXELS" after compactness changes. Root cause: card content needs ~181px minimum but height was set to 176. Solved by making sizing fully responsive:
+
+**Phase 1 — Overflow fix:**
+- Card height minimum raised to 182px (content ~181px + 1px buffer)
+
+**Phase 2 — Responsive carousel:**
+```dart
+final screenWidth = MediaQuery.sizeOf(context).width;
+final cardWidth = (screenWidth * 0.46).clamp(160.0, 200.0);
+final cardHeight = cardWidth.clamp(182.0, 205.0);
+final outerHeight = cardHeight + 18.0;
+final txStep = cardWidth * 0.43;   // coverflow fan spread per index
+final maxTx = screenWidth * 0.60;
+```
+- `cardWidth` and `cardHeight` passed to `_CoverFlowCard` as constructor params
+- Replaces all hardcoded pixel values; adapts to 360dp–414dp screens automatically
+
+**Phase 3 — Text scale guard:**
+`_CoverFlowCard.build()` wraps content in `MediaQuery` override:
+```dart
+return MediaQuery(
+  data: MediaQuery.of(context).copyWith(
+    textScaler: TextScaler.linear(
+      MediaQuery.textScalerOf(context).scale(1.0).clamp(0.85, 1.15),
+    ),
+  ),
+  child: Stack(...),
+);
+```
+Prevents accessibility font sizes (150–200%) from overflowing the card layout.
+
+---
+
+### Adaptive Ink Colors — Whole App ✅
+
+**Problem:** 174 hardcoded `AppColors.ink950 / ink700 / ink500 / ink300` (light-theme-only near-black colors) used as text/icon colors across 26 files. On dark theme these are invisible.
+
+**Fix:** Replaced every occurrence with `pt.inkXXX` via `PetfolioThemeExtension`:
+- `AppColors.ink950` → `pt.ink950` (64 occurrences)
+- `AppColors.ink700` → `pt.ink700` (31 occurrences)
+- `AppColors.ink500` → `pt.ink500` (63 occurrences)
+- `AppColors.ink300` → `pt.ink300` (16 occurrences)
+
+Per-file changes:
+- Added `import 'package:petfolio/core/theme/app_theme.dart'` to 13 files missing it
+- Injected `final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;` into every `build()` method that uses `pt`
+- Stripped `const` from ~115 widget constructors where `pt.inkXXX` made them non-constant
+- Dark-variant colors (`AppColors.ink950D` etc.) and semantic colors left untouched
+
+Files fixed (26 total):
+`seller_dashboard_screen.dart`, `cart_screen.dart`, `buyer_order_detail_screen.dart`, `medical_vault_screen.dart`, `vendor_order_detail_screen.dart`, `vendor_product_list_screen.dart`, `vendor_order_queue_screen.dart`, `buyer_order_list_screen.dart`, `shop_profile_screen.dart`, `shipment_tracking_screen.dart`, `manual_kyc_screen.dart`, `order_confirmation_screen.dart`, `cart_line_item.dart`, `wishlist_screen.dart`, `add_edit_product_screen.dart`, `prescription_upload_screen.dart`, `stripe_onboarding_screen.dart`, `notifications_screen.dart`, `matching_screen.dart`, `activity_screen.dart`, `offers_screen.dart`, `vendor_earnings_screen.dart`, `marketplace_screen.dart`, `kyc_approvals_tab.dart`, `admin_layout.dart`, `post_grid.dart`
+
+`flutter analyze`: 0 errors, 33 pre-existing info lints only.
+
+---
+
+### Header Polish ✅
+
+**Files:** `lib/core/widgets/app_shell.dart`, `lib/core/widgets/app_header.dart`
+
+#### `AppShellHeader` (app_shell.dart)
+
+All glass pills (back button, pet switcher, action buttons) now use true frosted glass:
+
+```dart
+DecoratedBox(
+  decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(999),
+    border: Border.all(color: Colors.white.withAlpha(55), width: 0.5),
+  ),
+  child: ClipRRect(
+    borderRadius: BorderRadius.circular(999),
+    child: BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+      child: Material(
+        color: Colors.white.withAlpha(45),  // was 56, less opaque now blur adds depth
+        child: InkWell(...),
+      ),
+    ),
+  ),
+)
+```
+
+Action buttons (`_HeaderIconBtn`) use `ClipOval > BackdropFilter` with same treatment.
+
+Text improvements:
+- Eyebrow label: **9px → 11px**, `letterSpacing: 0.6 → 0.8` — readable at a glance
+- Pet name: **14px → 15px** — slightly more visual weight
+
+#### `_CircleChip` (app_header.dart)
+
+- `filled ? AppColors.ink950 : cs.surface` → `filled ? pt.ink950 : cs.surface` — dark-theme safe
+- `const BoxShadow(color: AppColors.shadowE1L, ...)` → `...pt.shadowE1` — adaptive shadow
+
+`flutter analyze`: 0 errors on both files.
+
+---
+
 ## 2026-06-18 — AppBar/Header Unification + Performance Optimisation ✅ (in progress)
 
 ### Branch: `accessibility-fix`
@@ -278,7 +407,7 @@ Replacements (27 hardcoded Color literals eliminated):
 
 `flutter analyze` — 1 pre-existing `anonKey` info lint only. `flutter test` — 112 pass / 5 pre-existing failures unchanged.
 
-**Phase complete — please run `/remember` to save tokens before next phase.**
+**Phase complete — please run `/compact` to compress conversation context before the next phase.**
 
 ---
 

@@ -308,14 +308,10 @@ class _CircleChip extends StatelessWidget {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: filled ? AppColors.ink950 : cs.surface,
+          color: filled ? pt.ink950 : cs.surface,
           shape: BoxShape.circle,
           boxShadow: [
-            const BoxShadow(
-              color: AppColors.shadowE1L,
-              blurRadius: 2,
-              offset: Offset(0, 1),
-            ),
+            ...pt.shadowE1,
             BoxShadow(
               color: pt.line.withAlpha(128),
               blurRadius: 0,

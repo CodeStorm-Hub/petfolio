@@ -226,13 +226,13 @@ class _EmptyOrders extends StatelessWidget {
       final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Center(
       child: Padding(
-        padding: EdgeInsets.all(32),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.receipt_long_outlined,
                 size: 48, color: pt.ink300),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               'No active orders',
               style: TextStyle(
@@ -241,7 +241,7 @@ class _EmptyOrders extends StatelessWidget {
                 color: pt.ink950,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               'New orders from buyers will appear here.',
               style: TextStyle(fontSize: 14, color: pt.ink500),
