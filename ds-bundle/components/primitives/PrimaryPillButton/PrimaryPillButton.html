@@ -1,0 +1,59 @@
+<!-- @dsCard group="Primitives" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#FFF4E6;font-family:'Inter',sans-serif;padding:24px;display:flex;flex-direction:column;gap:20px}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#957762;margin-bottom:10px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:9999px;cursor:pointer;font-family:'Sora',sans-serif;font-weight:700;white-space:nowrap}
+  /* sizes */
+  .sm  {height:36px;padding:0 14px;font-size:13px}
+  .md  {height:44px;padding:0 18px;font-size:15px}
+  .lg  {height:52px;padding:0 22px;font-size:16px}
+  .xl  {height:60px;padding:0 26px;font-size:17px}
+  /* variants */
+  .primary{background:#FF8A4C;color:#fff;box-shadow:0 6px 0 0 #E0651E,0 14px 20px -6px rgba(255,138,76,.59)}
+  .secondary{background:#fff;color:#261308;border:1.5px solid #EFD8BB;box-shadow:0 4px 0 0 #EFD8BB}
+  .ghost{background:transparent;color:#E0651E;box-shadow:none}
+  .soft{background:#FFE0CB;color:#E0651E;box-shadow:none}
+  .destructive{background:#FF3D3D;color:#fff;box-shadow:0 6px 0 0 #C41818,0 14px 20px -6px rgba(255,61,61,.5)}
+  .mint{background:#2FCBA0;color:#fff;box-shadow:0 6px 0 0 #198C6E,0 14px 20px -6px rgba(47,203,160,.5)}
+</style>
+</head>
+<body>
+  <div>
+    <div class="label">Variants — lg size</div>
+    <div class="row">
+      <button class="btn lg primary">Adopt Biscuit</button>
+      <button class="btn lg secondary">View Profile</button>
+      <button class="btn lg ghost">Skip</button>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn lg soft">Save for Later</button>
+      <button class="btn lg destructive">Delete Post</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="label">Sizes — primary variant</div>
+    <div class="row" style="align-items:flex-end">
+      <button class="btn sm primary">Book</button>
+      <button class="btn md primary">Find Vets</button>
+      <button class="btn lg primary">Adopt Now</button>
+      <button class="btn xl primary">Get Started</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="label">Custom pillar color</div>
+    <div class="row">
+      <button class="btn md mint">🩺 Vet nearby</button>
+      <button class="btn md" style="background:#A98BFF;color:#fff;box-shadow:0 6px 0 0 #6E4DDB,0 14px 20px -6px rgba(169,139,255,.5)">💜 Match</button>
+    </div>
+  </div>
+</body>
+</html>

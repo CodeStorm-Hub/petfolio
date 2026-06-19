@@ -1,0 +1,54 @@
+<!-- @dsCard group="Primitives" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#FFF4E6;font-family:'Inter',sans-serif;padding:24px;display:flex;flex-direction:column;gap:16px;align-items:flex-start}
+  .card{background:#fff;border:1px solid #F4E2CB;border-radius:24px;padding:16px;box-shadow:0 1px 2px rgba(38,19,8,.04)}
+  .card--elevated{box-shadow:0 4px 12px -2px rgba(38,19,8,.10)}
+  .card--flat{box-shadow:none;border-color:#EFD8BB}
+  .card--soft{background:#FFE0CB;border-color:#FFE0CB}
+  .label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#957762;margin-bottom:8px}
+  .title{font-family:'Sora',sans-serif;font-size:15px;font-weight:600;color:#261308}
+  .body{font-size:13px;color:#5E3A28;margin-top:4px}
+  .row{display:flex;gap:12px;width:100%}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:#FFE0CB;color:#E0651E;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600}
+</style>
+</head>
+<body>
+  <!-- Default -->
+  <div style="width:280px">
+    <div class="label">Default</div>
+    <div class="card">
+      <div class="title">Biscuit the Golden Retriever</div>
+      <div class="body">3 years old · Sydney, AU</div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <div class="chip">🐾 Dog</div>
+        <div class="chip">🦺 Playful</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Elevated -->
+  <div style="width:280px">
+    <div class="label">Elevated</div>
+    <div class="card card--elevated">
+      <div class="title">Marketplace Listing</div>
+      <div class="body">Premium dog food — 5kg bag</div>
+    </div>
+  </div>
+
+  <!-- Flat / soft -->
+  <div style="width:280px">
+    <div class="label">Soft Fill</div>
+    <div class="card card--flat card--soft">
+      <div class="title" style="color:#E0651E">7-Day Care Streak 🔥</div>
+      <div class="body" style="color:#5E3A28">Keep it up! Biscuit is thriving.</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!-- @dsCard group="Feedback" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@700&family=Inter:wght@400;500;600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#FFF4E6;font-family:'Inter',sans-serif;padding:24px;display:flex;flex-direction:column;gap:24px;align-items:center}
+  .state{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:24px;background:#fff;border:1px solid #F4E2CB;border-radius:24px;width:280px}
+  .icon{font-size:48px;line-height:1;color:#D6C2B0}
+  .title{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:#261308}
+  .sub{font-size:14px;line-height:1.45;color:#5E3A28;max-width:220px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 22px;background:#FF8A4C;color:#fff;border:none;border-radius:9999px;font-family:'Sora',sans-serif;font-size:15px;font-weight:700;box-shadow:0 6px 0 0 #E0651E,0 14px 20px -6px rgba(255,138,76,.5);margin-top:6px;cursor:pointer}
+  .btn--sec{background:#fff;color:#261308;border:1.5px solid #EFD8BB;box-shadow:0 4px 0 0 #EFD8BB}
+</style>
+</head>
+<body>
+  <!-- No pets -->
+  <div class="state">
+    <div class="icon">🐾</div>
+    <div class="title">No pets yet</div>
+    <div class="sub">Add your first pet to get started with care tracking and more.</div>
+    <button class="btn">Add a Pet</button>
+  </div>
+
+  <!-- Empty feed -->
+  <div class="state">
+    <div class="icon">📸</div>
+    <div class="title">Nothing here yet</div>
+    <div class="sub">Follow other pet owners to see their posts.</div>
+  </div>
+
+  <!-- No matches -->
+  <div class="state">
+    <div class="icon">💜</div>
+    <div class="title">No matches nearby</div>
+    <div class="sub">Try expanding your search radius or updating your pet's profile.</div>
+    <button class="btn btn--sec">Adjust Filters</button>
+  </div>
+</body>
+</html>
