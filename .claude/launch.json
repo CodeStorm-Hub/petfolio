@@ -21,6 +21,12 @@
         "--dart-define=NVIDIA_API_KEY=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"
       ],
       "port": 8080
+    },
+    {
+      "name": "petfolio-dashboard",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "J:/GitHub/petfolio-dashboard", "run", "dev"],
+      "port": 3000
     }
   ]
 }

@@ -1,0 +1,45 @@
+<!-- @dsCard group="Primitives" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#FFF4E6;font-family:'Inter',sans-serif;padding:24px;display:flex;flex-direction:column;gap:20px}
+  .row{display:flex;align-items:center;gap:14px}
+  .lbl{font-size:14px;font-weight:500;color:#261308;flex:1}
+  .sub{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#957762;margin-bottom:10px}
+  .toggle{width:56px;height:32px;border-radius:999px;position:relative;flex-shrink:0;transition:background .26s}
+  .toggle--off{background:rgba(0,0,0,.12)}
+  .toggle--on-orange{background:#FF8A4C}
+  .toggle--on-mint  {background:#2FCBA0}
+  .toggle--on-lilac {background:#A98BFF}
+  .thumb{position:absolute;left:3px;top:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:14px;transition:transform .26s cubic-bezier(.34,1.56,.64,1)}
+  .toggle--on-orange .thumb,
+  .toggle--on-mint   .thumb,
+  .toggle--on-lilac  .thumb{transform:translateX(24px)}
+</style>
+</head>
+<body>
+  <div class="sub">States</div>
+  <div class="row">
+    <span class="lbl">Notifications</span>
+    <div class="toggle toggle--off"><div class="thumb">🐾</div></div>
+  </div>
+  <div class="row">
+    <span class="lbl">Daily reminders</span>
+    <div class="toggle toggle--on-orange"><div class="thumb">🐾</div></div>
+  </div>
+
+  <div class="sub" style="margin-top:4px">Pillar colors</div>
+  <div class="row">
+    <span class="lbl">Health tracking</span>
+    <div class="toggle toggle--on-mint"><div class="thumb">🐾</div></div>
+  </div>
+  <div class="row">
+    <span class="lbl">Match discovery</span>
+    <div class="toggle toggle--on-lilac"><div class="thumb">🐾</div></div>
+  </div>
+</body>
+</html>

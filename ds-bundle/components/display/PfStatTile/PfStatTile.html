@@ -1,0 +1,53 @@
+<!-- @dsCard group="Display" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700;900&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#FFF4E6;font-family:'Inter',sans-serif;padding:20px;display:flex;flex-direction:column;gap:16px}
+  .sub{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#957762;margin-bottom:8px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .tile{padding:14px 12px;border-radius:22px;display:flex;flex-direction:column;gap:0}
+  .tile__icon{font-size:20px;line-height:1}
+  .tile__value{font-size:22px;font-weight:900;color:#261308;line-height:1;margin-top:6px}
+  .tile__label{font-size:11px;font-weight:700;line-height:1.2;margin-top:2px}
+</style>
+</head>
+<body>
+  <div class="sub">Home quick-stats</div>
+  <div class="grid">
+    <div class="tile" style="background:#FFE0CB">
+      <div class="tile__icon">🐾</div>
+      <div class="tile__value">3</div>
+      <div class="tile__label" style="color:#E0651E">Pets</div>
+    </div>
+    <div class="tile" style="background:#FFEDB3">
+      <div class="tile__icon">🔥</div>
+      <div class="tile__value">7</div>
+      <div class="tile__label" style="color:#C68B0F">Day streak</div>
+    </div>
+    <div class="tile" style="background:#E2D6FF">
+      <div class="tile__icon">💜</div>
+      <div class="tile__value">12</div>
+      <div class="tile__label" style="color:#6E4DDB">Matches</div>
+    </div>
+    <div class="tile" style="background:#BFF1E0">
+      <div class="tile__icon">🩺</div>
+      <div class="tile__value">98%</div>
+      <div class="tile__label" style="color:#198C6E">Health score</div>
+    </div>
+    <div class="tile" style="background:#FFE0E0">
+      <div class="tile__icon">❤️</div>
+      <div class="tile__value">48</div>
+      <div class="tile__label" style="color:#C41818">Social posts</div>
+    </div>
+    <div class="tile" style="background:#CDEAFF">
+      <div class="tile__icon">🛒</div>
+      <div class="tile__value">$24</div>
+      <div class="tile__label" style="color:#2895DA">Saved</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!-- @dsCard group="Feedback" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#FFF4E6;padding:16px;width:340px;display:flex;flex-direction:column;gap:20px}
+  .sub{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#957762;margin-bottom:10px;font-family:'Inter',sans-serif}
+  .sk{background:#F2F3F7;border-radius:12px;position:relative;overflow:hidden;flex-shrink:0}
+  .sk::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.55) 50%,transparent 100%);transform:translateX(-100%);animation:shimmer 1.4s infinite}
+  @keyframes shimmer{to{transform:translateX(100%)}}
+  .circle{border-radius:50%}
+  .row{display:flex;gap:12px;align-items:center;padding:10px 0}
+  .col{display:flex;flex-direction:column;gap:6px;flex:1}
+  .card{background:#fff;border:1px solid #F4E2CB;border-radius:20px;padding:12px;display:flex;flex-direction:column;gap:10px}
+</style>
+</head>
+<body>
+  <div>
+    <div class="sub">List-tile skeleton</div>
+    <div class="row">
+      <div class="sk circle" style="width:44px;height:44px"></div>
+      <div class="col">
+        <div class="sk" style="width:100%;height:13px"></div>
+        <div class="sk" style="width:120px;height:11px"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="sk circle" style="width:44px;height:44px"></div>
+      <div class="col">
+        <div class="sk" style="width:100%;height:13px"></div>
+        <div class="sk" style="width:90px;height:11px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sub">Feed-card skeleton</div>
+    <div class="card">
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="sk circle" style="width:36px;height:36px"></div>
+        <div class="col" style="gap:4px">
+          <div class="sk" style="width:100px;height:12px"></div>
+          <div class="sk" style="width:64px;height:10px"></div>
+        </div>
+      </div>
+      <div class="sk" style="width:100%;height:180px;border-radius:12px"></div>
+      <div class="sk" style="width:100%;height:12px"></div>
+      <div class="sk" style="width:160px;height:12px"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sub">Primitives</div>
+    <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+      <div class="sk circle" style="width:32px;height:32px"></div>
+      <div class="sk circle" style="width:44px;height:44px"></div>
+      <div class="sk circle" style="width:56px;height:56px"></div>
+      <div class="sk" style="width:80px;height:13px"></div>
+      <div class="sk" style="width:120px;height:13px"></div>
+    </div>
+  </div>
+</body>
+</html>

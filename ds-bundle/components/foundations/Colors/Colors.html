@@ -1,0 +1,71 @@
+<!-- @dsCard group="Foundations" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#FFF4E6;font-family:'Inter',sans-serif;padding:20px;display:flex;flex-direction:column;gap:18px}
+  .sub{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#957762;margin-bottom:8px}
+  .row{display:flex;gap:6px;flex-wrap:wrap}
+  .swatch{display:flex;flex-direction:column;gap:4px;align-items:center}
+  .dot{width:36px;height:36px;border-radius:10px;border:1px solid rgba(0,0,0,.06)}
+  .name{font-size:9px;font-weight:600;color:#957762;text-align:center;max-width:42px}
+  .pill-row{display:flex;gap:6px;flex-wrap:wrap}
+  .pill{height:28px;border-radius:999px;padding:0 12px;display:flex;align-items:center;font-size:12px;font-weight:600;color:#fff;white-space:nowrap}
+</style>
+</head>
+<body>
+  <div>
+    <div class="sub">Pillar accents</div>
+    <div class="pill-row">
+      <div class="pill" style="background:#FF8A4C">Pets 🐾</div>
+      <div class="pill" style="background:#FFC53D;color:#261308">Care 🌟</div>
+      <div class="pill" style="background:#FF3D3D">Social ❤️</div>
+      <div class="pill" style="background:#A98BFF">Match 💜</div>
+      <div class="pill" style="background:#2FCBA0">Health 🩺</div>
+      <div class="pill" style="background:#6EC8FF;color:#261308">Market 🛒</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sub">Tangerine scale</div>
+    <div class="row">
+      <div class="swatch"><div class="dot" style="background:#FFE0CB"></div><div class="name">soft</div></div>
+      <div class="swatch"><div class="dot" style="background:#FF8A4C"></div><div class="name">500</div></div>
+      <div class="swatch"><div class="dot" style="background:#E0651E"></div><div class="name">700</div></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sub">Ink / text</div>
+    <div class="row">
+      <div class="swatch"><div class="dot" style="background:#261308"></div><div class="name">950</div></div>
+      <div class="swatch"><div class="dot" style="background:#5E3A28"></div><div class="name">700</div></div>
+      <div class="swatch"><div class="dot" style="background:#957762"></div><div class="name">500</div></div>
+      <div class="swatch"><div class="dot" style="background:#D6C2B0"></div><div class="name">300</div></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sub">Surfaces</div>
+    <div class="row">
+      <div class="swatch"><div class="dot" style="background:#FFFFFF;border:1px solid #F4E2CB"></div><div class="name">0</div></div>
+      <div class="swatch"><div class="dot" style="background:#FFF4E6"></div><div class="name">1</div></div>
+      <div class="swatch"><div class="dot" style="background:#FFFAF3"></div><div class="name">2</div></div>
+      <div class="swatch"><div class="dot" style="background:#F2F3F7"></div><div class="name">3</div></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sub">Semantic</div>
+    <div class="row">
+      <div class="swatch"><div class="dot" style="background:#2FCBA0"></div><div class="name">success</div></div>
+      <div class="swatch"><div class="dot" style="background:#FFC53D"></div><div class="name">warning</div></div>
+      <div class="swatch"><div class="dot" style="background:#FF3D3D"></div><div class="name">danger</div></div>
+      <div class="swatch"><div class="dot" style="background:#6EC8FF"></div><div class="name">info</div></div>
+    </div>
+  </div>
+</body>
+</html>

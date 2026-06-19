@@ -1,0 +1,80 @@
+<!-- @dsCard group="Feedback" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#FFF4E6;font-family:'Inter',sans-serif;padding:24px;display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap}
+  .loader{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .lbl{font-size:13px;font-weight:700;letter-spacing:.3px}
+  @keyframes wag{from{transform:rotate(-18deg)}to{transform:rotate(18deg)}}
+  .tail{animation:wag 500ms ease-in-out infinite alternate;transform-origin:30% 50%}
+  .sub{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#957762;margin-bottom:12px;width:100%}
+</style>
+</head>
+<body>
+  <div class="sub">Branded loaders</div>
+
+  <!-- Tangerine default -->
+  <div class="loader">
+    <svg width="64" height="64" viewBox="0 0 64 64" aria-label="Loading">
+      <ellipse cx="32" cy="36" rx="14" ry="9.5" fill="#FF8A4C"/>
+      <circle cx="43.5" cy="26.5" r="11" fill="#FF8A4C"/>
+      <path d="M36 20 Q33 10 37 8 Q40 10 39 20Z" fill="#FF8A4C" opacity=".85"/>
+      <path d="M51 20 Q54 10 50 8 Q47 10 48 20Z" fill="#FF8A4C" opacity=".85"/>
+      <circle cx="47.5" cy="25" r="1.8" fill="#1a1a1a"/>
+      <circle cx="48" cy="24.5" r=".6" fill="#fff"/>
+      <ellipse cx="52.5" cy="29" rx="2" ry="1.4" fill="#1a1a1a"/>
+      <rect x="20" y="43" width="5" height="10" rx="2.5" fill="#FF8A4C"/>
+      <rect x="27" y="43" width="5" height="10" rx="2.5" fill="#FF8A4C"/>
+      <rect x="34" y="43" width="5" height="10" rx="2.5" fill="#FF8A4C"/>
+      <rect x="41" y="43" width="5" height="10" rx="2.5" fill="#FF8A4C"/>
+      <g class="tail"><path d="M19 34 Q14 24 16 18 Q18 12 19.5 18 Q17 24 21 34Z" fill="#FF8A4C"/></g>
+      <ellipse cx="33" cy="39" rx="8" ry="4.5" fill="#FF8A4C" opacity=".25"/>
+    </svg>
+    <div class="lbl" style="color:#FF8A4C">Loading…</div>
+  </div>
+
+  <!-- Mint -->
+  <div class="loader">
+    <svg width="64" height="64" viewBox="0 0 64 64" aria-label="Loading">
+      <ellipse cx="32" cy="36" rx="14" ry="9.5" fill="#2FCBA0"/>
+      <circle cx="43.5" cy="26.5" r="11" fill="#2FCBA0"/>
+      <path d="M36 20 Q33 10 37 8 Q40 10 39 20Z" fill="#2FCBA0" opacity=".85"/>
+      <path d="M51 20 Q54 10 50 8 Q47 10 48 20Z" fill="#2FCBA0" opacity=".85"/>
+      <circle cx="47.5" cy="25" r="1.8" fill="#1a1a1a"/>
+      <circle cx="48" cy="24.5" r=".6" fill="#fff"/>
+      <ellipse cx="52.5" cy="29" rx="2" ry="1.4" fill="#1a1a1a"/>
+      <rect x="20" y="43" width="5" height="10" rx="2.5" fill="#2FCBA0"/>
+      <rect x="27" y="43" width="5" height="10" rx="2.5" fill="#2FCBA0"/>
+      <rect x="34" y="43" width="5" height="10" rx="2.5" fill="#2FCBA0"/>
+      <rect x="41" y="43" width="5" height="10" rx="2.5" fill="#2FCBA0"/>
+      <g class="tail"><path d="M19 34 Q14 24 16 18 Q18 12 19.5 18 Q17 24 21 34Z" fill="#2FCBA0"/></g>
+      <ellipse cx="33" cy="39" rx="8" ry="4.5" fill="#2FCBA0" opacity=".25"/>
+    </svg>
+    <div class="lbl" style="color:#2FCBA0">Checking health…</div>
+  </div>
+
+  <!-- Lilac -->
+  <div class="loader">
+    <svg width="64" height="64" viewBox="0 0 64 64" aria-label="Loading">
+      <ellipse cx="32" cy="36" rx="14" ry="9.5" fill="#A98BFF"/>
+      <circle cx="43.5" cy="26.5" r="11" fill="#A98BFF"/>
+      <path d="M36 20 Q33 10 37 8 Q40 10 39 20Z" fill="#A98BFF" opacity=".85"/>
+      <path d="M51 20 Q54 10 50 8 Q47 10 48 20Z" fill="#A98BFF" opacity=".85"/>
+      <circle cx="47.5" cy="25" r="1.8" fill="#1a1a1a"/>
+      <circle cx="48" cy="24.5" r=".6" fill="#fff"/>
+      <ellipse cx="52.5" cy="29" rx="2" ry="1.4" fill="#1a1a1a"/>
+      <rect x="20" y="43" width="5" height="10" rx="2.5" fill="#A98BFF"/>
+      <rect x="27" y="43" width="5" height="10" rx="2.5" fill="#A98BFF"/>
+      <rect x="34" y="43" width="5" height="10" rx="2.5" fill="#A98BFF"/>
+      <rect x="41" y="43" width="5" height="10" rx="2.5" fill="#A98BFF"/>
+      <g class="tail"><path d="M19 34 Q14 24 16 18 Q18 12 19.5 18 Q17 24 21 34Z" fill="#A98BFF"/></g>
+      <ellipse cx="33" cy="39" rx="8" ry="4.5" fill="#A98BFF" opacity=".25"/>
+    </svg>
+    <div class="lbl" style="color:#A98BFF">Finding matches…</div>
+  </div>
+</body>
+</html>

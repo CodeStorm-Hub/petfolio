@@ -1,0 +1,8 @@
+/* Petfolio Design System — entry point
+ * All rendered designs receive this file's transitive @import closure.
+ */
+@import './tokens/colors.css';
+@import './tokens/typography.css';
+@import './tokens/spacing.css';
+@import './tokens/shadows.css';
+@import './_ds_bundle.css';

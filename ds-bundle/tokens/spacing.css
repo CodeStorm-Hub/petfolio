@@ -1,0 +1,40 @@
+/* Petfolio Spacing & Radius Tokens */
+:root {
+  /* ── Content spacing ──────────────────────────────────────── */
+  --pf-space-xs:  4px;
+  --pf-space-sm:  8px;
+  --pf-space-md:  16px;
+  --pf-space-lg:  24px;
+  --pf-space-xl:  32px;
+  --pf-space-2xl: 48px;
+  --pf-space-3xl: 64px;
+  --pf-space-4xl: 96px;
+
+  /* ── Corner radius ────────────────────────────────────────── */
+  --pf-radius-xs:   6px;
+  --pf-radius-sm:   8px;
+  --pf-radius-md:   12px;
+  --pf-radius-lg:   16px;
+  --pf-radius-xl:   20px;
+  --pf-radius-2xl:  28px;
+  --pf-radius-3xl:  32px;
+  --pf-radius-pill: 9999px;
+
+  /* ── Squircle shapes (M3 Expressive superellipse) ─────────── */
+  --pf-squircle-card:       24px;
+  --pf-squircle-container:  28px;
+  --pf-squircle-dialog:     28px;
+
+  /* ── Button heights ───────────────────────────────────────── */
+  --pf-btn-height-sm:   36px;
+  --pf-btn-height-md:   44px;
+  --pf-btn-height-lg:   52px;
+  --pf-btn-height-xl:   60px;
+  --pf-btn-height-walk: 64px;
+
+  /* ── Touch target minimum ─────────────────────────────────── */
+  --pf-touch-target: 48px;
+
+  /* ── Nav bar ─────────────────────────────────────────────── */
+  --pf-nav-height: 72px;
+}

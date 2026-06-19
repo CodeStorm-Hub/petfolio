@@ -1,0 +1,65 @@
+<!-- @dsCard group="Display" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#FFF4E6;font-family:'Inter',sans-serif;padding:16px;width:340px}
+  .sub{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#957762;margin-bottom:4px;padding:0 4px}
+  .row{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid #F4E2CB}
+  .row:last-child{border-bottom:none}
+  .box{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+  .info{flex:1;min-width:0}
+  .label{font-size:15px;font-weight:800;color:#261308;line-height:1.2}
+  .label--done{text-decoration:line-through;opacity:.6}
+  .time{font-size:12px;font-weight:700;color:#957762;margin-top:2px}
+  .time--due{color:#C41818}
+  .xp{display:flex;align-items:center;gap:3px;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:900;flex-shrink:0}
+</style>
+</head>
+<body>
+  <div class="sub">Today's Quests</div>
+
+  <!-- Default -->
+  <div class="row">
+    <div class="box" style="background:#FFEAD2">💊</div>
+    <div class="info">
+      <div class="label">Morning medication</div>
+      <div class="time">8:00 AM</div>
+    </div>
+    <div class="xp" style="background:#FFEDB3;color:#C68B0F">+15 ⭐</div>
+  </div>
+
+  <!-- Done -->
+  <div class="row">
+    <div class="box" style="background:#BFF1E0">✅</div>
+    <div class="info">
+      <div class="label label--done">Walk Biscuit</div>
+      <div class="time">5:30 PM</div>
+    </div>
+    <div class="xp" style="background:#BFF1E0;color:#198C6E">+30 ⭐</div>
+  </div>
+
+  <!-- Overdue -->
+  <div class="row">
+    <div class="box" style="background:#FFE0E0">🛁</div>
+    <div class="info">
+      <div class="label">Bath time</div>
+      <div class="time time--due">Due 7:00 PM</div>
+    </div>
+    <div class="xp" style="background:#FFEDB3;color:#C68B0F">+20 ⭐</div>
+  </div>
+
+  <!-- Upcoming -->
+  <div class="row">
+    <div class="box" style="background:#FFEAD2">🦮</div>
+    <div class="info">
+      <div class="label">Evening walk</div>
+      <div class="time">In 2 hrs</div>
+    </div>
+    <div class="xp" style="background:#FFEDB3;color:#C68B0F">+25 ⭐</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!-- @dsCard group="Display" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@700&family=Inter:wght@400;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#FFF4E6;font-family:'Inter',sans-serif;padding:20px;display:flex;flex-direction:column;gap:20px}
+  .sub{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#957762;margin-bottom:10px}
+  .row{display:flex;align-items:flex-end;gap:12px}
+  .avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;overflow:hidden}
+  .sm {width:32px;height:32px;font-size:18px}
+  .md {width:40px;height:40px;font-size:22px}
+  .lg {width:48px;height:48px;font-size:27px}
+  .xl {width:56px;height:56px;font-size:31px}
+  .xxl{width:72px;height:72px;font-size:40px}
+  .dog   {background:radial-gradient(circle at 35% 35%,#FFE0CB,#FF8A4C)}
+  .cat   {background:radial-gradient(circle at 35% 35%,#E2D6FF,#A98BFF)}
+  .bird  {background:radial-gradient(circle at 35% 35%,#CDEAFF,#6EC8FF)}
+  .rabbit{background:radial-gradient(circle at 35% 35%,#BFF1E0,#2FCBA0)}
+  .other {background:radial-gradient(circle at 35% 35%,#FFEDB3,#FFC53D)}
+  .dot{position:absolute;bottom:0;right:0;border-radius:50%;border:1.5px solid #FFF4E6}
+  .online {background:#2FCBA0}
+  .offline{background:#D6C2B0}
+  .ring{padding:2px;background:conic-gradient(from 218deg,#FF8A4C,#FF3D3D,#FFC53D,#2FCBA0,#FF8A4C);border-radius:50%;display:inline-flex}
+  .ring__inner{background:#fff;border-radius:50%;padding:3px;display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+  <div>
+    <div class="sub">Species discs — sizes</div>
+    <div class="row">
+      <div class="avatar sm dog">🐶</div>
+      <div class="avatar md cat">🐱</div>
+      <div class="avatar lg bird">🐦</div>
+      <div class="avatar xl rabbit">🐰</div>
+      <div class="avatar xxl dog">🐶</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sub">Status dots</div>
+    <div class="row">
+      <div class="avatar lg cat" style="overflow:visible">🐱
+        <div class="dot online" style="width:12px;height:12px"></div>
+      </div>
+      <div class="avatar lg dog" style="overflow:visible">🐶
+        <div class="dot offline" style="width:12px;height:12px"></div>
+      </div>
+      <div class="avatar xl rabbit" style="overflow:visible">🐰
+        <div class="dot online" style="width:14px;height:14px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sub">Rainbow ring (story / highlight)</div>
+    <div class="row">
+      <div class="ring">
+        <div class="ring__inner"><div class="avatar lg dog">🐶</div></div>
+      </div>
+      <div class="ring">
+        <div class="ring__inner"><div class="avatar xl cat">🐱</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sub">Initials fallback</div>
+    <div class="row">
+      <div class="avatar md dog" style="font-size:14px;font-weight:800;color:#fff;font-family:'Inter',sans-serif">BK</div>
+      <div class="avatar lg cat" style="font-size:17px;font-weight:800;color:#fff;font-family:'Inter',sans-serif">LU</div>
+    </div>
+  </div>
+</body>
+</html>

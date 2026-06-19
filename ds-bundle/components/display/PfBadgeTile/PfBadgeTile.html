@@ -1,0 +1,56 @@
+<!-- @dsCard group="Display" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700;800&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#FFF4E6;font-family:'Inter',sans-serif;padding:20px}
+  .sub{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#957762;margin-bottom:12px}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:320px}
+  .tile{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .icon{width:100%;aspect-ratio:1;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:28px}
+  .lbl{font-size:10px;font-weight:800;color:#261308;line-height:1.2;text-align:center}
+  .owned{box-shadow:0 6px 14px -4px var(--c),0 -8px 0 0 rgba(0,0,0,.18),0 8px 0 -4px rgba(255,255,255,.39)}
+  .locked{background:#F4E2CB!important;filter:grayscale(1);opacity:.45}
+</style>
+</head>
+<body>
+  <div class="sub">Trophy Room</div>
+  <div class="grid">
+    <div class="tile">
+      <div class="icon owned" style="background:linear-gradient(135deg,#4CAF50,#81C784);--c:#4CAF50">🐾</div>
+      <div class="lbl">First Log</div>
+    </div>
+    <div class="tile">
+      <div class="icon owned" style="background:linear-gradient(135deg,#FF9800,#FFB74D);--c:#FF9800">🔥</div>
+      <div class="lbl">3-Day Streak</div>
+    </div>
+    <div class="tile">
+      <div class="icon owned" style="background:linear-gradient(135deg,#FFCC00,#FFE066);--c:#FFCC00">🏆</div>
+      <div class="lbl">7-Day Hero</div>
+    </div>
+    <div class="tile">
+      <div class="icon owned" style="background:linear-gradient(135deg,#E91E63,#F48FB1);--c:#E91E63">⭐</div>
+      <div class="lbl">Routine Master</div>
+    </div>
+    <div class="tile">
+      <div class="icon locked">👑</div>
+      <div class="lbl" style="opacity:.45">30-Day Legend</div>
+    </div>
+    <div class="tile">
+      <div class="icon locked">💎</div>
+      <div class="lbl" style="opacity:.45">Care Champion</div>
+    </div>
+    <div class="tile">
+      <div class="icon locked">🌟</div>
+      <div class="lbl" style="opacity:.45">Social Star</div>
+    </div>
+    <div class="tile">
+      <div class="icon locked">💜</div>
+      <div class="lbl" style="opacity:.45">Match Maker</div>
+    </div>
+  </div>
+</body>
+</html>
