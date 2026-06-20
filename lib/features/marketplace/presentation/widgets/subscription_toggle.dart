@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SubscriptionToggle — animated pill switch matching the design spec
@@ -106,6 +106,7 @@ class _FreqChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Semantics(
       label: '$weeks week delivery frequency${selected ? ", selected" : ""}',
       button: true,
@@ -116,12 +117,12 @@ class _FreqChip extends StatelessWidget {
         height: 44,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: selected ? AppColors.ink950 : Colors.white,
+          color: selected ? AppColors.ink950 : pt.surface1,
           boxShadow: selected
               ? null
               : [
-                  const BoxShadow(
-                    color: AppColors.line,
+                  BoxShadow(
+                    color: pt.line,
                     blurRadius: 0,
                     spreadRadius: 0.5,
                   ),
@@ -136,7 +137,7 @@ class _FreqChip extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
-                    color: selected ? Colors.white : AppColors.ink700,
+                    color: selected ? Colors.white : pt.ink700,
                   ),
                 ),
                 TextSpan(
@@ -144,7 +145,7 @@ class _FreqChip extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 10,
-                    color: selected ? Colors.white70 : AppColors.ink500,
+                    color: selected ? Colors.white70 : pt.ink500,
                   ),
                 ),
               ],
