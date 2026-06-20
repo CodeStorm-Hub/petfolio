@@ -14,6 +14,17 @@ description: |
 
 Create beautiful, responsive, and animated Flutter applications with modern design patterns and best practices.
 
+## Project Overrides — Petfolio (these take precedence over everything below)
+
+### Material 3 native widgets only
+- Use the native Material 3 widget for the job instead of a hand-rolled equivalent: `SearchAnchor` (not a custom `TextField` + dropdown), `NavigationBar`/`NavigationDrawer` (not a custom bottom bar), `FilledButton`/`FilledButton.tonal` (not a styled `ElevatedButton` standing in for one), `SegmentedButton`, `Badge`, `Card` with default M3 elevation, `Chip`/`FilterChip`/`InputChip`.
+- All color comes from `Theme.of(context).colorScheme.*` (e.g. `colorScheme.primary`, `colorScheme.surfaceContainerHigh`). Never hardcode a `Color(...)` or `Colors.*` value in a widget — route new tokens through `AppTheme`/`AppColors` (see `.claude/rules/flutter-rules.md`) if the scheme doesn't have one.
+
+### No helper-method widgets — extract a class instead
+- A private method that returns a `Widget` (`Widget _buildHeader() => ...`) is forbidden. Extract it into its own `StatelessWidget` (or `ConsumerWidget` if it needs Riverpod state) instead.
+- Why: helper methods rebuild on every parent rebuild with no `const`/`Element` boundary; a separate widget class gets its own `Element` and can be `const`, skip rebuilds, and be tested in isolation.
+- This applies even to small, one-off pieces of a screen — prefer `class _SectionTitle extends StatelessWidget` over `Widget _sectionTitle(String text)`.
+
 ## Core Philosophy
 
 **"Mobile-first, animation-enhanced, accessible design"** - Focus on:
@@ -129,23 +140,20 @@ AnimatedBuilder(
 
 ### Custom Widget Examples
 
-**Themed Button:**
+**Themed Button (native M3 `FilledButton`, theme-driven color):**
 ```dart
 class ThemedButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
 
-  const ThemedButton({required this.text, required this.onPressed});
+  const ThemedButton({required this.text, required this.onPressed, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
+    return FilledButton(
       onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      style: FilledButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: Text(text),
     );
@@ -153,34 +161,46 @@ class ThemedButton extends StatelessWidget {
 }
 ```
 
-**Responsive Card:**
+**Responsive Card (extracted widgets, not helper methods):**
 ```dart
 class ResponsiveCard extends StatelessWidget {
   final Widget child;
 
-  const ResponsiveCard({required this.child});
+  const ResponsiveCard({required this.child, super.key});
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth > 600) {
-          return _buildWideLayout(child);
-        } else {
-          return _buildNarrowLayout(child);
-        }
+        return constraints.maxWidth > 600
+            ? _WideCard(child: child)
+            : _NarrowCard(child: child);
       },
     );
   }
+}
 
-  Widget _buildWideLayout(Widget child) {
+class _WideCard extends StatelessWidget {
+  final Widget child;
+
+  const _WideCard({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.all(16),
       child: Padding(padding: const EdgeInsets.all(24), child: child),
     );
   }
+}
 
-  Widget _buildNarrowLayout(Widget child) {
+class _NarrowCard extends StatelessWidget {
+  final Widget child;
+
+  const _NarrowCard({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.all(8),
       child: Padding(padding: const EdgeInsets.all(16), child: child),

@@ -1,134 +1,75 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code in this repository.
 
-## Project Overview
+## Mission
 
-**Petfolio** is a Flutter mobile app combining a social network, pet discovery/matching platform, health tracker, and e-commerce marketplace. It uses **Supabase** for backend authentication and data, **Riverpod** for state management, **Go Router** for navigation, and **Stripe** for payments.
+**Petfolio** is a Flutter mobile app combining a social network, pet discovery/matching platform, health tracker, and e-commerce marketplace. Backend: **Supabase** (auth + data). State: **Riverpod**. Navigation: **GoRouter**. Payments: **Stripe**.
 
-## Petfolio Project Context
-- **Stack**: Flutter, Riverpod (Generator — `@riverpod` annotations, `build_runner` required), GoRouter, Supabase.
-- **Architecture**: Feature-first (e.g., `lib/features/<feature_name>/`).
-- **Styling**: Material 3, Adaptive Design. No hardcoded colors; use `AppTheme` and `AppColors`.
-- **State**: All state via Riverpod `@riverpod`/`@notifier` providers. Do NOT use `ChangeNotifier`, `ValueNotifier`, or `StreamBuilder` directly.
+## Where to look (progressive disclosure)
 
-## Key Files
-- Entry point: `lib/main.dart`
-- Router: `lib/core/router.dart`
-- Theme / colors: `lib/core/theme/` — `app_theme.dart`, `app_colors.dart`
-- Features: `lib/features/<feature>/` — each has `data/`, `domain/`, `presentation/`
-- Coding standards: `.claude/flutter-rules.md` (Dart style, layout, theming rules)
+Read only the file(s) relevant to the current task — do not load all of these at once.
+
+| Working on... | Read |
+|---|---|
+| Feature folder structure, state management (Riverpod) | `.claude/rules/flutter-architecture.md` |
+| Dart/Flutter style, lint, formatting, testing conventions | `.claude/rules/flutter-rules.md` |
+| Supabase access, RLS, repositories, migrations | `.claude/rules/supabase-backend.md` |
+| Building or styling a screen/widget, animations, Material 3 | `.claude/skills/flutter-ui-ux/SKILL.md` |
+| "How does X relate to Y", architecture/dependency questions | `graphify-out/` — see **graphify** below |
 
 ## Claude Code Rules
-- **Progressive Disclosure**: Only read the files explicitly required for the immediate task. Do not scan the entire `lib/` folder.
-- **Conciseness**: Keep explanations brief. Do not output raw markdown for unchanged code.
-- **Verification**: Always run `flutter analyze` and `flutter test` after making changes.
-- **No Mock Data**: Always bind UI directly to Supabase schemas or Riverpod controllers.
 
-## Development Setup
+- **Progressive disclosure**: only read files explicitly required for the immediate task. Do not scan the entire `lib/` folder to "understand the app." If working on Pet Care UI, read `lib/features/care/` and the shared widgets it depends on — nothing else.
+- **Respect ignores**: adhere to `.claudeignore`. Never read generated files (`*.g.dart`, `*.freezed.dart`), build/cache dirs, or native platform folders unless explicitly asked.
+- **Conciseness**: keep explanations brief; don't re-output unchanged code.
+- **No mock data**: bind UI directly to Supabase schemas or Riverpod controllers.
+- **Verification**: always run `flutter analyze` and `flutter test` after changes.
 
-### Prerequisites
-- Flutter 3.22.0+ SDK installed
-- Dart 3.4.0+
-- Android/iOS development tools (for emulator/device builds)
+## Key Files
 
-### Installation
+- Entry point: `lib/main.dart`
+- Router: `lib/core/router.dart`
+- Theme/colors: `lib/core/theme/app_theme.dart`, `app_colors.dart`
+- Features: `lib/features/<feature>/` — each has `data/`, `domain/`, `presentation/`
+
+## Setup & Environment
+
 ```bash
 flutter pub get
-```
-
-### Environment Variables
-The app uses `--dart-define` for environment configuration. Default values for Supabase are hardcoded in `main.dart` for dev convenience, but **must** be overridden via `--dart-define` for production builds.
-
-**Recommended: use a `.env` file (requires Dart 2.19+):**
-```bash
 flutter run --dart-define-from-file=.env
 ```
 
-**.env file format:**
-```
-SUPABASE_URL=https://jqyjvhwlcqcsuwcqgcwf.supabase.co
-SUPABASE_ANON_KEY=<anon-key>
-STRIPE_PUBLISHABLE_KEY=pk_test_...
-NVIDIA_API_KEY=<nvidia-api-key>   # AI care-routine suggestions (CareRecommendationService)
-```
-
-Individual overrides:
-```bash
-flutter run \
-  --dart-define=SUPABASE_URL=<url> \
-  --dart-define=SUPABASE_ANON_KEY=<key> \
-  --dart-define=STRIPE_PUBLISHABLE_KEY=pk_test_...
-```
+`.env` keys: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `STRIPE_PUBLISHABLE_KEY`, `NVIDIA_API_KEY` (AI care-routine suggestions). Dev defaults are hardcoded in `main.dart`; production builds must override via `--dart-define`.
 
 ## Common Commands
 
-### Run The App
 ```bash
-flutter run
+flutter pub get                                              # install deps
+dart run build_runner build --delete-conflicting-outputs    # after @freezed/@JsonSerializable/@riverpod changes
+flutter analyze                                              # static analysis
+flutter test                                                 # tests
+flutter run                                                  # run app
+flutter build apk --debug | --release                       # build
 ```
 
-### Code Generation
-Run after modifying any `@freezed`, `@JsonSerializable`, or `@riverpod` annotated class:
-```bash
-dart run build_runner build --delete-conflicting-outputs
-```
+## Documentation Policy
 
-Watch mode:
-```bash
-dart run build_runner watch
-```
+No inline comments, dartdocs (`///`), or standalone doc files in implementation work, unless explicitly requested. See "Project Overrides" at the top of `.claude/rules/flutter-rules.md`.
 
-### Static Analysis
-```bash
-flutter analyze
-```
+## Session State (`progress.md`)
 
-### Testing
-```bash
-flutter test
-```
+After completing a distinct feature phase, update `progress.md` at the repo root with a concise bulleted summary (what shipped, new data contracts/models, next step), then tell the user: "Phase complete — please run `/remember` to save tokens before proceeding."
 
-### Build
-```bash
-flutter build apk --debug    # debug
-flutter build apk --release  # release
-```
+## Sequential Execution
 
-## Project Rules & Token Optimization Strategy
-
-### 1. Strict No-Documentation Rule (Implementation Only)
-* **Code Only:** Do not write any inline comments, dartdocs (`///`), explanations of code, or standalone documentation files. Focus 100% of your output on functional task implementations.
-* **Explicit Override:** You may only write documentation if I explicitly command you with a prompt like "write a documentation file for this." Otherwise, output clean, uncommented code.
-
-### 2. State Management & Session Resets (The `progress.md` Pattern)
-* **Maintain State:** You must actively maintain a `progress.md` file at the root of the project.
-* **Log & Wipe:** After completing a distinct phase of a feature, update `progress.md` with a concise bulleted summary of what was implemented, any new data contracts/models created, and the immediate next step.
-* **Prompt to Clear:** After updating `progress.md`, you MUST explicitly advise the user: "Phase complete — please run (/remember) to save tokens before proceeding to the next phase."
-
-### 3. Aggressive Context Scoping
-* **Blind by Default:** Do not scan, grep, or read the entire codebase to "understand the app".
-* **Targeted Reads:** Only read files in directories explicitly related to the current task. If working on Pet Care UI, only read `lib/features/care/` and shared widgets in `lib/core/widgets/`.
-* **Respect Ignores:** Strictly adhere to the `.claudeignore` file. Never attempt to read UI design dumps, `.g.dart` generated files, or native Android/iOS folders unless explicitly commanded.
-
-### 4. Output Formatting & Boilerplate Reduction
-* **Targeted Diffs:** When updating an existing file, do not rewrite the entire file if you only changed one method. Output only the specific class, widget, or method that changed, along with instructions on where to place it.
-* **No Unnecessary Explanations:** Do not explain standard Flutter/Dart concepts or write essays about how the code works unless asked.
-
-### 5. Strict Sequential Execution
-When given a full feature to implement, execute strictly in this order, waiting for user confirmation or session clears between steps:
-1. Supabase SQL Schema & RLS (migration file)
-2. Dart Models (Freezed/JsonSerializable)
-3. Repositories (Supabase DB / RPC calls)
-4. State Management (Controllers)
-5. UI/UX Implementation
+When implementing a full feature, follow this order, pausing for confirmation between steps: (1) Supabase SQL schema & RLS, (2) Dart models, (3) repositories, (4) Riverpod controllers, (5) UI. Details in `.claude/rules/supabase-backend.md`.
 
 ## graphify
 
-This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+Knowledge graph at `graphify-out/` — god nodes, community structure, cross-file relationships.
 
-Rules:
-- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
-- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
-- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- For codebase questions, run `graphify query "<question>"` (or `graphify path "<A>" "<B>"`, `graphify explain "<concept>"`) before grepping — these return a scoped subgraph, usually much smaller than raw source browsing.
+- Read `graphify-out/GRAPH_REPORT.md` only for broad architecture review.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+- `/graphify` is wired up via `.claude/CLAUDE.md` → `.claude/skills/graphify/SKILL.md`.

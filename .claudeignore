@@ -18,6 +18,8 @@ build/
 .dart_tool/
 .pub-cache/
 .pub/
+node_modules/
+ios/Pods/
 
 # ==========================================
 # 3. CODE GENERATION
