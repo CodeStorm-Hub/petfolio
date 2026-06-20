@@ -20,6 +20,7 @@ _Promo _$PromoFromJson(Map<String, dynamic> json) => _Promo(
       ? null
       : DateTime.parse(json['valid_until'] as String),
   createdAt: DateTime.parse(json['created_at'] as String),
+  shopId: json['shop_id'] as String?,
 );
 
 Map<String, dynamic> _$PromoToJson(_Promo instance) => <String, dynamic>{
@@ -34,6 +35,7 @@ Map<String, dynamic> _$PromoToJson(_Promo instance) => <String, dynamic>{
   'is_active': instance.isActive,
   'valid_until': instance.validUntil?.toIso8601String(),
   'created_at': instance.createdAt.toIso8601String(),
+  'shop_id': instance.shopId,
 };
 
 const _$PromoDiscountTypeEnumMap = {

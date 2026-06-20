@@ -21,7 +21,7 @@ class PromoRepository {
     return (data as List).map((e) => Promo.fromJson(e)).toList();
   }
 
-  Future<Promo?> validateCode(String code) async {
+  Future<Promo?> validateCode(String code, {String? shopId}) async {
     final data = await _client
         .from('promos')
         .select()
@@ -30,6 +30,10 @@ class PromoRepository {
         .maybeSingle();
     if (data == null) return null;
     final promo = Promo.fromJson(data);
-    return promo.isExpired ? null : promo;
+    if (promo.isExpired) return null;
+    if (shopId != null && promo.shopId != null && promo.shopId != shopId) {
+      return null;
+    }
+    return promo;
   }
 }

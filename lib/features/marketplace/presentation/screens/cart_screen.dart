@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -348,28 +350,47 @@ class _VendorCheckoutSectionState
     }
     setState(() => _promoLoading = true);
     try {
-      final promo = await ref.read(promoRepositoryProvider).validateCode(code);
+      final promo = await ref
+          .read(promoRepositoryProvider)
+          .validateCode(code, shopId: widget.shopId);
       if (!mounted) return;
-      FocusScope.of(context).unfocus();
       if (promo == null) {
+        setState(() { _promoLoading = false; _promoExpanded = false; });
+        if (!context.mounted) return;
+        FocusScope.of(context).unfocus();
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(_snack('Promo code not valid or expired', error: true));
-        setState(() { _promoLoading = false; _promoExpanded = false; });
       } else if (subtotalCents < promo.minOrderCents) {
-        final min = '\$${(promo.minOrderCents / 100).toStringAsFixed(0)}';
-        ScaffoldMessenger.of(context).showSnackBar(_snack('Minimum order $min required for this code', error: true));
         setState(() { _promoLoading = false; _promoExpanded = false; });
+        if (!context.mounted) return;
+        FocusScope.of(context).unfocus();
+        final min = '\$${(promo.minOrderCents / 100).toStringAsFixed(0)}';
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(_snack('Minimum order $min required for this code', error: true));
       } else {
         HapticFeedback.mediumImpact();
-        ScaffoldMessenger.of(context).showSnackBar(_snack('${promo.discountLabel} applied!'));
         setState(() { _appliedPromo = promo; _promoApplied = true; _promoLoading = false; _promoExpanded = false; });
+        if (!context.mounted) return;
+        FocusScope.of(context).unfocus();
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(_snack('${promo.discountLabel} applied!'));
       }
-    } catch (e) {
+    } catch (e, st) {
+      developer.log(
+        'Failed to apply promo code',
+        name: 'marketplace.cart.promo',
+        level: 1000,
+        error: e,
+        stackTrace: st,
+      );
       if (!mounted) return;
+      setState(() { _promoLoading = false; _promoExpanded = false; });
+      if (!context.mounted) return;
       FocusScope.of(context).unfocus();
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         _snack('Could not apply promo. Please try again.', error: true),
       );
-      setState(() { _promoLoading = false; _promoExpanded = false; });
     }
   }
 
@@ -382,7 +403,7 @@ class _VendorCheckoutSectionState
         duration: const Duration(seconds: 2),
       );
 
-  void _handleCheckout(int subtotalCents) {
+  void _handleCheckout(int totalCents) {
     final promoCode = _appliedPromo?.code;
     if (_method == PaymentMethod.cod) {
       showModalBottomSheet(
@@ -393,7 +414,7 @@ class _VendorCheckoutSectionState
         builder: (_) => _CodConfirmSheet(
           shopName: widget.shopName,
           items: widget.items,
-          subtotalCents: subtotalCents,
+          totalCents: totalCents,
           onConfirm: () {
             Navigator.pop(context);
             ref.read(checkoutProvider.notifier).startCodCheckoutForShop(
@@ -594,6 +615,10 @@ class _VendorCheckoutSectionState
                     child: TextField(
                       controller: _promoCtrl,
                       textCapitalization: TextCapitalization.characters,
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: _promoLoading
+                          ? null
+                          : (_) => _applyPromo(subtotalCents),
                       decoration: InputDecoration(
                         hintText: 'Enter promo code',
                         hintStyle: TextStyle(
@@ -865,7 +890,7 @@ class _VendorCheckoutSectionState
             onPressed: widget.canCheckout && !isLoading
                 ? () {
                     HapticFeedback.mediumImpact();
-                    _handleCheckout(subtotalCents);
+                    _handleCheckout(totalCents);
                   }
                 : null,
             style: FilledButton.styleFrom(
@@ -1169,13 +1194,13 @@ class _CodConfirmSheet extends StatelessWidget {
   const _CodConfirmSheet({
     required this.shopName,
     required this.items,
-    required this.subtotalCents,
+    required this.totalCents,
     required this.onConfirm,
   });
 
   final String shopName;
   final List<CartItem> items;
-  final int subtotalCents;
+  final int totalCents;
   final VoidCallback onConfirm;
 
   @override
@@ -1257,7 +1282,7 @@ class _CodConfirmSheet extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    formatCents(subtotalCents),
+                    formatCents(totalCents),
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 17,

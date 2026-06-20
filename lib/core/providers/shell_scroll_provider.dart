@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class _ScrollProgressNotifier extends Notifier<double> {
+class ScrollProgressNotifier extends Notifier<double> {
   @override
   double build() => 0.0;
 
@@ -8,6 +8,6 @@ class _ScrollProgressNotifier extends Notifier<double> {
 }
 
 final homeScrollProgressProvider =
-    NotifierProvider<_ScrollProgressNotifier, double>(
-  _ScrollProgressNotifier.new,
+    NotifierProvider<ScrollProgressNotifier, double>(
+  ScrollProgressNotifier.new,
 );

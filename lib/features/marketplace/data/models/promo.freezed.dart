@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Promo {
 
- String get id; String get code; String get description;@JsonKey(name: 'discount_type') PromoDiscountType get discountType;@JsonKey(name: 'discount_value') int get discountValue;@JsonKey(name: 'min_order_cents') int get minOrderCents;@JsonKey(name: 'max_discount_cents') int? get maxDiscountCents; String get category;@JsonKey(name: 'is_active') bool get isActive;@JsonKey(name: 'valid_until') DateTime? get validUntil;@JsonKey(name: 'created_at') DateTime get createdAt;
+ String get id; String get code; String get description;@JsonKey(name: 'discount_type') PromoDiscountType get discountType;@JsonKey(name: 'discount_value') int get discountValue;@JsonKey(name: 'min_order_cents') int get minOrderCents;@JsonKey(name: 'max_discount_cents') int? get maxDiscountCents; String get category;@JsonKey(name: 'is_active') bool get isActive;@JsonKey(name: 'valid_until') DateTime? get validUntil;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'shop_id') String? get shopId;
 /// Create a copy of Promo
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $PromoCopyWith<Promo> get copyWith => _$PromoCopyWithImpl<Promo>(this as Promo, 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Promo&&(identical(other.id, id) || other.id == id)&&(identical(other.code, code) || other.code == code)&&(identical(other.description, description) || other.description == description)&&(identical(other.discountType, discountType) || other.discountType == discountType)&&(identical(other.discountValue, discountValue) || other.discountValue == discountValue)&&(identical(other.minOrderCents, minOrderCents) || other.minOrderCents == minOrderCents)&&(identical(other.maxDiscountCents, maxDiscountCents) || other.maxDiscountCents == maxDiscountCents)&&(identical(other.category, category) || other.category == category)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.validUntil, validUntil) || other.validUntil == validUntil)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Promo&&(identical(other.id, id) || other.id == id)&&(identical(other.code, code) || other.code == code)&&(identical(other.description, description) || other.description == description)&&(identical(other.discountType, discountType) || other.discountType == discountType)&&(identical(other.discountValue, discountValue) || other.discountValue == discountValue)&&(identical(other.minOrderCents, minOrderCents) || other.minOrderCents == minOrderCents)&&(identical(other.maxDiscountCents, maxDiscountCents) || other.maxDiscountCents == maxDiscountCents)&&(identical(other.category, category) || other.category == category)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.validUntil, validUntil) || other.validUntil == validUntil)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.shopId, shopId) || other.shopId == shopId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,code,description,discountType,discountValue,minOrderCents,maxDiscountCents,category,isActive,validUntil,createdAt);
+int get hashCode => Object.hash(runtimeType,id,code,description,discountType,discountValue,minOrderCents,maxDiscountCents,category,isActive,validUntil,createdAt,shopId);
 
 @override
 String toString() {
-  return 'Promo(id: $id, code: $code, description: $description, discountType: $discountType, discountValue: $discountValue, minOrderCents: $minOrderCents, maxDiscountCents: $maxDiscountCents, category: $category, isActive: $isActive, validUntil: $validUntil, createdAt: $createdAt)';
+  return 'Promo(id: $id, code: $code, description: $description, discountType: $discountType, discountValue: $discountValue, minOrderCents: $minOrderCents, maxDiscountCents: $maxDiscountCents, category: $category, isActive: $isActive, validUntil: $validUntil, createdAt: $createdAt, shopId: $shopId)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $PromoCopyWith<$Res>  {
   factory $PromoCopyWith(Promo value, $Res Function(Promo) _then) = _$PromoCopyWithImpl;
 @useResult
 $Res call({
- String id, String code, String description,@JsonKey(name: 'discount_type') PromoDiscountType discountType,@JsonKey(name: 'discount_value') int discountValue,@JsonKey(name: 'min_order_cents') int minOrderCents,@JsonKey(name: 'max_discount_cents') int? maxDiscountCents, String category,@JsonKey(name: 'is_active') bool isActive,@JsonKey(name: 'valid_until') DateTime? validUntil,@JsonKey(name: 'created_at') DateTime createdAt
+ String id, String code, String description,@JsonKey(name: 'discount_type') PromoDiscountType discountType,@JsonKey(name: 'discount_value') int discountValue,@JsonKey(name: 'min_order_cents') int minOrderCents,@JsonKey(name: 'max_discount_cents') int? maxDiscountCents, String category,@JsonKey(name: 'is_active') bool isActive,@JsonKey(name: 'valid_until') DateTime? validUntil,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'shop_id') String? shopId
 });
 
 
@@ -65,7 +65,7 @@ class _$PromoCopyWithImpl<$Res>
 
 /// Create a copy of Promo
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? code = null,Object? description = null,Object? discountType = null,Object? discountValue = null,Object? minOrderCents = null,Object? maxDiscountCents = freezed,Object? category = null,Object? isActive = null,Object? validUntil = freezed,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? code = null,Object? description = null,Object? discountType = null,Object? discountValue = null,Object? minOrderCents = null,Object? maxDiscountCents = freezed,Object? category = null,Object? isActive = null,Object? validUntil = freezed,Object? createdAt = null,Object? shopId = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
@@ -78,7 +78,8 @@ as int?,category: null == category ? _self.category : category // ignore: cast_n
 as String,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
 as bool,validUntil: freezed == validUntil ? _self.validUntil : validUntil // ignore: cast_nullable_to_non_nullable
 as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,shopId: freezed == shopId ? _self.shopId : shopId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -163,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String code,  String description, @JsonKey(name: 'discount_type')  PromoDiscountType discountType, @JsonKey(name: 'discount_value')  int discountValue, @JsonKey(name: 'min_order_cents')  int minOrderCents, @JsonKey(name: 'max_discount_cents')  int? maxDiscountCents,  String category, @JsonKey(name: 'is_active')  bool isActive, @JsonKey(name: 'valid_until')  DateTime? validUntil, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String code,  String description, @JsonKey(name: 'discount_type')  PromoDiscountType discountType, @JsonKey(name: 'discount_value')  int discountValue, @JsonKey(name: 'min_order_cents')  int minOrderCents, @JsonKey(name: 'max_discount_cents')  int? maxDiscountCents,  String category, @JsonKey(name: 'is_active')  bool isActive, @JsonKey(name: 'valid_until')  DateTime? validUntil, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'shop_id')  String? shopId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Promo() when $default != null:
-return $default(_that.id,_that.code,_that.description,_that.discountType,_that.discountValue,_that.minOrderCents,_that.maxDiscountCents,_that.category,_that.isActive,_that.validUntil,_that.createdAt);case _:
+return $default(_that.id,_that.code,_that.description,_that.discountType,_that.discountValue,_that.minOrderCents,_that.maxDiscountCents,_that.category,_that.isActive,_that.validUntil,_that.createdAt,_that.shopId);case _:
   return orElse();
 
 }
@@ -184,10 +185,10 @@ return $default(_that.id,_that.code,_that.description,_that.discountType,_that.d
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String code,  String description, @JsonKey(name: 'discount_type')  PromoDiscountType discountType, @JsonKey(name: 'discount_value')  int discountValue, @JsonKey(name: 'min_order_cents')  int minOrderCents, @JsonKey(name: 'max_discount_cents')  int? maxDiscountCents,  String category, @JsonKey(name: 'is_active')  bool isActive, @JsonKey(name: 'valid_until')  DateTime? validUntil, @JsonKey(name: 'created_at')  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String code,  String description, @JsonKey(name: 'discount_type')  PromoDiscountType discountType, @JsonKey(name: 'discount_value')  int discountValue, @JsonKey(name: 'min_order_cents')  int minOrderCents, @JsonKey(name: 'max_discount_cents')  int? maxDiscountCents,  String category, @JsonKey(name: 'is_active')  bool isActive, @JsonKey(name: 'valid_until')  DateTime? validUntil, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'shop_id')  String? shopId)  $default,) {final _that = this;
 switch (_that) {
 case _Promo():
-return $default(_that.id,_that.code,_that.description,_that.discountType,_that.discountValue,_that.minOrderCents,_that.maxDiscountCents,_that.category,_that.isActive,_that.validUntil,_that.createdAt);case _:
+return $default(_that.id,_that.code,_that.description,_that.discountType,_that.discountValue,_that.minOrderCents,_that.maxDiscountCents,_that.category,_that.isActive,_that.validUntil,_that.createdAt,_that.shopId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +205,10 @@ return $default(_that.id,_that.code,_that.description,_that.discountType,_that.d
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String code,  String description, @JsonKey(name: 'discount_type')  PromoDiscountType discountType, @JsonKey(name: 'discount_value')  int discountValue, @JsonKey(name: 'min_order_cents')  int minOrderCents, @JsonKey(name: 'max_discount_cents')  int? maxDiscountCents,  String category, @JsonKey(name: 'is_active')  bool isActive, @JsonKey(name: 'valid_until')  DateTime? validUntil, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String code,  String description, @JsonKey(name: 'discount_type')  PromoDiscountType discountType, @JsonKey(name: 'discount_value')  int discountValue, @JsonKey(name: 'min_order_cents')  int minOrderCents, @JsonKey(name: 'max_discount_cents')  int? maxDiscountCents,  String category, @JsonKey(name: 'is_active')  bool isActive, @JsonKey(name: 'valid_until')  DateTime? validUntil, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'shop_id')  String? shopId)?  $default,) {final _that = this;
 switch (_that) {
 case _Promo() when $default != null:
-return $default(_that.id,_that.code,_that.description,_that.discountType,_that.discountValue,_that.minOrderCents,_that.maxDiscountCents,_that.category,_that.isActive,_that.validUntil,_that.createdAt);case _:
+return $default(_that.id,_that.code,_that.description,_that.discountType,_that.discountValue,_that.minOrderCents,_that.maxDiscountCents,_that.category,_that.isActive,_that.validUntil,_that.createdAt,_that.shopId);case _:
   return null;
 
 }
@@ -219,7 +220,7 @@ return $default(_that.id,_that.code,_that.description,_that.discountType,_that.d
 @JsonSerializable()
 
 class _Promo extends Promo {
-  const _Promo({required this.id, required this.code, required this.description, @JsonKey(name: 'discount_type') required this.discountType, @JsonKey(name: 'discount_value') required this.discountValue, @JsonKey(name: 'min_order_cents') required this.minOrderCents, @JsonKey(name: 'max_discount_cents') this.maxDiscountCents, required this.category, @JsonKey(name: 'is_active') required this.isActive, @JsonKey(name: 'valid_until') this.validUntil, @JsonKey(name: 'created_at') required this.createdAt}): super._();
+  const _Promo({required this.id, required this.code, required this.description, @JsonKey(name: 'discount_type') required this.discountType, @JsonKey(name: 'discount_value') required this.discountValue, @JsonKey(name: 'min_order_cents') required this.minOrderCents, @JsonKey(name: 'max_discount_cents') this.maxDiscountCents, required this.category, @JsonKey(name: 'is_active') required this.isActive, @JsonKey(name: 'valid_until') this.validUntil, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'shop_id') this.shopId}): super._();
   factory _Promo.fromJson(Map<String, dynamic> json) => _$PromoFromJson(json);
 
 @override final  String id;
@@ -233,6 +234,7 @@ class _Promo extends Promo {
 @override@JsonKey(name: 'is_active') final  bool isActive;
 @override@JsonKey(name: 'valid_until') final  DateTime? validUntil;
 @override@JsonKey(name: 'created_at') final  DateTime createdAt;
+@override@JsonKey(name: 'shop_id') final  String? shopId;
 
 /// Create a copy of Promo
 /// with the given fields replaced by the non-null parameter values.
@@ -247,16 +249,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Promo&&(identical(other.id, id) || other.id == id)&&(identical(other.code, code) || other.code == code)&&(identical(other.description, description) || other.description == description)&&(identical(other.discountType, discountType) || other.discountType == discountType)&&(identical(other.discountValue, discountValue) || other.discountValue == discountValue)&&(identical(other.minOrderCents, minOrderCents) || other.minOrderCents == minOrderCents)&&(identical(other.maxDiscountCents, maxDiscountCents) || other.maxDiscountCents == maxDiscountCents)&&(identical(other.category, category) || other.category == category)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.validUntil, validUntil) || other.validUntil == validUntil)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Promo&&(identical(other.id, id) || other.id == id)&&(identical(other.code, code) || other.code == code)&&(identical(other.description, description) || other.description == description)&&(identical(other.discountType, discountType) || other.discountType == discountType)&&(identical(other.discountValue, discountValue) || other.discountValue == discountValue)&&(identical(other.minOrderCents, minOrderCents) || other.minOrderCents == minOrderCents)&&(identical(other.maxDiscountCents, maxDiscountCents) || other.maxDiscountCents == maxDiscountCents)&&(identical(other.category, category) || other.category == category)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.validUntil, validUntil) || other.validUntil == validUntil)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.shopId, shopId) || other.shopId == shopId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,code,description,discountType,discountValue,minOrderCents,maxDiscountCents,category,isActive,validUntil,createdAt);
+int get hashCode => Object.hash(runtimeType,id,code,description,discountType,discountValue,minOrderCents,maxDiscountCents,category,isActive,validUntil,createdAt,shopId);
 
 @override
 String toString() {
-  return 'Promo(id: $id, code: $code, description: $description, discountType: $discountType, discountValue: $discountValue, minOrderCents: $minOrderCents, maxDiscountCents: $maxDiscountCents, category: $category, isActive: $isActive, validUntil: $validUntil, createdAt: $createdAt)';
+  return 'Promo(id: $id, code: $code, description: $description, discountType: $discountType, discountValue: $discountValue, minOrderCents: $minOrderCents, maxDiscountCents: $maxDiscountCents, category: $category, isActive: $isActive, validUntil: $validUntil, createdAt: $createdAt, shopId: $shopId)';
 }
 
 
@@ -267,7 +269,7 @@ abstract mixin class _$PromoCopyWith<$Res> implements $PromoCopyWith<$Res> {
   factory _$PromoCopyWith(_Promo value, $Res Function(_Promo) _then) = __$PromoCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String code, String description,@JsonKey(name: 'discount_type') PromoDiscountType discountType,@JsonKey(name: 'discount_value') int discountValue,@JsonKey(name: 'min_order_cents') int minOrderCents,@JsonKey(name: 'max_discount_cents') int? maxDiscountCents, String category,@JsonKey(name: 'is_active') bool isActive,@JsonKey(name: 'valid_until') DateTime? validUntil,@JsonKey(name: 'created_at') DateTime createdAt
+ String id, String code, String description,@JsonKey(name: 'discount_type') PromoDiscountType discountType,@JsonKey(name: 'discount_value') int discountValue,@JsonKey(name: 'min_order_cents') int minOrderCents,@JsonKey(name: 'max_discount_cents') int? maxDiscountCents, String category,@JsonKey(name: 'is_active') bool isActive,@JsonKey(name: 'valid_until') DateTime? validUntil,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'shop_id') String? shopId
 });
 
 
@@ -284,7 +286,7 @@ class __$PromoCopyWithImpl<$Res>
 
 /// Create a copy of Promo
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? code = null,Object? description = null,Object? discountType = null,Object? discountValue = null,Object? minOrderCents = null,Object? maxDiscountCents = freezed,Object? category = null,Object? isActive = null,Object? validUntil = freezed,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? code = null,Object? description = null,Object? discountType = null,Object? discountValue = null,Object? minOrderCents = null,Object? maxDiscountCents = freezed,Object? category = null,Object? isActive = null,Object? validUntil = freezed,Object? createdAt = null,Object? shopId = freezed,}) {
   return _then(_Promo(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
@@ -297,7 +299,8 @@ as int?,category: null == category ? _self.category : category // ignore: cast_n
 as String,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
 as bool,validUntil: freezed == validUntil ? _self.validUntil : validUntil // ignore: cast_nullable_to_non_nullable
 as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,shopId: freezed == shopId ? _self.shopId : shopId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

@@ -36,8 +36,7 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
   late final AnimationController _fadeCtrl;
   late final Animation<double> _fadeAnim;
   late final ScrollController _scrollCtrl;
-  late final _scrollProgressNotifier =
-      ref.read(homeScrollProgressProvider.notifier);
+  late final ScrollProgressNotifier _scrollProgressNotifier;
   int _selectedDealChip = 0;
 
   static const _dealChips = ['All', 'Food', 'Grooming', 'Health', 'Toys'];
@@ -46,6 +45,7 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
   @override
   void initState() {
     super.initState();
+    _scrollProgressNotifier = ref.read(homeScrollProgressProvider.notifier);
     _fadeCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 480),

@@ -22,6 +22,7 @@ abstract class Promo with _$Promo {
     @JsonKey(name: 'is_active') required bool isActive,
     @JsonKey(name: 'valid_until') DateTime? validUntil,
     @JsonKey(name: 'created_at') required DateTime createdAt,
+    @JsonKey(name: 'shop_id') String? shopId,
   }) = _Promo;
 
   factory Promo.fromJson(Map<String, dynamic> json) => _$PromoFromJson(json);

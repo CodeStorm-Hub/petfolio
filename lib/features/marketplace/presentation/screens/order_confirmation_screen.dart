@@ -18,7 +18,7 @@ class OrderSuccessSheet extends ConsumerStatefulWidget {
     String orderId, {
     bool confirmStripePayment = false,
   }) {
-    return showModalBottomSheet<void>(
+    return showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -26,8 +26,18 @@ class OrderSuccessSheet extends ConsumerStatefulWidget {
       enableDrag: false,
       backgroundColor: AppColors.surface0,
       builder: (_) => OrderSuccessSheet(orderId: orderId, confirmStripePayment: confirmStripePayment),
-    ).then((_) {
-      if (context.mounted) context.go('/home/activity');
+    ).then((destination) {
+      if (!context.mounted) return;
+      switch (destination) {
+        case 'shop':
+          context.go('/marketplace');
+        case 'order':
+          context.go('/marketplace/orders/$orderId');
+        case 'home':
+          context.go('/home');
+        default:
+          context.go('/home/activity');
+      }
     });
   }
 
@@ -137,27 +147,18 @@ class _OrderSuccessSheetState extends ConsumerState<OrderSuccessSheet>
                     label: 'Continue shopping',
                     size: PillButtonSize.lg,
                     isFullWidth: true,
-                    onPressed: () {
-                      context.pop();
-                      context.go('/marketplace');
-                    },
+                    onPressed: () => context.pop('shop'),
                   ),
                   const SizedBox(height: 12),
                   PrimaryPillButton(
                     label: 'View Order',
                     size: PillButtonSize.lg,
                     isFullWidth: true,
-                    onPressed: () {
-                      context.pop();
-                      context.go('/marketplace/orders/${widget.orderId}');
-                    },
+                    onPressed: () => context.pop('order'),
                   ),
                   const SizedBox(height: 12),
                   TextButton(
-                    onPressed: () {
-                      context.pop();
-                      context.go('/home');
-                    },
+                    onPressed: () => context.pop('home'),
                     child: Text('Back to home', style: TextStyle(fontSize: 14, color: pt.ink500)),
                   ),
                 ],
