@@ -349,6 +349,7 @@ class _VendorCheckoutSectionState
     try {
       final promo = await ref.read(promoRepositoryProvider).validateCode(code);
       if (!mounted) return;
+      FocusScope.of(context).unfocus();
       if (promo == null) {
         ScaffoldMessenger.of(context).showSnackBar(_snack('Promo code not valid or expired', error: true));
         setState(() { _promoLoading = false; _promoExpanded = false; });
@@ -363,6 +364,7 @@ class _VendorCheckoutSectionState
       }
     } catch (e) {
       if (!mounted) return;
+      FocusScope.of(context).unfocus();
       ScaffoldMessenger.of(context).showSnackBar(
         _snack('Could not apply promo. Please try again.', error: true),
       );
@@ -590,7 +592,6 @@ class _VendorCheckoutSectionState
                   Expanded(
                     child: TextField(
                       controller: _promoCtrl,
-                      autofocus: true,
                       textCapitalization: TextCapitalization.characters,
                       decoration: InputDecoration(
                         hintText: 'Enter promo code',
