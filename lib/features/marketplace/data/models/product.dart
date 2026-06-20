@@ -1,5 +1,7 @@
 import 'package:flutter/painting.dart';
 
+import '../../domain/services/currency_formatter.dart';
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Product category
 // ─────────────────────────────────────────────────────────────────────────────
@@ -97,13 +99,13 @@ class Product {
   // ── Computed ───────────────────────────────────────────────────────────────
 
   /// Human-readable price, e.g. "$48.00".
-  String get priceFormatted => '\$${(priceCents / 100).toStringAsFixed(2)}';
+  String get priceFormatted => formatCents(priceCents);
 
   /// Subscribe-and-save price in cents. Uses vendor-set value when available,
   /// otherwise defaults to 12% off the regular price.
   int get subPriceCents => subPriceCentsDb ?? (priceCents * 0.88).round();
 
-  String get subPriceFormatted => '\$${(subPriceCents / 100).toStringAsFixed(2)}';
+  String get subPriceFormatted => formatCents(subPriceCents);
 
   int savingsCents(bool subscribed) => subscribed ? priceCents - subPriceCents : 0;
 

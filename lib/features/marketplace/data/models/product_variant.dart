@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../domain/services/currency_formatter.dart';
+
 part 'product_variant.freezed.dart';
 part 'product_variant.g.dart';
 
@@ -21,7 +23,7 @@ abstract class ProductVariant with _$ProductVariant {
 }
 
 extension ProductVariantX on ProductVariant {
-  String get priceFormatted => '\$${(priceCents / 100).toStringAsFixed(2)}';
+  String get priceFormatted => formatCents(priceCents);
 
   String get attributeLabel {
     if (attributes.isEmpty) return sku ?? 'Standard';

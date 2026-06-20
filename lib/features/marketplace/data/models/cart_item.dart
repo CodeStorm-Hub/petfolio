@@ -1,3 +1,4 @@
+import '../../domain/services/currency_formatter.dart';
 import 'product.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -35,6 +36,8 @@ class CartItem {
   }
 
   int get lineTotalCents => unitCents * quantity;
+
+  String get lineTotalFormatted => formatCents(lineTotalCents);
 
   int get savingsCentsTotal =>
       isSubscribed && product.subscribable
@@ -123,7 +126,7 @@ class CartState {
   /// Total savings from subscribe-and-save across all subscribed lines.
   int get savingsCents => items.fold(0, (s, e) => s + e.savingsCentsTotal);
 
-  String get totalFormatted => '\$${(totalCents / 100).toStringAsFixed(2)}';
+  String get totalFormatted => formatCents(totalCents);
 
   /// True if any line is a subscription.
   bool get hasSubscription => items.any((i) => i.isSubscribed && i.product.subscribable);

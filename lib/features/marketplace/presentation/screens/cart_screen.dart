@@ -9,6 +9,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/petfolio_empty_state.dart';
 import '../../data/models/cart_item.dart';
 import '../../data/models/promo.dart';
+import '../../domain/services/currency_formatter.dart';
 import '../../data/repositories/promo_repository.dart';
 import '../controllers/address_controller.dart';
 import '../widgets/address_sheet.dart';
@@ -769,34 +770,34 @@ class _VendorCheckoutSectionState
                 const SizedBox(height: 12),
                 _SumRow(
                   label: 'Total item price (${shopItems.fold<int>(0, (s, i) => s + i.quantity)} items)',
-                  value: '\$${((subtotalCents + shopSavingsCents) / 100).toStringAsFixed(2)}',
+                  value: formatCents(subtotalCents + shopSavingsCents),
                   labelColor: AppColors.ink500,
                 ),
                 if (shopSavingsCents > 0) ...[
                   const SizedBox(height: 6),
                   _SumRow(
                     label: 'Store Discount',
-                    value: '- \$${(shopSavingsCents / 100).toStringAsFixed(2)}',
+                    value: '- ${formatCents(shopSavingsCents)}',
                     valueColor: AppColors.poppy,
                   ),
                 ],
                 const SizedBox(height: 6),
                 _SumRow(
                   label: 'Subtotal',
-                  value: '\$${(subtotalCents / 100).toStringAsFixed(2)}',
+                  value: formatCents(subtotalCents),
                 ),
                 if (promoCents > 0) ...[
                   const SizedBox(height: 6),
                   _SumRow(
                     label: 'Promo (${_appliedPromo!.code})',
-                    value: '- \$${(promoCents / 100).toStringAsFixed(2)}',
+                    value: '- ${formatCents(promoCents)}',
                     valueColor: AppColors.mint700,
                   ),
                 ],
                 const SizedBox(height: 6),
                 _SumRow(
                   label: 'Delivery Charge',
-                  value: deliveryCents == 0 ? 'Free' : '\$${(deliveryCents / 100).toStringAsFixed(2)}',
+                  value: deliveryCents == 0 ? 'Free' : formatCents(deliveryCents),
                   valueColor: deliveryCents == 0 ? AppColors.mint700 : null,
                 ),
                 Padding(
@@ -810,7 +811,7 @@ class _VendorCheckoutSectionState
                 ),
                 _SumRow(
                   label: 'Total',
-                  value: '\$${(totalCents / 100).toStringAsFixed(2)}',
+                  value: formatCents(totalCents),
                   bold: true,
                   valueFontSize: 18,
                 ),
@@ -842,7 +843,7 @@ class _VendorCheckoutSectionState
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'You are saving \$${(shopSavingsCents / 100).toStringAsFixed(2)} on this order!',
+                    'You are saving ${formatCents(shopSavingsCents)} on this order!',
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -911,7 +912,7 @@ class _VendorCheckoutSectionState
                           PaymentMethod.bkash      => 'Pay with bKash',
                           PaymentMethod.nagad      => 'Pay with Nagad',
                           PaymentMethod.sslcommerz => 'Pay with Card (BD)',
-                          _                        => 'Pay · \$${(totalCents / 100).toStringAsFixed(2)}',
+                          _                        => 'Pay · ${formatCents(totalCents)}',
                         },
                       ),
                     ],
@@ -1233,7 +1234,7 @@ class _CodConfirmSheet extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '\$${((item.product.priceCents * item.quantity) / 100).toStringAsFixed(2)}',
+                        formatCents(item.product.priceCents * item.quantity),
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -1256,7 +1257,7 @@ class _CodConfirmSheet extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '\$${(subtotalCents / 100).toStringAsFixed(2)}',
+                    formatCents(subtotalCents),
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 17,

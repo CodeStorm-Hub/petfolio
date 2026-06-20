@@ -221,19 +221,9 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
         );
       }
     } on ShopNotVerifiedException catch (e) {
-      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
-      state = CheckoutState(
-        status:       CheckoutStatus.failure,
-        activeShopId: shopId,
-        errorMessage: e.toString(),
-      );
+      state = _failureFor(shopId, orderId, e);
     } catch (e) {
-      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
-      state = CheckoutState(
-        status:       CheckoutStatus.failure,
-        activeShopId: shopId,
-        errorMessage: e.toString(),
-      );
+      state = _failureFor(shopId, orderId, e);
     }
   }
 
@@ -280,26 +270,11 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
         clearError: true,
       );
     } on ShopInactiveException catch (e) {
-      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
-      state = CheckoutState(
-        status: CheckoutStatus.failure,
-        activeShopId: shopId,
-        errorMessage: e.toString(),
-      );
+      state = _failureFor(shopId, orderId, e);
     } on InsufficientStockException catch (e) {
-      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
-      state = CheckoutState(
-        status: CheckoutStatus.failure,
-        activeShopId: shopId,
-        errorMessage: e.toString(),
-      );
+      state = _failureFor(shopId, orderId, e);
     } catch (e) {
-      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
-      state = CheckoutState(
-        status: CheckoutStatus.failure,
-        activeShopId: shopId,
-        errorMessage: e.toString(),
-      );
+      state = _failureFor(shopId, orderId, e);
     }
   }
 
@@ -375,26 +350,11 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
           await _finalizePaidCheckout(shopId: shopId, orderId: orderId);
       }
     } on ShopNotVerifiedException catch (e) {
-      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
-      state = CheckoutState(
-        status:       CheckoutStatus.failure,
-        activeShopId: shopId,
-        errorMessage: e.toString(),
-      );
+      state = _failureFor(shopId, orderId, e);
     } on ShopInactiveException catch (e) {
-      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
-      state = CheckoutState(
-        status:       CheckoutStatus.failure,
-        activeShopId: shopId,
-        errorMessage: e.toString(),
-      );
+      state = _failureFor(shopId, orderId, e);
     } catch (e) {
-      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
-      state = CheckoutState(
-        status:       CheckoutStatus.failure,
-        activeShopId: shopId,
-        errorMessage: e.toString(),
-      );
+      state = _failureFor(shopId, orderId, e);
     }
   }
 
@@ -435,6 +395,15 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
       status: CheckoutStatus.success,
       verificationPending: false,
       clearError: true,
+    );
+  }
+
+  CheckoutState _failureFor(String shopId, String? orderId, Object error) {
+    if (orderId != null) unawaited(_repo.cancelOrder(orderId));
+    return CheckoutState(
+      status: CheckoutStatus.failure,
+      activeShopId: shopId,
+      errorMessage: error.toString(),
     );
   }
 

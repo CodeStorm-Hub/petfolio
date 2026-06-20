@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../domain/services/currency_formatter.dart';
+
 part 'vendor_ledger.freezed.dart';
 part 'vendor_ledger.g.dart';
 
@@ -25,6 +27,5 @@ abstract class VendorLedger with _$VendorLedger {
   factory VendorLedger.fromJson(Map<String, dynamic> json) =>
       _$VendorLedgerFromJson(json);
 
-  String get earningsFormatted =>
-      '\$${(vendorEarningsCents / 100).toStringAsFixed(2)}';
+  String get earningsFormatted => formatCents(vendorEarningsCents);
 }

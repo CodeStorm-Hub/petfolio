@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -8,6 +7,8 @@ import 'package:petfolio/core/theme/app_theme.dart';
 import '../../../../core/widgets/primary_pill_button.dart';
 import '../../data/models/shipment.dart';
 import '../controllers/shipment_controller.dart';
+import '../widgets/marketplace_back_button.dart';
+import '../widgets/marketplace_state_views.dart';
 
 class ShipmentTrackingScreen extends ConsumerWidget {
   const ShipmentTrackingScreen({super.key, required this.orderId});
@@ -30,27 +31,8 @@ class ShipmentTrackingScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Row(
                   children: [
-                    Semantics(
-                      label: 'Back',
-                      button: true,
-                      child: GestureDetector(
-                        onTap: () => context.pop(),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColors.surface0,
-                            boxShadow: [
-                              BoxShadow(color: AppColors.line, spreadRadius: 0.5),
-                            ],
-                          ),
-                          child: Icon(Icons.arrow_back_ios_new_rounded,
-                              size: 18, color: pt.ink700),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
+                    const MarketplaceBackButton(),
+                    const SizedBox(width: 4),
                     Text(
                       'Track Shipment',
                       style: TextStyle(
@@ -68,17 +50,18 @@ class ShipmentTrackingScreen extends ConsumerWidget {
                 child: Center(child: CircularProgressIndicator()),
               ),
               error: (e, _) => SliverFillRemaining(
-                child: Center(child: Text('$e')),
+                child: MarketplaceErrorView(
+                  message: 'Could not load shipment info',
+                  onRetry: () => ref.invalidate(shipmentProvider(orderId)),
+                ),
               ),
               data: (shipment) {
                 if (shipment == null) {
-                  return SliverFillRemaining(
-                    child: Center(
-                      child: Text(
-                        'No shipment info yet.\nCheck back once your order ships.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: pt.ink500),
-                      ),
+                  return const SliverFillRemaining(
+                    child: MarketplaceEmptyView(
+                      icon: Icons.local_shipping_outlined,
+                      title: 'No shipment info yet',
+                      message: 'Check back once your order ships.',
                     ),
                   );
                 }

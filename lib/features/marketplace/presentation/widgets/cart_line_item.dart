@@ -80,7 +80,7 @@ class CartLineItem extends ConsumerWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '\$${(item.lineTotalCents / 100).toStringAsFixed(2)}',
+                    item.lineTotalFormatted,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,

@@ -1,94 +1,72 @@
-file_path: C:\Users\syedr\.claude\plans\for-the-petfolio-whole-snuggly-cupcake.md
-content: # Petfolio Marketplace — Cross-Stack Audit & Remediation Plan
+# Marketplace Module — UX Audit, Backend Mapping Check, De-dup, Back-Gesture Pass
 
 ## Context
+The user (acting as Customer/Buyer) wants a full health check of the Marketplace module: UX issues, UI<->Supabase mismatches, duplicated code, and consistent native back-gesture support across all marketplace screens. Three Explore agents read every file under `lib/features/marketplace/` (screens, widgets, controllers, repositories, models, routes) and cross-checked the live Supabase schema for project `petfolio` (`jqyjvhwlcqcsuwcqgcwf`). Findings below are confirmed against actual table columns, not assumed.
 
-The Marketplace module spans three surfaces that must work together: the Flutter app (`lib/features/marketplace/`, buyer-facing), the web dashboard (`J:\GitHub\petfolio-dashboard`, vendor + admin-facing), and the shared Supabase backend. No one has audited these together before. The goal here is to surface every correctness, security, UX, and architectural gap across all three, then sequence the fixes so the highest-risk item (an unauthenticated checkout RPC) lands first, followed by feature-completeness gaps that block real vendor/admin usage, then polish.
+**Correction from research:** one agent flagged `product_repository.dart`'s `.eq('active', true)` as a schema mismatch (guessing the column was `is_active`). Verified directly against the live schema (`list_tables` verbose) — `products.active` is the real column (`boolean`, default `true`). False positive, no fix needed. The rest of the data-layer audit found zero real table/column mismatches: every repository's `.from()` table/columns match the live schema, RPC param naming (`p_buyer_id`, `p_shop_id`, etc.) is consistent, no mock data or stubbed logic anywhere. So the "backend mismatch" ask is satisfied by documenting it was verified clean — effort goes into the UX/code-quality issues instead, which is where the real problems are.
 
-Three Explore-style audits were run in parallel (Flutter marketplace code, the dashboard repo, and the live Supabase schema via MCP). Findings are consolidated below by severity.
+## Confirmed Issues
 
----
+### A. Back-gesture / navigation (explicit user ask)
+7 screens have no `PopScope` / back-gesture handling and rely only on a custom AppBar back `IconButton`:
+- presentation/screens/product_detail_screen.dart
+- presentation/screens/wishlist_screen.dart
+- presentation/screens/shipment_tracking_screen.dart
+- presentation/screens/prescription_upload_screen.dart
+- presentation/screens/customer/buyer_order_list_screen.dart
+- presentation/screens/customer/buyer_order_detail_screen.dart
+- presentation/screens/customer/shop_storefront_screen.dart
 
-## Findings
+### B. UI/UX inconsistencies
+- 4 screens (wishlist, shipment tracking, buyer order list, buyer order detail) show raw/unstyled error text with no retry, while marketplace_screen.dart already has a correct styled error+retry pattern.
+- Inconsistent empty states across screens (_NoResultsState, _EmptyWishlist, ad-hoc text) — no shared component.
+- Several icon back-buttons are 40x40/44x44, below the 48x48 minimum touch target.
+- PrescriptionUploadScreen and BuyerOrderDetailScreen have no "continue shopping / back to shop" CTA.
+- Hardcoded Colors.xxx bypassing the theme extension in places (dark-mode risk).
 
-### 🔴 P0 — Security / Data-Integrity Critical
+### C. Duplicated code
+- A private back-button widget is reimplemented independently in 5+ screens (marketplace_screen, cart_screen, product_detail_screen, wishlist_screen, order screens).
+- Currency formatting `'$${(cents / 100).toStringAsFixed(2)}'` duplicated across 4+ screens/widgets.
+- checkout_controller.dart: 3 checkout methods (startCheckoutForShop, startCodCheckoutForShop, startSslcommerzCheckoutForShop) repeat near-identical try/catch error-handling blocks.
+- 3 list controllers (buyer_orders_controller.dart, shop_list_controller.dart, shop_products_controller.dart) each hand-roll an identical refresh() pattern.
 
-1. **`process_checkout(p_buyer_id, p_shop_id, p_cart_items, p_promo_code)` RPC is exploitable.**
-   - `SECURITY DEFINER`, no pinned `search_path` (flagged `function_search_path_mutable`), and **executable by `anon`** (unauthenticated).
-   - This is the live checkout path called from [`order_repository`](lib/features/marketplace/data/repositories) for promo-code orders. An unauthenticated caller could invoke it directly via the Supabase REST/RPC endpoint to create orders, reserve inventory, or apply promos without ever logging in.
-   - The older 3-arg overload (no promo code) is correctly pinned — only the newer 4-arg one regressed.
-   - **Fix:** `ALTER FUNCTION ... SET search_path = public`; `REVOKE EXECUTE ... FROM anon`; `GRANT EXECUTE ... TO authenticated`. Verify the 3-arg overload as the template.
+### D. Routes / orphans
+None — all 13 screens have matching GoRoutes or are reachable via modal/shell; no orphaned screens, no missing route params.
 
-2. **Dashboard `.env` has an empty `SUPABASE_SERVICE_ROLE_KEY`.**
-   - Any admin-side server action that needs to bypass RLS (KYC approval, payout approval, vendor fee edits) is either silently failing or — worse — those actions are running on RLS-restricted client/anon credentials in a way that may already be a workaround masking a different vuln. Needs the real key populated from the Supabase project settings, and an audit of which admin actions currently assume it's set.
+## Implementation Plan
 
-3. **KYC documents (`trade_license_url`, `national_id_url`) are linked with raw/unsigned URLs in `vendors-view.tsx`**, unlike the prescriptions page which correctly uses 10-minute signed URLs. If the storage bucket is private, this is broken; if public, it's a PII leak (national ID images reachable by URL guessing/sharing).
+### Phase 1 — Shared building blocks
+In lib/features/marketplace/presentation/widgets/:
+1. marketplace_back_button.dart — single MarketplaceBackButton widget (48x48 tap target, themed, context.pop() with fallback to context.go() if !context.canPop()). Replaces all duplicated back-button implementations.
+2. marketplace_state_views.dart — MarketplaceErrorView (styled message + Retry button via onRetry callback) and MarketplaceEmptyView (icon + message + optional CTA). Compose on top of existing lib/core/widgets/ (app_snack_bar.dart, primary_pill_button.dart) rather than re-styling from scratch.
 
-### 🟠 P1 — Functional Gaps Blocking Real Usage
+New currency formatter (path matching domain/services convention from flutter-architecture.md):
+3. lib/features/marketplace/domain/services/currency_formatter.dart — formatCents(int cents, {String currency}) helper.
 
-4. **No mobile vendor flow at all.** Every `/seller/*` route in the Flutter app (`lib/features/marketplace/marketplace_routes.dart`) renders `VendorWebRedirectScreen`, which just launches an external browser to the dashboard. Vendors cannot fulfill orders, update tracking, or manage products from the app — only from the web dashboard. Confirm with the user whether this is intentional (web-only vendor ops) or a gap to close.
+### Phase 2 — Back-gesture consistency
+For each of the 7 screens in section A: wrap the screen body in PopScope (canPop:true for simple cases; canPop:false + onPopInvokedWithResult only where there's real unsaved state, e.g. mid-upload in PrescriptionUploadScreen) and swap the local back-icon implementation for MarketplaceBackButton, so hardware/gesture back and the visible button always agree. Spot-check the screens not flagged (marketplace_screen, cart_screen, checkout, order_confirmation) and only touch them if testing shows a real problem.
 
-5. **Dashboard has dead-end navigation links**: `/admin/vendors/{id}`, `/vendor/orders/{id}`, `/admin/orders/{id}`, and `/unauthorized` are all linked from existing pages but have no corresponding `page.tsx`. Clicking through from the vendor list, order overview, etc. currently 404s.
+### Phase 3 — UX consistency fixes
+- Swap per-screen error widgets for MarketplaceErrorView (wishlist, shipment tracking, buyer order list, buyer order detail) — adds retry for free.
+- Swap empty states for MarketplaceEmptyView (marketplace_screen, wishlist_screen, buyer_order_list_screen).
+- Add "Continue shopping / Back to shop" CTA to PrescriptionUploadScreen and BuyerOrderDetailScreen (via context.go to the relevant marketplace/shop route already in marketplace_routes.dart).
+- Replace flagged hardcoded Colors.xxx with Theme.of(context)/AppColors/PetfolioThemeExtension.
+- Bump sub-48x48 icon buttons to 48x48 (MarketplaceBackButton sets the standard).
 
-6. **Duplicate/dead RLS policies and missing indexes in Supabase:**
-   - `shop_deletion_requests` has two identical INSERT policies and two identical SELECT policies (leftover from an incomplete migration).
-   - 11 foreign-key columns have no supporting index (`disputes.order_id`, `disputes.raised_by`, `inventory_reservations.variant_id`, `payout_requests.resolved_by`, `payout_requests.shop_id`, `prescriptions.reviewer_id`, `product_reviews.user_id`, `promos.shop_id`, `vendor_ledgers.payout_request_id`, `wishlist_items.product_id`, `wishlist_items.variant_id`).
-   - `multiple_permissive_policies` advisor flags real per-row overhead on `disputes`, `marketplace_orders`, `payout_requests`, `prescriptions`, `promos`, `shipments`.
-   - `user_addresses` INSERT policy uses raw `auth.uid()` instead of `(select auth.uid())`, causing per-row re-evaluation instead of plan-time caching.
+### Phase 4 — De-duplication in controllers
+- checkout_controller.dart: extract one private error-handling helper used by all 3 checkout methods instead of 3 copies of the same catch blocks.
+- buyer_orders_controller.dart, shop_list_controller.dart, shop_products_controller.dart: factor the repeated refresh() body into one shared helper (keep each controller's generated provider boilerplate untouched — behavior-neutral cleanup only).
 
-7. **Pagination silently fails in the Flutter app.** `ProductListNotifier.loadMore()` catches exceptions but never surfaces an error state — a network blip during infinite-scroll just stops loading more products with no feedback.
+### Phase 5 — Verification
+- flutter analyze (must stay clean per CLAUDE.md).
+- flutter test.
+- Manually trace: Marketplace -> Shop -> Product detail -> Add to cart -> Cart -> Checkout -> Order confirmation -> Buyer order list -> Buyer order detail -> Shipment tracking, plus Wishlist and Prescription-upload side paths — confirm back gesture matches the back button at every step, and error/empty states render the new shared widgets.
+- No backend/schema changes in this pass (data layer already verified correctly mapped) — no migration step needed.
 
-8. **Checkout confirmation race condition.** `pollOrderConfirmation()` throws `PaymentTimeoutException` after a fixed 15s even though the card may have already been charged and the order row just hasn't caught up to the webhook. No retry/backoff; user is told to "check Orders" with no guarantee the order is visible yet.
-
-### 🟡 P2 — UX / Consistency Issues
-
-9. Multi-vendor cart checkout silently creates **separate orders per shop** with no warning to the buyer about split shipping/costs.
-10. No debounce on marketplace search — fires a query per keystroke.
-11. No "no results" empty state for product search (just an empty grid).
-12. `MarketplaceCategoriesScreen` hardcodes 8 categories/emojis in Dart; dashboard also hardcodes the same category list in its product form. **No shared `categories` table** — both `products.category` and `promos.category` are free-text columns with no canonical source, so the two surfaces can drift independently.
-13. Hardcoded "3–5 business days" delivery estimate in `order_confirmation_screen.dart` instead of derived from shop/shipping data.
-14. Dashboard: bulk product delete/deactivate has no confirmation dialog.
-15. Dashboard: large tables (orders, disputes, payouts) have no pagination or search/filter UI, unlike the products table.
-16. Naming drift between "shop" (table/columns) and "vendor" (function names, `is_vendor()`, `vendor_ledgers`) for what's currently a 1:1 entity — confusing but not currently a bug.
-17. `marketplace_orders.seller_id` (nullable) appears redundant with `shop_id` (NOT NULL) — same entity reachable two ways; `idx_orders_seller` is flagged as an unused index, suggesting `seller_id` is vestigial and safe to deprecate after confirming no code path reads it.
-
-### ⚪ P3 — Polish
-
-18. FlyToCart add-to-cart animation has no Semantics label (screen-reader silent).
-19. Inventory shown as a raw count with no low-stock urgency messaging.
-20. Wishlist doesn't pass `variantId` when adding from `ProductCard`, risking duplicate wishlist entries per variant.
-21. No unit/widget tests anywhere in `lib/features/marketplace/`.
-22. Several unused indexes flagged by advisors (`idx_orders_seller`, `idx_shops_kyc_status`, `idx_products_shop_id`, `vendor_ledgers_order_id_idx`, `vendor_ledgers_status_idx`, `idx_shop_deletion_requests_owner_id`) — candidates for removal once confirmed against real query patterns, not blind deletion.
-23. Platform-wide (non-marketplace) advisor items noted for awareness, out of scope here: `auth_leaked_password_protection` disabled; several other `SECURITY DEFINER` functions (community counters, care dashboard, matching) are also anon/authenticated-executable.
-
----
-
-## Remediation Plan (sequenced)
-
-**Phase 1 — Security lockdown (do first, per your priority call)**
-- Fix `process_checkout` 4-arg overload: pin `search_path`, revoke `anon` execute, grant `authenticated` only. Diff against the already-correct 3-arg overload as the reference.
-- Populate `SUPABASE_SERVICE_ROLE_KEY` in the dashboard env (pull from Supabase project API settings — coordinate with whoever holds project access, this is a secret and should go through `vercel env`/local `.env`, never committed).
-- Switch KYC document links in `vendors-view.tsx` to signed URLs (mirror the existing pattern in `prescriptions-view.tsx`, 10-min expiry).
-
-**Phase 2 — Close functional gaps**
-- Implement the missing dashboard pages: `/admin/vendors/[id]`, `/vendor/orders/[id]`, `/admin/orders/[id]`, `/unauthorized`. Use existing table/detail patterns already established elsewhere in the app (e.g. `BuyerOrderDetailScreen`'s data shape as a reference for what an order detail view needs).
-- Fix Supabase RLS/index issues: drop duplicate `shop_deletion_requests` policies, add the 11 missing FK indexes, consolidate the `multiple_permissive_policies` tables, wrap `auth.uid()` in `(select ...)` on `user_addresses`.
-- Add error state surfacing to `ProductListNotifier.loadMore()`.
-- Add retry/backoff to `pollOrderConfirmation()` instead of a hard 15s timeout-to-failure.
-- Decide (ask user) whether mobile vendor flow is in-scope; if yes, scope as a separate follow-up plan — it's a large addition, not a quick fix.
-
-**Phase 3 — UX/consistency**
-- Introduce a real `categories` table (or at minimum a single shared constants source) consumed by both the Flutter app and the dashboard product form, replacing the two independently hardcoded lists.
-- Add search debounce + "no results" state in the Flutter marketplace search.
-- Add confirmation dialogs for destructive bulk actions in the dashboard.
-- Add pagination/search to admin orders/disputes/payouts tables, matching the existing products table pattern.
-- Surface per-shop split-shipping warning in the multi-vendor cart UI.
-
-**Phase 4 — Polish**
-- Semantics label for FlyToCart animation; low-stock messaging; fix wishlist variant scoping; add baseline widget/unit test coverage for checkout and cart logic; clean up confirmed-unused indexes after verifying against query logs.
-
-## Verification
-- Phase 1: Re-run Supabase advisors (`get_advisors`) to confirm `process_checkout` and `user_addresses` findings clear; manually attempt an anon RPC call against `process_checkout` (e.g. via `curl` with the anon key, no auth header) before/after to confirm it's rejected post-fix.
-- Phase 2: Click through the previously-dead dashboard links to confirm pages render; trigger a pagination failure (e.g. via airplane mode/throttling in the Flutter app) to confirm the new error state appears; run `flutter analyze` after any Dart changes.
-- Phase 3/4: Manual UI walkthrough of search, bulk actions, and cart checkout in both the Flutter app and dashboard; `flutter test` for new widget tests.
-
+## Files Touched (representative)
+- New: lib/features/marketplace/presentation/widgets/marketplace_back_button.dart, marketplace_state_views.dart
+- New: lib/features/marketplace/domain/services/currency_formatter.dart
+- Edited: the 7 screens in section A (PopScope + back button swap)
+- Edited: wishlist_screen.dart, shipment_tracking_screen.dart, buyer_order_list_screen.dart, buyer_order_detail_screen.dart, prescription_upload_screen.dart (error/empty states + CTAs)
+- Edited: checkout_controller.dart, buyer_orders_controller.dart, shop_list_controller.dart, shop_products_controller.dart (de-dup)
+- No changes to repositories/models — backend mapping already verified correct.

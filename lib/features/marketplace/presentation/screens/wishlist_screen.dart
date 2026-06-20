@@ -7,6 +7,8 @@ import 'package:petfolio/core/theme/app_theme.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../data/models/product.dart';
 import '../controllers/wishlist_controller.dart';
+import '../widgets/marketplace_back_button.dart';
+import '../widgets/marketplace_state_views.dart';
 import '../widgets/product_card.dart';
 
 class WishlistScreen extends ConsumerWidget {
@@ -28,12 +30,8 @@ class WishlistScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Row(
                   children: [
-                    _IconBtn(
-                      icon: Icons.arrow_back_ios_new_rounded,
-                      label: 'Back',
-                      onTap: () => context.pop(),
-                    ),
-                    const SizedBox(width: 12),
+                    const MarketplaceBackButton(),
+                    const SizedBox(width: 4),
                     Text(
                       'Wishlist',
                       style: TextStyle(
@@ -51,7 +49,10 @@ class WishlistScreen extends ConsumerWidget {
                 child: Center(child: CircularProgressIndicator()),
               ),
               error: (e, _) => SliverFillRemaining(
-                child: Center(child: Text('$e')),
+                child: MarketplaceErrorView(
+                  message: 'Could not load your wishlist',
+                  onRetry: () => ref.invalidate(wishlistItemsProvider),
+                ),
               ),
               data: (items) {
                 if (items.isEmpty) {
@@ -187,38 +188,6 @@ class _EmptyWishlist extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.w700)),
         ),
       ],
-    );
-  }
-}
-
-class _IconBtn extends StatelessWidget {
-  const _IconBtn({required this.icon, required this.onTap, required this.label});
-
-  final IconData icon;
-  final VoidCallback onTap;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    return Semantics(
-      label: label,
-      button: true,
-      child: GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.surface0,
-          boxShadow: [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
-          ],
-        ),
-        child: Icon(icon, size: 18, color: pt.ink700),
-      ),
-    ),
     );
   }
 }

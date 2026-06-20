@@ -18,12 +18,14 @@ import '../../../../core/widgets/widgets.dart';
 import '../../data/models/cart_item.dart';
 import '../../data/models/product.dart';
 import '../../data/repositories/order_repository.dart';
+import '../../domain/services/currency_formatter.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/checkout_controller.dart';
 import '../controllers/product_list_controller.dart';
 import '../controllers/shop_list_controller.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../widgets/product_glyph.dart';
+import '../widgets/marketplace_state_views.dart';
 import '../widgets/web_checkout_resume_listener.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../widgets/address_sheet.dart';
@@ -604,7 +606,6 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
   }
 
   Widget _buildBody(BuildContext context, double maxWidth) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final productsAsync = ref.watch(productListProvider);
     final cols = _crossAxisCount(maxWidth);
 
@@ -628,14 +629,9 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
           ),
         ],
       ),
-      error: (_, _) => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Could not load products', style: TextStyle(color: pt.ink500)),
-            TextButton(onPressed: () => ref.invalidate(productListProvider), child: const Text('Retry')),
-          ],
-        ),
+      error: (_, _) => MarketplaceErrorView(
+        message: 'Could not load products',
+        onRetry: () => ref.invalidate(productListProvider),
       ),
       data: (_) {
         final filtered = ref.watch(filteredProductsProvider(widget.selectedCat));
@@ -856,7 +852,7 @@ class _YoullLoveTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final price = '\$${(product.priceCents / 100).toStringAsFixed(2)}';
+    final price = product.priceFormatted;
 
     return Semantics(
       label: product.name,
@@ -1332,7 +1328,7 @@ class _NewProductTileState extends State<_NewProductTile> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            '\$${(widget.product.priceCents / 100).toStringAsFixed(2)}',
+                            widget.product.priceFormatted,
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: pt.ink950),
                           ),
                           const Spacer(),
@@ -1392,33 +1388,10 @@ class _NoResultsState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('🔍', style: TextStyle(fontSize: 48)),
-            const SizedBox(height: 16),
-            Text(
-              'No results for "$query"',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: pt.ink950,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Try a different keyword or browse categories',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: pt.ink500),
-            ),
-          ],
-        ),
-      ),
+    return MarketplaceEmptyView(
+      icon: Icons.search_off_rounded,
+      title: 'No results for "$query"',
+      message: 'Try a different keyword or browse categories',
     );
   }
 }
@@ -1732,7 +1705,7 @@ class _CartItemRow extends ConsumerWidget {
                 Text(item.product.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: pt.ink950)),
                 Text(item.product.brand, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: pt.ink500)),
                 const SizedBox(height: 2),
-                Text('\$${((item.product.priceCents * item.quantity) / 100).toStringAsFixed(2)}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: pt.ink950)),
+                Text(formatCents(item.product.priceCents * item.quantity), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: pt.ink950)),
               ],
             ),
           ),

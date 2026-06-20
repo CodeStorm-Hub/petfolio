@@ -12,6 +12,7 @@ import '../../controllers/shipment_controller.dart';
 import '../../../data/models/marketplace_order.dart';
 import '../../../data/models/shipment.dart';
 import '../../../data/repositories/order_repository.dart';
+import '../../widgets/marketplace_back_button.dart';
 
 class BuyerOrderDetailScreen extends ConsumerWidget {
   const BuyerOrderDetailScreen({
@@ -83,12 +84,8 @@ class BuyerOrderDetailScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
                 child: Row(
                   children: [
-                    _IconBtn(
-                      icon: Icons.arrow_back_ios_new_rounded,
-                      label: 'Back',
-                      onTap: () => _goBack(context),
-                    ),
-                    const SizedBox(width: 12),
+                    const MarketplaceBackButton(),
+                    const SizedBox(width: 4),
                     Text(
                       'Order Detail',
                       style: TextStyle(
@@ -127,6 +124,23 @@ class BuyerOrderDetailScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: _CancelOrderButton(orderId: resolved.id),
               ),
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: OutlinedButton(
+                  onPressed: () => context.go('/marketplace'),
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: const Text('Continue Shopping',
+                      style: TextStyle(fontWeight: FontWeight.w700)),
+                ),
+              ),
+            ),
 
             const SliverToBoxAdapter(child: SizedBox(height: 120)),
           ],
@@ -343,7 +357,7 @@ class _LineItemsCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        '\$${(item.lineTotalCents / 100).toStringAsFixed(2)}',
+                        item.lineTotalFormatted,
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
@@ -544,38 +558,6 @@ class _Row extends StatelessWidget {
               color: pt.ink950,
             )),
       ],
-    );
-  }
-}
-
-class _IconBtn extends StatelessWidget {
-  const _IconBtn({required this.icon, required this.onTap, required this.label});
-
-  final IconData icon;
-  final VoidCallback onTap;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    return Semantics(
-      label: label,
-      button: true,
-      child: GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.surface0,
-          boxShadow: [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
-          ],
-        ),
-        child: Icon(icon, size: 18, color: pt.ink700),
-      ),
-    ),
     );
   }
 }

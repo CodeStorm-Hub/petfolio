@@ -11,6 +11,7 @@ import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../../core/widgets/primary_pill_button.dart';
 import '../../data/models/prescription.dart';
 import '../controllers/prescription_controller.dart';
+import '../widgets/marketplace_back_button.dart';
 
 class PrescriptionUploadScreen extends ConsumerStatefulWidget {
   const PrescriptionUploadScreen({super.key, required this.orderId});
@@ -98,27 +99,8 @@ class _PrescriptionUploadScreenState
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Row(
                   children: [
-                    Semantics(
-                      label: 'Back',
-                      button: true,
-                      child: GestureDetector(
-                        onTap: () => context.pop(),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColors.surface0,
-                            boxShadow: [
-                              BoxShadow(color: AppColors.line, spreadRadius: 0.5),
-                            ],
-                          ),
-                          child: Icon(Icons.arrow_back_ios_new_rounded,
-                              size: 18, color: pt.ink700),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
+                    const MarketplaceBackButton(),
+                    const SizedBox(width: 4),
                     Text(
                       'Upload Prescription',
                       style: TextStyle(

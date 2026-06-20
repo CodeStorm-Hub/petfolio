@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/marketplace_order.dart';
 import '../../data/repositories/order_repository.dart';
+import 'refreshable_list_notifier.dart';
 
 final orderByIdProvider = FutureProvider.autoDispose
     .family<MarketplaceOrder, String>(
@@ -13,15 +14,12 @@ final buyerOrdersProvider =
   BuyerOrdersNotifier.new,
 );
 
-class BuyerOrdersNotifier extends AsyncNotifier<List<MarketplaceOrder>> {
+class BuyerOrdersNotifier extends AsyncNotifier<List<MarketplaceOrder>>
+    with RefreshableListNotifier<MarketplaceOrder> {
   @override
-  Future<List<MarketplaceOrder>> build() =>
-      ref.read(orderRepositoryProvider).fetchBuyerOrders();
+  Future<List<MarketplaceOrder>> build() => fetch();
 
-  Future<void> refresh() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => ref.read(orderRepositoryProvider).fetchBuyerOrders(),
-    );
-  }
+  @override
+  Future<List<MarketplaceOrder>> fetch() =>
+      ref.read(orderRepositoryProvider).fetchBuyerOrders();
 }

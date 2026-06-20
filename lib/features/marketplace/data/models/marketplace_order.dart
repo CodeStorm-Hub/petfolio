@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../domain/services/currency_formatter.dart';
+
 part 'marketplace_order.freezed.dart';
 part 'marketplace_order.g.dart';
 
@@ -56,6 +58,10 @@ abstract class LineItem with _$LineItem {
       _$LineItemFromJson(json);
 }
 
+extension LineItemX on LineItem {
+  String get lineTotalFormatted => formatCents(lineTotalCents);
+}
+
 @freezed
 abstract class MarketplaceOrder with _$MarketplaceOrder {
   const MarketplaceOrder._();
@@ -84,8 +90,7 @@ abstract class MarketplaceOrder with _$MarketplaceOrder {
   factory MarketplaceOrder.fromJson(Map<String, dynamic> json) =>
       _$MarketplaceOrderFromJson(json);
 
-  String get amountFormatted =>
-      '\$${(amountCents / 100).toStringAsFixed(2)}';
+  String get amountFormatted => formatCents(amountCents);
 
   bool get hasTracking =>
       shippingTrackingNumber != null && shippingTrackingNumber!.isNotEmpty;

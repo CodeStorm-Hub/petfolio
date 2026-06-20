@@ -5,11 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../core/theme/theme.dart';
-import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/cart_controller.dart';
 import '../../controllers/shop_list_controller.dart';
 import '../../controllers/shop_products_controller.dart';
 import '../../../data/models/shop.dart';
+import '../../widgets/marketplace_back_button.dart';
+import '../../widgets/marketplace_state_views.dart';
 import '../../widgets/product_card.dart';
 import '../../../../../core/widgets/skeleton_loader.dart';
 
@@ -50,7 +51,9 @@ class ShopStorefrontRoute extends ConsumerWidget {
                     style: Theme.of(context).textTheme.bodyMedium),
                 const SizedBox(height: 12),
                 TextButton(
-                  onPressed: () => context.pop(),
+                  onPressed: () => context.canPop()
+                      ? context.pop()
+                      : context.go('/marketplace'),
                   child: const Text('Go back'),
                 ),
               ],
@@ -88,14 +91,7 @@ class ShopStorefrontScreen extends ConsumerWidget {
             backgroundColor: pt.surface1,
             elevation: 0,
             pinned: true,
-            leading: Padding(
-              padding: const EdgeInsets.all(8),
-              child: _CircleBtn(
-                icon: Icons.arrow_back_ios_new_rounded,
-                label: 'Back',
-                onTap: () => context.pop(),
-              ),
-            ),
+            leading: const MarketplaceBackButton(),
             actions: [
               if (cartCount > 0)
                 Padding(
@@ -230,16 +226,18 @@ class ShopStorefrontScreen extends ConsumerWidget {
               child: Center(child: CircularProgressIndicator.adaptive()),
             ),
             error: (e, _) => SliverToBoxAdapter(
-              child: _ErrorRetry(
+              child: MarketplaceErrorView(
+                message: 'Could not load products',
                 onRetry: () =>
                     ref.read(shopProductsProvider(shop.id).notifier).refresh(),
               ),
             ),
             data: (products) => products.isEmpty
-                ? SliverFillRemaining(
-                    child: Center(
-                      child: Text('No products available',
-                          style: tt.bodyMedium?.copyWith(color: pt.ink500)),
+                ? const SliverFillRemaining(
+                    child: MarketplaceEmptyView(
+                      icon: Icons.storefront_outlined,
+                      title: 'No products yet',
+                      message: 'This shop hasn\'t listed any products.',
                     ),
                   )
                 : SliverPadding(
@@ -427,33 +425,6 @@ class _SocialBtn extends StatelessWidget {
           ),
         ),
         ),
-      ),
-    );
-  }
-}
-
-class _ErrorRetry extends StatelessWidget {
-  const _ErrorRetry({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('Could not load products',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: pt.ink500)),
-          const SizedBox(height: 12),
-          PrimaryPillButton(
-            label: 'Retry',
-            size: PillButtonSize.md,
-            variant: PillButtonVariant.secondary,
-            onPressed: onRetry,
-          ),
-        ],
       ),
     );
   }

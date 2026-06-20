@@ -9,10 +9,12 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../../../core/theme/theme.dart';
 import '../../data/models/product.dart';
 import '../../data/models/product_variant.dart';
+import '../../domain/services/currency_formatter.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/product_list_controller.dart';
 import '../controllers/product_variant_controller.dart';
 import '../controllers/wishlist_controller.dart';
+import '../widgets/marketplace_back_button.dart';
 import '../widgets/product_glyph.dart';
 import '../widgets/product_reviews_section.dart';
 import '../widgets/subscription_toggle.dart';
@@ -388,11 +390,9 @@ class _ProductHeroCarousel extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _IconBtn(
+                const MarketplaceBackButton(
                   icon: Icons.arrow_back_rounded,
-                  tooltip: 'Back',
-                  bg: Colors.white.withAlpha(235),
-                  onTap: () => context.pop(),
+                  backgroundColor: Color(0xFFFFFFFF),
                 ),
                 Row(
                   children: [
@@ -569,7 +569,7 @@ class _ProductInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final showSubPrice = subscribe && product.subscribable;
     final displayCents = showSubPrice ? product.subPriceCents : product.priceCents;
-    final displayFormatted = '\$${(displayCents / 100).toStringAsFixed(2)}';
+    final displayFormatted = formatCents(displayCents);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -806,7 +806,7 @@ class _SubscribeCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       subscribe
-                          ? 'Auto-delivers every $frequencyWeeks weeks · save \$${(savingsCents / 100).toStringAsFixed(2)}'
+                          ? 'Auto-delivers every $frequencyWeeks weeks · save ${formatCents(savingsCents)}'
                           : 'Save 12% on every refill · cancel anytime',
                       style: TextStyle(
                         fontSize: 13,
@@ -884,7 +884,7 @@ class _DualCtaBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final bottomPad = MediaQuery.paddingOf(context).bottom;
     final buyNowPrice = subscribe && product.subscribable
-        ? '\$${(product.subPriceCents / 100).toStringAsFixed(2)}'
+        ? product.subPriceFormatted
         : product.priceFormatted;
 
     return Container(
@@ -1320,7 +1320,7 @@ class _VariantSheetContentState extends ConsumerState<_VariantSheetContent> {
                                     ),
                                   ),
                                   Text(
-                                    '\$${(opt.priceCents / 100).toStringAsFixed(2)}',
+                                    formatCents(opt.priceCents),
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
@@ -1435,7 +1435,7 @@ class _VariantSheetContentState extends ConsumerState<_VariantSheetContent> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '\$${(_totalCents / 100).toStringAsFixed(2)}',
+                        formatCents(_totalCents),
                         style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
@@ -1566,8 +1566,8 @@ class _IconBtn extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: 44,
-          height: 44,
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: bg ?? AppColors.surface0,

@@ -7,6 +7,8 @@ import '../../../../../core/theme/app_colors.dart';
 import 'package:petfolio/core/theme/app_theme.dart';
 import '../../controllers/buyer_orders_controller.dart';
 import '../../../data/models/marketplace_order.dart';
+import '../../widgets/marketplace_back_button.dart';
+import '../../widgets/marketplace_state_views.dart';
 
 class BuyerOrderListScreen extends ConsumerWidget {
   const BuyerOrderListScreen({super.key});
@@ -26,12 +28,8 @@ class BuyerOrderListScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
               child: Row(
                 children: [
-                  _IconBtn(
-                    icon: Icons.arrow_back_ios_new_rounded,
-                    label: 'Back',
-                    onTap: () => context.pop(),
-                  ),
-                  const SizedBox(width: 12),
+                  const MarketplaceBackButton(),
+                  const SizedBox(width: 4),
                   Text(
                     'My Orders',
                     style: TextStyle(
@@ -55,7 +53,10 @@ class BuyerOrderListScreen extends ConsumerWidget {
               child: ordersAsync.when(
                 loading: () =>
                     const Center(child: CircularProgressIndicator.adaptive()),
-                error: (e, _) => Center(child: Text(e.toString())),
+                error: (e, _) => MarketplaceErrorView(
+                  message: 'Could not load your orders',
+                  onRetry: () => ref.read(buyerOrdersProvider.notifier).refresh(),
+                ),
                 data: (orders) {
                   final sorted = [...orders]
                     ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -322,64 +323,12 @@ class _EmptyOrders extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.receipt_long_outlined,
-                size: 48, color: pt.ink300),
-            const SizedBox(height: 16),
-            Text(
-              'No orders yet',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 18,
-                color: pt.ink950,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Your order history will appear here.',
-              style: TextStyle(fontSize: 14, color: pt.ink500),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _IconBtn extends StatelessWidget {
-  const _IconBtn({required this.icon, required this.onTap, required this.label});
-
-  final IconData icon;
-  final VoidCallback onTap;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    return Semantics(
-      label: label,
-      button: true,
-      child: GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.surface0,
-          boxShadow: [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
-          ],
-        ),
-        child: Icon(icon, size: 18, color: pt.ink700),
-      ),
-    ),
+    return MarketplaceEmptyView(
+      icon: Icons.receipt_long_outlined,
+      title: 'No orders yet',
+      message: 'Your order history will appear here.',
+      ctaLabel: 'Browse Products',
+      onCta: () => context.go('/marketplace'),
     );
   }
 }
