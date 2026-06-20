@@ -14,6 +14,8 @@ _LineItem _$LineItemFromJson(Map<String, dynamic> json) => _LineItem(
   lineTotalCents: (json['line_total_cents'] as num).toInt(),
   isSubscribed: json['is_subscribed'] as bool,
   frequencyWeeks: (json['frequency_weeks'] as num).toInt(),
+  variantId: json['variant_id'] as String?,
+  isRx: json['is_rx'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$LineItemToJson(_LineItem instance) => <String, dynamic>{
@@ -24,6 +26,8 @@ Map<String, dynamic> _$LineItemToJson(_LineItem instance) => <String, dynamic>{
   'line_total_cents': instance.lineTotalCents,
   'is_subscribed': instance.isSubscribed,
   'frequency_weeks': instance.frequencyWeeks,
+  'variant_id': instance.variantId,
+  'is_rx': instance.isRx,
 };
 
 _MarketplaceOrder _$MarketplaceOrderFromJson(Map<String, dynamic> json) =>
@@ -42,6 +46,7 @@ _MarketplaceOrder _$MarketplaceOrderFromJson(Map<String, dynamic> json) =>
           $enumDecodeNullable(_$PaymentStatusEnumMap, json['payment_status']) ??
           PaymentStatus.pending,
       stripePaymentIntentId: json['stripe_payment_intent_id'] as String?,
+      sslcommerzTransactionId: json['sslcommerz_transaction_id'] as String?,
       lineItems: (json['line_items'] as List<dynamic>)
           .map((e) => LineItem.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -69,6 +74,7 @@ Map<String, dynamic> _$MarketplaceOrderToJson(_MarketplaceOrder instance) =>
       'payment_method': _$PaymentMethodEnumMap[instance.paymentMethod]!,
       'payment_status': _$PaymentStatusEnumMap[instance.paymentStatus]!,
       'stripe_payment_intent_id': instance.stripePaymentIntentId,
+      'sslcommerz_transaction_id': instance.sslcommerzTransactionId,
       'line_items': instance.lineItems,
       'shipping_tracking_number': instance.shippingTrackingNumber,
       'shipping_tracking_url': instance.shippingTrackingUrl,
@@ -89,6 +95,9 @@ const _$OrderStatusEnumMap = {
 const _$PaymentMethodEnumMap = {
   PaymentMethod.stripe: 'stripe',
   PaymentMethod.cod: 'cod',
+  PaymentMethod.bkash: 'bkash',
+  PaymentMethod.nagad: 'nagad',
+  PaymentMethod.sslcommerz: 'sslcommerz',
 };
 
 const _$PaymentStatusEnumMap = {

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/tail_wag_loader.dart';
 import '../controllers/ledger_controller.dart';
 import 'admin_shared_widgets.dart';
 
@@ -17,7 +18,7 @@ class FinancialLedgerTab extends ConsumerWidget {
       title: 'Payouts',
       onRefresh: () => ref.read(ledgerProvider.notifier).refresh(),
       child: ledgerAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: TailWagLoader()),
         error: (e, _) => AdminErrorState(message: e.toString()),
         data: (groups) => groups.isEmpty
             ? const AdminEmptyState(
@@ -100,7 +101,10 @@ class _PayoutCardState extends ConsumerState<_PayoutCard> {
           ),
           if (bank != null) ...[
             const SizedBox(height: 10),
-            GestureDetector(
+            Semantics(
+              label: _expanded ? 'Hide bank details' : 'Show bank details',
+              button: true,
+              child: GestureDetector(
               onTap: () => setState(() => _expanded = !_expanded),
               child: Row(
                 children: [
@@ -118,6 +122,7 @@ class _PayoutCardState extends ConsumerState<_PayoutCard> {
                   ),
                 ],
               ),
+            ),
             ),
             if (_expanded) ...[
               const SizedBox(height: 8),

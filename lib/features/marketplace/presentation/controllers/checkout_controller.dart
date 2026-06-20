@@ -3,13 +3,15 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:flutter_stripe/flutter_stripe.dart' hide PaymentMethod;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/platform/platform_payments.dart';
 import '../../../../core/platform/web_app_url.dart';
+import '../../../../core/services/sslcommerz_service.dart';
 import '../../../../core/services/stripe_init_service.dart';
+import '../../data/models/marketplace_order.dart' show PaymentMethod;
 import '../../data/repositories/order_repository.dart'
     show
         InsufficientStockException,
@@ -116,7 +118,7 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
   ///
   /// Flow: idle → loadingIntent → awaitingSheet → success | failure
   /// Cancel: awaitingSheet → idle (pending order row is cancelled)
-  Future<void> startCheckoutForShop(String shopId) async {
+  Future<void> startCheckoutForShop(String shopId, {String? promoCode}) async {
     if (isLoading) return;
 
     final cart = ref.read(cartProvider);
@@ -142,9 +144,10 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
     try {
       // 1. Insert pending order row for this vendor.
       orderId = await _repo.insertPendingOrder(
-        buyerId: user.id,
-        shopId:  shopId,
-        cart:    cart,
+        buyerId:   user.id,
+        shopId:    shopId,
+        cart:      cart,
+        promoCode: promoCode,
       );
       state = state.copyWith(orderId: orderId);
 
@@ -235,7 +238,7 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
   }
 
   /// Cash-on-Delivery checkout — inserts order then validates via Edge Function.
-  Future<void> startCodCheckoutForShop(String shopId) async {
+  Future<void> startCodCheckoutForShop(String shopId, {String? promoCode}) async {
     if (isLoading) return;
 
     final cart = ref.read(cartProvider);
@@ -260,9 +263,10 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
 
     try {
       orderId = await _repo.insertPendingOrder(
-        buyerId: user.id,
-        shopId: shopId,
-        cart: cart,
+        buyerId:   user.id,
+        shopId:    shopId,
+        cart:      cart,
+        promoCode: promoCode,
       );
       state = state.copyWith(orderId: orderId);
 
@@ -299,9 +303,102 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
     }
   }
 
-  Future<void> resumeWebCheckoutIfNeeded() async {
-    if (!kIsWeb) return;
+  /// SSLCommerz checkout — shows in-app WebView via the flutter_sslcommerz SDK.
+  ///
+  /// Flow: idle → loadingIntent → awaitingSheet → success | failure | idle (cancel)
+  /// IPN webhook confirms the order server-side; Flutter polls for confirmation.
+  Future<void> startSslcommerzCheckoutForShop(
+    String shopId,
+    PaymentMethod method, {
+    String? promoCode,
+  }) async {
+    if (isLoading) return;
 
+    final cart = ref.read(cartProvider);
+    final shopItems = cart.itemsByShop[shopId] ?? [];
+    if (shopItems.isEmpty) return;
+
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      state = const CheckoutState(
+        status: CheckoutStatus.failure,
+        errorMessage: 'You must be logged in to checkout.',
+      );
+      return;
+    }
+
+    state = CheckoutState(
+      status: CheckoutStatus.loadingIntent,
+      activeShopId: shopId,
+    );
+
+    String? orderId;
+
+    try {
+      orderId = await _repo.insertPendingOrder(
+        buyerId:   user.id,
+        shopId:    shopId,
+        cart:      cart,
+        promoCode: promoCode,
+      );
+      state = state.copyWith(orderId: orderId);
+
+      await _repo.setPaymentMethod(orderId, method);
+
+      final order = await _repo.fetchOrder(orderId);
+      final amountBdt = order.amountCents / 100.0;
+
+      state = state.copyWith(status: CheckoutStatus.awaitingSheet);
+
+      final result = await SslcommerzService.pay(
+        orderId:           orderId,
+        amountBdt:         amountBdt,
+        paymentMethodName: method.name,
+        customerEmail:     user.email ?? 'customer@petfolio.app',
+        customerName:      user.email?.split('@')[0] ?? 'Customer',
+      );
+
+      switch (result) {
+        case SslPayResult.cancelled:
+          unawaited(_repo.cancelOrder(orderId));
+          state = const CheckoutState(status: CheckoutStatus.idle);
+
+        case SslPayResult.failed:
+          unawaited(_repo.cancelOrder(orderId));
+          state = CheckoutState(
+            status:       CheckoutStatus.failure,
+            activeShopId: shopId,
+            errorMessage: 'Payment was declined. Please try again.',
+          );
+
+        case SslPayResult.success:
+          await _finalizePaidCheckout(shopId: shopId, orderId: orderId);
+      }
+    } on ShopNotVerifiedException catch (e) {
+      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
+      state = CheckoutState(
+        status:       CheckoutStatus.failure,
+        activeShopId: shopId,
+        errorMessage: e.toString(),
+      );
+    } on ShopInactiveException catch (e) {
+      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
+      state = CheckoutState(
+        status:       CheckoutStatus.failure,
+        activeShopId: shopId,
+        errorMessage: e.toString(),
+      );
+    } catch (e) {
+      if (orderId != null) unawaited(_repo.cancelOrder(orderId));
+      state = CheckoutState(
+        status:       CheckoutStatus.failure,
+        activeShopId: shopId,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+  Future<void> resumeWebCheckoutIfNeeded() async {
     final orderId = state.orderId;
     final shopId = state.activeShopId;
     if (state.status != CheckoutStatus.awaitingRedirect ||

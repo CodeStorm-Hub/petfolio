@@ -27,7 +27,7 @@ Widget _panel(ThemeData theme) {
                 _ColorRow(label: 'surface', color: cs.surface, onColor: cs.onSurface),
                 _ColorRow(label: 'error', color: cs.error, onColor: cs.onError),
                 const SizedBox(height: 12),
-                _SwatchRow(
+                const _SwatchRow(
                   colors: [
                     (AppColors.tangerine, 'tangerine'),
                     (AppColors.sunny, 'sunny'),

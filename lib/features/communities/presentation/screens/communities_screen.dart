@@ -19,14 +19,8 @@ class CommunitiesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(communitiesControllerProvider);
-    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Communities'),
-        backgroundColor: cs.surface,
-        surfaceTintColor: Colors.transparent,
-      ),
       floatingActionButton: state.maybeWhen(
         data: (communities) => communities.isEmpty
             ? null
@@ -37,13 +31,33 @@ class CommunitiesScreen extends ConsumerWidget {
               ),
         orElse: () => null,
       ),
-      body: state.when(
-        loading: () => ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: 6,
-          separatorBuilder: (_, _) => const SizedBox(height: 12),
-          itemBuilder: (_, _) =>
-              const SkeletonLoader(width: double.infinity, height: 88),
+      body: Column(
+        children: [
+          SizedBox(height: MediaQuery.paddingOf(context).top + 76.0),
+          const SizedBox(height: 16),
+          Expanded(
+            child: state.when(
+        loading: () => LayoutBuilder(
+          builder: (_, constraints) => constraints.maxWidth >= 600
+              ? GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 400,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 3.5,
+                  ),
+                  itemCount: 6,
+                  itemBuilder: (_, _) =>
+                      const SkeletonLoader(width: double.infinity, height: 88),
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: 6,
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
+                  itemBuilder: (_, _) =>
+                      const SkeletonLoader(width: double.infinity, height: 88),
+                ),
         ),
         error: (e, _) => PetfolioEmptyState(
           icon: Icons.error_outline_rounded,
@@ -68,14 +82,41 @@ class CommunitiesScreen extends ConsumerWidget {
               ),
             );
           }
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: communities.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 12),
-            itemBuilder: (context, i) =>
-                _CommunityCard(community: communities[i]),
+          return LayoutBuilder(
+            builder: (_, constraints) {
+              final isWide = constraints.maxWidth >= 600;
+              if (isWide) {
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 840),
+                    child: GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 400,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 3.2,
+                      ),
+                      itemCount: communities.length,
+                      itemBuilder: (context, i) =>
+                          _CommunityCard(community: communities[i]),
+                    ),
+                  ),
+                );
+              }
+              return ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: communities.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
+                itemBuilder: (context, i) =>
+                    _CommunityCard(community: communities[i]),
+              );
+            },
           );
         },
+          ),
+          ),
+        ],
       ),
     );
   }
@@ -125,28 +166,32 @@ class _CommunityCard extends ConsumerWidget {
                     ),
                   ],
                   const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Icon(Icons.group_rounded, size: 14, color: pt.ink500),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${community.memberCount}',
-                        style: tt.labelSmall?.copyWith(
-                          color: pt.ink500,
-                          fontWeight: FontWeight.w600,
+                  Semantics(
+                    label: '${community.memberCount} ${community.memberCount == 1 ? 'member' : 'members'}, ${community.postCount} ${community.postCount == 1 ? 'post' : 'posts'}',
+                    excludeSemantics: true,
+                    child: Row(
+                      children: [
+                        Icon(Icons.group_rounded, size: 14, color: pt.ink500),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${community.memberCount}',
+                          style: tt.labelSmall?.copyWith(
+                            color: pt.ink500,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Icon(Icons.article_rounded, size: 14, color: pt.ink500),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${community.postCount}',
-                        style: tt.labelSmall?.copyWith(
-                          color: pt.ink500,
-                          fontWeight: FontWeight.w600,
+                        const SizedBox(width: 12),
+                        Icon(Icons.article_rounded, size: 14, color: pt.ink500),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${community.postCount}',
+                          style: tt.labelSmall?.copyWith(
+                            color: pt.ink500,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),

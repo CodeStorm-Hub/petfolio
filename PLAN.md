@@ -1,393 +1,94 @@
-Let me read the screenshots, the current router and shell, then research the design pattern in parallel.
+file_path: C:\Users\syedr\.claude\plans\for-the-petfolio-whole-snuggly-cupcake.md
+content: # Petfolio Marketplace — Cross-Stack Audit & Remediation Plan
 
-Let me get the right food screen and read the shell + home in parallel with web research.
+## Context
 
-I now have everything. Let me read the current AppShell to fully understand the existing implementation before writing the plan.
+The Marketplace module spans three surfaces that must work together: the Flutter app (`lib/features/marketplace/`, buyer-facing), the web dashboard (`J:\GitHub\petfolio-dashboard`, vendor + admin-facing), and the shared Supabase backend. No one has audited these together before. The goal here is to surface every correctness, security, UX, and architectural gap across all three, then sequence the fixes so the highest-risk item (an unauthenticated checkout RPC) lands first, followed by feature-completeness gaps that block real vendor/admin usage, then polish.
 
-Now I have the complete picture. I can see the current AppShell already has a beautiful custom floating pill nav with spring physics. Let me now write the full analysis and implementation plan.
-
----
-
-# Petfolio — Contextual Navigation Redesign Plan
-
-## What the Pathao Screenshots Tell Us
-
-**Home Screen (global shell):**
-- Bottom nav: `Home | Offers | Activity | Inbox` — 4 utility-level tabs
-- These are always present regardless of what you're doing
-- Home tab = the launcher hub (bento grid of services)
-
-**Food Screen (module shell):**
-- Bottom nav completely **replaced** with: `Food | Pick-up | Offers | Favorites | Reorder` — 5 feature-level tabs
-- A `← back arrow` appears in the AppBar to escape back to the global Home hub
-- The global 4-tab nav is **gone** while inside the module
-
-**The Core Pattern:** Two-tier navigation — a lean global shell for utility, and a rich module-specific shell for each major feature. The hub is the gateway, not a peer of the features.
+Three Explore-style audits were run in parallel (Flutter marketplace code, the dashboard repo, and the live Supabase schema via MCP). Findings are consolidated below by severity.
 
 ---
 
-## Current Petfolio Architecture (What Exists Now)
+## Findings
 
-```
-AppShell (FloatingNav — 5 equal tabs)
-  ├── /home       → HubHomeScreen       [Tab 1 - Home]
-  ├── /care       → CareScreen          [Tab 2 - Care]
-  ├── /social     → SocialScreen        [Tab 3 - Social]
-  ├── /matching   → MatchingScreen      [Tab 4 - Match]
-  └── /marketplace → MarketplaceScreen  [Tab 5 - Market]
+### 🔴 P0 — Security / Data-Integrity Critical
 
-Root Navigator (outside shell — pushed on top):
-  ├── /care/nutrition, /care/walk, /care/medical-vault, /care/appointments
-  ├── /social/stories, /social/create-post, /social/communities, /social/notifications
-  ├── /matching/inbox, /matching/chat/:id
-  ├── /marketplace/product/:id, /marketplace/cart, /seller, etc.
-  ├── /activity, /offers, /settings  ← NO SHELL, buried in AllFeaturesSheet
-  └── /onboarding, /login, /register
-```
+1. **`process_checkout(p_buyer_id, p_shop_id, p_cart_items, p_promo_code)` RPC is exploitable.**
+   - `SECURITY DEFINER`, no pinned `search_path` (flagged `function_search_path_mutable`), and **executable by `anon`** (unauthenticated).
+   - This is the live checkout path called from [`order_repository`](lib/features/marketplace/data/repositories) for promo-code orders. An unauthenticated caller could invoke it directly via the Supabase REST/RPC endpoint to create orders, reserve inventory, or apply promos without ever logging in.
+   - The older 3-arg overload (no promo code) is correctly pinned — only the newer 4-arg one regressed.
+   - **Fix:** `ALTER FUNCTION ... SET search_path = public`; `REVOKE EXECUTE ... FROM anon`; `GRANT EXECUTE ... TO authenticated`. Verify the 3-arg overload as the template.
 
-**The Problem:**
-- Care sub-screens (Nutrition, Walk, Medical, Vets) are pushed _over_ the shell — user loses Care tab context
-- Activity, Offers, and Settings have zero navigation entry points visible to a normal user
-- Social Notifications, Communities, Matching Inbox — only reachable via hidden AppBar icons
-- All 5 tabs are equal weight, but Home is really a hub (launcher), not a peer feature
-- The existing `_FloatingNav` (spring animated, pill-shaped) is already excellent — needs configuration swapping, not a rebuild
+2. **Dashboard `.env` has an empty `SUPABASE_SERVICE_ROLE_KEY`.**
+   - Any admin-side server action that needs to bypass RLS (KYC approval, payout approval, vendor fee edits) is either silently failing or — worse — those actions are running on RLS-restricted client/anon credentials in a way that may already be a workaround masking a different vuln. Needs the real key populated from the Supabase project settings, and an audit of which admin actions currently assume it's set.
 
----
+3. **KYC documents (`trade_license_url`, `national_id_url`) are linked with raw/unsigned URLs in `vendors-view.tsx`**, unlike the prescriptions page which correctly uses 10-minute signed URLs. If the storage bucket is private, this is broken; if public, it's a PII leak (national ID images reachable by URL guessing/sharing).
 
-## Proposed Architecture: Contextual Shell
+### 🟠 P1 — Functional Gaps Blocking Real Usage
 
-```
-AppShell (path-aware, renders the correct FloatingNav config)
-  │
-  ├── GLOBAL SHELL  (when at /home, /notifications, /activity, /me)
-  │    FloatingNav: Home | Notifs | Activity | Me
-  │
-  ├── CARE MODULE   (when at /care or any /care/* path)
-  │    FloatingNav: Dashboard | Nutrition | Health | Walk | Vets
-  │    AppBar: ← Home
-  │
-  ├── SOCIAL MODULE (when at /social or any /social/* path)
-  │    FloatingNav: Feed | Stories | Communities | Profile
-  │    AppBar: ← Home
-  │
-  ├── MATCH MODULE  (when at /matching or any /matching/* path)
-  │    FloatingNav: Discover | Inbox | Liked
-  │    AppBar: ← Home
-  │
-  └── MARKET MODULE (when at /marketplace or any /marketplace/* path,
-                     or /seller/*, /shop/*)
-       FloatingNav: Shop | Categories | Cart | Sell
-       AppBar: ← Home
-```
+4. **No mobile vendor flow at all.** Every `/seller/*` route in the Flutter app (`lib/features/marketplace/marketplace_routes.dart`) renders `VendorWebRedirectScreen`, which just launches an external browser to the dashboard. Vendors cannot fulfill orders, update tracking, or manage products from the app — only from the web dashboard. Confirm with the user whether this is intentional (web-only vendor ops) or a gap to close.
+
+5. **Dashboard has dead-end navigation links**: `/admin/vendors/{id}`, `/vendor/orders/{id}`, `/admin/orders/{id}`, and `/unauthorized` are all linked from existing pages but have no corresponding `page.tsx`. Clicking through from the vendor list, order overview, etc. currently 404s.
+
+6. **Duplicate/dead RLS policies and missing indexes in Supabase:**
+   - `shop_deletion_requests` has two identical INSERT policies and two identical SELECT policies (leftover from an incomplete migration).
+   - 11 foreign-key columns have no supporting index (`disputes.order_id`, `disputes.raised_by`, `inventory_reservations.variant_id`, `payout_requests.resolved_by`, `payout_requests.shop_id`, `prescriptions.reviewer_id`, `product_reviews.user_id`, `promos.shop_id`, `vendor_ledgers.payout_request_id`, `wishlist_items.product_id`, `wishlist_items.variant_id`).
+   - `multiple_permissive_policies` advisor flags real per-row overhead on `disputes`, `marketplace_orders`, `payout_requests`, `prescriptions`, `promos`, `shipments`.
+   - `user_addresses` INSERT policy uses raw `auth.uid()` instead of `(select auth.uid())`, causing per-row re-evaluation instead of plan-time caching.
+
+7. **Pagination silently fails in the Flutter app.** `ProductListNotifier.loadMore()` catches exceptions but never surfaces an error state — a network blip during infinite-scroll just stops loading more products with no feedback.
+
+8. **Checkout confirmation race condition.** `pollOrderConfirmation()` throws `PaymentTimeoutException` after a fixed 15s even though the card may have already been charged and the order row just hasn't caught up to the webhook. No retry/backoff; user is told to "check Orders" with no guarantee the order is visible yet.
+
+### 🟡 P2 — UX / Consistency Issues
+
+9. Multi-vendor cart checkout silently creates **separate orders per shop** with no warning to the buyer about split shipping/costs.
+10. No debounce on marketplace search — fires a query per keystroke.
+11. No "no results" empty state for product search (just an empty grid).
+12. `MarketplaceCategoriesScreen` hardcodes 8 categories/emojis in Dart; dashboard also hardcodes the same category list in its product form. **No shared `categories` table** — both `products.category` and `promos.category` are free-text columns with no canonical source, so the two surfaces can drift independently.
+13. Hardcoded "3–5 business days" delivery estimate in `order_confirmation_screen.dart` instead of derived from shop/shipping data.
+14. Dashboard: bulk product delete/deactivate has no confirmation dialog.
+15. Dashboard: large tables (orders, disputes, payouts) have no pagination or search/filter UI, unlike the products table.
+16. Naming drift between "shop" (table/columns) and "vendor" (function names, `is_vendor()`, `vendor_ledgers`) for what's currently a 1:1 entity — confusing but not currently a bug.
+17. `marketplace_orders.seller_id` (nullable) appears redundant with `shop_id` (NOT NULL) — same entity reachable two ways; `idx_orders_seller` is flagged as an unused index, suggesting `seller_id` is vestigial and safe to deprecate after confirming no code path reads it.
+
+### ⚪ P3 — Polish
+
+18. FlyToCart add-to-cart animation has no Semantics label (screen-reader silent).
+19. Inventory shown as a raw count with no low-stock urgency messaging.
+20. Wishlist doesn't pass `variantId` when adding from `ProductCard`, risking duplicate wishlist entries per variant.
+21. No unit/widget tests anywhere in `lib/features/marketplace/`.
+22. Several unused indexes flagged by advisors (`idx_orders_seller`, `idx_shops_kyc_status`, `idx_products_shop_id`, `vendor_ledgers_order_id_idx`, `vendor_ledgers_status_idx`, `idx_shop_deletion_requests_owner_id`) — candidates for removal once confirmed against real query patterns, not blind deletion.
+23. Platform-wide (non-marketplace) advisor items noted for awareness, out of scope here: `auth_leaked_password_protection` disabled; several other `SECURITY DEFINER` functions (community counters, care dashboard, matching) are also anon/authenticated-executable.
 
 ---
 
-## Proposed Bottom Navigation — Per Module
+## Remediation Plan (sequenced)
+
+**Phase 1 — Security lockdown (do first, per your priority call)**
+- Fix `process_checkout` 4-arg overload: pin `search_path`, revoke `anon` execute, grant `authenticated` only. Diff against the already-correct 3-arg overload as the reference.
+- Populate `SUPABASE_SERVICE_ROLE_KEY` in the dashboard env (pull from Supabase project API settings — coordinate with whoever holds project access, this is a secret and should go through `vercel env`/local `.env`, never committed).
+- Switch KYC document links in `vendors-view.tsx` to signed URLs (mirror the existing pattern in `prescriptions-view.tsx`, 10-min expiry).
+
+**Phase 2 — Close functional gaps**
+- Implement the missing dashboard pages: `/admin/vendors/[id]`, `/vendor/orders/[id]`, `/admin/orders/[id]`, `/unauthorized`. Use existing table/detail patterns already established elsewhere in the app (e.g. `BuyerOrderDetailScreen`'s data shape as a reference for what an order detail view needs).
+- Fix Supabase RLS/index issues: drop duplicate `shop_deletion_requests` policies, add the 11 missing FK indexes, consolidate the `multiple_permissive_policies` tables, wrap `auth.uid()` in `(select ...)` on `user_addresses`.
+- Add error state surfacing to `ProductListNotifier.loadMore()`.
+- Add retry/backoff to `pollOrderConfirmation()` instead of a hard 15s timeout-to-failure.
+- Decide (ask user) whether mobile vendor flow is in-scope; if yes, scope as a separate follow-up plan — it's a large addition, not a quick fix.
+
+**Phase 3 — UX/consistency**
+- Introduce a real `categories` table (or at minimum a single shared constants source) consumed by both the Flutter app and the dashboard product form, replacing the two independently hardcoded lists.
+- Add search debounce + "no results" state in the Flutter marketplace search.
+- Add confirmation dialogs for destructive bulk actions in the dashboard.
+- Add pagination/search to admin orders/disputes/payouts tables, matching the existing products table pattern.
+- Surface per-shop split-shipping warning in the multi-vendor cart UI.
+
+**Phase 4 — Polish**
+- Semantics label for FlyToCart animation; low-stock messaging; fix wishlist variant scoping; add baseline widget/unit test coverage for checkout and cart logic; clean up confirmed-unused indexes after verifying against query logs.
+
+## Verification
+- Phase 1: Re-run Supabase advisors (`get_advisors`) to confirm `process_checkout` and `user_addresses` findings clear; manually attempt an anon RPC call against `process_checkout` (e.g. via `curl` with the anon key, no auth header) before/after to confirm it's rejected post-fix.
+- Phase 2: Click through the previously-dead dashboard links to confirm pages render; trigger a pagination failure (e.g. via airplane mode/throttling in the Flutter app) to confirm the new error state appears; run `flutter analyze` after any Dart changes.
+- Phase 3/4: Manual UI walkthrough of search, bulk actions, and cart checkout in both the Flutter app and dashboard; `flutter test` for new widget tests.
 
-### Global Shell (4 tabs)
-> **Shown when:** at `/home`, `/notifications`, `/activity`, `/me`
-
-| # | Icon | Label | Route | Accent | What's Here |
-|---|------|-------|-------|--------|-------------|
-| 1 | `home_rounded` | **Home** | `/home` | Tangerine | HubHomeScreen — bento grid launcher |
-| 2 | `notifications_rounded` | **Alerts** | `/notifications` | Sunny | Combined: social notifs + system notifs + promos |
-| 3 | `receipt_long_rounded` | **Activity** | `/activity` | Poppy | Order history + appointment history |
-| 4 | `manage_accounts_rounded` | **Me** | `/me` | Lilac | Pet profile, Settings, Addresses, Theme toggle |
-
-> **How to reach a module:** Tap any tile in the Home bento grid (Care tile → enters Care module). AllFeaturesSheet remains as a "see everything" overlay from Home.
-
----
-
-### Care Module (5 tabs)
-> **Shown when:** on `/care`, `/care/nutrition`, `/care/medical-vault`, `/care/walk`, `/care/appointments`
-> **Back to Home:** `←` in AppBar → `context.go('/home')`
-
-| # | Icon | Label | Route (bring inside shell) | Accent |
-|---|------|-------|--------------------------|--------|
-| 1 | `local_fire_department` | **Dashboard** | `/care` | Sunny |
-| 2 | `restaurant_rounded` | **Nutrition** | `/care/nutrition` | Mint |
-| 3 | `medical_services_rounded` | **Health** | `/care/health` | Poppy |
-| 4 | `directions_walk_rounded` | **Walk** | `/care/walk` | Tangerine |
-| 5 | `event_available_rounded` | **Vets** | `/care/appointments` | Lilac |
-
-> **Note:** `/care/medical-vault` → rename route to `/care/health` for clarity. Sub-screens like Edit vitals, Add record stay as `context.push` over this shell.
-
----
-
-### Social Module (4 tabs)
-> **Shown when:** on `/social`, `/social/stories`, `/social/communities`, `/social/profile/:id`
-> **Back to Home:** `←` in AppBar → `context.go('/home')`
-
-| # | Icon | Label | Route | Accent |
-|---|------|-------|-------|--------|
-| 1 | `dynamic_feed_rounded` | **Feed** | `/social` | Poppy |
-| 2 | `auto_stories_rounded` | **Stories** | `/social/stories` | Sunny |
-| 3 | `groups_rounded` | **Community** | `/social/communities` | Lilac |
-| 4 | `pets_rounded` | **My Pet** | `/social/profile/me` | Tangerine |
-
-> **Create Post FAB:** Stays as floating action button on Feed and Stories tabs (not a nav item).
-> **Social notifications:** Moved to global Alerts tab — no longer buried behind an AppBar icon.
-
----
-
-### Match Module (3 tabs)
-> **Shown when:** on `/matching`, `/matching/inbox`, `/matching/chat/:id`
-> **Back to Home:** `←` in AppBar → `context.go('/home')`
-
-| # | Icon | Label | Route | Accent |
-|---|------|-------|-------|--------|
-| 1 | `auto_awesome_rounded` | **Discover** | `/matching` | Lilac |
-| 2 | `chat_bubble_rounded` | **Messages** | `/matching/inbox` | Tangerine |
-| 3 | `favorite_rounded` | **Liked** | `/matching/liked` | Poppy |
-
-> **Note:** `/matching/liked` is a new screen to surface mutual matches / liked profiles. Chat screen (`/matching/chat/:id`) stays as a push _over_ the shell (full-screen, no nav bar — correct UX pattern like any messaging app).
-
----
-
-### Marketplace Module (4 tabs)
-> **Shown when:** on `/marketplace`, `/marketplace/categories`, `/marketplace/cart`, `/seller`, `/shop/:id`
-> **Back to Home:** `←` in AppBar → `context.go('/home')`
-
-| # | Icon | Label | Route | Accent | Badge |
-|---|------|-------|-------|--------|-------|
-| 1 | `storefront_rounded` | **Shop** | `/marketplace` | Mint | — |
-| 2 | `category_rounded` | **Browse** | `/marketplace/categories` | Tangerine | — |
-| 3 | `shopping_cart_rounded` | **Cart** | `/marketplace/cart` | Poppy | Item count |
-| 4 | `sell_rounded` | **Sell** | `/seller` | Sunny | — |
-
-> **My Orders:** Accessible from the global **Activity** tab (not buried in Marketplace).
-> **Cart badge:** Item count dot shown on Cart tab icon when `cartProvider.itemCount > 0`.
-
----
-
-## How to Get Back to Home from Any Module
-
-Three consistent back-to-home entry points — users can always escape:
-
-1. **AppBar back arrow `←`** (most visible): Every module screen shows `← Home` in top-left. `context.go('/home')` resets to global shell.
-2. **Long-press any nav tab** (power user): Long-pressing the first module tab pops to its root route (standard GoRouter `initialLocation: true`).
-3. **Double-tap Home tile (from AllFeaturesSheet)**: When already in a module, tapping the Home tile in AllFeaturesSheet = `context.go('/home')`.
-
-> There is **no persistent "Home" tab inside module navs** (unlike the current design where Home is always tab 1). This is intentional — it's cleaner and matches the Pathao mental model. The back arrow is unambiguous.
-
----
-
-## Technical Implementation Plan
-
-### Architecture Approach: Path-Aware Single Shell (Option A — Recommended)
-
-Keeps the existing `ShellRoute` and the beautiful `_FloatingNav` widget. Only adds:
-1. A `shellModuleProvider` (Riverpod `StateProvider`)
-2. Multiple `AppShellDestinationSet` configs
-3. `AnimatedSwitcher` wrapping the nav bar
-4. Path-to-module mapping in `AppShell._moduleFromPath()`
-
-This avoids a full GoRouter restructure to `StatefulShellRoute` (which would require rewriting all 12 route files and break the redirect system).
-
----
-
-### Phase 1 — New Provider & Destination Sets
-**New file:** `lib/core/navigation/shell_module_provider.dart`
-
-```dart
-enum ShellModule { global, care, social, matching, marketplace }
-
-final shellModuleProvider = StateProvider<ShellModule>(
-  (ref) => ShellModule.global,
-);
-```
-
-**New file:** `lib/core/navigation/shell_destinations.dart`
-
-Define 5 `List<AppShellDestination>` constants:
-- `globalDestinations` — 4 tabs (Home, Alerts, Activity, Me)
-- `careDestinations` — 5 tabs (Dashboard, Nutrition, Health, Walk, Vets)
-- `socialDestinations` — 4 tabs (Feed, Stories, Community, My Pet)
-- `matchingDestinations` — 3 tabs (Discover, Messages, Liked)
-- `marketplaceDestinations` — 4 tabs (Shop, Browse, Cart, Sell)
-
-Each set also carries `accentColors[]` and `moduleName` (for AppBar eyebrow).
-
----
-
-### Phase 2 — Update AppShell
-
-**Changes to `lib/core/widgets/app_shell.dart`:**
-
-1. **`_moduleFromPath(String location) → ShellModule`**
-   ```
-   /care*        → ShellModule.care
-   /social*      → ShellModule.social
-   /matching*    → ShellModule.matching
-   /marketplace*, /seller*, /shop*  → ShellModule.marketplace
-   default       → ShellModule.global
-   ```
-
-2. **`_selectedSubIndex(ShellModule module, String location) → int`**
-   Returns which tab within the current module's destination set is active.
-   - E.g., `/care/nutrition` → careDestinations index 1
-
-3. **Wrap `_FloatingNav` with `AnimatedSwitcher`:**
-   ```dart
-   AnimatedSwitcher(
-     duration: const Duration(milliseconds: 220),
-     transitionBuilder: (child, anim) => FadeTransition(
-       opacity: anim,
-       child: SlideTransition(
-         position: Tween(begin: Offset(0, 0.15), end: Offset.zero)
-           .animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
-         child: child,
-       ),
-     ),
-     child: _FloatingNav(
-       key: ValueKey(currentModule), // ← triggers AnimatedSwitcher on module change
-       destinations: _destinationsFor(currentModule),
-       selectedIndex: _selectedSubIndex(currentModule, location),
-       onSelect: (i) => context.go(_destinationsFor(currentModule)[i].path),
-       accentColors: _accentColorsFor(currentModule),
-     ),
-   ),
-   ```
-
-4. **Module AppBar back-arrow:** When `currentModule != ShellModule.global`, the `AppShellHeader` left side shows `← Home` button instead of the pet switcher pill. The pet switcher moves to the right side.
-
----
-
-### Phase 3 — Route Restructure
-
-**Move sub-routes inside the ShellRoute** (so they keep the module nav bar visible):
-
-| Route | Current | Proposed |
-|-------|---------|----------|
-| `/care/nutrition` | root push (loses nav) | inside ShellRoute ✅ |
-| `/care/medical-vault` | root push | inside ShellRoute ✅ |
-| `/care/walk` | root push | inside ShellRoute ✅ |
-| `/care/appointments` | root push | inside ShellRoute ✅ |
-| `/social/stories` | root push | inside ShellRoute ✅ |
-| `/social/communities` | root push | inside ShellRoute ✅ |
-| `/social/notifications` | root push | → merge into `/notifications` in global shell |
-| `/matching/inbox` | root push | inside ShellRoute ✅ |
-| `/activity` | root push (no nav) | inside ShellRoute, global tab ✅ |
-| `/offers` | root push (no nav) | → merge into `/notifications` as a tab or sub-section |
-| `/settings` | root push (no nav) | → `/me` screen inside ShellRoute global tab ✅ |
-
-**Keep as root pushes** (full-screen modal behavior — correct):
-- `/social/create-post`, `/social/create-story` — creation flows
-- `/matching/chat/:id` — immersive chat (like WhatsApp — no bottom nav)
-- `/social/post/:id` — full-screen post detail
-- `/marketplace/product/:id`, `/marketplace/order/:id` — detail screens
-- `/onboarding`, `/login`, `/register` — pre-auth
-
----
-
-### Phase 4 — New Screens to Create
-
-| Screen | Route | Why |
-|--------|-------|-----|
-| `NotificationsScreen` (merged) | `/notifications` | Unify social notifs + system notifs + promos into one global Alerts tab |
-| `MeScreen` | `/me` | Replaces `/settings` — adds pet management, theme, addresses, logout |
-| `MatchLikedScreen` | `/matching/liked` | Surfaces mutual matches / liked pets (using existing `matches` + `swipes` tables) |
-
----
-
-### Phase 5 — AppShellHeader Adaptation
-
-The header currently switches its trailing icons per tab index (0–4). With contextual nav, it needs to:
-
-| Context | Left side | Right side |
-|---------|-----------|------------|
-| Global/Home | Pet switcher pill | 🔥streak + 🔔 → /notifications + ⚙ → /me |
-| Global/Alerts | "ALERTS" label | Mark-all-read button |
-| Global/Activity | "ACTIVITY" label | Filter icon |
-| Global/Me | "MY PROFILE" label | — |
-| Care module | `← Home` + "CARE" | Walk shortcut + Dark mode toggle |
-| Social module | `← Home` + "PAWSFEED" | Search + Create (FAB instead?) |
-| Match module | `← Home` + "MATCH" | Preferences filter |
-| Market module | `← Home` + "MARKET" | Cart badge button |
-
----
-
-### Phase 6 — Accent Color & Visual Consistency
-
-Each module has a "pillar color" already defined in the current codebase:
-| Module | Color | `AppColors` |
-|--------|-------|-------------|
-| Home | Tangerine | `AppColors.tangerine` |
-| Care | Sunny | `AppColors.sunny` |
-| Social | Poppy | `AppColors.poppy` |
-| Match | Lilac | `AppColors.lilac` |
-| Marketplace | Mint | `AppColors.mint` |
-
-The `_FloatingNav` already uses `tabAccentColors[]`. With contextual nav, each module's 3–5 tabs will all use that module's pillar color for selected state — consistent with the existing spring animation system.
-
----
-
-## What Doesn't Change
-
-- The `_FloatingNav` widget + spring animation system — **no rebuild needed**
-- GoRouter redirect/auth logic in `RouterNotifier` — untouched
-- All 47 screen widgets — no changes to their internal code
-- All repositories, controllers, providers — untouched
-- The `_WideNavRail` for tablet — just needs the same destination config update
-- `AppShellDestination` class — unchanged
-
----
-
-## File Change Summary
-
-| File | Change Type | Description |
-|------|------------|-------------|
-| `lib/core/navigation/shell_destinations.dart` | **NEW** | 5 destination set configs |
-| `lib/core/navigation/shell_module_provider.dart` | **NEW** | `ShellModule` enum + Riverpod provider |
-| `lib/core/widgets/app_shell.dart` | **MODIFY** | Path→module mapping, AnimatedSwitcher nav, header adaptation |
-| `lib/core/router.dart` | **MODIFY** | Move 8 sub-routes inside ShellRoute; add `/notifications`, `/me`, `/matching/liked` |
-| `lib/core/navigation/app_shell_routes.dart` | **MODIFY** | Add Care/Social/Matching/Marketplace sub-routes inside shell |
-| `lib/features/social/social_routes.dart` | **MODIFY** | `/social/notifications` → delegates to `/notifications` |
-| `lib/features/settings/settings_routes.dart` | **MODIFY** | `/settings` → `/me` |
-| `lib/features/offers/offers_routes.dart` | **MODIFY** | Merge into `/notifications` tab |
-| `lib/features/home/presentation/screens/hub_home_screen.dart` | **MINOR** | Care/Social/Match/Market tiles navigate _into_ module root (already do) |
-| `lib/features/notifications/` | **NEW FEATURE** | `NotificationsScreen` (merged alerts + promos) |
-| `lib/features/profile/` | **NEW FEATURE** | `MeScreen` (profile hub: pets, settings, addresses) |
-| `lib/features/matching/presentation/screens/match_liked_screen.dart` | **NEW** | Liked/mutual matches screen |
-
-**Total new files: ~8 | Modified files: ~9 | Deleted/merged routes: 3**
-
----
-
-## Implementation Sequence (5 Phases — Confirm Before Each)
-
-```
-Phase 1 — Foundation
-  → Create shell_module_provider.dart + shell_destinations.dart
-  → Update app_shell.dart with path→module detection + AnimatedSwitcher
-  → Update app_shell_routes.dart with sub-routes inside shell
-  ✅ Confirm: nav swaps correctly when navigating to /care, /social, etc.
-
-Phase 2 — Global Shell Completion
-  → Create /notifications (merged) screen
-  → Create /me screen (profile + settings hub)
-  → Update AppShellHeader for module back-arrow
-  ✅ Confirm: global 4-tab nav works, notifications and Me screens load
-
-Phase 3 — Module Sub-route Migration
-  → Move care sub-routes inside shell
-  → Move social/stories + communities inside shell
-  → Move matching/inbox inside shell
-  ✅ Confirm: sub-screens retain the module nav bar
-
-Phase 4 — New Screens
-  → MatchLikedScreen for /matching/liked
-  → MeScreen sub-sections (pet switcher, settings, addresses)
-  ✅ Confirm: new tabs are functional
-
-Phase 5 — Polish
-  → AnimatedSwitcher slide/fade tuning
-  → Wide screen NavigationRail context-awareness
-  → AppBar eyebrow text updates per module
-  → Cart badge on Marketplace nav tab
-  ✅ Final review
-```
-
----
-
-Ready to start Phase 1 on your confirmation. Which phase would you like to begin with?

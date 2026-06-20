@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../data/models/match_mode.dart';
 import 'match_preferences_state.dart';
 
+const String _kMode = 'match_pref_mode';
 const String _kSpecies = 'match_pref_species';
 const String _kDistance = 'match_pref_distance_meters';
 const String _kAgeMin = 'match_pref_age_min';
@@ -22,17 +24,26 @@ class MatchPreferenceController extends Notifier<MatchPreferencesState> {
 
   Future<void> _loadFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
+    final mode = MatchMode.fromDb(prefs.getString(_kMode));
     final species = prefs.getStringList(_kSpecies) ?? const <String>[];
     final distance = prefs.getDouble(_kDistance) ?? kMatchMaxDistanceMeters;
     final ageMin = prefs.getInt(_kAgeMin) ?? 0;
     final ageMax = prefs.getInt(_kAgeMax) ?? kMatchMaxAgeYears;
     if (!ref.mounted) return;
     state = MatchPreferencesState(
+      mode: mode,
       selectedSpecies: List<String>.unmodifiable(species),
       maxDistanceMeters: distance,
       ageMinYears: ageMin,
       ageMaxYears: ageMax,
     );
+  }
+
+  void setMode(MatchMode mode) {
+    if (state.mode == mode) return;
+    state = state.copyWith(mode: mode);
+    SharedPreferences.getInstance()
+        .then((p) => p.setString(_kMode, mode.dbValue));
   }
 
   void setSelectedSpecies(List<String> species) {

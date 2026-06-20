@@ -75,17 +75,18 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                 child: Row(
                   children: [
                     IconButton(
+                      tooltip: 'Back',
                       icon: const Icon(Icons.arrow_back_rounded),
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                       onPressed: () => context.pop(),
                     ),
                     const SizedBox(width: 4),
                     Text(
                       'Notifications',
                       style: GoogleFonts.sora(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 20,
-                        color: AppColors.ink950,
+                        color: pt.ink950,
                       ),
                     ),
                     const Spacer(),
@@ -93,7 +94,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                       TextButton(
                         onPressed: () =>
                             ref.read(notificationsProvider.notifier).markAllRead(),
-                        child: Text(
+                        child: const Text(
                           'Mark all read',
                           style: TextStyle(
                             fontSize: 13,
@@ -107,6 +108,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
               )
             else
               SizedBox(height: topPad + 76),
+            const SizedBox(height: 16),
 
             // ── Pathao-style flat tab bar ──────────────────────────────────
             Container(
@@ -131,7 +133,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                 labelColor: AppColors.poppy,
                 unselectedLabelColor: AppColors.ink500,
                 labelStyle: const TextStyle(
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   fontSize: 14,
                 ),
                 unselectedLabelStyle: const TextStyle(
@@ -160,7 +162,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 11,
-                                fontWeight: FontWeight.w900,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
@@ -186,8 +188,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                 data: (_) => TabBarView(
                   controller: _tabCtrl,
                   children: [
-                    _UpdatesTab(notifications: updates, pt: pt),
-                    _PromotionsTab(pt: pt),
+                    KeepAliveTab(child: _UpdatesTab(notifications: updates, pt: pt)),
+                    KeepAliveTab(child: _PromotionsTab(pt: pt)),
                   ],
                 ),
               ),
@@ -336,7 +338,7 @@ class _PromoNotifCard extends StatelessWidget {
                   promo.code,
                   style: GoogleFonts.sora(
                     fontSize: 15,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                     color: pt.ink950,
                     letterSpacing: 0.5,
                   ),
@@ -352,7 +354,7 @@ class _PromoNotifCard extends StatelessWidget {
                   promo.discountLabel,
                   style: const TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.tangerine,
                   ),
                 ),
@@ -378,20 +380,25 @@ class _PromoNotifCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              GestureDetector(
-                onTap: () => HapticFeedback.selectionClick(),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: AppColors.poppy,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Text(
-                    'Copy code',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
+              Semantics(
+                label: 'Copy referral code',
+                button: true,
+                child: InkWell(
+                  onTap: () => HapticFeedback.selectionClick(),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: AppColors.poppy,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Text(
+                      'Copy code',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -427,12 +434,14 @@ class _NotificationTile extends StatelessWidget {
           : AppColors.poppy.withAlpha(12),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        leading: CircleAvatar(
-          radius: 22,
-          backgroundColor: _iconColor(notification.type).withAlpha(30),
-          child: Text(
-            _emoji(notification.type),
-            style: const TextStyle(fontSize: 20),
+        leading: ExcludeSemantics(
+          child: CircleAvatar(
+            radius: 22,
+            backgroundColor: _iconColor(notification.type).withAlpha(30),
+            child: Text(
+              _emoji(notification.type),
+              style: const TextStyle(fontSize: 20),
+            ),
           ),
         ),
         title: Text(

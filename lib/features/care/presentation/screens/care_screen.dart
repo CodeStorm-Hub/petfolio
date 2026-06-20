@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -193,7 +193,11 @@ class _CareScreenState extends ConsumerState<CareScreen> {
               )
             : const TailWagLoader(),
       );
-      return Scaffold(backgroundColor: pt.surface1, body: Center(child: body));
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (_, _) => context.go('/home'),
+        child: Scaffold(backgroundColor: pt.surface1, body: Center(child: body)),
+      );
     }
 
     final dashboard = ref.watch(careDashboardProvider);
@@ -221,7 +225,10 @@ class _CareScreenState extends ConsumerState<CareScreen> {
           ),
         );
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (_, _) => context.go('/home'),
+      child: Scaffold(
       backgroundColor: pt.surface1,
       floatingActionButton: FloatingActionButton(
         key: const ValueKey<String>('care_fab_add_task'),
@@ -244,8 +251,8 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // ── Space for floating hero card overlap (card at bottom:-28) ──
-                            const SizedBox(height: 44.0),
+                            // ── Streak freeze chip ─────────────────────────
+                            _StreakFreezeRow(dashboard: dashboard),
                             // ── Date picker ────────────────────────────────
                             CareDatePicker(
                               selectedDate: dashboard.selectedDate,
@@ -263,39 +270,49 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                   final active = _careFilter == chip.$1;
                                   return Padding(
                                     padding: const EdgeInsets.only(right: 8),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        HapticFeedback.selectionClick();
-                                        setState(() => _careFilter = chip.$1);
-                                      },
-                                      child: AnimatedContainer(
-                                        duration: const Duration(milliseconds: 160),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14, vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: active ? AppColors.poppy : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(999),
-                                          border: Border.all(
-                                            color: active ? AppColors.poppy : pt.line,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(chip.$3, style: const TextStyle(fontSize: 13)),
-                                            const SizedBox(width: 5),
-                                            Text(
-                                              chip.$2,
-                                              overflow: TextOverflow.visible,
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w700,
-                                                color: active ? Colors.white : pt.ink950,
+                                    child: Semantics(
+                                      label: '${chip.$2} filter',
+                                      button: true,
+                                      selected: active,
+                                      child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(999),
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          onTap: () {
+                                            HapticFeedback.selectionClick();
+                                            setState(() => _careFilter = chip.$1);
+                                          },
+                                          child: AnimatedContainer(
+                                            duration: const Duration(milliseconds: 160),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 14, vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: active ? AppColors.poppy : Colors.transparent,
+                                              borderRadius: BorderRadius.circular(999),
+                                              border: Border.all(
+                                                color: active ? AppColors.poppy : pt.line,
                                               ),
                                             ),
-                                          ],
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(chip.$3, style: const TextStyle(fontSize: 13)),
+                                                const SizedBox(width: 5),
+                                                Text(
+                                                  chip.$2,
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: active ? Colors.white : pt.ink950,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
+                                      ),
                                       ),
                                     ),
                                   );
@@ -333,8 +350,8 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                       borderRadius: BorderRadius.circular(22),
                                       child: AnimatedContainer(
                                         duration: PetfolioThemeExtension.durationSm,
-                                        width: 44,
-                                        height: 44,
+                                        width: 48,
+                                        height: 48,
                                         decoration: BoxDecoration(
                                           color: AppColors.lilacSoft,
                                           shape: BoxShape.circle,
@@ -366,7 +383,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                             ),
                             // ── Config error — persistent banner ──────────
                             if (aiState.isConfigError)
-                              _AiConfigErrorBanner(),
+                              const _AiConfigErrorBanner(),
                             // ── AI empty-state full banner ─────────────────
                             if (dashboard.tasks.value?.isEmpty == true &&
                                 !aiState.isConfigError)
@@ -386,7 +403,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                               categoryFilter: _careFilter,
                             ),
                             const SizedBox(height: 28),
-                            PfSectionTitle(
+                            const PfSectionTitle(
                               title: 'This week',
                               accent: AppColors.mint,
                             ),
@@ -425,6 +442,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                   );
                 },
               ),
+      ),
     );
   }
 }
@@ -613,8 +631,74 @@ class _DoneCounter extends StatelessWidget {
           allDone ? 'All done! 🎉' : '$done/$total done',
           style: TextStyle(
             fontSize: 11,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             color: allDone ? AppColors.mint700 : AppColors.sunny700,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Streak Freeze chip ──────────────────────────────────────────────────────
+
+class _StreakFreezeRow extends ConsumerWidget {
+  const _StreakFreezeRow({required this.dashboard});
+
+  final DailyRoutineState dashboard;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final freezes = dashboard.streak.maybeWhen(
+      data: (s) => s.freezesAvailable,
+      orElse: () => 0,
+    );
+    if (freezes <= 0) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => ref.read(careDashboardProvider.notifier).useFreeze(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.info.withAlpha(12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.info.withAlpha(60)),
+              ),
+              child: Row(
+                children: [
+                  const Text('🧊', style: TextStyle(fontSize: 20)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Streak Freeze available',
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Text(
+                          '$freezes freeze${freezes == 1 ? '' : 's'} remaining — tap to protect your streak',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.shield_outlined,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

@@ -115,7 +115,7 @@ class _PawToggleState extends State<PawToggle> with SingleTickerProviderStateMix
                             ],
                           ),
                           alignment: Alignment.center,
-                          child: Text(
+                          child: const Text(
                             '🐾',
                             style: TextStyle(fontSize: _thumbD * 0.52),
                           ),

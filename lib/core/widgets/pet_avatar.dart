@@ -39,6 +39,7 @@ class PetAvatar extends StatelessWidget {
     this.showRing = false,
     this.onTap,
     this.borderColor,
+    this.heroTag,
   });
 
   final String? imageUrl;
@@ -50,6 +51,7 @@ class PetAvatar extends StatelessWidget {
   final bool showRing;
   final VoidCallback? onTap;
   final Color? borderColor;
+  final String? heroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -123,11 +125,17 @@ class PetAvatar extends StatelessWidget {
       );
     }
 
-    return Semantics(
+    Widget result = Semantics(
       label: semanticLabel.isNotEmpty ? semanticLabel : null,
       image: imageUrl != null,
       child: avatar,
     );
+
+    if (heroTag != null) {
+      result = Hero(tag: heroTag!, child: result);
+    }
+
+    return result;
   }
 }
 

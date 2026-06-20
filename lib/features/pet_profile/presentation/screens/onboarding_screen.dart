@@ -220,7 +220,10 @@ class _OnboardingHeader extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
         child: Row(
           children: [
-            GestureDetector(
+            Semantics(
+              label: 'Back',
+              button: true,
+              child: GestureDetector(
               onTap: onBack,
               child: Container(
                 width: 40,
@@ -228,13 +231,14 @@ class _OnboardingHeader extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(color: AppColors.shadowE1L, blurRadius: 2, offset: const Offset(0, 1)),
+                  boxShadow: const [
+                    BoxShadow(color: AppColors.shadowE1L, blurRadius: 2, offset: Offset(0, 1)),
                   ],
                 ),
                 alignment: Alignment.center,
                 child: const Icon(Icons.arrow_back_rounded, size: 22),
               ),
+            ),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -447,7 +451,11 @@ class _StepSpecies extends StatelessWidget {
                 final on = selectedSpecies == s;
                 final color = s.resolvedAccent(isDark);
                 
-                return GestureDetector(
+                return Semantics(
+                  label: '${s.label}${on ? ", selected" : ""}',
+                  selected: on,
+                  button: true,
+                  child: GestureDetector(
                   onTap: () => onSelect(s),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 240),
@@ -477,7 +485,7 @@ class _StepSpecies extends StatelessWidget {
                         Text(
                           s.label,
                           style: TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.w800,
+                            fontSize: 13, fontWeight: FontWeight.w700,
                             color: on ? Colors.white : pt.ink950,
                           ),
                           maxLines: 1,
@@ -485,6 +493,7 @@ class _StepSpecies extends StatelessWidget {
                       ],
                     ),
                   ),
+                ),
                 );
               },
             ),
@@ -571,7 +580,10 @@ class _StepName extends StatelessWidget {
           Wrap(
             spacing: 8, runSpacing: 8,
             children: ['Mochi', 'Biscuit', 'Pepper', 'Luna', 'Coco', 'Tofu'].map((n) {
-              return GestureDetector(
+              return Semantics(
+                label: n,
+                button: true,
+                child: GestureDetector(
                 onTap: () => onNameChanged(n),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -582,6 +594,7 @@ class _StepName extends StatelessWidget {
                   ),
                   child: Text(n, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: pt.ink700)),
                 ),
+              ),
               );
             }).toList(),
           ),
@@ -773,7 +786,11 @@ class _StepPersonality extends StatelessWidget {
             spacing: 8, runSpacing: 8,
             children: traits.map((t) {
               final on = personality.contains(t['id']);
-              return GestureDetector(
+              return Semantics(
+                label: '${t['id']}${on ? ", selected" : ""}',
+                selected: on,
+                button: true,
+                child: GestureDetector(
                 onTap: () => onToggle(t['id']!),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
@@ -793,11 +810,12 @@ class _StepPersonality extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         t['id']!,
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: on ? Colors.white : pt.ink950),
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: on ? Colors.white : pt.ink950),
                       ),
                     ],
                   ),
                 ),
+              ),
               );
             }).toList(),
           ),

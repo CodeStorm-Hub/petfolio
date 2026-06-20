@@ -70,7 +70,8 @@ class _CommunityDetailScreenState
         surfaceTintColor: Colors.transparent,
         actions: [
           IconButton(
-            icon: Icon(
+            tooltip: 'New post',
+            icon: const Icon(
               Icons.add_rounded,
               color: AppColors.lilac,
             ),
@@ -245,7 +246,10 @@ class _PostCard extends ConsumerWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              GestureDetector(
+              Semantics(
+                label: post.isLiked ? 'Unlike post' : 'Like post',
+                button: true,
+                child: GestureDetector(
                 onTap: () => ref
                     .read(communityPostsProvider.notifier)
                     .toggleLike(post),
@@ -266,6 +270,7 @@ class _PostCard extends ConsumerWidget {
                     ),
                   ],
                 ),
+              ),
               ),
             ],
           ),
@@ -298,7 +303,7 @@ class _PetAvatar extends StatelessWidget {
         color: AppColors.lilac.withValues(alpha: 0.2),
         shape: BoxShape.circle,
       ),
-      child: Icon(Icons.pets_rounded,
+      child: const Icon(Icons.pets_rounded,
           size: 16, color: AppColors.lilac),
     );
   }

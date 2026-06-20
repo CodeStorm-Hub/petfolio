@@ -40,32 +40,42 @@ class SocialScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final petId = ref.watch(activePetIdProvider);
-    if (petId != null) return _SocialView(key: ValueKey(petId), petId: petId);
+    if (petId != null) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (_, _) => context.go('/home'),
+        child: _SocialView(key: ValueKey(petId), petId: petId),
+      );
+    }
 
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final petsAsync = ref.watch(petListProvider);
-    return Scaffold(
-      backgroundColor: pt.surface1,
-      body: Center(
-        child: petsAsync.when(
-          skipLoadingOnReload: true,
-          loading: () => const TailWagLoader(),
-          error: (_, _) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
-              const SizedBox(height: 12),
-              Text('Connection error',
-                  style: TextStyle(fontSize: 15, color: pt.ink500)),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: () => ref.invalidate(petListProvider),
-                icon: const Icon(Icons.refresh_rounded, size: 16),
-                label: const Text('Retry'),
-              ),
-            ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (_, _) => context.go('/home'),
+      child: Scaffold(
+        backgroundColor: pt.surface1,
+        body: Center(
+          child: petsAsync.when(
+            skipLoadingOnReload: true,
+            loading: () => const TailWagLoader(),
+            error: (_, _) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
+                const SizedBox(height: 12),
+                Text('Connection error',
+                    style: TextStyle(fontSize: 15, color: pt.ink500)),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: () => ref.invalidate(petListProvider),
+                  icon: const Icon(Icons.refresh_rounded, size: 16),
+                  label: const Text('Retry'),
+                ),
+              ],
+            ),
+            data: (_) => const TailWagLoader(),
           ),
-          data: (_) => const TailWagLoader(),
         ),
       ),
     );
@@ -117,18 +127,6 @@ class _SocialViewState extends ConsumerState<_SocialView> {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isWide = screenWidth >= ResponsiveLayout.mobileMax;
-    final activePet = ref.watch(activePetControllerProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    Color headerColor = AppColors.poppy; // default social accent
-    if (activePet != null) {
-      headerColor = activePet.speciesEnum.resolvedAccent(isDark);
-      final dbAccent = activePet.accentColor;
-      if (dbAccent != null && dbAccent.isNotEmpty && dbAccent != '#FF6B9D') {
-        headerColor = AppColors.fromHexString(dbAccent, fallback: headerColor);
-      }
-    }
-
     final headerHeight = MediaQuery.paddingOf(context).top + 92.0;
 
     Widget content = Stack(
@@ -237,19 +235,6 @@ class _SocialViewState extends ConsumerState<_SocialView> {
           ),
         ),
 
-        // Wave header floats on top — waveColor: transparent so the WavePainter
-        // draws nothing below the curve; content scrolls through underneath.
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: WaveHeader(
-            color: headerColor,
-            waveColor: Colors.transparent,
-            height: MediaQuery.paddingOf(context).top + 100.0,
-            child: const SizedBox.shrink(),
-          ),
-        ),
       ],
     );
 
@@ -295,14 +280,23 @@ class _IconBtn extends StatelessWidget {
     final defaultBg = pt.surface2;
     final defaultColor = pt.ink950;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(color: defaultBg, shape: BoxShape.circle),
-        alignment: Alignment.center,
-        child: Icon(icon, size: 20, color: defaultColor),
+    return Semantics(
+      button: true,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: SizedBox.square(
+          dimension: 48,
+          child: Center(
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(color: defaultBg, shape: BoxShape.circle),
+              alignment: Alignment.center,
+              child: Icon(icon, size: 20, color: defaultColor),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -502,7 +496,7 @@ class _StoriesRow extends ConsumerWidget {
                   isAdd: true,
                   onTap: () {
                     ref.read(createPostControllerProvider.notifier).setIsStory(true);
-                    context.push('/social/create-story');
+                    context.push('/social/create-post?mode=story');
                   },
                 ),
 
@@ -603,7 +597,7 @@ class _OwnStoryOptionsSheet extends ConsumerWidget {
               onTap: () {
                 Navigator.pop(context);
                 ref.read(createPostControllerProvider.notifier).setIsStory(true);
-                context.push('/social/create-story');
+                context.push('/social/create-post?mode=story');
               },
             ),
           ],
@@ -679,7 +673,10 @@ class _StoryItemState extends State<_StoryItem>
     final ink950 = Theme.of(context).extension<PetfolioThemeExtension>()!.ink950;
 
     if (widget.isAdd) {
-      return GestureDetector(
+      return Semantics(
+        label: 'Add story',
+        button: true,
+        child: GestureDetector(
         onTap: widget.onTap,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -724,6 +721,7 @@ class _StoryItemState extends State<_StoryItem>
             Text(widget.label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ink950)),
           ],
         ),
+      ),
       );
     }
 
@@ -763,7 +761,10 @@ class _StoryItemState extends State<_StoryItem>
       return body;
     }
 
-    return GestureDetector(
+    return Semantics(
+      label: '${widget.label}\'s story',
+      button: true,
+      child: GestureDetector(
       onTap: widget.onTap,
       onLongPress: widget.onLongPress,
       child: Column(
@@ -801,6 +802,7 @@ class _StoryItemState extends State<_StoryItem>
           ),
         ],
       ),
+    ),
     );
   }
 }
@@ -1078,18 +1080,18 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
+                    InkWell(
                       onTap: () => context.push('/social/profile/${widget.post.petId}'),
+                      customBorder: const CircleBorder(),
                       child: Container(
                         width: 50,
                         height: 50,
-                        decoration: ShapeDecoration(
-                          shape: const CircleBorder(),
+                        decoration: const ShapeDecoration(
+                          shape: CircleBorder(),
                           gradient: SweepGradient(
                             startAngle: 3.84,
                             endAngle: 3.84 + math.pi * 2,
-                            colors: const [
+                            colors: [
                               AppColors.tangerine,
                               AppColors.poppy,
                               AppColors.sunny,
@@ -1122,9 +1124,9 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
+                      child: InkWell(
                         onTap: () => context.push('/social/profile/${widget.post.petId}'),
+                        borderRadius: BorderRadius.circular(8),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -1159,7 +1161,11 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
               ),
               
               // Photo
-              GestureDetector(
+              Semantics(
+                label: 'View post',
+                hint: 'Double tap to like',
+                button: true,
+                child: GestureDetector(
                 onTap: widget.onTapPost,
                 onDoubleTapDown: (details) {
                   _doubleTapPosition = details;
@@ -1256,7 +1262,8 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   ),
                 ),
               ),
-              
+              ),
+
               // Caption with hashtag highlighting
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -1269,22 +1276,22 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   ),
                 ),
               ),
-              
+
               // Reaction stack visualizer
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: Row(
                   children: [
                     // Overlapping emoji circles — fixed width prevents overflow
-                    SizedBox(
+                    const SizedBox(
                       width: 24 + 18 + 18, // 3 circles × 24px, overlapping by 6px each
                       height: 24,
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          const Positioned(left: 0,  child: _EmojiCircle(emoji: '🐾', color: AppColors.tangerine, index: 0)),
-                          const Positioned(left: 18, child: _EmojiCircle(emoji: '❤️', color: AppColors.poppy,     index: 0)),
-                          const Positioned(left: 36, child: _EmojiCircle(emoji: '🦴', color: AppColors.sunny,     index: 0)),
+                          Positioned(left: 0,  child: _EmojiCircle(emoji: '🐾', color: AppColors.tangerine, index: 0)),
+                          Positioned(left: 18, child: _EmojiCircle(emoji: '❤️', color: AppColors.poppy,     index: 0)),
+                          Positioned(left: 36, child: _EmojiCircle(emoji: '🦴', color: AppColors.sunny,     index: 0)),
                         ],
                       ),
                     ),
@@ -1309,7 +1316,11 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 child: Row(
                   children: [
                     Expanded(
-                      child: Listener(
+                      child: Semantics(
+                        label: _reacted != null ? 'Reacted: $_reacted' : 'React to post',
+                        hint: 'Hold to pick a reaction',
+                        button: true,
+                        child: Listener(
                         onPointerDown: _onPointerDown,
                         onPointerMove: _onPointerMove,
                         onPointerUp: _onPointerUp,
@@ -1341,6 +1352,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                           ),
                         ),
                       ),
+                    ),
                     ),
                     Expanded(
                       child: _ActionBtn(
@@ -1396,7 +1408,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                       color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(999),
                       boxShadow: [
-                        BoxShadow(color: Color(0x4D783C14), blurRadius: 32, spreadRadius: -10, offset: const Offset(0, 16)),
+                        const BoxShadow(color: AppColors.shadowGlassL, blurRadius: 32, spreadRadius: -10, offset: Offset(0, 16)),
                         BorderSide(color: Theme.of(context).extension<PetfolioThemeExtension>()!.line).toBoxShadow()
                       ],
                     ),
@@ -1461,11 +1473,11 @@ class _ActionBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final style = Theme.of(context).textTheme.labelLarge?.copyWith(color: pt.ink700);
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
-      child: Container(
-        height: 44,
-        color: Colors.transparent,
+      borderRadius: BorderRadius.circular(8),
+      child: SizedBox(
+        height: 48,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1501,7 +1513,10 @@ class _ReactPickerBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    return GestureDetector(
+    return Semantics(
+      label: kind,
+      button: true,
+      child: GestureDetector(
       onTapDown: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
@@ -1520,6 +1535,7 @@ class _ReactPickerBtn extends StatelessWidget {
           child: Text(emoji, style: const TextStyle(fontSize: 24)),
         ),
       ),
+    ),
     );
   }
 }
@@ -1613,18 +1629,19 @@ class _VideoPostPlayerState extends State<_VideoPostPlayer> {
         ),
         Padding(
           padding: const EdgeInsets.all(8),
-          child: GestureDetector(
-            onTap: _toggleMute,
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Icon(
-                _muted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
-                color: Colors.white,
-                size: 16,
+          child: ClipOval(
+            child: Material(
+              color: Colors.black54,
+              child: InkWell(
+                onTap: _toggleMute,
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Icon(
+                    _muted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
               ),
             ),
           ),

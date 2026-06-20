@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CareStreak {
 
-@JsonKey(name: 'pet_id') String get petId;@JsonKey(name: 'current_streak') int get currentStreak;@JsonKey(name: 'last_completion_date', fromJson: _lastCompletionFromJson, toJson: _lastCompletionToJson) DateTime? get lastCompletionDate;@JsonKey(name: 'best_streak') int get bestStreak;
+@JsonKey(name: 'pet_id') String get petId;@JsonKey(name: 'current_streak') int get currentStreak;@JsonKey(name: 'last_completion_date', fromJson: _lastCompletionFromJson, toJson: _lastCompletionToJson) DateTime? get lastCompletionDate;@JsonKey(name: 'best_streak') int get bestStreak;@JsonKey(name: 'freezes_available') int get freezesAvailable;
 /// Create a copy of CareStreak
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $CareStreakCopyWith<CareStreak> get copyWith => _$CareStreakCopyWithImpl<CareStr
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CareStreak&&(identical(other.petId, petId) || other.petId == petId)&&(identical(other.currentStreak, currentStreak) || other.currentStreak == currentStreak)&&(identical(other.lastCompletionDate, lastCompletionDate) || other.lastCompletionDate == lastCompletionDate)&&(identical(other.bestStreak, bestStreak) || other.bestStreak == bestStreak));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CareStreak&&(identical(other.petId, petId) || other.petId == petId)&&(identical(other.currentStreak, currentStreak) || other.currentStreak == currentStreak)&&(identical(other.lastCompletionDate, lastCompletionDate) || other.lastCompletionDate == lastCompletionDate)&&(identical(other.bestStreak, bestStreak) || other.bestStreak == bestStreak)&&(identical(other.freezesAvailable, freezesAvailable) || other.freezesAvailable == freezesAvailable));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,petId,currentStreak,lastCompletionDate,bestStreak);
+int get hashCode => Object.hash(runtimeType,petId,currentStreak,lastCompletionDate,bestStreak,freezesAvailable);
 
 @override
 String toString() {
-  return 'CareStreak(petId: $petId, currentStreak: $currentStreak, lastCompletionDate: $lastCompletionDate, bestStreak: $bestStreak)';
+  return 'CareStreak(petId: $petId, currentStreak: $currentStreak, lastCompletionDate: $lastCompletionDate, bestStreak: $bestStreak, freezesAvailable: $freezesAvailable)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $CareStreakCopyWith<$Res>  {
   factory $CareStreakCopyWith(CareStreak value, $Res Function(CareStreak) _then) = _$CareStreakCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'pet_id') String petId,@JsonKey(name: 'current_streak') int currentStreak,@JsonKey(name: 'last_completion_date', fromJson: _lastCompletionFromJson, toJson: _lastCompletionToJson) DateTime? lastCompletionDate,@JsonKey(name: 'best_streak') int bestStreak
+@JsonKey(name: 'pet_id') String petId,@JsonKey(name: 'current_streak') int currentStreak,@JsonKey(name: 'last_completion_date', fromJson: _lastCompletionFromJson, toJson: _lastCompletionToJson) DateTime? lastCompletionDate,@JsonKey(name: 'best_streak') int bestStreak,@JsonKey(name: 'freezes_available') int freezesAvailable
 });
 
 
@@ -65,12 +65,13 @@ class _$CareStreakCopyWithImpl<$Res>
 
 /// Create a copy of CareStreak
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? petId = null,Object? currentStreak = null,Object? lastCompletionDate = freezed,Object? bestStreak = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? petId = null,Object? currentStreak = null,Object? lastCompletionDate = freezed,Object? bestStreak = null,Object? freezesAvailable = null,}) {
   return _then(_self.copyWith(
 petId: null == petId ? _self.petId : petId // ignore: cast_nullable_to_non_nullable
 as String,currentStreak: null == currentStreak ? _self.currentStreak : currentStreak // ignore: cast_nullable_to_non_nullable
 as int,lastCompletionDate: freezed == lastCompletionDate ? _self.lastCompletionDate : lastCompletionDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,bestStreak: null == bestStreak ? _self.bestStreak : bestStreak // ignore: cast_nullable_to_non_nullable
+as int,freezesAvailable: null == freezesAvailable ? _self.freezesAvailable : freezesAvailable // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -156,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'pet_id')  String petId, @JsonKey(name: 'current_streak')  int currentStreak, @JsonKey(name: 'last_completion_date', fromJson: _lastCompletionFromJson, toJson: _lastCompletionToJson)  DateTime? lastCompletionDate, @JsonKey(name: 'best_streak')  int bestStreak)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'pet_id')  String petId, @JsonKey(name: 'current_streak')  int currentStreak, @JsonKey(name: 'last_completion_date', fromJson: _lastCompletionFromJson, toJson: _lastCompletionToJson)  DateTime? lastCompletionDate, @JsonKey(name: 'best_streak')  int bestStreak, @JsonKey(name: 'freezes_available')  int freezesAvailable)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CareStreak() when $default != null:
-return $default(_that.petId,_that.currentStreak,_that.lastCompletionDate,_that.bestStreak);case _:
+return $default(_that.petId,_that.currentStreak,_that.lastCompletionDate,_that.bestStreak,_that.freezesAvailable);case _:
   return orElse();
 
 }
@@ -177,10 +178,10 @@ return $default(_that.petId,_that.currentStreak,_that.lastCompletionDate,_that.b
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'pet_id')  String petId, @JsonKey(name: 'current_streak')  int currentStreak, @JsonKey(name: 'last_completion_date', fromJson: _lastCompletionFromJson, toJson: _lastCompletionToJson)  DateTime? lastCompletionDate, @JsonKey(name: 'best_streak')  int bestStreak)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'pet_id')  String petId, @JsonKey(name: 'current_streak')  int currentStreak, @JsonKey(name: 'last_completion_date', fromJson: _lastCompletionFromJson, toJson: _lastCompletionToJson)  DateTime? lastCompletionDate, @JsonKey(name: 'best_streak')  int bestStreak, @JsonKey(name: 'freezes_available')  int freezesAvailable)  $default,) {final _that = this;
 switch (_that) {
 case _CareStreak():
-return $default(_that.petId,_that.currentStreak,_that.lastCompletionDate,_that.bestStreak);case _:
+return $default(_that.petId,_that.currentStreak,_that.lastCompletionDate,_that.bestStreak,_that.freezesAvailable);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +198,10 @@ return $default(_that.petId,_that.currentStreak,_that.lastCompletionDate,_that.b
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'pet_id')  String petId, @JsonKey(name: 'current_streak')  int currentStreak, @JsonKey(name: 'last_completion_date', fromJson: _lastCompletionFromJson, toJson: _lastCompletionToJson)  DateTime? lastCompletionDate, @JsonKey(name: 'best_streak')  int bestStreak)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'pet_id')  String petId, @JsonKey(name: 'current_streak')  int currentStreak, @JsonKey(name: 'last_completion_date', fromJson: _lastCompletionFromJson, toJson: _lastCompletionToJson)  DateTime? lastCompletionDate, @JsonKey(name: 'best_streak')  int bestStreak, @JsonKey(name: 'freezes_available')  int freezesAvailable)?  $default,) {final _that = this;
 switch (_that) {
 case _CareStreak() when $default != null:
-return $default(_that.petId,_that.currentStreak,_that.lastCompletionDate,_that.bestStreak);case _:
+return $default(_that.petId,_that.currentStreak,_that.lastCompletionDate,_that.bestStreak,_that.freezesAvailable);case _:
   return null;
 
 }
@@ -212,13 +213,14 @@ return $default(_that.petId,_that.currentStreak,_that.lastCompletionDate,_that.b
 @JsonSerializable()
 
 class _CareStreak implements CareStreak {
-  const _CareStreak({@JsonKey(name: 'pet_id') required this.petId, @JsonKey(name: 'current_streak') required this.currentStreak, @JsonKey(name: 'last_completion_date', fromJson: _lastCompletionFromJson, toJson: _lastCompletionToJson) this.lastCompletionDate, @JsonKey(name: 'best_streak') required this.bestStreak});
+  const _CareStreak({@JsonKey(name: 'pet_id') required this.petId, @JsonKey(name: 'current_streak') required this.currentStreak, @JsonKey(name: 'last_completion_date', fromJson: _lastCompletionFromJson, toJson: _lastCompletionToJson) this.lastCompletionDate, @JsonKey(name: 'best_streak') required this.bestStreak, @JsonKey(name: 'freezes_available') this.freezesAvailable = 2});
   factory _CareStreak.fromJson(Map<String, dynamic> json) => _$CareStreakFromJson(json);
 
 @override@JsonKey(name: 'pet_id') final  String petId;
 @override@JsonKey(name: 'current_streak') final  int currentStreak;
 @override@JsonKey(name: 'last_completion_date', fromJson: _lastCompletionFromJson, toJson: _lastCompletionToJson) final  DateTime? lastCompletionDate;
 @override@JsonKey(name: 'best_streak') final  int bestStreak;
+@override@JsonKey(name: 'freezes_available') final  int freezesAvailable;
 
 /// Create a copy of CareStreak
 /// with the given fields replaced by the non-null parameter values.
@@ -233,16 +235,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CareStreak&&(identical(other.petId, petId) || other.petId == petId)&&(identical(other.currentStreak, currentStreak) || other.currentStreak == currentStreak)&&(identical(other.lastCompletionDate, lastCompletionDate) || other.lastCompletionDate == lastCompletionDate)&&(identical(other.bestStreak, bestStreak) || other.bestStreak == bestStreak));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CareStreak&&(identical(other.petId, petId) || other.petId == petId)&&(identical(other.currentStreak, currentStreak) || other.currentStreak == currentStreak)&&(identical(other.lastCompletionDate, lastCompletionDate) || other.lastCompletionDate == lastCompletionDate)&&(identical(other.bestStreak, bestStreak) || other.bestStreak == bestStreak)&&(identical(other.freezesAvailable, freezesAvailable) || other.freezesAvailable == freezesAvailable));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,petId,currentStreak,lastCompletionDate,bestStreak);
+int get hashCode => Object.hash(runtimeType,petId,currentStreak,lastCompletionDate,bestStreak,freezesAvailable);
 
 @override
 String toString() {
-  return 'CareStreak(petId: $petId, currentStreak: $currentStreak, lastCompletionDate: $lastCompletionDate, bestStreak: $bestStreak)';
+  return 'CareStreak(petId: $petId, currentStreak: $currentStreak, lastCompletionDate: $lastCompletionDate, bestStreak: $bestStreak, freezesAvailable: $freezesAvailable)';
 }
 
 
@@ -253,7 +255,7 @@ abstract mixin class _$CareStreakCopyWith<$Res> implements $CareStreakCopyWith<$
   factory _$CareStreakCopyWith(_CareStreak value, $Res Function(_CareStreak) _then) = __$CareStreakCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'pet_id') String petId,@JsonKey(name: 'current_streak') int currentStreak,@JsonKey(name: 'last_completion_date', fromJson: _lastCompletionFromJson, toJson: _lastCompletionToJson) DateTime? lastCompletionDate,@JsonKey(name: 'best_streak') int bestStreak
+@JsonKey(name: 'pet_id') String petId,@JsonKey(name: 'current_streak') int currentStreak,@JsonKey(name: 'last_completion_date', fromJson: _lastCompletionFromJson, toJson: _lastCompletionToJson) DateTime? lastCompletionDate,@JsonKey(name: 'best_streak') int bestStreak,@JsonKey(name: 'freezes_available') int freezesAvailable
 });
 
 
@@ -270,12 +272,13 @@ class __$CareStreakCopyWithImpl<$Res>
 
 /// Create a copy of CareStreak
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? petId = null,Object? currentStreak = null,Object? lastCompletionDate = freezed,Object? bestStreak = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? petId = null,Object? currentStreak = null,Object? lastCompletionDate = freezed,Object? bestStreak = null,Object? freezesAvailable = null,}) {
   return _then(_CareStreak(
 petId: null == petId ? _self.petId : petId // ignore: cast_nullable_to_non_nullable
 as String,currentStreak: null == currentStreak ? _self.currentStreak : currentStreak // ignore: cast_nullable_to_non_nullable
 as int,lastCompletionDate: freezed == lastCompletionDate ? _self.lastCompletionDate : lastCompletionDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,bestStreak: null == bestStreak ? _self.bestStreak : bestStreak // ignore: cast_nullable_to_non_nullable
+as int,freezesAvailable: null == freezesAvailable ? _self.freezesAvailable : freezesAvailable // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }

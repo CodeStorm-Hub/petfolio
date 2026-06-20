@@ -43,6 +43,7 @@ class _PrimaryPillButtonState extends State<PrimaryPillButton>
   late final Animation<double> _shadowShift;
 
   bool _pressed = false;
+  bool _isFiring = false;
 
   @override
   void initState() {
@@ -83,7 +84,13 @@ class _PrimaryPillButtonState extends State<PrimaryPillButton>
   void _up(PointerUpEvent _) {
     setState(() => _pressed = false);
     _controller.reverse();
-    if (_isEnabled) widget.onPressed?.call();
+    if (_isEnabled && !_isFiring) {
+      _isFiring = true;
+      widget.onPressed?.call();
+      Future.microtask(() {
+        if (mounted) setState(() => _isFiring = false);
+      });
+    }
   }
 
   void _cancel(PointerCancelEvent _) {

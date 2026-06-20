@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/product.dart';
+import '../models/product_variant.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Provider
@@ -50,6 +51,18 @@ class ProductRepository {
 
     return (rows as List)
         .map((r) => Product.fromJson(r as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<ProductVariant>> fetchVariants(String productId) async {
+    final rows = await _client
+        .from('product_variants')
+        .select()
+        .eq('product_id', productId)
+        .eq('is_active', true)
+        .order('created_at');
+    return (rows as List)
+        .map((r) => ProductVariant.fromJson(r as Map<String, dynamic>))
         .toList();
   }
 

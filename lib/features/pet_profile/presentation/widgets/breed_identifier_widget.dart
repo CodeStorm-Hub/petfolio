@@ -189,7 +189,10 @@ class _PickerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    return GestureDetector(
+    return Semantics(
+      label: label,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -208,6 +211,7 @@ class _PickerButton extends StatelessWidget {
               style: tt.labelSmall?.copyWith(color: pt.ink500)),
         ],
       ),
+    ),
     );
   }
 }
@@ -245,7 +249,7 @@ class _ResultCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.auto_awesome_rounded,
+              const Icon(Icons.auto_awesome_rounded,
                   color: AppColors.mint, size: 18),
               const SizedBox(width: 6),
               Text('Breed identified',

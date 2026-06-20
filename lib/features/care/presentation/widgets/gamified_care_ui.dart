@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
-import 'package:petfolio/core/widgets/widgets.dart';
 
 import '../../../../core/models/pet.dart';
 import '../../data/models/care_task.dart' show CareFrequency;
@@ -109,24 +108,18 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
     final totalToday = planned.length;
     final pct = lv.progress.clamp(0.0, 1.0);
 
-    // ── WaveHeader pattern (matches Home/Pets screen architecture) ──────────
-    // AppShellHeader overlays at Positioned(top:0) with height = topPad + 76.
-    // We reserve that space at top, then show greeting, then let the hero
-    // card float at the wave boundary — exactly how PetProfileScreen works.
     return Stack(
-      clipBehavior: Clip.none,
       children: [
-        WaveHeader(
+        Container(
           color: AppColors.tangerine,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Clear AppShellHeader ───────────────────────────────────
               SizedBox(height: topPad + 76),
+              const SizedBox(height: 16),
 
-              // ── Care greeting — unique copy, never duplicates hero card ──
               Padding(
-                padding: const EdgeInsets.fromLTRB(22, 10, 22, 0),
+                padding: const EdgeInsets.fromLTRB(22, 10, 22, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -145,12 +138,10 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                         text: streak > 1
                             ? '$streak days strong!'
                             : 'Let\'s crush today!',
-                        children: const [
-                          TextSpan(text: ' 🔥'),
-                        ],
+                        children: const [TextSpan(text: ' 🔥')],
                       ),
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: Colors.white,
                         height: 1.05,
                         letterSpacing: -0.3,
@@ -161,11 +152,92 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
                 ),
               ),
 
-              // ── Breathing room: greeting height (~44px) + 33px gap + card top
-              // card_top = waveHeight + 28 - 115 must be > greetingEnd
-              // waveHeight = topPad + 76 + 44(greeting) + SizedBox
-              // SizedBox = 120 → gap ≈ 33px on all device topPad values
-              const SizedBox(height: 120),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.poppy,
+                        AppColors.tangerine700,
+                        AppColors.tangerine,
+                      ],
+                      stops: [0.0, 0.48, 1.0],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.poppy.withAlpha(0x60),
+                        blurRadius: 32,
+                        offset: const Offset(0, 16),
+                        spreadRadius: -12,
+                      ),
+                      const BoxShadow(
+                        color: AppColors.shadowE1L,
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                        spreadRadius: -2,
+                      ),
+                    ],
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        right: -6,
+                        top: -8,
+                        child: Opacity(
+                          opacity: 0.16,
+                          child: Transform.rotate(
+                            angle: 18 * math.pi / 180,
+                            child: const Icon(Icons.pets_rounded, size: 96, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 15, 16, 16),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            RepaintBoundary(
+                              child: _StreakCoin(
+                                streak: streak,
+                                coinCtrl: _coinCtrl,
+                                pulseCtrl: _pulseCtrl,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: awardsAsync.when(
+                                loading: () => _HeroLevelContent(
+                                  lv: PetLevel.fromXp(0),
+                                  pct: 0,
+                                  doneToday: 0,
+                                  totalToday: totalToday,
+                                ),
+                                error: (_, _) => _HeroLevelContent(
+                                  lv: PetLevel.fromXp(0),
+                                  pct: 0,
+                                  doneToday: doneToday,
+                                  totalToday: totalToday,
+                                ),
+                                data: (_) => _HeroLevelContent(
+                                  lv: lv,
+                                  pct: pct,
+                                  doneToday: doneToday,
+                                  totalToday: totalToday,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -177,110 +249,21 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
           right: 0,
           child: Align(
             alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiCtrl,
-              blastDirectionality: BlastDirectionality.explosive,
-              numberOfParticles: 30,
-              gravity: 0.3,
-              colors: const [
-                AppColors.tangerine,
-                AppColors.sunny,
-                AppColors.poppy,
-                AppColors.mint,
-                AppColors.lilac,
-              ],
-              shouldLoop: false,
-            ),
-          ),
-        ),
-
-        // ── Floating hero card (streak coin + XP bar) ─────────────────────
-        // Positioned at bottom:-28 so it straddles the wave edge, matching
-        // the same floating-card pattern used in PetProfileScreen.
-        Positioned(
-          left: 16,
-          right: 16,
-          bottom: -28,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFFF2E2E),
-                  Color(0xFFFF5830),
+            child: RepaintBoundary(
+              child: ConfettiWidget(
+                confettiController: _confettiCtrl,
+                blastDirectionality: BlastDirectionality.explosive,
+                numberOfParticles: 30,
+                gravity: 0.3,
+                colors: const [
                   AppColors.tangerine,
+                  AppColors.sunny,
+                  AppColors.poppy,
+                  AppColors.mint,
+                  AppColors.lilac,
                 ],
-                stops: [0.0, 0.48, 1.0],
+                shouldLoop: false,
               ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x60FF3D3D),
-                  blurRadius: 32,
-                  offset: Offset(0, 16),
-                  spreadRadius: -12,
-                ),
-                BoxShadow(
-                  color: Color(0x20000000),
-                  blurRadius: 8,
-                  offset: Offset(0, 4),
-                  spreadRadius: -2,
-                ),
-              ],
-            ),
-            clipBehavior: Clip.hardEdge,
-            child: Stack(
-              children: [
-                // Decorative paw watermark
-                Positioned(
-                  right: -6,
-                  top: -8,
-                  child: Opacity(
-                    opacity: 0.16,
-                    child: Transform.rotate(
-                      angle: 18 * math.pi / 180,
-                      child: const Icon(Icons.pets_rounded, size: 96, color: Colors.white),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 15, 16, 16),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _StreakCoin(
-                        streak: streak,
-                        coinCtrl: _coinCtrl,
-                        pulseCtrl: _pulseCtrl,
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: awardsAsync.when(
-                          loading: () => _HeroLevelContent(
-                            lv: PetLevel.fromXp(0),
-                            pct: 0,
-                            doneToday: 0,
-                            totalToday: totalToday,
-                          ),
-                          error: (_, _) => _HeroLevelContent(
-                            lv: PetLevel.fromXp(0),
-                            pct: 0,
-                            doneToday: doneToday,
-                            totalToday: totalToday,
-                          ),
-                          data: (_) => _HeroLevelContent(
-                            lv: lv,
-                            pct: pct,
-                            doneToday: doneToday,
-                            totalToday: totalToday,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ),
         ),
@@ -310,30 +293,29 @@ class _StreakCoin extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Expanding pulse ring
+          // Expanding pulse ring — Container is const child, only Transform/Opacity change per frame
           AnimatedBuilder(
             animation: pulseCtrl,
-            builder: (_, _) {
+            builder: (_, child) {
               final scale = 1.0 + pulseCtrl.value * 0.90;
               final opacity = ((1.0 - pulseCtrl.value) * 0.50).clamp(0.0, 0.50);
               return Transform.scale(
                 scale: scale,
-                child: Opacity(
-                  opacity: opacity,
-                  child: Container(
-                    width: 84,
-                    height: 84,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withAlpha(160),
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                ),
+                child: Opacity(opacity: opacity, child: child),
               );
             },
+            child: const SizedBox(
+              width: 84,
+              height: 84,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.fromBorderSide(
+                    BorderSide(color: Color(0xA0FFFFFF), width: 2),
+                  ),
+                ),
+              ),
+            ),
           ),
           // 3D Y-rotation coin
           AnimatedBuilder(
@@ -357,8 +339,8 @@ class _StreakCoin extends StatelessWidget {
                   center: Alignment(-0.28, -0.42),
                   radius: 0.88,
                   colors: [
-                    Color(0xFFFFF0B0),
-                    Color(0xFFFFD234),
+                    AppColors.sunnySoft,
+                    AppColors.sunny,
                     AppColors.tangerine,
                     AppColors.tangerine700,
                   ],
@@ -423,12 +405,12 @@ class _StreakCoin extends StatelessWidget {
                         '$streak',
                         style: const TextStyle(
                           fontSize: 22,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
                           height: 1.0,
                           shadows: [
                             Shadow(
-                              color: Color(0x80961400),
+                              color: Color(0x80C41818),
                               blurRadius: 6,
                               offset: Offset(0, 2),
                             ),
@@ -439,7 +421,7 @@ class _StreakCoin extends StatelessWidget {
                         'DAY STREAK',
                         style: TextStyle(
                           fontSize: 6.5,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
                           letterSpacing: 0.4,
                           height: 1.3,
@@ -490,7 +472,7 @@ class _HeroLevelContent extends StatelessWidget {
                   Text(
                     'Lv ${lv.level}',
                     style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       color: Colors.white,
                       height: 1.0,
                       fontSize: 26,
@@ -529,7 +511,7 @@ class _HeroLevelContent extends StatelessWidget {
                     allDone ? 'All done! 🎉' : '$doneToday/$totalToday tasks',
                     style: TextStyle(
                       fontSize: 10.5,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       color: allDone ? Colors.white : AppColors.poppy700,
                       height: 1,
                     ),
@@ -558,7 +540,7 @@ class _HeroLevelContent extends StatelessWidget {
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Color(0xFFFFE08A),
+                          AppColors.sunnySoft,
                           AppColors.sunny,
                           AppColors.tangerine,
                         ],
@@ -574,7 +556,7 @@ class _HeroLevelContent extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Color(0x99FFFFFF), Colors.transparent],
+                        colors: [AppColors.glassTopL, Colors.transparent],
                         stops: [0.0, 0.55],
                       ),
                     ),
@@ -681,7 +663,7 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
                     '$hitsCount 🔥 day${hitsCount == 1 ? '' : 's'}',
                     style: const TextStyle(
                       fontSize: 11,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: AppColors.mint700,
                     ),
                   ),
@@ -791,7 +773,7 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
                         _dayLetters[dayDate.weekday - 1],
                         style: TextStyle(
                           fontSize: 10,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: isToday
                               ? _colors[i]
                               : (isFuture ? pt.ink300 : pt.ink500),
@@ -869,7 +851,7 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
               '$ownedCount / ${kBadgeCatalog.length} earned',
               style: TextStyle(
                 fontSize: 11,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 color: ownedCount > 0 ? AppColors.mint700 : pt.ink300,
               ),
             ),
@@ -968,7 +950,7 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
               badge.label,
               style: TextStyle(
                 fontSize: 22,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 color: owned
                     ? badge.color
                     : Theme.of(context).colorScheme.onSurface,
@@ -1010,7 +992,7 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
                             : 'Keep logging care'),
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: owned ? badge.color : pt.ink500,
                     ),
                   ),
@@ -1205,12 +1187,15 @@ class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin 
 
     final bgTop = owned
         ? Color.lerp(badge.color, Colors.white, isDark ? 0.50 : 0.82)!
-        : (isDark ? const Color(0xFF252020) : const Color(0xFFF9F6F2));
+        : (isDark ? AppColors.surface3D : AppColors.surface2);
     final bgBottom = owned
         ? Color.lerp(badge.color, Colors.white, isDark ? 0.24 : 0.52)!
-        : (isDark ? const Color(0xFF1C1818) : pt.line.withAlpha(130));
+        : (isDark ? AppColors.surface1D : pt.line.withAlpha(130));
 
-    return GestureDetector(
+    return Semantics(
+      label: '${widget.badge.label} badge, ${widget.owned ? 'earned' : widget.progressHint}',
+      button: true,
+      child: GestureDetector(
       onTap: widget.onTap,
       child: Container(
         decoration: BoxDecoration(
@@ -1258,7 +1243,7 @@ class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin 
                             end: Alignment.bottomRight,
                             colors: [
                               Colors.transparent,
-                              Color(0x50FFFFFF),
+                              AppColors.glassShineL,
                               Colors.transparent,
                             ],
                           ),
@@ -1295,7 +1280,7 @@ class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin 
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 11,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         height: 1.2,
                         color: owned
                             ? (isDark
@@ -1383,6 +1368,7 @@ class _TrophyCardState extends State<_TrophyCard> with TickerProviderStateMixin 
           ),
         ),
       ),
+    ),
     );
   }
 }

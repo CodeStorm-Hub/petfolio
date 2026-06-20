@@ -55,9 +55,16 @@ class CartScreen extends ConsumerWidget {
 
     final groups = cart.itemsByShop.entries.toList();
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1A1014) : const Color(0xFFF2F3F7);
+    final bg = isDark ? AppColors.surface1D : AppColors.surface3;
 
-    return WebCheckoutResumeListener(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          context.canPop() ? context.pop() : context.go('/marketplace');
+        }
+      },
+      child: WebCheckoutResumeListener(
       child: Scaffold(
         backgroundColor: bg,
         body: SafeArea(
@@ -67,7 +74,7 @@ class CartScreen extends ConsumerWidget {
               // ── Header ──────────────────────────────────────────────────────
               _CartHeader(
                 itemCount: cart.itemCount,
-                onBack: () => context.pop(),
+                onBack: () => context.canPop() ? context.pop() : context.go('/marketplace'),
                 onClear: cart.isEmpty
                     ? null
                     : () => ref.read(cartProvider.notifier).clear(),
@@ -124,6 +131,7 @@ class CartScreen extends ConsumerWidget {
           ),
         ),
       ),
+      ),
     );
   }
 }
@@ -145,18 +153,19 @@ class _CartHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
       child: Row(
         children: [
-          _IconBtn(icon: Icons.arrow_back_ios_new_rounded, onTap: onBack),
+          _IconBtn(icon: Icons.arrow_back_ios_new_rounded, label: 'Back', onTap: onBack),
           const SizedBox(width: 12),
           Text(
             'Your Cart',
             style: GoogleFonts.sora(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               fontSize: 20,
-              color: AppColors.ink950,
+              color: pt.ink950,
             ),
           ),
           if (itemCount > 0) ...[
@@ -242,7 +251,7 @@ class _DeliverToCard extends ConsumerWidget {
                           'DELIVER TO',
                           style: TextStyle(
                             fontSize: 10,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             letterSpacing: 0.7,
                             color: pt.ink500,
                           ),
@@ -317,7 +326,7 @@ class _VendorCheckoutSection extends ConsumerStatefulWidget {
 
 class _VendorCheckoutSectionState
     extends ConsumerState<_VendorCheckoutSection> {
-  PaymentMethod _method = PaymentMethod.stripe;
+  PaymentMethod _method = PaymentMethod.sslcommerz;
   final _promoCtrl = TextEditingController();
   bool _promoExpanded = false;
   bool _promoApplied = false;
@@ -340,6 +349,7 @@ class _VendorCheckoutSectionState
     try {
       final promo = await ref.read(promoRepositoryProvider).validateCode(code);
       if (!mounted) return;
+      FocusScope.of(context).unfocus();
       if (promo == null) {
         ScaffoldMessenger.of(context).showSnackBar(_snack('Promo code not valid or expired', error: true));
         setState(() { _promoLoading = false; _promoExpanded = false; });
@@ -352,8 +362,13 @@ class _VendorCheckoutSectionState
         ScaffoldMessenger.of(context).showSnackBar(_snack('${promo.discountLabel} applied!'));
         setState(() { _appliedPromo = promo; _promoApplied = true; _promoLoading = false; _promoExpanded = false; });
       }
-    } catch (_) {
-      if (mounted) setState(() { _promoLoading = false; _promoExpanded = false; });
+    } catch (e) {
+      if (!mounted) return;
+      FocusScope.of(context).unfocus();
+      ScaffoldMessenger.of(context).showSnackBar(
+        _snack('Could not apply promo. Please try again.', error: true),
+      );
+      setState(() { _promoLoading = false; _promoExpanded = false; });
     }
   }
 
@@ -367,6 +382,7 @@ class _VendorCheckoutSectionState
       );
 
   void _handleCheckout(int subtotalCents) {
+    final promoCode = _appliedPromo?.code;
     if (_method == PaymentMethod.cod) {
       showModalBottomSheet(
         context: context,
@@ -379,17 +395,32 @@ class _VendorCheckoutSectionState
           subtotalCents: subtotalCents,
           onConfirm: () {
             Navigator.pop(context);
-            ref.read(checkoutProvider.notifier).startCodCheckoutForShop(widget.shopId);
+            ref.read(checkoutProvider.notifier).startCodCheckoutForShop(
+              widget.shopId,
+              promoCode: promoCode,
+            );
           },
         ),
       );
+    } else if (_method == PaymentMethod.bkash ||
+               _method == PaymentMethod.nagad ||
+               _method == PaymentMethod.sslcommerz) {
+      ref.read(checkoutProvider.notifier).startSslcommerzCheckoutForShop(
+        widget.shopId,
+        _method,
+        promoCode: promoCode,
+      );
     } else {
-      ref.read(checkoutProvider.notifier).startCheckoutForShop(widget.shopId);
+      ref.read(checkoutProvider.notifier).startCheckoutForShop(
+        widget.shopId,
+        promoCode: promoCode,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cart = ref.watch(cartProvider);
     final checkout = ref.watch(checkoutProvider);
     final subtotalCents = cart.totalCentsForShop(widget.shopId);
@@ -431,7 +462,7 @@ class _VendorCheckoutSectionState
                             : 'S',
                         style: const TextStyle(
                           fontSize: 15,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.tangerine,
                         ),
                       ),
@@ -443,22 +474,22 @@ class _VendorCheckoutSectionState
                         children: [
                           Text(
                             widget.shopName,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w800,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
                               fontSize: 15,
-                              color: AppColors.ink950,
+                              color: pt.ink950,
                             ),
                           ),
-                          const Text(
+                          Text(
                             'Est. delivery: 2-3 business days',
-                            style: TextStyle(fontSize: 12, color: AppColors.ink500),
+                            style: TextStyle(fontSize: 12, color: pt.ink500),
                           ),
                         ],
                       ),
                     ),
                     Text(
                       '${shopItems.fold<int>(0, (s, i) => s + i.quantity)} items',
-                      style: const TextStyle(fontSize: 12, color: AppColors.ink500),
+                      style: TextStyle(fontSize: 12, color: pt.ink500),
                     ),
                   ],
                 ),
@@ -472,17 +503,17 @@ class _VendorCheckoutSectionState
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      color: const Color(0xFFFFF3CD),
+                      color: AppColors.warningSoft,
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(Icons.info_outline_rounded,
+                        const Icon(Icons.info_outline_rounded,
                             size: 16, color: AppColors.warning),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'This shop is not ready to accept payments yet.',
-                            style: TextStyle(fontSize: 12, color: AppColors.ink700),
+                            style: TextStyle(fontSize: 12, color: pt.ink700),
                           ),
                         ),
                       ],
@@ -561,13 +592,12 @@ class _VendorCheckoutSectionState
                   Expanded(
                     child: TextField(
                       controller: _promoCtrl,
-                      autofocus: true,
                       textCapitalization: TextCapitalization.characters,
                       decoration: InputDecoration(
                         hintText: 'Enter promo code',
-                        hintStyle: const TextStyle(
+                        hintStyle: TextStyle(
                           fontSize: 14,
-                          color: AppColors.ink500,
+                          color: pt.ink500,
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 10,
@@ -604,7 +634,7 @@ class _VendorCheckoutSectionState
                         horizontal: 16, vertical: 10,
                       ),
                       textStyle: const TextStyle(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 14,
                       ),
                     ),
@@ -642,35 +672,74 @@ class _VendorCheckoutSectionState
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Pay via',
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.ink950,
+                        fontWeight: FontWeight.w700,
+                        color: pt.ink950,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                Row(
+                Column(
                   children: [
-                    Expanded(
-                      child: _PaymentChip(
-                        label: 'Credit Card',
-                        icon: Icons.credit_card_rounded,
-                        selected: _method == PaymentMethod.stripe,
-                        onTap: () => setState(() => _method = PaymentMethod.stripe),
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _PaymentChip(
+                            label: 'Card (BD)',
+                            icon: Icons.credit_card_rounded,
+                            selected: _method == PaymentMethod.sslcommerz,
+                            onTap: () => setState(() => _method = PaymentMethod.sslcommerz),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _PaymentChip(
+                            label: "Int'l Card",
+                            icon: Icons.language_rounded,
+                            selected: _method == PaymentMethod.stripe,
+                            onTap: () => setState(() => _method = PaymentMethod.stripe),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _PaymentChip(
-                        label: 'Cash on Delivery',
-                        icon: Icons.payments_outlined,
-                        selected: _method == PaymentMethod.cod,
-                        onTap: () => setState(() => _method = PaymentMethod.cod),
-                      ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _PaymentChip(
+                            label: 'bKash',
+                            icon: Icons.phone_android_rounded,
+                            selected: _method == PaymentMethod.bkash,
+                            onTap: () => setState(() => _method = PaymentMethod.bkash),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _PaymentChip(
+                            label: 'Nagad',
+                            icon: Icons.phone_android_rounded,
+                            selected: _method == PaymentMethod.nagad,
+                            onTap: () => setState(() => _method = PaymentMethod.nagad),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _PaymentChip(
+                            label: 'Cash on Delivery',
+                            icon: Icons.payments_outlined,
+                            selected: _method == PaymentMethod.cod,
+                            onTap: () => setState(() => _method = PaymentMethod.cod),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -689,12 +758,12 @@ class _VendorCheckoutSectionState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Receipt',
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.ink950,
+                    fontWeight: FontWeight.w700,
+                    color: pt.ink950,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -810,7 +879,7 @@ class _VendorCheckoutSectionState
               ),
               textStyle: const TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
             child: isLoading
@@ -826,16 +895,24 @@ class _VendorCheckoutSectionState
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        _method == PaymentMethod.cod
-                            ? Icons.payments_outlined
-                            : Icons.lock_outline_rounded,
+                        switch (_method) {
+                          PaymentMethod.cod        => Icons.payments_outlined,
+                          PaymentMethod.bkash ||
+                          PaymentMethod.nagad      => Icons.phone_android_rounded,
+                          PaymentMethod.sslcommerz => Icons.credit_card_rounded,
+                          _                        => Icons.lock_outline_rounded,
+                        },
                         size: 18,
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        _method == PaymentMethod.cod
-                            ? 'Place Order (COD)'
-                            : 'Place Order · \$${(totalCents / 100).toStringAsFixed(2)}',
+                        switch (_method) {
+                          PaymentMethod.cod        => 'Place Order (COD)',
+                          PaymentMethod.bkash      => 'Pay with bKash',
+                          PaymentMethod.nagad      => 'Pay with Nagad',
+                          PaymentMethod.sslcommerz => 'Pay with Card (BD)',
+                          _                        => 'Pay · \$${(totalCents / 100).toStringAsFixed(2)}',
+                        },
                       ),
                     ],
                   ),
@@ -865,13 +942,14 @@ class _MultiVendorSummaryBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         gradient: LinearGradient(
           colors: isDark
-              ? [const Color(0xFF2A1820), const Color(0xFF331825)]
+              ? [AppColors.surface0D, AppColors.surface2D]
               : [AppColors.poppy.withAlpha(18), AppColors.tangerine.withAlpha(12)],
         ),
         border: Border.all(
@@ -900,16 +978,16 @@ class _MultiVendorSummaryBanner extends StatelessWidget {
               children: [
                 Text(
                   'Ordering from $shopCount shops',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.ink950,
+                    fontWeight: FontWeight.w700,
+                    color: pt.ink950,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '$itemCount item${itemCount == 1 ? '' : 's'} · Each shop ships separately',
-                  style: const TextStyle(fontSize: 12, color: AppColors.ink500),
+                  style: TextStyle(fontSize: 12, color: pt.ink500),
                 ),
               ],
             ),
@@ -921,13 +999,13 @@ class _MultiVendorSummaryBanner extends StatelessWidget {
                 totalFormatted,
                 style: const TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.poppy,
                 ),
               ),
-              const Text(
+              Text(
                 'combined',
-                style: TextStyle(fontSize: 10, color: AppColors.ink500),
+                style: TextStyle(fontSize: 10, color: pt.ink500),
               ),
             ],
           ),
@@ -951,14 +1029,14 @@ class _SectionCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
-        color: isDark ? const Color(0xFF2A1820) : Colors.white,
+        color: isDark ? AppColors.surface0D : Colors.white,
         boxShadow: isDark
             ? null
             : [
-                BoxShadow(
+                const BoxShadow(
                   color: AppColors.shadowE3L,
                   blurRadius: 18,
-                  offset: const Offset(0, 4),
+                  offset: Offset(0, 4),
                   spreadRadius: -2,
                 ),
               ],
@@ -1006,7 +1084,7 @@ class _SumRow extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            fontWeight: bold ? FontWeight.w900 : FontWeight.w700,
+            fontWeight: bold ? FontWeight.w700 : FontWeight.w700,
             fontSize: valueFontSize,
             color: valueColor ?? (bold ? AppColors.ink950 : AppColors.ink700),
           ),
@@ -1035,7 +1113,10 @@ class _PaymentChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: '$label${selected ? ", selected" : ""}',
+      button: true,
+      child: GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
         onTap();
@@ -1074,6 +1155,7 @@ class _PaymentChip extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -1097,11 +1179,12 @@ class _CodConfirmSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2A1820) : Colors.white,
+        color: isDark ? AppColors.surface0D : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: SafeArea(
@@ -1123,18 +1206,18 @@ class _CodConfirmSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Confirm Order',
                 style: TextStyle(
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   fontSize: 18,
-                  color: AppColors.ink950,
+                  color: pt.ink950,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 shopName,
-                style: const TextStyle(fontSize: 13, color: AppColors.ink500),
+                style: TextStyle(fontSize: 13, color: pt.ink500),
               ),
               const SizedBox(height: 16),
               for (final item in items)
@@ -1145,16 +1228,16 @@ class _CodConfirmSheet extends StatelessWidget {
                       Expanded(
                         child: Text(
                           '${item.product.name} × ${item.quantity}',
-                          style: const TextStyle(
-                              fontSize: 13, color: AppColors.ink700),
+                          style: TextStyle(
+                              fontSize: 13, color: pt.ink700),
                         ),
                       ),
                       Text(
                         '\$${((item.product.priceCents * item.quantity) / 100).toStringAsFixed(2)}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.ink950,
+                          color: pt.ink950,
                         ),
                       ),
                     ],
@@ -1164,20 +1247,20 @@ class _CodConfirmSheet extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Total',
                     style: TextStyle(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       fontSize: 15,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                   Text(
                     '\$${(subtotalCents / 100).toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
                       fontSize: 17,
-                      color: AppColors.ink950,
+                      color: pt.ink950,
                     ),
                   ),
                 ],
@@ -1187,17 +1270,17 @@ class _CodConfirmSheet extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: const Color(0xFFFFF3CD),
+                  color: AppColors.warningSoft,
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.payments_outlined,
+                    const Icon(Icons.payments_outlined,
                         size: 16, color: AppColors.warning),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Pay when you receive your order.',
-                        style: TextStyle(fontSize: 12, color: AppColors.ink700),
+                        style: TextStyle(fontSize: 12, color: pt.ink700),
                       ),
                     ),
                   ],
@@ -1218,7 +1301,7 @@ class _CodConfirmSheet extends StatelessWidget {
                         borderRadius: BorderRadius.circular(18)),
                     textStyle: const TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -1236,32 +1319,38 @@ class _CodConfirmSheet extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _IconBtn extends StatelessWidget {
-  const _IconBtn({required this.icon, required this.onTap});
+  const _IconBtn({required this.icon, required this.onTap, required this.label});
 
   final IconData icon;
   final VoidCallback onTap;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    return Semantics(
+      label: label,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.surface0,
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(color: AppColors.line, spreadRadius: 0.5),
             BoxShadow(
-              color: Color(0x0A0B1220),
+              color: AppColors.shadowE1L,
               offset: Offset(0, 1),
               blurRadius: 2,
             ),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: pt.ink700),
       ),
+    ),
     );
   }
 }

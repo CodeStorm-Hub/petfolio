@@ -31,7 +31,7 @@ class OffersScreen extends ConsumerWidget {
     ];
 
     return Scaffold(
-      backgroundColor: isDark ? pt.surface1 : const Color(0xFFF2F3F7),
+      backgroundColor: isDark ? pt.surface1 : pt.surface2,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -41,6 +41,7 @@ class OffersScreen extends ConsumerWidget {
               child: Row(
                 children: [
                   IconButton(
+                    tooltip: 'Back',
                     icon: const Icon(Icons.arrow_back_rounded),
                     color: pt.ink950,
                     onPressed: () => context.pop(),
@@ -49,7 +50,7 @@ class OffersScreen extends ConsumerWidget {
                   Text(
                     'Offers',
                     style: GoogleFonts.sora(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       fontSize: 20,
                       color: pt.ink950,
                     ),
@@ -67,7 +68,11 @@ class OffersScreen extends ConsumerWidget {
                     final active = filter == c.$1;
                     return Padding(
                       padding: const EdgeInsets.only(right: 8),
-                      child: GestureDetector(
+                      child: Semantics(
+                        label: '${c.$2}${active ? ", selected" : ""}',
+                        selected: active,
+                        button: true,
+                        child: GestureDetector(
                         onTap: () {
                           HapticFeedback.selectionClick();
                           ref.read(promoFilterProvider.notifier).setFilter(c.$1);
@@ -95,6 +100,7 @@ class OffersScreen extends ConsumerWidget {
                             ),
                           ),
                         ),
+                      ),
                       ),
                     );
                   }).toList(),
@@ -173,7 +179,7 @@ class _PromoCard extends StatelessWidget {
                   promo.code,
                   style: GoogleFonts.sora(
                     fontSize: 15,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                     color: pt.ink950,
                     letterSpacing: 0.5,
                   ),
@@ -189,7 +195,7 @@ class _PromoCard extends StatelessWidget {
                   promo.category.toUpperCase(),
                   style: const TextStyle(
                     fontSize: 10,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.poppy,
                     letterSpacing: 0.5,
                   ),
@@ -207,10 +213,10 @@ class _PromoCard extends StatelessWidget {
             children: [
               Text(
                 promo.validUntilFormatted,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.ink500,
+                  color: pt.ink500,
                 ),
               ),
               const Spacer(),
@@ -229,7 +235,7 @@ class _PromoCard extends StatelessWidget {
                     horizontal: 16, vertical: 8,
                   ),
                   textStyle: const TextStyle(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     fontSize: 13,
                   ),
                 ),

@@ -287,7 +287,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                       ),
                       const SizedBox(height: 28),
                       FilledButton.icon(
-                        onPressed: () => context.push('/social/create-story'),
+                        onPressed: () => context.push('/social/create-post?mode=story'),
                         icon: const Icon(Icons.add_a_photo_outlined, size: 18),
                         label: const Text('Share a Story'),
                       ),
@@ -376,20 +376,28 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                     children: [
                       // Left tap area -> Previous
                       Expanded(
-                        child: GestureDetector(
+                        child: Semantics(
+                          label: 'Previous story',
+                          button: true,
+                          child: GestureDetector(
                           behavior: HitTestBehavior.translucent,
                           onTap: _previousStory,
                           onLongPress: _pause,
                           onLongPressUp: _resume,
                         ),
+                        ),
                       ),
                       // Middle long-press area & right tap area -> Next
                       Expanded(
-                        child: GestureDetector(
+                        child: Semantics(
+                          label: 'Next story',
+                          button: true,
+                          child: GestureDetector(
                           behavior: HitTestBehavior.translucent,
                           onTap: _nextStory,
                           onLongPress: _pause,
                           onLongPressUp: _resume,
+                        ),
                         ),
                       ),
                     ],
@@ -428,16 +436,23 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: ['🐾', '❤️', '😂', '😮', '🔥'].map((emoji) {
-                                return GestureDetector(
+                                return Semantics(
+                                  label: 'React with $emoji',
+                                  button: true,
+                                  child: GestureDetector(
                                   onTap: () => _sendReaction(emoji),
                                   child: Text(emoji, style: const TextStyle(fontSize: 28)),
+                                ),
                                 );
                               }).toList(),
                             ),
                           ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                          child: GestureDetector(
+                          child: Semantics(
+                            label: _showReactions ? 'Hide reactions' : 'React',
+                            button: true,
+                            child: GestureDetector(
                             onTap: () {
                               if (_showReactions) {
                                 setState(() => _showReactions = false);
@@ -466,6 +481,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                                 ],
                               ),
                             ),
+                          ),
                           ),
                         ),
                       ],
@@ -524,7 +540,10 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                       Row(
                         children: [
                           Expanded(
-                            child: GestureDetector(
+                            child: Semantics(
+                              label: 'View ${activeStack.petName}\'s profile',
+                              button: true,
+                              child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
                               onTap: () {
                                 _timer?.cancel();
@@ -598,7 +617,9 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                               ),
                             ),
                           ),
+                          ),
                           IconButton(
+                            tooltip: 'Close',
                             icon: const Icon(Icons.close_rounded, color: Colors.white, size: 24),
                             onPressed: () => context.pop(),
                           ),

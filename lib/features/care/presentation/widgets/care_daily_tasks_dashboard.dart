@@ -169,7 +169,11 @@ class _FreqTabBar extends StatelessWidget {
         final hasCount = count > 0;
 
         return Expanded(
-          child: GestureDetector(
+          child: Semantics(
+            label: hasCount ? '${labels[i]}, $done of $count done' : labels[i],
+            selected: active,
+            button: true,
+            child: GestureDetector(
             onTap: () => onSelect(i),
             child: AnimatedContainer(
               duration: PetfolioThemeExtension.durationSm,
@@ -209,7 +213,7 @@ class _FreqTabBar extends StatelessWidget {
                         allDone ? '$done/$count ✓' : '$done/$count',
                         style: TextStyle(
                           fontSize: 9.5,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: active
                               ? Colors.white
                               : (allDone ? AppColors.mint700 : AppColors.sunny700),
@@ -222,6 +226,7 @@ class _FreqTabBar extends StatelessWidget {
               ),
             ),
           ),
+        ),
         );
       }),
     );
@@ -303,7 +308,7 @@ class _AllDoneBanner extends StatelessWidget {
                   'All done for today!',
                   style: TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.mint700,
                   ),
                 ),

@@ -43,7 +43,7 @@ class AuthBrand extends StatelessWidget {
           'PetFolio',
           style: tt.displaySmall?.copyWith(
             color: cs.primary,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             letterSpacing: -0.5,
           ),
         ),
@@ -244,6 +244,7 @@ class VisibilityToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
+      tooltip: obscure ? 'Show password' : 'Hide password',
       icon: Icon(
         obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
         size: 20,
@@ -319,7 +320,10 @@ class AuthToggleLink extends StatelessWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
-    return GestureDetector(
+    return Semantics(
+      label: actionLabel,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
@@ -342,6 +346,7 @@ class AuthToggleLink extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

@@ -29,8 +29,18 @@ class _CatMeta {
   final Color color;
 }
 
-class MarketplaceCategoriesScreen extends ConsumerWidget {
-  const MarketplaceCategoriesScreen({super.key});
+class MarketplaceCategoriesSheet extends ConsumerWidget {
+  const MarketplaceCategoriesSheet({super.key});
+
+  static Future<void> show(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const MarketplaceCategoriesSheet(),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,95 +49,84 @@ class MarketplaceCategoriesScreen extends ConsumerWidget {
     final selected = ref.watch(selectedCategoryProvider);
     final allProducts = ref.watch(productListProvider).value ?? [];
 
-    return Scaffold(
-      backgroundColor: isDark ? pt.surface1 : const Color(0xFFF2F3F7),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(6, 10, 16, 0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded),
-                    color: pt.ink950,
-                    onPressed: () => context.pop(),
+    return DraggableScrollableSheet(
+      initialChildSize: 0.88,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      snap: true,
+      snapSizes: const [0.88],
+      builder: (ctx, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: isDark ? pt.surface1 : pt.surface2,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 4),
+                  child: Container(
+                    width: 36, height: 4,
+                    decoration: BoxDecoration(color: pt.line, borderRadius: BorderRadius.circular(2)),
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Browse Categories',
-                    style: GoogleFonts.sora(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 20,
-                      color: pt.ink950,
-                    ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                child: Text(
+                  'Browse Categories',
+                  style: GoogleFonts.sora(fontWeight: FontWeight.w700, fontSize: 20, color: pt.ink950),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: GridView.builder(
+                  controller: scrollController,
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 1.55,
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 4),
-            Expanded(
-              child: GridView.builder(
-                padding: EdgeInsets.fromLTRB(
-                  16, 12, 16,
-                  MediaQuery.paddingOf(context).bottom + 24,
+                  itemCount: _allCats.length,
+                  itemBuilder: (_, i) {
+                    final cat = _allCats[i];
+                    final count = allProducts.where((p) => p.category == cat.id).length;
+                    final isActive = selected == cat.id;
+                    return _CategoryTile(
+                      cat: cat,
+                      count: count,
+                      isActive: isActive,
+                      isDark: isDark,
+                      pt: pt,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        ref.read(selectedCategoryProvider.notifier)
+                            .select(isActive ? ProductCategory.all : cat.id);
+                        context.pop();
+                      },
+                    )
+                        .animate(delay: Duration(milliseconds: 40 * i))
+                        .fadeIn(duration: 260.ms, curve: Curves.easeOut)
+                        .slideY(begin: 0.12, end: 0, duration: 320.ms, curve: Curves.easeOutCubic);
+                  },
                 ),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.55,
-                ),
-                itemCount: _allCats.length,
-                itemBuilder: (_, i) {
-                  final cat = _allCats[i];
-                  final count = allProducts
-                      .where((p) => p.category == cat.id)
-                      .length;
-                  final isActive = selected == cat.id;
-
-                  return _CategoryTile(
-                    cat: cat,
-                    count: count,
-                    isActive: isActive,
-                    isDark: isDark,
-                    pt: pt,
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      ref
-                          .read(selectedCategoryProvider.notifier)
-                          .select(isActive ? ProductCategory.all : cat.id);
-                      context.pop();
-                    },
-                  )
-                      .animate(delay: Duration(milliseconds: 40 * i))
-                      .fadeIn(duration: 260.ms, curve: Curves.easeOut)
-                      .slideY(
-                        begin: 0.12,
-                        end: 0,
-                        duration: 320.ms,
-                        curve: Curves.easeOutCubic,
-                      );
-                },
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
 
 class _CategoryTile extends StatelessWidget {
   const _CategoryTile({
-    required this.cat,
-    required this.count,
-    required this.isActive,
-    required this.isDark,
-    required this.pt,
-    required this.onTap,
+    required this.cat, required this.count, required this.isActive,
+    required this.isDark, required this.pt, required this.onTap,
   });
 
   final _CatMeta cat;
@@ -139,7 +138,10 @@ class _CategoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: '${cat.label}${isActive ? ", selected" : ""}',
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -150,32 +152,15 @@ class _CategoryTile extends StatelessWidget {
               ? Color.lerp(cat.color, Colors.white, isDark ? 0.15 : 0.85)
               : (isDark ? pt.surface2 : Colors.white),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isActive ? cat.color : pt.line,
-            width: isActive ? 2.0 : 1.0,
-          ),
+          border: Border.all(color: isActive ? cat.color : pt.line, width: isActive ? 2.0 : 1.0),
           boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: cat.color.withAlpha(60),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                    spreadRadius: -4,
-                  )
-                ]
-              : const [
-                  BoxShadow(
-                    color: Color(0x08000000),
-                    blurRadius: 8,
-                    offset: Offset(0, 2),
-                  )
-                ],
+              ? [BoxShadow(color: cat.color.withAlpha(60), blurRadius: 16, offset: const Offset(0, 6), spreadRadius: -4)]
+              : const [BoxShadow(color: AppColors.shadowE1L, blurRadius: 8, offset: Offset(0, 2))],
         ),
         child: Row(
           children: [
             Container(
-              width: 52,
-              height: 52,
+              width: 52, height: 52,
               decoration: BoxDecoration(
                 color: Color.lerp(cat.color, Colors.white, isDark ? 0.2 : 0.78),
                 borderRadius: BorderRadius.circular(16),
@@ -189,36 +174,20 @@ class _CategoryTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    cat.label,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: isActive ? cat.color : pt.ink950,
-                    ),
-                  ),
+                  Text(cat.label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: isActive ? cat.color : pt.ink950)),
                   const SizedBox(height: 3),
-                  Text(
-                    count > 0 ? '$count items' : 'Browse',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: pt.ink500,
-                    ),
-                  ),
+                  Text(count > 0 ? '$count items' : 'Browse', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: pt.ink500)),
                 ],
               ),
             ),
-            Icon(
-              isActive
-                  ? Icons.check_circle_rounded
-                  : Icons.chevron_right_rounded,
-              size: 18,
-              color: isActive ? cat.color : pt.ink500,
-            ),
+            Icon(isActive ? Icons.check_circle_rounded : Icons.chevron_right_rounded, size: 18, color: isActive ? cat.color : pt.ink500),
           ],
         ),
       ),
+    ),
     );
   }
 }
+
+// Backward-compat alias.
+typedef MarketplaceCategoriesScreen = MarketplaceCategoriesSheet;

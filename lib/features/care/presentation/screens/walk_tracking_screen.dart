@@ -59,7 +59,7 @@ class _WalkNotifier extends Notifier<_WalkState> {
       return;
     }
 
-    state = _WalkState(isTracking: true);
+    state = const _WalkState(isTracking: true);
 
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       state = state.copyWith(elapsedSeconds: state.elapsedSeconds + 1);
@@ -122,12 +122,9 @@ class WalkTrackingScreen extends ConsumerWidget {
         ? walk.points.last
         : const LatLng(23.8103, 90.4125);
 
+    final topInset = MediaQuery.paddingOf(context).top + 76.0;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Walk Tracker'),
-        backgroundColor: cs.surface,
-        surfaceTintColor: Colors.transparent,
-      ),
       body: Stack(
         children: [
           FlutterMap(
@@ -167,7 +164,7 @@ class WalkTrackingScreen extends ConsumerWidget {
             ],
           ),
           Positioned(
-            top: 16,
+            top: topInset + 16,
             left: 16,
             right: 16,
             child: _StatsCard(

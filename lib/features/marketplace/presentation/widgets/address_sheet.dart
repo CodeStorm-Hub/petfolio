@@ -54,7 +54,7 @@ class AddressSheet extends ConsumerWidget {
                     'Deliver To',
                     style: GoogleFonts.sora(
                       fontSize: 18,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: pt.ink950,
                     ),
                   ),
@@ -139,7 +139,10 @@ class _AddressTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
-    return GestureDetector(
+    return Semantics(
+      label: '${address.labelName}${isSelected ? ", selected" : ""}',
+      button: true,
+      child: GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
         onTap();
@@ -183,7 +186,7 @@ class _AddressTile extends StatelessWidget {
                         address.labelName,
                         style: TextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: isSelected ? AppColors.poppy : pt.ink950,
                         ),
                       ),
@@ -201,7 +204,7 @@ class _AddressTile extends StatelessWidget {
                             'Default',
                             style: TextStyle(
                               fontSize: 10,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                               color: AppColors.mint700,
                             ),
                           ),
@@ -243,6 +246,7 @@ class _AddressTile extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -265,7 +269,7 @@ class _EmptyAddressState extends StatelessWidget {
             'No saved addresses',
             style: GoogleFonts.sora(
               fontSize: 17,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: pt.ink950,
             ),
           ),
@@ -287,7 +291,7 @@ class _EmptyAddressState extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
               ),
               textStyle: const TextStyle(
-                fontWeight: FontWeight.w800, fontSize: 14,
+                fontWeight: FontWeight.w700, fontSize: 14,
               ),
             ),
           ),
@@ -393,7 +397,7 @@ class AddAddressSheetState extends ConsumerState<AddAddressSheet> {
                 'Add New Address',
                 style: GoogleFonts.sora(
                   fontSize: 18,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   color: pt.ink950,
                 ),
               ),
@@ -504,7 +508,7 @@ class AddAddressSheetState extends ConsumerState<AddAddressSheet> {
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     textStyle: const TextStyle(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       fontSize: 15,
                     ),
                   ),
@@ -582,7 +586,15 @@ class _LabelTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    return GestureDetector(
+    final labelText = switch (label) {
+      AddressLabel.home => 'Home',
+      AddressLabel.work => 'Work',
+      _ => label.name,
+    };
+    return Semantics(
+      label: '$labelText${selected ? ", selected" : ""}',
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
@@ -633,6 +645,7 @@ class _LabelTile extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

@@ -303,6 +303,7 @@ class DiscoveryCandidatesController extends AsyncNotifier<DiscoveryCandidatesBuf
       speciesFilters: prefs.selectedSpecies,
       minAgeYears: prefs.ageMinYears,
       maxAgeYears: prefs.ageMaxYears,
+      mode: prefs.mode,
     );
     final candidates = rows.map(_discoveryRowToCandidate).toList(growable: false);
 

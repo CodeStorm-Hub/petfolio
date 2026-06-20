@@ -5,18 +5,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../marketplace/presentation/controllers/address_controller.dart';
 import '../marketplace/presentation/widgets/address_sheet.dart';
-import 'presentation/screens/settings_screen.dart';
 import '../marketplace/data/models/user_address.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/widgets.dart';
 
 List<GoRoute> settingsRoutes(GlobalKey<NavigatorState> rootKey) => [
-      GoRoute(
-        path: '/settings',
-        parentNavigatorKey: rootKey,
-        builder: (_, _) => const SettingsScreen(),
-      ),
       GoRoute(
         path: '/settings/addresses',
         parentNavigatorKey: rootKey,
@@ -35,7 +29,7 @@ class _AddressManagementScreen extends ConsumerWidget {
     final selected = ref.watch(selectedAddressProvider);
 
     return Scaffold(
-      backgroundColor: isDark ? pt.surface1 : const Color(0xFFF2F3F7),
+      backgroundColor: isDark ? pt.surface1 : pt.surface2,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -45,6 +39,7 @@ class _AddressManagementScreen extends ConsumerWidget {
               child: Row(
                 children: [
                   IconButton(
+                    tooltip: 'Back',
                     icon: const Icon(Icons.arrow_back_rounded),
                     color: pt.ink950,
                     onPressed: () => Navigator.of(context).pop(),
@@ -53,7 +48,7 @@ class _AddressManagementScreen extends ConsumerWidget {
                   Text(
                     'Saved Addresses',
                     style: GoogleFonts.sora(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       fontSize: 20,
                       color: pt.ink950,
                     ),
@@ -90,7 +85,7 @@ class _AddressManagementScreen extends ConsumerWidget {
                             'No saved addresses',
                             style: GoogleFonts.sora(
                               fontSize: 17,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                               color: pt.ink950,
                             ),
                           ),
@@ -192,7 +187,7 @@ class _AddressCard extends StatelessWidget {
                       address.labelName,
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink950,
                       ),
                     ),
@@ -210,7 +205,7 @@ class _AddressCard extends StatelessWidget {
                           'Default',
                           style: TextStyle(
                             fontSize: 10,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             color: AppColors.mint700,
                           ),
                         ),

@@ -1,0 +1,11 @@
+{
+  "shape": "package",
+  "version": "1.0.0",
+  "builtAt": "2026-06-19",
+  "components": [
+    "Colors", "Typography", "Spacing", "Shadows",
+    "PfCard", "GlassCard", "PrimaryPillButton", "PawToggle",
+    "PetAvatar", "SectionHeader", "PfStatTile", "PfBadgeTile", "PfDailyQuestRow",
+    "SkeletonLoader", "PetfolioEmptyState", "TailWagLoader"
+  ]
+}

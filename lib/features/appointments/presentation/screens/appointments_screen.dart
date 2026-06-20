@@ -26,44 +26,39 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final petId = ref.watch(activePetIdProvider) ?? '';
 
+    final topInset = MediaQuery.paddingOf(context).top + 76.0;
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         backgroundColor: pt.surface1,
-        appBar: AppBar(
-          backgroundColor: pt.surface1,
-          surfaceTintColor: Colors.transparent,
-          leading: BackButton(color: pt.ink950),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'CARE · CALENDAR',
-                style: TextStyle(fontSize: 10, color: pt.ink500, letterSpacing: 1),
-              ),
-              Text(
-                'Appointments',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: pt.ink950),
-              ),
-            ],
-          ),
-          bottom: TabBar(
-            labelColor: AppColors.mint,
-            unselectedLabelColor: pt.ink500,
-            indicatorColor: AppColors.mint,
-            labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-            indicatorWeight: 3,
-            tabs: const [
-              Tab(text: 'Upcoming'),
-              Tab(text: 'Past'),
-            ],
-          ),
-        ),
-        body: const TabBarView(
+        body: Column(
           children: [
-            _AppointmentsTabList(past: false),
-            _AppointmentsTabList(past: true),
+            SizedBox(height: topInset),
+            const SizedBox(height: 16),
+            ColoredBox(
+              color: pt.surface1,
+              child: TabBar(
+                labelColor: AppColors.mint,
+                unselectedLabelColor: pt.ink500,
+                indicatorColor: AppColors.mint,
+                labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                indicatorWeight: 3,
+                tabs: const [
+                  Tab(text: 'Upcoming'),
+                  Tab(text: 'Past'),
+                ],
+              ),
+            ),
+            const Expanded(
+              child: TabBarView(
+                children: [
+                  KeepAliveTab(child: _AppointmentsTabList(past: false)),
+                  KeepAliveTab(child: _AppointmentsTabList(past: true)),
+                ],
+              ),
+            ),
           ],
         ),
         floatingActionButton: petId.isEmpty
@@ -148,6 +143,7 @@ class _AppointmentsTabList extends ConsumerWidget {
                       ? 'Your completed or cancelled visits will show up here.'
                       : 'Tap + to book a new appointment.',
                 ),
+                SizedBox(height: MediaQuery.sizeOf(context).height * 0.2),
               ],
             );
           }
@@ -232,7 +228,7 @@ class AppointmentCardWidget extends ConsumerWidget {
                       appointment.title,
                       style: TextStyle(
                         fontSize: 15,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink950,
                       ),
                     ),
@@ -248,7 +244,7 @@ class AppointmentCardWidget extends ConsumerWidget {
                       appointment.status.toUpperCase(),
                       style: TextStyle(
                         fontSize: 9,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: badgeText,
                         letterSpacing: 0.5,
                       ),
@@ -333,7 +329,7 @@ class AppointmentCardWidget extends ConsumerWidget {
                 'Appointment Actions',
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   color: pt.ink950,
                 ),
               ),
@@ -455,7 +451,7 @@ class AppointmentCardWidget extends ConsumerWidget {
                     'Select Time Slot',
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: pt.ink950,
                     ),
                   ),
@@ -585,7 +581,7 @@ class AppointmentCardWidget extends ConsumerWidget {
           backgroundColor: pt.surface1,
           title: Text(
             'Cancel Appointment?',
-            style: TextStyle(fontWeight: FontWeight.w800, color: pt.ink950),
+            style: TextStyle(fontWeight: FontWeight.w700, color: pt.ink950),
           ),
           content: Text(
             'Are you sure you want to cancel this appointment?\n\n'
@@ -743,7 +739,7 @@ class _AddAppointmentSheetState extends ConsumerState<_AddAppointmentSheet> {
               'New Appointment',
               style: TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 color: pt.ink950,
               ),
             ),

@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'presentation/screens/breeding_setup_screen.dart';
 import 'presentation/screens/chat_screen.dart';
+import 'presentation/screens/verification_center_screen.dart';
 
 List<RouteBase> matchingRoutes(GlobalKey<NavigatorState> rootKey) => [
+  GoRoute(
+    parentNavigatorKey: rootKey,
+    path: '/matching/breeding-setup',
+    builder: (context, state) => const BreedingSetupScreen(),
+  ),
+  GoRoute(
+    parentNavigatorKey: rootKey,
+    path: '/matching/verification',
+    builder: (context, state) => const VerificationCenterScreen(),
+  ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/matching/chat/:threadId',

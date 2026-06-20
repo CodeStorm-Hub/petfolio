@@ -7,6 +7,7 @@ import '../../../../core/errors/app_exception.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/time_ago.dart';
 import '../models/feed_post.dart';
+import '../models/hashtag.dart';
 import '../models/pet_stats.dart';
 
 final socialRepositoryProvider = Provider<SocialRepository>(
@@ -313,13 +314,15 @@ class SocialRepository {
     required String caption,
     List<String> imageUrls = const [],
   }) async {
-    await _client.from('posts').insert({
+    final row = await _client.from('posts').insert({
       'author_id': _uid,
       'pet_id': petId,
       'content': caption,
       'image_urls': imageUrls,
       'visibility': 'public',
-    });
+    }).select('id').single();
+    final postId = row['id'] as String;
+    await attachHashtagsToPost(postId, caption);
   }
 
   /// Fetches stats for a pet (posts, followers, following) in a single RPC.
@@ -428,6 +431,186 @@ class SocialRepository {
           message: 'You have already reported this post.',
         );
       }
+      throw DatabaseException.fromPostgrest(e);
+    }
+  }
+
+  // ── Hashtags ──────────────────────────────────────────────────────────────
+
+  Future<List<Hashtag>> searchHashtags(String query, {int limit = 20}) async {
+    try {
+      final q = query.trim().replaceAll('#', '');
+      if (q.isEmpty) return const [];
+      final rows = await _client
+          .from('hashtags')
+          .select()
+          .ilike('tag', '$q%')
+          .order('post_count', ascending: false)
+          .limit(limit);
+      return (rows as List).cast<Map<String, dynamic>>().map(Hashtag.fromJson).toList();
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
+    }
+  }
+
+  Future<List<FeedPost>> fetchPostsForHashtag(
+    String tag, {
+    String? activePetId,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      final cleanTag = tag.replaceAll('#', '').toLowerCase();
+      final rows = await _client
+          .from('post_hashtags')
+          .select('post_id')
+          .eq('tag', cleanTag)
+          .range(offset, offset + limit - 1);
+      final postIds = (rows as List).cast<Map<String, dynamic>>().map((r) => r['post_id'] as String).toList();
+      if (postIds.isEmpty) return const [];
+
+      final postRows = await _client
+          .from('posts')
+          .select('''
+            id,
+            content,
+            image_urls,
+            created_at,
+            like_count,
+            comment_count,
+            pet:pets!posts_pet_id_fkey!inner(id, name, species, breed, avatar_url),
+            author:users!posts_author_id_fkey(id, username, display_name, avatar_url, location)
+          ''')
+          .inFilter('id', postIds)
+          .eq('visibility', 'public')
+          .order('created_at', ascending: false);
+
+      final posts = (postRows as List).cast<Map<String, dynamic>>();
+      var likedIds = const <String>{};
+      if (activePetId != null && posts.isNotEmpty) {
+        likedIds = await _fetchLikedPostIds(activePetId, postIds);
+      }
+      return posts.map((r) => _rowToFeedPost(r, isLiked: likedIds.contains(r['id'] as String))).toList();
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
+    }
+  }
+
+  Future<void> attachHashtagsToPost(String postId, String caption) async {
+    final tags = _extractHashtags(caption);
+    if (tags.isEmpty) return;
+    try {
+      await _client.from('hashtags').upsert(
+        tags.map((t) => {'tag': t}).toList(),
+        onConflict: 'tag',
+        ignoreDuplicates: true,
+      );
+      await _client.from('post_hashtags').upsert(
+        tags.map((t) => {'post_id': postId, 'tag': t}).toList(),
+        onConflict: 'post_id,tag',
+        ignoreDuplicates: true,
+      );
+    } on PostgrestException {
+      // Non-fatal: hashtag indexing failure doesn't break the post.
+    }
+  }
+
+  List<String> _extractHashtags(String text) {
+    final pattern = RegExp(r'#([a-zA-Z0-9_]+)');
+    return pattern
+        .allMatches(text)
+        .map((m) => m.group(1)!.toLowerCase())
+        .toSet()
+        .toList();
+  }
+
+  // ── Saved posts / bookmarks ───────────────────────────────────────────────
+
+  Future<bool> isPostSaved(String postId) async {
+    final row = await _client
+        .from('saved_posts')
+        .select('id')
+        .eq('user_id', _uid)
+        .eq('post_id', postId)
+        .maybeSingle();
+    return row != null;
+  }
+
+  Future<void> savePost(String postId) async {
+    try {
+      await _client.from('saved_posts').upsert(
+        {'user_id': _uid, 'post_id': postId},
+        onConflict: 'user_id,post_id',
+        ignoreDuplicates: true,
+      );
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
+    }
+  }
+
+  Future<void> unsavePost(String postId) async {
+    try {
+      await _client
+          .from('saved_posts')
+          .delete()
+          .eq('user_id', _uid)
+          .eq('post_id', postId);
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
+    }
+  }
+
+  Future<List<FeedPost>> fetchSavedPosts({
+    String? activePetId,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      final savedRows = await _client
+          .from('saved_posts')
+          .select('post_id')
+          .eq('user_id', _uid)
+          .order('created_at', ascending: false)
+          .range(offset, offset + limit - 1);
+      final postIds = (savedRows as List).cast<Map<String, dynamic>>().map((r) => r['post_id'] as String).toList();
+      if (postIds.isEmpty) return const [];
+
+      final postRows = await _client
+          .from('posts')
+          .select('''
+            id,
+            content,
+            image_urls,
+            created_at,
+            like_count,
+            comment_count,
+            pet:pets!posts_pet_id_fkey!inner(id, name, species, breed, avatar_url),
+            author:users!posts_author_id_fkey(id, username, display_name, avatar_url, location)
+          ''')
+          .inFilter('id', postIds)
+          .eq('visibility', 'public');
+
+      final posts = (postRows as List).cast<Map<String, dynamic>>();
+      var likedIds = const <String>{};
+      if (activePetId != null && posts.isNotEmpty) {
+        likedIds = await _fetchLikedPostIds(activePetId, postIds);
+      }
+      return posts.map((r) => _rowToFeedPost(r, isLiked: likedIds.contains(r['id'] as String))).toList();
+    } on PostgrestException catch (e) {
+      throw DatabaseException.fromPostgrest(e);
+    }
+  }
+
+  // ── Social DMs ────────────────────────────────────────────────────────────
+
+  Future<String> getOrCreateSocialThread(String otherUserId) async {
+    try {
+      final result = await _client.rpc(
+        'get_or_create_social_thread',
+        params: {'p_other_user_id': otherUserId},
+      );
+      return result as String;
+    } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     }
   }

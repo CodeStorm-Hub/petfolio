@@ -1,0 +1,145 @@
+/* Petfolio Color Tokens — light mode defaults */
+:root {
+  /* ── Warm primary backgrounds ─────────────────────────────── */
+  --pf-cream:         #FFF4E6;
+  --pf-cream2:        #FFEAD2;
+
+  /* ── Tangerine — pets / primary action ───────────────────── */
+  --pf-tangerine:       #FF8A4C;
+  --pf-tangerine-700:   #E0651E;
+  --pf-tangerine-soft:  #FFE0CB;
+
+  /* ── Poppy — social / danger ─────────────────────────────── */
+  --pf-poppy:           #FF3D3D;
+  --pf-poppy-700:       #C41818;
+  --pf-poppy-soft:      #FFE0E0;
+
+  /* ── Mint — health / marketplace ────────────────────────── */
+  --pf-mint:            #2FCBA0;
+  --pf-mint-700:        #198C6E;
+  --pf-mint-soft:       #BFF1E0;
+
+  /* ── Sunny — care / streak ───────────────────────────────── */
+  --pf-sunny:           #FFC53D;
+  --pf-sunny-700:       #C68B0F;
+  --pf-sunny-soft:      #FFEDB3;
+
+  /* ── Lilac — match ───────────────────────────────────────── */
+  --pf-lilac:           #A98BFF;
+  --pf-lilac-700:       #6E4DDB;
+  --pf-lilac-soft:      #E2D6FF;
+
+  /* ── Sky — bird species accent ───────────────────────────── */
+  --pf-sky:             #6EC8FF;
+  --pf-sky-700:         #2895DA;
+  --pf-sky-soft:        #CDEAFF;
+
+  /* ── Ink — text & icons ──────────────────────────────────── */
+  --pf-ink-950:  #261308;
+  --pf-ink-700:  #5E3A28;
+  --pf-ink-500:  #957762;
+  --pf-ink-300:  #D6C2B0;
+
+  /* ── Dividers ─────────────────────────────────────────────── */
+  --pf-line:   #F4E2CB;
+  --pf-line2:  #EFD8BB;
+
+  /* ── Surfaces ─────────────────────────────────────────────── */
+  --pf-surface-0:  #FFFFFF;
+  --pf-surface-1:  #FFF4E6;
+  --pf-surface-2:  #FFFAF3;
+  --pf-surface-3:  #F2F3F7;
+
+  /* ── Semantic ─────────────────────────────────────────────── */
+  --pf-success:       #2FCBA0;
+  --pf-warning:       #FFC53D;
+  --pf-warning-soft:  #FFF3CD;
+  --pf-danger:        #FF3D3D;
+  --pf-info:          #6EC8FF;
+
+  /* ── Achievement badges ───────────────────────────────────── */
+  --pf-badge-green:   #4CAF50;
+  --pf-badge-amber:   #FF9800;
+  --pf-badge-gold:    #FFCC00;
+  --pf-badge-blue:    #2196F3;
+  --pf-badge-purple:  #9C27B0;
+  --pf-badge-pink:    #E91E63;
+  --pf-badge-violet:  #7B61FF;
+
+  /* ── Premium gold ─────────────────────────────────────────── */
+  --pf-premium-gold:       #D4AF37;
+  --pf-premium-gold-soft:  #F5D56E;
+
+  /* ── Glass fills ──────────────────────────────────────────── */
+  --pf-glass-fill:       rgba(255,255,255,0.62);
+  --pf-glass-top-border: rgba(255,255,255,0.55);
+  --pf-glass-rim-border: rgba(38,19,8,0.06);
+  --pf-glass-shine:      rgba(255,255,255,0.08);
+  --pf-glass-blur:       24px;
+
+  /* ── Pillar accent colors ─────────────────────────────────── */
+  --pf-pillar-pets:    var(--pf-tangerine);
+  --pf-pillar-care:    var(--pf-sunny);
+  --pf-pillar-social:  var(--pf-poppy);
+  --pf-pillar-match:   var(--pf-lilac);
+  --pf-pillar-health:  var(--pf-mint);
+  --pf-pillar-market:  var(--pf-sky);
+
+  /* ── Background ───────────────────────────────────────────── */
+  --pf-bg: var(--pf-cream);
+}
+
+/* Dark mode overrides */
+[data-theme="dark"] {
+  --pf-cream:         #1A1014;
+  --pf-cream2:        #221319;
+
+  --pf-tangerine:       #FFA374;
+  --pf-tangerine-700:   #FFB886;
+  --pf-tangerine-soft:  #4A2516;
+
+  --pf-poppy:           #FF7070;
+  --pf-poppy-700:       #FF9898;
+  --pf-poppy-soft:      #3D1010;
+
+  --pf-mint:            #59E0BB;
+  --pf-mint-700:        #62E8BE;
+  --pf-mint-soft:       #163A2E;
+
+  --pf-sunny:           #FFD668;
+  --pf-sunny-700:       #FFD96E;
+  --pf-sunny-soft:      #3D2B0A;
+
+  --pf-lilac:           #C1A7FF;
+  --pf-lilac-700:       #C8AEFF;
+  --pf-lilac-soft:      #2E2249;
+
+  --pf-sky:             #6EC8FF;
+  --pf-sky-soft:        #0B2840;
+
+  --pf-ink-950:  #FFF1E1;
+  --pf-ink-700:  #E9CFB8;
+  --pf-ink-500:  #B89685;
+  --pf-ink-300:  #B09080;
+
+  --pf-line:   #47313F;
+  --pf-line2:  #5A404C;
+
+  --pf-surface-0:  #2A1820;
+  --pf-surface-1:  #1A1014;
+  --pf-surface-2:  #321C25;
+  --pf-surface-3:  #252020;
+
+  --pf-success:   #59E0BB;
+  --pf-warning:   #FFD668;
+  --pf-danger:    #FF7070;
+  --pf-info:      #6EC8FF;
+
+  --pf-glass-fill:       rgba(42,24,32,0.55);
+  --pf-glass-top-border: rgba(255,255,255,0.10);
+  --pf-glass-rim-border: rgba(0,0,0,0.40);
+  --pf-glass-shine:      rgba(255,255,255,0.04);
+  --pf-glass-blur:       28px;
+
+  --pf-bg: #1A1014;
+}

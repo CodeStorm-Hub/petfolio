@@ -24,12 +24,15 @@ class OrderRepository {
     required String buyerId,
     required String shopId,
     required CartState cart,
+    String? promoCode,
   }) async {
     try {
       final result = await _client.rpc('process_checkout', params: {
         'p_buyer_id':   buyerId,
         'p_shop_id':    shopId,
         'p_cart_items': cart.rpcLineItemsJsonForShop(shopId),
+        if (promoCode != null && promoCode.isNotEmpty)
+          'p_promo_code': promoCode.toUpperCase().trim(),
       });
       return result as String;
     } on PostgrestException catch (e) {
@@ -89,6 +92,14 @@ class OrderRepository {
     return checkoutUrl;
   }
 
+  Future<void> setPaymentMethod(String orderId, PaymentMethod method) async {
+    await _client
+        .from('marketplace_orders')
+        .update({'payment_method': method.name})
+        .eq('id', orderId)
+        .eq('status', 'pending');
+  }
+
   /// Validate a CoD order via the Edge Function (inventory check, shop active
   /// guard) and stamp payment_method='cod' on the row server-side.
   /// Returns the confirmed orderId on success.
@@ -115,6 +126,41 @@ class OrderRepository {
 
     final data = response.data as Map<String, dynamic>;
     return data['orderId'] as String? ?? orderId;
+  }
+
+  /// Create an SSLCommerz payment session for bKash / Nagad checkout.
+  /// Returns the gateway URL to open in an external browser.
+  Future<SslcommerzSessionResult> createSslcommerzSession({
+    required String orderId,
+    required PaymentMethod paymentMethod,
+    required String successUrl,
+    required String failUrl,
+    required String cancelUrl,
+  }) async {
+    final response = await _client.functions.invoke(
+      'create-sslcommerz-session',
+      body: {
+        'orderId':        orderId,
+        'payment_method': paymentMethod.name,
+        'success_url':    successUrl,
+        'fail_url':       failUrl,
+        'cancel_url':     cancelUrl,
+      },
+    );
+
+    if (response.status != 200) {
+      final data = response.data as Map<String, dynamic>?;
+      final code = data?['code'] as String?;
+      if (code == 'SHOP_NOT_VERIFIED') throw const ShopNotVerifiedException();
+      if (code == 'SHOP_INACTIVE')     throw const ShopInactiveException();
+      throw Exception('SSLCommerz session error ${response.status}: ${response.data}');
+    }
+
+    final data = response.data as Map<String, dynamic>;
+    return SslcommerzSessionResult(
+      gatewayUrl:    data['gatewayUrl']    as String,
+      transactionId: data['transactionId'] as String,
+    );
   }
 
   /// No-op — the stripe-webhook Edge Function transitions pending → processing
@@ -209,27 +255,50 @@ class OrderRepository {
   }
 
   /// Poll until the backend confirms payment (webhook updated the row) or
-  /// [timeout] elapses.  Throws [PaymentTimeoutException] on timeout so the
-  /// caller can distinguish "still pending" from a hard failure.
+  /// [timeout] elapses.  Uses exponential backoff between polls (2s → 10s cap)
+  /// and swallows transient network errors so a momentary blip does not fail
+  /// the entire verification.  Throws [PaymentTimeoutException] on timeout.
   Future<MarketplaceOrder> pollOrderConfirmation(
     String orderId, {
-    Duration timeout = const Duration(seconds: 15),
-    Duration interval = const Duration(seconds: 2),
+    Duration timeout = const Duration(seconds: 45),
   }) async {
     final deadline = DateTime.now().add(timeout);
+    var interval = const Duration(seconds: 2);
+    const maxInterval = Duration(seconds: 10);
+
     while (DateTime.now().isBefore(deadline)) {
-      final order = await fetchOrder(orderId);
-      if (order.paymentStatus == PaymentStatus.paid ||
-          order.status == OrderStatus.processing) {
-        return order;
-      }
-      if (order.status == OrderStatus.cancelled) {
-        throw Exception('Order was cancelled during verification.');
+      try {
+        final order = await fetchOrder(orderId);
+        if (order.paymentStatus == PaymentStatus.paid ||
+            order.status == OrderStatus.processing) {
+          return order;
+        }
+        if (order.status == OrderStatus.cancelled) {
+          throw Exception('Order was cancelled during verification.');
+        }
+      } catch (e) {
+        if (e.toString().contains('cancelled')) rethrow;
+        // Swallow transient errors (network, timeout) and keep polling.
       }
       await Future<void>.delayed(interval);
+      interval = Duration(
+        microseconds: (interval.inMicroseconds * 1.5)
+            .round()
+            .clamp(0, maxInterval.inMicroseconds),
+      );
     }
     throw const PaymentTimeoutException();
   }
+}
+
+class SslcommerzSessionResult {
+  const SslcommerzSessionResult({
+    required this.gatewayUrl,
+    required this.transactionId,
+  });
+
+  final String gatewayUrl;
+  final String transactionId;
 }
 
 /// Stripe confirmed the payment but the backend webhook has not updated the

@@ -31,7 +31,7 @@ class ProductReviewsSection extends ConsumerWidget {
               'Reviews',
               style: TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 color: pt.ink950,
               ),
             ),
@@ -41,7 +41,7 @@ class ProductReviewsSection extends ConsumerWidget {
                 rating: product.rating!,
                 size: 16,
                 semanticLabel:
-                    '${product.rating!.toStringAsFixed(1)} average from ${product.reviewCount ?? 0} reviews',
+                    '${product.rating!.toStringAsFixed(1)} average from ${product.reviewCount ?? 0} ${(product.reviewCount ?? 0) == 1 ? 'review' : 'reviews'}',
               ),
           ],
         ),
@@ -180,7 +180,7 @@ class _ReviewSheetState extends ConsumerState<_ReviewSheet> {
             'Rate this product',
             style: TextStyle(
               fontSize: 20,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: pt.ink950,
             ),
           ),

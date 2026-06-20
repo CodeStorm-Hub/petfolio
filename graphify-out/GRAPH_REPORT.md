@@ -1,290 +1,330 @@
-# Graph Report - .  (2026-06-10)
+# Graph Report - .  (2026-06-20)
 
 ## Corpus Check
-- 393 files · ~192,697 words
+- 342 files · ~170,560 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 5396 nodes · 8468 edges · 263 communities (237 shown, 26 thin omitted)
+- 5838 nodes · 9139 edges · 303 communities (273 shown, 30 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_App Color Palette|App Color Palette]]
-- [[_COMMUNITY_Theme & Design Tokens|Theme & Design Tokens]]
-- [[_COMMUNITY_Social Feed & Media|Social Feed & Media]]
-- [[_COMMUNITY_Home Hub Screen|Home Hub Screen]]
-- [[_COMMUNITY_Care & Gamification|Care & Gamification]]
-- [[_COMMUNITY_Marketplace Browsing|Marketplace Browsing]]
-- [[_COMMUNITY_Pet Discovery & Matching|Pet Discovery & Matching]]
-- [[_COMMUNITY_Medical Vault & Health|Medical Vault & Health]]
-- [[_COMMUNITY_Pet Profile Editing|Pet Profile Editing]]
-- [[_COMMUNITY_Active Pet State|Active Pet State]]
-- [[_COMMUNITY_Vendor Shop Management|Vendor Shop Management]]
-- [[_COMMUNITY_Vendor Order Fulfillment|Vendor Order Fulfillment]]
-- [[_COMMUNITY_Matching Data & Chat|Matching Data & Chat]]
-- [[_COMMUNITY_Error Handling|Error Handling]]
-- [[_COMMUNITY_Shell Navigation & Routing|Shell Navigation & Routing]]
-- [[_COMMUNITY_Care Task Carousel UI|Care Task Carousel UI]]
+- [[_COMMUNITY_Color Palette & Tokens|Color Palette & Tokens]]
+- [[_COMMUNITY_Theme System & Extensions|Theme System & Extensions]]
+- [[_COMMUNITY_Social Feed & Posts|Social Feed & Posts]]
+- [[_COMMUNITY_Marketplace UI|Marketplace UI]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Care Dashboard & Awards|Care Dashboard & Awards]]
+- [[_COMMUNITY_Marketplace UI|Marketplace UI]]
+- [[_COMMUNITY_Hub Home Screen|Hub Home Screen]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Medical Vault|Medical Vault]]
+- [[_COMMUNITY_Product Detail|Product Detail]]
+- [[_COMMUNITY_Social Feed & Posts|Social Feed & Posts]]
+- [[_COMMUNITY_Social Feed & Posts|Social Feed & Posts]]
+- [[_COMMUNITY_Media & Content Creation|Media & Content Creation]]
 - [[_COMMUNITY_Story Viewer|Story Viewer]]
-- [[_COMMUNITY_Product Detail Screen|Product Detail Screen]]
-- [[_COMMUNITY_Buyer Orders & Checkout|Buyer Orders & Checkout]]
-- [[_COMMUNITY_Post Creation|Post Creation]]
-- [[_COMMUNITY_Activity & Appointments|Activity & Appointments]]
-- [[_COMMUNITY_Social Profiles & Awards|Social Profiles & Awards]]
-- [[_COMMUNITY_Seller Dashboard|Seller Dashboard]]
-- [[_COMMUNITY_Vendor KYC Verification|Vendor KYC Verification]]
-- [[_COMMUNITY_Post Detail & Comments|Post Detail & Comments]]
-- [[_COMMUNITY_Appointments Calendar|Appointments Calendar]]
-- [[_COMMUNITY_Shopping Cart|Shopping Cart]]
-- [[_COMMUNITY_Pet Onboarding Flow|Pet Onboarding Flow]]
-- [[_COMMUNITY_Care Streak & Rewards|Care Streak & Rewards]]
-- [[_COMMUNITY_Order Detail & Tracking|Order Detail & Tracking]]
-- [[_COMMUNITY_Pet Nutrition Screen|Pet Nutrition Screen]]
-- [[_COMMUNITY_Product List & Pagination|Product List & Pagination]]
-- [[_COMMUNITY_Care Task Repository|Care Task Repository]]
-- [[_COMMUNITY_Local Preferences Storage|Local Preferences Storage]]
-- [[_COMMUNITY_Core Button Widget|Core Button Widget]]
-- [[_COMMUNITY_Discovery Candidates|Discovery Candidates]]
-- [[_COMMUNITY_Product Data Models|Product Data Models]]
-- [[_COMMUNITY_Comment System|Comment System]]
-- [[_COMMUNITY_AI Care Routine UI|AI Care Routine UI]]
-- [[_COMMUNITY_App Shell & Router|App Shell & Router]]
-- [[_COMMUNITY_Module Group 40|Module Group 40]]
-- [[_COMMUNITY_Module Group 41|Module Group 41]]
-- [[_COMMUNITY_Module Group 42|Module Group 42]]
-- [[_COMMUNITY_Module Group 43|Module Group 43]]
-- [[_COMMUNITY_Module Group 44|Module Group 44]]
-- [[_COMMUNITY_Module Group 45|Module Group 45]]
-- [[_COMMUNITY_Module Group 46|Module Group 46]]
-- [[_COMMUNITY_Module Group 47|Module Group 47]]
-- [[_COMMUNITY_Module Group 48|Module Group 48]]
-- [[_COMMUNITY_Module Group 49|Module Group 49]]
-- [[_COMMUNITY_Module Group 50|Module Group 50]]
-- [[_COMMUNITY_Module Group 51|Module Group 51]]
-- [[_COMMUNITY_Module Group 52|Module Group 52]]
-- [[_COMMUNITY_Module Group 53|Module Group 53]]
-- [[_COMMUNITY_Module Group 54|Module Group 54]]
-- [[_COMMUNITY_Module Group 55|Module Group 55]]
-- [[_COMMUNITY_Module Group 56|Module Group 56]]
-- [[_COMMUNITY_Module Group 57|Module Group 57]]
-- [[_COMMUNITY_Module Group 58|Module Group 58]]
-- [[_COMMUNITY_Module Group 59|Module Group 59]]
-- [[_COMMUNITY_Module Group 60|Module Group 60]]
-- [[_COMMUNITY_Module Group 61|Module Group 61]]
-- [[_COMMUNITY_Module Group 62|Module Group 62]]
-- [[_COMMUNITY_Module Group 63|Module Group 63]]
-- [[_COMMUNITY_Module Group 64|Module Group 64]]
-- [[_COMMUNITY_Module Group 65|Module Group 65]]
-- [[_COMMUNITY_Module Group 66|Module Group 66]]
-- [[_COMMUNITY_Module Group 67|Module Group 67]]
-- [[_COMMUNITY_Module Group 68|Module Group 68]]
-- [[_COMMUNITY_Module Group 69|Module Group 69]]
-- [[_COMMUNITY_Module Group 70|Module Group 70]]
-- [[_COMMUNITY_Module Group 71|Module Group 71]]
-- [[_COMMUNITY_Module Group 72|Module Group 72]]
-- [[_COMMUNITY_Module Group 73|Module Group 73]]
-- [[_COMMUNITY_Module Group 74|Module Group 74]]
-- [[_COMMUNITY_Module Group 75|Module Group 75]]
-- [[_COMMUNITY_Module Group 76|Module Group 76]]
-- [[_COMMUNITY_Module Group 77|Module Group 77]]
-- [[_COMMUNITY_Module Group 78|Module Group 78]]
-- [[_COMMUNITY_Module Group 79|Module Group 79]]
-- [[_COMMUNITY_Module Group 80|Module Group 80]]
-- [[_COMMUNITY_Module Group 81|Module Group 81]]
-- [[_COMMUNITY_Module Group 82|Module Group 82]]
-- [[_COMMUNITY_Module Group 83|Module Group 83]]
-- [[_COMMUNITY_Module Group 84|Module Group 84]]
-- [[_COMMUNITY_Module Group 85|Module Group 85]]
-- [[_COMMUNITY_Module Group 86|Module Group 86]]
-- [[_COMMUNITY_Module Group 87|Module Group 87]]
-- [[_COMMUNITY_Module Group 88|Module Group 88]]
-- [[_COMMUNITY_Module Group 89|Module Group 89]]
-- [[_COMMUNITY_Module Group 90|Module Group 90]]
-- [[_COMMUNITY_Module Group 91|Module Group 91]]
-- [[_COMMUNITY_Module Group 92|Module Group 92]]
-- [[_COMMUNITY_Module Group 93|Module Group 93]]
-- [[_COMMUNITY_Module Group 94|Module Group 94]]
-- [[_COMMUNITY_Module Group 95|Module Group 95]]
-- [[_COMMUNITY_Module Group 96|Module Group 96]]
-- [[_COMMUNITY_Module Group 97|Module Group 97]]
-- [[_COMMUNITY_Module Group 98|Module Group 98]]
-- [[_COMMUNITY_Module Group 99|Module Group 99]]
-- [[_COMMUNITY_Module Group 100|Module Group 100]]
-- [[_COMMUNITY_Module Group 101|Module Group 101]]
-- [[_COMMUNITY_Module Group 102|Module Group 102]]
-- [[_COMMUNITY_Module Group 103|Module Group 103]]
-- [[_COMMUNITY_Module Group 104|Module Group 104]]
-- [[_COMMUNITY_Module Group 105|Module Group 105]]
-- [[_COMMUNITY_Module Group 106|Module Group 106]]
-- [[_COMMUNITY_Module Group 107|Module Group 107]]
-- [[_COMMUNITY_Module Group 108|Module Group 108]]
-- [[_COMMUNITY_Module Group 109|Module Group 109]]
-- [[_COMMUNITY_Module Group 110|Module Group 110]]
-- [[_COMMUNITY_Module Group 111|Module Group 111]]
-- [[_COMMUNITY_Module Group 112|Module Group 112]]
-- [[_COMMUNITY_Module Group 113|Module Group 113]]
-- [[_COMMUNITY_Module Group 114|Module Group 114]]
-- [[_COMMUNITY_Module Group 115|Module Group 115]]
-- [[_COMMUNITY_Module Group 116|Module Group 116]]
-- [[_COMMUNITY_Module Group 117|Module Group 117]]
-- [[_COMMUNITY_Module Group 118|Module Group 118]]
-- [[_COMMUNITY_Module Group 119|Module Group 119]]
-- [[_COMMUNITY_Module Group 120|Module Group 120]]
-- [[_COMMUNITY_Module Group 121|Module Group 121]]
-- [[_COMMUNITY_Module Group 122|Module Group 122]]
-- [[_COMMUNITY_Module Group 123|Module Group 123]]
-- [[_COMMUNITY_Module Group 124|Module Group 124]]
-- [[_COMMUNITY_Module Group 125|Module Group 125]]
-- [[_COMMUNITY_Module Group 126|Module Group 126]]
-- [[_COMMUNITY_Module Group 127|Module Group 127]]
-- [[_COMMUNITY_Module Group 128|Module Group 128]]
-- [[_COMMUNITY_Module Group 129|Module Group 129]]
-- [[_COMMUNITY_Module Group 130|Module Group 130]]
-- [[_COMMUNITY_Module Group 131|Module Group 131]]
-- [[_COMMUNITY_Module Group 132|Module Group 132]]
-- [[_COMMUNITY_Module Group 133|Module Group 133]]
-- [[_COMMUNITY_Module Group 134|Module Group 134]]
-- [[_COMMUNITY_Module Group 135|Module Group 135]]
-- [[_COMMUNITY_Module Group 136|Module Group 136]]
-- [[_COMMUNITY_Module Group 137|Module Group 137]]
-- [[_COMMUNITY_Module Group 138|Module Group 138]]
-- [[_COMMUNITY_Module Group 139|Module Group 139]]
-- [[_COMMUNITY_Module Group 140|Module Group 140]]
-- [[_COMMUNITY_Module Group 141|Module Group 141]]
-- [[_COMMUNITY_Module Group 142|Module Group 142]]
-- [[_COMMUNITY_Module Group 143|Module Group 143]]
-- [[_COMMUNITY_Module Group 144|Module Group 144]]
-- [[_COMMUNITY_Module Group 145|Module Group 145]]
-- [[_COMMUNITY_Module Group 146|Module Group 146]]
-- [[_COMMUNITY_Module Group 147|Module Group 147]]
-- [[_COMMUNITY_Module Group 148|Module Group 148]]
-- [[_COMMUNITY_Module Group 149|Module Group 149]]
-- [[_COMMUNITY_Module Group 150|Module Group 150]]
-- [[_COMMUNITY_Module Group 151|Module Group 151]]
-- [[_COMMUNITY_Module Group 152|Module Group 152]]
-- [[_COMMUNITY_Module Group 153|Module Group 153]]
-- [[_COMMUNITY_Module Group 154|Module Group 154]]
-- [[_COMMUNITY_Module Group 155|Module Group 155]]
-- [[_COMMUNITY_Module Group 156|Module Group 156]]
-- [[_COMMUNITY_Module Group 157|Module Group 157]]
-- [[_COMMUNITY_Module Group 158|Module Group 158]]
-- [[_COMMUNITY_Module Group 159|Module Group 159]]
-- [[_COMMUNITY_Module Group 160|Module Group 160]]
-- [[_COMMUNITY_Module Group 161|Module Group 161]]
-- [[_COMMUNITY_Module Group 162|Module Group 162]]
-- [[_COMMUNITY_Module Group 163|Module Group 163]]
-- [[_COMMUNITY_Module Group 164|Module Group 164]]
-- [[_COMMUNITY_Module Group 165|Module Group 165]]
-- [[_COMMUNITY_Module Group 166|Module Group 166]]
-- [[_COMMUNITY_Module Group 167|Module Group 167]]
-- [[_COMMUNITY_Module Group 168|Module Group 168]]
-- [[_COMMUNITY_Module Group 169|Module Group 169]]
-- [[_COMMUNITY_Module Group 170|Module Group 170]]
-- [[_COMMUNITY_Module Group 171|Module Group 171]]
-- [[_COMMUNITY_Module Group 172|Module Group 172]]
-- [[_COMMUNITY_Module Group 173|Module Group 173]]
-- [[_COMMUNITY_Module Group 174|Module Group 174]]
-- [[_COMMUNITY_Module Group 175|Module Group 175]]
-- [[_COMMUNITY_Module Group 176|Module Group 176]]
-- [[_COMMUNITY_Module Group 177|Module Group 177]]
-- [[_COMMUNITY_Module Group 178|Module Group 178]]
-- [[_COMMUNITY_Module Group 179|Module Group 179]]
-- [[_COMMUNITY_Module Group 180|Module Group 180]]
-- [[_COMMUNITY_Module Group 181|Module Group 181]]
-- [[_COMMUNITY_Module Group 182|Module Group 182]]
-- [[_COMMUNITY_Module Group 183|Module Group 183]]
-- [[_COMMUNITY_Module Group 184|Module Group 184]]
-- [[_COMMUNITY_Module Group 185|Module Group 185]]
-- [[_COMMUNITY_Module Group 186|Module Group 186]]
-- [[_COMMUNITY_Module Group 187|Module Group 187]]
-- [[_COMMUNITY_Module Group 188|Module Group 188]]
-- [[_COMMUNITY_Module Group 189|Module Group 189]]
-- [[_COMMUNITY_Module Group 190|Module Group 190]]
-- [[_COMMUNITY_Module Group 191|Module Group 191]]
-- [[_COMMUNITY_Module Group 192|Module Group 192]]
-- [[_COMMUNITY_Module Group 193|Module Group 193]]
-- [[_COMMUNITY_Module Group 194|Module Group 194]]
-- [[_COMMUNITY_Module Group 195|Module Group 195]]
-- [[_COMMUNITY_Module Group 196|Module Group 196]]
-- [[_COMMUNITY_Module Group 197|Module Group 197]]
-- [[_COMMUNITY_Module Group 198|Module Group 198]]
-- [[_COMMUNITY_Module Group 199|Module Group 199]]
-- [[_COMMUNITY_Module Group 200|Module Group 200]]
-- [[_COMMUNITY_Module Group 201|Module Group 201]]
-- [[_COMMUNITY_Module Group 202|Module Group 202]]
-- [[_COMMUNITY_Module Group 203|Module Group 203]]
-- [[_COMMUNITY_Module Group 204|Module Group 204]]
-- [[_COMMUNITY_Module Group 205|Module Group 205]]
-- [[_COMMUNITY_Module Group 206|Module Group 206]]
-- [[_COMMUNITY_Module Group 207|Module Group 207]]
-- [[_COMMUNITY_Module Group 208|Module Group 208]]
-- [[_COMMUNITY_Module Group 209|Module Group 209]]
-- [[_COMMUNITY_Module Group 210|Module Group 210]]
-- [[_COMMUNITY_Module Group 211|Module Group 211]]
-- [[_COMMUNITY_Module Group 212|Module Group 212]]
-- [[_COMMUNITY_Module Group 213|Module Group 213]]
-- [[_COMMUNITY_Module Group 214|Module Group 214]]
-- [[_COMMUNITY_Module Group 215|Module Group 215]]
-- [[_COMMUNITY_Module Group 216|Module Group 216]]
-- [[_COMMUNITY_Module Group 217|Module Group 217]]
-- [[_COMMUNITY_Module Group 218|Module Group 218]]
-- [[_COMMUNITY_Module Group 219|Module Group 219]]
-- [[_COMMUNITY_Module Group 220|Module Group 220]]
-- [[_COMMUNITY_Module Group 221|Module Group 221]]
-- [[_COMMUNITY_Module Group 222|Module Group 222]]
-- [[_COMMUNITY_Module Group 223|Module Group 223]]
-- [[_COMMUNITY_Module Group 224|Module Group 224]]
-- [[_COMMUNITY_Module Group 225|Module Group 225]]
-- [[_COMMUNITY_Module Group 226|Module Group 226]]
-- [[_COMMUNITY_Module Group 227|Module Group 227]]
-- [[_COMMUNITY_Module Group 228|Module Group 228]]
-- [[_COMMUNITY_Module Group 229|Module Group 229]]
-- [[_COMMUNITY_Module Group 230|Module Group 230]]
-- [[_COMMUNITY_Module Group 231|Module Group 231]]
-- [[_COMMUNITY_Module Group 232|Module Group 232]]
-- [[_COMMUNITY_Module Group 233|Module Group 233]]
-- [[_COMMUNITY_Module Group 234|Module Group 234]]
-- [[_COMMUNITY_Module Group 235|Module Group 235]]
-- [[_COMMUNITY_Module Group 236|Module Group 236]]
-- [[_COMMUNITY_Module Group 237|Module Group 237]]
-- [[_COMMUNITY_Module Group 238|Module Group 238]]
-- [[_COMMUNITY_Module Group 239|Module Group 239]]
-- [[_COMMUNITY_Module Group 240|Module Group 240]]
-- [[_COMMUNITY_Module Group 241|Module Group 241]]
-- [[_COMMUNITY_Module Group 242|Module Group 242]]
-- [[_COMMUNITY_Module Group 243|Module Group 243]]
-- [[_COMMUNITY_Module Group 244|Module Group 244]]
-- [[_COMMUNITY_Module Group 245|Module Group 245]]
-- [[_COMMUNITY_Module Group 246|Module Group 246]]
-- [[_COMMUNITY_Module Group 247|Module Group 247]]
-- [[_COMMUNITY_Module Group 248|Module Group 248]]
-- [[_COMMUNITY_Module Group 249|Module Group 249]]
-- [[_COMMUNITY_Module Group 250|Module Group 250]]
-- [[_COMMUNITY_Module Group 251|Module Group 251]]
-- [[_COMMUNITY_Module Group 252|Module Group 252]]
-- [[_COMMUNITY_Module Group 253|Module Group 253]]
-- [[_COMMUNITY_Module Group 254|Module Group 254]]
-- [[_COMMUNITY_Module Group 255|Module Group 255]]
-- [[_COMMUNITY_Module Group 256|Module Group 256]]
-- [[_COMMUNITY_Module Group 257|Module Group 257]]
-- [[_COMMUNITY_Module Group 258|Module Group 258]]
-- [[_COMMUNITY_Module Group 259|Module Group 259]]
-- [[_COMMUNITY_Module Group 260|Module Group 260]]
-- [[_COMMUNITY_Module Group 261|Module Group 261]]
-- [[_COMMUNITY_Module Group 262|Module Group 262]]
+- [[_COMMUNITY_Cart & Promo|Cart & Promo]]
+- [[_COMMUNITY_Active Pet State|Active Pet State]]
+- [[_COMMUNITY_Vet Appointments|Vet Appointments]]
+- [[_COMMUNITY_Theme Primitives|Theme Primitives]]
+- [[_COMMUNITY_Care Dashboard & Awards|Care Dashboard & Awards]]
+- [[_COMMUNITY_Onboarding Flow|Onboarding Flow]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Vet Appointments|Vet Appointments]]
+- [[_COMMUNITY_Social Feed & Posts|Social Feed & Posts]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Breeding & Verification|Breeding & Verification]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Pill Button Widget|Pill Button Widget]]
+- [[_COMMUNITY_Care Dashboard & Awards|Care Dashboard & Awards]]
+- [[_COMMUNITY_Product List|Product List]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Care Streaks & Tasks|Care Streaks & Tasks]]
+- [[_COMMUNITY_Active Pet State|Active Pet State]]
+- [[_COMMUNITY_Nutrition Tracker|Nutrition Tracker]]
+- [[_COMMUNITY_Product Detail|Product Detail]]
+- [[_COMMUNITY_Social Repository|Social Repository]]
+- [[_COMMUNITY_Social Feed & Posts|Social Feed & Posts]]
+- [[_COMMUNITY_Booking Slots|Booking Slots]]
+- [[_COMMUNITY_Chat & Messaging|Chat & Messaging]]
+- [[_COMMUNITY_Media & Content Creation|Media & Content Creation]]
+- [[_COMMUNITY_Marketplace UI|Marketplace UI]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Vet Appointments|Vet Appointments]]
+- [[_COMMUNITY_Animated Carousel|Animated Carousel]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Profile Editing|Profile Editing]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_AI Care Routine|AI Care Routine]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Care Dashboard & Awards|Care Dashboard & Awards]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Controllers Shop List Controll|Controllers Shop List Controll]]
+- [[_COMMUNITY_Package Flutter Map Flutter Ma|Package Flutter Map Flutter Ma]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Social Controller|Social Controller]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Media & Content Creation|Media & Content Creation]]
+- [[_COMMUNITY_Buyer Orders|Buyer Orders]]
+- [[_COMMUNITY_Notifications|Notifications]]
+- [[_COMMUNITY_Social Repository|Social Repository]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Media & Content Creation|Media & Content Creation]]
+- [[_COMMUNITY_Theme Primitives|Theme Primitives]]
+- [[_COMMUNITY_Care Dashboard & Awards|Care Dashboard & Awards]]
+- [[_COMMUNITY_Communities Index|Communities Index]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Active Pet State|Active Pet State]]
+- [[_COMMUNITY_Models Cart Item|Models Cart Item]]
+- [[_COMMUNITY_Annotation Jsonenum|Annotation Jsonenum]]
+- [[_COMMUNITY_Firebase & FCM|Firebase & FCM]]
+- [[_COMMUNITY_Color Palette & Tokens|Color Palette & Tokens]]
+- [[_COMMUNITY_Config App Config|Config App Config]]
+- [[_COMMUNITY_Marketplace UI|Marketplace UI]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Annotation Immutable|Annotation Immutable]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Controllers Match Liked Contro|Controllers Match Liked Contro]]
+- [[_COMMUNITY_Controllers Shipment Controlle|Controllers Shipment Controlle]]
+- [[_COMMUNITY_Models Pet Level|Models Pet Level]]
+- [[_COMMUNITY_Care Dashboard & Awards|Care Dashboard & Awards]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Breeding & Verification|Breeding & Verification]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Firebase & FCM|Firebase & FCM]]
+- [[_COMMUNITY_Navigation & Shell Routing|Navigation & Shell Routing]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Firebase & FCM|Firebase & FCM]]
+- [[_COMMUNITY_Social Feed & Posts|Social Feed & Posts]]
+- [[_COMMUNITY_Controllers Auth Controller|Controllers Auth Controller]]
+- [[_COMMUNITY_Buyer Orders|Buyer Orders]]
+- [[_COMMUNITY_Product Detail|Product Detail]]
+- [[_COMMUNITY_Marketplace UI|Marketplace UI]]
+- [[_COMMUNITY_Vet Appointments|Vet Appointments]]
+- [[_COMMUNITY_Active Pet State|Active Pet State]]
+- [[_COMMUNITY_Payments|Payments]]
+- [[_COMMUNITY_Care Dashboard & Awards|Care Dashboard & Awards]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Chat Controller|Chat Controller]]
+- [[_COMMUNITY_Controllers Communities Contro|Controllers Communities Contro]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Controllers Match Preference C|Controllers Match Preference C]]
+- [[_COMMUNITY_Firebase & FCM|Firebase & FCM]]
+- [[_COMMUNITY_Customer Buyer Order Detail Sc|Customer Buyer Order Detail Sc]]
+- [[_COMMUNITY_Vet Appointments|Vet Appointments]]
+- [[_COMMUNITY_Models Prescription|Models Prescription]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Media & Content Creation|Media & Content Creation]]
+- [[_COMMUNITY_Marketplace UI|Marketplace UI]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Medical Vault|Medical Vault]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Pet Care Repository|Pet Care Repository]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Product Models|Product Models]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Vet Appointments|Vet Appointments]]
+- [[_COMMUNITY_Theme Primitives|Theme Primitives]]
+- [[_COMMUNITY_Controllers Create Post Contro|Controllers Create Post Contro]]
+- [[_COMMUNITY_Profile Editing|Profile Editing]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Vet Appointments|Vet Appointments]]
+- [[_COMMUNITY_Product Detail|Product Detail]]
+- [[_COMMUNITY_Controllers Admin Dashboard Co|Controllers Admin Dashboard Co]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Active Pet State|Active Pet State]]
+- [[_COMMUNITY_Firebase & FCM|Firebase & FCM]]
+- [[_COMMUNITY_Models Comment|Models Comment]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Cat Rabbit Bird Fish|Cat Rabbit Bird Fish]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Firebase & FCM|Firebase & FCM]]
+- [[_COMMUNITY_Firebase & FCM|Firebase & FCM]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Chat Controller|Chat Controller]]
+- [[_COMMUNITY_Controllers Clinic List Provid|Controllers Clinic List Provid]]
+- [[_COMMUNITY_Social Profile & Follow|Social Profile & Follow]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Controllers Prescription Contr|Controllers Prescription Contr]]
+- [[_COMMUNITY_Cart & Promo|Cart & Promo]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Convert|Convert]]
+- [[_COMMUNITY_Product Detail|Product Detail]]
+- [[_COMMUNITY_Marketplace UI|Marketplace UI]]
+- [[_COMMUNITY_Onboarding Flow|Onboarding Flow]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Breeding & Verification|Breeding & Verification]]
+- [[_COMMUNITY_Auth Presentation Controllers|Auth Presentation Controllers ]]
+- [[_COMMUNITY_Controllers Cart Controller|Controllers Cart Controller]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Active Pet State|Active Pet State]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Care Dashboard & Awards|Care Dashboard & Awards]]
+- [[_COMMUNITY_Models Shop Deletion Request|Models Shop Deletion Request]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Pill Button Widget|Pill Button Widget]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Color Palette & Tokens|Color Palette & Tokens]]
+- [[_COMMUNITY_Icondata Get|Icondata Get]]
+- [[_COMMUNITY_Models Community Post|Models Community Post]]
+- [[_COMMUNITY_Models Match Inbox Item|Models Match Inbox Item]]
+- [[_COMMUNITY_Package Flutter Image Compress|Package Flutter Image Compress]]
+- [[_COMMUNITY_Services Prefs Schema|Services Prefs Schema]]
+- [[_COMMUNITY_Admin Admin Routes|Admin Admin Routes]]
+- [[_COMMUNITY_Nutrition Tracker|Nutrition Tracker]]
+- [[_COMMUNITY_Theme Primitives|Theme Primitives]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Theme System & Extensions|Theme System & Extensions]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Notifications|Notifications]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_External Location Get|External Location Get]]
+- [[_COMMUNITY_Firebase & FCM|Firebase & FCM]]
+- [[_COMMUNITY_Social Repository|Social Repository]]
+- [[_COMMUNITY_Firebase & FCM|Firebase & FCM]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Models Community|Models Community]]
+- [[_COMMUNITY_Models Story|Models Story]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Platform Web Image Cache|Platform Web Image Cache]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Booking Slots|Booking Slots]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Story Viewer|Story Viewer]]
+- [[_COMMUNITY_Theme Primitives|Theme Primitives]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Active Pet State|Active Pet State]]
+- [[_COMMUNITY_Controllers Cart Controller Ca|Controllers Cart Controller Ca]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Vet Appointments|Vet Appointments]]
+- [[_COMMUNITY_Models Chat Thread|Models Chat Thread]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Vet Appointments|Vet Appointments]]
+- [[_COMMUNITY_Care Dashboard & Awards|Care Dashboard & Awards]]
+- [[_COMMUNITY_Active Pet State|Active Pet State]]
+- [[_COMMUNITY_Jsonconverter|Jsonconverter]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Models Chat Message|Models Chat Message]]
+- [[_COMMUNITY_Models Pet Search Result|Models Pet Search Result]]
+- [[_COMMUNITY_Product Detail|Product Detail]]
+- [[_COMMUNITY_Product Models|Product Models]]
+- [[_COMMUNITY_Social Repository|Social Repository]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Firebase & FCM|Firebase & FCM]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Core Config App Config|Core Config App Config]]
+- [[_COMMUNITY_Datetime|Datetime]]
+- [[_COMMUNITY_Datetime Get|Datetime Get]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Models Pet Health Cert|Models Pet Health Cert]]
+- [[_COMMUNITY_Product Models|Product Models]]
+- [[_COMMUNITY_Notifications|Notifications]]
+- [[_COMMUNITY_Seller Module|Seller Module]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Cart & Promo|Cart & Promo]]
+- [[_COMMUNITY_Controllers Address Controller|Controllers Address Controller]]
+- [[_COMMUNITY_Medical Vault|Medical Vault]]
+- [[_COMMUNITY_Nutrition Tracker|Nutrition Tracker]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Vet Appointments|Vet Appointments]]
+- [[_COMMUNITY_Product List|Product List]]
+- [[_COMMUNITY_Pet Matching & Discovery|Pet Matching & Discovery]]
+- [[_COMMUNITY_Media & Content Creation|Media & Content Creation]]
+- [[_COMMUNITY_Male Female|Male Female]]
+- [[_COMMUNITY_Match Hub Screen|Match Hub Screen]]
+- [[_COMMUNITY_Care Streaks & Tasks|Care Streaks & Tasks]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Utils Care Scheduled Time|Utils Care Scheduled Time]]
+- [[_COMMUNITY_Chat & Messaging|Chat & Messaging]]
+- [[_COMMUNITY_Medical Vault|Medical Vault]]
+- [[_COMMUNITY_Models Pet Stats|Models Pet Stats]]
+- [[_COMMUNITY_Supabase Repository|Supabase Repository]]
+- [[_COMMUNITY_Vet Appointments|Vet Appointments]]
+- [[_COMMUNITY_Routing|Routing]]
+- [[_COMMUNITY_Io|Io]]
+- [[_COMMUNITY_Models Vendor Ledger|Models Vendor Ledger]]
+- [[_COMMUNITY_Package Image Picker Image Pic|Package Image Picker Image Pic]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Account Screen|Account Screen]]
+- [[_COMMUNITY_Theme Primitives|Theme Primitives]]
+- [[_COMMUNITY_Buyer Orders|Buyer Orders]]
+- [[_COMMUNITY_Models Pet Pedigree|Models Pet Pedigree]]
+- [[_COMMUNITY_Payments|Payments]]
+- [[_COMMUNITY_Platform Platform Location|Platform Platform Location]]
+- [[_COMMUNITY_Firebase & FCM|Firebase & FCM]]
+- [[_COMMUNITY_Models Vet Service|Models Vet Service]]
+- [[_COMMUNITY_Chat & Messaging|Chat & Messaging]]
+- [[_COMMUNITY_Utils Time Ago|Utils Time Ago]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Media Picker Io|Media Picker Io]]
+- [[_COMMUNITY_Routing|Routing]]
+- [[_COMMUNITY_Pet Care Repository|Pet Care Repository]]
+- [[_COMMUNITY_Platform Web Checkout Redirect|Platform Web Checkout Redirect]]
+- [[_COMMUNITY_Platform Web Push Environment|Platform Web Push Environment]]
+- [[_COMMUNITY_Platform Web Push Registration|Platform Web Push Registration]]
+- [[_COMMUNITY_Care Streaks & Tasks|Care Streaks & Tasks]]
+- [[_COMMUNITY_Chat & Messaging|Chat & Messaging]]
+- [[_COMMUNITY_Chat & Messaging|Chat & Messaging]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Shared Widgets|Shared Widgets]]
+- [[_COMMUNITY_Annotation Example|Annotation Example]]
+- [[_COMMUNITY_None Caredashboardprovider|None Caredashboardprovider]]
+- [[_COMMUNITY_None Commentlistprovider|None Commentlistprovider]]
+- [[_COMMUNITY_None Createpostcontrollerprovi|None Createpostcontrollerprovi]]
+- [[_COMMUNITY_None Hashtagfeedprovider|None Hashtagfeedprovider]]
+- [[_COMMUNITY_None Ispostsavedprovider|None Ispostsavedprovider]]
+- [[_COMMUNITY_None Iswishlistedprovider|None Iswishlistedprovider]]
+- [[_COMMUNITY_Notifications|Notifications]]
+- [[_COMMUNITY_None Postdetailprovider|None Postdetailprovider]]
+- [[_COMMUNITY_None Postprovider|None Postprovider]]
+- [[_COMMUNITY_None Prescriptionuploadprovide|None Prescriptionuploadprovide]]
+- [[_COMMUNITY_None Productvariantsprovider|None Productvariantsprovider]]
+- [[_COMMUNITY_None Savedpostsprovider|None Savedpostsprovider]]
+- [[_COMMUNITY_None Shipmentprovider|None Shipmentprovider]]
+- [[_COMMUNITY_None Socialcontrollerprovider|None Socialcontrollerprovider]]
+- [[_COMMUNITY_None Socialdmthreadprovider|None Socialdmthreadprovider]]
+- [[_COMMUNITY_None Storiesprovider|None Storiesprovider]]
+- [[_COMMUNITY_None Wishlistitemsprovider|None Wishlistitemsprovider]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `PetfolioThemeExtension` - 75 edges
-2. `activePetControllerProvider` - 73 edges
+1. `PetfolioThemeExtension` - 91 edges
+2. `activePetControllerProvider` - 72 edges
 3. `_` - 60 edges
-4. `activePetIdProvider` - 32 edges
+4. `activePetIdProvider` - 37 edges
 5. `_` - 31 edges
-6. `petListProvider` - 29 edges
-7. `cartProvider` - 27 edges
-8. `_` - 21 edges
-9. `_` - 18 edges
-10. `authRepositoryProvider` - 16 edges
+6. `_` - 31 edges
+7. `petListProvider` - 29 edges
+8. `cartProvider` - 25 edges
+9. `matchingRepositoryProvider` - 24 edges
+10. `_` - 22 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `build` --references--> `activePetControllerProvider`  [EXTRACTED]
@@ -295,985 +335,1133 @@
   lib/features/admin/presentation/controllers/shop_deletion_controller.dart → lib/features/admin/data/repositories/admin_repository.dart
 - `build` --references--> `activePetIdProvider`  [EXTRACTED]
   lib/features/care/presentation/controllers/health_vault_controller.dart → lib/features/pet_profile/presentation/controllers/active_pet_controller.dart
-- `showCreateCommunitySheet` --references--> `activePetIdProvider`  [EXTRACTED]
-  lib/features/communities/presentation/widgets/create_community_sheet.dart → lib/features/pet_profile/presentation/controllers/active_pet_controller.dart
+- `_load` --references--> `activePetIdProvider`  [EXTRACTED]
+  lib/features/communities/presentation/controllers/communities_controller.dart → lib/features/pet_profile/presentation/controllers/active_pet_controller.dart
 
 ## Import Cycles
 - None detected.
 
-## Communities (263 total, 26 thin omitted)
+## Communities (303 total, 30 thin omitted)
 
-### Community 0 - "App Color Palette"
+### Community 0 - "Color Palette & Tokens"
 Cohesion: 0.02
-Nodes (117): AppColors, apricot500, apricot500D, blue100, blue100D, blue200, blue200D, blue300 (+109 more)
+Nodes (130): AppColors, apricot500, apricot500D, badgeAmber, badgeBlue, badgeGold, badgeGreen, badgePink (+122 more)
 
-### Community 1 - "Theme & Design Tokens"
+### Community 1 - "Theme System & Extensions"
 Cohesion: 0.02
-Nodes (80): package:flutter/cupertino.dart, static const AppThemeSpacing, static const Curve, static const PetfolioThemeExtension, AppTheme, AppThemeSpacing, btnHeightLg, btnHeightMd (+72 more)
+Nodes (91): package:flutter/cupertino.dart, static const AppThemeSpacing, static const Curve, static const PetfolioThemeExtension, TextStyle get, AppTheme, AppThemeSpacing, btnHeightLg (+83 more)
 
-### Community 2 - "Social Feed & Media"
+### Community 2 - "Social Feed & Posts"
 Cohesion: 0.03
-Nodes (71): ../../../../core/widgets/dashed_circle_painter.dart, ../../../../core/widgets/petfolio_network_image.dart, package:video_player/video_player.dart, post_detail_screen.dart, _ActionBtn, animateRing, avatarUrl, baseStyle (+63 more)
+Nodes (77): ../controllers/create_post_controller.dart, ../../../../core/widgets/dashed_circle_painter.dart, ../../../../core/widgets/petfolio_network_image.dart, package:video_player/video_player.dart, post_detail_screen.dart, _ActionBtn, animateRing, avatarUrl (+69 more)
 
-### Community 3 - "Home Hub Screen"
-Cohesion: 0.04
-Nodes (61): homeScrollProgressProvider, accent, accentColor, action, _AllTile, _AllTileState, _bentoCardDecoration, _BentoGrid (+53 more)
-
-### Community 4 - "Care & Gamification"
+### Community 3 - "Marketplace UI"
 Cohesion: 0.03
-Nodes (60): AnimationStatusListener, ConfettiController, ../controllers/care_dashboard_controller.dart, ../controllers/pet_awards_provider.dart, ../../../../core/models/pet.dart, ../../data/models/pet_level.dart, package:confetti/confetti.dart, activePet (+52 more)
+Nodes (65): marketplace_categories_screen.dart, allProducts, big, _btnKey, _CategoryChips, _CategoryModel, _cats, color (+57 more)
 
-### Community 5 - "Marketplace Browsing"
+### Community 4 - "Pet Matching & Discovery"
 Cohesion: 0.03
-Nodes (59): Route /marketplace/intro, allProducts, big, _btnKey, _CategoryChips, _CategoryModel, _cats, color (+51 more)
+Nodes (63): ../controllers/discovery_candidates_controller.dart, ../controllers/discovery_controller.dart, ../controllers/mutual_match_realtime_provider.dart, ../../../../core/services/lat_lng.dart, ../../../../core/services/location_providers.dart, ../../../../core/services/location_service.dart, package:permission_handler/permission_handler.dart, ../../../pet_profile/presentation/controllers/edit_profile_controller.dart (+55 more)
 
-### Community 6 - "Pet Discovery & Matching"
+### Community 5 - "Care Dashboard & Awards"
+Cohesion: 0.03
+Nodes (61): AnimationStatusListener, ConfettiController, ../controllers/care_dashboard_controller.dart, ../controllers/pet_awards_provider.dart, ../../../../core/models/pet.dart, ../../data/models/pet_awards_summary.dart, ../../data/models/pet_level.dart, package:confetti/confetti.dart (+53 more)
+
+### Community 6 - "Marketplace UI"
+Cohesion: 0.03
+Nodes (58): GoRouterDelegate?, package:petfolio/core/navigation/shell_destinations.dart, package:petfolio/core/providers/shell_scroll_provider.dart, package:petfolio/core/widgets/app_tutorial_overlay.dart, package:petfolio/features/marketplace/presentation/controllers/cart_controller.dart, package:petfolio/features/marketplace/presentation/screens/marketplace_screen.dart, package:petfolio/features/matching/presentation/matching_navigation.dart, package:petfolio/features/matching/presentation/widgets/match_preferences_sheet.dart (+50 more)
+
+### Community 7 - "Hub Home Screen"
 Cohesion: 0.04
-Nodes (57): ../controllers/discovery_candidates_controller.dart, ../controllers/discovery_controller.dart, ../controllers/mutual_match_realtime_provider.dart, ../../../../core/services/lat_lng.dart, ../../../../core/services/location_providers.dart, ../../../../core/services/location_service.dart, package:permission_handler/permission_handler.dart, ../../../pet_profile/presentation/controllers/edit_profile_controller.dart (+49 more)
+Nodes (53): accent, accentColor, action, _AllTile, _bentoCardDecoration, _BentoGrid, _BentoTile, _CareTile (+45 more)
 
-### Community 7 - "Medical Vault & Health"
+### Community 8 - "Pet Matching & Discovery"
 Cohesion: 0.04
-Nodes (54): ../controllers/health_vault_controller.dart, healthVaultControllerProvider, ../../../../core/widgets/dashed_rect_painter.dart, ../../../../core/widgets/tail_wag_loader.dart, accent, _administeredAt, asyncRecords, build (+46 more)
+Nodes (51): editProfileControllerProvider, package:petfolio/core/widgets/primary_pill_button.dart, package:petfolio/features/pet_profile/presentation/controllers/discovery_visibility_controller.dart, package:petfolio/features/pet_profile/presentation/controllers/edit_profile_controller.dart, accent, _activityLevel, _ageLabel, _bioController (+43 more)
 
-### Community 8 - "Pet Profile Editing"
+### Community 9 - "Medical Vault"
 Cohesion: 0.04
-Nodes (52): package:petfolio/core/widgets/primary_pill_button.dart, package:petfolio/features/pet_profile/presentation/controllers/discovery_visibility_controller.dart, package:petfolio/features/pet_profile/presentation/controllers/edit_profile_controller.dart, accent, _ActivityChip, _activityLevel, _ageLabel, _AvatarEditor (+44 more)
+Nodes (51): ../controllers/health_vault_controller.dart, ../../../../core/widgets/app_bottom_sheet.dart, ../../../../core/widgets/dashed_rect_painter.dart, accent, _administeredAt, asyncRecords, createState, cs (+43 more)
 
-### Community 9 - "Active Pet State"
-Cohesion: 0.06
-Nodes (50): active_pet_controller.dart, ConsumerWidget, activePetControllerProvider, build, DiscoveryVisibilityController, setDiscoverable, matchLikedControllerProvider, petListProvider (+42 more)
-
-### Community 10 - "Vendor Shop Management"
+### Community 10 - "Product Detail"
 Cohesion: 0.04
-Nodes (47): ../../controllers/edit_shop_controller.dart, bannerBytes, _BannerPicker, _bannerPlaceholder, _BrandingTab, bytes, _cityCtrl, _ContactTab (+39 more)
+Nodes (51): ../controllers/product_variant_controller.dart, package:smooth_page_indicator/smooth_page_indicator.dart, Product? get, bg, cartCount, createState, dispose, _DualCtaBar (+43 more)
 
-### Community 11 - "Vendor Order Fulfillment"
-Cohesion: 0.05
-Nodes (44): build, ../../controllers/vendor_orders_controller.dart, refresh, _repo, updateStatus, updateTracking, vendorOrdersProvider, ../../../../../core/widgets/app_bottom_sheet.dart (+36 more)
-
-### Community 12 - "Matching Data & Chat"
-Cohesion: 0.05
-Nodes (45): _client, conversations, currentUserId, ../datasources/matching_supabase_data_source.dart, ensureChatThreadForMatch, ensureDirectChatThread, fetchDiscoveryCandidates, fetchMatchesForPet (+37 more)
-
-### Community 13 - "Error Handling"
-Cohesion: 0.05
-Nodes (44): @visibleForTesting, _LocationSyncErrorNotifier, AppException, DatabaseException, fromPostgrest, message, NetworkException, NotAuthenticatedException (+36 more)
-
-### Community 14 - "Shell Navigation & Routing"
+### Community 11 - "Social Feed & Posts"
 Cohesion: 0.04
-Nodes (45): package:flutter/physics.dart, package:petfolio/core/navigation/shell_destinations.dart, package:petfolio/core/providers/shell_scroll_provider.dart, package:petfolio/core/widgets/app_tutorial_overlay.dart, package:petfolio/features/marketplace/presentation/controllers/cart_controller.dart, package:petfolio/features/marketplace/presentation/screens/marketplace_screen.dart, package:petfolio/features/matching/presentation/matching_navigation.dart, package:petfolio/features/matching/presentation/widgets/match_preferences_sheet.dart (+37 more)
+Nodes (50): ../controllers/social_controller.dart, RegExp, autofocus, autofocusComment, baseStyle, _Caption, comment, _commentController (+42 more)
 
-### Community 15 - "Care Task Carousel UI"
+### Community 12 - "Social Feed & Posts"
+Cohesion: 0.04
+Nodes (50): PostCard, _PostCardState, SingleTickerProviderStateMixin, _anim, build, _buildOrdered, cardHeight, cardWidth (+42 more)
+
+### Community 13 - "Media & Content Creation"
+Cohesion: 0.04
+Nodes (49): ../../../../core/widgets/pet_avatar.dart, ImageSource, aspectRatio, avatarUrl, _buildAppBar, _buildStoryPreview, _captionController, charCount (+41 more)
+
+### Community 14 - "Story Viewer"
+Cohesion: 0.04
+Nodes (46): ../controllers/story_controller.dart, PageController, createState, _ctrl, _currentPetIndex, _currentStoryIndex, dispose, emoji (+38 more)
+
+### Community 15 - "Cart & Promo"
+Cohesion: 0.04
+Nodes (46): promoRepositoryProvider, _appliedPromo, _applyPromo, bold, canCheckout, _CartHeader, child, _CodConfirmSheet (+38 more)
+
+### Community 16 - "Active Pet State"
 Cohesion: 0.05
-Nodes (44): _anim, build, _buildOrdered, _cfColor, _cfConfirmDialog, _cfEmoji, _cfSublabel, color (+36 more)
+Nodes (42): ActivePetController, ../controllers/active_pet_controller.dart, ../controllers/pet_list_controller.dart, Pet, Pet, activeId, _AddPetCallout, createState (+34 more)
 
-### Community 16 - "Story Viewer"
+### Community 17 - "Vet Appointments"
 Cohesion: 0.05
-Nodes (43): ../controllers/story_controller.dart, PageController, build, createState, _ctrl, _currentPetIndex, _currentStoryIndex, dispose (+35 more)
+Nodes (42): Appointment, appointmentControllerProvider, ../controllers/appointment_controller.dart, book, package:add_2_calendar/add_2_calendar.dart, vetRepositoryProvider, build, _AddAppointmentSheet (+34 more)
 
-### Community 17 - "Product Detail Screen"
+### Community 18 - "Theme Primitives"
 Cohesion: 0.05
-Nodes (43): package:smooth_page_indicator/smooth_page_indicator.dart, Product? get, bg, cartCount, color, createState, dispose, _DualCtaBar (+35 more)
+Nodes (40): Color, double?, EdgeInsets, ../theme/theme.dart, borderRadius, color, dashLength, _dashPath (+32 more)
 
-### Community 18 - "Buyer Orders & Checkout"
-Cohesion: 0.06
-Nodes (40): Animation, build, BuyerOrdersNotifier, refresh, checkoutProvider, ../controllers/checkout_controller.dart, shopListProvider, _goBack (+32 more)
-
-### Community 19 - "Post Creation"
+### Community 19 - "Care Dashboard & Awards"
 Cohesion: 0.05
-Nodes (40): ../controllers/social_controller.dart, ImageSource, avatarUrl, _buildAppBar, _CaptionCard, _captionController, charCount, color (+32 more)
+Nodes (40): ../../../care/data/models/pet_awards_summary.dart, ../../../care/presentation/controllers/pet_awards_provider.dart, ../controllers/follow_controller.dart, ../controllers/social_profile_controller.dart, package:share_plus/share_plus.dart, _ActionButton, avatarUrl, awards (+32 more)
 
-### Community 20 - "Activity & Appointments"
+### Community 20 - "Onboarding Flow"
+Cohesion: 0.05
+Nodes (40): addAnotherPet, _ageMonths, _back, _breed, build, _buildPaw, createState, _ctrl (+32 more)
+
+### Community 21 - "Pet Matching & Discovery"
+Cohesion: 0.07
+Nodes (39): active_pet_controller.dart, activePetControllerProvider, build, DiscoveryVisibilityController, discoveryVisibilityControllerProvider, setDiscoverable, petMatchLocationProvider, medicationsControllerProvider (+31 more)
+
+### Community 22 - "Vet Appointments"
 Cohesion: 0.05
 Nodes (40): ../../../appointments/data/models/appointment.dart, ../../../appointments/presentation/controllers/appointment_controller.dart, _Filter, ../../../marketplace/presentation/controllers/buyer_orders_controller.dart, _, actionLabel, actionRoute, active (+32 more)
 
-### Community 21 - "Social Profiles & Awards"
+### Community 23 - "Social Feed & Posts"
+Cohesion: 0.06
+Nodes (39): appointments_screen.dart, package:flutter/physics.dart, _CommentInputBar, PostCard, accent, activeIcon, _AppointmentsHistoryTab, clinic (+31 more)
+
+### Community 24 - "Pet Matching & Discovery"
 Cohesion: 0.05
-Nodes (39): ../../../care/data/models/pet_awards_summary.dart, ../../../care/presentation/controllers/pet_awards_provider.dart, ../controllers/follow_controller.dart, ../controllers/social_profile_controller.dart, ../../../matching/presentation/matching_navigation.dart, package:share_plus/share_plus.dart, _ActionButton, avatarUrl (+31 more)
+Nodes (39): ChatConversationArgs get, actorPetId, matchId, otherPetId, threadId, ../../../matching/presentation/controllers/chat_conversation_controller.dart, ../../../matching/presentation/matching_navigation.dart, ../../../matching/presentation/widgets/playdate_scheduler_sheet.dart (+31 more)
 
-### Community 22 - "Seller Dashboard"
-Cohesion: 0.07
-Nodes (39): ../../controllers/deletion_request_controller.dart, StatelessWidget, _ActionRow, _checking, color, _ConsequenceItem, createState, _DeleteTile (+31 more)
+### Community 25 - "Breeding & Verification"
+Cohesion: 0.06
+Nodes (39): breedingSetupControllerProvider, ../controllers/breeding_setup_controller.dart, ../controllers/verification_controller.dart, verificationControllerProvider, _BreedingTab, _BreedingTabState, build, cert (+31 more)
 
-### Community 23 - "Vendor KYC Verification"
+### Community 26 - "Pet Matching & Discovery"
 Cohesion: 0.05
-Nodes (39): ../../controllers/manual_kyc_controller.dart, manualKycControllerProvider, Route /seller, accountCtrl, addressCtrl, bankCtrl, branchCtrl, build (+31 more)
+Nodes (39): _client, conversations, currentUserId, deleteHealthCert, ensureChatThreadForMatch, ensureDirectChatThread, fetchDiscoveryCandidates, fetchHealthCerts (+31 more)
 
-### Community 24 - "Post Detail & Comments"
+### Community 27 - "Pill Button Widget"
 Cohesion: 0.05
-Nodes (39): autofocus, autofocusComment, _Caption, comment, _commentController, _CommentDisplayItem, _commentFocusNode, controller (+31 more)
+Nodes (39): background, _BtnColors, build, _buildContent, _buildVisual, _cancel, color, _controller (+31 more)
 
-### Community 25 - "Appointments Calendar"
+### Community 28 - "Care Dashboard & Awards"
 Cohesion: 0.06
-Nodes (38): Appointment, appointmentControllerProvider, ../controllers/appointment_controller.dart, package:table_calendar/table_calendar.dart, _AddAppointmentSheet, _AddAppointmentSheetState, appointment, appointments (+30 more)
+Nodes (38): care_streak_stream_provider.dart, CareTaskRepository get, activePetIdProvider, _applyBadgeDelta, _badgeBaseline, badgeTypes, bulkCreateTasks, copyWith (+30 more)
 
-### Community 26 - "Shopping Cart"
+### Community 29 - "Product List"
+Cohesion: 0.06
+Nodes (38): all, build, byCat, clear, _cursorCreatedAt, _cursorId, filteredProductsProvider, _hasMore (+30 more)
+
+### Community 30 - "Pet Matching & Discovery"
 Cohesion: 0.05
-Nodes (38): bold, canCheckout, _CartHeader, child, _CodConfirmSheet, createState, dispose, icon (+30 more)
+Nodes (38): ../datasources/matching_supabase_data_source.dart, MatchingSupabaseDataSource, ../models/match_mode.dart, ../models/pet_mutual_match.dart, ../models/pet_swipe.dart, ../models/verification.dart, actorPetHasLocation, addHealthCert (+30 more)
 
-### Community 27 - "Pet Onboarding Flow"
+### Community 31 - "Care Streaks & Tasks"
 Cohesion: 0.05
-Nodes (38): addAnotherPet, _ageMonths, _back, _breed, build, _buildPaw, createState, _ctrl (+30 more)
+Nodes (38): ../models/care_streak.dart, ../models/care_task.dart, _appliesOnDay, badgeTypes, badgeUnlocked, _buildTasksFromSnapshotData, bulkCreateTasks, CareDashboardSnapshot (+30 more)
 
-### Community 28 - "Care Streak & Rewards"
+### Community 32 - "Active Pet State"
 Cohesion: 0.06
-Nodes (37): care_streak_stream_provider.dart, CareTaskRepository get, activePetIdProvider, _applyBadgeDelta, _badgeBaseline, badgeTypes, bulkCreateTasks, copyWith (+29 more)
+Nodes (36): CareFilter, aiRoutineProvider, package:petfolio/features/care/presentation/widgets/care_banners.dart, package:petfolio/features/care/presentation/widgets/care_daily_tasks_dashboard.dart, package:petfolio/features/care/presentation/widgets/care_date_picker.dart, package:petfolio/features/care/presentation/widgets/care_task_form_sheet.dart, package:petfolio/features/care/presentation/widgets/gamified_care_ui.dart, package:petfolio/features/care/presentation/widgets/routine_recommendation_sheet.dart (+28 more)
 
-### Community 29 - "Order Detail & Tracking"
+### Community 33 - "Nutrition Tracker"
 Cohesion: 0.05
-Nodes (35): ../../controllers/buyer_orders_controller.dart, _formatDate, icon, _IconBtn, label, _LineItemsCard, onTap, order (+27 more)
+Nodes (36): ../controllers/nutrition_controller.dart, package:petfolio/features/pet_profile/data/models/activity_level.dart, active, _CalorieCard, _CalorieDivider, _CalorieStat, _computeCalories, createState (+28 more)
 
-### Community 30 - "Pet Nutrition Screen"
+### Community 34 - "Product Detail"
 Cohesion: 0.05
-Nodes (37): ../controllers/nutrition_controller.dart, package:petfolio/features/pet_profile/data/models/activity_level.dart, active, _CalorieCard, _CalorieDivider, _CalorieStat, _computeCalories, createState (+29 more)
+Nodes (36): variant, apparel, brand, category, _colorToHex, createdAt, currency, fromJson (+28 more)
 
-### Community 31 - "Product List & Pagination"
-Cohesion: 0.06
-Nodes (36): all, build, byCat, clear, _cursorCreatedAt, _cursorId, filteredProductsProvider, _hasMore (+28 more)
-
-### Community 32 - "Care Task Repository"
+### Community 35 - "Social Repository"
 Cohesion: 0.05
-Nodes (37): ../models/care_streak.dart, ../models/care_task.dart, _appliesOnDay, badgeTypes, badgeUnlocked, _buildTasksFromSnapshotData, bulkCreateTasks, CareDashboardSnapshot (+29 more)
+Nodes (36): ../models/feed_post.dart, ../models/hashtag.dart, ../models/pet_stats.dart, accent, _allowedExtensions, attachHashtagsToPost, _client, createPost (+28 more)
 
-### Community 33 - "Local Preferences Storage"
-Cohesion: 0.06
-Nodes (34): package:shared_preferences/shared_preferences.dart, activePetPrefix, cartPrefix, _currentVersion, matchAgeMax, matchAgeMin, matchDistance, matchSpecies (+26 more)
-
-### Community 34 - "Core Button Widget"
-Cohesion: 0.05
-Nodes (36): background, _BtnColors, build, _buildContent, _buildVisual, _cancel, color, _controller (+28 more)
-
-### Community 35 - "Discovery Candidates"
-Cohesion: 0.06
-Nodes (35): isLoggedInProvider, _ageString, _bufferOrNull, build, candidates, copyWith, createdAt, cursor (+27 more)
-
-### Community 36 - "Product Data Models"
-Cohesion: 0.06
-Nodes (35): apparel, brand, category, _colorToHex, createdAt, currency, fromJson, fromStorageJson (+27 more)
-
-### Community 37 - "Comment System"
-Cohesion: 0.06
-Nodes (34): BuildContext, Comment?, ../controllers/comment_controller.dart, build, comment, _commentController, _CommentDisplayItem, _commentFocusNode (+26 more)
-
-### Community 38 - "AI Care Routine UI"
-Cohesion: 0.06
-Nodes (34): CareFilter, aiRoutineProvider, package:petfolio/features/care/presentation/widgets/care_banners.dart, package:petfolio/features/care/presentation/widgets/care_daily_tasks_dashboard.dart, package:petfolio/features/care/presentation/widgets/care_date_picker.dart, package:petfolio/features/care/presentation/widgets/gamified_care_ui.dart, package:petfolio/features/care/presentation/widgets/routine_recommendation_sheet.dart, package:petfolio/features/care/presentation/widgets/web_push_enable_banner.dart (+26 more)
-
-### Community 39 - "App Shell & Router"
-Cohesion: 0.06
-Nodes (33): ChangeNotifier, ../../features/activity/presentation/screens/activity_screen.dart, ../../features/admin/presentation/controllers/admin_auth_controller.dart, ../../features/appointments/presentation/screens/appointments_screen.dart, ../../features/care/presentation/screens/care_screen.dart, ../../features/care/presentation/screens/medical_vault_screen.dart, ../../features/care/presentation/screens/nutrition_screen.dart, ../../features/care/presentation/screens/walk_tracking_screen.dart (+25 more)
-
-### Community 40 - "Module Group 40"
-Cohesion: 0.06
-Nodes (34): ChatConversationArgs get, ../controllers/chat_conversation_controller.dart, actorPetId, _args, _buildChatItems, color, _Composer, controller (+26 more)
-
-### Community 41 - "Module Group 41"
-Cohesion: 0.06
-Nodes (32): ../../../auth/presentation/controllers/auth_controller.dart, ../../../../core/theme/theme_notifier.dart, ../../../../core/widgets/pet_avatar.dart, activePet, icon, iconColor, isDark, items (+24 more)
-
-### Community 42 - "Module Group 42"
-Cohesion: 0.07
-Nodes (32): cartProvider, ../controllers/cart_controller.dart, startCheckoutForShop, startCodCheckoutForShop, CartItem, product_glyph.dart, Route /marketplace/cart, _addToCart (+24 more)
-
-### Community 43 - "Module Group 43"
-Cohesion: 0.07
-Nodes (32): ../controllers/shop_deletion_controller.dart, shopDeletionRequestsProvider, FormState, _AdminBadge, AdminLayout, _AdminLayoutState, _AdminTab, _body (+24 more)
-
-### Community 44 - "Module Group 44"
-Cohesion: 0.06
-Nodes (32): @pragma, firebaseMessagingBackgroundHandler, package:flutter_local_notifications/flutter_local_notifications.dart, package:timezone/data/latest_all.dart, package:timezone/timezone.dart, cancelAll, cancelForTask, _channelId (+24 more)
-
-### Community 45 - "Module Group 45"
+### Community 36 - "Social Feed & Posts"
 Cohesion: 0.08
-Nodes (32): _CommentInputBar, package:shimmer/shimmer.dart, _CommentInputBarState, _PostImages, _PostImagesState, _ReportPostDialog, _ReportPostDialogState, State (+24 more)
+Nodes (35): _CommentInputBar, package:shimmer/shimmer.dart, _CommentInputBarState, State, _CommentInputBarState, borderRadius, build, chatBubble (+27 more)
 
-### Community 46 - "Module Group 46"
+### Community 37 - "Booking Slots"
 Cohesion: 0.06
-Nodes (31): int get, copyWith, empty, frequencyWeeks, fromStorageJson, hasSubscription, isEmpty, isSubscribed (+23 more)
+Nodes (34): booking_confirmation_sheet.dart, availableSlotsProvider, ../controllers/available_slots_provider.dart, clinicServicesProvider, build, clinic, ClinicDetailsScreen, _ClinicDetailsScreenState (+26 more)
 
-### Community 47 - "Module Group 47"
+### Community 38 - "Chat & Messaging"
+Cohesion: 0.07
+Nodes (32): deleteCert, _load, arg, broadcastTyping, build, ChatConversationArgs, effectiveThreadId, _hasMore (+24 more)
+
+### Community 39 - "Media & Content Creation"
+Cohesion: 0.06
+Nodes (32): AnimationController, CustomPainter, dart:math, _CameraGridPainter, _CameraViewfinderBracketsPainter, _BoneSliderPainter, color, DashedCirclePainter (+24 more)
+
+### Community 40 - "Marketplace UI"
+Cohesion: 0.07
+Nodes (32): cartProvider, ../controllers/cart_controller.dart, ../../data/models/cart_item.dart, CartItem, product_glyph.dart, Route /marketplace/cart, _addToCart, _CartItemRow (+24 more)
+
+### Community 41 - "Shared Widgets"
+Cohesion: 0.06
+Nodes (33): FocusNode?, FormFieldValidator, Iterable, TextInputType?, actionLabel, AuthBrand, AuthCard, AuthErrorBanner (+25 more)
+
+### Community 42 - "Vet Appointments"
+Cohesion: 0.06
+Nodes (33): package:flutter_local_notifications/flutter_local_notifications.dart, package:timezone/data/latest_all.dart, package:timezone/timezone.dart, cancelAll, cancelAppointmentReminder, cancelForTask, cancelMedicationReminder, _channelId (+25 more)
+
+### Community 43 - "Animated Carousel"
+Cohesion: 0.06
+Nodes (33): package:petfolio/features/care/presentation/widgets/care_coverflow_carousel.dart, package:petfolio/features/care/presentation/widgets/care_task_card.dart, _AllDoneBanner, _applyFilter, build, _CareErrorCard, CareFilter, categoryFilter (+25 more)
+
+### Community 44 - "Pet Matching & Discovery"
+Cohesion: 0.09
+Nodes (25): @freezed, fromJson, Hashtag, LineItem, _dateTimeFromJson, fromJson, MatchingDiscoveryOwner, MatchingDiscoveryRow (+17 more)
+
+### Community 45 - "Shared Widgets"
+Cohesion: 0.06
+Nodes (32): BuildContext, Comment?, ../controllers/comment_controller.dart, build, comment, _commentController, _CommentDisplayItem, _commentFocusNode (+24 more)
+
+### Community 46 - "Shared Widgets"
+Cohesion: 0.06
+Nodes (32): ../../../../core/platform/media_picker.dart, ../../domain/services/breed_identification_service.dart, _colorScheme, _textTheme, _apply, breed, BreedIdentifierWidget, _BreedIdentifierWidgetState (+24 more)
+
+### Community 47 - "Profile Editing"
+Cohesion: 0.07
+Nodes (32): _BrowseLibraryTile, _CameraViewfinderCard, _CaptionCard, _EmptyImagePlaceholder, _ErrorBanner, _ImageSourceSheet, _ImageWell, _MockImageTile (+24 more)
+
+### Community 48 - "Shared Widgets"
+Cohesion: 0.06
+Nodes (32): build, CareTaskCard, CareTaskCardSkeleton, _CareTaskCardState, CareTaskContextMenu, color, _confirmDialog, createState (+24 more)
+
+### Community 49 - "AI Care Routine"
 Cohesion: 0.07
 Nodes (31): AiRoutineNotifier, AiRoutineState, AiRoutineStatus, AiSuggestion, build, _buildSuggestions, cachedAt, cachedForPetId (+23 more)
 
-### Community 48 - "Module Group 48"
+### Community 50 - "Pet Matching & Discovery"
 Cohesion: 0.06
-Nodes (31): FocusNode?, Iterable, actionLabel, AuthBrand, AuthCard, AuthErrorBanner, AuthField, _AuthFieldState (+23 more)
+Nodes (31): ../controllers/match_liked_controller.dart, ../controllers/matches_inbox_controller.dart, ../../data/models/match_inbox_item.dart, ../matching_navigation.dart, _AvatarPlaceholder, avatarUrl, _CardAvatar, color (+23 more)
 
-### Community 49 - "Module Group 49"
+### Community 51 - "Care Dashboard & Awards"
 Cohesion: 0.06
-Nodes (31): package:petfolio/features/care/presentation/utils/care_scheduled_time.dart, TimeOfDay?, build, CareTaskFormSheet, _CareTaskFormSheetState, createSeed, createState, _defaultTitle (+23 more)
+Nodes (31): package:petfolio/features/care/data/models/pet_level.dart, package:petfolio/features/care/presentation/controllers/care_streak_stream_provider.dart, package:petfolio/features/care/presentation/controllers/pet_awards_provider.dart, color, createState, _ctrl, _DailyQuestRow, _DailyQuestsCard (+23 more)
 
-### Community 50 - "Module Group 50"
+### Community 52 - "Supabase Repository"
 Cohesion: 0.06
-Nodes (31): package:petfolio/features/care/presentation/widgets/care_coverflow_carousel.dart, package:petfolio/features/care/presentation/widgets/care_task_card.dart, _AllDoneBanner, _applyFilter, build, _CareErrorCard, CareFilter, categoryFilter (+23 more)
+Nodes (30): @visibleForTesting, ../models/cart_item.dart, ../models/marketplace_order.dart, available, cancelOrder, _client, confirmCodOrder, confirmOrder (+22 more)
 
-### Community 51 - "Module Group 51"
+### Community 53 - "Pet Matching & Discovery"
 Cohesion: 0.06
-Nodes (31): package:petfolio/features/care/presentation/widgets/care_task_form_sheet.dart, build, CareTaskCard, CareTaskCardSkeleton, _CareTaskCardState, CareTaskContextMenu, color, _confirmDialog (+23 more)
+Nodes (30): _ageString, _bufferOrNull, candidates, copyWith, createdAt, cursor, _defaultBestWith, _defaultBio (+22 more)
 
-### Community 52 - "Module Group 52"
+### Community 54 - "Controllers Shop List Controll"
 Cohesion: 0.07
-Nodes (29): ActivePetController, build, ../controllers/active_pet_controller.dart, _initialized, _prefKey, _restoreFromPrefs, setActivePet, _sync (+21 more)
+Nodes (29): build, ../controllers/shop_list_controller.dart, read, refresh, shopByIdProvider, ../../controllers/shop_products_controller.dart, shopProductsProvider, build (+21 more)
 
-### Community 53 - "Module Group 53"
-Cohesion: 0.07
-Nodes (30): ../controllers/create_post_controller.dart, _BrowseLibraryTile, build, _buildMediaSelector, _buildStoryPreview, color, createState, CreateStoryScreen (+22 more)
-
-### Community 54 - "Module Group 54"
-Cohesion: 0.07
-Nodes (29): ../controllers/match_liked_controller.dart, ../controllers/matches_inbox_controller.dart, ../../data/models/match_inbox_item.dart, ../matching_navigation.dart, ../../../pet_profile/presentation/controllers/pet_list_controller.dart, ../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart, _AvatarPlaceholder, avatarUrl (+21 more)
-
-### Community 55 - "Module Group 55"
-Cohesion: 0.06
-Nodes (30): ../../domain/services/breed_identification_service.dart, File?, _colorScheme, _textTheme, _apply, breed, build, _confidence (+22 more)
-
-### Community 56 - "Module Group 56"
+### Community 55 - "Package Flutter Map Flutter Ma"
 Cohesion: 0.07
 Nodes (30): package:flutter_map/flutter_map.dart, package:latlong2/latlong.dart, build, _cleanup, copyWith, _distance, distanceMeters, duration (+22 more)
 
-### Community 57 - "Module Group 57"
+### Community 56 - "Shared Widgets"
+Cohesion: 0.07
+Nodes (30): package:petfolio/features/care/presentation/utils/care_scheduled_time.dart, build, CareTaskFormSheet, _CareTaskFormSheetState, createSeed, createState, _defaultTitle, dispose (+22 more)
+
+### Community 57 - "Social Controller"
 Cohesion: 0.09
-Nodes (31): PostCard, _DotDotDot, _DotDotDotState, _CameraViewfinderCard, _CameraViewfinderCardState, _FlyToCartAnim, _FlyToCartAnimState, _FloatingPaws (+23 more)
+Nodes (29): activePetId, build, _channel, copyWith, decrementCommentCount, deletePost, _feedPageSize, feedState (+21 more)
 
-### Community 58 - "Module Group 58"
+### Community 58 - "Supabase Repository"
 Cohesion: 0.07
-Nodes (30): TextInputType?, AddEditProductScreen, _AddEditProductScreenState, _brandCtrl, build, _category, controller, createState (+22 more)
+Nodes (29): ../../data/models/health_log.dart, healthRepositoryProvider, build, _buildStep, _ChoiceStep, color, createState, _DisclaimerBanner (+21 more)
 
-### Community 59 - "Module Group 59"
-Cohesion: 0.08
-Nodes (28): arg, broadcastTyping, build, ChatConversationArgs, effectiveThreadId, _hasMore, _loadingOlder, loadOlderMessages (+20 more)
-
-### Community 60 - "Module Group 60"
-Cohesion: 0.08
-Nodes (28): build, ../controllers/product_reviews_controller.dart, ownProductReviewProvider, productId, productReviewsProvider, submitReview, ../../data/models/product_review.dart, ../../data/repositories/product_review_repository.dart (+20 more)
-
-### Community 61 - "Module Group 61"
+### Community 59 - "Media & Content Creation"
 Cohesion: 0.07
-Nodes (29): CustomClipper, EdgeInsets, path, accent, avatarUrl, build, child, clipWave (+21 more)
+Nodes (29): package:petfolio/core/widgets/pet_avatar.dart, package:petfolio/core/widgets/skeleton_loader.dart, package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart, key, action, _ActionButton, actions, AppHeader (+21 more)
 
-### Community 62 - "Module Group 62"
+### Community 60 - "Buyer Orders"
 Cohesion: 0.07
-Nodes (29): FormFieldValidator, build, controller, createState, _descCtrl, dispose, _Field, _formKey (+21 more)
+Nodes (28): buyer_orders_controller.dart, cart_controller.dart, activeShopId, build, CheckoutNotifier, CheckoutState, CheckoutStatus, copyWith (+20 more)
 
-### Community 63 - "Module Group 63"
-Cohesion: 0.07
-Nodes (29): accentColor, breed, caption, comments, _copy, copyWithCaption, copyWithCounts, copyWithDecrementedComment (+21 more)
-
-### Community 64 - "Module Group 64"
-Cohesion: 0.07
-Nodes (29): package:petfolio/features/care/data/models/pet_level.dart, package:petfolio/features/care/presentation/controllers/care_streak_stream_provider.dart, package:petfolio/features/care/presentation/controllers/pet_awards_provider.dart, color, createState, _ctrl, _DailyQuestRow, _DailyQuestsCard (+21 more)
-
-### Community 65 - "Module Group 65"
-Cohesion: 0.08
-Nodes (28): AuthState, asyncState, authRepositoryProvider, build, copyWith, error, isLoading, isSent (+20 more)
-
-### Community 66 - "Module Group 66"
+### Community 61 - "Notifications"
 Cohesion: 0.08
 Nodes (27): ../controllers/notification_controller.dart, ../../../marketplace/data/models/promo.dart, ../../../marketplace/presentation/controllers/promo_controller.dart, Promo, package:flutter_animate/flutter_animate.dart, package:flutter/services.dart, Promo, createState (+19 more)
 
-### Community 67 - "Module Group 67"
-Cohesion: 0.09
-Nodes (28): activePetId, build, _channel, copyWith, decrementCommentCount, deletePost, _feedPageSize, feedState (+20 more)
-
-### Community 68 - "Module Group 68"
+### Community 62 - "Social Repository"
 Cohesion: 0.07
-Nodes (26): addStory, build, markStoryViewed, _repo, sendReaction, Stories, ../../data/models/story.dart, ../../data/repositories/story_repository.dart (+18 more)
+Nodes (28): accentColor, breed, caption, comments, _copy, copyWithCaption, copyWithCounts, copyWithDecrementedComment (+20 more)
 
-### Community 69 - "Module Group 69"
+### Community 63 - "Supabase Repository"
 Cohesion: 0.07
 Nodes (28): ../models/post_report.dart, ../models/shop_deletion_request.dart, AdminRepository, approveKyc, _client, fetchActiveShopCount, fetchAvailableLedgers, fetchDeliveredCodOrders (+20 more)
 
-### Community 70 - "Module Group 70"
+### Community 64 - "Media & Content Creation"
 Cohesion: 0.07
-Nodes (28): package:petfolio/core/widgets/pet_avatar.dart, package:petfolio/core/widgets/skeleton_loader.dart, key, action, _ActionButton, actions, AppHeader, AppHeaderAction (+20 more)
+Nodes (27): bool?, package:petfolio/core/platform/web_image_cache.dart, PetSpecies, borderColor, build, child, diameter, dotSize (+19 more)
 
-### Community 71 - "Module Group 71"
-Cohesion: 0.08
-Nodes (20): adminRoutes, appointmentRoutes, careRoutes, FcmMessageRouter, navigate, routeFromData, usePushForPath, matchingRoutes (+12 more)
-
-### Community 72 - "Module Group 72"
+### Community 65 - "Theme Primitives"
 Cohesion: 0.07
-Nodes (27): ../models/feed_post.dart, ../models/pet_stats.dart, accent, _allowedExtensions, _client, createPost, deletePost, fetchFeed (+19 more)
+Nodes (25): dart:ui, T, ../theme/app_theme.dart, Widget?, AppBottomSheet, borderRadius, build, child (+17 more)
 
-### Community 73 - "Module Group 73"
+### Community 66 - "Care Dashboard & Awards"
 Cohesion: 0.07
 Nodes (27): package:petfolio/core/widgets/app_snack_bar.dart, package:petfolio/features/care/presentation/controllers/ai_routine_controller.dart, package:petfolio/features/care/presentation/controllers/care_dashboard_controller.dart, _buildFooter, _buildHeader, color, _confirmDismiss, createState (+19 more)
 
-### Community 74 - "Module Group 74"
-Cohesion: 0.09
-Nodes (26): _, @riverpod, CareDashboard, CreatePostController, MyShop, build, _channel, markAllRead (+18 more)
-
-### Community 75 - "Module Group 75"
-Cohesion: 0.07
-Nodes (26): bool?, package:petfolio/core/platform/web_image_cache.dart, PetSpecies, borderColor, build, child, diameter, dotSize (+18 more)
-
-### Community 76 - "Module Group 76"
+### Community 67 - "Communities Index"
 Cohesion: 0.10
 Nodes (25): _activeCommunityIdProvider, build, _channel, _communityId, CommunityPostsNotifier, copyWith, createCommunity, createPost (+17 more)
 
-### Community 77 - "Module Group 77"
+### Community 68 - "Shared Widgets"
 Cohesion: 0.07
 Nodes (26): ../controllers/address_controller.dart, address, _addressCtrl, _AddressTile, _areaCtrl, _cityCtrl, controller, createState (+18 more)
 
-### Community 78 - "Module Group 78"
-Cohesion: 0.07
-Nodes (25): add, build, CartNotifier, clear, clearShopCart, decrement, _loadFromPrefs, _persist (+17 more)
-
-### Community 79 - "Module Group 79"
+### Community 69 - "Active Pet State"
 Cohesion: 0.08
-Nodes (26): accountCtrl, bankCtrl, bizAddressCtrl, bizNameCtrl, bizPhoneCtrl, branchCtrl, build, copyWith (+18 more)
+Nodes (26): ../controllers/vet_booking_controller.dart, vetBookingControllerProvider, ../../../pet_profile/presentation/controllers/pet_list_controller.dart, BookingConfirmationSheet, _BookingConfirmationSheetState, _BookingSummary, build, createState (+18 more)
 
-### Community 80 - "Module Group 80"
+### Community 70 - "Models Cart Item"
+Cohesion: 0.07
+Nodes (26): copyWith, empty, frequencyWeeks, fromStorageJson, hasSubscription, isEmpty, isSubscribed, itemCount (+18 more)
+
+### Community 71 - "Annotation Jsonenum"
+Cohesion: 0.10
+Nodes (26): @JsonEnum, CareFrequency, CareTaskType, _, amountFormatted, cancelled, fromJson, hasRxItems (+18 more)
+
+### Community 72 - "Firebase & FCM"
 Cohesion: 0.09
 Nodes (23): care_fcm_reminder_sync.dart, media_picker.dart, platform_location.dart, platform_notifications.dart, platform_payments.dart, cancelAll, cancelForTask, initialize (+15 more)
 
-### Community 81 - "Module Group 81"
-Cohesion: 0.10
-Nodes (23): @immutable, discoveryControllerProvider, lat_lng.dart, location_service.dart, package:geolocator/geolocator.dart, package:petfolio/core/errors/app_exception.dart, build, didChangeAppLifecycleState (+15 more)
-
-### Community 82 - "Module Group 82"
+### Community 73 - "Color Palette & Tokens"
 Cohesion: 0.08
-Nodes (24): buyer_orders_controller.dart, cart_controller.dart, activeShopId, build, CheckoutNotifier, CheckoutState, CheckoutStatus, copyWith (+16 more)
+Nodes (24): ../controllers/product_list_controller.dart, ../../../../core/theme/app_colors.dart, _allCats, cat, _CategoryTile, _CatMeta, color, count (+16 more)
 
-### Community 83 - "Module Group 83"
+### Community 74 - "Config App Config"
 Cohesion: 0.09
-Nodes (23): Community, communitiesControllerProvider, ../controllers/communities_controller.dart, ../../../../core/widgets/petfolio_empty_state.dart, ../../../../core/widgets/skeleton_loader.dart, _Avatar, build, CommunitiesScreen (+15 more)
+Nodes (22): AppConfig, dashboardUrl, build, clear, _hasMore, _load, loadMore, _pageSize (+14 more)
 
-### Community 84 - "Module Group 84"
-Cohesion: 0.10
-Nodes (24): ../controllers/auth_controller.dart, passwordResetProvider, Route /register, build, createState, dispose, _emailController, _emailCtrl (+16 more)
+### Community 75 - "Marketplace UI"
+Cohesion: 0.11
+Nodes (24): checkoutProvider, ../controllers/checkout_controller.dart, shopListProvider, _goBack, Route /marketplace, build, CartScreen, _handleCheckout (+16 more)
 
-### Community 85 - "Module Group 85"
-Cohesion: 0.09
-Nodes (24): discoveryCandidatesControllerProvider, swipeErrorProvider, arg, build, copyWith, DiscoveryNotifier, DiscoveryState, dragOffset (+16 more)
-
-### Community 86 - "Module Group 86"
+### Community 76 - "Supabase Repository"
 Cohesion: 0.08
-Nodes (24): activeId, _AddPetCallout, createState, _EmptyState, _ErrorState, index, isActive, isReordering (+16 more)
+Nodes (24): ../models/health_log.dart, ../models/medical_record.dart, ../models/medication_log.dart, _client, createDocumentUrl, createLog, createRecord, deactivateRecord (+16 more)
 
-### Community 87 - "Module Group 87"
+### Community 77 - "Annotation Immutable"
+Cohesion: 0.09
+Nodes (21): @immutable, int get, lat_lng.dart, location_service.dart, package:geolocator/geolocator.dart, package:petfolio/core/errors/app_exception.dart, hashCode, latitude (+13 more)
+
+### Community 78 - "Supabase Repository"
+Cohesion: 0.09
+Nodes (23): AuthState, asyncState, authRepositoryProvider, build, copyWith, error, isLoading, isSent (+15 more)
+
+### Community 79 - "Controllers Match Liked Contro"
 Cohesion: 0.09
 Nodes (22): avatarUrl, breed, isEmpty, isMutual, likedAt, LikedPetItem, _load, matchId (+14 more)
 
-### Community 88 - "Module Group 88"
+### Community 80 - "Controllers Shipment Controlle"
 Cohesion: 0.09
-Nodes (23): ../controllers/shop_list_controller.dart, shopByIdProvider, ../../controllers/shop_products_controller.dart, shopProductsProvider, build, _CircleBtn, _ContactInfoSection, _ContactRow (+15 more)
+Nodes (22): ../controllers/shipment_controller.dart, failed, fromJson, isTerminal, label, Shipment, ShipmentStatus, pickedUp,
+  inTransit,
+  outForDelivery,
+  delivered, (+14 more)
 
-### Community 89 - "Module Group 89"
+### Community 81 - "Models Pet Level"
 Cohesion: 0.09
 Nodes (24): _, BadgeInfo, badgeInfoFor, color, currentXp, description, emoji, fromXp (+16 more)
 
-### Community 90 - "Module Group 90"
-Cohesion: 0.17
-Nodes (23): AsyncNotifier, AddressListNotifier, ChatConversationController, CodOrdersNotifier, CommunitiesController, KycReviewNotifier, LedgerNotifier, ModerationNotifier (+15 more)
+### Community 82 - "Care Dashboard & Awards"
+Cohesion: 0.11
+Nodes (23): _, @riverpod, CareDashboard, CreatePostController, HashtagFeed, HashtagSearch, _autoGenerateRoutines, productVariants (+15 more)
 
-### Community 91 - "Module Group 91"
-Cohesion: 0.09
-Nodes (21): ../controllers/product_list_controller.dart, ../../../../core/theme/app_theme.dart, package:google_fonts/google_fonts.dart, _allCats, cat, _CategoryTile, _CatMeta, color (+13 more)
+### Community 83 - "Pet Matching & Discovery"
+Cohesion: 0.14
+Nodes (23): isLoggedInProvider, build, DiscoveryCandidatesBuffer, DiscoveryCandidatesController, discoveryCandidatesControllerProvider, locationSyncErrorProvider, removeFront, swipeErrorProvider (+15 more)
 
-### Community 92 - "Module Group 92"
+### Community 84 - "Shared Widgets"
+Cohesion: 0.10
+Nodes (22): passwordResetProvider, package:petfolio/core/widgets/widgets.dart, Route /register, build, createState, dispose, _emailController, _emailCtrl (+14 more)
+
+### Community 85 - "Breeding & Verification"
+Cohesion: 0.10
+Nodes (22): addCert, arg, BreedingSetupController, BreedingSetupState, build, certs, hasVerifiedVaccination, isReady (+14 more)
+
+### Community 86 - "Shared Widgets"
+Cohesion: 0.11
+Nodes (22): ../controllers/product_reviews_controller.dart, ownProductReviewProvider, productReviewsProvider, TextEditingController, _bodyCtrl, build, createState, dispose (+14 more)
+
+### Community 87 - "Firebase & FCM"
 Cohesion: 0.09
 Nodes (22): fcm_message_router.dart, fcm_token_repository.dart, FcmTokenRepository get, firebase_env.dart, clearTokenForSignOut, dispose, FcmService, _handleForeground (+14 more)
 
-### Community 93 - "Module Group 93"
+### Community 88 - "Navigation & Shell Routing"
 Cohesion: 0.09
-Nodes (21): package:petfolio/core/models/pet.dart, package:petfolio/features/care/data/models/care_task.dart, package:uuid/uuid.dart, _apiKey, _buildPrompt, CareRecommendationService, cause, _defaultPoints (+13 more)
+Nodes (22): 0, accentsFor, activeIcon, AppShellDestination, careAccents, careDestinations, destinationsFor, globalAccents (+14 more)
 
-### Community 94 - "Module Group 94"
+### Community 89 - "Supabase Repository"
 Cohesion: 0.10
 Nodes (19): AdminRepository get, class, build, markCashReceived, refresh, _repo, approve, build (+11 more)
 
-### Community 95 - "Module Group 95"
-Cohesion: 0.11
-Nodes (22): @JsonEnum, CareFrequency, CareTaskType, HealthSeverity, _, amountFormatted, cancelled, fromJson (+14 more)
-
-### Community 96 - "Module Group 96"
-Cohesion: 0.11
-Nodes (21): followStatusProvider, petAwardsSummaryProvider, fetchPostsForPet, fromJson, petByIdProvider, petStatsProvider, raw, read (+13 more)
-
-### Community 97 - "Module Group 97"
-Cohesion: 0.15
-Nodes (20): marketplaceRoutes, marketplace_routes.dart, presentation/screens/cart_screen.dart, presentation/screens/customer/buyer_order_detail_screen.dart, presentation/screens/customer/buyer_order_list_screen.dart, presentation/screens/customer/shop_storefront_screen.dart, presentation/screens/marketplace_categories_screen.dart, presentation/screens/marketplace_screen.dart (+12 more)
-
-### Community 98 - "Module Group 98"
+### Community 90 - "Firebase & FCM"
 Cohesion: 0.09
-Nodes (21): 0, accentsFor, activeIcon, AppShellDestination, careAccents, careDestinations, destinationsFor, globalAccents (+13 more)
+Nodes (18): careRoutes, ActivityLevel, factor, fromId, icon, id, label, shortLabel (+10 more)
 
-### Community 99 - "Module Group 99"
-Cohesion: 0.14
-Nodes (17): @freezed, MatchPreferenceController, MatchPreferencesState, CareStreak, fromJson, _lastCompletionFromJson, _lastCompletionToJson, s (+9 more)
-
-### Community 100 - "Module Group 100"
+### Community 91 - "Social Feed & Posts"
 Cohesion: 0.10
-Nodes (17): bool get, DateTime? get, integrationTestActive, _, fromJson, isDueSoon, isVaccine, MedicalRecord (+9 more)
+Nodes (20): ../communities/data/models/community.dart, ../communities/presentation/screens/community_detail_screen.dart, data/models/feed_post.dart, presentation/controllers/follow_controller.dart, presentation/controllers/notification_controller.dart, presentation/controllers/social_controller.dart, presentation/controllers/story_controller.dart, presentation/screens/create_content_screen.dart (+12 more)
 
-### Community 101 - "Module Group 101"
+### Community 92 - "Controllers Auth Controller"
 Cohesion: 0.10
-Nodes (19): Color, dart:math, double?, ../theme/theme.dart, color, DashedCirclePainter, dashLength, dashSpace (+11 more)
+Nodes (21): ../controllers/auth_controller.dart, Route /login, build, _confirmController, createState, dispose, _emailController, _emailRegex (+13 more)
 
-### Community 102 - "Module Group 102"
-Cohesion: 0.14
-Nodes (21): ConsumerState, ConsumerStatefulWidget, ActivityScreen, _ActivityScreenState, CreatePostScreen, _CreatePostScreenState, ManagePetsScreen, _ManagePetsScreenState (+13 more)
+### Community 93 - "Buyer Orders"
+Cohesion: 0.10
+Nodes (21): buyerOrdersProvider, ../../controllers/buyer_orders_controller.dart, orderByIdProvider, build, BuyerOrderDetailScreen, _ActionBtn, build, BuyerOrderListScreen (+13 more)
 
-### Community 103 - "Module Group 103"
+### Community 94 - "Product Detail"
+Cohesion: 0.09
+Nodes (19): build, refresh, shopId, ../controllers/wishlist_controller.dart, ../../data/models/product.dart, ../../data/models/product_variant.dart, ../../data/repositories/product_repository.dart, _EmptyWishlist (+11 more)
+
+### Community 95 - "Marketplace UI"
+Cohesion: 0.09
+Nodes (21): ../../features/activity/presentation/screens/activity_screen.dart, ../../features/appointments/presentation/screens/appointments_screen.dart, ../../features/care/presentation/screens/care_screen.dart, ../../features/care/presentation/screens/medical_vault_screen.dart, ../../features/care/presentation/screens/nutrition_screen.dart, ../../features/care/presentation/screens/walk_tracking_screen.dart, ../../features/communities/presentation/screens/communities_screen.dart, ../../features/home/presentation/screens/hub_home_screen.dart (+13 more)
+
+### Community 96 - "Vet Appointments"
+Cohesion: 0.09
+Nodes (20): IconData, package:petfolio/core/theme/theme.dart, CareAppointmentsBanner, CareExploreRow, CareUtilityBanner, detail, _ExploreTile, icon (+12 more)
+
+### Community 97 - "Active Pet State"
+Cohesion: 0.20
+Nodes (21): AsyncNotifier, AddressListNotifier, BuyerOrdersNotifier, ChatConversationController, CodOrdersNotifier, CommunitiesController, KycReviewNotifier, LedgerNotifier (+13 more)
+
+### Community 98 - "Payments"
+Cohesion: 0.10
+Nodes (17): bool get, integrationTestActive, _, fromJson, hasSeverity, HealthLog, HealthLogType, HealthSeverity (+9 more)
+
+### Community 99 - "Care Dashboard & Awards"
+Cohesion: 0.11
+Nodes (17): asyncState, when, client, fromJson, raw, ../models/promo.dart, ../models/shipment.dart, package:flutter_riverpod/flutter_riverpod.dart (+9 more)
+
+### Community 100 - "Shared Widgets"
+Cohesion: 0.10
+Nodes (20): ../controllers/admin_auth_controller.dart, isAdminProvider, _AdminBadge, AdminLayout, _AdminLayoutState, _AdminTab, _body, build (+12 more)
+
+### Community 101 - "Pet Matching & Discovery"
+Cohesion: 0.11
+Nodes (20): build, careStreakRealtimeProvider, petAwardsSummaryProvider, ../../data/models/care_streak.dart, Route /appointments, Route /care, Route /matching, Route /social (+12 more)
+
+### Community 102 - "Chat Controller"
+Cohesion: 0.10
+Nodes (20): ../controllers/chat_conversation_controller.dart, TimeOfDay?, actorPetId, args, build, createState, _date, dispose (+12 more)
+
+### Community 103 - "Controllers Communities Contro"
 Cohesion: 0.11
 Nodes (20): communityPostsProvider, avatarUrl, build, _buildFeed, community, CommunityDetailScreen, _CommunityDetailScreenState, _composerVisible (+12 more)
 
-### Community 104 - "Module Group 104"
+### Community 104 - "Pet Matching & Discovery"
+Cohesion: 0.10
+Nodes (20): arg, build, copyWith, dragOffset, exitAction, exitDurationMs, exitingCard, isExiting (+12 more)
+
+### Community 105 - "Shared Widgets"
 Cohesion: 0.11
 Nodes (20): kycReviewProvider, secure_doc_button.dart, _approve, _BankDetailRow, build, _busy, createState, _fallback (+12 more)
 
-### Community 105 - "Module Group 105"
+### Community 106 - "Controllers Match Preference C"
 Cohesion: 0.10
-Nodes (20): core/firebase/fcm_background_handler.dart, core/platform/platform_notifications.dart, core/router.dart, core/services/notification_service.dart, integration_test_gate_stub.dart, _assertEnvVars, initialize, _initializeWebPushStack (+12 more)
+Nodes (19): build, _kAgeMax, _kAgeMin, _kDistance, kMatchMaxAgeYears, kMatchMaxDistanceMeters, kMatchMinDistanceMeters, _kMode (+11 more)
 
-### Community 106 - "Module Group 106"
+### Community 107 - "Firebase & FCM"
 Cohesion: 0.10
-Nodes (20): CustomPainter, _CameraGridPainter, _CameraViewfinderBracketsPainter, _WavePainter, _BoneSliderPainter, borderRadius, color, DashedRectPainter (+12 more)
+Nodes (20): core/firebase/fcm_background_handler.dart, core/platform/platform_notifications.dart, core/router.dart, core/services/stripe_init_service.dart, integration_test_gate_stub.dart, _assertEnvVars, initialize, _initializeWebPushStack (+12 more)
 
-### Community 107 - "Module Group 107"
+### Community 108 - "Customer Buyer Order Detail Sc"
 Cohesion: 0.10
-Nodes (20): ../models/health_log.dart, ../models/medical_record.dart, _client, createDocumentUrl, createLog, createRecord, deactivateRecord, deleteLog (+12 more)
+Nodes (20): _CancelOrderButton, _CancelOrderButtonState, createState, _formatDate, icon, _IconBtn, label, _LineItemsCard (+12 more)
 
-### Community 108 - "Module Group 108"
+### Community 109 - "Vet Appointments"
 Cohesion: 0.10
-Nodes (20): package:petfolio/core/widgets/widgets.dart, Route /login, build, _confirmController, createState, dispose, _emailController, _emailRegex (+12 more)
+Nodes (20): Appointment, clinicId, clinicName, copyWith, createdAt, fromJson, id, isCompleted (+12 more)
 
-### Community 109 - "Module Group 109"
+### Community 110 - "Models Prescription"
+Cohesion: 0.11
+Nodes (20): fromJson, fromString, label, Prescription, PrescriptionStatus, rejected, _rxStatusFromJson, _rxStatusToJson (+12 more)
+
+### Community 111 - "Shared Widgets"
 Cohesion: 0.10
 Nodes (20): AllFeaturesSheet, _AllFeaturesSheetContent, build, color, createState, _FeatureCard, _FeatureCardState, _FeatureItem (+12 more)
 
-### Community 110 - "Module Group 110"
-Cohesion: 0.11
-Nodes (18): BoxBorder?, EdgeInsetsGeometry, fcm_service.dart, child, createState, FcmLifecycle, _FcmLifecycleState, Widget? (+10 more)
+### Community 112 - "Media & Content Creation"
+Cohesion: 0.10
+Nodes (19): app_bottom_sheet.dart, app_header.dart, app_shell.dart, app_snack_bar.dart, bone_slider.dart, glass_card.dart, keep_alive_tab.dart, paw_toggle.dart (+11 more)
 
-### Community 111 - "Module Group 111"
+### Community 113 - "Marketplace UI"
+Cohesion: 0.11
+Nodes (20): ConsumerWidget, matchLikedControllerProvider, matchesInboxControllerProvider, _Composer, _DeliveryStrip, _MarketHeader, build, _InboxTab (+12 more)
+
+### Community 114 - "Shared Widgets"
 Cohesion: 0.11
 Nodes (19): adminDashboardProvider, ../controllers/admin_dashboard_controller.dart, RecentActivityItem, ../../../../core/widgets/glass_card.dart, _ActivityTile, AdminDashboardTab, build, _DashboardBody (+11 more)
 
-### Community 112 - "Module Group 112"
-Cohesion: 0.12
-Nodes (18): codOrdersProvider, ../controllers/cod_orders_controller.dart, T, ../theme/app_theme.dart, PetfolioThemeExtension, ThemeExtension, AppBottomSheet, amountFormatted (+10 more)
+### Community 115 - "Medical Vault"
+Cohesion: 0.11
+Nodes (18): addRecord, build, deactivateRecord, _repo, _syncMedicationReminders, updateRecord, arg, build (+10 more)
 
-### Community 113 - "Module Group 113"
+### Community 116 - "Shared Widgets"
 Cohesion: 0.12
 Nodes (19): ../controllers/vitals_controller.dart, vitalsNotifierProvider, package:fl_chart/fl_chart.dart, WidgetRef, _AddWeightLogSheet, _AddWeightLogSheetState, build, createState (+11 more)
 
-### Community 114 - "Module Group 114"
+### Community 117 - "Pet Matching & Discovery"
 Cohesion: 0.10
 Nodes (19): notifier, rootNavigatorKey, state, ../features/activity/activity_routes.dart, ../features/admin/admin_routes.dart, ../features/appointments/appointment_routes.dart, ../features/auth/auth_routes.dart, ../features/care/care_routes.dart (+11 more)
 
-### Community 115 - "Module Group 115"
+### Community 118 - "Pet Care Repository"
+Cohesion: 0.10
+Nodes (18): package:petfolio/core/models/pet.dart, package:petfolio/features/care/data/models/care_task.dart, package:uuid/uuid.dart, _buildPrompt, CareRecommendationService, cause, _defaultPoints, _defaultTitleForType (+10 more)
+
+### Community 119 - "Pet Matching & Discovery"
 Cohesion: 0.10
 Nodes (19): age, avatarUrl, bestWith, bio, breed, DiscoveryCandidate, distance, energy (+11 more)
 
-### Community 116 - "Module Group 116"
+### Community 120 - "Product Models"
 Cohesion: 0.10
 Nodes (19): ProductGlyphType, static final, build, _drawBag, _drawBall, _drawBone, _drawBowl, _drawBrush (+11 more)
 
-### Community 117 - "Module Group 117"
+### Community 121 - "Shared Widgets"
+Cohesion: 0.11
+Nodes (18): Animation, Offset, package:lottie/lottie.dart, action, build, createState, _ctrl, dispose (+10 more)
+
+### Community 122 - "Vet Appointments"
+Cohesion: 0.12
+Nodes (19): appointment_controller.dart, _, build, canBook, _getMimeType, initForClinic, isLoading, resetStatus (+11 more)
+
+### Community 123 - "Theme Primitives"
+Cohesion: 0.12
+Nodes (18): refresh, _cancel, package:petfolio/core/theme/app_theme.dart, orderRepositoryProvider, _confirming, _confirmStripe, confirmStripePayment, _controller (+10 more)
+
+### Community 124 - "Controllers Create Post Contro"
 Cohesion: 0.11
 Nodes (18): build, caption, copyWith, CreatePostState, error, image, isStory, isSubmitting (+10 more)
 
-### Community 118 - "Module Group 118"
+### Community 125 - "Profile Editing"
 Cohesion: 0.11
-Nodes (18): removeFront, ../controllers/match_preference_controller.dart, matchPreferenceControllerProvider, package:petfolio/core/theme/app_theme.dart, accent, build, emoji, _formatDistanceMiles (+10 more)
+Nodes (18): build, clearError, copyWith, EditProfileController, EditProfileState, errorMessage, isSubmitting, isSyncingLocation (+10 more)
 
-### Community 119 - "Module Group 119"
-Cohesion: 0.12
-Nodes (18): addPet, archive, _autoGenerateRoutines, byOrder, _comparePetsListOrder, editPetProfile, petRepositoryProvider, refresh (+10 more)
-
-### Community 120 - "Module Group 120"
-Cohesion: 0.12
-Nodes (18): ../../controllers/vendor_products_controller.dart, vendorProductsProvider, Route /seller/products/add, _save, _DashboardBody, build, _confirmDelete, _EmptyProducts (+10 more)
-
-### Community 121 - "Module Group 121"
+### Community 126 - "Shared Widgets"
 Cohesion: 0.11
-Nodes (16): dart:io, integrationTestActive, marionetteEnabledInThisBuild, package:flutter_image_compress/flutter_image_compress.dart, bytes, _compress, compressed, dir (+8 more)
+Nodes (17): ../controllers/medications_controller.dart, adherence, _MedicationCard, onGiven, _time, VoidCallback, build, _FreqChip (+9 more)
 
-### Community 122 - "Module Group 122"
+### Community 127 - "Supabase Repository"
 Cohesion: 0.11
-Nodes (18): ../models/pet.dart, ../models/pet_gender.dart, _allowedExtensions, archivePet, _avatarExtension, _client, createPet, fetchPets (+10 more)
+Nodes (16): shipment, build, isWishlisted, toggle, ../../data/models/shipment.dart, ../../data/repositories/shipment_repository.dart, ../../data/repositories/wishlist_repository.dart, shipmentProvider (+8 more)
 
-### Community 123 - "Module Group 123"
-Cohesion: 0.11
-Nodes (16): ../models/product.dart, package:flutter_riverpod/flutter_riverpod.dart, build, _client, _defaultPageSize, fetchProducts, fetchProductsByShop, ProductRepository (+8 more)
-
-### Community 124 - "Module Group 124"
+### Community 128 - "Shared Widgets"
 Cohesion: 0.11
 Nodes (18): activeColor, build, createState, _ctrl, didUpdateWidget, dispose, _h, initState (+10 more)
 
-### Community 125 - "Module Group 125"
-Cohesion: 0.14
-Nodes (16): admin_shared_widgets.dart, build, ../controllers/moderation_controller.dart, moderationProvider, refresh, _repo, resolve, ../../data/models/post_report.dart (+8 more)
+### Community 129 - "Vet Appointments"
+Cohesion: 0.16
+Nodes (16): appointment_routes.dart, add, AppointmentController, build, PastAppointmentsNotifier, refresh, remove, toggleComplete (+8 more)
 
-### Community 126 - "Module Group 126"
-Cohesion: 0.11
-Nodes (17): app_bottom_sheet.dart, app_header.dart, app_shell.dart, app_snack_bar.dart, bone_slider.dart, glass_card.dart, paw_toggle.dart, pet_avatar.dart (+9 more)
+### Community 130 - "Product Detail"
+Cohesion: 0.16
+Nodes (18): ConsumerState, ConsumerStatefulWidget, ActivityScreen, _ActivityScreenState, CreateContentScreen, _CreateContentScreenState, LoginScreen, _LoginScreenState (+10 more)
 
-### Community 127 - "Module Group 127"
+### Community 131 - "Controllers Admin Dashboard Co"
 Cohesion: 0.12
 Nodes (17): activeShopCount, ActivityType, AdminDashboardData, AdminDashboardNotifier, build, _buildActivity, _fetch, pendingKycCount (+9 more)
 
-### Community 128 - "Module Group 128"
-Cohesion: 0.11
-Nodes (17): dart:ui, borderRadius, build, child, forceOpaque, _GlassBody, GlassCard, height (+9 more)
+### Community 132 - "Shared Widgets"
+Cohesion: 0.14
+Nodes (16): build, ../controllers/moderation_controller.dart, moderationProvider, refresh, _repo, resolve, ../../data/models/post_report.dart, PostReport (+8 more)
 
-### Community 129 - "Module Group 129"
+### Community 133 - "Active Pet State"
+Cohesion: 0.13
+Nodes (17): addPet, archive, byOrder, _comparePetsListOrder, editPetProfile, petRepositoryProvider, refresh, reorder (+9 more)
+
+### Community 134 - "Firebase & FCM"
+Cohesion: 0.12
+Nodes (15): canRequestWebToken, FirebaseEnv, isConfigured, options, vapidKey, android, DefaultFirebaseOptions, ios (+7 more)
+
+### Community 135 - "Models Comment"
 Cohesion: 0.11
 Nodes (17): avatarUrl, Comment, content, copyWithContent, copyWithLike, createdAt, fromJson, handle (+9 more)
 
-### Community 130 - "Module Group 130"
-Cohesion: 0.18
-Nodes (11): corsHeaders, corsHeaders, corsHeaders, SendBody, base64UrlEncode(), base64UrlEncodeJson(), getAccessToken(), isUnregisteredTokenError() (+3 more)
+### Community 136 - "Supabase Repository"
+Cohesion: 0.11
+Nodes (17): ../models/pet.dart, ../models/pet_gender.dart, _allowedExtensions, archivePet, _avatarExtension, _client, createPet, fetchPets (+9 more)
 
-### Community 131 - "Module Group 131"
+### Community 137 - "Supabase Repository"
+Cohesion: 0.11
+Nodes (17): ../models/shop.dart, _client, createShop, _errorMessageFromPayload, fetchAllActiveShops, fetchMyDeletionRequest, fetchMyShop, fetchShopById (+9 more)
+
+### Community 138 - "Shared Widgets"
 Cohesion: 0.12
 Nodes (17): ScrollController, build, CareDatePicker, _CareDatePickerState, _chipGap, _chipW, createState, _dayLetters (+9 more)
 
-### Community 132 - "Module Group 132"
+### Community 139 - "Shared Widgets"
 Cohesion: 0.11
 Nodes (17): backgroundColor, build, color, done, due, emoji, icon, label (+9 more)
 
-### Community 133 - "Module Group 133"
+### Community 140 - "Cat Rabbit Bird Fish"
 Cohesion: 0.12
 Nodes (16): cat,
   rabbit,
   bird,
   fish,, Color get, accent, accentDark, breeds, emoji, fromId, label (+8 more)
 
-### Community 134 - "Module Group 134"
-Cohesion: 0.12
-Nodes (16): build, clearError, copyWith, EditProfileController, EditProfileState, errorMessage, isSubmitting, isSyncingLocation (+8 more)
-
-### Community 135 - "Module Group 135"
+### Community 141 - "Shared Widgets"
 Cohesion: 0.12
 Nodes (16): double get, BoneSliderWidget, build, color, max, min, onChanged, paint (+8 more)
 
-### Community 136 - "Module Group 136"
-Cohesion: 0.12
-Nodes (16): _client, createShop, _errorMessageFromPayload, fetchAllActiveShops, fetchMyDeletionRequest, fetchMyShop, fetchShopById, _functionResponseMap (+8 more)
+### Community 142 - "Firebase & FCM"
+Cohesion: 0.13
+Nodes (12): activityRoutes, authRoutes, auth_routes.dart, FcmMessageRouter, navigate, routeFromData, usePushForPath, package:go_router/go_router.dart (+4 more)
 
-### Community 137 - "Module Group 137"
+### Community 143 - "Firebase & FCM"
+Cohesion: 0.13
+Nodes (14): @JS, dart:js_interop, external bool get, external JSPromise, external String get, contains, _fcmSwReady, _isIosStandalonePwa (+6 more)
+
+### Community 144 - "Supabase Repository"
 Cohesion: 0.13
 Nodes (15): CommentRepository get, _activePetId, add, build, CommentList, delete, edit, refresh (+7 more)
 
-### Community 138 - "Module Group 138"
-Cohesion: 0.12
-Nodes (13): asyncState, when, client, fromJson, raw, ../../data/models/pet_awards_summary.dart, features/auth/presentation/controllers/auth_controller.dart, package:supabase_flutter/supabase_flutter.dart (+5 more)
-
-### Community 139 - "Module Group 139"
-Cohesion: 0.14
-Nodes (14): _ChatTypingStateNotifier, build, DeletionRequestNotifier, msg, parseDeletionError, submitRequest, build, read (+6 more)
-
-### Community 140 - "Module Group 140"
+### Community 145 - "Chat Controller"
 Cohesion: 0.13
-Nodes (14): arg, build, FollowNotifier, _repo, toggle, addLog, build, deleteLog (+6 more)
+Nodes (15): _ChatTypingStateNotifier, Map, build, _controllers, createState, didUpdateWidget, dispose, dx (+7 more)
 
-### Community 141 - "Module Group 141"
+### Community 146 - "Controllers Clinic List Provid"
+Cohesion: 0.14
+Nodes (15): clinicListProvider, ../controllers/clinic_list_provider.dart, package:cached_network_image/cached_network_image.dart, build, clinic, _ClinicAvatarPlaceholder, _ClinicCard, _ClinicCardState (+7 more)
+
+### Community 147 - "Social Profile & Follow"
+Cohesion: 0.16
+Nodes (15): followStatusProvider, fetchPostsForPet, fromJson, petByIdProvider, petStatsProvider, raw, read, repo (+7 more)
+
+### Community 148 - "Supabase Repository"
+Cohesion: 0.12
+Nodes (15): build, _fetchGroups, ledgers, markShopPaid, overviewMetricsProvider, read, refresh, _repo (+7 more)
+
+### Community 149 - "Controllers Prescription Contr"
+Cohesion: 0.13
+Nodes (15): ../controllers/prescription_controller.dart, File?, build, createState, dispose, orderId, _pick, _pickedFile (+7 more)
+
+### Community 150 - "Cart & Promo"
 Cohesion: 0.16
 Nodes (15): allPromos, build, filter, filteredPromosProvider, PromoFilterNotifier, promoFilterProvider, promoListProvider, setFilter (+7 more)
 
-### Community 142 - "Module Group 142"
+### Community 151 - "Shared Widgets"
+Cohesion: 0.15
+Nodes (15): ../controllers/shop_deletion_controller.dart, shopDeletionRequestsProvider, FormState, _destinationIcon, build, createState, _DeletionRequestCard, _DeletionRequestCardState (+7 more)
+
+### Community 152 - "Shared Widgets"
+Cohesion: 0.12
+Nodes (15): ../../../../core/theme/theme_notifier.dart, ../../../../core/widgets/section_header.dart, ../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart, _AccountTile, _group, icon, iconColor, isDark (+7 more)
+
+### Community 153 - "Convert"
 Cohesion: 0.12
 Nodes (15): dart:convert, package:http/http.dart, _apiKey, breed, BreedIdentificationResult, BreedIdentificationService, breedIdentificationServiceProvider, confidence (+7 more)
 
-### Community 143 - "Module Group 143"
+### Community 154 - "Product Detail"
 Cohesion: 0.16
-Nodes (14): data/models/feed_post.dart, presentation/controllers/follow_controller.dart, presentation/controllers/notification_controller.dart, presentation/controllers/social_controller.dart, presentation/controllers/story_controller.dart, presentation/screens/create_post_screen.dart, presentation/screens/create_story_screen.dart, presentation/screens/notifications_screen.dart (+6 more)
+Nodes (14): dbValue, fromJson, PetSwipe, SwipeTableAction, fromJson, priceFormatted, ProductVariant, ProductVariantX (+6 more)
 
-### Community 144 - "Module Group 144"
+### Community 155 - "Marketplace UI"
+Cohesion: 0.17
+Nodes (14): marketplaceRoutes, marketplace_routes.dart, presentation/screens/cart_screen.dart, presentation/screens/customer/buyer_order_detail_screen.dart, presentation/screens/customer/buyer_order_list_screen.dart, presentation/screens/customer/shop_storefront_screen.dart, presentation/screens/marketplace_categories_screen.dart, presentation/screens/marketplace_screen.dart (+6 more)
+
+### Community 156 - "Onboarding Flow"
 Cohesion: 0.12
-Nodes (15): Offset, package:lottie/lottie.dart, action, build, createState, _ctrl, dispose, icon (+7 more)
+Nodes (14): build, location, RouterErrorScreen, build, build, homeScrollProgressProvider, _ScrollProgressNotifier, Route /home (+6 more)
 
-### Community 145 - "Module Group 145"
+### Community 157 - "Shared Widgets"
+Cohesion: 0.13
+Nodes (15): AppTutorialOverlay, _AppTutorialOverlayState, build, createState, dispose, _finish, markAppTutorialSeen, onDismiss (+7 more)
+
+### Community 158 - "Breeding & Verification"
 Cohesion: 0.14
-Nodes (14): AsyncValue, arg, build, copyWith, history, _load, logWeight, NutritionNotifier (+6 more)
+Nodes (11): admin_layout.dart, match_profile_settings_screen.dart, offersRoutes, package:flutter/widgets.dart, presentation/screens/offers_screen.dart, AdminScreen, build, BreedingSetupScreen (+3 more)
 
-### Community 146 - "Module Group 146"
+### Community 159 - "Auth Presentation Controllers "
 Cohesion: 0.13
-Nodes (14): build, _kAgeMax, _kAgeMin, _kDistance, kMatchMaxAgeYears, kMatchMaxDistanceMeters, kMatchMinDistanceMeters, _kSpecies (+6 more)
+Nodes (14): ../../../auth/presentation/controllers/auth_controller.dart, icon, isDark, items, label, labelColor, _NewBadge, onTap (+6 more)
 
-### Community 147 - "Module Group 147"
+### Community 160 - "Controllers Cart Controller"
 Cohesion: 0.13
-Nodes (13): ../models/app_notification.dart, ../models/promo.dart, _client, fetchNotifications, insertNotification, markAllRead, NotificationRepository, _client (+5 more)
+Nodes (14): add, build, clear, clearShopCart, decrement, _loadFromPrefs, _persist, remove (+6 more)
 
-### Community 148 - "Module Group 148"
+### Community 161 - "Shared Widgets"
+Cohesion: 0.15
+Nodes (14): codOrdersProvider, ../controllers/cod_orders_controller.dart, ../../../../core/widgets/tail_wag_loader.dart, amountFormatted, build, _busy, _CodOrderCard, _CodOrderCardState (+6 more)
+
+### Community 162 - "Active Pet State"
 Cohesion: 0.13
-Nodes (14): Appointment, clinicName, copyWith, createdAt, fromJson, id, isCompleted, notes (+6 more)
+Nodes (13): arg, build, FollowNotifier, _repo, toggle, ../controllers/social_dm_controller.dart, ../../../pet_profile/presentation/controllers/active_pet_controller.dart, build (+5 more)
 
-### Community 149 - "Module Group 149"
+### Community 163 - "Supabase Repository"
 Cohesion: 0.13
 Nodes (14): ../models/community.dart, ../models/community_post.dart, _client, CommunityRepository, createCommunity, createPost, fetchAll, fetchPosts (+6 more)
 
-### Community 150 - "Module Group 150"
+### Community 164 - "Pet Matching & Discovery"
+Cohesion: 0.15
+Nodes (14): breeding, dbValue, fromDb, label, MatchMode, _, cancelled, dbValue (+6 more)
+
+### Community 165 - "Care Dashboard & Awards"
 Cohesion: 0.13
 Nodes (14): badgeType, bestStreak, currentStreak, empty, fromJson, logsCount, PetAwardsSummary, totalXp (+6 more)
 
-### Community 151 - "Module Group 151"
+### Community 166 - "Models Shop Deletion Request"
 Cohesion: 0.13
 Nodes (14): fromJson, id, isApproved, isPending, isRejected, ownerId, reason, rejectionNote (+6 more)
 
-### Community 152 - "Module Group 152"
-Cohesion: 0.13
-Nodes (14): package:petfolio/core/theme/theme.dart, CareAppointmentsBanner, CareExploreRow, CareUtilityBanner, detail, _ExploreTile, icon, iconBg (+6 more)
-
-### Community 153 - "Module Group 153"
-Cohesion: 0.13
-Nodes (14): AdminBankRow, AdminEmptyState, AdminErrorState, AdminPanelScaffold, AdminStatusChip, build, child, color (+6 more)
-
-### Community 154 - "Module Group 154"
+### Community 167 - "Shared Widgets"
 Cohesion: 0.19
-Nodes (12): appointment_routes.dart, add, AppointmentController, build, remove, toggleComplete, ../../data/models/appointment.dart, ../../data/repositories/appointment_repository.dart (+4 more)
+Nodes (13): admin_shared_widgets.dart, ../controllers/ledger_controller.dart, ledgerProvider, VendorPayoutGroup, build, _busy, createState, _expanded (+5 more)
 
-### Community 155 - "Module Group 155"
+### Community 168 - "Shared Widgets"
 Cohesion: 0.14
-Nodes (13): BoxFit, int?, package:cached_network_image/cached_network_image.dart, package:flutter_cache_manager/flutter_cache_manager.dart, build, errorFallback, _evictStaleCache, fit (+5 more)
+Nodes (13): BoxFit, int?, package:flutter_cache_manager/flutter_cache_manager.dart, build, cacheManager, errorFallback, _evictStaleCache, fit (+5 more)
 
-### Community 156 - "Module Group 156"
+### Community 169 - "Pill Button Widget"
+Cohesion: 0.15
+Nodes (13): Community, communitiesControllerProvider, ../../../../core/widgets/petfolio_empty_state.dart, ../../../../core/widgets/primary_pill_button.dart, ../../../../core/widgets/skeleton_loader.dart, _Avatar, build, CommunitiesScreen (+5 more)
+
+### Community 170 - "Shared Widgets"
 Cohesion: 0.14
-Nodes (12): addRecord, build, deactivateRecord, _repo, updateRecord, core/widgets/app_snack_bar.dart, ../../data/models/medical_record.dart, ../../data/repositories/health_repository.dart (+4 more)
+Nodes (13): ../controllers/match_preference_controller.dart, accent, emoji, _formatDistanceMiles, label, onTap, _SectionLabel, selected (+5 more)
 
-### Community 157 - "Module Group 157"
-Cohesion: 0.14
-Nodes (13): build, _fetchGroups, ledgers, markShopPaid, overviewMetricsProvider, read, refresh, _repo (+5 more)
-
-### Community 158 - "Module Group 158"
+### Community 171 - "Shared Widgets"
 Cohesion: 0.14
 Nodes (13): ../../../../core/platform/web_image_cache.dart, activePet, _AvatarCircle, avatarUrl, build, _buildPaw, fallbackEmoji, _FloatingPawsBackground (+5 more)
 
-### Community 159 - "Module Group 159"
-Cohesion: 0.14
-Nodes (13): ../../../../core/widgets/widgets.dart, ../marketplace/data/models/user_address.dart, ../marketplace/presentation/controllers/address_controller.dart, ../marketplace/presentation/widgets/address_sheet.dart, presentation/screens/settings_screen.dart, address, _AddressCard, isDark (+5 more)
-
-### Community 160 - "Module Group 160"
+### Community 172 - "Color Palette & Tokens"
 Cohesion: 0.14
 Nodes (13): ../errors/app_exception.dart, GlobalKey, ScaffoldMessengerState, ../theme/app_colors.dart, AppSnackBar, appSnackBarMessengerKey, _badgeIcon, _badgeLabel (+5 more)
 
-### Community 161 - "Module Group 161"
-Cohesion: 0.14
-Nodes (11): android, DefaultFirebaseOptions, ios, web, marionetteEnabledInThisBuild, package:firebase_core/firebase_core.dart, package:flutter/foundation.dart, package:flutter_stripe/flutter_stripe.dart (+3 more)
+### Community 173 - "Icondata Get"
+Cohesion: 0.16
+Nodes (14): IconData get, _, appliesToDay, CareTask, careTaskCategoryIconData, careTaskTypeIconData, categoryIconData, _defaultCategoryIconKey (+6 more)
 
-### Community 162 - "Module Group 162"
+### Community 174 - "Models Community Post"
 Cohesion: 0.14
 Nodes (13): authorAvatarUrl, authorPetId, authorPetName, communityId, CommunityPost, content, copyWith, createdAt (+5 more)
 
-### Community 163 - "Module Group 163"
+### Community 175 - "Models Match Inbox Item"
 Cohesion: 0.14
 Nodes (13): isDm, isNewMatch, lastMessageAt, lastMessagePreview, matchedAt, matchId, MatchInboxItem, otherPetAvatarUrl (+5 more)
 
-### Community 164 - "Module Group 164"
+### Community 176 - "Package Flutter Image Compress"
 Cohesion: 0.14
-Nodes (13): dpr, mem, networkImageMaxDiskCacheWidth, networkImageMemCacheWidth, petfolioWebImageCacheManager, pixels, _webDiskCache, webImageDiskCacheMaxObjects (+5 more)
+Nodes (13): package:flutter_image_compress/flutter_image_compress.dart, bytes, _compress, compressed, dir, maxWidth, outFile, outPath (+5 more)
 
-### Community 165 - "Module Group 165"
+### Community 177 - "Services Prefs Schema"
+Cohesion: 0.14
+Nodes (13): activePetPrefix, cartPrefix, _currentVersion, matchAgeMax, matchAgeMin, matchDistance, matchSpecies, migrate (+5 more)
+
+### Community 178 - "Admin Admin Routes"
 Cohesion: 0.15
-Nodes (13): build, _controllers, createState, didUpdateWidget, dispose, dx, dy, emoji (+5 more)
+Nodes (11): adminRoutes, admin_routes.dart, presentation/controllers/admin_auth_controller.dart, presentation/controllers/admin_dashboard_controller.dart, presentation/controllers/cod_orders_controller.dart, presentation/controllers/kyc_review_controller.dart, presentation/controllers/ledger_controller.dart, presentation/controllers/moderation_controller.dart (+3 more)
 
-### Community 166 - "Module Group 166"
+### Community 179 - "Nutrition Tracker"
+Cohesion: 0.17
+Nodes (12): AsyncValue, arg, build, copyWith, history, _load, logWeight, NutritionNotifier (+4 more)
+
+### Community 180 - "Theme Primitives"
 Cohesion: 0.15
-Nodes (12): AnimationController, build, color, createState, _ctrl, dispose, initState, label (+4 more)
+Nodes (12): BoxBorder?, EdgeInsetsGeometry, backgroundColor, border, borderRadius, boxShadow, build, child (+4 more)
 
-### Community 167 - "Module Group 167"
-Cohesion: 0.15
-Nodes (12): build, careStreakRealtimeProvider, matchesInboxControllerProvider, ../../data/models/care_streak.dart, Route /appointments, Route /matching, Route /social, build (+4 more)
+### Community 181 - "Pet Matching & Discovery"
+Cohesion: 0.17
+Nodes (12): _ActiveCommunityNotifier, _SwipeErrorNotifier, copyWith, fromJson, id, notes, petId, recordedAt (+4 more)
 
-### Community 168 - "Module Group 168"
-Cohesion: 0.21
-Nodes (12): ../controllers/ledger_controller.dart, ledgerProvider, VendorPayoutGroup, build, _busy, createState, _expanded, FinancialLedgerTab (+4 more)
+### Community 182 - "Theme System & Extensions"
+Cohesion: 0.19
+Nodes (11): ../controllers/hashtag_controller.dart, ../controllers/saved_posts_controller.dart, ../../../../core/theme/app_theme.dart, ../../../../core/widgets/post_grid.dart, build, HashtagScreen, tag, build (+3 more)
 
-### Community 169 - "Module Group 169"
+### Community 183 - "Supabase Repository"
+Cohesion: 0.18
+Nodes (12): build, _channel, markAllRead, Notifications, ref, unreadCount, ../../data/models/app_notification.dart, ../../data/repositories/notification_repository.dart (+4 more)
+
+### Community 184 - "Pet Matching & Discovery"
+Cohesion: 0.19
+Nodes (12): build, getOrCreateThread, repo, send, SocialDmConversation, socialDmThread, _threadId, ../../data/repositories/social_dm_repository.dart (+4 more)
+
+### Community 185 - "Notifications"
 Cohesion: 0.15
 Nodes (12): ../../../../core/utils/time_ago.dart, actorHandle, actorPetName, AppNotification, copyWith, createdAt, fromJson, id (+4 more)
 
-### Community 170 - "Module Group 170"
+### Community 186 - "Shared Widgets"
+Cohesion: 0.15
+Nodes (12): ../../../../core/widgets/widgets.dart, ../marketplace/data/models/user_address.dart, ../marketplace/presentation/controllers/address_controller.dart, ../marketplace/presentation/widgets/address_sheet.dart, address, _AddressCard, isDark, isSelected (+4 more)
+
+### Community 187 - "External Location Get"
 Cohesion: 0.17
 Nodes (11): external _Location get, external _Window get, JSObject, false, openWebCheckoutUrl, href, _Location, openWebCheckoutUrl (+3 more)
 
-### Community 171 - "Module Group 171"
+### Community 188 - "Firebase & FCM"
 Cohesion: 0.17
 Nodes (11): fcm_push_display.dart, message, showFcmAsLocalNotification, body, data, id, showFcmAsLocalNotification, title (+3 more)
 
-### Community 172 - "Module Group 172"
-Cohesion: 0.17
-Nodes (13): IconData get, _, appliesToDay, careTaskCategoryIconData, careTaskTypeIconData, categoryIconData, _defaultCategoryIconKey, effectiveAnchor (+5 more)
+### Community 189 - "Social Repository"
+Cohesion: 0.15
+Nodes (12): ../../features/social/data/models/feed_post.dart, FeedPost, skeleton_loader.dart, build, _EmptyPostGrid, _GradientFallback, onLoadMore, onTap (+4 more)
 
-### Community 173 - "Module Group 173"
-Cohesion: 0.17
-Nodes (12): male,
-  female,, dbValue, fromDb, label, PetGender, unknown, _, discountLabel (+4 more)
+### Community 190 - "Firebase & FCM"
+Cohesion: 0.15
+Nodes (11): _client, deleteToken, FcmTokenRepository, upsertToken, ../models/app_notification.dart, _client, fetchNotifications, insertNotification (+3 more)
 
-### Community 174 - "Module Group 174"
+### Community 191 - "Pet Matching & Discovery"
+Cohesion: 0.15
+Nodes (11): matchingRoutes, matching_routes.dart, presentation/controllers/discovery_candidates_controller.dart, presentation/controllers/discovery_controller.dart, presentation/controllers/match_preference_controller.dart, presentation/controllers/matches_inbox_controller.dart, presentation/screens/breeding_setup_screen.dart, presentation/screens/chat_screen.dart (+3 more)
+
+### Community 192 - "Models Community"
 Cohesion: 0.15
 Nodes (12): avatarUrl, Community, copyWith, createdAt, description, fromJson, id, isMember (+4 more)
 
-### Community 175 - "Module Group 175"
+### Community 193 - "Models Story"
 Cohesion: 0.15
 Nodes (12): copyWith, createdAt, fromJson, id, imageUrl, petAvatarUrl, petId, petName (+4 more)
 
-### Community 176 - "Module Group 176"
+### Community 194 - "Supabase Repository"
+Cohesion: 0.15
+Nodes (12): ../models/wishlist_item.dart, Product, addToWishlist, _client, fetchWishlistProducts, _getOrCreateWishlistId, isInWishlist, item (+4 more)
+
+### Community 195 - "Supabase Repository"
+Cohesion: 0.15
+Nodes (12): package:flutter_sslcommerz/model/SSLCCustomerInfoInitializer.dart, package:flutter_sslcommerz/model/SSLCommerzInitialization.dart, package:flutter_sslcommerz/model/SSLCSdkType.dart, package:flutter_sslcommerz/model/SSLCurrencyType.dart, package:flutter_sslcommerz/sslcommerz.dart, _multiCardForMethod, pay, SslcommerzService (+4 more)
+
+### Community 196 - "Pet Matching & Discovery"
 Cohesion: 0.19
 Nodes (11): _PetEditMissingScreen, petProfileRoutes, pet_profile_routes.dart, presentation/controllers/active_pet_controller.dart, presentation/controllers/discovery_visibility_controller.dart, presentation/controllers/edit_profile_controller.dart, presentation/controllers/pet_list_controller.dart, presentation/screens/edit_profile_screen.dart (+3 more)
 
-### Community 177 - "Module Group 177"
+### Community 197 - "Platform Web Image Cache"
+Cohesion: 0.15
+Nodes (12): dpr, mem, networkImageMaxDiskCacheWidth, networkImageMemCacheWidth, petfolioWebImageCacheManager, pixels, _webDiskCache, webImageDiskCacheMaxObjects (+4 more)
+
+### Community 198 - "Supabase Repository"
 Cohesion: 0.15
 Nodes (12): AuthRepository, _client, currentSession, currentUser, onAuthStateChange, resetPassword, signIn, signOut (+4 more)
 
-### Community 178 - "Module Group 178"
-Cohesion: 0.15
-Nodes (12): VoidCallback, build, _FreqChip, _freqs, FrequencyChips, onChanged, onSelected, onTap (+4 more)
-
-### Community 179 - "Module Group 179"
+### Community 199 - "Booking Slots"
 Cohesion: 0.18
-Nodes (11): admin_layout.dart, ../controllers/admin_auth_controller.dart, isAdminProvider, ../../../../core/theme/app_colors.dart, build, Route /home, build, AdminScreen (+3 more)
+Nodes (10): AvailableSlotsRequest, clinicId, date, hashCode, operator, service, clinicDetailProvider, read (+2 more)
 
-### Community 180 - "Module Group 180"
+### Community 200 - "Shared Widgets"
+Cohesion: 0.18
+Nodes (11): ../controllers/communities_controller.dart, build, _CreateCommunitySheet, _CreateCommunitySheetState, createState, _descCtrl, dispose, _nameCtrl (+3 more)
+
+### Community 201 - "Shared Widgets"
 Cohesion: 0.18
 Nodes (11): ../controllers/kyc_review_controller.dart, package:url_launcher/url_launcher.dart, build, createState, documentPath, label, _loading, _open (+3 more)
 
-### Community 181 - "Module Group 181"
+### Community 202 - "Story Viewer"
+Cohesion: 0.18
+Nodes (11): addStory, build, markStoryViewed, _repo, sendReaction, Stories, ../../data/models/story.dart, ../../data/repositories/story_repository.dart (+3 more)
+
+### Community 203 - "Theme Primitives"
 Cohesion: 0.18
 Nodes (11): core/firebase/fcm_service.dart, ../../../../core/firebase/firebase_env.dart, ../../../../core/platform/web_push_environment.dart, core/theme/theme.dart, build, createState, _enable, _enabled (+3 more)
 
-### Community 182 - "Module Group 182"
+### Community 204 - "Supabase Repository"
+Cohesion: 0.17
+Nodes (11): ../models/story.dart, _allowedExtensions, _client, createStory, fetchActiveStories, markStoryViewed, _maxImageBytes, _mimeTypes (+3 more)
+
+### Community 205 - "Shared Widgets"
 Cohesion: 0.17
 Nodes (11): static const double, build, desktop, isDesktop, isMobile, isTablet, mobile, mobileMax (+3 more)
 
-### Community 183 - "Module Group 183"
+### Community 206 - "Active Pet State"
 Cohesion: 0.18
-Nodes (10): ../../controllers/my_shop_controller.dart, ../../../../core/widgets/primary_pill_button.dart, accountLinkUrl, build, createState, didChangeAppLifecycleState, dispose, initState (+2 more)
+Nodes (10): ChangeNotifier, ../../features/admin/presentation/controllers/admin_auth_controller.dart, ../../features/pet_profile/presentation/controllers/pet_list_controller.dart, _lastDismissedLocation, redirect, _ref, RouterNotifier, navigator_keys.dart (+2 more)
 
-### Community 184 - "Module Group 184"
+### Community 207 - "Controllers Cart Controller Ca"
+Cohesion: 0.18
+Nodes (10): CartNotifier, FlutterSecureStorage, CartState, package:flutter_secure_storage/flutter_secure_storage.dart, delete, read, SecureStorageService, secureStorageServiceProvider (+2 more)
+
+### Community 208 - "Pet Matching & Discovery"
+Cohesion: 0.27
+Nodes (10): _LocationSyncErrorNotifier, AppException, DatabaseException, fromPostgrest, message, NetworkException, NotAuthenticatedException, NotFoundException (+2 more)
+
+### Community 209 - "Supabase Repository"
 Cohesion: 0.18
 Nodes (10): ../../../../core/errors/app_exception.dart, ../models/comment.dart, addComment, _client, CommentRepository, deleteComment, fetchComments, _fetchLikedCommentIds (+2 more)
 
-### Community 185 - "Module Group 185"
+### Community 210 - "Vet Appointments"
+Cohesion: 0.18
+Nodes (10): ../models/appointment.dart, ../models/vet_clinic.dart, ../models/vet_service.dart, bookAppointment, _client, fetchAvailableSlots, fetchClinic, fetchClinics (+2 more)
+
+### Community 211 - "Models Chat Thread"
 Cohesion: 0.18
 Nodes (10): activePetId, ChatThread, createdAt, fromJson, id, lastMessageAt, matchRequestId, mutualMatchId (+2 more)
 
-### Community 186 - "Module Group 186"
+### Community 212 - "Pet Matching & Discovery"
 Cohesion: 0.20
-Nodes (11): openMatchesInbox, Route /care/appointments, Route /care/health, Route /care/nutrition, Route /care/walk, Route /matching/inbox, Route /me, Route /notifications (+3 more)
+Nodes (11): openMatchesInbox, Route /care/appointments, Route /care/health, Route /care/nutrition, Route /care/walk, Route /home/me, Route /home/notifications, Route /matching/inbox (+3 more)
 
-### Community 187 - "Module Group 187"
-Cohesion: 0.20
-Nodes (9): admin_routes.dart, presentation/controllers/admin_auth_controller.dart, presentation/controllers/admin_dashboard_controller.dart, presentation/controllers/cod_orders_controller.dart, presentation/controllers/kyc_review_controller.dart, presentation/controllers/ledger_controller.dart, presentation/controllers/moderation_controller.dart, presentation/controllers/shop_deletion_controller.dart (+1 more)
+### Community 213 - "Vet Appointments"
+Cohesion: 0.18
+Nodes (10): AppointmentRepository, _client, _combineDateAndTime, create, delete, fetchAppointments, fetchForPet, rescheduleAppointment (+2 more)
 
-### Community 188 - "Module Group 188"
+### Community 214 - "Care Dashboard & Awards"
 Cohesion: 0.20
 Nodes (9): care_routes.dart, presentation/controllers/ai_routine_controller.dart, presentation/controllers/care_dashboard_controller.dart, presentation/controllers/health_vault_controller.dart, presentation/controllers/nutrition_controller.dart, presentation/screens/care_screen.dart, presentation/screens/medical_vault_screen.dart, presentation/screens/nutrition_screen.dart (+1 more)
 
-### Community 189 - "Module Group 189"
+### Community 215 - "Active Pet State"
 Cohesion: 0.20
-Nodes (9): build, _client, EditShopNotifier, _repo, saveShopDetails, _uploadShopAsset, Shop, Shop (+1 more)
+Nodes (9): build, _initialized, _prefKey, _restoreFromPrefs, setActivePet, _sync, _userId, watch (+1 more)
 
-### Community 190 - "Module Group 190"
-Cohesion: 0.20
-Nodes (9): build, createShop, refreshAfterOnboarding, _repo, startOnboarding, submitKyc, updateShop, ../../data/repositories/kyc_repository.dart (+1 more)
-
-### Community 191 - "Module Group 191"
-Cohesion: 0.20
-Nodes (9): DateTime, createdAt, fromJson, id, postContent, postId, PostReport, reason (+1 more)
-
-### Community 192 - "Module Group 192"
-Cohesion: 0.20
-Nodes (9): external bool get, external JSPromise, external String get, contains, _fcmSwReady, _isIosStandalonePwa, ready, _userAgent (+1 more)
-
-### Community 193 - "Module Group 193"
+### Community 216 - "Jsonconverter"
 Cohesion: 0.22
 Nodes (10): JsonConverter, _, fromJson, isArchived, _PetGenderConverter, speciesEnum, toJson, package:petfolio/features/pet_profile/data/models/pet_gender.dart (+2 more)
 
-### Community 194 - "Module Group 194"
+### Community 217 - "Pet Matching & Discovery"
+Cohesion: 0.20
+Nodes (9): actorPetId, build, matchId, otherPetId, threadId, ../../../messaging/presentation/screens/chat_screen.dart, ChatScreen, fromMatchInbox (+1 more)
+
+### Community 218 - "Models Chat Message"
 Cohesion: 0.20
 Nodes (9): ChatMessage, content, copyWith, createdAt, fromJson, id, isRead, senderId (+1 more)
 
-### Community 195 - "Module Group 195"
+### Community 219 - "Models Pet Search Result"
 Cohesion: 0.20
 Nodes (9): accentColor, avatarUrl, breed, fromJson, handle, petId, petName, PetSearchResult (+1 more)
 
-### Community 196 - "Module Group 196"
+### Community 220 - "Product Detail"
+Cohesion: 0.20
+Nodes (9): ../models/product.dart, ../models/product_variant.dart, _client, _defaultPageSize, fetchProducts, fetchProductsByShop, fetchVariants, ProductRepository (+1 more)
+
+### Community 221 - "Product Models"
 Cohesion: 0.20
 Nodes (9): body, createdAt, fromJson, id, isOwn, productId, ProductReview, rating (+1 more)
 
-### Community 197 - "Module Group 197"
+### Community 222 - "Social Repository"
+Cohesion: 0.20
+Nodes (9): _client, fetchMessages, getOrCreateThread, sendMessage, _social, SocialDmRepository, streamMessages, SocialRepository (+1 more)
+
+### Community 223 - "Supabase Repository"
 Cohesion: 0.25
 Nodes (8): addAddress, build, deleteAddress, select, setDefault, ../../data/models/user_address.dart, ../../data/repositories/address_repository.dart, addressRepositoryProvider
 
-### Community 198 - "Module Group 198"
+### Community 224 - "Firebase & FCM"
 Cohesion: 0.28
-Nodes (9): discoveryVisibilityControllerProvider, editProfileControllerProvider, petMatchLocationProvider, build, _clearDateOfBirth, EditProfileScreen, _EditProfileScreenState, _pickDateOfBirth (+1 more)
+Nodes (8): authStateProvider, fcm_service.dart, ../../../../features/auth/presentation/controllers/auth_controller.dart, build, child, createState, FcmLifecycle, _FcmLifecycleState
 
-### Community 199 - "Module Group 199"
+### Community 225 - "Supabase Repository"
+Cohesion: 0.25
+Nodes (8): build, _orderId, PrescriptionUpload, upload, ../../data/models/prescription.dart, ../../data/repositories/prescription_repository.dart, prescriptionUploadProvider, prescriptionRepositoryProvider
+
+### Community 226 - "Core Config App Config"
+Cohesion: 0.25
+Nodes (8): ../../../../core/config/app_config.dart, package:google_fonts/google_fonts.dart, createState, initState, _launchFailed, _openDashboard, VendorWebRedirectScreen, _VendorWebRedirectScreenState
+
+### Community 227 - "Datetime"
 Cohesion: 0.22
-Nodes (8): canRequestWebToken, FirebaseEnv, isConfigured, options, vapidKey, static bool get, static const, static FirebaseOptions get
+Nodes (8): DateTime, createdAt, fromJson, id, postContent, postId, reason, reporterId
 
-### Community 200 - "Module Group 200"
+### Community 228 - "Datetime Get"
+Cohesion: 0.28
+Nodes (9): DateTime? get, _, fromJson, isDueSoon, isVaccine, MedicalRecord, MedicalRecordType, needsReminder (+1 more)
+
+### Community 229 - "Supabase Repository"
+Cohesion: 0.22
+Nodes (9): Exception, NotAdminException, InsufficientStockException, PaymentTimeoutException, ShopInactiveException, ShopNotVerifiedException, StripeOnboardingException, BreedIdentificationException (+1 more)
+
+### Community 230 - "Models Pet Health Cert"
+Cohesion: 0.28
+Nodes (9): _, dbValue, fromDb, fromJson, HealthCertType, label, PetHealthCert, vet (+1 more)
+
+### Community 231 - "Product Models"
 Cohesion: 0.22
 Nodes (8): ../models/product_review.dart, _client, fetchOwnReview, fetchReviews, ProductReviewRepository, productReviewRepositoryProvider, upsertReview, _userId
 
-### Community 201 - "Module Group 201"
-Cohesion: 0.22
-Nodes (8): copyWith, fromJson, id, notes, petId, recordedAt, weightKg, WeightLog
-
-### Community 202 - "Module Group 202"
+### Community 232 - "Notifications"
 Cohesion: 0.22
 Nodes (8): platform_notifications_io.dart, cancelAll, cancelForTask, initialize, instance, PlatformNotifications, scheduleTaskReminder, static PlatformNotifications get
 
-### Community 203 - "Module Group 203"
-Cohesion: 0.22
-Nodes (5): CONNECT_EVENT_TYPES, PLATFORM_EVENT_TYPES, stripe, SupabaseAdmin, WebhookRoute
+### Community 233 - "Seller Module"
+Cohesion: 0.28
+Nodes (9): Route /home/activity, Route /marketplace/wishlist, Route /offers, Route /seller, Route /settings/addresses, Route /social/notifications, Route /social/saved, build (+1 more)
 
-### Community 204 - "Module Group 204"
+### Community 234 - "Shared Widgets"
 Cohesion: 0.29
-Nodes (6): authRoutes, auth_routes.dart, presentation/controllers/auth_controller.dart, presentation/screens/login_screen.dart, presentation/screens/registration_screen.dart, presentation/widgets/auth_widgets.dart
+Nodes (7): AutomaticKeepAliveClientMixin, build, child, createState, KeepAliveTab, _KeepAliveTabState, wantKeepAlive
 
-### Community 205 - "Module Group 205"
+### Community 235 - "Cart & Promo"
 Cohesion: 0.36
 Nodes (8): addressListProvider, selectedAddressProvider, _DeliverToCard, _AddressManagementScreen, build, AddressSheet, build, _save
 
-### Community 206 - "Module Group 206"
+### Community 236 - "Controllers Address Controller"
 Cohesion: 0.32
 Nodes (8): SelectedAddressNotifier, _, AddressLabel, displayLine1, fromJson, labelEmoji, labelName, UserAddress
 
-### Community 207 - "Module Group 207"
+### Community 237 - "Medical Vault"
 Cohesion: 0.25
-Nodes (8): deletionRequestProvider, Route /seller/edit-shop, Route /seller/kyc, Route /seller/orders, Route /seller/products, Route /seller/setup, build, _DangerZone
+Nodes (8): HealthVaultController, _load, medicalVaultRepositoryProvider, medicationLogRepositoryProvider, AddMedicalRecordSheet, _AddMedicalRecordSheetState, _save, StreamNotifier
 
-### Community 208 - "Module Group 208"
+### Community 238 - "Nutrition Tracker"
 Cohesion: 0.25
 Nodes (8): nutritionProvider, build, _HistoryList, _LogWeightSheet, _LogWeightSheetState, _NutritionBody, _NutritionBodyState, _save
 
-### Community 209 - "Module Group 209"
-Cohesion: 0.25
-Nodes (7): build, createProduct, deleteProduct, _repo, updateProduct, ../../data/repositories/vendor_product_repository.dart, VendorProductRepository get
-
-### Community 210 - "Module Group 210"
-Cohesion: 0.29
-Nodes (6): allowedRedirectOrigins(), corsHeaders, isAllowedRedirectUrl(), PiParams, SessionParams, stripe
-
-### Community 211 - "Module Group 211"
-Cohesion: 0.25
-Nodes (7): matching_routes.dart, presentation/controllers/discovery_candidates_controller.dart, presentation/controllers/discovery_controller.dart, presentation/controllers/match_preference_controller.dart, presentation/controllers/matches_inbox_controller.dart, presentation/screens/matches_inbox_screen.dart, presentation/screens/matching_screen.dart
-
-### Community 212 - "Module Group 212"
-Cohesion: 0.25
-Nodes (7): ActivityLevel, factor, fromId, icon, id, label, shortLabel
-
-### Community 213 - "Module Group 213"
-Cohesion: 0.25
-Nodes (7): ../models/appointment.dart, AppointmentRepository, _client, create, delete, fetchForPet, toggleComplete
-
-### Community 214 - "Module Group 214"
+### Community 239 - "Supabase Repository"
 Cohesion: 0.32
-Nodes (8): _, fromJson, hasSeverity, HealthLog, HealthLogType, isVetVisit, isWeightEntry, requiresFollowUp
+Nodes (7): addLog, build, deleteLog, VitalsNotifier, ../../data/models/weight_log.dart, ../../data/repositories/vitals_repository.dart, vitalsRepositoryProvider
 
-### Community 215 - "Module Group 215"
-Cohesion: 0.32
-Nodes (7): _dateTimeFromJson, fromJson, MatchingDiscoveryOwner, MatchingDiscoveryRow, null, _numToDouble, tryParse
+### Community 240 - "Supabase Repository"
+Cohesion: 0.25
+Nodes (7): ../models/prescription.dart, _client, fetchPrescription, _mimeFor, PrescriptionRepository, signedUrl, uploadPrescription
 
-### Community 216 - "Module Group 216"
+### Community 241 - "Supabase Repository"
 Cohesion: 0.25
 Nodes (7): ../models/user_address.dart, AddressRepository, _client, deleteAddress, fetchAddresses, insertAddress, setDefault
 
-### Community 217 - "Module Group 217"
+### Community 242 - "Pet Matching & Discovery"
+Cohesion: 0.25
+Nodes (7): careBranchKey, globalBranchKey, marketplaceBranchKey, matchingBranchKey, rootNavigatorKey, socialBranchKey, NavigatorState
+
+### Community 243 - "Shared Widgets"
 Cohesion: 0.25
 Nodes (7): ValueChanged, build, onRatingChanged, rating, semanticLabel, size, StarRatingWidget
 
-### Community 218 - "Module Group 218"
-Cohesion: 0.38
-Nodes (7): authStateProvider, routerProvider, build, build, PetfolioApp, MeScreen, themeProvider
+### Community 244 - "Vet Appointments"
+Cohesion: 0.57
+Nodes (7): pastAppointmentsProvider, upcomingAppointmentsProvider, past, _AppointmentsTabList, build, _AppointmentsList, build
 
-### Community 219 - "Module Group 219"
+### Community 245 - "Product List"
+Cohesion: 0.29
+Nodes (6): build, productId, submitReview, ../../data/models/product_review.dart, ../../data/repositories/product_review_repository.dart, product_list_controller.dart
+
+### Community 246 - "Pet Matching & Discovery"
+Cohesion: 0.29
+Nodes (6): core/widgets/app_snack_bar.dart, fromMatchInbox, openDirectChat, openMatchChat, popOrGo, required String otherPetName,
+  bool
+
+### Community 247 - "Media & Content Creation"
+Cohesion: 0.29
+Nodes (5): create_content_screen.dart, build, CreatePostScreen, build, CreateStoryScreen
+
+### Community 248 - "Male Female"
+Cohesion: 0.29
+Nodes (6): male,
+  female,, dbValue, fromDb, label, PetGender, unknown
+
+### Community 249 - "Match Hub Screen"
+Cohesion: 0.29
+Nodes (5): match_hub_screen.dart, build, MatchLikedScreen, build, MatchesInboxScreen
+
+### Community 250 - "Care Streaks & Tasks"
 Cohesion: 0.33
-Nodes (7): buyerOrdersProvider, orderByIdProvider, build, BuyerOrderDetailScreen, build, BuyerOrderListScreen, build
+Nodes (6): CareStreak, fromJson, _lastCompletionFromJson, _lastCompletionToJson, s, tryParse
 
-### Community 220 - "Module Group 220"
-Cohesion: 0.29
-Nodes (7): chatConversationControllerProvider, chatTypingStateProvider, build, ChatScreen, _ChatScreenState, _send, _TypingIndicator
-
-### Community 221 - "Module Group 221"
-Cohesion: 0.29
-Nodes (6): dart:typed_data, ../models/shop.dart, _client, KycRepository, submitKyc, _uploadKycDoc
-
-### Community 222 - "Module Group 222"
+### Community 251 - "Supabase Repository"
 Cohesion: 0.29
 Nodes (6): ../models/weight_log.dart, addWeightLog, _client, deleteWeightLog, fetchWeightLogs, VitalsRepository
 
-### Community 223 - "Module Group 223"
+### Community 252 - "Utils Care Scheduled Time"
 Cohesion: 0.29
 Nodes (6): h, hour, m, minute, parseCareScheduledTimeOfDay, parts
 
-### Community 224 - "Module Group 224"
+### Community 253 - "Chat & Messaging"
 Cohesion: 0.33
-Nodes (4): activityRoutes, offersRoutes, package:flutter/widgets.dart, presentation/screens/offers_screen.dart
+Nodes (6): chatConversationControllerProvider, chatTypingStateProvider, build, _TypingIndicator, UnifiedChatScreen, _UnifiedChatScreenState
 
-### Community 225 - "Module Group 225"
-Cohesion: 0.40
-Nodes (5): @JS, dart:js_interop, _petfolioPushIsSupported, _petfolioPushRegister, registerWebPushIfAvailable
-
-### Community 226 - "Module Group 226"
+### Community 254 - "Medical Vault"
 Cohesion: 0.33
-Nodes (6): HealthVaultController, medicalVaultRepositoryProvider, AddMedicalRecordSheet, _AddMedicalRecordSheetState, _save, StreamNotifier
+Nodes (6): healthVaultControllerProvider, Route /care/medications, Route /care/symptoms, build, _MedicalRecordCard, _MedicalVaultBody
 
-### Community 227 - "Module Group 227"
+### Community 255 - "Models Pet Stats"
 Cohesion: 0.33
 Nodes (5): empty, followerCount, followingCount, PetStats, postCount
 
-### Community 228 - "Module Group 228"
-Cohesion: 0.50
-Nodes (5): _ActiveCommunityNotifier, _SwipeErrorNotifier, Notifier, _ScrollProgressNotifier, String?
+### Community 256 - "Supabase Repository"
+Cohesion: 0.33
+Nodes (5): base, normalized, petfolioAppUrl, query, _supabaseUrl
 
-### Community 229 - "Module Group 229"
+### Community 257 - "Vet Appointments"
 Cohesion: 0.40
-Nodes (5): editShopControllerProvider, build, EditShopScreen, _EditShopScreenState, _save
+Nodes (4): appointmentRoutes, ../../data/models/vet_clinic.dart, presentation/screens/clinic_details_screen.dart, presentation/screens/vet_hub_screen.dart
 
-### Community 230 - "Module Group 230"
+### Community 258 - "Routing"
 Cohesion: 0.50
-Nodes (4): dbValue, fromJson, PetSwipe, SwipeTableAction
+Nodes (5): routerProvider, build, PetfolioApp, _ThemeToggleRow, themeProvider
 
-### Community 231 - "Module Group 231"
+### Community 259 - "Io"
+Cohesion: 0.40
+Nodes (3): dart:io, integrationTestActive, marionetteEnabledInThisBuild
+
+### Community 260 - "Models Vendor Ledger"
 Cohesion: 0.60
 Nodes (5): _, earningsFormatted, fromJson, LedgerStatus, VendorLedger
 
-### Community 232 - "Module Group 232"
+### Community 261 - "Package Image Picker Image Pic"
+Cohesion: 0.40
+Nodes (4): package:image_picker/image_picker.dart, pickGalleryImage, pickImage, prepareImageForUpload
+
+### Community 262 - "Shared Widgets"
 Cohesion: 0.40
 Nodes (5): TickerProviderStateMixin, CareGamifiedHeader, _CareGamifiedHeaderState, _TrophyCard, _TrophyCardState
 
-### Community 233 - "Module Group 233"
+### Community 263 - "Account Screen"
+Cohesion: 0.50
+Nodes (3): account_screen.dart, build, MeScreen
+
+### Community 264 - "Theme Primitives"
 Cohesion: 0.50
 Nodes (3): app_colors.dart, app_theme.dart, theme_notifier.dart
 
-### Community 234 - "Module Group 234"
+### Community 265 - "Buyer Orders"
+Cohesion: 0.50
+Nodes (3): build, ../../../data/models/marketplace_order.dart, ../../data/repositories/order_repository.dart
+
+### Community 266 - "Models Pet Pedigree"
+Cohesion: 0.83
+Nodes (4): _, fromJson, PetPedigree, toUpsert
+
+### Community 267 - "Payments"
+Cohesion: 0.50
+Nodes (3): package:flutter_stripe/flutter_stripe.dart, _appliedKey, ensureStripeReady
+
+### Community 268 - "Platform Platform Location"
 Cohesion: 0.50
 Nodes (3): ../services/lat_lng.dart, ../services/location_providers.dart, ../services/location_service.dart
 
-### Community 235 - "Module Group 235"
-Cohesion: 0.50
-Nodes (3): normalized, petfolioAppUrl, query
+### Community 269 - "Firebase & FCM"
+Cohesion: 0.67
+Nodes (3): @pragma, firebaseMessagingBackgroundHandler, _onBackgroundNotificationResponse
 
-### Community 238 - "Module Group 238"
+### Community 270 - "Models Vet Service"
+Cohesion: 1.33
+Nodes (3): _, fromJson, VetService
+
+### Community 271 - "Chat & Messaging"
 Cohesion: 0.67
 Nodes (3): _ChatItem, _DateSeparatorItem, _MessageItem
 
+### Community 273 - "Shared Widgets"
+Cohesion: 0.67
+Nodes (3): AppShell, _AppShellState, WidgetsBindingObserver
+
 ## Knowledge Gaps
-- **3303 isolated node(s):** `message`, `toString`, `fromPostgrest`, `message`, `showFcmAsLocalNotification` (+3298 more)
+- **3574 isolated node(s):** `AppConfig`, `dashboardUrl`, `message`, `toString`, `fromPostgrest` (+3569 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **26 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **30 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `PetfolioThemeExtension` connect `Module Group 112` to `Module Group 128`, `Theme & Design Tokens`, `Social Feed & Media`, `Home Hub Screen`, `Module Group 131`, `Marketplace Browsing`, `Pet Discovery & Matching`, `Medical Vault & Health`, `Pet Profile Editing`, `Module Group 135`, `Vendor Shop Management`, `Care & Gamification`, `Care Task Carousel UI`, `Module Group 144`, `Product Detail Screen`, `Post Creation`, `Activity & Appointments`, `Social Profiles & Awards`, `Seller Dashboard`, `Post Detail & Comments`, `Appointments Calendar`, `Shopping Cart`, `Pet Onboarding Flow`, `Module Group 152`, `Pet Nutrition Screen`, `Module Group 159`, `Local Preferences Storage`, `Comment System`, `AI Care Routine UI`, `Module Group 40`, `Module Group 41`, `Module Group 168`, `Module Group 43`, `Module Group 48`, `Module Group 49`, `Module Group 50`, `Module Group 51`, `Module Group 52`, `Module Group 53`, `Module Group 54`, `Module Group 55`, `Module Group 56`, `Module Group 181`, `Module Group 60`, `Module Group 61`, `Module Group 64`, `Module Group 66`, `Module Group 70`, `Module Group 73`, `Module Group 77`, `Module Group 81`, `Module Group 83`, `Module Group 84`, `Module Group 86`, `Module Group 88`, `Module Group 91`, `Module Group 101`, `Module Group 103`, `Module Group 104`, `Module Group 108`, `Module Group 109`, `Module Group 111`, `Module Group 113`, `Module Group 118`, `Module Group 125`?**
-  _High betweenness centrality (0.048) - this node is a cross-community bridge._
-- **Why does `_` connect `Activity & Appointments` to `Module Group 159`, `Module Group 66`, `Module Group 101`, `Module Group 102`, `Module Group 71`, `Module Group 199`, `Module Group 123`, `Module Group 173`, `Module Group 219`, `Module Group 112`, `Module Group 178`, `Module Group 179`, `Module Group 90`, `Module Group 91`, `Module Group 94`, `Module Group 191`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
-- **Why does `_` connect `Module Group 89` to `Module Group 133`, `Module Group 101`, `Module Group 71`, `Module Group 135`, `Module Group 170`, `Module Group 46`?**
-  _High betweenness centrality (0.013) - this node is a cross-community bridge._
-- **What connects `message`, `toString`, `fromPostgrest` to the rest of the system?**
-  _3303 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `App Color Palette` be split into smaller, more focused modules?**
-  _Cohesion score 0.01694915254237288 - nodes in this community are weakly interconnected._
-- **Should `Theme & Design Tokens` be split into smaller, more focused modules?**
-  _Cohesion score 0.024691358024691357 - nodes in this community are weakly interconnected._
-- **Should `Social Feed & Media` be split into smaller, more focused modules?**
-  _Cohesion score 0.027777777777777776 - nodes in this community are weakly interconnected._
+- **Why does `PetfolioThemeExtension` connect `Theme System & Extensions` to `Theme System & Extensions`, `Social Feed & Posts`, `Marketplace UI`, `Pet Matching & Discovery`, `Care Dashboard & Awards`, `Hub Home Screen`, `Pet Matching & Discovery`, `Medical Vault`, `Product Detail`, `Social Feed & Posts`, `Social Feed & Posts`, `Media & Content Creation`, `Cart & Promo`, `Active Pet State`, `Vet Appointments`, `Theme Primitives`, `Care Dashboard & Awards`, `Onboarding Flow`, `Vet Appointments`, `Social Feed & Posts`, `Pet Matching & Discovery`, `Breeding & Verification`, `Active Pet State`, `Nutrition Tracker`, `Booking Slots`, `Marketplace UI`, `Shared Widgets`, `Animated Carousel`, `Shared Widgets`, `Shared Widgets`, `Shared Widgets`, `Pet Matching & Discovery`, `Care Dashboard & Awards`, `Controllers Shop List Controll`, `Package Flutter Map Flutter Ma`, `Shared Widgets`, `Supabase Repository`, `Media & Content Creation`, `Notifications`, `Theme Primitives`, `Care Dashboard & Awards`, `Shared Widgets`, `Active Pet State`, `Color Palette & Tokens`, `Annotation Immutable`, `Controllers Shipment Controlle`, `Shared Widgets`, `Shared Widgets`, `Controllers Auth Controller`, `Buyer Orders`, `Product Detail`, `Vet Appointments`, `Shared Widgets`, `Chat Controller`, `Controllers Communities Contro`, `Shared Widgets`, `Customer Buyer Order Detail Sc`, `Shared Widgets`, `Shared Widgets`, `Shared Widgets`, `Shared Widgets`, `Theme Primitives`, `Shared Widgets`, `Shared Widgets`, `Shared Widgets`, `Shared Widgets`, `Controllers Clinic List Provid`, `Controllers Prescription Contr`, `Shared Widgets`, `Shared Widgets`, `Shared Widgets`, `Auth Presentation Controllers `, `Shared Widgets`, `Shared Widgets`, `Pill Button Widget`, `Shared Widgets`, `Shared Widgets`, `Social Repository`, `Shared Widgets`, `Theme Primitives`, `Core Config App Config`?**
+  _High betweenness centrality (0.067) - this node is a cross-community bridge._
+- **Why does `_` connect `Models Pet Level` to `Cat Rabbit Bird Fish`, `Annotation Immutable`, `Shared Widgets`, `Theme Primitives`, `Firebase & FCM`, `External Location Get`?**
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
+- **Why does `_` connect `Vet Appointments` to `Vet Appointments`, `Payments`, `Care Dashboard & Awards`, `Active Pet State`, `Package Image Picker Image Pic`, `Booking Slots`, `Pet Matching & Discovery`, `Vet Appointments`, `Medical Vault`?**
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **What connects `AppConfig`, `dashboardUrl`, `message` to the rest of the system?**
+  _3574 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Color Palette & Tokens` be split into smaller, more focused modules?**
+  _Cohesion score 0.015267175572519083 - nodes in this community are weakly interconnected._
+- **Should `Theme System & Extensions` be split into smaller, more focused modules?**
+  _Cohesion score 0.021739130434782608 - nodes in this community are weakly interconnected._
+- **Should `Social Feed & Posts` be split into smaller, more focused modules?**
+  _Cohesion score 0.02664002664002664 - nodes in this community are weakly interconnected._

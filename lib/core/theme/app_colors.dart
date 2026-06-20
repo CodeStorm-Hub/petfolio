@@ -74,19 +74,36 @@ abstract final class AppColors {
   static const surface0  = Color(0xFFFFFFFF);
   static const surface1  = Color(0xFFFFF4E6); // cream
   static const surface2  = Color(0xFFFFFAF3);
+  static const surface3  = Color(0xFFF2F3F7); // neutral cool light
   static const surface0D = Color(0xFF2A1820);
   static const surface1D = Color(0xFF1A1014);
   static const surface2D = Color(0xFF321C25);
+  static const surface3D = Color(0xFF252020); // neutral dark
 
   // ── Semantic ────────────────────────────────────────────────────────────────
   static const success  = Color(0xFF2FCBA0); // mint
   static const successD = Color(0xFF59E0BB);
   static const warning  = Color(0xFFFFC53D); // sunny
   static const warningD = Color(0xFFFFD668);
+  static const warningSoft  = Color(0xFFFFF3CD); // light warning fill
+  static const warningSoftD = Color(0xFF3D2E00); // dark warning fill
   static const danger   = Color(0xFFFF3D3D); // poppy
   static const dangerD  = Color(0xFFFF7070);
   static const info     = Color(0xFF6EC8FF); // sky
   static const infoD    = Color(0xFF6EC8FF);
+
+  // ── Achievement badge palette ────────────────────────────────────────────────
+  static const badgeGreen  = Color(0xFF4CAF50);
+  static const badgeAmber  = Color(0xFFFF9800);
+  static const badgeGold   = Color(0xFFFFCC00);
+  static const badgeBlue   = Color(0xFF2196F3);
+  static const badgePurple = Color(0xFF9C27B0);
+  static const badgePink   = Color(0xFFE91E63);
+  static const badgeViolet = Color(0xFF7B61FF);
+
+  // ── Premium gold ────────────────────────────────────────────────────────────
+  static const premiumGold     = Color(0xFFD4AF37);
+  static const premiumGoldSoft = Color(0xFFF5D56E);
 
   // ── Glass fills ──────────────────────────────────────────────────────────────
   static const glassFillL   = Color(0x9EFFFFFF);

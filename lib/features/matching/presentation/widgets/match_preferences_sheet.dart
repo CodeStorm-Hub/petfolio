@@ -14,7 +14,7 @@ class MatchPreferencesSheet extends ConsumerWidget {
         isScrollControlled: true,
         useRootNavigator: true,
         backgroundColor: Colors.transparent,
-        barrierColor: const Color(0x6B0B1220),
+        barrierColor: const Color(0x6B000000),
         useSafeArea: true,
         builder: (_) => const MatchPreferencesSheet(),
       );
@@ -48,11 +48,11 @@ class MatchPreferencesSheet extends ConsumerWidget {
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(PetfolioThemeExtension.radius2xl),
             ),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: AppColors.shadowE4L,
                 blurRadius: 60,
-                offset: const Offset(0, -20),
+                offset: Offset(0, -20),
               ),
             ],
           ),
@@ -86,6 +86,7 @@ class MatchPreferencesSheet extends ConsumerWidget {
                   ),
                   IconButton(
                     key: const ValueKey<String>('match_prefs_close'),
+                    tooltip: 'Close',
                     onPressed: () => Navigator.of(context).pop(),
                     icon: Icon(Icons.close_rounded, color: pt.ink500),
                   ),
@@ -100,7 +101,7 @@ class MatchPreferencesSheet extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              _SectionLabel(title: 'Species'),
+              const _SectionLabel(title: 'Species'),
               const SizedBox(height: 10),
               Wrap(
                 spacing: 8,

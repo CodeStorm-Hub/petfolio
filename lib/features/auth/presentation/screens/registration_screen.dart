@@ -147,6 +147,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           autocorrect: false,
+                          autofillHints: const [AutofillHints.newUsername, AutofillHints.email],
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
                               return 'Email is required';
@@ -165,6 +166,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                           label: 'Password',
                           obscureText: _obscurePassword,
                           textInputAction: TextInputAction.next,
+                          autofillHints: const [AutofillHints.newPassword],
                           suffixIcon: VisibilityToggle(
                             obscure: _obscurePassword,
                             onTap: () => setState(
@@ -189,6 +191,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                           label: 'Confirm password',
                           obscureText: _obscureConfirm,
                           textInputAction: TextInputAction.done,
+                          autofillHints: const [AutofillHints.newPassword],
                           onSubmitted: (_) => _submit(),
                           suffixIcon: VisibilityToggle(
                             obscure: _obscureConfirm,

@@ -23,96 +23,129 @@ import '../../features/social/presentation/screens/story_viewer_screen.dart';
 import '../widgets/app_shell.dart';
 import 'navigator_keys.dart';
 
-ShellRoute appShellRoute() => ShellRoute(
-      navigatorKey: shellNavigatorKey,
-      builder: (context, state, child) => AppShell(child: child),
-      routes: [
-        GoRoute(
-          path: '/home',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: HubHomeScreen()),
+StatefulShellRoute appShellRoute() => StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) =>
+          AppShell(navigationShell: navigationShell),
+      branches: [
+        StatefulShellBranch(
+          navigatorKey: globalBranchKey,
+          routes: [
+            GoRoute(
+              path: '/home',
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: HubHomeScreen()),
+              routes: [
+                GoRoute(
+                  path: 'notifications',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: NotificationsScreen(showHeader: false)),
+                ),
+                GoRoute(
+                  path: 'activity',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: ActivityScreen(showHeader: false)),
+                ),
+                GoRoute(
+                  path: 'me',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: MeScreen()),
+                ),
+              ],
+            ),
+          ],
         ),
-        GoRoute(
-          path: '/notifications',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: NotificationsScreen(showHeader: false)),
+        StatefulShellBranch(
+          navigatorKey: careBranchKey,
+          routes: [
+            GoRoute(
+              path: '/care',
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: CareScreen()),
+              routes: [
+                GoRoute(
+                  path: 'nutrition',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: NutritionScreen()),
+                ),
+                GoRoute(
+                  path: 'health',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: MedicalVaultScreen()),
+                ),
+                GoRoute(
+                  path: 'walk',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: WalkTrackingScreen()),
+                ),
+                GoRoute(
+                  path: 'appointments',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: AppointmentsScreen()),
+                ),
+              ],
+            ),
+          ],
         ),
-        GoRoute(
-          path: '/activity',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: ActivityScreen(showHeader: false)),
+        StatefulShellBranch(
+          navigatorKey: socialBranchKey,
+          routes: [
+            GoRoute(
+              path: '/social',
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: SocialScreen()),
+              routes: [
+                GoRoute(
+                  path: 'stories',
+                  pageBuilder: (context, state) {
+                    final petId = state.uri.queryParameters['petId'] ?? '';
+                    return NoTransitionPage(child: StoryViewerScreen(initialPetId: petId));
+                  },
+                ),
+                GoRoute(
+                  path: 'communities',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: CommunitiesScreen()),
+                ),
+                GoRoute(
+                  path: 'profile/me',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: _MePetProfileTab()),
+                ),
+              ],
+            ),
+          ],
         ),
-        GoRoute(
-          path: '/me',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: MeScreen()),
+        StatefulShellBranch(
+          navigatorKey: matchingBranchKey,
+          routes: [
+            GoRoute(
+              path: '/matching',
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: MatchingScreen()),
+              routes: [
+                GoRoute(
+                  path: 'inbox',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: MatchesInboxScreen()),
+                ),
+                GoRoute(
+                  path: 'liked',
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: MatchLikedScreen()),
+                ),
+              ],
+            ),
+          ],
         ),
-        GoRoute(
-          path: '/care',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: CareScreen()),
-        ),
-        GoRoute(
-          path: '/care/nutrition',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: NutritionScreen()),
-        ),
-        GoRoute(
-          path: '/care/health',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: MedicalVaultScreen()),
-        ),
-        GoRoute(
-          path: '/care/walk',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: WalkTrackingScreen()),
-        ),
-        GoRoute(
-          path: '/care/appointments',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: AppointmentsScreen()),
-        ),
-        GoRoute(
-          path: '/social',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: SocialScreen()),
-        ),
-        GoRoute(
-          path: '/social/stories',
-          pageBuilder: (context, state) {
-            final petId = state.uri.queryParameters['petId'] ?? '';
-            return NoTransitionPage(child: StoryViewerScreen(initialPetId: petId));
-          },
-        ),
-        GoRoute(
-          path: '/social/communities',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: CommunitiesScreen()),
-        ),
-        GoRoute(
-          path: '/social/profile/me',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: _MePetProfileTab()),
-        ),
-        GoRoute(
-          path: '/matching',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: MatchingScreen()),
-        ),
-        GoRoute(
-          path: '/matching/inbox',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: MatchesInboxScreen()),
-        ),
-        GoRoute(
-          path: '/matching/liked',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: MatchLikedScreen()),
-        ),
-        GoRoute(
-          path: '/marketplace',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage(child: MarketplaceScreen()),
+        StatefulShellBranch(
+          navigatorKey: marketplaceBranchKey,
+          routes: [
+            GoRoute(
+              path: '/marketplace',
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: MarketplaceScreen()),
+            ),
+          ],
         ),
       ],
     );
@@ -128,6 +161,6 @@ class _MePetProfileTab extends ConsumerWidget {
         body: Center(child: CircularProgressIndicator.adaptive()),
       );
     }
-    return SocialProfileScreen(petId: pet.id);
+    return SocialProfileScreen(petId: pet.id, showAppBar: false);
   }
 }

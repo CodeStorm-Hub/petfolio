@@ -16,7 +16,7 @@ class SettingsScreen extends ConsumerWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final User? user = Supabase.instance.client.auth.currentUser;
-    final bg = isDark ? pt.surface1 : const Color(0xFFF2F3F7);
+    final bg = isDark ? pt.surface1 : AppColors.surface3;
 
     return Scaffold(
       backgroundColor: bg,
@@ -30,6 +30,7 @@ class SettingsScreen extends ConsumerWidget {
                 child: Row(
                   children: [
                     IconButton(
+                      tooltip: 'Back',
                       icon: const Icon(Icons.arrow_back_rounded),
                       color: pt.ink950,
                       onPressed: () => context.pop(),
@@ -38,7 +39,7 @@ class SettingsScreen extends ConsumerWidget {
                     Text(
                       'Account & Settings',
                       style: GoogleFonts.sora(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 20,
                         color: pt.ink950,
                       ),
@@ -69,7 +70,7 @@ class SettingsScreen extends ConsumerWidget {
                   _SettingsTile(
                     icon: Icons.shopping_bag_outlined,
                     label: 'My Orders',
-                    onTap: () => context.go('/activity'),
+                    onTap: () => context.go('/home/activity'),
                   ),
                 ],
               ),
@@ -201,7 +202,7 @@ class _ProfileCard extends StatelessWidget {
           Container(
             width: 56,
             height: 56,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [AppColors.poppy, AppColors.tangerine],
                 begin: Alignment.topLeft,
@@ -214,7 +215,7 @@ class _ProfileCard extends StatelessWidget {
               initials,
               style: const TextStyle(
                 fontSize: 22,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
                 color: Colors.white,
               ),
             ),
@@ -230,7 +231,7 @@ class _ProfileCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: pt.ink950,
                   ),
                 ),
@@ -243,7 +244,7 @@ class _ProfileCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFFD4AF37), Color(0xFFF5D56E)],
+                          colors: [AppColors.premiumGold, AppColors.premiumGoldSoft],
                         ),
                         borderRadius: BorderRadius.circular(999),
                       ),
@@ -251,7 +252,7 @@ class _ProfileCard extends StatelessWidget {
                         '⭐ Gold Member',
                         style: TextStyle(
                           fontSize: 11,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
                         ),
                       ),
@@ -294,7 +295,7 @@ class _SettingsGroup extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 11,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 color: pt.ink500,
                 letterSpacing: 0.8,
               ),
@@ -381,7 +382,7 @@ class _NewBadge extends StatelessWidget {
             'NEW',
             style: TextStyle(
               fontSize: 10,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               color: Colors.white,
               letterSpacing: 0.5,
             ),

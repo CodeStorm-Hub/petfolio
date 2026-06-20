@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/widgets/tail_wag_loader.dart';
 import '../../../care/data/models/pet_awards_summary.dart';
 import '../../../care/presentation/controllers/pet_awards_provider.dart';
 import '../../../matching/presentation/matching_navigation.dart';
@@ -19,8 +20,9 @@ import '../controllers/social_profile_controller.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 
 class SocialProfileScreen extends ConsumerWidget {
-  const SocialProfileScreen({super.key, required this.petId});
+  const SocialProfileScreen({super.key, required this.petId, this.showAppBar = true});
   final String petId;
+  final bool showAppBar;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,16 +37,26 @@ class SocialProfileScreen extends ConsumerWidget {
 
     final isOwnProfile = activePet?.id == petId;
 
+    final topInset = showAppBar ? 0.0 : MediaQuery.paddingOf(context).top + 76.0;
+
     return petAsync.when(
       loading: () => Scaffold(
         backgroundColor: pt.surface1,
-        appBar: AppBar(backgroundColor: cs.surface, leading: BackButton(color: cs.onSurface)),
-        body: const Center(child: CircularProgressIndicator.adaptive()),
+        appBar: showAppBar
+            ? AppBar(backgroundColor: cs.surface, leading: BackButton(color: cs.onSurface))
+            : null,
+        body: showAppBar
+            ? const Center(child: TailWagLoader())
+            : Column(children: [SizedBox(height: topInset), const SizedBox(height: 16), const Expanded(child: Center(child: TailWagLoader()))]),
       ),
-      error: (e, st) => Scaffold(
+      error: (e, _) => Scaffold(
         backgroundColor: pt.surface1,
-        appBar: AppBar(backgroundColor: cs.surface, leading: BackButton(color: cs.onSurface)),
-        body: Center(child: Text('Could not load profile', style: TextStyle(color: pt.ink500))),
+        appBar: showAppBar
+            ? AppBar(backgroundColor: cs.surface, leading: BackButton(color: cs.onSurface))
+            : null,
+        body: showAppBar
+            ? Center(child: Text('Could not load profile', style: TextStyle(color: pt.ink500)))
+            : Column(children: [SizedBox(height: topInset), const SizedBox(height: 16), Expanded(child: Center(child: Text('Could not load profile', style: TextStyle(color: pt.ink500))))]),
       ),
       data: (pet) {
         final resolvedPet = pet ?? (isOwnProfile ? activePet : null);
@@ -59,22 +71,29 @@ class SocialProfileScreen extends ConsumerWidget {
 
         return Scaffold(
           backgroundColor: pt.surface1,
-          appBar: AppBar(
-            backgroundColor: cs.surface,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_rounded, color: cs.onSurface),
-              onPressed: () => context.pop(),
-            ),
-            title: Text(
-              petName,
-              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: cs.onSurface),
-            ),
-            centerTitle: true,
-          ),
+          appBar: showAppBar
+              ? AppBar(
+                  backgroundColor: cs.surface,
+                  elevation: 0,
+                  scrolledUnderElevation: 0,
+                  leading: IconButton(
+                    tooltip: 'Back',
+                    icon: Icon(Icons.arrow_back_rounded, color: cs.onSurface),
+                    onPressed: () => context.pop(),
+                  ),
+                  title: Text(
+                    petName,
+                    style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: cs.onSurface),
+                  ),
+                  centerTitle: true,
+                )
+              : null,
           body: CustomScrollView(
             slivers: [
+              if (!showAppBar) ...[
+                SliverToBoxAdapter(child: SizedBox(height: topInset)),
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+              ],
               // ── Profile header card ───────────────────────────────────
               SliverToBoxAdapter(
                 child: _ProfileHeader(
@@ -152,7 +171,7 @@ class SocialProfileScreen extends ConsumerWidget {
               // ── Posts grid ────────────────────────────────────────────
               postsAsync.when(
                 loading: () => const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator.adaptive()),
+                  child: Center(child: TailWagLoader()),
                 ),
                 error: (e, st) => SliverFillRemaining(
                   child: Center(child: Text('Failed to load posts', style: TextStyle(color: pt.ink500))),
@@ -233,9 +252,13 @@ class SocialProfileScreen extends ConsumerWidget {
                             );
                           }
 
-                          return GestureDetector(
-                            onTap: () => context.push('/social/post/${post.id}', extra: post),
-                            child: child,
+                          return Semantics(
+                            label: post.caption.isNotEmpty ? post.caption : 'View post',
+                            button: true,
+                            child: GestureDetector(
+                              onTap: () => context.push('/social/post/${post.id}', extra: post),
+                              child: child,
+                            ),
                           );
                         },
                         childCount: posts.length,
@@ -378,7 +401,7 @@ class _ProfileAvatar extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: hasImage
             ? const LinearGradient(
-                colors: [Color(0xFFFF6B35), Color(0xFFFF9800), Color(0xFF7B61FF)],
+                colors: [AppColors.tangerine, AppColors.badgeAmber, AppColors.badgeViolet],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               )
@@ -423,7 +446,7 @@ class _ProfileStatColumn extends StatelessWidget {
       children: [
         Text(
           value,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: cs.onSurface, height: 1.1),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: cs.onSurface, height: 1.1),
         ),
         const SizedBox(height: 3),
         Text(
@@ -433,7 +456,11 @@ class _ProfileStatColumn extends StatelessWidget {
       ],
     );
     if (onTap == null) return column;
-    return GestureDetector(onTap: onTap, child: column);
+    return Semantics(
+      label: '$value $label',
+      button: true,
+      child: GestureDetector(onTap: onTap, child: column),
+    );
   }
 }
 
@@ -485,8 +512,8 @@ class _AwardsSection extends StatelessWidget {
                 Expanded(
                   child: _CareStatCard(
                     icon: Icons.local_fire_department_rounded,
-                    iconColor: const Color(0xFFFF6B35),
-                    bgColor: const Color(0xFFFF6B35),
+                    iconColor: AppColors.tangerine,
+                    bgColor: AppColors.tangerine,
                     value: '${awards.currentStreak}',
                     label: 'Day streak',
                   ),
@@ -495,8 +522,8 @@ class _AwardsSection extends StatelessWidget {
                 Expanded(
                   child: _CareStatCard(
                     icon: Icons.star_rounded,
-                    iconColor: const Color(0xFFFFB300),
-                    bgColor: const Color(0xFFFFB300),
+                    iconColor: AppColors.badgeAmber,
+                    bgColor: AppColors.badgeAmber,
                     value: '${awards.totalXp}',
                     label: 'XP earned',
                   ),
@@ -505,8 +532,8 @@ class _AwardsSection extends StatelessWidget {
                 Expanded(
                   child: _CareStatCard(
                     icon: Icons.checklist_rounded,
-                    iconColor: const Color(0xFF7B61FF),
-                    bgColor: const Color(0xFF7B61FF),
+                    iconColor: AppColors.badgeViolet,
+                    bgColor: AppColors.badgeViolet,
                     value: '${awards.logsCount}',
                     label: 'Care logs',
                   ),
@@ -579,7 +606,7 @@ class _CareStatCard extends StatelessWidget {
             value,
             style: TextStyle(
               fontSize: 22,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: cs.onSurface,
               height: 1,
             ),
@@ -605,12 +632,12 @@ class _BadgeHighlight extends StatelessWidget {
   final String badgeType;
 
   static const _catalog = <String, (String, IconData, Color)>{
-    'first_log':      ('First Log',      Icons.flag_rounded,               Color(0xFF4CAF50)),
-    '3_day_streak':   ('3-Day',          Icons.local_fire_department_rounded, Color(0xFFFF9800)),
-    '7_day_hero':     ('7-Day Hero',     Icons.bolt_rounded,               Color(0xFFFFCC00)),
-    'routine_master': ('Routine',        Icons.checklist_rounded,          Color(0xFF2196F3)),
-    '30_day_legend':  ('Legend',         Icons.workspace_premium_rounded,  Color(0xFF9C27B0)),
-    'care_champion':  ('Champion',       Icons.military_tech_rounded,      Color(0xFFE91E63)),
+    'first_log':      ('First Log',      Icons.flag_rounded,               AppColors.badgeGreen),
+    '3_day_streak':   ('3-Day',          Icons.local_fire_department_rounded, AppColors.badgeAmber),
+    '7_day_hero':     ('7-Day Hero',     Icons.bolt_rounded,               AppColors.badgeGold),
+    'routine_master': ('Routine',        Icons.checklist_rounded,          AppColors.badgeBlue),
+    '30_day_legend':  ('Legend',         Icons.workspace_premium_rounded,  AppColors.badgePurple),
+    'care_champion':  ('Champion',       Icons.military_tech_rounded,      AppColors.badgePink),
   };
 
   @override
@@ -618,11 +645,14 @@ class _BadgeHighlight extends StatelessWidget {
     final info = _catalog[badgeType];
     final label = info?.$1 ?? badgeType;
     final icon = info?.$2 ?? Icons.emoji_events_rounded;
-    final color = info?.$3 ?? const Color(0xFF7B61FF);
+    final color = info?.$3 ?? AppColors.badgeViolet;
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Column(
+    return Semantics(
+      label: '$label badge',
+      excludeSemantics: true,
+      child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
@@ -645,7 +675,7 @@ class _BadgeHighlight extends StatelessWidget {
           child: Text(
             label,
             textAlign: TextAlign.center,
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 10,
@@ -655,6 +685,7 @@ class _BadgeHighlight extends StatelessWidget {
           ),
         ),
       ],
+      ),
     );
   }
 }

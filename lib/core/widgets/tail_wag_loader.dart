@@ -37,21 +37,25 @@ class _TailWagLoaderState extends State<TailWagLoader> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Semantics(
+      label: widget.label ?? 'Loading',
+      liveRegion: true,
+      child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        AnimatedBuilder(
+        ExcludeSemantics(
+          child: AnimatedBuilder(
           animation: _ctrl,
           builder: (context, _) {
             return CustomPaint(
               size: Size(widget.size, widget.size),
               painter: _DogPainter(
-                // M3E spring curve — easeOutBack gives a wag overshoot
                 tailAngle: Curves.easeInOutBack.transform(_ctrl.value),
                 color: widget.color,
               ),
             );
           },
+        ),
         ),
         if (widget.label != null) ...[
           const SizedBox(height: 10),
@@ -66,6 +70,7 @@ class _TailWagLoaderState extends State<TailWagLoader> with SingleTickerProvider
           ),
         ],
       ],
+      ),
     );
   }
 }

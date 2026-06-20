@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_card.dart';
+import '../../../../core/widgets/tail_wag_loader.dart';
 import '../controllers/admin_dashboard_controller.dart';
 import 'admin_shared_widgets.dart';
 
@@ -18,7 +19,7 @@ class AdminDashboardTab extends ConsumerWidget {
       title: 'Dashboard',
       onRefresh: () => ref.read(adminDashboardProvider.notifier).refresh(),
       child: dashAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: TailWagLoader()),
         error: (e, _) => AdminErrorState(message: e.toString()),
         data: (data) => _DashboardBody(data: data),
       ),
@@ -65,7 +66,7 @@ class _MetricsBanner extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius2xl),
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           // ink950 → blue600 — both from AppColors

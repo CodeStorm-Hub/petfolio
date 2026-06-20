@@ -120,6 +120,7 @@ class _PostCommentsBottomSheetState extends ConsumerState<PostCommentsBottomShee
                     style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                   ),
                   IconButton(
+                    tooltip: 'Close',
                     icon: const Icon(Icons.close_rounded),
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -219,9 +220,13 @@ class _PostCommentsBottomSheetState extends ConsumerState<PostCommentsBottomShee
                             ),
                           ),
                         ),
-                        GestureDetector(
+                        Semantics(
+                          label: 'Dismiss reply',
+                          button: true,
+                          child: GestureDetector(
                           onTap: () => setState(() => _replyingToComment = null),
                           child: Icon(Icons.close_rounded, size: 16, color: pt.ink300),
+                          ),
                         ),
                       ],
                     ),
@@ -370,7 +375,10 @@ class _CommentTile extends ConsumerWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final tt = Theme.of(context).textTheme;
 
-    return GestureDetector(
+    return Semantics(
+      label: 'Comment by ${comment.petName}: ${comment.content}',
+      button: true,
+      child: GestureDetector(
       behavior: HitTestBehavior.opaque,
       onLongPress: () => _showContextMenu(context, ref),
       child: Padding(
@@ -383,7 +391,10 @@ class _CommentTile extends ConsumerWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GestureDetector(
+            Semantics(
+              label: 'View ${comment.petName}\'s profile',
+              button: true,
+              child: GestureDetector(
               onTap: () => context.push('/social/profile/${comment.petId}'),
               child: CircleAvatar(
                 radius: isReply ? 12 : 16,
@@ -403,6 +414,7 @@ class _CommentTile extends ConsumerWidget {
                     : null,
               ),
             ),
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
@@ -412,7 +424,10 @@ class _CommentTile extends ConsumerWidget {
                     children: [
                       Flexible(
                         fit: FlexFit.loose,
-                        child: GestureDetector(
+                        child: Semantics(
+                          label: comment.petName,
+                          button: true,
+                          child: GestureDetector(
                           onTap: () => context.push('/social/profile/${comment.petId}'),
                           child: Text(
                             comment.petName,
@@ -423,6 +438,7 @@ class _CommentTile extends ConsumerWidget {
                               color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
+                        ),
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -460,7 +476,10 @@ class _CommentTile extends ConsumerWidget {
                         ),
                         const SizedBox(width: 12),
                       ],
-                      GestureDetector(
+                      Semantics(
+                        label: 'Reply',
+                        button: true,
+                        child: GestureDetector(
                         onTap: () => onReplyTap?.call(comment),
                         child: Text(
                           'Reply',
@@ -470,12 +489,14 @@ class _CommentTile extends ConsumerWidget {
                           ),
                         ),
                       ),
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
             IconButton(
+              tooltip: comment.isLiked ? 'Unlike comment' : 'Like comment',
               icon: Icon(
                 comment.isLiked ? Icons.pets_rounded : Icons.pets_outlined,
                 size: 16,
@@ -493,6 +514,7 @@ class _CommentTile extends ConsumerWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -653,7 +675,10 @@ class _CommentInputBarState extends State<_CommentInputBar> {
                       ),
                     ),
                   )
-                : GestureDetector(
+                : Semantics(
+                    label: 'Send',
+                    button: true,
+                    child: GestureDetector(
                     key: const ValueKey('send'),
                     onTap: widget.onSend,
                     child: AnimatedContainer(
@@ -683,6 +708,7 @@ class _CommentInputBarState extends State<_CommentInputBar> {
                         size: 20,
                       ),
                     ),
+                  ),
                   ),
           ),
         ],

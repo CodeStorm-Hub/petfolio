@@ -14,6 +14,7 @@ import '../../data/models/comment.dart';
 import '../../data/models/feed_post.dart';
 import '../../data/repositories/social_repository.dart';
 import '../controllers/comment_controller.dart';
+import '../controllers/saved_posts_controller.dart';
 import '../controllers/social_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -133,6 +134,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
           elevation: 0,
           scrolledUnderElevation: 0,
           leading: IconButton(
+            tooltip: 'Back',
             icon: Icon(Icons.arrow_back_rounded,
                 color: Theme.of(context).colorScheme.onSurface),
             onPressed: () => context.pop(),
@@ -151,6 +153,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           leading: IconButton(
+            tooltip: 'Back',
             icon: Icon(Icons.arrow_back_rounded,
                 color: Theme.of(context).colorScheme.onSurface),
             onPressed: () => context.pop(),
@@ -169,11 +172,15 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
+          tooltip: 'Back',
           icon: Icon(Icons.arrow_back_rounded,
               color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
-        title: GestureDetector(
+        title: Semantics(
+          label: 'View ${post.petName}\'s profile',
+          button: true,
+          child: GestureDetector(
           onTap: () => context.push('/social/profile/${post.petId}'),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -203,9 +210,11 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
             ],
           ),
         ),
+        ),
         centerTitle: true,
         actions: [
           IconButton(
+            tooltip: 'More options',
             icon: Icon(Icons.more_horiz_rounded, color: pt.ink500),
             onPressed: () => _showPostOptions(context, post),
           ),
@@ -344,9 +353,13 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                           ),
                         ),
                       ),
-                      GestureDetector(
+                      Semantics(
+                        label: 'Dismiss reply',
+                        button: true,
+                        child: GestureDetector(
                         onTap: () => setState(() => _replyingToComment = null),
                         child: Icon(Icons.close_rounded, size: 16, color: pt.ink300),
+                        ),
                       ),
                     ],
                   ),
@@ -480,18 +493,95 @@ class _Caption extends StatelessWidget {
   final FeedPost post;
   final PetfolioThemeExtension pt;
 
+  static final _hashtagPattern = RegExp(r'#([a-zA-Z0-9_]+)');
+
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
+    final baseStyle = tt.bodySmall?.copyWith(fontSize: 14, height: 1.5);
+    final caption = post.caption;
+    final matches = _hashtagPattern.allMatches(caption).toList();
+
+    if (matches.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
+        child: Text(caption, style: baseStyle),
+      );
+    }
+
+    final spans = <InlineSpan>[];
+    int cursor = 0;
+    for (final m in matches) {
+      if (m.start > cursor) {
+        spans.add(TextSpan(text: caption.substring(cursor, m.start)));
+      }
+      final tag = m.group(0)!;
+      spans.add(TextSpan(
+        text: tag,
+        style: baseStyle?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
+        recognizer: null, // tap handled via GestureDetector below
+      ));
+      cursor = m.end;
+    }
+    if (cursor < caption.length) {
+      spans.add(TextSpan(text: caption.substring(cursor)));
+    }
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
-      child: Text(
-        post.caption,
-        style: tt.bodySmall?.copyWith(
-          fontSize: 14,
-          height: 1.5,
-        ),
+      child: _TappableHashtagText(
+        spans: spans,
+        caption: caption,
+        baseStyle: baseStyle,
+        hashtagPattern: _hashtagPattern,
       ),
+    );
+  }
+}
+
+class _TappableHashtagText extends StatelessWidget {
+  const _TappableHashtagText({
+    required this.spans,
+    required this.caption,
+    required this.baseStyle,
+    required this.hashtagPattern,
+  });
+
+  final List<InlineSpan> spans;
+  final String caption;
+  final TextStyle? baseStyle;
+  final RegExp hashtagPattern;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: caption,
+      child: GestureDetector(
+      onTapUp: (details) {
+        final renderBox = context.findRenderObject() as RenderBox?;
+        if (renderBox == null) return;
+        final localPos = renderBox.globalToLocal(details.globalPosition);
+        final tp = TextPainter(
+          text: TextSpan(children: spans, style: baseStyle),
+          textDirection: TextDirection.ltr,
+        )..layout(maxWidth: renderBox.size.width);
+        final textPos = tp.getPositionForOffset(localPos);
+        final offset = textPos.offset.clamp(0, caption.length - 1);
+        for (final m in hashtagPattern.allMatches(caption)) {
+          if (offset >= m.start && offset < m.end) {
+            final tag = m.group(1)!.toLowerCase();
+            context.push('/social/hashtag/$tag');
+            return;
+          }
+        }
+      },
+      child: RichText(
+        text: TextSpan(children: spans, style: baseStyle),
+      ),
+    ),
     );
   }
 }
@@ -516,6 +606,7 @@ class _StatsBar extends ConsumerWidget {
         children: [
           // Like button
           IconButton(
+            tooltip: post.isLiked ? 'Unlike' : 'Like',
             icon: Icon(
               post.isLiked ? Icons.pets_rounded : Icons.pets_outlined,
               color: post.isLiked ? AppColors.coral500 : pt.ink500,
@@ -528,25 +619,62 @@ class _StatsBar extends ConsumerWidget {
                   .toggleLike(postId);
             },
           ),
-          Text(
-            '${post.likes}',
-            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+          Semantics(
+            label: '${post.likes} ${post.likes == 1 ? 'like' : 'likes'}',
+            child: Text(
+              '${post.likes}',
+              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+            ),
           ),
           const SizedBox(width: 16),
-          Icon(Icons.chat_bubble_outline_rounded, size: 22, color: pt.ink500),
+          ExcludeSemantics(
+            child: Icon(Icons.chat_bubble_outline_rounded, size: 22, color: pt.ink500),
+          ),
           const SizedBox(width: 6),
-          Text(
-            '${post.comments}',
-            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+          Semantics(
+            label: '${post.comments} ${post.comments == 1 ? 'comment' : 'comments'}',
+            child: Text(
+              '${post.comments}',
+              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+            ),
           ),
           const Spacer(),
           Text(
             post.timeAgo,
             style: tt.labelSmall?.copyWith(color: pt.ink500),
           ),
-          const SizedBox(width: 8),
+          _BookmarkButton(postId: postId, pt: pt),
         ],
       ),
+    );
+  }
+}
+
+class _BookmarkButton extends ConsumerWidget {
+  const _BookmarkButton({required this.postId, required this.pt});
+
+  final String postId;
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final savedAsync = ref.watch(isPostSavedProvider(postId));
+    final isSaved = savedAsync.asData?.value ?? false;
+    return IconButton(
+      tooltip: isSaved ? 'Remove from saved' : 'Save post',
+      icon: Icon(
+        isSaved ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
+        color: isSaved ? AppColors.poppy : pt.ink500,
+      ),
+      onPressed: () async {
+        final repo = ref.read(socialRepositoryProvider);
+        if (isSaved) {
+          await repo.unsavePost(postId);
+        } else {
+          await repo.savePost(postId);
+        }
+        ref.invalidate(isPostSavedProvider(postId));
+      },
     );
   }
 }
@@ -779,7 +907,10 @@ class _CommentTile extends ConsumerWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final tt = Theme.of(context).textTheme;
 
-    return GestureDetector(
+    return Semantics(
+      label: 'Comment by ${comment.petName}: ${comment.content}',
+      button: true,
+      child: GestureDetector(
       behavior: HitTestBehavior.opaque,
       onLongPress: () => _showContextMenu(context, ref),
       child: Padding(
@@ -793,7 +924,10 @@ class _CommentTile extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Tappable avatar → pet social profile
-            GestureDetector(
+            Semantics(
+              label: 'View ${comment.petName}\'s profile',
+              button: true,
+              child: GestureDetector(
               onTap: () => context.push('/social/profile/${comment.petId}'),
               child: CircleAvatar(
                 radius: isReply ? 12 : 16,
@@ -815,6 +949,7 @@ class _CommentTile extends ConsumerWidget {
                     : null,
               ),
             ),
+            ),
             const SizedBox(width: 10),
             // Content
             Expanded(
@@ -826,7 +961,10 @@ class _CommentTile extends ConsumerWidget {
                       // Tappable pet name → pet social profile
                       Flexible(
                         fit: FlexFit.loose,
-                        child: GestureDetector(
+                        child: Semantics(
+                          label: comment.petName,
+                          button: true,
+                          child: GestureDetector(
                           onTap: () =>
                               context.push('/social/profile/${comment.petId}'),
                           child: Text(
@@ -838,6 +976,7 @@ class _CommentTile extends ConsumerWidget {
                               color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
+                        ),
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -877,7 +1016,10 @@ class _CommentTile extends ConsumerWidget {
                         ),
                         const SizedBox(width: 12),
                       ],
-                      GestureDetector(
+                      Semantics(
+                        label: 'Reply',
+                        button: true,
+                        child: GestureDetector(
                         onTap: () => onReplyTap?.call(comment),
                         child: Text(
                           'Reply',
@@ -887,6 +1029,7 @@ class _CommentTile extends ConsumerWidget {
                           ),
                         ),
                       ),
+                      ),
                     ],
                   ),
                 ],
@@ -894,6 +1037,7 @@ class _CommentTile extends ConsumerWidget {
             ),
             // Like button (paw icon) on the right
             IconButton(
+              tooltip: comment.isLiked ? 'Unlike comment' : 'Like comment',
               icon: Icon(
                 comment.isLiked ? Icons.pets_rounded : Icons.pets_outlined,
                 size: 16,
@@ -913,6 +1057,7 @@ class _CommentTile extends ConsumerWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -1088,7 +1233,10 @@ class _CommentInputBarState extends State<_CommentInputBar> {
                       ),
                     ),
                   )
-                : GestureDetector(
+                : Semantics(
+                    label: 'Send',
+                    button: true,
+                    child: GestureDetector(
                     key: const ValueKey('send'),
                     onTap: widget.onSend,
                     child: AnimatedContainer(
@@ -1118,6 +1266,7 @@ class _CommentInputBarState extends State<_CommentInputBar> {
                         size: 20,
                       ),
                     ),
+                  ),
                   ),
           ),
         ],
@@ -1155,8 +1304,8 @@ class PostOptionsSheet extends ConsumerWidget {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.delete_outline, color: AppColors.coral500),
-                title: Text('Delete Post',
+                leading: const Icon(Icons.delete_outline, color: AppColors.coral500),
+                title: const Text('Delete Post',
                     style: TextStyle(color: AppColors.coral500)),
                 onTap: () {
                   Navigator.pop(context);

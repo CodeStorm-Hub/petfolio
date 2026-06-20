@@ -1,0 +1,44 @@
+<!-- @dsCard group="Foundations" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#FFF4E6;font-family:'Inter',sans-serif;padding:20px;display:flex;flex-direction:column;gap:8px}
+  .sub{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#957762;margin-bottom:8px}
+  .row{display:flex;align-items:center;gap:12px}
+  .bar{background:#FF8A4C;border-radius:4px;height:16px;opacity:.7}
+  .lbl{font-size:12px;font-weight:600;color:#5E3A28;min-width:80px}
+  .val{font-size:11px;color:#957762}
+
+  .radius-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+  .rbox{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .rsq{width:36px;height:36px;background:#FFE0CB;border:1.5px solid #FF8A4C}
+  .rlbl{font-size:9px;font-weight:700;color:#957762;text-align:center}
+</style>
+</head>
+<body>
+  <div class="sub">Spacing scale</div>
+  <div class="row"><span class="lbl">xs — 4px</span><div class="bar" style="width:4px"></div></div>
+  <div class="row"><span class="lbl">sm — 8px</span><div class="bar" style="width:8px"></div></div>
+  <div class="row"><span class="lbl">md — 16px</span><div class="bar" style="width:16px"></div></div>
+  <div class="row"><span class="lbl">lg — 24px</span><div class="bar" style="width:24px"></div></div>
+  <div class="row"><span class="lbl">xl — 32px</span><div class="bar" style="width:32px"></div></div>
+  <div class="row"><span class="lbl">2xl — 48px</span><div class="bar" style="width:48px"></div></div>
+  <div class="row"><span class="lbl">3xl — 64px</span><div class="bar" style="width:64px"></div></div>
+
+  <div class="sub" style="margin-top:16px">Corner radius</div>
+  <div class="radius-row">
+    <div class="rbox"><div class="rsq" style="border-radius:6px"></div><div class="rlbl">xs 6</div></div>
+    <div class="rbox"><div class="rsq" style="border-radius:8px"></div><div class="rlbl">sm 8</div></div>
+    <div class="rbox"><div class="rsq" style="border-radius:12px"></div><div class="rlbl">md 12</div></div>
+    <div class="rbox"><div class="rsq" style="border-radius:16px"></div><div class="rlbl">lg 16</div></div>
+    <div class="rbox"><div class="rsq" style="border-radius:20px"></div><div class="rlbl">xl 20</div></div>
+    <div class="rbox"><div class="rsq" style="border-radius:24px"></div><div class="rlbl">card 24</div></div>
+    <div class="rbox"><div class="rsq" style="border-radius:28px"></div><div class="rlbl">2xl 28</div></div>
+    <div class="rbox"><div class="rsq" style="border-radius:9999px"></div><div class="rlbl">pill</div></div>
+  </div>
+</body>
+</html>

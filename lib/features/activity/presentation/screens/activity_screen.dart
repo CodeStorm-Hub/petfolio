@@ -51,7 +51,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     final topPad = MediaQuery.paddingOf(context).top;
 
     return Scaffold(
-      backgroundColor: isDark ? pt.surface1 : const Color(0xFFF2F3F7),
+      backgroundColor: isDark ? pt.surface1 : AppColors.surface3,
       body: SafeArea(
         top: widget.showHeader,
         bottom: false,
@@ -65,9 +65,10 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      tooltip: 'Back',
+                      icon: Icon(
                         Icons.arrow_back_rounded,
-                        color: AppColors.ink950,
+                        color: pt.ink950,
                       ),
                       onPressed: () => context.pop(),
                     ),
@@ -75,9 +76,9 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                     Text(
                       'Activity',
                       style: GoogleFonts.sora(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 20,
-                        color: AppColors.ink950,
+                        color: pt.ink950,
                       ),
                     ),
                   ],
@@ -85,6 +86,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
               )
             else
               SizedBox(height: topPad + 76),
+            const SizedBox(height: 16),
 
             // ── Filter chips ──────────────────────────────────────────────
             Padding(
@@ -120,9 +122,33 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                   ? const Center(child: TailWagLoader())
                   : hasError
                       ? Center(
-                          child: Text(
-                            'Failed to load activity',
-                            style: TextStyle(color: pt.ink500),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.error_outline_rounded,
+                                size: 48,
+                                color: pt.ink300,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Failed to load activity',
+                                style: TextStyle(color: pt.ink500),
+                              ),
+                              const SizedBox(height: 16),
+                              FilledButton.icon(
+                                onPressed: () {
+                                  ref.invalidate(buyerOrdersProvider);
+                                  ref.invalidate(
+                                      appointmentControllerProvider);
+                                },
+                                icon: const Icon(
+                                  Icons.refresh_rounded,
+                                  size: 16,
+                                ),
+                                label: const Text('Retry'),
+                              ),
+                            ],
                           ),
                         )
                       : filtered.isEmpty
@@ -354,7 +380,7 @@ class _DateGroup extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               letterSpacing: 0.5,
               color: pt.ink500,
             ),
@@ -389,14 +415,14 @@ class _ActivityCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
-        color: isDark ? const Color(0xFF2A1820) : Colors.white,
+        color: isDark ? AppColors.surface0D : Colors.white,
         boxShadow: isDark
             ? null
             : [
-                BoxShadow(
+                const BoxShadow(
                   color: AppColors.shadowE3L,
                   blurRadius: 14,
-                  offset: const Offset(0, 3),
+                  offset: Offset(0, 3),
                   spreadRadius: -2,
                 ),
               ],
@@ -436,7 +462,7 @@ class _ActivityCard extends StatelessWidget {
                           color: item.statusColor,
                           border: Border.all(
                             color: isDark
-                                ? const Color(0xFF2A1820)
+                                ? AppColors.surface0D
                                 : Colors.white,
                             width: 1.5,
                           ),
@@ -485,7 +511,7 @@ class _ActivityCard extends StatelessWidget {
                     Text(
                       item.trailingValue,
                       style: TextStyle(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 14,
                         color: pt.ink950,
                       ),
@@ -504,7 +530,7 @@ class _ActivityCard extends StatelessWidget {
                         item.statusLabel,
                         style: TextStyle(
                           fontSize: 10,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: item.statusColor,
                         ),
                       ),
@@ -537,7 +563,7 @@ class _ActivityCard extends StatelessWidget {
                     ),
                     textStyle: const TextStyle(
                       fontSize: 13,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                     ),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     minimumSize: Size.zero,
@@ -574,7 +600,11 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: '$label${active ? ", selected" : ""}',
+      selected: active,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
@@ -583,7 +613,7 @@ class _FilterChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           color: active
               ? AppColors.poppy
-              : (isDark ? const Color(0xFF2A1820) : Colors.white),
+              : (isDark ? AppColors.surface0D : Colors.white),
           border: Border.all(
             color: active
                 ? AppColors.poppy
@@ -593,10 +623,10 @@ class _FilterChip extends StatelessWidget {
           boxShadow: active || isDark
               ? null
               : [
-                  BoxShadow(
+                  const BoxShadow(
                     color: AppColors.shadowE3L,
                     blurRadius: 8,
-                    offset: const Offset(0, 2),
+                    offset: Offset(0, 2),
                   ),
                 ],
         ),
@@ -618,6 +648,7 @@ class _FilterChip extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

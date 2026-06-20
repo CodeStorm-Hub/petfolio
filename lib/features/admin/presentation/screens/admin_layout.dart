@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../controllers/admin_auth_controller.dart';
 import '../widgets/admin_dashboard_tab.dart';
 import '../widgets/financial_ledger_tab.dart';
 import '../widgets/kyc_approvals_tab.dart';
@@ -92,8 +93,38 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final isWide = MediaQuery.sizeOf(context).width > 800;
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final isAdmin = ref.watch(isAdminProvider);
+    if (!isAdmin) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.lock_outline_rounded,
+                  size: 48, color: pt.ink300),
+              const SizedBox(height: 16),
+              Text(
+                'Admin access required',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: () => context.go('/home'),
+                child: const Text('Go Home'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
+    return LayoutBuilder(
+      builder: (context, constraints) => _buildLayout(context, constraints.maxWidth > 800),
+    );
+  }
+
+  Widget _buildLayout(BuildContext context, bool isWide) {
     if (isWide) {
       return Scaffold(
         backgroundColor: AppColors.surface1,
@@ -145,6 +176,7 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
         title: Text(_destinations[_selectedIndex].label),
         leading: Builder(
           builder: (ctx) => IconButton(
+            tooltip: 'Open menu',
             icon: const Icon(Icons.menu_rounded),
             onPressed: () => Scaffold.of(ctx).openDrawer(),
           ),

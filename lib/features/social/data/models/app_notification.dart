@@ -52,7 +52,9 @@ class AppNotification {
     return AppNotification(
       id: json['id'] as String,
       type: json['type'] as String,
-      actorHandle: '@${actor['handle'] ?? 'unknown'}',
+      actorHandle: actor['handle'] != null
+          ? '@${actor['handle']}'
+          : (actor['name'] as String? ?? 'Someone'),
       actorPetName: actor['name'] as String? ?? 'Unknown',
       isRead: json['is_read'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),

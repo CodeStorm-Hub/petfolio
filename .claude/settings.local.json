@@ -189,8 +189,20 @@
       "WebFetch(domain:www.vetsoftwarehub.com)",
       "WebFetch(domain:www.vetstoria.com)",
       "WebFetch(domain:vitusvet.com)",
-      "mcp__62036b11-6fe4-42d7-b814-e64c7714d92c__execute_sql"
-      "Bash(cd /mnt/f/workspace/petfolio && flutter analyze lib/features/appointments/ 2>&1)"
+      "mcp__62036b11-6fe4-42d7-b814-e64c7714d92c__execute_sql",
+      "Bash(cd /mnt/f/workspace/petfolio && flutter analyze lib/features/appointments/ 2>&1)",
+      "mcp__89c78ea8-43b6-40a7-8ff3-e0ad465a8f0e__list_projects",
+      "mcp__89c78ea8-43b6-40a7-8ff3-e0ad465a8f0e__list_tables",
+      "mcp__89c78ea8-43b6-40a7-8ff3-e0ad465a8f0e__get_advisors",
+      "mcp__89c78ea8-43b6-40a7-8ff3-e0ad465a8f0e__list_migrations",
+      "Bash(xargs grep -l \"@riverpod\\\\|NotifierProvider\\\\|AsyncNotifierProvider\\\\|FutureProvider\")",
+      "mcp__89c78ea8-43b6-40a7-8ff3-e0ad465a8f0e__execute_sql",
+      "Bash(xargs wc -l)",
+      "Bash(cd /c/Users/syedr/.claude/projects/J--GitHub-petfolio/776edc4f-b743-44a0-b716-09b79287891f/tool-results/)",
+      "Bash(ls -la)",
+      "Bash(find . -iname \"*list_tables*\" -o -iname \"*advisor*\")",
+      "Read(//c/Users/syedr/.claude/projects/J--GitHub-petfolio/776edc4f-b743-44a0-b716-09b79287891f/tool-results//**)",
+      "Bash(ls -la \"C:/Users/syedr/.claude/plans/\" 2>&1 | head -20)"
     ]
   }
 }

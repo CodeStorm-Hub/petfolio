@@ -4,30 +4,18 @@ import 'package:go_router/go_router.dart';
 import 'data/models/marketplace_order.dart';
 import 'data/models/product.dart';
 import 'presentation/screens/cart_screen.dart';
-import 'presentation/screens/shop_intro_screen.dart';
+import 'presentation/screens/prescription_upload_screen.dart';
+import 'presentation/screens/shipment_tracking_screen.dart';
+import 'presentation/screens/wishlist_screen.dart';
 import 'presentation/screens/customer/buyer_order_detail_screen.dart';
 import 'presentation/screens/customer/buyer_order_list_screen.dart';
 import 'presentation/screens/customer/shop_storefront_screen.dart';
 import 'presentation/screens/order_confirmation_screen.dart';
 import 'presentation/screens/marketplace_categories_screen.dart';
 import 'presentation/screens/product_detail_screen.dart';
-import 'presentation/screens/vendor/add_edit_product_screen.dart';
-import 'presentation/screens/vendor/edit_shop_screen.dart';
-import 'presentation/screens/vendor/manual_kyc_screen.dart';
-import 'presentation/screens/vendor/seller_dashboard_screen.dart';
-import 'presentation/screens/vendor/shop_setup_screen.dart';
-import 'presentation/screens/vendor/stripe_onboarding_screen.dart';
-import 'presentation/screens/vendor/vendor_order_detail_screen.dart';
-import 'presentation/screens/vendor/vendor_earnings_screen.dart';
-import 'presentation/screens/vendor/vendor_order_queue_screen.dart';
-import 'presentation/screens/vendor/vendor_product_list_screen.dart';
+import 'presentation/screens/vendor_web_redirect_screen.dart';
 
 List<RouteBase> marketplaceRoutes(GlobalKey<NavigatorState> rootKey) => [
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/marketplace/intro',
-    builder: (_, _) => const ShopIntroScreen(),
-  ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/categories',
@@ -84,64 +72,70 @@ List<RouteBase> marketplaceRoutes(GlobalKey<NavigatorState> rootKey) => [
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller',
-    builder: (context, state) => const SellerDashboardScreen(),
+    builder: (context, state) => const VendorWebRedirectScreen(),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/setup',
-    builder: (context, state) => const ShopSetupScreen(),
-  ),
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/seller/onboarding',
-    builder: (context, state) {
-      final url = state.uri.queryParameters['url'] ?? '';
-      return StripeOnboardingScreen(accountLinkUrl: url);
-    },
+    builder: (context, state) => const VendorWebRedirectScreen(),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/edit-shop',
-    builder: (context, state) => const EditShopScreen(),
+    builder: (context, state) => const VendorWebRedirectScreen(),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/kyc',
-    builder: (context, state) => const ManualKycScreen(),
+    builder: (context, state) => const VendorWebRedirectScreen(),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/products',
-    builder: (context, state) => const VendorProductListScreen(),
+    builder: (context, state) => const VendorWebRedirectScreen(),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/products/add',
-    builder: (context, state) => const AddEditProductScreen(),
+    builder: (context, state) => const VendorWebRedirectScreen(),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/products/:id/edit',
-    builder: (context, state) => AddEditProductScreen(
-      product: state.extra as Product?,
-    ),
+    builder: (context, state) => const VendorWebRedirectScreen(),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/orders',
-    builder: (context, state) => const VendorOrderQueueScreen(),
+    builder: (context, state) => const VendorWebRedirectScreen(),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/orders/:id',
-    builder: (context, state) => VendorOrderDetailScreen(
-      orderId: state.pathParameters['id']!,
-      order: state.extra as MarketplaceOrder?,
-    ),
+    builder: (context, state) => const VendorWebRedirectScreen(),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/earnings',
-    builder: (context, state) => const VendorEarningsScreen(),
+    builder: (context, state) => const VendorWebRedirectScreen(),
+  ),
+  GoRoute(
+    parentNavigatorKey: rootKey,
+    path: '/marketplace/wishlist',
+    builder: (_, _) => const WishlistScreen(),
+  ),
+  GoRoute(
+    parentNavigatorKey: rootKey,
+    path: '/marketplace/orders/:id/prescription',
+    builder: (context, state) => PrescriptionUploadScreen(
+      orderId: state.pathParameters['id']!,
+    ),
+  ),
+  GoRoute(
+    parentNavigatorKey: rootKey,
+    path: '/marketplace/orders/:id/tracking',
+    builder: (context, state) => ShipmentTrackingScreen(
+      orderId: state.pathParameters['id']!,
+    ),
   ),
 ];

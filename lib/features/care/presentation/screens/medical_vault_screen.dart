@@ -64,13 +64,12 @@ class _MedicalVaultBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final asyncRecords = ref.watch(healthVaultControllerProvider);
 
     return Scaffold(
       backgroundColor: AppColors.cream,
-      body: SafeArea(
-        bottom: false,
-        child: CustomScrollView(
+      body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
               child: Container(
@@ -81,37 +80,27 @@ class _MedicalVaultBody extends ConsumerWidget {
                     colors: [AppColors.mintSoft, AppColors.cream],
                   ),
                 ),
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
+                padding: EdgeInsets.fromLTRB(16, MediaQuery.paddingOf(context).top + 76.0, 16, 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        GestureDetector(
-                          onTap: () => context.pop(),
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: const BoxDecoration(
-                              color: AppColors.surface0,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.arrow_back_ios_new_rounded, size: 22, color: AppColors.ink700),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             '${petName.toUpperCase()} · MEDICAL VAULT',
                             style: const TextStyle(
                               fontSize: 10,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                               letterSpacing: 0.8,
                               color: AppColors.mint700,
                             ),
                           ),
                         ),
-                        GestureDetector(
+                        Semantics(
+                          label: 'Add record',
+                          button: true,
+                          child: GestureDetector(
                           onTap: () => _openAddSheet(context),
                           child: Container(
                             width: 40,
@@ -123,19 +112,20 @@ class _MedicalVaultBody extends ConsumerWidget {
                             ),
                             child: const Icon(Icons.add_rounded, size: 22, color: Colors.white),
                           ),
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     RichText(
-                      text: const TextSpan(
+                      text: TextSpan(
                         style: TextStyle(
                           fontSize: 36,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           height: 1.05,
-                          color: AppColors.ink950,
+                          color: pt.ink950,
                         ),
-                        children: [
+                        children: const [
                           TextSpan(text: 'Everything '),
                           TextSpan(text: 'healthy', style: TextStyle(color: AppColors.mint700)),
                           TextSpan(text: ',\nin one cozy spot.'),
@@ -145,10 +135,10 @@ class _MedicalVaultBody extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Text(
                       'Vaccines, meds, and vet visits — synced live from $petName\'s clinic.',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.ink700,
+                        color: pt.ink700,
                       ),
                     ),
                     const SizedBox(height: 18),
@@ -170,8 +160,8 @@ class _MedicalVaultBody extends ConsumerWidget {
                   delegate: SliverChildListDelegate([
                     ...List.generate(
                       4,
-                      (_) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
+                      (_) => const Padding(
+                        padding: EdgeInsets.only(bottom: 10),
                         child: SkeletonLoader(
                           width: double.infinity,
                           height: 88,
@@ -186,11 +176,11 @@ class _MedicalVaultBody extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(vertical: 48),
                     child: Column(
                       children: [
-                        const Icon(Icons.cloud_off_rounded, size: 44, color: AppColors.ink300),
+                        Icon(Icons.cloud_off_rounded, size: 44, color: pt.ink300),
                         const SizedBox(height: 12),
-                        const Text(
+                        Text(
                           'Could not load medical records',
-                          style: TextStyle(fontSize: 15, color: AppColors.ink500),
+                          style: TextStyle(fontSize: 15, color: pt.ink500),
                         ),
                         const SizedBox(height: 16),
                         FilledButton.icon(
@@ -232,6 +222,9 @@ class _MedicalVaultBody extends ConsumerWidget {
                         records: vet,
                         emptyLabel: 'No vet visit or clinical notes yet.',
                       ),
+                      const SizedBox(height: 20),
+                      const _HealthToolsRow(),
+                      const SizedBox(height: 20),
                       _ShareWithVetCard(petName: petName, records: records),
                     ]),
                   );
@@ -240,7 +233,6 @@ class _MedicalVaultBody extends ConsumerWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }
@@ -302,6 +294,35 @@ class _HealthSummaryPills extends StatelessWidget {
   ][m - 1];
 }
 
+// ── Health tools row ─────────────────────────────────────────────────────────
+
+class _HealthToolsRow extends StatelessWidget {
+  const _HealthToolsRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => context.push('/care/medications'),
+            icon: const Icon(Icons.medication_liquid_outlined, size: 18),
+            label: const Text('Medications'),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => context.push('/care/symptoms'),
+            icon: const Icon(Icons.health_and_safety_outlined, size: 18),
+            label: const Text('Symptom check'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 // ── Share with vet card ───────────────────────────────────────────────────────
 
 class _ShareWithVetCard extends StatelessWidget {
@@ -327,7 +348,11 @@ class _ShareWithVetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    return Semantics(
+      label: 'Share medical records',
+      button: true,
+      child: GestureDetector(
       onTap: _share,
       child: CustomPaint(
         painter: DashedRectPainter(
@@ -352,12 +377,12 @@ class _ShareWithVetCard extends StatelessWidget {
             children: [
               const Text('🩺', style: TextStyle(fontSize: 36)),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Share with your vet', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.ink950)),
-                    Text('Share a summary of all active records', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.ink500)),
+                    Text('Share with your vet', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: pt.ink950)),
+                    Text('Share a summary of all active records', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: pt.ink500)),
                   ],
                 ),
               ),
@@ -373,6 +398,7 @@ class _ShareWithVetCard extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }
@@ -384,6 +410,7 @@ class _HealthPill extends StatelessWidget {
   final String value;
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
@@ -397,8 +424,8 @@ class _HealthPill extends StatelessWidget {
         children: [
           Text(icon, style: const TextStyle(fontSize: 18, height: 1)),
           const SizedBox(height: 2),
-          Text(label.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.4, color: AppColors.ink500)),
-          Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.ink950)),
+          Text(label.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.4, color: pt.ink500)),
+          Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: pt.ink950)),
         ],
       ),
     );
@@ -422,6 +449,7 @@ class _VaultSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -441,10 +469,10 @@ class _VaultSection extends StatelessWidget {
               const SizedBox(width: 10),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.ink950,
+                  fontWeight: FontWeight.w700,
+                  color: pt.ink950,
                 ),
               ),
               const SizedBox(width: 8),
@@ -456,10 +484,10 @@ class _VaultSection extends StatelessWidget {
                 ),
                 child: Text(
                   '${records.length}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.ink700,
+                    fontWeight: FontWeight.w700,
+                    color: pt.ink700,
                   ),
                 ),
               ),
@@ -538,6 +566,7 @@ class _MedicalRecordCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final warn = record.isExpiringSoon;
     final statusBg = warn ? AppColors.sunnySoft : Color.lerp(accent, AppColors.surface0, 0.85)!;
     final statusColor = warn ? AppColors.sunny700 : Color.lerp(accent, AppColors.ink950, 0.5)!;
@@ -582,10 +611,10 @@ class _MedicalRecordCard extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           record.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.ink950,
+                            fontWeight: FontWeight.w700,
+                            color: pt.ink950,
                           ),
                         ),
                       ),
@@ -599,7 +628,7 @@ class _MedicalRecordCard extends ConsumerWidget {
                           statusLabel,
                           style: TextStyle(
                             fontSize: 11,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w700,
                             color: statusColor,
                           ),
                         ),
@@ -609,26 +638,29 @@ class _MedicalRecordCard extends ConsumerWidget {
                   const SizedBox(height: 2),
                   Text(
                     _dateLine(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.ink500,
+                      color: pt.ink500,
                     ),
                   ),
                   if (record.notes != null && record.notes!.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
                       record.notes!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'monospace',
                         fontSize: 12,
-                        color: AppColors.ink700,
+                        color: pt.ink700,
                       ),
                     ),
                   ],
                   if (record.documentUrl != null) ...[
                     const SizedBox(height: 8),
-                    GestureDetector(
+                    Semantics(
+                      label: 'View document',
+                      button: true,
+                      child: GestureDetector(
                       onTap: () => _openDocument(context, ref),
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
@@ -648,6 +680,7 @@ class _MedicalRecordCard extends ConsumerWidget {
                             ),
                           ),
                         ],
+                      ),
                       ),
                     ),
                   ],
@@ -845,7 +878,11 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
               runSpacing: 8,
               children: MedicalRecordType.values.map((t) {
                 final selected = t == _type;
-                return GestureDetector(
+                return Semantics(
+                  label: _typeLabel(t),
+                  selected: selected,
+                  button: true,
+                  child: GestureDetector(
                   onTap: () => setState(() => _type = t),
                   child: AnimatedContainer(
                     duration: PetfolioThemeExtension.durationSm,
@@ -866,6 +903,7 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                         color: selected ? Colors.white : pt.ink500,
                       ),
                     ),
+                  ),
                   ),
                 );
               }).toList(),
@@ -1032,7 +1070,10 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
               ),
             ),
             const SizedBox(height: 8),
-            GestureDetector(
+            Semantics(
+              label: _pickedFile == null ? 'Attach image, optional' : 'Attached: ${_pickedFile!.name}',
+              button: _pickedFile == null,
+              child: GestureDetector(
               onTap: _pickedFile == null ? _pickDocument : null,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -1058,14 +1099,19 @@ class _AddMedicalRecordSheetState extends ConsumerState<AddMedicalRecordSheet> {
                       ),
                     ),
                     if (_pickedFile != null)
-                      GestureDetector(
-                        onTap: () => setState(() => _pickedFile = null),
-                        child: Icon(Icons.close_rounded, size: 18, color: pt.ink300),
+                      Semantics(
+                        label: 'Clear attachment',
+                        button: true,
+                        child: GestureDetector(
+                          onTap: () => setState(() => _pickedFile = null),
+                          child: Icon(Icons.close_rounded, size: 18, color: pt.ink300),
+                        ),
                       )
                     else
                       Icon(Icons.chevron_right_rounded, size: 18, color: pt.ink300),
                   ],
                 ),
+              ),
               ),
             ),
             const SizedBox(height: 12),
@@ -1136,6 +1182,7 @@ class _DateRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final text = value == null
         ? 'Tap to set'
         : '${value!.year}-${value!.month.toString().padLeft(2, '0')}-${value!.day.toString().padLeft(2, '0')}';
@@ -1153,7 +1200,10 @@ class _DateRow extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        GestureDetector(
+        Semantics(
+          label: value == null ? '$label, tap to set' : '$label, $text',
+          button: true,
+          child: GestureDetector(
           onTap: onTap,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -1176,14 +1226,19 @@ class _DateRow extends StatelessWidget {
                   ),
                 ),
                 if (value != null)
-                  GestureDetector(
-                    onTap: onClear,
-                    child: Icon(Icons.close_rounded, size: 18, color: pt.ink300),
+                  Semantics(
+                    label: 'Clear $label',
+                    button: true,
+                    child: GestureDetector(
+                      onTap: onClear,
+                      child: Icon(Icons.close_rounded, size: 18, color: pt.ink300),
+                    ),
                   )
                 else
                   Icon(Icons.chevron_right_rounded, size: 18, color: pt.ink300),
               ],
             ),
+          ),
           ),
         ),
       ],

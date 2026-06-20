@@ -62,7 +62,7 @@ class _ClinicDetailsScreenState extends ConsumerState<ClinicDetailsScreen> {
             Text('VETS', style: TextStyle(fontSize: 10, color: pt.ink500, letterSpacing: 1)),
             Text(
               widget.clinic.name,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: pt.ink950),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: pt.ink950),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -105,9 +105,9 @@ class _ClinicDetailsScreenState extends ConsumerState<ClinicDetailsScreen> {
                 child: Column(
                   children: List.generate(
                     3,
-                    (_) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: const SkeletonLoader(width: double.infinity, height: 72, borderRadius: 16),
+                    (_) => const Padding(
+                      padding: EdgeInsets.only(bottom: 10),
+                      child: SkeletonLoader(width: double.infinity, height: 72, borderRadius: 16),
                     ),
                   ),
                 ),
@@ -189,7 +189,7 @@ class _ClinicHeroCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             colors: [AppColors.sky, AppColors.mint],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -216,7 +216,7 @@ class _ClinicHeroCard extends StatelessWidget {
                     clinic.name,
                     style: const TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       color: Colors.white,
                       height: 1.2,
                     ),
@@ -314,7 +314,7 @@ class _ClinicHeroCard extends StatelessWidget {
                       clinic.rating.toStringAsFixed(1),
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                         color: Colors.white,
                       ),
                     ),
@@ -349,7 +349,7 @@ class _SectionLabel extends StatelessWidget {
         label.toUpperCase(),
         style: TextStyle(
           fontSize: 12,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           color: pt.ink500,
           letterSpacing: 0.8,
         ),
@@ -414,7 +414,11 @@ class _ServiceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: '${service.name}, ${service.formattedPrice}',
+      selected: isSelected,
+      button: true,
+      child: GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
         onTap();
@@ -445,7 +449,7 @@ class _ServiceTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(11),
               ),
               alignment: Alignment.center,
-              child: Icon(
+              child: const Icon(
                 Icons.medical_services_rounded,
                 color: AppColors.sky,
                 size: 20,
@@ -484,7 +488,7 @@ class _ServiceTile extends StatelessWidget {
                   service.formattedPrice,
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: isSelected ? AppColors.sky : pt.ink950,
                   ),
                 ),
@@ -510,6 +514,7 @@ class _ServiceTile extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -550,7 +555,11 @@ class _DateStrip extends StatelessWidget {
               d.day == selectedDate!.day;
           final isToday = i == 0;
 
-          return GestureDetector(
+          return Semantics(
+            label: isToday ? 'Today, ${d.day} ${_months[d.month - 1]}' : '${_days[d.weekday - 1]}, ${d.day} ${_months[d.month - 1]}',
+            selected: isSelected,
+            button: true,
+            child: GestureDetector(
             onTap: () {
               HapticFeedback.selectionClick();
               onDateSelected(d);
@@ -582,7 +591,7 @@ class _DateStrip extends StatelessWidget {
                     '${d.day}',
                     style: TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       color: isSelected ? Colors.white : pt.ink950,
                     ),
                   ),
@@ -597,6 +606,7 @@ class _DateStrip extends StatelessWidget {
                 ],
               ),
             ),
+          ),
           );
         },
       ),
@@ -661,7 +671,11 @@ class _TimeSlotsGrid extends ConsumerWidget {
                   final isSelected = selectedSlot != null &&
                       slot.hour == selectedSlot!.hour &&
                       slot.minute == selectedSlot!.minute;
-                  return GestureDetector(
+                  return Semantics(
+                    label: _formatSlot(slot),
+                    selected: isSelected,
+                    button: true,
+                    child: GestureDetector(
                     onTap: () {
                       HapticFeedback.selectionClick();
                       onSlotSelected(slot);
@@ -686,6 +700,7 @@ class _TimeSlotsGrid extends ConsumerWidget {
                         ),
                       ),
                     ),
+                  ),
                   );
                 }).toList(),
               ),

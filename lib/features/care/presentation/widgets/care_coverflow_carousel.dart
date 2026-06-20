@@ -98,6 +98,7 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
   late Animation<double> _anim;
   late List<dbtask.CareTask> _ordered;
   double _page = 0;
+  double _dragDelta = 0;
   String? _xpBurstId;
 
   @override
@@ -300,6 +301,14 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
     final total = _ordered.length;
     if (total == 0) return const SizedBox.shrink();
 
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final cardWidth = (screenWidth * 0.46).clamp(160.0, 200.0);
+    // 182 is the minimum height that fits the card content without overflow
+    final cardHeight = cardWidth.clamp(182.0, 205.0);
+    final outerHeight = cardHeight + 18.0;
+    final txStep = cardWidth * 0.43;
+    final maxTx = screenWidth * 0.60;
+
     final entries = _ordered.asMap().entries.toList()
       ..sort((a, b) {
         final ad = (a.key.toDouble() - _page).abs();
@@ -309,15 +318,21 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
 
     return Column(
       children: [
-        SizedBox(
-          height: 242,
+        Semantics(
+          hint: 'Swipe left or right to browse tasks',
+          child: SizedBox(
+          height: outerHeight,
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
+            onHorizontalDragUpdate: (d) => _dragDelta += d.delta.dx,
             onHorizontalDragEnd: (d) {
               final v = d.primaryVelocity ?? 0;
-              if (v < -260) _goTo(_currentIdx + 1);
-              if (v > 260)  _goTo(_currentIdx - 1);
+              final dx = _dragDelta;
+              _dragDelta = 0;
+              if (v < -100 || dx < -40) _goTo(_currentIdx + 1);
+              if (v > 100 || dx > 40)  _goTo(_currentIdx - 1);
             },
+            onHorizontalDragCancel: () => _dragDelta = 0,
             child: Stack(
               clipBehavior: Clip.none,
               alignment: Alignment.center,
@@ -334,7 +349,7 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
                 final rotY    = sign * (abs * 0.88).clamp(0.0, 1.12);
                 final tx      = abs < 0.02
                     ? 0.0
-                    : sign * (abs * 78.0).clamp(0.0, 220.0);
+                    : sign * (abs * txStep).clamp(0.0, maxTx);
 
                 return Opacity(
                   opacity: opacity,
@@ -347,14 +362,20 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
                         transform: Matrix4.identity()
                           ..setEntry(3, 2, 0.0012)
                           ..rotateY(rotY),
-                        child: GestureDetector(
+                        child: Semantics(
+                          label: '${task.title}${task.isCompleted ? ", completed" : ""}',
+                          button: abs < 0.35,
+                          child: GestureDetector(
                           onTap: abs > 0.35 ? () => _goTo(i) : null,
                           child: _CoverFlowCard(
                             task: task,
                             isCenter: abs < 0.35,
                             xpBurstId: _xpBurstId,
+                            cardWidth: cardWidth,
+                            cardHeight: cardHeight,
                             onToggle: () => _onToggle(i),
                             onLongPress: () => _showContextMenu(context, task),
+                          ),
                           ),
                         ),
                       ),
@@ -365,9 +386,10 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
             ),
           ),
         ),
+        ),
 
         Padding(
-          padding: const EdgeInsets.only(top: 10, bottom: 4),
+          padding: const EdgeInsets.only(top: 6, bottom: 4),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -423,6 +445,8 @@ class _CoverFlowCard extends StatelessWidget {
     required this.task,
     required this.isCenter,
     required this.xpBurstId,
+    required this.cardWidth,
+    required this.cardHeight,
     required this.onToggle,
     required this.onLongPress,
   });
@@ -430,6 +454,8 @@ class _CoverFlowCard extends StatelessWidget {
   final dbtask.CareTask task;
   final bool isCenter;
   final String? xpBurstId;
+  final double cardWidth;
+  final double cardHeight;
   final VoidCallback onToggle;
   final VoidCallback onLongPress;
 
@@ -441,16 +467,25 @@ class _CoverFlowCard extends StatelessWidget {
     final due   = !done && task.isDueToday && task.scheduledTime != null;
     final color = _cfColor(task.taskType);
 
-    return Stack(
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: TextScaler.linear(
+          MediaQuery.textScalerOf(context).scale(1.0).clamp(0.85, 1.15),
+        ),
+      ),
+      child: Stack(
       clipBehavior: Clip.none,
       alignment: Alignment.topCenter,
       children: [
-        GestureDetector(
+        Semantics(
+          label: task.title,
+          button: true,
+          child: GestureDetector(
           onLongPress: onLongPress,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 260),
-            width: 198,
-            height: 220,
+            width: cardWidth,
+            height: cardHeight,
             decoration: BoxDecoration(
               color: done
                   ? Color.alphaBlend(color.withAlpha(22), cs.surface)
@@ -477,7 +512,7 @@ class _CoverFlowCard extends StatelessWidget {
                     ]
                   : pt.shadowE2,
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -486,8 +521,8 @@ class _CoverFlowCard extends StatelessWidget {
                   children: [
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 260),
-                      width: 64,
-                      height: 64,
+                      width: 52,
+                      height: 52,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: done ? color : color.withAlpha(40),
@@ -510,13 +545,13 @@ class _CoverFlowCard extends StatelessWidget {
                         child: done
                             ? const Icon(Icons.check_rounded,
                                 color: Colors.white,
-                                size: 30,
+                                size: 24,
                                 key: ValueKey('c'))
                             : Text(
                                 _cfEmoji(task.taskType),
                                 key: const ValueKey('e'),
                                 style: const TextStyle(
-                                    fontSize: 30, height: 1.0),
+                                    fontSize: 24, height: 1.0),
                               ),
                       ),
                     ),
@@ -536,12 +571,12 @@ class _CoverFlowCard extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 AnimatedDefaultTextStyle(
                   duration: const Duration(milliseconds: 200),
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: done ? pt.ink500 : cs.onSurface,
                     decoration: done
                         ? TextDecoration.lineThrough
@@ -557,7 +592,7 @@ class _CoverFlowCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
                   _cfSublabel(task),
                   style: TextStyle(
@@ -570,7 +605,7 @@ class _CoverFlowCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
@@ -594,7 +629,7 @@ class _CoverFlowCard extends StatelessWidget {
                             '+${task.gamificationPoints}',
                             style: TextStyle(
                               fontSize: 11,
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.w700,
                               color: done
                                   ? AppColors.mint700
                                   : AppColors.sunny700,
@@ -608,12 +643,14 @@ class _CoverFlowCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    _SpringCheckButton(
-                      done: done,
-                      color: color,
-                      line: pt.line,
-                      surface: cs.surface,
-                      onTap: onToggle,
+                    RepaintBoundary(
+                      child: _SpringCheckButton(
+                        done: done,
+                        color: color,
+                        line: pt.line,
+                        surface: cs.surface,
+                        onTap: onToggle,
+                      ),
                     ),
                   ],
                 ),
@@ -621,12 +658,16 @@ class _CoverFlowCard extends StatelessWidget {
             ),
           ),
         ),
+        ),
         if (xpBurstId == task.id)
           const Positioned(
             top: -22,
-            child: _XpBurst(),
+            child: RepaintBoundary(
+              child: _XpBurst(),
+            ),
           ),
       ],
+    ),
     );
   }
 }
@@ -677,7 +718,7 @@ class _XpBurstState extends State<_XpBurst>
             '+XP ⭐',
             style: TextStyle(
               fontSize: 15,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               color: AppColors.sunny700,
               shadows: [
                 Shadow(
@@ -704,12 +745,16 @@ class _NavArrow extends StatelessWidget {
     final cs     = Theme.of(context).colorScheme;
     final pt     = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final active = onTap != null;
-    return GestureDetector(
+    return Semantics(
+      label: icon == Icons.chevron_left_rounded ? 'Previous task' : 'Next task',
+      button: true,
+      enabled: active,
+      child: GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        width: 38,
-        height: 38,
+        width: 48,
+        height: 48,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: active ? cs.primary.withAlpha(22) : Colors.transparent,
@@ -724,6 +769,7 @@ class _NavArrow extends StatelessWidget {
           color: active ? cs.primary : pt.ink300,
         ),
       ),
+    ),
     );
   }
 }
@@ -777,7 +823,10 @@ class _SpringCheckButtonState extends State<_SpringCheckButton>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: widget.done ? 'Mark incomplete' : 'Mark complete',
+      button: true,
+      child: GestureDetector(
       onTapDown: (_) => _ctrl.forward(),
       onTapUp: (_) {
         _ctrl.reverse();
@@ -788,8 +837,8 @@ class _SpringCheckButtonState extends State<_SpringCheckButton>
         scale: _scale,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 230),
-          width: 38,
-          height: 38,
+          width: 32,
+          height: 32,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: widget.done ? widget.color : widget.surface,
@@ -814,6 +863,7 @@ class _SpringCheckButtonState extends State<_SpringCheckButton>
               : null,
         ),
       ),
+    ),
     );
   }
 }

@@ -206,6 +206,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
+          tooltip: 'Close',
           icon: Icon(Icons.close_rounded, color: cs.onSurface),
           onPressed: state.isSubmitting ? null : () => context.pop(),
         ),
@@ -637,7 +638,10 @@ class _AvatarEditor extends StatelessWidget {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
 
-    return GestureDetector(
+    return Semantics(
+      label: 'Change pet photo',
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Stack(
         children: [
@@ -689,6 +693,7 @@ class _AvatarEditor extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

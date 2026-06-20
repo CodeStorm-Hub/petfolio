@@ -28,6 +28,25 @@ final productListProvider =
   ProductListNotifier.new,
 );
 
+/// Holds the error (if any) from the most recent [ProductListNotifier.loadMore]
+/// call. Distinct from [productListProvider]'s own state so that the already-
+/// loaded list is not discarded when pagination hits a network error.
+/// Auto-resets whenever [productListProvider] rebuilds (e.g. on pull-to-refresh).
+final productLoadMoreErrorProvider =
+    NotifierProvider<_LoadMoreErrorNotifier, Object?>(
+  _LoadMoreErrorNotifier.new,
+);
+
+class _LoadMoreErrorNotifier extends Notifier<Object?> {
+  @override
+  Object? build() {
+    ref.watch(productListProvider);
+    return null;
+  }
+
+  void set(Object? error) => state = error;
+}
+
 /// Current search query typed in the marketplace search bar.
 final marketplaceSearchQueryProvider =
     NotifierProvider<MarketplaceSearchNotifier, String>(
@@ -122,6 +141,9 @@ class ProductListNotifier extends AsyncNotifier<List<Product>> {
         final fresh = more.where((p) => !existingIds.contains(p.id)).toList();
         if (fresh.isNotEmpty) state = AsyncData([...current, ...fresh]);
       }
+      ref.read(productLoadMoreErrorProvider.notifier).set(null);
+    } catch (e) {
+      ref.read(productLoadMoreErrorProvider.notifier).set(e);
     } finally {
       _loadingMore = false;
     }

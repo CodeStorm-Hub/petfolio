@@ -28,6 +28,7 @@ class _TrackingDataSource extends MatchingSupabaseDataSource {
     required String actorPetId,
     required String targetPetId,
     required SwipeTableAction action,
+    String mode = 'playdate',
   }) async {
     swipes.add((actor: actorPetId, target: targetPetId, action: action));
   }

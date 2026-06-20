@@ -20,9 +20,9 @@ class AppShellDestination {
 // ── Global shell (4 tabs) ─────────────────────────────────────────────────────
 const globalDestinations = <AppShellDestination>[
   AppShellDestination(icon: Icons.home_outlined,                    activeIcon: Icons.home_rounded,                    label: 'Home',     path: '/home'),
-  AppShellDestination(icon: Icons.notifications_outlined,           activeIcon: Icons.notifications_rounded,           label: 'Alerts',   path: '/notifications'),
-  AppShellDestination(icon: Icons.receipt_long_outlined,            activeIcon: Icons.receipt_long_rounded,            label: 'Activity', path: '/activity'),
-  AppShellDestination(icon: Icons.manage_accounts_outlined,         activeIcon: Icons.manage_accounts_rounded,         label: 'Me',       path: '/me'),
+  AppShellDestination(icon: Icons.notifications_outlined,           activeIcon: Icons.notifications_rounded,           label: 'Alerts',   path: '/home/notifications'),
+  AppShellDestination(icon: Icons.receipt_long_outlined,            activeIcon: Icons.receipt_long_rounded,            label: 'Activity', path: '/home/activity'),
+  AppShellDestination(icon: Icons.manage_accounts_outlined,         activeIcon: Icons.manage_accounts_rounded,         label: 'Me',       path: '/home/me'),
 ];
 
 const globalAccents = <Color>[

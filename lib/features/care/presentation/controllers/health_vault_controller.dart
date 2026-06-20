@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/services/notification_service.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
 
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
@@ -38,8 +39,26 @@ class HealthVaultController extends StreamNotifier<List<MedicalRecord>> {
               if (keyB == null) return -1;
               return keyA.compareTo(keyB);
             });
+          _syncMedicationReminders(records);
           return records;
         });
+  }
+
+  void _syncMedicationReminders(List<MedicalRecord> records) {
+    final svc = NotificationService.instance;
+    for (final r in records) {
+      if (r.reminderEnabled && r.nextDueAt != null) {
+        svc
+            .scheduleMedicationDueReminder(
+              recordId: r.id,
+              medicationName: r.name,
+              nextDue: r.nextDueAt!,
+            )
+            .ignore();
+      } else {
+        svc.cancelMedicationReminder(r.id).ignore();
+      }
+    }
   }
 
   MedicalVaultRepository get _repo => ref.read(medicalVaultRepositoryProvider);

@@ -30,6 +30,8 @@ class CareTaskCard extends ConsumerStatefulWidget {
 class _CareTaskCardState extends ConsumerState<CareTaskCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _xpCtrl;
+  late Animation<double> _yAnim;
+  late Animation<double> _opacityAnim;
   bool _showBurst = false;
 
   @override
@@ -44,6 +46,14 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
           _xpCtrl.reset();
         }
       });
+    _yAnim = Tween<double>(begin: 0.0, end: -72.0).animate(
+      CurvedAnimation(parent: _xpCtrl, curve: const Cubic(0.2, 0.8, 0.2, 1.0)),
+    );
+    _opacityAnim = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 15),
+      TweenSequenceItem(tween: ConstantTween(1.0), weight: 55),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 30),
+    ]).animate(_xpCtrl);
   }
 
   @override
@@ -244,15 +254,6 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
     final due  = !done && task.isDueToday && task.scheduledTime != null;
     final color = _color;
 
-    final yAnim = Tween<double>(begin: 0.0, end: -72.0).animate(
-      CurvedAnimation(parent: _xpCtrl, curve: const Cubic(0.2, 0.8, 0.2, 1.0)),
-    );
-    final opacityAnim = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 15),
-      TweenSequenceItem(tween: ConstantTween(1.0), weight: 55),
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 30),
-    ]).animate(_xpCtrl);
-
     final taskLabel = done
         ? '${task.title}, completed'
         : '${task.title}, $_sublabel, mark complete';
@@ -359,15 +360,15 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               color: AppColors.lilacSoft,
-                              borderRadius: BorderRadius.circular(999),
+                              borderRadius: BorderRadius.all(Radius.circular(999)),
                             ),
                             child: Text(
                               _frequencyPill(task.frequency),
                               style: const TextStyle(
                                 fontSize: 9,
-                                fontWeight: FontWeight.w900,
+                                fontWeight: FontWeight.w700,
                                 letterSpacing: 0.3,
                                 color: AppColors.lilac700,
                                 height: 1.2,
@@ -432,7 +433,7 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
                           '+${task.gamificationPoints}',
                           style: TextStyle(
                             fontSize: 11,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w700,
                             letterSpacing: 0.2,
                             color: done ? AppColors.mint700 : AppColors.sunny700,
                             height: 1,
@@ -444,7 +445,10 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
                     ),
                   ),
                   const SizedBox(width: 8),
-                  GestureDetector(
+                  Semantics(
+                    label: done ? 'Mark ${task.title} incomplete' : 'Mark ${task.title} complete',
+                    button: true,
+                    child: GestureDetector(
                     key: ValueKey('care_task_check_${task.id}'),
                     onTap: _toggle,
                     behavior: HitTestBehavior.opaque,
@@ -483,6 +487,7 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
                       ),
                     ),
                   ),
+                  ),
                 ],
               ),
             ],
@@ -502,14 +507,14 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
             child: AnimatedBuilder(
               animation: _xpCtrl,
               builder: (_, child) => Transform.translate(
-                offset: Offset(0, yAnim.value),
+                offset: Offset(0, _yAnim.value),
                 child: Opacity(
-                  opacity: opacityAnim.value.clamp(0.0, 1.0),
+                  opacity: _opacityAnim.value.clamp(0.0, 1.0),
                   child: Text(
                     '+${task.gamificationPoints} XP ⭐',
                     style: const TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       color: AppColors.sunny700,
                       shadows: [
                         Shadow(
@@ -606,7 +611,7 @@ class CareTaskContextMenu extends StatelessWidget {
           Text(taskTitle,
               style: TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   color: cs.onSurface)),
           const SizedBox(height: 12),
           if (onAddPlan != null)
@@ -677,22 +682,22 @@ class CareTaskCardSkeleton extends StatelessWidget {
             BoxShadow(color: AppColors.shadowE1L, blurRadius: 2, offset: Offset(0, 1)),
           ],
         ),
-        child: Row(
+        child: const Row(
           children: [
-            const SkeletonLoader(width: 40, height: 40, borderRadius: 12),
-            const SizedBox(width: 12),
+            SkeletonLoader(width: 40, height: 40, borderRadius: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   SkeletonLoader(width: 140, height: 14),
                   SizedBox(height: 6),
                   SkeletonLoader(width: 100, height: 11),
                 ],
               ),
             ),
-            const SkeletonLoader(width: 36, height: 36, borderRadius: 999),
+            SkeletonLoader(width: 36, height: 36, borderRadius: 999),
           ],
         ),
       ),

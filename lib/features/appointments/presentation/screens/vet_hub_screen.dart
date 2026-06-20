@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
@@ -31,50 +33,33 @@ class _VetHubScreenState extends State<VetHubScreen> {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
+    final topPadding = MediaQuery.paddingOf(context).top;
+    final topInset = topPadding + 76.0;
+
     return Scaffold(
       backgroundColor: pt.surface1,
-      appBar: AppBar(
-        backgroundColor: pt.surface1,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        leading: BackButton(color: pt.ink950),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'PETFOLIO · VET',
-              style: TextStyle(fontSize: 10, color: pt.ink500, letterSpacing: 1),
-            ),
-            Text(
-              'Vet Hub',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                color: pt.ink950,
-              ),
-            ),
-          ],
-        ),
-      ),
       body: Stack(
         children: [
           Positioned.fill(
-            child: IndexedStack(
-              index: _selectedIndex,
-              children: const [
-                _ClinicsGridTab(),
-                _AppointmentsHistoryTab(),
-                _PlaceholderTab(
-                  icon: Icons.favorite_rounded,
-                  title: 'Favorites Coming Soon',
-                  subtitle: 'Save your favourite vets and clinics here.',
-                ),
-                _PlaceholderTab(
-                  icon: Icons.person_rounded,
-                  title: 'Vet Profile Coming Soon',
-                  subtitle: 'Your vet history and profile will appear here.',
-                ),
-              ],
+            child: Padding(
+              padding: EdgeInsets.only(top: topInset + 16),
+              child: IndexedStack(
+                index: _selectedIndex,
+                children: const [
+                  _ClinicsGridTab(),
+                  _AppointmentsHistoryTab(),
+                  _PlaceholderTab(
+                    icon: Icons.favorite_rounded,
+                    title: 'Favorites Coming Soon',
+                    subtitle: 'Save your favourite vets and clinics here.',
+                  ),
+                  _PlaceholderTab(
+                    icon: Icons.person_rounded,
+                    title: 'Vet Profile Coming Soon',
+                    subtitle: 'Your vet history and profile will appear here.',
+                  ),
+                ],
+              ),
             ),
           ),
           Positioned(
@@ -84,6 +69,89 @@ class _VetHubScreenState extends State<VetHubScreen> {
             child: _VetFloatingNav(
               selectedIndex: _selectedIndex,
               onSelect: (i) => setState(() => _selectedIndex = i),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+                child: SizedBox(
+                  height: topInset,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white.withAlpha(55),
+                          Colors.white.withAlpha(18),
+                        ],
+                      ),
+                      border: Border(
+                        top: BorderSide(color: Colors.white.withAlpha(100), width: 0.5),
+                        bottom: BorderSide(color: Colors.white.withAlpha(35), width: 0.5),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(18, topPadding + 8, 18, 8),
+                      child: Row(
+                        children: [
+                          Semantics(
+                            button: true,
+                            label: 'Back',
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(color: Colors.white.withAlpha(90), width: 0.8),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(999),
+                                child: Material(
+                                  color: Colors.white.withAlpha(55),
+                                  child: InkWell(
+                                    onTap: () => context.canPop() ? context.pop() : context.go('/home'),
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(10),
+                                      child: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 14),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'VET',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withAlpha(160),
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                              const Text(
+                                'Vet Hub',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -179,7 +247,11 @@ class _ClinicGridCardState extends State<_ClinicGridCard> {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return GestureDetector(
+    return Semantics(
+      label: widget.clinic.name,
+      hint: 'View clinic details',
+      button: true,
+      child: GestureDetector(
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) => setState(() => _pressed = false),
       onTapCancel: () => setState(() => _pressed = false),
@@ -221,7 +293,7 @@ class _ClinicGridCardState extends State<_ClinicGridCard> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   color: pt.ink950,
                   height: 1.3,
                 ),
@@ -266,7 +338,7 @@ class _ClinicGridCardState extends State<_ClinicGridCard> {
                     widget.clinic.rating.toStringAsFixed(1),
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: pt.ink950,
                     ),
                   ),
@@ -279,13 +351,14 @@ class _ClinicGridCardState extends State<_ClinicGridCard> {
                       style: TextStyle(fontSize: 10, color: pt.ink300),
                     ),
                   ),
-                  Icon(Icons.chevron_right_rounded, size: 16, color: AppColors.sky),
+                  const Icon(Icons.chevron_right_rounded, size: 16, color: AppColors.sky),
                 ],
               ),
             ],
           ),
         ),
       ),
+    ),
     );
   }
 }
@@ -347,7 +420,7 @@ class _AppointmentsHistoryTab extends StatelessWidget {
             labelColor: AppColors.sky,
             unselectedLabelColor: pt.ink500,
             indicatorColor: AppColors.sky,
-            labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+            labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
             unselectedLabelStyle:
                 const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             indicatorWeight: 3,
@@ -359,8 +432,8 @@ class _AppointmentsHistoryTab extends StatelessWidget {
           const Expanded(
             child: TabBarView(
               children: [
-                _AppointmentsList(past: false),
-                _AppointmentsList(past: true),
+                KeepAliveTab(child: _AppointmentsList(past: false)),
+                KeepAliveTab(child: _AppointmentsList(past: true)),
               ],
             ),
           ),
@@ -639,7 +712,11 @@ class _VetNavTabState extends State<_VetNavTab>
   Widget build(BuildContext context) {
     final unselected = widget.isDark ? AppColors.ink500D : AppColors.ink500;
 
-    return GestureDetector(
+    return Semantics(
+      label: widget.dest.label,
+      selected: widget.isSelected,
+      button: true,
+      child: GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
         widget.onTap();
@@ -689,6 +766,7 @@ class _VetNavTabState extends State<_VetNavTab>
           );
         },
       ),
+    ),
     );
   }
 }

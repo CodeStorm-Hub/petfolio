@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/errors/app_exception.dart';
@@ -22,9 +23,11 @@ import '../../../pet_profile/presentation/controllers/edit_profile_controller.da
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
 
 import '../../data/models/discovery_candidate.dart';
+import '../../data/models/match_mode.dart';
 import '../../data/models/pet_mutual_match.dart';
 import '../controllers/discovery_candidates_controller.dart';
 import '../controllers/discovery_controller.dart';
+import '../controllers/match_preference_controller.dart';
 import '../controllers/mutual_match_realtime_provider.dart';
 import '../matching_navigation.dart';
 import '../widgets/match_celebration_overlay.dart';
@@ -90,32 +93,42 @@ class MatchingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pet = ref.watch(activePetControllerProvider);
-    if (pet != null) return _DiscoveryView(petId: pet.id);
+    if (pet != null) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (_, _) => context.go('/home'),
+        child: _DiscoveryView(petId: pet.id),
+      );
+    }
 
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final petsAsync = ref.watch(petListProvider);
-    return Scaffold(
-      backgroundColor: pt.surface1,
-      body: Center(
-        child: petsAsync.when(
-          skipLoadingOnReload: true,
-          loading: () => const TailWagLoader(),
-          error: (_, _) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
-              const SizedBox(height: 12),
-              Text('Connection error',
-                  style: TextStyle(fontSize: 15, color: pt.ink500)),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: () => ref.invalidate(petListProvider),
-                icon: const Icon(Icons.refresh_rounded, size: 16),
-                label: const Text('Retry'),
-              ),
-            ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (_, _) => context.go('/home'),
+      child: Scaffold(
+        backgroundColor: pt.surface1,
+        body: Center(
+          child: petsAsync.when(
+            skipLoadingOnReload: true,
+            loading: () => const TailWagLoader(),
+            error: (_, _) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.wifi_off_rounded, size: 48, color: pt.ink300),
+                const SizedBox(height: 12),
+                Text('Connection error',
+                    style: TextStyle(fontSize: 15, color: pt.ink500)),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: () => ref.invalidate(petListProvider),
+                  icon: const Icon(Icons.refresh_rounded, size: 16),
+                  label: const Text('Retry'),
+                ),
+              ],
+            ),
+            data: (_) => const TailWagLoader(),
           ),
-          data: (_) => const TailWagLoader(),
         ),
       ),
     );
@@ -309,43 +322,35 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isWide = screenWidth >= ResponsiveLayout.mobileMax;
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    Color headerColor = AppColors.lilac; // default lilac match accent
-    if (activePet != null) {
-      headerColor = activePet.speciesEnum.resolvedAccent(isDark);
-      final dbAccent = activePet.accentColor;
-      if (dbAccent != null && dbAccent.isNotEmpty && dbAccent != '#FF6B9D') {
-        try {
-          final hex = dbAccent.replaceAll('#', '');
-          if (hex.length == 6) {
-            headerColor = Color(int.parse('FF$hex', radix: 16));
-          } else if (hex.length == 8) {
-            headerColor = Color(int.parse(hex, radix: 16));
-          }
-        } catch (_) {}
-      }
-    }
-
     Widget mainContent = Column(
       children: [
-        SizedBox(
-          height: MediaQuery.paddingOf(context).top + 92.0,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: WaveHeader(
-                  color: headerColor,
-                  height: MediaQuery.paddingOf(context).top + 100.0,
-                  child: const SizedBox.shrink(),
-                ),
-              ),
-            ],
+        SizedBox(height: MediaQuery.paddingOf(context).top + 92.0),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+          child: _MatchModeToggle(
+            mode: ref.watch(
+              matchPreferenceControllerProvider.select((p) => p.mode),
+            ),
+            onChanged: (m) => ref
+                .read(matchPreferenceControllerProvider.notifier)
+                .setMode(m),
           ),
         ),
+        if (ref.watch(
+              matchPreferenceControllerProvider.select((p) => p.mode),
+            ) ==
+            MatchMode.breeding)
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: TextButton.icon(
+                onPressed: () => context.push('/matching/breeding-setup'),
+                icon: const Icon(Icons.tune, size: 18),
+                label: const Text('Breeding setup'),
+              ),
+            ),
+          ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
@@ -744,6 +749,7 @@ class _SwipeCardState extends State<_SwipeCard> {
     Size size,
     double layoutWidth,
   ) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final dxNorm = widget.state.dragOffset.dx / (layoutWidth * 0.75);
     final dyTilt = widget.state.dragOffset.dy / (size.height * 1.2);
     final angle = (dxNorm + dyTilt * 0.12).clamp(-0.44, 0.44);
@@ -757,7 +763,11 @@ class _SwipeCardState extends State<_SwipeCard> {
       child: Transform.rotate(
         angle: angle,
         alignment: Alignment.bottomCenter,
-        child: GestureDetector(
+        child: Semantics(
+          label: '${top.name}, ${top.breed}, ${top.age}',
+          hint: 'Swipe right to like, swipe left to pass',
+          button: true,
+          child: GestureDetector(
           onPanUpdate: (d) {
             widget.notifier.onDragUpdate(d.delta);
             _checkHaptic(widget.state.dragOffset + d.delta);
@@ -785,7 +795,7 @@ class _SwipeCardState extends State<_SwipeCard> {
                   left: 20,
                   child: Opacity(
                     opacity: matchOpacity,
-                    child: _SwipeLabel(
+                    child: const _SwipeLabel(
                       label: 'MATCH',
                       color: AppColors.poppy,
                     ),
@@ -799,7 +809,7 @@ class _SwipeCardState extends State<_SwipeCard> {
                     opacity: passOpacity,
                     child: _SwipeLabel(
                       label: 'PASS',
-                      color: AppColors.ink500,
+                      color: pt.ink500,
                     ),
                   ),
                 ),
@@ -811,7 +821,7 @@ class _SwipeCardState extends State<_SwipeCard> {
                   child: Center(
                     child: Opacity(
                       opacity: greetOpacity,
-                      child: _SwipeLabel(
+                      child: const _SwipeLabel(
                         label: 'WAVE  👋',
                         color: AppColors.lilac,
                       ),
@@ -822,6 +832,7 @@ class _SwipeCardState extends State<_SwipeCard> {
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -908,7 +919,7 @@ class _CardSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = candidate.gradientColors;
-    final softColor = colors.isNotEmpty ? colors.first.withAlpha(120) : AppColors.tangerine.withAlpha(120);
+    final softColor = colors.isNotEmpty ? colors.first : AppColors.tangerine;
     final mainColor = colors.isNotEmpty ? colors.last : AppColors.tangerine;
 
     final emoji = switch (candidate.species) {
@@ -1035,7 +1046,7 @@ class _CardSurface extends StatelessWidget {
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
@@ -1152,6 +1163,7 @@ class _ActionDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final deck = bufferAsync.asData?.value.candidates ?? const <DiscoveryCandidate>[];
     final disabled = state.isExiting || deck.isEmpty;
 
@@ -1163,9 +1175,10 @@ class _ActionDock extends StatelessWidget {
         children: [
           _DockButton(
             size: 56,
-            color: AppColors.ink500,
+            color: pt.ink500,
             bgColor: Theme.of(context).colorScheme.surface,
             label: '✕',
+            semanticLabel: 'Pass',
             fontSize: 22,
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.pass),
           ),
@@ -1175,6 +1188,7 @@ class _ActionDock extends StatelessWidget {
             color: Colors.white,
             bgColor: AppColors.lilac,
             label: '⭐',
+            semanticLabel: 'Super Like',
             fontSize: 19,
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.superPaw),
           ),
@@ -1184,6 +1198,7 @@ class _ActionDock extends StatelessWidget {
             color: Colors.white,
             bgColor: AppColors.poppy,
             label: '🐾',
+            semanticLabel: 'Like',
             fontSize: 32,
             onTap: disabled ? null : () => notifier.swipe(SwipeAction.match),
           ),
@@ -1200,6 +1215,7 @@ class _DockButton extends StatelessWidget {
     required this.color,
     required this.bgColor,
     required this.label,
+    required this.semanticLabel,
     required this.fontSize,
     required this.onTap,
   });
@@ -1207,6 +1223,7 @@ class _DockButton extends StatelessWidget {
   final Color color;
   final Color bgColor;
   final String label;
+  final String semanticLabel;
   final double fontSize;
   final VoidCallback? onTap;
 
@@ -1214,7 +1231,11 @@ class _DockButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDisabled = onTap == null;
 
-    return GestureDetector(
+    return Semantics(
+      label: semanticLabel,
+      button: true,
+      enabled: !isDisabled,
+      child: GestureDetector(
       onTap: onTap,
       child: AnimatedOpacity(
         duration: PetfolioThemeExtension.durationSm,
@@ -1243,12 +1264,13 @@ class _DockButton extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: fontSize,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               color: color,
             ),
           ),
         ),
       ),
+    ),
     );
   }
 }
@@ -1281,3 +1303,34 @@ class _SwipeLabel extends StatelessWidget {
   }
 }
 
+
+class _MatchModeToggle extends StatelessWidget {
+  const _MatchModeToggle({required this.mode, required this.onChanged});
+
+  final MatchMode mode;
+  final ValueChanged<MatchMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: SegmentedButton<MatchMode>(
+        segments: const [
+          ButtonSegment(
+            value: MatchMode.playdate,
+            icon: Icon(Icons.sports_baseball_outlined),
+            label: Text('Playdate'),
+          ),
+          ButtonSegment(
+            value: MatchMode.breeding,
+            icon: Icon(Icons.favorite_outline),
+            label: Text('Breeding'),
+          ),
+        ],
+        selected: {mode},
+        showSelectedIcon: false,
+        onSelectionChanged: (set) => onChanged(set.first),
+      ),
+    );
+  }
+}

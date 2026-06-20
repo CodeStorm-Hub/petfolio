@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
 import '../../../../../core/widgets/app_snack_bar.dart';
 import '../../../../../core/widgets/primary_pill_button.dart';
 import '../../controllers/buyer_orders_controller.dart'
     show buyerOrdersProvider, orderByIdProvider;
+import '../../controllers/shipment_controller.dart';
 import '../../../data/models/marketplace_order.dart';
+import '../../../data/models/shipment.dart';
 import '../../../data/repositories/order_repository.dart';
 
 class BuyerOrderDetailScreen extends ConsumerWidget {
@@ -31,6 +33,7 @@ class BuyerOrderDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     // Fast path: use pre-loaded order or find it in the cached list.
     final cachedList = ref.watch(buyerOrdersProvider).value;
     final fromCache = order ??
@@ -56,8 +59,8 @@ class BuyerOrderDetailScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Order not found',
-                    style: TextStyle(color: AppColors.ink500)),
+                Text('Order not found',
+                    style: TextStyle(color: pt.ink500)),
                 const SizedBox(height: 12),
                 TextButton(
                     onPressed: () => _goBack(context),
@@ -82,15 +85,16 @@ class BuyerOrderDetailScreen extends ConsumerWidget {
                   children: [
                     _IconBtn(
                       icon: Icons.arrow_back_ios_new_rounded,
+                      label: 'Back',
                       onTap: () => _goBack(context),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Order Detail',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 20,
-                        color: AppColors.ink950,
+                        color: pt.ink950,
                       ),
                     ),
                   ],
@@ -110,10 +114,14 @@ class BuyerOrderDetailScreen extends ConsumerWidget {
               child: _LineItemsCard(order: resolved),
             ),
 
-            if (resolved.hasTracking)
+            if (resolved.hasRxItems)
               SliverToBoxAdapter(
-                child: _TrackingCard(order: resolved),
+                child: _PrescriptionCard(order: resolved),
               ),
+
+            SliverToBoxAdapter(
+              child: _ShipmentCard(order: resolved),
+            ),
 
             if (resolved.status == OrderStatus.pending)
               SliverToBoxAdapter(
@@ -135,6 +143,7 @@ class _StatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final color = switch (order.status) {
       OrderStatus.pending    => AppColors.warning,
       OrderStatus.processing => AppColors.info,
@@ -185,7 +194,7 @@ class _StatusCard extends StatelessWidget {
                 Text(
                   _statusMessage(order.status),
                   style:
-                      const TextStyle(fontSize: 12, color: AppColors.ink500),
+                      TextStyle(fontSize: 12, color: pt.ink500),
                 ),
               ],
             ),
@@ -211,6 +220,7 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
@@ -225,13 +235,13 @@ class _SummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'ORDER SUMMARY',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.88,
-                color: AppColors.ink500,
+                color: pt.ink500,
               ),
             ),
             const SizedBox(height: 12),
@@ -268,6 +278,7 @@ class _LineItemsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
@@ -282,13 +293,13 @@ class _LineItemsCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'ITEMS',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.88,
-                color: AppColors.ink500,
+                color: pt.ink500,
               ),
             ),
             const SizedBox(height: 12),
@@ -302,8 +313,8 @@ class _LineItemsCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                       color: AppColors.surface2,
                     ),
-                    child: const Icon(Icons.shopping_bag_outlined,
-                        size: 18, color: AppColors.ink300),
+                    child: Icon(Icons.shopping_bag_outlined,
+                        size: 18, color: pt.ink300),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -312,10 +323,10 @@ class _LineItemsCard extends StatelessWidget {
                       children: [
                         Text(
                           item.productName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: AppColors.ink950,
+                            color: pt.ink950,
                           ),
                         ),
                         if (item.isSubscribed)
@@ -333,16 +344,16 @@ class _LineItemsCard extends StatelessWidget {
                     children: [
                       Text(
                         '\$${(item.lineTotalCents / 100).toStringAsFixed(2)}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
-                          color: AppColors.ink950,
+                          color: pt.ink950,
                         ),
                       ),
                       Text(
                         '×${item.quantity}',
-                        style: const TextStyle(
-                            fontSize: 12, color: AppColors.ink500),
+                        style: TextStyle(
+                            fontSize: 12, color: pt.ink500),
                       ),
                     ],
                   ),
@@ -357,64 +368,156 @@ class _LineItemsCard extends StatelessWidget {
   }
 }
 
-class _TrackingCard extends StatelessWidget {
-  const _TrackingCard({required this.order});
+class _PrescriptionCard extends StatelessWidget {
+  const _PrescriptionCard({required this.order});
 
   final MarketplaceOrder order;
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-          color: AppColors.surface0,
-          boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
-          ],
+          color: AppColors.info.withAlpha(18),
+          border: Border.all(color: AppColors.info.withAlpha(60)),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            const Text(
-              'SHIPPING',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.88,
-                color: AppColors.ink500,
+            const Icon(Icons.medical_services_outlined,
+                color: AppColors.info, size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'This order contains prescription items. Please upload your vet\'s prescription to proceed.',
+                style: TextStyle(fontSize: 13, color: pt.ink700),
               ),
             ),
-            const SizedBox(height: 12),
-            if (order.shippingCarrier != null)
-              _Row(label: 'Carrier', value: order.shippingCarrier!),
-            const SizedBox(height: 6),
-            _Row(
-              label: 'Tracking #',
-              value: order.shippingTrackingNumber!,
-            ),
-            const SizedBox(height: 16),
-            if (order.shippingTrackingUrl != null &&
-                order.shippingTrackingUrl!.isNotEmpty)
-              PrimaryPillButton(
-                label: 'Track Package',
-                size: PillButtonSize.lg,
-                isFullWidth: true,
-                leadingIcon:
-                    const Icon(Icons.open_in_new_rounded, size: 18),
-                onPressed: () async {
-                  final uri = Uri.tryParse(order.shippingTrackingUrl!);
-                  if (uri != null && await canLaunchUrl(uri)) {
-                    await launchUrl(uri,
-                        mode: LaunchMode.externalApplication);
-                  }
-                },
+            const SizedBox(width: 12),
+            TextButton(
+              onPressed: () => context.push(
+                '/marketplace/orders/${order.id}/prescription',
               ),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.info,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+              child: const Text(
+                'Upload',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ShipmentCard extends ConsumerWidget {
+  const _ShipmentCard({required this.order});
+
+  final MarketplaceOrder order;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final shipmentAsync = ref.watch(shipmentProvider(order.id));
+
+    return shipmentAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (shipment) {
+        if (shipment == null && !order.hasTracking) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              color: AppColors.surface0,
+              boxShadow: const [
+                BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'SHIPPING',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.88,
+                    color: pt.ink500,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (shipment != null) ...[
+                  Row(
+                    children: [
+                      _statusDot(shipment.status),
+                      const SizedBox(width: 8),
+                      Text(
+                        shipment.status.label,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: pt.ink950,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (shipment.courier != null) ...[
+                    const SizedBox(height: 6),
+                    _Row(label: 'Carrier', value: shipment.courier!),
+                  ],
+                  if (shipment.trackingId != null) ...[
+                    const SizedBox(height: 6),
+                    _Row(label: 'Tracking #', value: shipment.trackingId!),
+                  ],
+                ] else if (order.hasTracking) ...[
+                  if (order.shippingCarrier != null)
+                    _Row(label: 'Carrier', value: order.shippingCarrier!),
+                  const SizedBox(height: 6),
+                  _Row(
+                    label: 'Tracking #',
+                    value: order.shippingTrackingNumber!,
+                  ),
+                ],
+                const SizedBox(height: 14),
+                PrimaryPillButton(
+                  label: 'Track Shipment',
+                  size: PillButtonSize.lg,
+                  isFullWidth: true,
+                  leadingIcon: const Icon(Icons.local_shipping_outlined, size: 18),
+                  onPressed: () => context.push(
+                    '/marketplace/orders/${order.id}/tracking',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _statusDot(ShipmentStatus status) {
+    final color = switch (status) {
+      ShipmentStatus.delivered      => AppColors.success,
+      ShipmentStatus.failed         => AppColors.danger,
+      ShipmentStatus.outForDelivery => AppColors.mint,
+      _                             => AppColors.info,
+    };
+    return Container(
+      width: 10,
+      height: 10,
+      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
     );
   }
 }
@@ -427,17 +530,18 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label,
             style:
-                const TextStyle(fontSize: 13, color: AppColors.ink500)),
+                TextStyle(fontSize: 13, color: pt.ink500)),
         Text(value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppColors.ink950,
+              color: pt.ink950,
             )),
       ],
     );
@@ -445,27 +549,33 @@ class _Row extends StatelessWidget {
 }
 
 class _IconBtn extends StatelessWidget {
-  const _IconBtn({required this.icon, required this.onTap});
+  const _IconBtn({required this.icon, required this.onTap, required this.label});
 
   final IconData icon;
   final VoidCallback onTap;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+      final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    return Semantics(
+      label: label,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.surface0,
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(color: AppColors.line, spreadRadius: 0.5),
           ],
         ),
-        child: Icon(icon, size: 18, color: AppColors.ink700),
+        child: Icon(icon, size: 18, color: pt.ink700),
       ),
+    ),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/tail_wag_loader.dart';
 import '../controllers/cod_orders_controller.dart';
 import 'admin_shared_widgets.dart';
 
@@ -17,7 +18,7 @@ class OrdersTab extends ConsumerWidget {
       title: 'COD Reconciliation',
       onRefresh: () => ref.read(codOrdersProvider.notifier).refresh(),
       child: codAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: TailWagLoader()),
         error: (e, _) => AdminErrorState(message: e.toString()),
         data: (orders) => orders.isEmpty
             ? const AdminEmptyState(

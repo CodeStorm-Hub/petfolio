@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,7 @@ class ShopStorefrontRoute extends ConsumerWidget {
     final shopAsync = ref.watch(shopByIdProvider(shopId));
 
     return shopAsync.when(
-      loading: () => Scaffold(
+      loading: () => const Scaffold(
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.all(16),
@@ -91,6 +92,7 @@ class ShopStorefrontScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(8),
               child: _CircleBtn(
                 icon: Icons.arrow_back_ios_new_rounded,
+                label: 'Back',
                 onTap: () => context.pop(),
               ),
             ),
@@ -102,6 +104,7 @@ class ShopStorefrontScreen extends ConsumerWidget {
                     children: [
                       _CircleBtn(
                         icon: Icons.shopping_bag_outlined,
+                        label: 'View cart',
                         onTap: () => context.push('/marketplace/cart'),
                       ),
                       Positioned(
@@ -132,9 +135,10 @@ class ShopStorefrontScreen extends ConsumerWidget {
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: shop.bannerUrl != null
-                  ? Image.network(
-                      shop.bannerUrl!,
+                  ? CachedNetworkImage(
+                      imageUrl: shop.bannerUrl!,
                       fit: BoxFit.cover,
+                      errorWidget: (_, _, _) => const SizedBox.shrink(),
                     )
                   : Container(
                       decoration: const BoxDecoration(
@@ -165,8 +169,11 @@ class ShopStorefrontScreen extends ConsumerWidget {
                     child: shop.logoUrl != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.network(shop.logoUrl!,
-                                fit: BoxFit.cover),
+                            child: CachedNetworkImage(
+                              imageUrl: shop.logoUrl!,
+                              fit: BoxFit.cover,
+                              errorWidget: (_, _, _) => const SizedBox.shrink(),
+                            ),
                           )
                         : Icon(Icons.storefront_outlined,
                             color: pt.ink300, size: 28),
@@ -354,7 +361,11 @@ class _ContactRow extends StatelessWidget {
       ),
     );
     if (onTap == null) return row;
-    return GestureDetector(onTap: onTap, child: row);
+    return Semantics(
+      label: label,
+      button: true,
+      child: GestureDetector(onTap: onTap, child: row),
+    );
   }
 }
 
@@ -376,7 +387,7 @@ class _SocialLinksRow extends StatelessWidget {
         .where((e) =>
             links[e.key] is String &&
             (links[e.key] as String).trim().isNotEmpty)
-        .map((e) => _SocialBtn(icon: e.value, url: links[e.key] as String))
+        .map((e) => _SocialBtn(icon: e.value, url: links[e.key] as String, platform: e.key))
         .toList();
     if (buttons.isEmpty) return const SizedBox.shrink();
     return Row(children: buttons);
@@ -384,9 +395,10 @@ class _SocialLinksRow extends StatelessWidget {
 }
 
 class _SocialBtn extends StatelessWidget {
-  const _SocialBtn({required this.icon, required this.url});
+  const _SocialBtn({required this.icon, required this.url, required this.platform});
   final IconData icon;
   final String url;
+  final String platform;
 
   @override
   Widget build(BuildContext context) {
@@ -395,7 +407,10 @@ class _SocialBtn extends StatelessWidget {
       height: 48,
       child: Align(
         alignment: Alignment.center,
-        child: GestureDetector(
+        child: Semantics(
+          label: 'Open $platform',
+          button: true,
+          child: GestureDetector(
           onTap: () => launchUrl(
             Uri.parse(url),
             mode: LaunchMode.externalApplication,
@@ -410,6 +425,7 @@ class _SocialBtn extends StatelessWidget {
             ),
             child: Icon(icon, size: 18, color: AppColors.blue500),
           ),
+        ),
         ),
       ),
     );
@@ -444,15 +460,19 @@ class _ErrorRetry extends StatelessWidget {
 }
 
 class _CircleBtn extends StatelessWidget {
-  const _CircleBtn({required this.icon, required this.onTap});
+  const _CircleBtn({required this.icon, required this.onTap, required this.label});
 
   final IconData icon;
   final VoidCallback onTap;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    return SizedBox(
+    return Semantics(
+      label: label,
+      button: true,
+      child: SizedBox(
       width: 48,
       height: 48,
       child: Align(
@@ -473,6 +493,7 @@ class _CircleBtn extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

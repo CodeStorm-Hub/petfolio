@@ -24,7 +24,16 @@ enum OrderStatus {
 }
 
 @JsonEnum()
-enum PaymentMethod { stripe, cod }
+enum PaymentMethod {
+  stripe,
+  cod,
+  bkash,
+  nagad,
+  sslcommerz;
+
+  bool get isSslcommerz =>
+      this == bkash || this == nagad || this == sslcommerz;
+}
 
 @JsonEnum()
 enum PaymentStatus { pending, paid, collected }
@@ -39,6 +48,8 @@ abstract class LineItem with _$LineItem {
     required int lineTotalCents,
     required bool isSubscribed,
     required int frequencyWeeks,
+    String? variantId,
+    @Default(false) bool isRx,
   }) = _LineItem;
 
   factory LineItem.fromJson(Map<String, dynamic> json) =>
@@ -60,6 +71,7 @@ abstract class MarketplaceOrder with _$MarketplaceOrder {
     @Default(PaymentMethod.stripe) PaymentMethod paymentMethod,
     @Default(PaymentStatus.pending) PaymentStatus paymentStatus,
     String? stripePaymentIntentId,
+    String? sslcommerzTransactionId,
     required List<LineItem> lineItems,
     String? shippingTrackingNumber,
     String? shippingTrackingUrl,
@@ -79,4 +91,8 @@ abstract class MarketplaceOrder with _$MarketplaceOrder {
       shippingTrackingNumber != null && shippingTrackingNumber!.isNotEmpty;
 
   bool get isCod => paymentMethod == PaymentMethod.cod;
+
+  bool get isSslcommerz => paymentMethod.isSslcommerz;
+
+  bool get hasRxItems => lineItems.any((i) => i.isRx);
 }

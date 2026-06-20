@@ -95,7 +95,7 @@ class _BookingConfirmationSheetState
               'Confirm Booking',
               style: TextStyle(
                 fontSize: 20,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
                 color: pt.ink950,
               ),
             ),
@@ -295,6 +295,7 @@ class _BookingConfirmationSheetState
                       ),
                     ),
                     IconButton(
+                      tooltip: 'Clear',
                       icon: const Icon(Icons.close_rounded, size: 18),
                       color: pt.ink500,
                       onPressed: () {
@@ -461,7 +462,7 @@ class _BookingSummary extends StatelessWidget {
                       'ESTIMATED DURATION',
                       style: TextStyle(
                         fontSize: 9,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink500,
                         letterSpacing: 0.8,
                       ),
@@ -471,7 +472,7 @@ class _BookingSummary extends StatelessWidget {
                       state.service!.formattedDuration,
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink950,
                       ),
                     ),
@@ -484,7 +485,7 @@ class _BookingSummary extends StatelessWidget {
                       'TOTAL PRICE',
                       style: TextStyle(
                         fontSize: 9,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink500,
                         letterSpacing: 0.8,
                       ),
@@ -492,9 +493,9 @@ class _BookingSummary extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       state.service!.formattedPrice,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.sky,
                       ),
                     ),
@@ -573,7 +574,11 @@ class _PetPicker extends StatelessWidget {
         itemBuilder: (context, i) {
           final pet = pets[i];
           final isSelected = pet.id == selectedPetId;
-          return GestureDetector(
+          return Semantics(
+            label: pet.name as String,
+            selected: isSelected,
+            button: true,
+            child: GestureDetector(
             onTap: () {
               HapticFeedback.selectionClick();
               onSelect(pet.id as String);
@@ -612,6 +617,7 @@ class _PetPicker extends StatelessWidget {
                 ],
               ),
             ),
+          ),
           );
         },
       ),

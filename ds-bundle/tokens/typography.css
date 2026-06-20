@@ -1,0 +1,83 @@
+/* Petfolio Typography Tokens */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --pf-font-display: 'Sora', system-ui, sans-serif;
+  --pf-font-sans:    'Inter', system-ui, sans-serif;
+
+  /* Display — Sora Bold */
+  --pf-text-display-lg-size:    36px;
+  --pf-text-display-lg-weight:  700;
+  --pf-text-display-lg-leading: 1.05;
+  --pf-text-display-lg-tracking: -0.5px;
+
+  --pf-text-display-md-size:    30px;
+  --pf-text-display-md-weight:  700;
+  --pf-text-display-md-leading: 1.08;
+  --pf-text-display-md-tracking: -0.3px;
+
+  --pf-text-display-sm-size:    24px;
+  --pf-text-display-sm-weight:  600;
+  --pf-text-display-sm-leading: 1.15;
+  --pf-text-display-sm-tracking: -0.1px;
+
+  /* Headline — Sora */
+  --pf-text-headline-lg-size:    24px;
+  --pf-text-headline-lg-weight:  700;
+  --pf-text-headline-lg-leading: 1.15;
+
+  --pf-text-headline-md-size:    20px;
+  --pf-text-headline-md-weight:  700;
+  --pf-text-headline-md-leading: 1.2;
+
+  --pf-text-headline-sm-size:    18px;
+  --pf-text-headline-sm-weight:  700;
+  --pf-text-headline-sm-leading: 1.2;
+
+  /* Title — Sora SemiBold */
+  --pf-text-title-lg-size:    20px;
+  --pf-text-title-lg-weight:  600;
+  --pf-text-title-lg-leading: 1.2;
+
+  --pf-text-title-md-size:    16px;
+  --pf-text-title-md-weight:  600;
+  --pf-text-title-md-leading: 1.45;
+
+  --pf-text-title-sm-size:    15px;
+  --pf-text-title-sm-weight:  600;
+  --pf-text-title-sm-leading: 1.5;
+
+  /* Body — Inter */
+  --pf-text-body-lg-size:    16px;
+  --pf-text-body-lg-weight:  500;
+  --pf-text-body-lg-leading: 1.5;
+
+  --pf-text-body-md-size:    15px;
+  --pf-text-body-md-weight:  400;
+  --pf-text-body-md-leading: 1.5;
+
+  --pf-text-body-sm-size:    13px;
+  --pf-text-body-sm-weight:  400;
+  --pf-text-body-sm-leading: 1.45;
+
+  /* Label — Inter */
+  --pf-text-label-lg-size:     13px;
+  --pf-text-label-lg-weight:   600;
+  --pf-text-label-lg-leading:  1.35;
+  --pf-text-label-lg-tracking: 0.1px;
+
+  --pf-text-label-md-size:     12px;
+  --pf-text-label-md-weight:   600;
+  --pf-text-label-md-leading:  1.35;
+  --pf-text-label-md-tracking: 0.1px;
+
+  --pf-text-label-sm-size:     11px;
+  --pf-text-label-sm-weight:   700;
+  --pf-text-label-sm-leading:  1.2;
+  --pf-text-label-sm-tracking: 0.5px;
+
+  /* Caps label — section headers */
+  --pf-text-caps-size:     11px;
+  --pf-text-caps-weight:   700;
+  --pf-text-caps-tracking: 0.8px;
+}

@@ -1,0 +1,32 @@
+<!-- @dsCard group="Display" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#FFF4E6;font-family:'Inter',sans-serif;width:320px}
+  .sh{display:flex;align-items:center;padding:24px 16px 8px;gap:8px}
+  .sh__lbl{flex:1;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#957762}
+  .sh__action{font-family:'Sora',sans-serif;font-size:13px;font-weight:600;color:#E0651E;white-space:nowrap}
+  .divider{height:1px;background:#F4E2CB;margin:0 16px}
+  .card{background:#fff;border:1px solid #F4E2CB;border-radius:16px;margin:0 16px 8px;padding:12px 14px}
+  .card__title{font-family:'Sora',sans-serif;font-size:15px;font-weight:600;color:#261308}
+  .card__sub{font-size:13px;color:#5E3A28;margin-top:2px}
+</style>
+</head>
+<body>
+  <!-- Label only -->
+  <div class="sh"><span class="sh__lbl">Your Pets</span></div>
+  <div class="card"><div class="card__title">🐶 Biscuit</div><div class="card__sub">Golden Retriever · 3 yrs</div></div>
+  <div class="card"><div class="card__title">🐱 Luna</div><div class="card__sub">Siamese · 2 yrs</div></div>
+
+  <!-- Label + trailing action -->
+  <div class="sh" style="margin-top:8px">
+    <span class="sh__lbl">Nearby Matches</span>
+    <span class="sh__action">See all →</span>
+  </div>
+  <div class="card"><div class="card__title">🐶 Max</div><div class="card__sub">Labrador · 1.2 km away</div></div>
+</body>
+</html>

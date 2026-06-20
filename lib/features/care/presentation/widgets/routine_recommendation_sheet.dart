@@ -604,7 +604,7 @@ class _TaskSuggestionCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Icon(Icons.star_rounded,
+                    const Icon(Icons.star_rounded,
                         size: 12, color: Colors.amber),
                     const SizedBox(width: 2),
                     Text(

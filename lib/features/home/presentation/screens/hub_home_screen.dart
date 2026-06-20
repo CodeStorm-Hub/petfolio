@@ -122,14 +122,18 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
           child: _SectionHeader(
             pt: pt,
             title: 'Services',
-            trailing: GestureDetector(
+            trailing: InkWell(
               onTap: () => AllFeaturesSheet.show(context),
-              child: Text(
-                'All ›',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tangerine,
+              borderRadius: BorderRadius.circular(4),
+              child: const Padding(
+                padding: EdgeInsets.all(4),
+                child: Text(
+                  'All ›',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tangerine,
+                  ),
                 ),
               ),
             ),
@@ -164,14 +168,18 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
           child: _SectionHeader(
             pt: pt,
             title: 'Pet Spotlight',
-            trailing: GestureDetector(
+            trailing: InkWell(
               onTap: () => context.go('/social'),
-              child: Text(
-                'See All ›',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tangerine,
+              borderRadius: BorderRadius.circular(4),
+              child: const Padding(
+                padding: EdgeInsets.all(4),
+                child: Text(
+                  'See All ›',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tangerine,
+                  ),
                 ),
               ),
             ),
@@ -188,14 +196,18 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
           child: _SectionHeader(
             pt: pt,
             title: 'Exclusive Deals',
-            trailing: GestureDetector(
+            trailing: InkWell(
               onTap: () => context.go('/marketplace'),
-              child: Text(
-                'See All ›',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.tangerine,
+              borderRadius: BorderRadius.circular(4),
+              child: const Padding(
+                padding: EdgeInsets.all(4),
+                child: Text(
+                  'See All ›',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.tangerine,
+                  ),
                 ),
               ),
             ),
@@ -273,7 +285,7 @@ class _WaveHeroSection extends StatelessWidget {
     if (totalTasks > 0 && remaining == 0) return '${pet.name} is well cared for ✨';
     if (streak >= 30) return '${pet.name} is legendary! 🏆';
     if (streak >= 7) return '${pet.name} is on a winning streak 🔥';
-    if (streak > 0 && remaining > 0) return '${pet.name} has $remaining tasks left 🎯';
+    if (streak > 0 && remaining > 0) return '${pet.name} has $remaining tasks left 📋';
     if (streak > 0) return '${pet.name} is thriving today 🌟';
     if (remaining > 0) return '${pet.name} has $remaining tasks today 📋';
     return '${pet.name} is ready for a new day 🌱';
@@ -334,7 +346,7 @@ class _WaveHeroSection extends StatelessWidget {
                         _moodLine(),
                         style: GoogleFonts.sora(
                           fontSize: 19,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
                           fontStyle: FontStyle.italic,
                           height: 1.2,
@@ -445,7 +457,7 @@ class _PetHeroCard extends ConsumerWidget {
                   pet.name,
                   style: GoogleFonts.sora(
                     fontSize: 16,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: pt.ink950,
                     height: 1.1,
                   ),
@@ -487,7 +499,7 @@ class _PetHeroCard extends ConsumerWidget {
                         '$streak',
                         style: const TextStyle(
                           fontSize: 12,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.sunny700,
                         ),
                       ),
@@ -505,7 +517,7 @@ class _PetHeroCard extends ConsumerWidget {
                     '$doneTasks/$totalTasks',
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: accentColor,
                     ),
                   ),
@@ -524,7 +536,7 @@ class _PetHeroCard extends ConsumerWidget {
                     'Lv ${petLevel.level} · ${petLevel.currentXp} XP',
                     style: const TextStyle(
                       fontSize: 11,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: Colors.white,
                     ),
                   ),
@@ -564,7 +576,7 @@ class _SectionHeader extends StatelessWidget {
             title.toUpperCase(),
             style: TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: pt.ink500,
               letterSpacing: 0.8,
             ),
@@ -599,10 +611,10 @@ BoxDecoration _bentoCardDecoration(
               ),
             ]
           : [
-              BoxShadow(
+              const BoxShadow(
                 color: AppColors.shadowE3L,
                 blurRadius: 24,
-                offset: const Offset(0, 8),
+                offset: Offset(0, 8),
                 spreadRadius: -4,
               ),
               if (glow != null)
@@ -808,7 +820,7 @@ class _CareTile extends StatelessWidget {
                           '🔥 $streak day${streak == 1 ? '' : 's'}',
                           style: const TextStyle(
                             fontSize: 11,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             color: Colors.white,
                           ),
                         ),
@@ -834,7 +846,7 @@ class _CareTile extends StatelessWidget {
                       'Care',
                       style: GoogleFonts.sora(
                         fontSize: 28,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink950,
                         height: 1.0,
                       ),
@@ -933,7 +945,7 @@ class _BentoTile extends StatelessWidget {
                       label,
                       style: GoogleFonts.sora(
                         fontSize: 19,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink950,
                         height: 1.0,
                         letterSpacing: -0.3,
@@ -998,7 +1010,7 @@ class _AllTile extends StatelessWidget {
                 'All Features',
                 style: GoogleFonts.sora(
                   fontSize: 16,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.tangerine,
                 ),
               ),
@@ -1078,7 +1090,7 @@ class _QuickActionsRow extends StatelessWidget {
         sub: 'Orders & appointments',
         color: AppColors.tangerine,
         soft: isDark ? AppColors.tangerineSoftD : AppColors.tangerineSoft,
-        route: '/activity',
+        route: '/home/activity',
       ),
     ];
 
@@ -1149,14 +1161,14 @@ class _QuickActionCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: pt.ink950,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       action.sub,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 11,
@@ -1210,28 +1222,28 @@ class _SpotlightCarousel extends StatelessWidget {
         emoji: '🐕',
         title: 'Nearby Matches',
         sub: 'Find playmates today',
-        gradient: [AppColors.lilac, AppColors.sky],
+        gradient: const [AppColors.lilac, AppColors.sky],
         onTap: () => context.go('/matching'),
       ),
       _SpotlightCard(
         emoji: '🛍️',
         title: 'Pet Food Sale',
         sub: 'Up to 30% off brands',
-        gradient: [AppColors.tangerine, AppColors.sunny],
+        gradient: const [AppColors.tangerine, AppColors.sunny],
         onTap: () => context.go('/marketplace'),
       ),
       _SpotlightCard(
         emoji: '🐾',
         title: 'Trending Posts',
         sub: 'See what\'s popular',
-        gradient: [AppColors.poppy, AppColors.lilac],
+        gradient: const [AppColors.poppy, AppColors.lilac],
         onTap: () => context.go('/social'),
       ),
       _SpotlightCard(
         emoji: '🏥',
         title: 'Book a Vet',
         sub: 'Clinics near you',
-        gradient: [AppColors.mint, AppColors.sky],
+        gradient: const [AppColors.mint, AppColors.sky],
         onTap: () => context.push('/appointments'),
       ),
     ];
@@ -1313,7 +1325,7 @@ class _SpotlightCard extends StatelessWidget {
                       title,
                       style: GoogleFonts.sora(
                         fontSize: 14,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: Colors.white,
                         height: 1.2,
                       ),
@@ -1384,11 +1396,15 @@ class _DealsSection extends StatelessWidget {
         const SizedBox(height: 12),
 
         // ── Promo deal banner ──────────────────────────────────────────
-        GestureDetector(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(22),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                child: Container(
               height: 100,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(22),
@@ -1408,14 +1424,14 @@ class _DealsSection extends StatelessWidget {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Positioned(
+                  const Positioned(
                     right: -12,
                     top: -12,
                     child: Opacity(
                       opacity: 0.2,
                       child: Text(
                         '🎁',
-                        style: const TextStyle(fontSize: 100),
+                        style: TextStyle(fontSize: 100),
                       ),
                     ),
                   ),
@@ -1438,7 +1454,7 @@ class _DealsSection extends StatelessWidget {
                           '30% OFF Pet Food & Treats 🎉',
                           style: GoogleFonts.sora(
                             fontSize: 16,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             color: Colors.white,
                           ),
                         ),
@@ -1450,6 +1466,8 @@ class _DealsSection extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    ),
       ],
     );
   }
@@ -1468,29 +1486,35 @@ class _DealChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        onTap();
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.tangerine : Colors.transparent,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color: selected
-                ? AppColors.tangerine
-                : AppColors.ink300.withAlpha(100),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: selected ? Colors.white : AppColors.ink500,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(999),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: selected ? AppColors.tangerine : Colors.transparent,
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: selected
+                    ? AppColors.tangerine
+                    : AppColors.ink300.withAlpha(100),
+              ),
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: selected ? Colors.white : AppColors.ink500,
+              ),
+            ),
           ),
         ),
       ),
