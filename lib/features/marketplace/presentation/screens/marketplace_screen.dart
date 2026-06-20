@@ -304,38 +304,15 @@ class _MarketHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
-    final activePet = ref.watch(activePetControllerProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    Color headerColor = AppColors.sunny; // default sunny market accent
-    if (activePet != null) {
-      headerColor = activePet.speciesEnum.resolvedAccent(isDark);
-      final dbAccent = activePet.accentColor;
-      if (dbAccent != null && dbAccent.isNotEmpty && dbAccent != '#FF6B9D') {
-        try {
-          final hex = dbAccent.replaceAll('#', '');
-          if (hex.length == 6) {
-            headerColor = Color(int.parse('FF$hex', radix: 16));
-          } else if (hex.length == 8) {
-            headerColor = Color(int.parse(hex, radix: 16));
-          }
-        } catch (_) {}
-      }
-    }
-
-    return WaveHeader(
-      color: headerColor,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
-        child: Column(
-          children: [
-            // Spacer for fixed AppShell status header
-            SizedBox(height: MediaQuery.paddingOf(context).top + 76.0),
-            const SizedBox(height: 16),
-            _SearchBar(),
-            const SizedBox(height: 32), // Spacing adjusted to prevent wave overlap
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
+      child: Column(
+        children: [
+          SizedBox(height: MediaQuery.paddingOf(context).top + 76.0),
+          const SizedBox(height: 16),
+          _SearchBar(),
+          const SizedBox(height: 16),
+        ],
       ),
     );
   }

@@ -322,43 +322,9 @@ class _DiscoveryViewState extends ConsumerState<_DiscoveryView>
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isWide = screenWidth >= ResponsiveLayout.mobileMax;
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    Color headerColor = AppColors.lilac; // default lilac match accent
-    if (activePet != null) {
-      headerColor = activePet.speciesEnum.resolvedAccent(isDark);
-      final dbAccent = activePet.accentColor;
-      if (dbAccent != null && dbAccent.isNotEmpty && dbAccent != '#FF6B9D') {
-        try {
-          final hex = dbAccent.replaceAll('#', '');
-          if (hex.length == 6) {
-            headerColor = Color(int.parse('FF$hex', radix: 16));
-          } else if (hex.length == 8) {
-            headerColor = Color(int.parse(hex, radix: 16));
-          }
-        } catch (_) {}
-      }
-    }
-
     Widget mainContent = Column(
       children: [
-        SizedBox(
-          height: MediaQuery.paddingOf(context).top + 92.0,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: WaveHeader(
-                  color: headerColor,
-                  height: MediaQuery.paddingOf(context).top + 76.0,
-                  child: const SizedBox.shrink(),
-                ),
-              ),
-            ],
-          ),
-        ),
+        SizedBox(height: MediaQuery.paddingOf(context).top + 92.0),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
           child: _MatchModeToggle(

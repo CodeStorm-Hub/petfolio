@@ -2,6 +2,62 @@
 
 ---
 
+## 2026-06-20 — Matching Screen Fix + Apple Glass Header Redesign ✅
+
+### Branch: `accessibility-fix`
+
+---
+
+### Matching Screen Ghost Text Fix ✅
+
+**File:** `lib/features/matching/presentation/screens/matching_screen.dart`
+
+`_CardSurface` used a `RadialGradient` with `.withAlpha(120)` (~47% opacity) at center, causing the next card in the z-stack to bleed through the top card's image area.
+
+```dart
+// Before (buggy):
+final softColor = colors.isNotEmpty ? colors.first.withAlpha(120) : AppColors.tangerine.withAlpha(120);
+// After:
+final softColor = colors.isNotEmpty ? colors.first : AppColors.tangerine;
+```
+
+---
+
+### Apple Liquid Glass Header — `AppShellHeader` ✅
+
+**File:** `lib/core/widgets/app_shell.dart`
+
+Replaced per-element `BackdropFilter` (5–6 blur instances) with a single bar-level blur pane:
+
+```
+ClipRect → BackdropFilter(blur 6→28σ) → SizedBox(topPadding+76)
+  └─ DecoratedBox(white veil gradient + top rim + bottom separator)
+       └─ pills/buttons (plain white.withAlpha fills, no per-element blur)
+```
+
+**Scroll-driven `t` (home only, all other screens fixed at `t = 1.0`):**
+```dart
+final t = isHome ? scrollProgress : 1.0;
+final blurSigma      = 6.0 + 22.0 * t;       // 6 → 28
+final glassTopAlpha  = (55 * t).round();      // white veil top
+final glassBottomAlpha = (18 * t).round();    // white veil bottom
+final rimAlpha       = (100 * t).round();     // specular top rim
+final separatorAlpha = (35 * t).round();      // bottom separator
+```
+
+**No `accentAlpha`**: removed `waveColor` tint layer entirely — blur picks up background color naturally, giving a neutral dark glass on all screens (matching home page look). `waveColor` and `isDark` removed from `AppShellHeader.build()`.
+
+**Glass element style (no per-element blur):**
+- Fill: `Colors.white.withAlpha(48–55)`
+- Border: `Colors.white.withAlpha(80–90)`, 0.8px
+- Icons/text: `Colors.white`
+
+**Extracted widgets:** `_PetSwitcherPill` (shared pill, replaces ~160 lines of duplication).
+
+`flutter analyze`: No issues found.
+
+---
+
 ## 2026-06-18 (Session 2) — Carousel Compactness, Responsiveness, Adaptive Colors, Header Polish ✅
 
 ### Branch: `accessibility-fix`

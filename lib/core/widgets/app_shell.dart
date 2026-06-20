@@ -294,31 +294,32 @@ class AppShellHeader extends ConsumerWidget {
                 orElse: () => 0,
               );
               if (streak == 0) return const SizedBox.shrink();
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              final sFill   = isDark ? Colors.white.withAlpha(48) : Colors.black.withAlpha(8);
+              final sBorder = isDark ? Colors.white.withAlpha(80) : Colors.black.withAlpha(20);
+              final sText   = isDark ? Colors.white : Colors.black87;
               return DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: Colors.white.withAlpha(55), width: 0.5),
+                  border: Border.all(color: sBorder, width: 0.8),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(999),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      color: Colors.white.withAlpha(45),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text('🔥', style: TextStyle(fontSize: 13)),
-                          const SizedBox(width: 4),
-                          Text(
-                            '$streak',
-                            style: const TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white,
-                            ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    color: sFill,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('🔥', style: TextStyle(fontSize: 13)),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$streak',
+                          style: TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w800, color: sText,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -334,12 +335,14 @@ class AppShellHeader extends ConsumerWidget {
             final notifs = ref.watch(notificationsProvider).value ?? [];
             final unread = notifs.where((n) => !n.isRead).length;
             if (unread == 0) return const SizedBox.shrink();
+            final isDark = Theme.of(context).brightness == Brightness.dark;
             return TextButton(
               onPressed: () => ref.read(notificationsProvider.notifier).markAllRead(),
-              child: const Text(
+              child: Text(
                 'Mark all read',
                 style: TextStyle(
-                  fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white,
+                  fontSize: 13, fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
             );
@@ -399,6 +402,10 @@ class AppShellHeader extends ConsumerWidget {
       case ShellModule.marketplace:
         return Consumer(builder: (context, ref, _) {
           final cart = ref.watch(cartProvider);
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final cFill   = isDark ? Colors.white.withAlpha(48) : Colors.black.withAlpha(8);
+          final cBorder = isDark ? Colors.white.withAlpha(80) : Colors.black.withAlpha(20);
+          final cIcon   = isDark ? Colors.white : Colors.black87;
           return Semantics(
             key: const ValueKey<String>('market_action_cart'),
             label: 'Cart${cart.itemCount > 0 ? ", ${cart.itemCount} items" : ""}',
@@ -419,21 +426,16 @@ class AppShellHeader extends ConsumerWidget {
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
-                      ClipOval(
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withAlpha(45),
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white.withAlpha(55), width: 0.5),
-                            ),
-                            alignment: Alignment.center,
-                            child: const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 18),
-                          ),
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: cFill,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: cBorder, width: 0.8),
                         ),
+                        alignment: Alignment.center,
+                        child: Icon(Icons.shopping_bag_outlined, color: cIcon, size: 18),
                       ),
                       if (cart.itemCount > 0)
                         Positioned(
@@ -470,17 +472,21 @@ class AppShellHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final activePet = ref.watch(activePetControllerProvider);
     final topPadding = MediaQuery.paddingOf(context).top;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isHome = module == ShellModule.global && subIndex == 0;
     final scrollProgress = isHome ? ref.watch(homeScrollProgressProvider) : 0.0;
-    final waveColor = activePet?.speciesEnum.resolvedAccent(isDark) ?? AppColors.tangerine;
-    final bgColor = Color.lerp(
-      Colors.transparent,
-      waveColor.withAlpha(238),
-      isHome ? scrollProgress : 1.0,
-    )!;
-    final blurSigma = 24.0 * scrollProgress;
+    final t = isHome ? scrollProgress : 1.0;
+    final blurSigma = 6.0 + 22.0 * t;
+    final veilTopAlpha   = isDark ? (55 * t).round()  : (180 * t).round();
+    final veilBottomAlpha = isDark ? (18 * t).round() : (120 * t).round();
+    final rimColor       = isDark ? Colors.white.withAlpha((100 * t).round())
+                                  : Colors.black.withAlpha((20 * t).round());
+    final separatorColor = isDark ? Colors.white.withAlpha((35 * t).round())
+                                  : Colors.black.withAlpha((25 * t).round());
+    final btnFill        = isDark ? Colors.white.withAlpha(55)  : Colors.black.withAlpha(8);
+    final btnBorder      = isDark ? Colors.white.withAlpha(90)  : Colors.black.withAlpha(20);
+    final btnIcon        = isDark ? Colors.white : Colors.black87;
 
     final eyebrow = switch (module) {
       ShellModule.global   => _globalEyebrows[subIndex.clamp(0, _globalEyebrows.length - 1)],
@@ -500,20 +506,17 @@ class AppShellHeader extends ConsumerWidget {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: Colors.white.withAlpha(55), width: 0.5),
+                border: Border.all(color: btnBorder, width: 0.8),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(999),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Material(
-                    color: Colors.white.withAlpha(45),
-                    child: InkWell(
-                      onTap: () => context.canPop() ? context.pop() : context.go('/home'),
-                      child: const Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 14),
-                      ),
+                child: Material(
+                  color: btnFill,
+                  child: InkWell(
+                    onTap: () => context.canPop() ? context.pop() : context.go('/home'),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Icon(Icons.arrow_back_ios_new_rounded, color: btnIcon, size: 14),
                     ),
                   ),
                 ),
@@ -553,29 +556,31 @@ class AppShellHeader extends ConsumerWidget {
       ),
     );
 
-    Widget header = Container(
-      height: topPadding + 76.0,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [bgColor, bgColor.withAlpha(0)],
-          stops: const [0.65, 1.0],
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+        child: SizedBox(
+          height: topPadding + 76.0,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.white.withAlpha(veilTopAlpha),
+                  Colors.white.withAlpha(veilBottomAlpha),
+                ],
+              ),
+              border: Border(
+                top: BorderSide(color: rimColor, width: 0.5),
+                bottom: BorderSide(color: separatorColor, width: 0.5),
+              ),
+            ),
+            child: innerContent,
+          ),
         ),
       ),
-      child: innerContent,
     );
-
-    if (scrollProgress > 0.01) {
-      header = ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
-          child: header,
-        ),
-      );
-    }
-
-    return header;
   }
 }
 
@@ -594,6 +599,10 @@ class _HeaderIconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fillColor   = isDark ? Colors.white.withAlpha(48) : Colors.black.withAlpha(8);
+    final borderColor = isDark ? Colors.white.withAlpha(80) : Colors.black.withAlpha(20);
+    final iconColor   = isDark ? Colors.white : Colors.black87;
     final btn = Semantics(
       label: tooltip,
       button: true,
@@ -603,21 +612,16 @@ class _HeaderIconBtn extends StatelessWidget {
           width: 44,
           height: 44,
           child: Center(
-            child: ClipOval(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: const Color(0x33FFFFFF),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withAlpha(55), width: 0.5),
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(icon, color: Colors.white, size: 18),
-                ),
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: fillColor,
+                shape: BoxShape.circle,
+                border: Border.all(color: borderColor, width: 0.8),
               ),
+              alignment: Alignment.center,
+              child: Icon(icon, color: iconColor, size: 18),
             ),
           ),
         ),
@@ -649,22 +653,24 @@ class _PetSwitcherPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final labelColor  = isDark ? Colors.white : Colors.black.withAlpha(200);
+    final fillColor   = isDark ? Colors.white.withAlpha(55) : Colors.black.withAlpha(8);
+    final borderColor = isDark ? Colors.white.withAlpha(90) : Colors.black.withAlpha(20);
     return Semantics(
       button: true,
       label: 'Switch active pet',
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: Colors.white.withAlpha(55), width: 0.5),
+          border: Border.all(color: borderColor, width: 0.8),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(999),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Material(
-              color: Colors.white.withAlpha(45),
-              child: InkWell(
-                onTap: onTap,
+          child: Material(
+            color: fillColor,
+            child: InkWell(
+              onTap: onTap,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
                   child: Row(
@@ -686,10 +692,10 @@ class _PetSwitcherPill extends StatelessWidget {
                           children: [
                             Text(
                               eyebrow,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: Colors.white,
+                                color: labelColor.withAlpha(180),
                                 letterSpacing: 0.8,
                               ),
                             ),
@@ -704,14 +710,14 @@ class _PetSwitcherPill extends StatelessWidget {
                                     style: GoogleFonts.sora(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w800,
-                                      color: Colors.white,
+                                      color: labelColor,
                                     ),
                                   ),
                                 ),
                                 const SizedBox(width: 4),
-                                const Icon(
+                                Icon(
                                   Icons.keyboard_arrow_down_rounded,
-                                  color: Colors.white,
+                                  color: labelColor,
                                   size: 14,
                                 ),
                               ],
@@ -726,12 +732,12 @@ class _PetSwitcherPill extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }
 
 // ── Floating pill bottom nav ──────────────────────────────────────────────────
+
 
 class _FloatingNav extends StatelessWidget {
   const _FloatingNav({

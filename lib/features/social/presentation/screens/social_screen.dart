@@ -127,18 +127,6 @@ class _SocialViewState extends ConsumerState<_SocialView> {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isWide = screenWidth >= ResponsiveLayout.mobileMax;
-    final activePet = ref.watch(activePetControllerProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    Color headerColor = AppColors.poppy; // default social accent
-    if (activePet != null) {
-      headerColor = activePet.speciesEnum.resolvedAccent(isDark);
-      final dbAccent = activePet.accentColor;
-      if (dbAccent != null && dbAccent.isNotEmpty && dbAccent != '#FF6B9D') {
-        headerColor = AppColors.fromHexString(dbAccent, fallback: headerColor);
-      }
-    }
-
     final headerHeight = MediaQuery.paddingOf(context).top + 92.0;
 
     Widget content = Stack(
@@ -247,18 +235,6 @@ class _SocialViewState extends ConsumerState<_SocialView> {
           ),
         ),
 
-        // Wave header floats on top — waveColor: transparent so the WavePainter
-        // draws nothing below the curve; content scrolls through underneath.
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: WaveHeader(
-            color: headerColor,
-            height: MediaQuery.paddingOf(context).top + 76.0,
-            child: const SizedBox.shrink(),
-          ),
-        ),
       ],
     );
 
