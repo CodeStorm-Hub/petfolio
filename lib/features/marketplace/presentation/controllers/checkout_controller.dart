@@ -118,7 +118,7 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
   ///
   /// Flow: idle → loadingIntent → awaitingSheet → success | failure
   /// Cancel: awaitingSheet → idle (pending order row is cancelled)
-  Future<void> startCheckoutForShop(String shopId) async {
+  Future<void> startCheckoutForShop(String shopId, {String? promoCode}) async {
     if (isLoading) return;
 
     final cart = ref.read(cartProvider);
@@ -144,9 +144,10 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
     try {
       // 1. Insert pending order row for this vendor.
       orderId = await _repo.insertPendingOrder(
-        buyerId: user.id,
-        shopId:  shopId,
-        cart:    cart,
+        buyerId:   user.id,
+        shopId:    shopId,
+        cart:      cart,
+        promoCode: promoCode,
       );
       state = state.copyWith(orderId: orderId);
 
@@ -237,7 +238,7 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
   }
 
   /// Cash-on-Delivery checkout — inserts order then validates via Edge Function.
-  Future<void> startCodCheckoutForShop(String shopId) async {
+  Future<void> startCodCheckoutForShop(String shopId, {String? promoCode}) async {
     if (isLoading) return;
 
     final cart = ref.read(cartProvider);
@@ -262,9 +263,10 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
 
     try {
       orderId = await _repo.insertPendingOrder(
-        buyerId: user.id,
-        shopId: shopId,
-        cart: cart,
+        buyerId:   user.id,
+        shopId:    shopId,
+        cart:      cart,
+        promoCode: promoCode,
       );
       state = state.copyWith(orderId: orderId);
 
@@ -307,8 +309,9 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
   /// IPN webhook confirms the order server-side; Flutter polls for confirmation.
   Future<void> startSslcommerzCheckoutForShop(
     String shopId,
-    PaymentMethod method,
-  ) async {
+    PaymentMethod method, {
+    String? promoCode,
+  }) async {
     if (isLoading) return;
 
     final cart = ref.read(cartProvider);
@@ -333,9 +336,10 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
 
     try {
       orderId = await _repo.insertPendingOrder(
-        buyerId: user.id,
-        shopId:  shopId,
-        cart:    cart,
+        buyerId:   user.id,
+        shopId:    shopId,
+        cart:      cart,
+        promoCode: promoCode,
       );
       state = state.copyWith(orderId: orderId);
 

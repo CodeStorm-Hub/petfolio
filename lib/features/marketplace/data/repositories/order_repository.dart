@@ -24,12 +24,15 @@ class OrderRepository {
     required String buyerId,
     required String shopId,
     required CartState cart,
+    String? promoCode,
   }) async {
     try {
       final result = await _client.rpc('process_checkout', params: {
         'p_buyer_id':   buyerId,
         'p_shop_id':    shopId,
         'p_cart_items': cart.rpcLineItemsJsonForShop(shopId),
+        if (promoCode != null && promoCode.isNotEmpty)
+          'p_promo_code': promoCode.toUpperCase().trim(),
       });
       return result as String;
     } on PostgrestException catch (e) {

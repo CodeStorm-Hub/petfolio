@@ -368,6 +368,7 @@ class _VendorCheckoutSectionState
       );
 
   void _handleCheckout(int subtotalCents) {
+    final promoCode = _appliedPromo?.code;
     if (_method == PaymentMethod.cod) {
       showModalBottomSheet(
         context: context,
@@ -380,16 +381,26 @@ class _VendorCheckoutSectionState
           subtotalCents: subtotalCents,
           onConfirm: () {
             Navigator.pop(context);
-            ref.read(checkoutProvider.notifier).startCodCheckoutForShop(widget.shopId);
+            ref.read(checkoutProvider.notifier).startCodCheckoutForShop(
+              widget.shopId,
+              promoCode: promoCode,
+            );
           },
         ),
       );
     } else if (_method == PaymentMethod.bkash ||
                _method == PaymentMethod.nagad ||
                _method == PaymentMethod.sslcommerz) {
-      ref.read(checkoutProvider.notifier).startSslcommerzCheckoutForShop(widget.shopId, _method);
+      ref.read(checkoutProvider.notifier).startSslcommerzCheckoutForShop(
+        widget.shopId,
+        _method,
+        promoCode: promoCode,
+      );
     } else {
-      ref.read(checkoutProvider.notifier).startCheckoutForShop(widget.shopId);
+      ref.read(checkoutProvider.notifier).startCheckoutForShop(
+        widget.shopId,
+        promoCode: promoCode,
+      );
     }
   }
 
