@@ -57,7 +57,14 @@ class CartScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.surface1D : AppColors.surface3;
 
-    return WebCheckoutResumeListener(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          context.canPop() ? context.pop() : context.go('/marketplace');
+        }
+      },
+      child: WebCheckoutResumeListener(
       child: Scaffold(
         backgroundColor: bg,
         body: SafeArea(
@@ -67,7 +74,7 @@ class CartScreen extends ConsumerWidget {
               // ── Header ──────────────────────────────────────────────────────
               _CartHeader(
                 itemCount: cart.itemCount,
-                onBack: () => context.pop(),
+                onBack: () => context.canPop() ? context.pop() : context.go('/marketplace'),
                 onClear: cart.isEmpty
                     ? null
                     : () => ref.read(cartProvider.notifier).clear(),
@@ -123,6 +130,7 @@ class CartScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -353,8 +361,12 @@ class _VendorCheckoutSectionState
         ScaffoldMessenger.of(context).showSnackBar(_snack('${promo.discountLabel} applied!'));
         setState(() { _appliedPromo = promo; _promoApplied = true; _promoLoading = false; _promoExpanded = false; });
       }
-    } catch (_) {
-      if (mounted) setState(() { _promoLoading = false; _promoExpanded = false; });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        _snack('Could not apply promo. Please try again.', error: true),
+      );
+      setState(() { _promoLoading = false; _promoExpanded = false; });
     }
   }
 

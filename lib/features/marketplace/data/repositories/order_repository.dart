@@ -255,24 +255,37 @@ class OrderRepository {
   }
 
   /// Poll until the backend confirms payment (webhook updated the row) or
-  /// [timeout] elapses.  Throws [PaymentTimeoutException] on timeout so the
-  /// caller can distinguish "still pending" from a hard failure.
+  /// [timeout] elapses.  Uses exponential backoff between polls (2s → 10s cap)
+  /// and swallows transient network errors so a momentary blip does not fail
+  /// the entire verification.  Throws [PaymentTimeoutException] on timeout.
   Future<MarketplaceOrder> pollOrderConfirmation(
     String orderId, {
-    Duration timeout = const Duration(seconds: 15),
-    Duration interval = const Duration(seconds: 2),
+    Duration timeout = const Duration(seconds: 45),
   }) async {
     final deadline = DateTime.now().add(timeout);
+    var interval = const Duration(seconds: 2);
+    const maxInterval = Duration(seconds: 10);
+
     while (DateTime.now().isBefore(deadline)) {
-      final order = await fetchOrder(orderId);
-      if (order.paymentStatus == PaymentStatus.paid ||
-          order.status == OrderStatus.processing) {
-        return order;
-      }
-      if (order.status == OrderStatus.cancelled) {
-        throw Exception('Order was cancelled during verification.');
+      try {
+        final order = await fetchOrder(orderId);
+        if (order.paymentStatus == PaymentStatus.paid ||
+            order.status == OrderStatus.processing) {
+          return order;
+        }
+        if (order.status == OrderStatus.cancelled) {
+          throw Exception('Order was cancelled during verification.');
+        }
+      } catch (e) {
+        if (e.toString().contains('cancelled')) rethrow;
+        // Swallow transient errors (network, timeout) and keep polling.
       }
       await Future<void>.delayed(interval);
+      interval = Duration(
+        microseconds: (interval.inMicroseconds * 1.5)
+            .round()
+            .clamp(0, maxInterval.inMicroseconds),
+      );
     }
     throw const PaymentTimeoutException();
   }

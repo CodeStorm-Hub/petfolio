@@ -326,6 +326,14 @@ class _SearchBar extends ConsumerStatefulWidget {
 
 class _SearchBarState extends ConsumerState<_SearchBar> {
   final _controller = TextEditingController();
+  Timer? _debounce;
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -352,7 +360,12 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
           Expanded(
             child: TextField(
               controller: _controller,
-              onChanged: (v) => ref.read(marketplaceSearchQueryProvider.notifier).set(v),
+              onChanged: (v) {
+                _debounce?.cancel();
+                _debounce = Timer(const Duration(milliseconds: 300), () {
+                  ref.read(marketplaceSearchQueryProvider.notifier).set(v);
+                });
+              },
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: pt.ink950),
               decoration: InputDecoration(
                 hintText: 'Search treats, beds, toys…',
@@ -572,6 +585,19 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<Object?>(productLoadMoreErrorProvider, (_, err) {
+      if (err == null || !mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(err.toString()),
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: 'Retry',
+            onPressed: () => ref.read(productListProvider.notifier).loadMore(),
+          ),
+        ),
+      );
+    });
     return LayoutBuilder(
       builder: (context, constraints) => _buildBody(context, constraints.maxWidth),
     );
@@ -613,6 +639,7 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
       ),
       data: (_) {
         final filtered = ref.watch(filteredProductsProvider(widget.selectedCat));
+        final query = ref.watch(marketplaceSearchQueryProvider).trim();
 
         return CustomScrollView(
           controller: _scrollController,
@@ -672,26 +699,32 @@ class _ShopBodyState extends ConsumerState<_ShopBody> {
               ),
             ),
 
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-              sliver: SliverGrid.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: cols,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.64,
-                ),
-                itemCount: filtered.length,
-                itemBuilder: (_, i) => RepaintBoundary(
-                  child: _NewProductTile(
-                    product: filtered[i],
-                    onTap: () => widget.onProductTap(filtered[i]),
-                    onAdd: widget.onAdd,
+            if (filtered.isEmpty && query.isNotEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: _NoResultsState(query: query),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+                sliver: SliverGrid.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: cols,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 0.64,
+                  ),
+                  itemCount: filtered.length,
+                  itemBuilder: (_, i) => RepaintBoundary(
+                    child: _NewProductTile(
+                      product: filtered[i],
+                      onTap: () => widget.onProductTap(filtered[i]),
+                      onAdd: widget.onAdd,
+                    ),
                   ),
                 ),
               ),
-            ),
-            if (_loadingMore)
+            if (_loadingMore && filtered.isNotEmpty)
               const SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),
@@ -1350,6 +1383,47 @@ class _NewProductTileState extends State<_NewProductTile> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// No-results empty state
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _NoResultsState extends StatelessWidget {
+  const _NoResultsState({required this.query});
+  final String query;
+
+  @override
+  Widget build(BuildContext context) {
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('🔍', style: TextStyle(fontSize: 48)),
+            const SizedBox(height: 16),
+            Text(
+              'No results for "$query"',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: pt.ink950,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Try a different keyword or browse categories',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: pt.ink500),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Cart Drawer
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1486,6 +1560,30 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                 ),
           ),
           
+          if (items.isNotEmpty && shopGroups.length > 1)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.warningSoft,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.warning.withAlpha(60)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded, size: 16, color: AppColors.warning),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Items from ${shopGroups.length} shops — each ships separately.',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: pt.ink700),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           if (items.isNotEmpty)
             Container(
               padding: const EdgeInsets.fromLTRB(22, 14, 22, 22),
