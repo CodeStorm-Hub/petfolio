@@ -387,7 +387,7 @@ class AppShellHeader extends ConsumerWidget {
             onTap: () => context.go('/social/communities'),
           ),
           const SizedBox(width: 8),
-          _HeaderIconBtn(icon: Icons.search, tooltip: 'Search', onTap: () {}),
+          _HeaderIconBtn(icon: Icons.search, tooltip: 'Search', onTap: () => context.push('/social/search')),
           const SizedBox(width: 8),
           _HeaderIconBtn(icon: Icons.send_rounded, tooltip: 'Direct messages', onTap: () => context.go('/matching/inbox')),
         ]);
@@ -819,8 +819,6 @@ class _NavTab extends StatefulWidget {
 class _NavTabState extends State<_NavTab> with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
 
-  static const _spring = SpringDescription(mass: 1.0, stiffness: 550, damping: 32);
-
   @override
   void initState() {
     super.initState();
@@ -832,7 +830,9 @@ class _NavTabState extends State<_NavTab> with SingleTickerProviderStateMixin {
     super.didUpdateWidget(old);
     if (widget.isSelected == old.isSelected) return;
     if (widget.isSelected) {
-      _ctrl.animateWith(SpringSimulation(_spring, _ctrl.value, 1.0, 0.0));
+      _ctrl.animateWith(
+        SpringSimulation(PetfolioThemeExtension.spring, _ctrl.value, 1.0, 0.0),
+      );
     } else {
       _ctrl.animateTo(0.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
     }

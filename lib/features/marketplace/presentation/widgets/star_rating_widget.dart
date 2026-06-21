@@ -40,11 +40,15 @@ class StarRatingWidget extends StatelessWidget {
           );
 
           if (interactive) {
-            icon = GestureDetector(
-              onTap: () => onRatingChanged!(starIndex),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: icon,
+            icon = Semantics(
+              label: 'Rate $starIndex star${starIndex == 1 ? '' : 's'}',
+              button: true,
+              child: GestureDetector(
+                onTap: () => onRatingChanged!(starIndex),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: icon,
+                ),
               ),
             );
           }

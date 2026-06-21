@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
@@ -97,6 +98,8 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
   static const double radiusXl   = 20.0;
   static const double radius2xl  = 28.0;
   static const double radius3xl  = 32.0;
+  // M3 Expressive extra-extra-large corner token (May 2025 spec).
+  static const double radius4xl  = 48.0;
   static const double radiusPill = 999.0;
 
   // ── M3 Expressive shape tokens ────────────────────────────────────────────
@@ -122,9 +125,18 @@ class PetfolioThemeExtension extends ThemeExtension<PetfolioThemeExtension> {
   /// Spring-like overshoot for interactive components (nav tabs, FABs).
   static const Curve curveSpring = Curves.easeOutBack;
 
+  /// Shared M3 Expressive spatial-spring physics — drives real
+  /// [SpringSimulation]-based motion (nav indicator, FAB menu, card press,
+  /// celebration overlays). Reuse this single config everywhere a true
+  /// physics spring (not just a curve) is needed, so all "springy" motion
+  /// in the app feels like the same physical system.
+  static const SpringDescription spring =
+      SpringDescription(mass: 1.0, stiffness: 550, damping: 32);
+
   static const durationEnter = Duration(milliseconds: 300);
   static const durationExit  = Duration(milliseconds: 200);
 
+  static const double btnHeightXs   = 28.0;
   static const double btnHeightSm   = 36.0;
   static const double btnHeightMd   = 44.0;
   static const double btnHeightLg   = 52.0;
@@ -591,7 +603,9 @@ abstract final class AppTheme {
         showDragHandle: true,
         dragHandleColor: isDark ? AppColors.ink300D : AppColors.ink300,
         dragHandleSize: const Size(32, 4),
-        shape: const RoundedRectangleBorder(
+        // Squircle top corners — matches card shape language (was plain
+        // RoundedRectangleBorder, breaking the unified shape system).
+        shape: const RoundedSuperellipseBorder(
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(PetfolioThemeExtension.radius3xl),
           ),
@@ -602,7 +616,7 @@ abstract final class AppTheme {
         backgroundColor: isDark ? AppColors.surface0D : AppColors.surface0,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        shape: RoundedRectangleBorder(
+        shape: RoundedSuperellipseBorder(
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius2xl),
         ),
         titleTextStyle: GoogleFonts.sora(
@@ -674,7 +688,7 @@ abstract final class AppTheme {
         foregroundColor: Colors.white,
         elevation: 4,
         highlightElevation: 6,
-        shape: RoundedRectangleBorder(
+        shape: RoundedSuperellipseBorder(
           borderRadius: BorderRadius.circular(PetfolioThemeExtension.radius2xl),
         ),
         extendedTextStyle: GoogleFonts.sora(

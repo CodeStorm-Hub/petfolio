@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/firebase/fcm_service.dart';
 import '../../../../core/firebase/firebase_env.dart';
 import '../../../../core/platform/web_push_environment.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class WebPushEnableBanner extends ConsumerStatefulWidget {
   const WebPushEnableBanner({super.key});
@@ -72,7 +72,7 @@ class _WebPushEnableBannerState extends ConsumerState<WebPushEnableBanner> {
   }
 
   Future<void> _enable() async {
-    final session = Supabase.instance.client.auth.currentSession;
+    final session = ref.read(currentSessionProvider);
     if (session == null) {
       AppSnackBar.showError('Sign in to enable notifications.');
       return;

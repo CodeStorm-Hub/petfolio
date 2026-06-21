@@ -1,14 +1,12 @@
 import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/appointment.dart';
-import '../../data/models/vet_service.dart';
 import '../../data/repositories/appointment_repository.dart';
 import '../../data/repositories/vet_repository.dart';
 import '../controllers/appointment_controller.dart';
@@ -516,12 +514,7 @@ class AppointmentCardWidget extends ConsumerWidget {
       return [];
     }
     try {
-      final serviceRow = await Supabase.instance.client
-          .from('vet_services')
-          .select()
-          .eq('id', appt.serviceId!)
-          .single();
-      final service = VetService.fromJson(Map<String, dynamic>.from(serviceRow as Map));
+      final service = await ref.read(vetRepositoryProvider).fetchService(appt.serviceId!);
 
       return await ref.read(vetRepositoryProvider).fetchAvailableSlots(
         clinicId: appt.clinicId!,
@@ -763,7 +756,9 @@ class _AddAppointmentSheetState extends ConsumerState<_AddAppointmentSheet> {
                         firstDate: DateTime.now().subtract(const Duration(days: 30)),
                         lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
                       );
-                      if (picked != null) setState(() => _selectedDate = picked);
+                      if (picked != null && mounted) {
+                        setState(() => _selectedDate = picked);
+                      }
                     },
                     icon: const Icon(Icons.calendar_today_rounded, size: 16),
                     label: Text(_dateLabel(_selectedDate)),
@@ -777,7 +772,9 @@ class _AddAppointmentSheetState extends ConsumerState<_AddAppointmentSheet> {
                         context: context,
                         initialTime: _selectedTime,
                       );
-                      if (picked != null) setState(() => _selectedTime = picked);
+                      if (picked != null && mounted) {
+                        setState(() => _selectedTime = picked);
+                      }
                     },
                     icon: const Icon(Icons.access_time_rounded, size: 16),
                     label: Text(_selectedTime.format(context)),

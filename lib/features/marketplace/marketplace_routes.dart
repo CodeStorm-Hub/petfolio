@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/navigation/pf_page_transitions.dart';
 import 'data/models/marketplace_order.dart';
 import 'data/models/product.dart';
 import 'presentation/screens/cart_screen.dart';
@@ -19,123 +20,160 @@ List<RouteBase> marketplaceRoutes(GlobalKey<NavigatorState> rootKey) => [
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/categories',
-    builder: (_, _) => const MarketplaceCategoriesScreen(),
+    pageBuilder: (context, state) => pfSharedAxisPage(
+      state: state,
+      child: const MarketplaceCategoriesScreen(),
+    ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/product/:id',
-    builder: (context, state) => ProductDetailScreen(
-      productId: state.pathParameters['id']!,
-      product: state.extra as Product?,
+    pageBuilder: (context, state) => pfSharedAxisPage(
+      state: state,
+      child: ProductDetailScreen(
+        productId: state.pathParameters['id']!,
+        product: state.extra as Product?,
+      ),
     ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/cart',
-    builder: (context, state) => const CartScreen(),
+    pageBuilder: (context, state) =>
+        pfFadeThroughPage(state: state, child: const CartScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/order/:id',
-    builder: (context, state) => OrderConfirmationScreen(
-      orderId: state.pathParameters['id']!,
+    pageBuilder: (context, state) => pfSharedAxisPage(
+      state: state,
+      child: OrderConfirmationScreen(
+        orderId: state.pathParameters['id']!,
+      ),
     ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/orders/:id',
-    builder: (context, state) => BuyerOrderDetailScreen(
-      orderId: state.pathParameters['id']!,
-      order: state.extra as MarketplaceOrder?,
+    pageBuilder: (context, state) => pfSharedAxisPage(
+      state: state,
+      child: BuyerOrderDetailScreen(
+        orderId: state.pathParameters['id']!,
+        order: state.extra as MarketplaceOrder?,
+      ),
     ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/profile/orders',
-    builder: (context, state) => const BuyerOrderListScreen(),
+    pageBuilder: (context, state) =>
+        pfSharedAxisPage(state: state, child: const BuyerOrderListScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/profile/orders/:id',
-    builder: (context, state) => BuyerOrderDetailScreen(
-      orderId: state.pathParameters['id']!,
-      order: state.extra as MarketplaceOrder?,
+    pageBuilder: (context, state) => pfSharedAxisPage(
+      state: state,
+      child: BuyerOrderDetailScreen(
+        orderId: state.pathParameters['id']!,
+        order: state.extra as MarketplaceOrder?,
+      ),
     ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/shop/:id',
-    builder: (context, state) => ShopStorefrontRoute(
-      shopId: state.pathParameters['id']!,
+    pageBuilder: (context, state) => pfSharedAxisPage(
+      state: state,
+      child: ShopStorefrontRoute(
+        shopId: state.pathParameters['id']!,
+      ),
     ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller',
-    builder: (context, state) => const VendorWebRedirectScreen(),
+    pageBuilder: (context, state) =>
+        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/setup',
-    builder: (context, state) => const VendorWebRedirectScreen(),
+    pageBuilder: (context, state) =>
+        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/edit-shop',
-    builder: (context, state) => const VendorWebRedirectScreen(),
+    pageBuilder: (context, state) =>
+        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/kyc',
-    builder: (context, state) => const VendorWebRedirectScreen(),
+    pageBuilder: (context, state) =>
+        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/products',
-    builder: (context, state) => const VendorWebRedirectScreen(),
+    pageBuilder: (context, state) =>
+        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/products/add',
-    builder: (context, state) => const VendorWebRedirectScreen(),
+    pageBuilder: (context, state) =>
+        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/products/:id/edit',
-    builder: (context, state) => const VendorWebRedirectScreen(),
+    pageBuilder: (context, state) =>
+        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/orders',
-    builder: (context, state) => const VendorWebRedirectScreen(),
+    pageBuilder: (context, state) =>
+        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/orders/:id',
-    builder: (context, state) => const VendorWebRedirectScreen(),
+    pageBuilder: (context, state) =>
+        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/seller/earnings',
-    builder: (context, state) => const VendorWebRedirectScreen(),
+    pageBuilder: (context, state) =>
+        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/wishlist',
-    builder: (_, _) => const WishlistScreen(),
+    pageBuilder: (context, state) =>
+        pfSharedAxisPage(state: state, child: const WishlistScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/orders/:id/prescription',
-    builder: (context, state) => PrescriptionUploadScreen(
-      orderId: state.pathParameters['id']!,
+    pageBuilder: (context, state) => pfSharedAxisPage(
+      state: state,
+      child: PrescriptionUploadScreen(
+        orderId: state.pathParameters['id']!,
+      ),
     ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/orders/:id/tracking',
-    builder: (context, state) => ShipmentTrackingScreen(
-      orderId: state.pathParameters['id']!,
+    pageBuilder: (context, state) => pfSharedAxisPage(
+      state: state,
+      child: ShipmentTrackingScreen(
+        orderId: state.pathParameters['id']!,
+      ),
     ),
   ),
 ];

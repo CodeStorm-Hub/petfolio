@@ -66,18 +66,21 @@ class _MedicalVaultBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
       final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final asyncRecords = ref.watch(healthVaultControllerProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mintSoft = isDark ? AppColors.mintSoftD : AppColors.mintSoft;
+    final mint700 = isDark ? AppColors.mint700D : AppColors.mint700;
 
     return Scaffold(
-      backgroundColor: AppColors.cream,
+      backgroundColor: pt.surface1,
       body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [AppColors.mintSoft, AppColors.cream],
+                    colors: [mintSoft, pt.surface1],
                   ),
                 ),
                 padding: EdgeInsets.fromLTRB(16, MediaQuery.paddingOf(context).top + 76.0, 16, 28),
@@ -89,11 +92,11 @@ class _MedicalVaultBody extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             '${petName.toUpperCase()} · MEDICAL VAULT',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.8,
-                              color: AppColors.mint700,
+                              color: mint700,
                             ),
                           ),
                         ),
@@ -125,10 +128,10 @@ class _MedicalVaultBody extends ConsumerWidget {
                           height: 1.05,
                           color: pt.ink950,
                         ),
-                        children: const [
-                          TextSpan(text: 'Everything '),
-                          TextSpan(text: 'healthy', style: TextStyle(color: AppColors.mint700)),
-                          TextSpan(text: ',\nin one cozy spot.'),
+                        children: [
+                          const TextSpan(text: 'Everything '),
+                          TextSpan(text: 'healthy', style: TextStyle(color: mint700)),
+                          const TextSpan(text: ',\nin one cozy spot.'),
                         ],
                       ),
                     ),
@@ -349,6 +352,9 @@ class _ShareWithVetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
       final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+      final cs = Theme.of(context).colorScheme;
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final mintSoft = isDark ? AppColors.mintSoftD : AppColors.mintSoft;
     return Semantics(
       label: 'Share medical records',
       button: true,
@@ -367,8 +373,8 @@ class _ShareWithVetCard extends StatelessWidget {
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            gradient: const LinearGradient(
-              colors: [AppColors.mintSoft, AppColors.surface0],
+            gradient: LinearGradient(
+              colors: [mintSoft, cs.surface],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -411,13 +417,14 @@ class _HealthPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
       final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+      final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.surface0,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.line, width: 1.5),
-        boxShadow: const [BoxShadow(color: AppColors.shadowE1L, blurRadius: 4, offset: Offset(0, 2))],
+        border: Border.all(color: pt.line, width: 1.5),
+        boxShadow: pt.shadowE1,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,6 +457,9 @@ class _VaultSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
       final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+      final cs = Theme.of(context).colorScheme;
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final surfaceBase = isDark ? AppColors.surface1D : AppColors.surface0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -461,7 +471,7 @@ class _VaultSection extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: Color.lerp(accent, AppColors.surface0, 0.78),
+                  color: Color.lerp(accent, surfaceBase, 0.78),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(child: Icon(icon, size: 18, color: accent)),
@@ -479,7 +489,7 @@ class _VaultSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Color.lerp(accent, AppColors.surface0, 0.82),
+                  color: Color.lerp(accent, surfaceBase, 0.82),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
@@ -497,9 +507,9 @@ class _VaultSection extends StatelessWidget {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: AppColors.surface0,
+            color: cs.surface,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.line),
+            border: Border.all(color: pt.line),
           ),
           child: records.isEmpty
               ? PetfolioEmptyState(
@@ -511,7 +521,7 @@ class _VaultSection extends StatelessWidget {
                     for (int i = 0; i < records.length; i++) ...[
                       _MedicalRecordCard(record: records[i], accent: accent, icon: icon),
                       if (i < records.length - 1)
-                        const Divider(height: 1, thickness: 1, color: AppColors.line),
+                        Divider(height: 1, thickness: 1, color: pt.line),
                     ]
                   ],
                 ),
@@ -567,9 +577,16 @@ class _MedicalRecordCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
       final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceBase = isDark ? AppColors.surface1D : AppColors.surface0;
+    final inkTarget = isDark ? AppColors.ink300D : AppColors.ink950;
     final warn = record.isExpiringSoon;
-    final statusBg = warn ? AppColors.sunnySoft : Color.lerp(accent, AppColors.surface0, 0.85)!;
-    final statusColor = warn ? AppColors.sunny700 : Color.lerp(accent, AppColors.ink950, 0.5)!;
+    final statusBg = warn
+        ? (isDark ? AppColors.sunnySoftD : AppColors.sunnySoft)
+        : Color.lerp(accent, surfaceBase, 0.85)!;
+    final statusColor = warn
+        ? (isDark ? AppColors.sunny700D : AppColors.sunny700)
+        : Color.lerp(accent, inkTarget, 0.5)!;
     final statusLabel = warn ? 'Due soon' : (record.isActive ? 'Active' : 'Archived');
     
     return Dismissible(
@@ -596,7 +613,7 @@ class _MedicalRecordCard extends ConsumerWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: Color.lerp(accent, AppColors.surface0, 0.82),
+                color: Color.lerp(accent, surfaceBase, 0.82),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Center(child: Icon(icon, size: 20, color: accent)),

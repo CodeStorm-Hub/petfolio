@@ -570,6 +570,11 @@ class _ProductInfo extends StatelessWidget {
     final showSubPrice = subscribe && product.subscribable;
     final displayCents = showSubPrice ? product.subPriceCents : product.priceCents;
     final displayFormatted = formatCents(displayCents);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sunnySoft = isDark ? AppColors.sunnySoftD : AppColors.sunnySoft;
+    final sunny700 = isDark ? AppColors.sunny700D : AppColors.sunny700;
+    final mintSoft = isDark ? AppColors.mintSoftD : AppColors.mintSoft;
+    final mint700 = isDark ? AppColors.mint700D : AppColors.mint700;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -580,19 +585,19 @@ class _ProductInfo extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.sunny.withAlpha(26),
+                color: sunnySoft,
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.star_rounded, color: AppColors.sunny700, size: 12),
+                  Icon(Icons.star_rounded, color: sunny700, size: 12),
                   const SizedBox(width: 4),
                   Text(
                     product.rating != null
                         ? product.rating!.toStringAsFixed(1)
                         : '—',
-                    style: const TextStyle(
-                      color: AppColors.sunny700,
+                    style: TextStyle(
+                      color: sunny700,
                       fontWeight: FontWeight.w700,
                       fontSize: 11,
                     ),
@@ -600,8 +605,8 @@ class _ProductInfo extends StatelessWidget {
                   if (product.reviewCount != null && product.reviewCount! > 0)
                     Text(
                       ' · ${product.reviewCount} review${product.reviewCount == 1 ? '' : 's'}',
-                      style: const TextStyle(
-                        color: AppColors.sunny700,
+                      style: TextStyle(
+                        color: sunny700,
                         fontWeight: FontWeight.w700,
                         fontSize: 11,
                       ),
@@ -613,13 +618,13 @@ class _ProductInfo extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.mint.withAlpha(26),
+                color: mintSoft,
                 borderRadius: BorderRadius.circular(999),
               ),
-              child: const Text(
+              child: Text(
                 'Free delivery',
                 style: TextStyle(
-                  color: AppColors.mint700,
+                  color: mint700,
                   fontWeight: FontWeight.w700,
                   fontSize: 11,
                 ),
@@ -1234,15 +1239,19 @@ class _VariantSheetContentState extends ConsumerState<_VariantSheetContent> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: AppColors.mint.withAlpha(30),
+                              color: isDark
+                                  ? AppColors.mintSoftD
+                                  : AppColors.mintSoft,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
+                            child: Text(
                               'COMPLETE',
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.mint700,
+                                color: isDark
+                                    ? AppColors.mint700D
+                                    : AppColors.mint700,
                                 letterSpacing: 0.5,
                               ),
                             ),

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../matching/data/models/chat_message.dart';
 import '../../../matching/presentation/controllers/chat_conversation_controller.dart';
 import '../../../matching/presentation/matching_navigation.dart';
@@ -136,7 +136,7 @@ class _UnifiedChatScreenState extends ConsumerState<UnifiedChatScreen> {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final messagesAsync = ref.watch(chatConversationControllerProvider(_args));
-    final myUserId = Supabase.instance.client.auth.currentUser?.id;
+    final myUserId = ref.watch(currentUserProvider)?.id;
 
     return Scaffold(
       backgroundColor: pt.surface1,

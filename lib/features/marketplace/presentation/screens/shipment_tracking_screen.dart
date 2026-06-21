@@ -21,7 +21,7 @@ class ShipmentTrackingScreen extends ConsumerWidget {
     final async = ref.watch(shipmentProvider(orderId));
 
     return Scaffold(
-      backgroundColor: AppColors.surface1,
+      backgroundColor: pt.surface1,
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
@@ -200,13 +200,15 @@ class _ShipmentTimeline extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentIdx = _steps.indexOf(status);
 
+    final cs = Theme.of(context).colorScheme;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
-        color: AppColors.surface0,
-        boxShadow: const [
-          BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+        color: cs.surface,
+        boxShadow: [
+          BoxShadow(color: pt.line, spreadRadius: 0.5),
         ],
       ),
       child: Column(
@@ -223,9 +225,9 @@ class _ShipmentTimeline extends StatelessWidget {
                     height: 22,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isDone ? AppColors.mint : AppColors.surface2,
+                      color: isDone ? AppColors.mint : pt.surface2,
                       border: Border.all(
-                        color: isDone ? AppColors.mint : AppColors.line,
+                        color: isDone ? AppColors.mint : pt.line,
                         width: 2,
                       ),
                     ),
@@ -238,7 +240,7 @@ class _ShipmentTimeline extends StatelessWidget {
                     Container(
                       width: 2,
                       height: 28,
-                      color: isDone ? AppColors.mint : AppColors.line,
+                      color: isDone ? AppColors.mint : pt.line,
                     ),
                 ],
               ),
@@ -251,7 +253,7 @@ class _ShipmentTimeline extends StatelessWidget {
                     fontSize: 14,
                     fontWeight:
                         i == currentIdx ? FontWeight.w700 : FontWeight.w500,
-                    color: isDone ? AppColors.ink950 : AppColors.ink300,
+                    color: isDone ? pt.ink950 : pt.ink300,
                   ),
                 ),
               ),
@@ -270,14 +272,15 @@ class _TrackingDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final cs = Theme.of(context).colorScheme;
       final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
-        color: AppColors.surface0,
-        boxShadow: const [
-          BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+        color: cs.surface,
+        boxShadow: [
+          BoxShadow(color: pt.line, spreadRadius: 0.5),
         ],
       ),
       child: Column(

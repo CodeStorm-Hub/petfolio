@@ -18,4 +18,8 @@ export 'pf_card.dart';
 export 'responsive_layout.dart';
 export 'app_shell.dart';
 export 'keep_alive_tab.dart';
+export 'pf_fab_menu.dart';
+export 'pf_button_group.dart';
+export 'pf_flexible_app_bar.dart';
+export 'pf_search_app_bar.dart';
 

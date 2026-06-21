@@ -108,6 +108,8 @@ class _WeightChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mint = isDark ? AppColors.mintD : AppColors.mint;
     final weights = logs.map((l) => l.weightKg).toList();
     final minY = (weights.reduce((a, b) => a < b ? a : b) - 0.5).clamp(0.0, double.infinity);
     final maxY = weights.reduce((a, b) => a > b ? a : b) + 0.5;
@@ -167,14 +169,14 @@ class _WeightChart extends StatelessWidget {
               spots: spots,
               isCurved: true,
               curveSmoothness: 0.35,
-              color: AppColors.mint,
+              color: mint,
               barWidth: 2.5,
               isStrokeCapRound: true,
               dotData: FlDotData(
                 show: true,
                 getDotPainter: (spot, pct, bar, idx) => FlDotCirclePainter(
                   radius: 4,
-                  color: AppColors.mint,
+                  color: mint,
                   strokeWidth: 2,
                   strokeColor: Colors.white,
                 ),
@@ -185,8 +187,8 @@ class _WeightChart extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    AppColors.mint.withAlpha(60),
-                    AppColors.mint.withAlpha(0),
+                    mint.withAlpha(60),
+                    mint.withAlpha(0),
                   ],
                 ),
               ),
@@ -200,7 +202,7 @@ class _WeightChart extends StatelessWidget {
                 final log = logs[s.x.toInt()];
                 return LineTooltipItem(
                   '${log.weightKg} kg\n',
-                  const TextStyle(color: AppColors.mint, fontWeight: FontWeight.w700, fontSize: 13),
+                  TextStyle(color: mint, fontWeight: FontWeight.w700, fontSize: 13),
                   children: [
                     TextSpan(
                       text: '${log.recordedAt.year}/${log.recordedAt.month}/${log.recordedAt.day}',

@@ -253,6 +253,14 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
     final done = task.isCompleted;
     final due  = !done && task.isDueToday && task.scheduledTime != null;
     final color = _color;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final lilacSoft = isDark ? AppColors.lilacSoftD : AppColors.lilacSoft;
+    final lilac700 = isDark ? AppColors.lilac700D : AppColors.lilac700;
+    final poppy700 = isDark ? AppColors.poppy700D : AppColors.poppy700;
+    final mintSoft = isDark ? AppColors.mintSoftD : AppColors.mintSoft;
+    final sunnySoft = isDark ? AppColors.sunnySoftD : AppColors.sunnySoft;
+    final mint700 = isDark ? AppColors.mint700D : AppColors.mint700;
+    final sunny700 = isDark ? AppColors.sunny700D : AppColors.sunny700;
 
     final taskLabel = done
         ? '${task.title}, completed'
@@ -360,17 +368,17 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
-                            decoration: const BoxDecoration(
-                              color: AppColors.lilacSoft,
-                              borderRadius: BorderRadius.all(Radius.circular(999)),
+                            decoration: BoxDecoration(
+                              color: lilacSoft,
+                              borderRadius: const BorderRadius.all(Radius.circular(999)),
                             ),
                             child: Text(
                               _frequencyPill(task.frequency),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.3,
-                                color: AppColors.lilac700,
+                                color: lilac700,
                                 height: 1.2,
                               ),
                             ),
@@ -397,7 +405,7 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: due ? AppColors.poppy700 : pt.ink500,
+                              color: due ? poppy700 : pt.ink500,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -417,7 +425,7 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: done ? AppColors.mintSoft : AppColors.sunnySoft,
+                      color: done ? mintSoft : sunnySoft,
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
                         color: done
@@ -435,7 +443,7 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 0.2,
-                            color: done ? AppColors.mint700 : AppColors.sunny700,
+                            color: done ? mint700 : sunny700,
                             height: 1,
                           ),
                         ),

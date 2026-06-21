@@ -207,10 +207,13 @@ class _ClinicAvatarPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: size,
       height: size,
-      color: AppColors.sky.withAlpha(30),
+      color: isDark
+          ? AppColors.skySoftD.withAlpha(170)
+          : AppColors.sky.withAlpha(30),
       alignment: Alignment.center,
       child: Text('🏥', style: TextStyle(fontSize: size * 0.5)),
     );

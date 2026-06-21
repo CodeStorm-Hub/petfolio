@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../marketplace/presentation/controllers/address_controller.dart';
 import '../marketplace/presentation/widgets/address_sheet.dart';
 import '../marketplace/data/models/user_address.dart';
+import '../../core/navigation/pf_page_transitions.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/widgets.dart';
@@ -14,7 +15,10 @@ List<GoRoute> settingsRoutes(GlobalKey<NavigatorState> rootKey) => [
       GoRoute(
         path: '/settings/addresses',
         parentNavigatorKey: rootKey,
-        builder: (_, _) => const _AddressManagementScreen(),
+        pageBuilder: (context, state) => pfSharedAxisPage(
+          state: state,
+          child: const _AddressManagementScreen(),
+        ),
       ),
     ];
 
@@ -198,15 +202,15 @@ class _AddressCard extends StatelessWidget {
                           horizontal: 7, vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.mint.withAlpha(25),
+                          color: AppColors.mint.withAlpha(isDark ? 40 : 25),
                           borderRadius: BorderRadius.circular(999),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Default',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.mint700,
+                            color: isDark ? AppColors.mint700D : AppColors.mint700,
                           ),
                         ),
                       ),

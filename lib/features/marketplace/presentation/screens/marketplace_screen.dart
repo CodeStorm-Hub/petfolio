@@ -321,81 +321,13 @@ class _MarketHeader extends ConsumerWidget {
 }
 
 
-class _SearchBar extends ConsumerStatefulWidget {
+class _SearchBar extends ConsumerWidget {
   @override
-  ConsumerState<_SearchBar> createState() => _SearchBarState();
-}
-
-class _SearchBarState extends ConsumerState<_SearchBar> {
-  final _controller = TextEditingController();
-  Timer? _debounce;
-
-  @override
-  void dispose() {
-    _debounce?.cancel();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final hasText = ref.watch(marketplaceSearchQueryProvider.select((q) => q.isNotEmpty));
-
-    return Container(
-      height: 44,
-      decoration: BoxDecoration(
-        color: isDark ? pt.surface2 : Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: isDark ? pt.line : pt.line.withAlpha(160),
-          width: 1.2,
-        ),
-        boxShadow: const [BoxShadow(color: AppColors.shadowE1L, blurRadius: 8, offset: Offset(0, 2))],
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Icon(Icons.search_rounded, size: 20, color: pt.ink500),
-          const SizedBox(width: 10),
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              onChanged: (v) {
-                _debounce?.cancel();
-                _debounce = Timer(const Duration(milliseconds: 300), () {
-                  ref.read(marketplaceSearchQueryProvider.notifier).set(v);
-                });
-              },
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: pt.ink950),
-              decoration: InputDecoration(
-                hintText: 'Search treats, beds, toys…',
-                hintStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: pt.ink500),
-                isDense: true,
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                disabledBorder: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-              ),
-            ),
-          ),
-          if (hasText)
-            Semantics(
-              label: 'Clear search',
-              button: true,
-              child: GestureDetector(
-                onTap: () {
-                  _controller.clear();
-                  ref.read(marketplaceSearchQueryProvider.notifier).clear();
-                },
-                child: Icon(Icons.close_rounded, size: 18, color: pt.ink500),
-              ),
-            ),
-        ],
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PfSearchAppBar(
+      hintText: 'Search treats, beds, toys…',
+      onQueryChanged: (v) =>
+          ref.read(marketplaceSearchQueryProvider.notifier).set(v),
     );
   }
 }

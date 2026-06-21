@@ -85,12 +85,13 @@ class _PrescriptionUploadScreenState
 
   @override
   Widget build(BuildContext context) {
+      final cs = Theme.of(context).colorScheme;
       final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final rxAsync = ref.watch(prescriptionUploadProvider(widget.orderId));
     final existing = rxAsync.asData?.value;
 
     return Scaffold(
-      backgroundColor: AppColors.surface1,
+      backgroundColor: pt.surface1,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -157,11 +158,11 @@ class _PrescriptionUploadScreenState
                           border: Border.all(
                             color: _pickedFile != null
                                 ? AppColors.mint
-                                : AppColors.line,
+                                : pt.line,
                             width: 1.5,
                             style: BorderStyle.solid,
                           ),
-                          color: AppColors.surface0,
+                          color: cs.surface,
                         ),
                         child: _pickedFile != null
                             ? ClipRRect(
@@ -188,8 +189,7 @@ class _PrescriptionUploadScreenState
                                     'JPG, PNG or PDF',
                                     style: TextStyle(
                                         fontSize: 12,
-                                        color:
-                                            AppColors.ink500.withAlpha(150)),
+                                        color: pt.ink500.withAlpha(150)),
                                   ),
                                 ],
                               ),
@@ -205,7 +205,7 @@ class _PrescriptionUploadScreenState
                           borderRadius: BorderRadius.circular(14),
                         ),
                         filled: true,
-                        fillColor: AppColors.surface0,
+                        fillColor: cs.surface,
                       ),
                     ),
                     const SizedBox(height: 28),

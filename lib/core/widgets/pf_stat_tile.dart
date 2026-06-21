@@ -213,6 +213,12 @@ class PfDailyQuestRow extends StatelessWidget {
     final ink950 = isDark ? AppColors.ink950D : AppColors.ink950;
     final ink500 = isDark ? AppColors.ink500D : AppColors.ink500;
     final cream2 = isDark ? AppColors.cream2D : AppColors.cream2;
+    final mintSoft = isDark ? AppColors.mintSoftD : AppColors.mintSoft;
+    final sunnySoft = isDark ? AppColors.sunnySoftD : AppColors.sunnySoft;
+    final poppySoft = isDark ? AppColors.poppySoftD : AppColors.poppySoft;
+    final mint700 = isDark ? AppColors.mint700D : AppColors.mint700;
+    final sunny700 = isDark ? AppColors.sunny700D : AppColors.sunny700;
+    final poppy700 = isDark ? AppColors.poppy700D : AppColors.poppy700;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
@@ -225,9 +231,9 @@ class PfDailyQuestRow extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
               color: done
-                  ? AppColors.mintSoft
+                  ? mintSoft
                   : due
-                      ? AppColors.poppySoft
+                      ? poppySoft
                       : cream2,
             ),
             child: Center(
@@ -260,7 +266,7 @@ class PfDailyQuestRow extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: due ? AppColors.poppy700 : ink500,
+                    color: due ? poppy700 : ink500,
                   ),
                 ),
               ],
@@ -272,7 +278,7 @@ class PfDailyQuestRow extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(999),
-              color: done ? AppColors.mintSoft : AppColors.sunnySoft,
+              color: done ? mintSoft : sunnySoft,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -282,7 +288,7 @@ class PfDailyQuestRow extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w900,
-                    color: done ? AppColors.mint700 : AppColors.sunny700,
+                    color: done ? mint700 : sunny700,
                   ),
                 ),
                 const SizedBox(width: 3),
@@ -290,7 +296,7 @@ class PfDailyQuestRow extends StatelessWidget {
                   '⭐',
                   style: TextStyle(
                     fontSize: 11,
-                    color: done ? AppColors.mint700 : AppColors.sunny700,
+                    color: done ? mint700 : sunny700,
                   ),
                 ),
               ],

@@ -157,6 +157,7 @@ class _CartHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
       final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+      final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
       child: Row(
@@ -176,15 +177,15 @@ class _CartHeader extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: AppColors.mint.withAlpha(30),
+                color: isDark ? AppColors.mintSoftD : AppColors.mintSoft,
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
                 '$itemCount item${itemCount == 1 ? '' : 's'}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.mint700,
+                  color: isDark ? AppColors.mint700D : AppColors.mint700,
                 ),
               ),
             ),
@@ -1139,6 +1140,7 @@ class _PaymentChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Semantics(
       label: '$label${selected ? ", selected" : ""}',
       button: true,
@@ -1152,9 +1154,13 @@ class _PaymentChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: selected ? AppColors.lilac.withAlpha(20) : AppColors.surface1,
+          color: selected
+              ? (isDark ? AppColors.lilacSoftD : AppColors.lilacSoft)
+              : (isDark ? AppColors.surface1D : AppColors.surface1),
           border: Border.all(
-            color: selected ? AppColors.lilac : AppColors.line,
+            color: selected
+                ? (isDark ? AppColors.lilacD : AppColors.lilac)
+                : (isDark ? AppColors.lineD : AppColors.line),
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -1164,7 +1170,9 @@ class _PaymentChip extends StatelessWidget {
             Icon(
               icon,
               size: 16,
-              color: selected ? AppColors.lilac : AppColors.ink500,
+              color: selected
+                  ? (isDark ? AppColors.lilacD : AppColors.lilac)
+                  : AppColors.ink500,
             ),
             const SizedBox(width: 6),
             Flexible(
@@ -1173,7 +1181,9 @@ class _PaymentChip extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: selected ? AppColors.lilac700 : AppColors.ink700,
+                  color: selected
+                      ? (isDark ? AppColors.lilac700D : AppColors.lilac700)
+                      : AppColors.ink700,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),

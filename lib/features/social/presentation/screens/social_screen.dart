@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:share_plus/share_plus.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -19,6 +18,7 @@ import '../../../../core/widgets/widgets.dart';
 import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../../pet_profile/presentation/controllers/pet_list_controller.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 
 import '../../data/models/feed_post.dart';
 import '../../data/models/story.dart';
@@ -383,7 +383,7 @@ class _StoriesRow extends ConsumerWidget {
     if (pet == null) return const SizedBox.shrink();
     final storiesAsync = ref.watch(storiesProvider);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
-    final userId = Supabase.instance.client.auth.currentUser?.id;
+    final userId = ref.watch(currentUserProvider)?.id;
 
     return storiesAsync.when(
       loading: () => SizedBox(
@@ -1554,8 +1554,9 @@ class _RichCaption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final hashStyle = baseStyle?.copyWith(
-      color: AppColors.lilac700,
+      color: isDark ? AppColors.lilac700D : AppColors.lilac700,
       fontWeight: FontWeight.w700,
     );
     final regex = RegExp(r'#\w+');

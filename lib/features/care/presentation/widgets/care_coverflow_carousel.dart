@@ -466,6 +466,12 @@ class _CoverFlowCard extends StatelessWidget {
     final done  = task.isCompleted;
     final due   = !done && task.isDueToday && task.scheduledTime != null;
     final color = _cfColor(task.taskType);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final poppy700 = isDark ? AppColors.poppy700D : AppColors.poppy700;
+    final mintSoft = isDark ? AppColors.mintSoftD : AppColors.mintSoft;
+    final sunnySoft = isDark ? AppColors.sunnySoftD : AppColors.sunnySoft;
+    final mint700 = isDark ? AppColors.mint700D : AppColors.mint700;
+    final sunny700 = isDark ? AppColors.sunny700D : AppColors.sunny700;
 
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
@@ -598,7 +604,7 @@ class _CoverFlowCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11.5,
                     fontWeight: FontWeight.w600,
-                    color: due ? AppColors.poppy700 : pt.ink500,
+                    color: due ? poppy700 : pt.ink500,
                     height: 1.2,
                   ),
                   textAlign: TextAlign.center,
@@ -614,7 +620,7 @@ class _CoverFlowCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: done ? AppColors.mintSoft : AppColors.sunnySoft,
+                        color: done ? mintSoft : sunnySoft,
                         borderRadius: BorderRadius.circular(999),
                         border: Border.all(
                           color: done
@@ -631,8 +637,8 @@ class _CoverFlowCard extends StatelessWidget {
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               color: done
-                                  ? AppColors.mint700
-                                  : AppColors.sunny700,
+                                  ? mint700
+                                  : sunny700,
                               height: 1,
                             ),
                           ),

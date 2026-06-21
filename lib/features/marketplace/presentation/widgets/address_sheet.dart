@@ -138,6 +138,7 @@ class _AddressTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Semantics(
       label: '${address.labelName}${isSelected ? ", selected" : ""}',
@@ -197,15 +198,19 @@ class _AddressTile extends StatelessWidget {
                             horizontal: 7, vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.mint.withAlpha(25),
+                            color: isDark
+                                ? AppColors.mintSoftD
+                                : AppColors.mintSoft,
                             borderRadius: BorderRadius.circular(999),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Default',
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.mint700,
+                              color: isDark
+                                  ? AppColors.mint700D
+                                  : AppColors.mint700,
                             ),
                           ),
                         ),

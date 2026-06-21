@@ -15,7 +15,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final User? user = Supabase.instance.client.auth.currentUser;
+    final User? user = ref.watch(currentUserProvider);
     final bg = isDark ? pt.surface1 : AppColors.surface3;
 
     return Scaffold(

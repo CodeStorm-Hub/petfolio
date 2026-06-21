@@ -21,8 +21,28 @@ final isLoggedInProvider = Provider<bool>((ref) {
   return asyncState.when(
     data: (s) => s.session != null,
     // Fall back to checking the cached session so the router doesn't flicker.
-    loading: () => Supabase.instance.client.auth.currentSession != null,
+    loading: () => ref.read(authRepositoryProvider).currentSession != null,
     error: (_, _) => false,
+  );
+});
+
+/// Derived convenience provider — the current signed-in user, if any.
+final currentUserProvider = Provider<User?>((ref) {
+  final asyncState = ref.watch(authStateProvider);
+  return asyncState.when(
+    data: (s) => s.session?.user,
+    loading: () => ref.read(authRepositoryProvider).currentUser,
+    error: (_, _) => null,
+  );
+});
+
+/// Derived convenience provider — the current signed-in session, if any.
+final currentSessionProvider = Provider<Session?>((ref) {
+  final asyncState = ref.watch(authStateProvider);
+  return asyncState.when(
+    data: (s) => s.session,
+    loading: () => ref.read(authRepositoryProvider).currentSession,
+    error: (_, _) => null,
   );
 });
 

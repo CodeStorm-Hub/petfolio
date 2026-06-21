@@ -10,13 +10,14 @@ class CareExploreRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
         Expanded(
           child: _ExploreTile(
             icon: Icons.map_rounded,
-            iconBg: AppColors.skySoft,
-            iconColor: AppColors.sky700,
+            iconBg: isDark ? AppColors.skySoftD : AppColors.skySoft,
+            iconColor: isDark ? AppColors.sky700D : AppColors.sky700,
             title: 'Walk Tracker',
             subtitle: 'Live GPS route map',
             onTap: () => context.go('/care/walk'),
@@ -26,8 +27,8 @@ class CareExploreRow extends StatelessWidget {
         Expanded(
           child: _ExploreTile(
             icon: Icons.groups_rounded,
-            iconBg: AppColors.poppySoft,
-            iconColor: AppColors.poppy700,
+            iconBg: isDark ? AppColors.poppySoftD : AppColors.poppySoft,
+            iconColor: isDark ? AppColors.poppy700D : AppColors.poppy700,
             title: 'Communities',
             subtitle: 'Pet parent groups',
             onTap: () => context.go('/social/communities'),
@@ -118,6 +119,7 @@ class CareUtilityBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,
@@ -132,8 +134,8 @@ class CareUtilityBanner extends StatelessWidget {
             _UtilityHalf(
               key: const ValueKey<String>('care_nutrition_banner'),
               icon: Icons.monitor_weight_outlined,
-              iconBg: AppColors.sunnySoft,
-              iconColor: AppColors.sunny700,
+              iconBg: isDark ? AppColors.sunnySoftD : AppColors.sunnySoft,
+              iconColor: isDark ? AppColors.sunny700D : AppColors.sunny700,
               title: 'Nutrition',
               subtitle: 'Weight & caloric needs',
               detail: 'Track daily feeding',
@@ -143,8 +145,8 @@ class CareUtilityBanner extends StatelessWidget {
             _UtilityHalf(
               key: const ValueKey<String>('care_medical_vault_banner'),
               icon: Icons.folder_special_outlined,
-              iconBg: AppColors.mintSoft,
-              iconColor: AppColors.mint700,
+              iconBg: isDark ? AppColors.mintSoftD : AppColors.mintSoft,
+              iconColor: isDark ? AppColors.mint700D : AppColors.mint700,
               title: 'Medical Vault',
               subtitle: 'Vaccines · Meds · Vet',
               detail: 'View health records',
@@ -258,6 +260,9 @@ class CareAppointmentsBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final lilacSoft = isDark ? AppColors.lilacSoftD : AppColors.lilacSoft;
+    final lilac700 = isDark ? AppColors.lilac700D : AppColors.lilac700;
     return Semantics(
       label: 'Appointments, Schedule and track vet visits',
       button: true,
@@ -277,10 +282,10 @@ class CareAppointmentsBanner extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.lilacSoft,
+                color: lilacSoft,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.event_rounded, color: AppColors.lilac700, size: 20),
+              child: Icon(Icons.event_rounded, color: lilac700, size: 20),
             ),
             const SizedBox(width: 14),
             Expanded(

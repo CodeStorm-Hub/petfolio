@@ -229,6 +229,7 @@ class _ReviewTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
@@ -256,7 +257,9 @@ class _ReviewTile extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: review.isOwn ? AppColors.lilac700 : pt.ink500,
+              color: review.isOwn
+                  ? (isDark ? AppColors.lilac700D : AppColors.lilac700)
+                  : pt.ink500,
             ),
           ),
           if (review.body != null && review.body!.trim().isNotEmpty) ...[

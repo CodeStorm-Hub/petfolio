@@ -45,6 +45,15 @@ class VetRepository {
         .toList();
   }
 
+  Future<VetService> fetchService(String serviceId) async {
+    final row = await _client
+        .from('vet_services')
+        .select()
+        .eq('id', serviceId)
+        .single();
+    return VetService.fromJson(Map<String, dynamic>.from(row as Map));
+  }
+
   /// Generates available time slots for [date] at a clinic offering [service].
   /// Slots run 09:00–18:00 in steps of [service.durationMinutes].
   /// Already-booked slots for [clinicId] on that day are excluded.

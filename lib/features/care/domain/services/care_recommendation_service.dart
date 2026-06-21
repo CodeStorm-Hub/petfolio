@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:petfolio/core/models/pet.dart';
 import 'package:petfolio/features/care/data/models/care_task.dart';
+import 'package:petfolio/features/care/data/repositories/care_recommendation_repository.dart';
 
 final careRecommendationServiceProvider = Provider<CareRecommendationService>(
-  (_) => CareRecommendationService(),
+  (ref) => CareRecommendationService(ref.read(careRecommendationRepositoryProvider)),
 );
 
 class CareRecommendationException implements Exception {
@@ -22,51 +22,25 @@ class CareRecommendationException implements Exception {
 }
 
 class CareRecommendationService {
+  CareRecommendationService(this._repository);
+
+  final CareRecommendationRepository _repository;
   final _uuid = const Uuid();
-
-
 
   /// Returns the AI-suggested tasks **and** the set of normalised existing
   /// task titles fetched from the DB. Callers use the existing-title set for
   /// duplicate detection against ALL pet tasks (not just today's view).
   Future<({List<CareTask> suggestions, Set<String> existingNormalised})>
       generateRecommendations(Pet pet) async {
+    final results = await Future.wait([
+      _repository.fetchActiveMedicalVault(pet.id),
+      _repository.fetchRecentHealthLogs(pet.id),
+      _repository.fetchExistingTasks(pet.id),
+    ]);
 
-    final supabase = Supabase.instance.client;
-
-    final vaultFuture = supabase
-        .from('medical_vault')
-        .select('record_type, name, frequency, next_due_at')
-        .eq('pet_id', pet.id)
-        .eq('is_active', true)
-        .limit(10);
-
-    final healthFuture = supabase
-        .from('health_logs')
-        .select('log_type, weight_kg, severity, diagnosis')
-        .eq('pet_id', pet.id)
-        .order('created_at', ascending: false)
-        .limit(5);
-
-    final tasksFuture = supabase
-        .from('care_tasks')
-        .select('task_type, title')
-        .eq('pet_id', pet.id)
-        .limit(50);
-
-    final results = await Future.wait([vaultFuture, healthFuture, tasksFuture]);
-
-    final vault = (results[0] as List)
-        .map((r) => Map<String, dynamic>.from(r as Map))
-        .toList();
-
-    final healthLogs = (results[1] as List)
-        .map((r) => Map<String, dynamic>.from(r as Map))
-        .toList();
-
-    final existingTasks = (results[2] as List)
-        .map((r) => {'type': r['task_type'] as String?, 'title': r['title'] as String?})
-        .toList();
+    final vault = results[0];
+    final healthLogs = results[1];
+    final existingTasks = results[2];
 
     // Build a normalised set of ALL existing task titles for the pet.
     // Used by AiRoutineNotifier to detect duplicates against the full task
@@ -85,9 +59,7 @@ class CareRecommendationService {
     );
 
     try {
-      final fnResp = await Supabase.instance.client.functions
-          .invoke('recommend-care-tasks', body: {'prompt': prompt})
-          .timeout(const Duration(seconds: 60));
+      final fnResp = await _repository.invokeRecommendCareTasks(prompt);
       if (fnResp.status != 200) {
         final detail = fnResp.data?.toString() ?? '';
         throw CareRecommendationException(

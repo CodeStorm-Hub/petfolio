@@ -19,7 +19,7 @@ class BuyerOrderListScreen extends ConsumerWidget {
     final ordersAsync = ref.watch(buyerOrdersProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.surface1,
+      backgroundColor: pt.surface1,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -93,6 +93,7 @@ class _OrderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final cs = Theme.of(context).colorScheme;
       final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final actions = _actionsFor(order.status);
 
@@ -104,9 +105,9 @@ class _OrderTile extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: AppColors.surface0,
-          boxShadow: const [
-            BoxShadow(color: AppColors.line, spreadRadius: 0.5),
+          color: cs.surface,
+          boxShadow: [
+            BoxShadow(color: pt.line, spreadRadius: 0.5),
           ],
         ),
         child: Column(
@@ -166,7 +167,7 @@ class _OrderTile extends StatelessWidget {
               ),
             ),
             if (actions.isNotEmpty) ...[
-              const Divider(height: 1, color: AppColors.line),
+              Divider(height: 1, color: pt.line),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: Row(

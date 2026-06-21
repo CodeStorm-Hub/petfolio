@@ -608,6 +608,9 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mintSoft = isDark ? AppColors.mintSoftD : AppColors.mintSoft;
+    final mint700 = isDark ? AppColors.mint700D : AppColors.mint700;
 
     final today = DateUtils.dateOnly(DateTime.now());
     final anchor = DateUtils.dateOnly(selectedDay);
@@ -656,15 +659,15 @@ class CareGamifiedWeeklyChart extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: AppColors.mintSoft,
+                    color: mintSoft,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     '$hitsCount 🔥 day${hitsCount == 1 ? '' : 's'}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.mint700,
+                      color: mint700,
                     ),
                   ),
                 ),
@@ -829,6 +832,9 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final awardsAsync = ref.watch(petAwardsSummaryProvider(petId));
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mintSoft = isDark ? AppColors.mintSoftD : AppColors.mintSoft;
+    final mint700 = isDark ? AppColors.mint700D : AppColors.mint700;
 
     final awards = awardsAsync.maybeWhen(
       data: (a) => a,
@@ -844,7 +850,7 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: ownedCount > 0 ? AppColors.mintSoft : pt.surface2,
+              color: ownedCount > 0 ? mintSoft : pt.surface2,
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
@@ -852,7 +858,7 @@ class CareGamifiedTrophyRoom extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: ownedCount > 0 ? AppColors.mint700 : pt.ink300,
+                color: ownedCount > 0 ? mint700 : pt.ink300,
               ),
             ),
           ),

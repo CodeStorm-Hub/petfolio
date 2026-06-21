@@ -278,7 +278,9 @@ class _ClinicGridCardState extends State<_ClinicGridCard> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppColors.sky.withAlpha(28),
+                  color: isDark
+                      ? AppColors.skySoftD.withAlpha(160)
+                      : AppColors.sky.withAlpha(28),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 alignment: Alignment.center,

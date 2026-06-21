@@ -80,11 +80,11 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
           );
       
       _commentController.clear();
-      setState(() => _replyingToComment = null);
-      
+      if (mounted) setState(() => _replyingToComment = null);
+
       // Scroll to the bottom after posting.
       await Future.delayed(const Duration(milliseconds: 100));
-      if (_scrollController.hasClients) {
+      if (mounted && _scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 300),

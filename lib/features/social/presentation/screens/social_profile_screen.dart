@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/widgets/pf_flexible_app_bar.dart';
 import '../../../../core/widgets/tail_wag_loader.dart';
 import '../../../care/data/models/pet_awards_summary.dart';
 import '../../../care/presentation/controllers/pet_awards_provider.dart';
@@ -71,25 +72,14 @@ class SocialProfileScreen extends ConsumerWidget {
 
         return Scaffold(
           backgroundColor: pt.surface1,
-          appBar: showAppBar
-              ? AppBar(
-                  backgroundColor: cs.surface,
-                  elevation: 0,
-                  scrolledUnderElevation: 0,
-                  leading: IconButton(
-                    tooltip: 'Back',
-                    icon: Icon(Icons.arrow_back_rounded, color: cs.onSurface),
-                    onPressed: () => context.pop(),
-                  ),
-                  title: Text(
-                    petName,
-                    style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: cs.onSurface),
-                  ),
-                  centerTitle: true,
-                )
-              : null,
           body: CustomScrollView(
             slivers: [
+              if (showAppBar)
+                PfFlexibleAppBar(
+                  title: petName,
+                  subtitle: petBreed,
+                  onBack: () => context.pop(),
+                ),
               if (!showAppBar) ...[
                 SliverToBoxAdapter(child: SizedBox(height: topInset)),
                 const SliverToBoxAdapter(child: SizedBox(height: 16)),

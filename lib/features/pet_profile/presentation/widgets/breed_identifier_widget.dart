@@ -4,12 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../core/platform/media_picker.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../domain/services/breed_identification_service.dart';
+import '../controllers/breed_identifier_controller.dart';
 
-class BreedIdentifierWidget extends ConsumerStatefulWidget {
+class BreedIdentifierWidget extends ConsumerWidget {
   const BreedIdentifierWidget({
     super.key,
     required this.onBreedIdentified,
@@ -18,75 +17,25 @@ class BreedIdentifierWidget extends ConsumerStatefulWidget {
   final void Function(String breed, String species) onBreedIdentified;
 
   @override
-  ConsumerState<BreedIdentifierWidget> createState() =>
-      _BreedIdentifierWidgetState();
-}
-
-class _BreedIdentifierWidgetState
-    extends ConsumerState<BreedIdentifierWidget> {
-  File? _imageFile;
-  bool _loading = false;
-  String? _error;
-  String? _resultBreed;
-  String? _resultSpecies;
-  double? _confidence;
-  String? _description;
-
-  Future<void> _pickAndIdentify(ImageSource source) async {
-    final picked = await pickImage(source: source, imageQuality: 80);
-    if (picked == null) return;
-
-    setState(() {
-      _imageFile = File(picked.path);
-      _loading = true;
-      _error = null;
-      _resultBreed = null;
-    });
-
-    try {
-      final result = await ref
-          .read(breedIdentificationServiceProvider)
-          .identifyBreed(_imageFile!);
-      if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _resultBreed = result.breed;
-        _resultSpecies = result.species;
-        _confidence = result.confidence;
-        _description = result.description;
-      });
-    } on BreedIdentificationException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _error = e.message;
-      });
-    }
-  }
-
-  void _apply() {
-    if (_resultBreed != null && _resultSpecies != null) {
-      widget.onBreedIdentified(_resultBreed!, _resultSpecies!);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
+    final state = ref.watch(breedIdentifierControllerProvider);
+    final controller = ref.read(breedIdentifierControllerProvider.notifier);
+    final result = state.result;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _ImagePicker(
-          imageFile: _imageFile,
-          loading: _loading,
-          onCamera: () => _pickAndIdentify(ImageSource.camera),
-          onGallery: () => _pickAndIdentify(ImageSource.gallery),
+          imageFile: state.imageFile,
+          loading: state.loading,
+          onCamera: () => controller.pickAndIdentify(ImageSource.camera),
+          onGallery: () => controller.pickAndIdentify(ImageSource.gallery),
           pt: pt,
         ),
-        if (_loading) ...[
+        if (state.loading) ...[
           const SizedBox(height: 16),
           const LinearProgressIndicator(),
           const SizedBox(height: 8),
@@ -94,20 +43,20 @@ class _BreedIdentifierWidgetState
               textAlign: TextAlign.center,
               style: tt.bodySmall?.copyWith(color: pt.ink500)),
         ],
-        if (_error != null) ...[
+        if (state.error != null) ...[
           const SizedBox(height: 12),
-          _ErrorBanner(error: _error!, cs: cs),
+          _ErrorBanner(error: state.error!, cs: cs),
         ],
-        if (_resultBreed != null) ...[
+        if (result != null) ...[
           const SizedBox(height: 16),
           _ResultCard(
-            breed: _resultBreed!,
-            species: _resultSpecies!,
-            confidence: _confidence ?? 0,
-            description: _description,
+            breed: result.breed,
+            species: result.species,
+            confidence: result.confidence,
+            description: result.description,
             pt: pt,
             tt: tt,
-            onApply: _apply,
+            onApply: () => onBreedIdentified(result.breed, result.species),
           ),
         ],
       ],
@@ -189,6 +138,8 @@ class _PickerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mint = isDark ? AppColors.mintD : AppColors.mint;
     return Semantics(
       label: label,
       button: true,
@@ -201,10 +152,10 @@ class _PickerButton extends StatelessWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: AppColors.mint.withValues(alpha: 0.15),
+              color: mint.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: AppColors.mint, size: 26),
+            child: Icon(icon, color: mint, size: 26),
           ),
           const SizedBox(height: 6),
           Text(label,
@@ -237,34 +188,36 @@ class _ResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pct = (confidence * 100).round();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mint = isDark ? AppColors.mintD : AppColors.mint;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.mint.withValues(alpha: 0.08),
+        color: mint.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.mint.withValues(alpha: 0.3)),
+        border: Border.all(color: mint.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome_rounded,
-                  color: AppColors.mint, size: 18),
+              Icon(Icons.auto_awesome_rounded,
+                  color: mint, size: 18),
               const SizedBox(width: 6),
               Text('Breed identified',
                   style: tt.labelMedium?.copyWith(
-                      color: AppColors.mint, fontWeight: FontWeight.w700)),
+                      color: mint, fontWeight: FontWeight.w700)),
               const Spacer(),
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.mint.withValues(alpha: 0.15),
+                  color: mint.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text('$pct% confident',
-                    style: tt.labelSmall?.copyWith(color: AppColors.mint)),
+                    style: tt.labelSmall?.copyWith(color: mint)),
               ),
             ],
           ),
@@ -287,7 +240,7 @@ class _ResultCard extends StatelessWidget {
               icon: const Icon(Icons.check_rounded, size: 16),
               label: Text('Use "$breed"'),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.mint,
+                backgroundColor: mint,
                 foregroundColor: Colors.white,
               ),
             ),

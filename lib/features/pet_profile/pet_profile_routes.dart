@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/navigation/pf_page_transitions.dart';
 import 'presentation/controllers/pet_list_controller.dart';
 import 'presentation/screens/edit_profile_screen.dart';
 import 'presentation/screens/manage_pets_screen.dart';
@@ -10,22 +11,28 @@ import 'presentation/screens/onboarding_screen.dart';
 List<RouteBase> petProfileRoutes(GlobalKey<NavigatorState> rootKey) => [
   GoRoute(
     path: '/onboarding',
-    builder: (context, state) {
+    pageBuilder: (context, state) {
       final mode = state.uri.queryParameters['mode'];
-      return OnboardingScreen(addAnotherPet: mode == 'add');
+      return pfFadeThroughPage(
+        state: state,
+        child: OnboardingScreen(addAnotherPet: mode == 'add'),
+      );
     },
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/pets/manage',
-    builder: (context, state) => const ManagePetsScreen(),
+    pageBuilder: (context, state) => pfSharedAxisPage(
+      state: state,
+      child: const ManagePetsScreen(),
+    ),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/pet/:petId/edit',
-    builder: (context, state) {
+    pageBuilder: (context, state) {
       final petId = state.pathParameters['petId']!;
-      return Consumer(
+      final screen = Consumer(
         builder: (context, ref, _) {
           final petsAsync = ref.watch(petListProvider);
           return petsAsync.when(
@@ -42,6 +49,7 @@ List<RouteBase> petProfileRoutes(GlobalKey<NavigatorState> rootKey) => [
           );
         },
       );
+      return pfSharedAxisPage(state: state, child: screen);
     },
   ),
 ];

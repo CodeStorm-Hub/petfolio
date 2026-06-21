@@ -59,6 +59,7 @@ class PetProfileScreen extends ConsumerWidget {
 
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isWide = screenWidth >= ResponsiveLayout.mobileMax;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final view = CustomScrollView(
       slivers: [
@@ -110,13 +111,13 @@ class PetProfileScreen extends ConsumerWidget {
                     child: const Text('Gallery →'),
                   ),
                 ),
-                const Row(
+                Row(
                   children: [
-                    Expanded(child: _MomentPlaceholder(label: 'bath day', color: AppColors.poppy, soft: AppColors.poppySoft, emoji: '🛁')),
-                    SizedBox(width: 8),
-                    Expanded(child: _MomentPlaceholder(label: 'napping', color: AppColors.lilac, soft: AppColors.lilacSoft, emoji: '💤')),
-                    SizedBox(width: 8),
-                    Expanded(child: _MomentPlaceholder(label: 'park run', color: AppColors.mint, soft: AppColors.mintSoft, emoji: '🌳')),
+                    Expanded(child: _MomentPlaceholder(label: 'bath day', color: isDark ? AppColors.poppyD : AppColors.poppy, soft: isDark ? AppColors.poppySoftD : AppColors.poppySoft, emoji: '🛁')),
+                    const SizedBox(width: 8),
+                    Expanded(child: _MomentPlaceholder(label: 'napping', color: isDark ? AppColors.lilacD : AppColors.lilac, soft: isDark ? AppColors.lilacSoftD : AppColors.lilacSoft, emoji: '💤')),
+                    const SizedBox(width: 8),
+                    Expanded(child: _MomentPlaceholder(label: 'park run', color: isDark ? AppColors.mintD : AppColors.mint, soft: isDark ? AppColors.mintSoftD : AppColors.mintSoft, emoji: '🌳')),
                   ],
                 ),
                 
@@ -248,7 +249,7 @@ class _HeroGamifiedBanner extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColors.sunnySoft,
+                    color: isDark ? AppColors.sunnySoftD : AppColors.sunnySoft,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Row(
@@ -258,10 +259,10 @@ class _HeroGamifiedBanner extends ConsumerWidget {
                       const SizedBox(width: 4),
                       Text(
                         streakLabel,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.sunny700,
+                          color: isDark ? AppColors.sunny700D : AppColors.sunny700,
                         ),
                       ),
                     ],
@@ -284,19 +285,27 @@ class _QuickStatsTrio extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final streakAsync = ref.watch(careStreakRealtimeProvider(pet.id));
     final streakLabel = streakAsync.maybeWhen(data: (s) => '${s.currentStreak}', orElse: () => '0');
     final awardsAsync = ref.watch(petAwardsSummaryProvider(pet.id));
     final xpLabel = awardsAsync.maybeWhen(data: (s) => '${s.totalXp}', orElse: () => '0');
     final logsLabel = awardsAsync.maybeWhen(data: (s) => '${s.logsCount}', orElse: () => '0');
 
+    final sunnySoft = isDark ? AppColors.sunnySoftD : AppColors.sunnySoft;
+    final sunny700 = isDark ? AppColors.sunny700D : AppColors.sunny700;
+    final lilacSoft = isDark ? AppColors.lilacSoftD : AppColors.lilacSoft;
+    final lilac700 = isDark ? AppColors.lilac700D : AppColors.lilac700;
+    final mintSoft = isDark ? AppColors.mintSoftD : AppColors.mintSoft;
+    final mint700 = isDark ? AppColors.mint700D : AppColors.mint700;
+
     return Row(
       children: [
-        Expanded(child: _StatTile(color: AppColors.sunnySoft, textColor: AppColors.sunny700, icon: const Text('🔥', style: TextStyle(fontSize: 20)), value: streakLabel, label: 'day streak')),
+        Expanded(child: _StatTile(color: sunnySoft, textColor: sunny700, icon: const Text('🔥', style: TextStyle(fontSize: 20)), value: streakLabel, label: 'day streak')),
         const SizedBox(width: 10),
-        Expanded(child: _StatTile(color: AppColors.lilacSoft, textColor: AppColors.lilac700, icon: const Icon(Icons.star_rounded, color: AppColors.lilac700, size: 20), value: xpLabel, label: 'XP earned')),
+        Expanded(child: _StatTile(color: lilacSoft, textColor: lilac700, icon: Icon(Icons.star_rounded, color: lilac700, size: 20), value: xpLabel, label: 'XP earned')),
         const SizedBox(width: 10),
-        Expanded(child: _StatTile(color: AppColors.mintSoft, textColor: AppColors.mint700, icon: const Icon(Icons.check_rounded, color: AppColors.mint700, size: 20), value: logsLabel, label: 'care logs')),
+        Expanded(child: _StatTile(color: mintSoft, textColor: mint700, icon: Icon(Icons.check_rounded, color: mint700, size: 20), value: logsLabel, label: 'care logs')),
       ],
     );
   }
@@ -420,8 +429,16 @@ class _DailyQuestRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink950 = pt.ink950;
     final ink500 = pt.ink500;
+    final mint = isDark ? AppColors.mintD : AppColors.mint;
+    final mintSoft = isDark ? AppColors.mintSoftD : AppColors.mintSoft;
+    final mint700 = isDark ? AppColors.mint700D : AppColors.mint700;
+    final poppySoft = isDark ? AppColors.poppySoftD : AppColors.poppySoft;
+    final poppy700 = isDark ? AppColors.poppy700D : AppColors.poppy700;
+    final sunnySoft = isDark ? AppColors.sunnySoftD : AppColors.sunnySoft;
+    final sunny700 = isDark ? AppColors.sunny700D : AppColors.sunny700;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
@@ -431,7 +448,7 @@ class _DailyQuestRow extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: done ? AppColors.mint : due ? AppColors.poppySoft : pt.surface2,
+              color: done ? mint : due ? poppySoft : pt.surface2,
               borderRadius: BorderRadius.circular(14),
             ),
             alignment: Alignment.center,
@@ -445,20 +462,20 @@ class _DailyQuestRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: ink950, decoration: done ? TextDecoration.lineThrough : TextDecoration.none).copyWith(color: done ? ink950.withAlpha(140) : ink950)),
-                Text(time, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: due ? AppColors.poppy700 : ink500)),
+                Text(time, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: due ? poppy700 : ink500)),
               ],
             ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: done ? AppColors.mintSoft : AppColors.sunnySoft,
+              color: done ? mintSoft : sunnySoft,
               borderRadius: BorderRadius.circular(999),
             ),
             child: Row(
               children: [
-                Text('+$xp ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: done ? AppColors.mint700 : AppColors.sunny700)),
-                Icon(Icons.star_rounded, size: 12, color: done ? AppColors.mint700 : AppColors.sunny700),
+                Text('+$xp ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: done ? mint700 : sunny700)),
+                Icon(Icons.star_rounded, size: 12, color: done ? mint700 : sunny700),
               ],
             ),
           ),

@@ -425,7 +425,7 @@ class _StepSpecies extends StatelessWidget {
         children: [
           Text(
             "Who are we\nwelcoming home?",
-            style: tt.headlineMedium?.copyWith(
+            style: tt.displayMedium?.copyWith(
               fontWeight: FontWeight.w700, height: 1.1,
               color: pt.ink950,
             ),
@@ -542,7 +542,7 @@ class _StepName extends StatelessWidget {
         children: [
           RichText(
             text: TextSpan(
-              style: tt.headlineMedium?.copyWith(
+              style: tt.displayMedium?.copyWith(
                 fontWeight: FontWeight.w700, height: 1.1,
                 color: pt.ink950,
               ),
@@ -656,7 +656,7 @@ class _StepAge extends StatelessWidget {
         children: [
           RichText(
             text: TextSpan(
-              style: tt.headlineMedium?.copyWith(
+              style: tt.displayMedium?.copyWith(
                 fontWeight: FontWeight.w700, height: 1.1,
                 color: pt.ink950,
               ),
@@ -764,7 +764,7 @@ class _StepPersonality extends StatelessWidget {
         children: [
           RichText(
             text: TextSpan(
-              style: tt.headlineMedium?.copyWith(
+              style: tt.displayMedium?.copyWith(
                 fontWeight: FontWeight.w700, height: 1.1,
                 color: pt.ink950,
               ),

@@ -34,6 +34,7 @@ class _VendorWebRedirectScreenState extends State<VendorWebRedirectScreen> {
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: pt.surface1,
@@ -46,8 +47,8 @@ class _VendorWebRedirectScreenState extends State<VendorWebRedirectScreen> {
               children: [
                 Container(
                   width: 96, height: 96,
-                  decoration: const BoxDecoration(
-                    color: AppColors.poppySoft,
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.poppySoftD : AppColors.poppySoft,
                     shape: BoxShape.circle,
                   ),
                   child: const Center(

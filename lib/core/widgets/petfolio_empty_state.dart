@@ -102,8 +102,9 @@ class _PetfolioEmptyStateState extends State<PetfolioEmptyState>
                       widget.title,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
                         color: cs.onSurface,
                       ),
                     ),

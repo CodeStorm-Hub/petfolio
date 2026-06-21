@@ -52,6 +52,7 @@ abstract final class AppColors {
   static const sky700  = Color(0xFF2895DA);
   static const skySoft = Color(0xFFCDEAFF);
   static const skyD    = Color(0xFF6EC8FF);
+  static const sky700D = Color(0xFF8FD4FF);
   static const skySoftD= Color(0xFF0B2840);
 
   // ── Ink — Text & icons ──────────────────────────────────────────────────────

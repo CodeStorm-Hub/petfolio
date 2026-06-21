@@ -159,6 +159,11 @@ class _FreqTabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mintSoft = isDark ? AppColors.mintSoftD : AppColors.mintSoft;
+    final sunnySoft = isDark ? AppColors.sunnySoftD : AppColors.sunnySoft;
+    final mint700 = isDark ? AppColors.mint700D : AppColors.mint700;
+    final sunny700 = isDark ? AppColors.sunny700D : AppColors.sunny700;
 
     return Row(
       children: List.generate(labels.length, (i) {
@@ -206,7 +211,7 @@ class _FreqTabBar extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: active
                             ? Colors.white.withAlpha(40)
-                            : (allDone ? AppColors.mintSoft : AppColors.sunnySoft),
+                            : (allDone ? mintSoft : sunnySoft),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
@@ -216,7 +221,7 @@ class _FreqTabBar extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           color: active
                               ? Colors.white
-                              : (allDone ? AppColors.mint700 : AppColors.sunny700),
+                              : (allDone ? mint700 : sunny700),
                           height: 1,
                         ),
                       ),
@@ -284,14 +289,18 @@ class _AllDoneBanner extends StatelessWidget {
     final totalXp = tasks.fold<int>(
       0, (sum, t) => sum + t.gamificationPoints,
     );
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mintSoft = isDark ? AppColors.mintSoftD : AppColors.mintSoft;
+    final sunnySoft = isDark ? AppColors.sunnySoftD : AppColors.sunnySoft;
+    final mint700 = isDark ? AppColors.mint700D : AppColors.mint700;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.mintSoft, AppColors.sunnySoft],
+          colors: [mintSoft, sunnySoft],
         ),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.mint.withAlpha(80)),
@@ -304,21 +313,21 @@ class _AllDoneBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'All done for today!',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.mint700,
+                    color: mint700,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'You earned $totalXp XP today ⭐',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.mint700,
+                    color: mint700,
                   ),
                 ),
               ],

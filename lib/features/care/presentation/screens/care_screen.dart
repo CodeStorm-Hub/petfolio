@@ -230,10 +230,34 @@ class _CareScreenState extends ConsumerState<CareScreen> {
       onPopInvokedWithResult: (_, _) => context.go('/home'),
       child: Scaffold(
       backgroundColor: pt.surface1,
-      floatingActionButton: FloatingActionButton(
-        key: const ValueKey<String>('care_fab_add_task'),
-        onPressed: openAddSheet,
-        child: const Icon(Icons.add_rounded),
+      floatingActionButton: PfFabMenu(
+        key: const ValueKey<String>('care_fab_menu'),
+        heroTag: 'care_fab_menu',
+        items: [
+          PfFabMenuItem(
+            label: 'Add task',
+            icon: Icons.add_task_rounded,
+            onTap: openAddSheet,
+          ),
+          PfFabMenuItem(
+            label: 'Nutrition',
+            icon: Icons.restaurant_menu_rounded,
+            color: AppColors.sunny,
+            onTap: () => context.go('/care/nutrition'),
+          ),
+          PfFabMenuItem(
+            label: 'Medical',
+            icon: Icons.medical_services_rounded,
+            color: AppColors.mint,
+            onTap: () => context.go('/care/health'),
+          ),
+          PfFabMenuItem(
+            label: 'Walk',
+            icon: Icons.directions_walk_rounded,
+            color: AppColors.sky,
+            onTap: () => context.go('/care/walk'),
+          ),
+        ],
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -261,63 +285,19 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                                   .selectDate(d),
                             ),
                             const SizedBox(height: 16.0),
-                            // ── Category filter chips ──────────────────────
-                            SizedBox(
-                              height: 40,
-                              child: ListView(
-                                scrollDirection: Axis.horizontal,
-                                children: _filterChips.map((chip) {
-                                  final active = _careFilter == chip.$1;
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 8),
-                                    child: Semantics(
-                                      label: '${chip.$2} filter',
-                                      button: true,
-                                      selected: active,
-                                      child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(999),
-                                      child: Material(
-                                        color: Colors.transparent,
-                                        child: InkWell(
-                                          onTap: () {
-                                            HapticFeedback.selectionClick();
-                                            setState(() => _careFilter = chip.$1);
-                                          },
-                                          child: AnimatedContainer(
-                                            duration: const Duration(milliseconds: 160),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 14, vertical: 6,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: active ? AppColors.poppy : Colors.transparent,
-                                              borderRadius: BorderRadius.circular(999),
-                                              border: Border.all(
-                                                color: active ? AppColors.poppy : pt.line,
-                                              ),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Text(chip.$3, style: const TextStyle(fontSize: 13)),
-                                                const SizedBox(width: 5),
-                                                Text(
-                                                  chip.$2,
-                                                  style: TextStyle(
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: active ? Colors.white : pt.ink950,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
+                            // ── Category filter — connected button group ───
+                            PfButtonGroup<CareFilter>(
+                              selected: _careFilter,
+                              onChanged: (filter) {
+                                HapticFeedback.selectionClick();
+                                setState(() => _careFilter = filter);
+                              },
+                              options: _filterChips
+                                  .map((chip) => PfButtonGroupOption<CareFilter>(
+                                        value: chip.$1,
+                                        label: '${chip.$3} ${chip.$2}',
+                                      ))
+                                  .toList(),
                             ),
                             const SizedBox(height: 16.0),
                             // ── TODAY'S QUESTS header with AI refresh ──────
@@ -470,6 +450,11 @@ class _AiRoutineBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!hasNoTasks) return const SizedBox.shrink();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final lilac = isDark ? AppColors.lilacD : AppColors.lilac;
+    final lilacOnContainer = isDark ? AppColors.lilac700D : AppColors.lilac700;
+    final lilacContainer = isDark ? AppColors.lilacSoftD : AppColors.lilacSoft;
+
     final String title;
     final String subtitle;
     if (isGenerating) {
@@ -492,14 +477,10 @@ class _AiRoutineBanner extends StatelessWidget {
           duration: const Duration(milliseconds: 250),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: hasResults
-                ? AppColors.lilac.withAlpha(30)
-                : AppColors.lilacSoft,
+            color: lilacContainer,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: hasResults
-                  ? AppColors.lilac.withAlpha(120)
-                  : AppColors.lilac.withAlpha(60),
+              color: hasResults ? lilac : lilac.withAlpha(150),
               width: hasResults ? 1.5 : 1,
             ),
           ),
@@ -508,7 +489,7 @@ class _AiRoutineBanner extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: hasResults ? AppColors.lilac : AppColors.lilac,
+                  color: lilac,
                   shape: BoxShape.circle,
                 ),
                 child: isGenerating
@@ -533,17 +514,17 @@ class _AiRoutineBanner extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: AppColors.lilac700,
+                        color: lilacOnContainer,
                         fontSize: 15,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(
-                        color: AppColors.lilac700,
+                      style: TextStyle(
+                        color: lilacOnContainer,
                         fontSize: 13,
                       ),
                     ),
@@ -551,7 +532,7 @@ class _AiRoutineBanner extends StatelessWidget {
                 ),
               ),
               if (!isGenerating)
-                const Icon(Icons.chevron_right, color: AppColors.lilac),
+                Icon(Icons.chevron_right, color: lilac),
             ],
           ),
         ),
@@ -618,13 +599,20 @@ class _DoneCounter extends StatelessWidget {
     final done = planned.where((t) => t.isCompleted).length;
     final total = planned.length;
     final allDone = done == total;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final container = allDone
+        ? (isDark ? AppColors.mintSoftD : AppColors.mintSoft)
+        : (isDark ? AppColors.sunnySoftD : AppColors.sunnySoft);
+    final onContainer = allDone
+        ? (isDark ? AppColors.mint700D : AppColors.mint700)
+        : (isDark ? AppColors.sunny700D : AppColors.sunny700);
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
       child: Container(
         key: ValueKey('$done/$total'),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: allDone ? AppColors.mintSoft : AppColors.sunnySoft,
+          color: container,
           borderRadius: BorderRadius.circular(999),
         ),
         child: Text(
@@ -632,7 +620,7 @@ class _DoneCounter extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: allDone ? AppColors.mint700 : AppColors.sunny700,
+            color: onContainer,
           ),
         ),
       ),

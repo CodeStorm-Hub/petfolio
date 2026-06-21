@@ -300,7 +300,7 @@ class _WaveHeroSection extends StatelessWidget {
 
     const cardH = 84.0;
     const cardOverlap = 38.0; // how much card bleeds below wave
-    final waveH = topPad + 76.0 + 140.0; // header clearance + greeting area
+    final waveH = topPad + 76.0 + 152.0; // header clearance + greeting area
 
     return SizedBox(
       height: waveH + cardOverlap,
@@ -344,13 +344,15 @@ class _WaveHeroSection extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         _moodLine(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.sora(
-                          fontSize: 19,
+                          fontSize: 23,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
                           fontStyle: FontStyle.italic,
-                          height: 1.2,
-                          letterSpacing: -0.3,
+                          height: 1.15,
+                          letterSpacing: -0.4,
                         ),
                       ),
                     ],
@@ -497,10 +499,10 @@ class _PetHeroCard extends ConsumerWidget {
                       const SizedBox(width: 3),
                       Text(
                         '$streak',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.sunny700,
+                          color: isDark ? AppColors.sunny700D : AppColors.sunny700,
                         ),
                       ),
                     ],
@@ -832,12 +834,12 @@ class _CareTile extends StatelessWidget {
                           color: AppColors.sunny.withAlpha(28),
                           borderRadius: BorderRadius.circular(999),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Start streak',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.sunny700,
+                            color: isDark ? AppColors.sunny700D : AppColors.sunny700,
                           ),
                         ),
                       ),
