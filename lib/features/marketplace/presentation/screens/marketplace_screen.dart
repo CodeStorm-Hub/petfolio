@@ -113,21 +113,6 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
     }
   }
 
-  void _openCart() {
-    _showCartDrawer();
-  }
-  
-  void _showCartDrawer() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      constraints: const BoxConstraints(maxWidth: 560),
-      builder: (ctx) => const CartDrawer(),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
@@ -146,7 +131,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
                 final isWide = constraints.maxWidth >= ResponsiveLayout.mobileMax;
                 Widget body = Column(
                   children: [
-                    _MarketHeader(onCart: _openCart),
+                    const _MarketHeader(),
                     _CategoryChips(
                       selected: selectedCat,
                       onSelected: (cat) =>
@@ -308,8 +293,7 @@ class _FlyToCartAnimState extends State<_FlyToCartAnim> with SingleTickerProvide
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _MarketHeader extends ConsumerWidget {
-  const _MarketHeader({required this.onCart});
-  final VoidCallback onCart;
+  const _MarketHeader();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

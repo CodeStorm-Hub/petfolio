@@ -18,7 +18,10 @@ class PromoRepository {
         .select()
         .eq('is_active', true)
         .order('created_at', ascending: false);
-    return (data as List).map((e) => Promo.fromJson(e)).toList();
+    return (data as List)
+        .map((e) => Promo.fromJson(e))
+        .where((p) => !p.isExpired)
+        .toList();
   }
 
   Future<Promo?> validateCode(String code, {String? shopId}) async {

@@ -74,10 +74,23 @@ class MarketplaceCategoriesSheet extends ConsumerWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-                child: Text(
-                  'Browse Categories',
-                  style: GoogleFonts.sora(fontWeight: FontWeight.w700, fontSize: 20, color: pt.ink950),
+                padding: const EdgeInsets.fromLTRB(16, 6, 8, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Browse Categories',
+                      style: GoogleFonts.sora(fontWeight: FontWeight.w700, fontSize: 20, color: pt.ink950),
+                    ),
+                    Semantics(
+                      label: 'Close',
+                      button: true,
+                      child: IconButton(
+                        icon: Icon(Icons.close_rounded, color: pt.ink500),
+                        onPressed: () => context.pop(),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 8),

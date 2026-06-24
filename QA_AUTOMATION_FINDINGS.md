@@ -12,6 +12,8 @@ Home, Care (Dashboard/Nutrition/Health/Walk/Vets), PawsFeed (Feed/Stories/Commun
 ## Critical bugs
 
 ### 1. Marketplace cart is completely unreachable
+
+**Status: Fixed.** Bottom-tab Browse/Cart and the app-bar cart icon now open `MarketplaceCategoriesSheet`/`CartDrawer` as proper modal sheets via `_AppShellState._onNavSelect` (`lib/core/widgets/app_shell.dart`) instead of `context.go()`-ing to root-pushed routes outside the shell branch. Removed the dead `/marketplace/categories` route and the unused `_MarketHeader.onCart` callback (`lib/features/marketplace/presentation/screens/marketplace_screen.dart`). `/marketplace/cart` route is kept as-is for deep-linked `context.push` entry points (product detail, shop storefront, checkout).
 Both the bottom-tab **Cart** button and the top app-bar cart icon (shopping bag) open the **Browse Categories** sheet instead of any cart screen. There is no working path to view the cart from the Marketplace UI in this build. Reproduced via both entry points on a fresh app session.
 
 **Files:**
@@ -23,6 +25,8 @@ Both the bottom-tab **Cart** button and the top app-bar cart icon (shopping bag)
 - [`lib/features/marketplace/presentation/screens/marketplace_screen.dart:149,310-328`](lib/features/marketplace/presentation/screens/marketplace_screen.dart) — `_MarketHeader(onCart: _openCart)` passes a callback that `_MarketHeader.build()` never wires to a button — a dead callback, separate from the routing issue above.
 
 ### 2. "Browse Categories" sheet is a dead end with no in-app exit
+
+**Status: Fixed.** Now opened via `showModalBottomSheet` from within the shell (not as a routed page outside it), so default scrim-tap/swipe-to-dismiss work again. Added an explicit Close (X) button to the sheet header (`lib/features/marketplace/presentation/screens/marketplace_categories_screen.dart`) matching the "All Features" sheet pattern.
 Category cards (Food, Treats, Toys, Beds, Apparel, Grooming, Gear, Health) only toggle a single-select checkmark — tapping a card (or its chevron) does not navigate to a product list. There is no Apply/Done/Continue button anywhere on the sheet. The sheet also cannot be dismissed by:
 - tapping outside the sheet (scrim tap did nothing)
 - swiping down on the sheet or its handle
@@ -34,6 +38,8 @@ Category cards (Food, Treats, Toys, Beds, Apparel, Grooming, Gear, Health) only 
   - `_CategoryTile.onTap` (lines 105-110): calls `ref.read(selectedCategoryProvider.notifier).select(...)` then immediately `context.pop()` — every tap both toggles selection AND closes the sheet, with no Apply/Done button rendered anywhere in the widget tree.
 
 ### 3. Back button from the trapped sheet exits the entire app
+
+**Status: Fixed.** Root cause was the sheet being reached as a root-pushed `GoRoute` outside the shell's navigator, so system back popped past the shell. Now it's a real modal route opened from within the shell context, so system back dismisses the modal as expected (see #1).
 Pressing system back while the Browse Categories sheet is open does not close the modal or return to the previous screen — it exits the whole app to the Android launcher. Reproduced 3 times. Because the Flutter engine process stays alive in the background, relaunching the app icon resumes directly into the same stuck sheet (no fresh navigation state). The only way out during testing was **Force Stop via Android Settings → Apps → petfolio**.
 
 **Files:**
@@ -42,6 +48,8 @@ Pressing system back while the Browse Categories sheet is open does not close th
 - [`lib/core/widgets/app_shell.dart:74-83`](lib/core/widgets/app_shell.dart) (`didPopRoute`) and [`:95-100`](lib/core/widgets/app_shell.dart) (`_onBranchPop`) — `context.go('/home')` when popping a branch root; if categories/cart aren't recognized as shell branch roots, back navigation falls through toward app exit instead.
 
 ### 4. Marketplace "Shop"/"Browse" bottom tabs are effectively non-functional
+
+**Status: Fixed.** Same fix as #1 — Browse now opens the categories sheet, Cart now opens the cart drawer, Shop still navigates to `/marketplace`.
 "Browse" opens the same broken Categories trap as the cart icon (#1). Only "Shop" (the default landing tab) renders the expected screen. Net effect: only 1 of 3 bottom tabs in the Marketplace module does anything useful.
 
 **Files:**
@@ -53,6 +61,8 @@ Pressing system back while the Browse Categories sheet is open does not close th
 ## Other confirmed bugs
 
 ### 5. Activity module completely broken
+
+**Status: Fixed.** Root cause confirmed live against Supabase (project `jqyjvhwlcqcsuwcqgcwf`): several legacy `marketplace_orders` rows have `line_items` jsonb missing `product_name`/`unit_cents`/`line_total_cents` (pre-dates those fields being added), but `LineItem` marks them `required`, so `MarketplaceOrder.fromJson` threw for any buyer with a legacy order — failing the whole Activity screen via the shared `hasError` flag. Added `_backfillLegacyLineItemFields` in `lib/features/marketplace/data/models/marketplace_order.dart` to default missing fields so legacy rows parse. Also decoupled `hasError`/`isLoading` in `lib/features/activity/presentation/screens/activity_screen.dart` so one source failing no longer blanks the other's data — shows a partial-failure banner instead, full-screen error only when both sources fail with no cached data. RLS/policies on `marketplace_orders` and `appointments` verified correct via `get_advisors`/`execute_sql`, not the cause.
 The Activity screen — reachable via bottom-nav "Activity" and via Me → "My Orders & Activity" — immediately shows **"Failed to load activity"** with a Retry button. Reproducible across all three sub-tabs (All, Orders, Appointments) and persists after tapping Retry.
 
 **Files:**
@@ -62,6 +72,8 @@ The Activity screen — reachable via bottom-nav "Activity" and via Me → "My O
 - [`lib/features/appointments/presentation/controllers/appointment_controller.dart:8`](lib/features/appointments/presentation/controllers/appointment_controller.dart) — `appointmentControllerProvider`. Recommend checking these repositories'/RPC calls and Supabase RLS policies for the actual failure.
 
 ### 6. Back-navigation skips a screen after the Activity failure path
+
+**Status: Fixed.** `lib/features/profile/presentation/screens/account_screen.dart` "My Orders & Activity" tile used `context.go('/home/activity')`, which replaces the location (discarding `/home/me` from the branch's navigation stack), so `context.pop()` in `ActivityScreen` fell back to the branch root `/home`. Changed to `context.push('/home/activity')` so it's pushed on top of `/home/me`, and back now correctly returns to Me.
 When Activity is reached via Me → "My Orders & Activity", pressing back lands on **Home**, skipping the Me screen that was actually the previous route. Confirmed this is not generic back-stack behavior — Me → Saved Addresses → back correctly returns to Me in a separate test. The skip is specific to the path through the broken Activity screen.
 
 **Files:**
@@ -70,6 +82,8 @@ When Activity is reached via Me → "My Orders & Activity", pressing back lands 
 - [`lib/features/activity/presentation/screens/activity_screen.dart:67-74`](lib/features/activity/presentation/screens/activity_screen.dart) — back button calls `context.pop()`, which pops within the `/home` branch stack back to `/home` rather than to `/home/me`, since Activity was never pushed on top of Me — it's a sibling route under `/home`.
 
 ### 7. Expired promotion still displayed as active
+
+**Status: Fixed.** Confirmed live via Supabase: `TOYS10` has `valid_until = 2026-06-22 20:51:13+00`, `is_active = true`, server `now() = 2026-06-24 03:52:14+00` — i.e. active flag alone doesn't account for expiry. `fetchActivePromos()` in `lib/features/marketplace/data/repositories/promo_repository.dart` now filters out `p.isExpired` (using the existing `Promo.isExpired` getter) before returning, same check already used in `validateCode`. `promoListProvider`/`filteredPromosProvider` and the Promotions tab consume this repository directly, so no further changes needed there.
 The "TOYS10" 10%-off coupon in Alerts → Promotions shows "Valid till Jun 22, 2026" while the system date is 2026-06-24 (2 days past expiry), yet it appears in the active promo list with the same "Copy code" affordance as valid promos — no expired badge or greying. Flagged from display-layer evidence only; whether the code is actually rejected at checkout was not verified.
 
 **Files:**
@@ -103,6 +117,14 @@ The top-bar "Direct messages" icon on PawsFeed opens the Match module's Messages
 - **"All Features" sheet** (Home): Properly dismissible via a visible Close (X) button — contrast this with the Browse Categories sheet (#2/#3), which has no equivalent.
 
 ---
+
+## Fix verification (2026-06-24)
+
+`flutter analyze`: clean (0 issues) across the whole project after all fixes.
+
+`flutter test`: 113/115 pass. The 2 failures (`test/features/appointments/appointment_model_test.dart`, `test/plan/synthetic_spring_implementation_contract_test.dart`) are pre-existing and unrelated — neither touches a file modified in this pass (confirmed via `git status`).
+
+Supabase MCP (project `jqyjvhwlcqcsuwcqgcwf`) used to verify #5 and #7 against live data/RLS rather than guessing: confirmed `marketplace_orders`/`appointments` RLS policies are correct (`get_advisors`, `pg_policy` inspection), found the actual legacy `line_items` schema drift causing #5, and confirmed `TOYS10`'s `valid_until` is in the past for #7.
 
 ## Suggested priority order
 

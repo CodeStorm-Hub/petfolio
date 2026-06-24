@@ -55,7 +55,23 @@ abstract class LineItem with _$LineItem {
   }) = _LineItem;
 
   factory LineItem.fromJson(Map<String, dynamic> json) =>
-      _$LineItemFromJson(json);
+      _$LineItemFromJson(_backfillLegacyLineItemFields(json));
+}
+
+/// Some orders predate the addition of [LineItem.productName],
+/// [LineItem.unitCents], and [LineItem.lineTotalCents] to `line_items`
+/// jsonb rows, so older rows lack those keys. Backfill safe defaults so
+/// legacy orders still parse instead of throwing in [fetchBuyerOrders].
+Map<String, dynamic> _backfillLegacyLineItemFields(Map<String, dynamic> json) {
+  final quantity = (json['quantity'] as num?)?.toInt() ?? 1;
+  final unitCents = (json['unit_cents'] as num?)?.toInt() ?? 0;
+  return {
+    ...json,
+    'product_name': json['product_name'] ?? 'Item unavailable',
+    'unit_cents': unitCents,
+    'line_total_cents':
+        (json['line_total_cents'] as num?)?.toInt() ?? unitCents * quantity,
+  };
 }
 
 extension LineItemX on LineItem {

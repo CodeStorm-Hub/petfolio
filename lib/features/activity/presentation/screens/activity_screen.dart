@@ -36,10 +36,16 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     final ordersAsync = ref.watch(buyerOrdersProvider);
     final appointmentsAsync = ref.watch(appointmentControllerProvider);
 
-    final isLoading =
-        ordersAsync.isLoading || appointmentsAsync.isLoading;
-    final hasError =
-        ordersAsync.hasError || appointmentsAsync.hasError;
+    final isLoading = ordersAsync.isLoading && appointmentsAsync.isLoading;
+    // Only show the full-screen error when *both* sources fail and neither
+    // has cached data — a single source failing still renders the other's
+    // items, with a partial-failure notice instead of blanking everything.
+    final hasError = ordersAsync.hasError &&
+        appointmentsAsync.hasError &&
+        ordersAsync.value == null &&
+        appointmentsAsync.value == null;
+    final hasPartialError =
+        !hasError && (ordersAsync.hasError || appointmentsAsync.hasError);
 
     final orders = ordersAsync.value ?? [];
     final appointments = appointmentsAsync.value ?? [];
@@ -115,6 +121,34 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
             ),
 
             const SizedBox(height: 12),
+
+            if (hasPartialError)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.tangerine.withAlpha(isDark ? 40 : 24),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline_rounded,
+                          size: 16, color: AppColors.tangerine),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          ordersAsync.hasError
+                              ? 'Some orders could not be loaded.'
+                              : 'Some appointments could not be loaded.',
+                          style: TextStyle(fontSize: 12, color: pt.ink700),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
 
             // ── Body ──────────────────────────────────────────────────────
             Expanded(

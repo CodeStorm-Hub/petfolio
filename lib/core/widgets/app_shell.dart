@@ -15,6 +15,7 @@ import 'package:petfolio/core/theme/theme.dart';
 import 'package:petfolio/core/widgets/pet_avatar.dart';
 import 'package:petfolio/core/widgets/app_tutorial_overlay.dart';
 import 'package:petfolio/features/marketplace/presentation/controllers/cart_controller.dart';
+import 'package:petfolio/features/marketplace/presentation/screens/marketplace_categories_screen.dart';
 import 'package:petfolio/features/marketplace/presentation/screens/marketplace_screen.dart';
 import 'package:petfolio/features/matching/presentation/matching_navigation.dart';
 import 'package:petfolio/features/matching/presentation/widgets/match_preferences_sheet.dart';
@@ -109,6 +110,30 @@ class _AppShellState extends ConsumerState<AppShell>
   int _currentSubIndex(ShellModule module, BuildContext context) =>
       selectedSubIndex(destinationsFor(module), _currentLocation());
 
+  void _onNavSelect(BuildContext context, ShellModule module, int i) {
+    if (module != ShellModule.marketplace) {
+      context.go(destinationsFor(module)[i].path);
+      return;
+    }
+    switch (i) {
+      case 1:
+        MarketplaceCategoriesSheet.show(context);
+        break;
+      case 2:
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          useRootNavigator: true,
+          backgroundColor: Colors.transparent,
+          constraints: const BoxConstraints(maxWidth: 560),
+          builder: (_) => const CartDrawer(),
+        );
+        break;
+      default:
+        context.go('/marketplace');
+    }
+  }
+
   Widget _wrapWithTutorial(Widget shell) {
     if (!_tutorialChecked || !_showTutorial) return shell;
     return Stack(
@@ -154,7 +179,7 @@ class _AppShellState extends ConsumerState<AppShell>
         key: ValueKey(module),
         destinations: dests,
         selectedIndex: subIndex,
-        onSelect: (i) => context.go(dests[i].path),
+        onSelect: (i) => _onNavSelect(context, module, i),
         accentColors: accents,
         badgeCounts: badgeCounts,
       ),
@@ -173,7 +198,7 @@ class _AppShellState extends ConsumerState<AppShell>
                   destinations: dests,
                   accentColors: accents,
                   selectedIndex: subIndex,
-                  onSelect: (i) => context.go(dests[i].path),
+                  onSelect: (i) => _onNavSelect(context, module, i),
                   module: module,
                   badgeCounts: badgeCounts,
                 ),

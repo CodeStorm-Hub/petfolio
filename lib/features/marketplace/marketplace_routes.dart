@@ -12,18 +12,9 @@ import 'presentation/screens/customer/buyer_order_detail_screen.dart';
 import 'presentation/screens/customer/buyer_order_list_screen.dart';
 import 'presentation/screens/customer/shop_storefront_screen.dart';
 import 'presentation/screens/order_confirmation_screen.dart';
-import 'presentation/screens/marketplace_categories_screen.dart';
 import 'presentation/screens/product_detail_screen.dart';
 
 List<RouteBase> marketplaceRoutes(GlobalKey<NavigatorState> rootKey) => [
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/marketplace/categories',
-    pageBuilder: (context, state) => pfSharedAxisPage(
-      state: state,
-      child: const MarketplaceCategoriesScreen(),
-    ),
-  ),
   GoRoute(
     parentNavigatorKey: rootKey,
     path: '/marketplace/product/:id',

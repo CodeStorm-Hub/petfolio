@@ -56,7 +56,7 @@ class AccountScreen extends ConsumerWidget {
             _AccountTile(
               icon: Icons.receipt_long_outlined,
               label: 'My Orders & Activity',
-              onTap: () => context.go('/home/activity'),
+              onTap: () => context.push('/home/activity'),
             ),
           ]),
 
