@@ -157,3 +157,4 @@ test/core/theme/failures/app_theme_light_isolatedDiff.png
 test/core/theme/failures/app_theme_light_maskedDiff.png
 test/core/theme/failures/app_theme_light_testImage.png
 /.claude/sessions
+/graphify-out/obsidian
