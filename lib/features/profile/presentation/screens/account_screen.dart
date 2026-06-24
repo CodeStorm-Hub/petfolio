@@ -63,11 +63,6 @@ class AccountScreen extends ConsumerWidget {
           _sectionHeader(context, 'STORE'),
           _group(isDark, pt, [
             _AccountTile(
-              icon: Icons.storefront_outlined,
-              label: 'My Shop',
-              onTap: () => context.go('/seller'),
-            ),
-            _AccountTile(
               icon: Icons.favorite_border_rounded,
               label: 'Wishlist',
               onTap: () => context.push('/marketplace/wishlist'),

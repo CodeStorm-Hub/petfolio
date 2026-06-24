@@ -1,10 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/app_snack_bar.dart';
 import '../../data/models/product.dart';
 import '../controllers/cart_controller.dart';
+import '../controllers/wishlist_controller.dart';
 import 'product_glyph.dart';
 import 'star_rating_widget.dart';
 
@@ -32,7 +34,15 @@ class ProductCard extends ConsumerWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  _ProductTile(product: product),
+                  _ProductTile(
+                    product: product,
+                    isWishlisted:
+                        ref.watch(isWishlistedProvider(product.id)).value ?? false,
+                    onToggleWishlist: () {
+                      HapticFeedback.selectionClick();
+                      ref.read(wishlistItemsProvider.notifier).toggle(product.id);
+                    },
+                  ),
                   Positioned(
                     bottom: 8,
                     right: 8,
@@ -82,7 +92,16 @@ class ProductCardCompact extends ConsumerWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    _ProductTile(product: product),
+                    _ProductTile(
+                      product: product,
+                      isWishlisted:
+                          ref.watch(isWishlistedProvider(product.id)).value ??
+                              false,
+                      onToggleWishlist: () {
+                        HapticFeedback.selectionClick();
+                        ref.read(wishlistItemsProvider.notifier).toggle(product.id);
+                      },
+                    ),
                     Positioned(
                       bottom: 8,
                       right: 8,
@@ -151,9 +170,15 @@ class _QuickAddButton extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ProductTile extends StatelessWidget {
-  const _ProductTile({required this.product});
+  const _ProductTile({
+    required this.product,
+    required this.isWishlisted,
+    required this.onToggleWishlist,
+  });
 
   final Product product;
+  final bool isWishlisted;
+  final VoidCallback onToggleWishlist;
 
   @override
   Widget build(BuildContext context) {
@@ -188,15 +213,42 @@ class _ProductTile extends StatelessWidget {
               ),
             ),
           ),
-          // Glyph
-          Center(
-            child: LayoutBuilder(
-              builder: (_, constraints) => ProductGlyph(
-                glyphType: product.glyphType,
-                size: constraints.maxWidth * 0.42,
+          // Product photo, falling back to the generated glyph
+          if (product.imageUrls.isNotEmpty)
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: CachedNetworkImage(
+                  imageUrl: product.imageUrls.first,
+                  fit: BoxFit.cover,
+                  placeholder: (_, _) => Center(
+                    child: LayoutBuilder(
+                      builder: (_, constraints) => ProductGlyph(
+                        glyphType: product.glyphType,
+                        size: constraints.maxWidth * 0.42,
+                      ),
+                    ),
+                  ),
+                  errorWidget: (_, _, _) => Center(
+                    child: LayoutBuilder(
+                      builder: (_, constraints) => ProductGlyph(
+                        glyphType: product.glyphType,
+                        size: constraints.maxWidth * 0.42,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          else
+            Center(
+              child: LayoutBuilder(
+                builder: (_, constraints) => ProductGlyph(
+                  glyphType: product.glyphType,
+                  size: constraints.maxWidth * 0.42,
+                ),
               ),
             ),
-          ),
           // Rating badge
           if (product.rating != null && product.rating! > 0)
             Positioned(
@@ -255,10 +307,10 @@ class _ProductTile extends StatelessWidget {
             top: 8,
             right: 8,
             child: Semantics(
-              label: 'Save to wishlist',
+              label: isWishlisted ? 'Remove from wishlist' : 'Save to wishlist',
               button: true,
               child: GestureDetector(
-              onTap: () => AppSnackBar.show('Wishlist coming soon 💛'),
+              onTap: onToggleWishlist,
               behavior: HitTestBehavior.opaque,
               child: Container(
                 width: 30,
@@ -275,9 +327,13 @@ class _ProductTile extends StatelessWidget {
                   ],
                 ),
                 child: Icon(
-                  Icons.bookmark_outline_rounded,
+                  isWishlisted
+                      ? Icons.bookmark_rounded
+                      : Icons.bookmark_outline_rounded,
                   size: 16,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: isWishlisted
+                      ? AppColors.poppy
+                      : Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),

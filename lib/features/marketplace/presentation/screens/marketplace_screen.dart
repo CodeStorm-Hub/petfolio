@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -50,6 +51,10 @@ class FlyToCartItem {
 // ─────────────────────────────────────────────────────────────────────────────
 // MarketplaceScreen
 // ─────────────────────────────────────────────────────────────────────────────
+
+/// Width at which the wide-layout body (and the fly-to-cart animation's
+/// landing point) is centered and constrained.
+const _kWideLayoutMaxWidth = 840.0;
 
 class MarketplaceScreen extends ConsumerStatefulWidget {
   const MarketplaceScreen({super.key});
@@ -161,7 +166,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> with Tick
                   body = Align(
                     alignment: Alignment.topCenter,
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 840),
+                      constraints: const BoxConstraints(maxWidth: _kWideLayoutMaxWidth),
                       child: body,
                     ),
                   );
@@ -220,9 +225,12 @@ class _FlyToCartAnimState extends State<_FlyToCartAnim> with SingleTickerProvide
     super.didChangeDependencies();
     if (!_initialized) {
       final screenWidth = MediaQuery.sizeOf(context).width;
-      // If layout is centered/constrained to 800px, cart icon is on the right edge of that 800px column
-      final endX = screenWidth >= 800 
-          ? (screenWidth + 800) / 2 - 40
+      // Mirrors the wide-layout centering in MarketplaceScreen.build: once the
+      // screen is wide enough, the body is centered in a _kWideLayoutMaxWidth
+      // column, so the cart icon sits at that column's right edge, not the
+      // screen's right edge.
+      final endX = screenWidth >= ResponsiveLayout.mobileMax
+          ? (screenWidth + _kWideLayoutMaxWidth) / 2 - 40
           : screenWidth - 40;
 
       _xAnim = Tween<double>(begin: widget.item.rect.center.dx - 24, end: endX).animate(
@@ -376,7 +384,10 @@ class _CategoryChips extends StatelessWidget {
               label: 'All categories',
               button: true,
               child: GestureDetector(
-              onTap: () => MarketplaceCategoriesSheet.show(context),
+              onTap: () {
+                HapticFeedback.selectionClick();
+                MarketplaceCategoriesSheet.show(context);
+              },
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -412,7 +423,10 @@ class _CategoryChips extends StatelessWidget {
             label: '${cat.label}${isActive ? ", selected" : ""}',
             button: true,
             child: GestureDetector(
-            onTap: () => onSelected(isActive ? ProductCategory.all : cat.id),
+            onTap: () {
+              HapticFeedback.selectionClick();
+              onSelected(isActive ? ProductCategory.all : cat.id);
+            },
             child: AnimatedScale(
               scale: isActive ? 1.07 : 1.0,
               duration: const Duration(milliseconds: 340),
@@ -1650,7 +1664,11 @@ class _CartItemRow extends ConsumerWidget {
                   label: 'Decrease quantity',
                   button: true,
                   child: GestureDetector(
-                    onTap: () => ref.read(cartProvider.notifier).decrement(item.product.id),
+                    onTap: () => ref.read(cartProvider.notifier).decrement(
+                          item.product.id,
+                          isSubscribed: item.isSubscribed,
+                          variantId: item.variantId,
+                        ),
                     child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: const Text('−', style: TextStyle(fontWeight: FontWeight.w700))),
                   ),
                 ),
@@ -1663,7 +1681,12 @@ class _CartItemRow extends ConsumerWidget {
                   label: 'Increase quantity',
                   button: true,
                   child: GestureDetector(
-                    onTap: () => ref.read(cartProvider.notifier).add(item.product),
+                    onTap: () => ref.read(cartProvider.notifier).add(
+                          item.product,
+                          subscribe: item.isSubscribed,
+                          frequencyWeeks: item.frequencyWeeks,
+                          variantId: item.variantId,
+                        ),
                     child: Container(width: 26, height: 26, decoration: BoxDecoration(color: pt.surface1, shape: BoxShape.circle), alignment: Alignment.center, child: const Text('+', style: TextStyle(fontWeight: FontWeight.w700))),
                   ),
                 ),

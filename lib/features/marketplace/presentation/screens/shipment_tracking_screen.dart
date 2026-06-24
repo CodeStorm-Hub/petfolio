@@ -85,11 +85,19 @@ class ShipmentTrackingScreen extends ConsumerWidget {
                           leadingIcon:
                               const Icon(Icons.open_in_new_rounded, size: 18),
                           onPressed: () async {
-                            final uri =
-                                Uri.tryParse(shipment.trackingUrl!);
+                            final uri = Uri.tryParse(shipment.trackingUrl!);
+                            var launched = false;
                             if (uri != null && await canLaunchUrl(uri)) {
-                              await launchUrl(uri,
+                              launched = await launchUrl(uri,
                                   mode: LaunchMode.externalApplication);
+                            }
+                            if (!launched && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('Could not open tracking link'),
+                                ),
+                              );
                             }
                           },
                         ),

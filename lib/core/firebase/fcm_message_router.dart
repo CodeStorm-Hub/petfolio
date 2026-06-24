@@ -32,22 +32,12 @@ class FcmMessageRouter {
         return '/social/notifications';
       case 'follow':
         return '/social/notifications';
-      case 'kyc_approved':
-        return '/seller';
-      case 'kyc_rejected':
-        return '/seller/kyc';
       case 'order':
         final orderId = data['order_id'] as String?;
         if (orderId != null && orderId.isNotEmpty) {
           return '/profile/orders/$orderId';
         }
         return '/profile/orders';
-      case 'seller_order':
-        final sellerOrderId = data['order_id'] as String?;
-        if (sellerOrderId != null && sellerOrderId.isNotEmpty) {
-          return '/seller/orders/$sellerOrderId';
-        }
-        return '/seller/orders';
       default:
         return null;
     }
@@ -58,9 +48,7 @@ class FcmMessageRouter {
         path == '/matching/inbox' ||
         path.startsWith('/social/post/') ||
         path == '/social/notifications' ||
-        path.startsWith('/profile/orders/') ||
-        path.startsWith('/seller/orders/') ||
-        path == '/seller/kyc';
+        path.startsWith('/profile/orders/');
   }
 
   static void navigate(GoRouter router, Map<String, dynamic> data) {

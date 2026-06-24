@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,9 +53,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   Product? get _product =>
       widget.product ??
-      ref.read(productListProvider).value?.firstWhere(
+      ref.read(productListProvider).value?.firstWhereOrNull(
             (p) => p.id == widget.productId,
-            orElse: () => throw StateError('Product not found'),
           );
 
   @override
@@ -117,6 +117,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       setState(() => _popping = true);
       for (var i = 0; i < result.qty; i++) {
         Future.delayed(Duration(milliseconds: i * 90), () {
+          if (!mounted) return;
           ref.read(cartProvider.notifier).add(
             p,
             subscribe: _subscribe,
@@ -139,7 +140,27 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   Widget build(BuildContext context) {
     final product = _product;
     if (product == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      final isLoading = widget.product == null &&
+          ref.watch(productListProvider).isLoading;
+      return Scaffold(
+        body: Center(
+          child: isLoading
+              ? const CircularProgressIndicator()
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.search_off_rounded, size: 40),
+                    const SizedBox(height: 12),
+                    const Text('Product not found'),
+                    const SizedBox(height: 16),
+                    FilledButton(
+                      onPressed: () => context.go('/marketplace'),
+                      child: const Text('Back to shop'),
+                    ),
+                  ],
+                ),
+        ),
+      );
     }
 
     final cartItemCount = ref.watch(cartProvider.select((c) => c.itemCount));
@@ -1573,7 +1594,10 @@ class _IconBtn extends StatelessWidget {
       label: tooltip,
       button: true,
       child: GestureDetector(
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
         child: Container(
           width: 48,
           height: 48,

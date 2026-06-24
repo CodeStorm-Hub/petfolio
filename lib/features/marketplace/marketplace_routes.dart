@@ -14,7 +14,6 @@ import 'presentation/screens/customer/shop_storefront_screen.dart';
 import 'presentation/screens/order_confirmation_screen.dart';
 import 'presentation/screens/marketplace_categories_screen.dart';
 import 'presentation/screens/product_detail_screen.dart';
-import 'presentation/screens/vendor_web_redirect_screen.dart';
 
 List<RouteBase> marketplaceRoutes(GlobalKey<NavigatorState> rootKey) => [
   GoRoute(
@@ -89,66 +88,6 @@ List<RouteBase> marketplaceRoutes(GlobalKey<NavigatorState> rootKey) => [
         shopId: state.pathParameters['id']!,
       ),
     ),
-  ),
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/seller',
-    pageBuilder: (context, state) =>
-        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
-  ),
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/seller/setup',
-    pageBuilder: (context, state) =>
-        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
-  ),
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/seller/edit-shop',
-    pageBuilder: (context, state) =>
-        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
-  ),
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/seller/kyc',
-    pageBuilder: (context, state) =>
-        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
-  ),
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/seller/products',
-    pageBuilder: (context, state) =>
-        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
-  ),
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/seller/products/add',
-    pageBuilder: (context, state) =>
-        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
-  ),
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/seller/products/:id/edit',
-    pageBuilder: (context, state) =>
-        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
-  ),
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/seller/orders',
-    pageBuilder: (context, state) =>
-        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
-  ),
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/seller/orders/:id',
-    pageBuilder: (context, state) =>
-        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
-  ),
-  GoRoute(
-    parentNavigatorKey: rootKey,
-    path: '/seller/earnings',
-    pageBuilder: (context, state) =>
-        pfFadeThroughPage(state: state, child: const VendorWebRedirectScreen()),
   ),
   GoRoute(
     parentNavigatorKey: rootKey,

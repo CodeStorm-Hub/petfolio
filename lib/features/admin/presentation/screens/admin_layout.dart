@@ -6,14 +6,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../controllers/admin_auth_controller.dart';
 import '../widgets/admin_dashboard_tab.dart';
-import '../widgets/financial_ledger_tab.dart';
-import '../widgets/kyc_approvals_tab.dart';
 import '../widgets/moderation_tab.dart';
-import '../widgets/orders_tab.dart';
-import '../widgets/shops_tab.dart';
-import '../controllers/shop_deletion_controller.dart';
 
-enum _AdminTab { dashboard, kyc, ledger, orders, moderation, shops }
+enum _AdminTab { dashboard, moderation }
 
 class AdminLayout extends ConsumerStatefulWidget {
   const AdminLayout({super.key});
@@ -33,44 +28,16 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
       tab: _AdminTab.dashboard,
     ),
     (
-      icon: Icons.verified_user_outlined,
-      activeIcon: Icons.verified_user_rounded,
-      label: 'KYC',
-      tab: _AdminTab.kyc,
-    ),
-    (
-      icon: Icons.account_balance_wallet_outlined,
-      activeIcon: Icons.account_balance_wallet_rounded,
-      label: 'Ledger',
-      tab: _AdminTab.ledger,
-    ),
-    (
-      icon: Icons.payments_outlined,
-      activeIcon: Icons.payments_rounded,
-      label: 'Orders',
-      tab: _AdminTab.orders,
-    ),
-    (
       icon: Icons.shield_outlined,
       activeIcon: Icons.shield_rounded,
       label: 'Moderation',
       tab: _AdminTab.moderation,
     ),
-    (
-      icon: Icons.store_outlined,
-      activeIcon: Icons.store_rounded,
-      label: 'Shops',
-      tab: _AdminTab.shops,
-    ),
   ];
 
   Widget get _body => switch (_tab) {
         _AdminTab.dashboard  => const AdminDashboardTab(),
-        _AdminTab.kyc        => const KycApprovalsTab(),
-        _AdminTab.ledger     => const FinancialLedgerTab(),
-        _AdminTab.orders     => const OrdersTab(),
         _AdminTab.moderation => const ModerationTab(),
-        _AdminTab.shops      => const ShopsTab(),
       };
 
   int get _selectedIndex =>
@@ -79,17 +46,8 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
   void _onDestinationSelected(int i) =>
       setState(() => _tab = _destinations[i].tab);
 
-  Widget _destinationIcon(IconData icon, _AdminTab tab, WidgetRef ref) {
-    if (tab != _AdminTab.shops) return Icon(icon);
-    final hasPending = ref.watch(
-      shopDeletionRequestsProvider.select((v) => (v.value?.isNotEmpty) ?? false),
-    );
-    return Badge(
-      isLabelVisible: hasPending,
-      backgroundColor: AppColors.danger,
-      child: Icon(icon),
-    );
-  }
+  Widget _destinationIcon(IconData icon, _AdminTab tab, WidgetRef ref) =>
+      Icon(icon);
 
   @override
   Widget build(BuildContext context) {

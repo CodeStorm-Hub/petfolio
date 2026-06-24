@@ -110,10 +110,17 @@ class CartNotifier extends Notifier<CartState> {
   }
 
   /// Remove one unit; remove the line entirely if quantity reaches 0.
-  void decrement(String productId, {bool isSubscribed = false}) {
+  void decrement(
+    String productId, {
+    bool isSubscribed = false,
+    String? variantId,
+  }) {
     final items = List<CartItem>.from(state.items);
     final idx = items.indexWhere(
-      (i) => i.product.id == productId && i.isSubscribed == isSubscribed,
+      (i) =>
+          i.product.id == productId &&
+          i.isSubscribed == isSubscribed &&
+          i.variantId == variantId,
     );
     if (idx == -1) return;
 

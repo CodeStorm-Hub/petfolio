@@ -77,16 +77,14 @@ const matchingAccents = <Color>[
   AppColors.lilac,
 ];
 
-// ── Marketplace module (4 tabs) ───────────────────────────────────────────────
+// ── Marketplace module (3 tabs) ───────────────────────────────────────────────
 const marketplaceDestinations = <AppShellDestination>[
   AppShellDestination(icon: Icons.storefront_outlined,              activeIcon: Icons.storefront,                     label: 'Shop',       path: '/marketplace'),
   AppShellDestination(icon: Icons.category_outlined,                activeIcon: Icons.category,                      label: 'Browse',     path: '/marketplace/categories'),
   AppShellDestination(icon: Icons.shopping_cart_outlined,           activeIcon: Icons.shopping_cart,                  label: 'Cart',       path: '/marketplace/cart'),
-  AppShellDestination(icon: Icons.sell_outlined,                    activeIcon: Icons.sell,                           label: 'Sell',       path: '/seller'),
 ];
 
 const marketplaceAccents = <Color>[
-  AppColors.mint,
   AppColors.mint,
   AppColors.mint,
   AppColors.mint,
@@ -119,7 +117,6 @@ ShellModule moduleFromPath(String location) {
   if (location.startsWith('/social')) { return ShellModule.social; }
   if (location.startsWith('/matching')) { return ShellModule.matching; }
   if (location.startsWith('/marketplace') ||
-      location.startsWith('/seller') ||
       location.startsWith('/shop')) { return ShellModule.marketplace; }
   return ShellModule.global;
 }

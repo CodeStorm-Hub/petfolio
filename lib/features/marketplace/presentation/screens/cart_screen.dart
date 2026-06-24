@@ -356,17 +356,13 @@ class _VendorCheckoutSectionState
           .validateCode(code, shopId: widget.shopId);
       if (!mounted) return;
       if (promo == null) {
-        setState(() { _promoLoading = false; _promoExpanded = false; });
-        if (!context.mounted) return;
-        FocusScope.of(context).unfocus();
+        setState(() => _promoLoading = false);
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(_snack('Promo code not valid or expired', error: true));
       } else if (subtotalCents < promo.minOrderCents) {
-        setState(() { _promoLoading = false; _promoExpanded = false; });
+        setState(() => _promoLoading = false);
         if (!context.mounted) return;
-        FocusScope.of(context).unfocus();
         final min = '\$${(promo.minOrderCents / 100).toStringAsFixed(0)}';
-        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(_snack('Minimum order $min required for this code', error: true));
       } else {
         HapticFeedback.mediumImpact();
@@ -385,10 +381,7 @@ class _VendorCheckoutSectionState
         stackTrace: st,
       );
       if (!mounted) return;
-      setState(() { _promoLoading = false; _promoExpanded = false; });
-      if (!context.mounted) return;
-      FocusScope.of(context).unfocus();
-      if (!context.mounted) return;
+      setState(() => _promoLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         _snack('Could not apply promo. Please try again.', error: true),
       );

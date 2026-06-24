@@ -6,6 +6,22 @@ part 'user_address.g.dart';
 @JsonEnum()
 enum AddressLabel { home, work, campus, other }
 
+extension AddressLabelDisplay on AddressLabel {
+  String get emoji => switch (this) {
+        AddressLabel.home => '🏠',
+        AddressLabel.work => '💼',
+        AddressLabel.campus => '🎓',
+        AddressLabel.other => '📍',
+      };
+
+  String get displayName => switch (this) {
+        AddressLabel.home => 'Home',
+        AddressLabel.work => 'Work',
+        AddressLabel.campus => 'Campus',
+        AddressLabel.other => 'Other',
+      };
+}
+
 @freezed
 abstract class UserAddress with _$UserAddress {
   const UserAddress._();
@@ -25,19 +41,9 @@ abstract class UserAddress with _$UserAddress {
   factory UserAddress.fromJson(Map<String, dynamic> json) =>
       _$UserAddressFromJson(json);
 
-  String get labelEmoji => switch (label) {
-        AddressLabel.home => '🏠',
-        AddressLabel.work => '💼',
-        AddressLabel.campus => '🎓',
-        AddressLabel.other => '📍',
-      };
+  String get labelEmoji => label.emoji;
 
-  String get labelName => switch (label) {
-        AddressLabel.home => 'Home',
-        AddressLabel.work => 'Work',
-        AddressLabel.campus => 'Campus',
-        AddressLabel.other => 'Other',
-      };
+  String get labelName => label.displayName;
 
   String get displayLine1 => labelName;
 

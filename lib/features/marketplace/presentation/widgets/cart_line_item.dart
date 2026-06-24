@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -50,7 +51,21 @@ class CartLineItem extends ConsumerWidget {
                 ),
               ),
               child: Center(
-                child: ProductGlyph(glyphType: p.glyphType, size: 30),
+                child: p.imageUrls.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: CachedNetworkImage(
+                          imageUrl: p.imageUrls.first,
+                          fit: BoxFit.cover,
+                          width: 60,
+                          height: 60,
+                          placeholder: (_, _) =>
+                              ProductGlyph(glyphType: p.glyphType, size: 30),
+                          errorWidget: (_, _, _) =>
+                              ProductGlyph(glyphType: p.glyphType, size: 30),
+                        ),
+                      )
+                    : ProductGlyph(glyphType: p.glyphType, size: 30),
               ),
             ),
             const SizedBox(width: 12),
@@ -116,11 +131,13 @@ class CartLineItem extends ConsumerWidget {
               onDecrement: () => cart.decrement(
                 p.id,
                 isSubscribed: item.isSubscribed,
+                variantId: item.variantId,
               ),
               onIncrement: () => cart.add(
                 p,
                 subscribe: item.isSubscribed,
                 frequencyWeeks: item.frequencyWeeks,
+                variantId: item.variantId,
               ),
             ),
           ],

@@ -6,4 +6,3 @@ export 'presentation/screens/order_confirmation_screen.dart';
 export 'presentation/screens/customer/buyer_order_list_screen.dart';
 export 'presentation/screens/customer/buyer_order_detail_screen.dart';
 export 'presentation/screens/customer/shop_storefront_screen.dart';
-export 'presentation/screens/vendor_web_redirect_screen.dart';

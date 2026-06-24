@@ -261,7 +261,8 @@ class _SummaryCard extends StatelessWidget {
             const SizedBox(height: 12),
             _Row(
               label: 'Order ID',
-              value: '#${order.id.substring(0, 8)}',
+              value:
+                  '#${order.id.length > 8 ? order.id.substring(0, 8) : order.id}',
             ),
             const SizedBox(height: 6),
             _Row(

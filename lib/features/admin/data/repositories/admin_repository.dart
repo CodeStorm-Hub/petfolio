@@ -5,7 +5,6 @@ import '../../../marketplace/data/models/marketplace_order.dart';
 import '../../../marketplace/data/models/shop.dart';
 import '../../../marketplace/data/models/vendor_ledger.dart';
 import '../models/post_report.dart';
-import '../models/shop_deletion_request.dart';
 
 final adminRepositoryProvider = Provider<AdminRepository>(
   (_) => AdminRepository(Supabase.instance.client),
@@ -15,59 +14,6 @@ class AdminRepository {
   const AdminRepository(this._client);
 
   final SupabaseClient _client;
-
-  // ── KYC ───────────────────────────────────────────────────────────────────
-
-  Future<List<Shop>> fetchSubmittedKycShops() async {
-    final rows = await _client
-        .from('shops')
-        .select()
-        .eq('kyc_status', 'submitted')
-        .order('updated_at', ascending: false);
-    return (rows as List)
-        .map((r) => Shop.fromJson(r as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<void> approveKyc(String shopId) async {
-    final adminId = _client.auth.currentUser?.id;
-    if (adminId == null) throw NotAdminException();
-    await _client.rpc('approve_vendor_kyc', params: {
-      'p_shop_id': shopId,
-      'p_admin_id': adminId,
-    });
-  }
-
-  Future<void> rejectKyc(String shopId, String reason) async {
-    final adminId = _client.auth.currentUser?.id;
-    if (adminId == null) throw NotAdminException();
-    await _client.rpc('reject_vendor_kyc', params: {
-      'p_shop_id':  shopId,
-      'p_admin_id': adminId,
-      'p_reason':   reason,
-    });
-  }
-
-  // ── KYC document signed URLs ──────────────────────────────────────────────
-
-  Future<String> getSignedDocUrl(String path) =>
-      _client.storage.from('kyc-documents').createSignedUrl(path, 60);
-
-  Future<String> getSecureDocumentUrl(String storagePath) {
-    final path = _resolveStoragePath(storagePath);
-    return _client.storage.from('kyc-documents').createSignedUrl(path, 60);
-  }
-
-  static String _resolveStoragePath(String value) {
-    if (!value.startsWith('http')) return value;
-    final uri = Uri.parse(value);
-    final segments = uri.pathSegments;
-    final bucketIndex = segments.indexOf('kyc-documents');
-    if (bucketIndex != -1 && bucketIndex < segments.length - 1) {
-      return segments.sublist(bucketIndex + 1).join('/');
-    }
-    return value;
-  }
 
   // ── Moderation ────────────────────────────────────────────────────────────
 
@@ -94,89 +40,6 @@ class AdminRepository {
       'p_action':    dismiss ? 'dismissed' : 'reviewed',
       'p_hide_post': hidePost,
     });
-  }
-
-  // ── Shop deletion requests ────────────────────────────────────────────────
-
-  Future<List<ShopDeletionRequest>> fetchPendingDeletionRequests() async {
-    final rows = await _client
-        .from('shop_deletion_requests')
-        .select('*, shop:shop_id(shop_name, owner_id)')
-        .eq('status', 'pending')
-        .order('requested_at', ascending: true);
-    return (rows as List)
-        .map((r) => ShopDeletionRequest.fromJson(r as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<void> resolveDeletionRequest(
-    String requestId, {
-    required bool approve,
-    String? rejectionNote,
-  }) async {
-    final adminId = _client.auth.currentUser?.id;
-    if (adminId == null) throw NotAdminException();
-    await _client.rpc('resolve_shop_deletion', params: {
-      'p_request_id':     requestId,
-      'p_action':         approve ? 'approved' : 'rejected',
-      if (!approve && rejectionNote != null) 'p_rejection_note': rejectionNote,
-    });
-  }
-
-  // ── COD reconciliation ────────────────────────────────────────────────────
-
-  Future<List<MarketplaceOrder>> fetchDeliveredCodOrders() async {
-    final rows = await _client
-        .from('marketplace_orders')
-        .select()
-        .eq('payment_method', 'cod')
-        .eq('status', 'delivered')
-        .eq('payment_status', 'pending')
-        .order('created_at', ascending: false);
-    return (rows as List)
-        .map((r) => MarketplaceOrder.fromJson(r as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<void> markCashReceived(String orderId) async {
-    await _client
-        .from('marketplace_orders')
-        .update({'payment_status': 'collected'}).eq('id', orderId);
-    await _client
-        .from('vendor_ledgers')
-        .update({'status': LedgerStatus.available.name}).eq('order_id', orderId).eq(
-          'status',
-          LedgerStatus.pendingClearance.name,
-        );
-  }
-
-  // ── Payouts ───────────────────────────────────────────────────────────────
-
-  Future<List<VendorLedger>> fetchAvailableLedgers() async {
-    final rows = await _client
-        .from('vendor_ledgers')
-        .select()
-        .eq('status', LedgerStatus.available.name)
-        .order('created_at');
-    return (rows as List)
-        .map((r) => VendorLedger.fromJson(r as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<List<Shop>> fetchShopsByIds(List<String> ids) async {
-    if (ids.isEmpty) return [];
-    final rows = await _client.from('shops').select().inFilter('id', ids);
-    return (rows as List)
-        .map((r) => Shop.fromJson(r as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<void> markShopPaid(String shopId) async {
-    await _client
-        .from('vendor_ledgers')
-        .update({'status': LedgerStatus.paid.name})
-        .eq('shop_id', shopId)
-        .eq('status', LedgerStatus.available.name);
   }
 
   // ── Dashboard ─────────────────────────────────────────────────────────────

@@ -40,10 +40,10 @@ void main() {
       );
     });
 
-    test('maps kyc_approved to seller dashboard', () {
+    test('returns null for unknown type', () {
       expect(
         FcmMessageRouter.routeFromData({'type': 'kyc_approved'}),
-        '/seller',
+        isNull,
       );
     });
 
@@ -54,7 +54,6 @@ void main() {
       );
       expect(FcmMessageRouter.usePushForPath('/matching/inbox'), isTrue);
       expect(FcmMessageRouter.usePushForPath('/care'), isFalse);
-      expect(FcmMessageRouter.usePushForPath('/seller'), isFalse);
     });
   });
 }

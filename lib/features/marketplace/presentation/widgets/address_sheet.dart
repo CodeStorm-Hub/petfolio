@@ -615,32 +615,12 @@ class _LabelTile extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              UserAddress(
-                id: '',
-                userId: '',
-                label: label,
-                fullAddress: '',
-                city: '',
-                zone: '',
-                area: '',
-                isDefault: false,
-                createdAt: DateTime.now(),
-              ).labelEmoji,
+              label.emoji,
               style: const TextStyle(fontSize: 20),
             ),
             const SizedBox(height: 4),
             Text(
-              UserAddress(
-                id: '',
-                userId: '',
-                label: label,
-                fullAddress: '',
-                city: '',
-                zone: '',
-                area: '',
-                isDefault: false,
-                createdAt: DateTime.now(),
-              ).labelName,
+              label.displayName,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
