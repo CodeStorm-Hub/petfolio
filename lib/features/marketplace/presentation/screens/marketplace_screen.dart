@@ -23,7 +23,6 @@ import '../../domain/services/currency_formatter.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/checkout_controller.dart';
 import '../controllers/product_list_controller.dart';
-import '../controllers/shop_list_controller.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../widgets/product_glyph.dart';
 import '../widgets/marketplace_state_views.dart';
@@ -1330,8 +1329,6 @@ class _NoResultsState extends StatelessWidget {
 // Cart Drawer
 // ─────────────────────────────────────────────────────────────────────────────
 
-const _petfolioOfficialShopId = 'cccccccc-0000-0000-0000-cccccccccccc';
-
 class CartDrawer extends ConsumerStatefulWidget {
   const CartDrawer({super.key});
 
@@ -1343,21 +1340,6 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
   @override
   Widget build(BuildContext context) {
     final cart = ref.watch(cartProvider);
-    final checkout = ref.watch(checkoutProvider);
-    final shopsAsync = ref.watch(shopListProvider);
-    final verifiedShopIds = shopsAsync.value?.map((s) => s.id).toSet() ?? {};
-
-    ref.listen(checkoutProvider, (prev, next) {
-      if (next.status == CheckoutStatus.success && next.orderId != null) {
-        Navigator.pop(context);
-        context.pushReplacement('/marketplace/order/${next.orderId}');
-        ref.read(checkoutProvider.notifier).reset();
-      }
-      if (next.status == CheckoutStatus.failure && next.errorMessage != null) {
-        AppSnackBar.showError(next.errorMessage!);
-        ref.read(checkoutProvider.notifier).reset();
-      }
-    });
 
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final ink950 = pt.ink950;
@@ -1370,12 +1352,6 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
     final shipping = items.isNotEmpty ? 4.50 : 0.0;
     final total = subtotal + shipping;
     final shopGroups = cart.itemsByShop.entries.toList();
-    final checkoutShopId = shopGroups.length == 1 ? shopGroups.first.key : null;
-    final canCheckout = checkoutShopId != null &&
-        (checkoutShopId == _petfolioOfficialShopId ||
-            verifiedShopIds.contains(checkoutShopId));
-    final isLoading =
-        checkoutShopId != null && checkout.isLoadingShop(checkoutShopId);
 
     return Container(
       decoration: BoxDecoration(
@@ -1502,34 +1478,20 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                   const SizedBox(height: 16),
                   FilledButton(
                     key: const ValueKey<String>('marketplace_cart_checkout'),
-                    onPressed: shopGroups.length > 1
-                        ? () {
-                            Navigator.pop(context);
-                            context.push('/marketplace/cart');
-                          }
-                        : !canCheckout || isLoading
-                            ? null
-                            : () => ref
-                                .read(checkoutProvider.notifier)
-                                .startCheckoutForShop(checkoutShopId),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      context.push('/marketplace/cart');
+                    },
                     style: FilledButton.styleFrom(
                       minimumSize: const Size(double.infinity, 56),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       backgroundColor: Theme.of(context).colorScheme.primary,
                     ),
-                    child: isLoading
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Row(
+                    child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                shopGroups.length > 1
-                                    ? 'Checkout by shop'
-                                    : 'Checkout · \$${total.toStringAsFixed(2)}',
+                                'Checkout · \$${total.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,

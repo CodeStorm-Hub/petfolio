@@ -8,10 +8,16 @@ import '../../../../core/widgets/primary_pill_button.dart';
 import '../../data/repositories/order_repository.dart';
 
 class OrderSuccessSheet extends ConsumerStatefulWidget {
-  const OrderSuccessSheet({super.key, required this.orderId, this.confirmStripePayment = false});
+  const OrderSuccessSheet({
+    super.key,
+    required this.orderId,
+    this.confirmStripePayment = false,
+    this.onNavigate,
+  });
 
   final String orderId;
   final bool confirmStripePayment;
+  final void Function(String destination)? onNavigate;
 
   static Future<void> show(
     BuildContext context,
@@ -147,18 +153,24 @@ class _OrderSuccessSheetState extends ConsumerState<OrderSuccessSheet>
                     label: 'Continue shopping',
                     size: PillButtonSize.lg,
                     isFullWidth: true,
-                    onPressed: () => context.pop('shop'),
+                    onPressed: () => widget.onNavigate != null
+                        ? widget.onNavigate!('shop')
+                        : context.pop('shop'),
                   ),
                   const SizedBox(height: 12),
                   PrimaryPillButton(
                     label: 'View Order',
                     size: PillButtonSize.lg,
                     isFullWidth: true,
-                    onPressed: () => context.pop('order'),
+                    onPressed: () => widget.onNavigate != null
+                        ? widget.onNavigate!('order')
+                        : context.pop('order'),
                   ),
                   const SizedBox(height: 12),
                   TextButton(
-                    onPressed: () => context.pop('home'),
+                    onPressed: () => widget.onNavigate != null
+                        ? widget.onNavigate!('home')
+                        : context.pop('home'),
                     child: Text('Back to home', style: TextStyle(fontSize: 14, color: pt.ink500)),
                   ),
                 ],
@@ -171,16 +183,34 @@ class _OrderSuccessSheetState extends ConsumerState<OrderSuccessSheet>
   }
 }
 
-// Backward-compat alias.
+// Backward-compat alias — full-screen route wrapper.
 class OrderConfirmationScreen extends StatelessWidget {
   const OrderConfirmationScreen({super.key, required this.orderId});
   final String orderId;
+
+  void _navigate(BuildContext context, String destination) {
+    switch (destination) {
+      case 'shop':
+        context.go('/marketplace');
+      case 'order':
+        context.go('/marketplace/orders/$orderId');
+      case 'home':
+        context.go('/home');
+      default:
+        context.go('/home/activity');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface0,
-      body: SafeArea(child: OrderSuccessSheet(orderId: orderId)),
+      body: SafeArea(
+        child: OrderSuccessSheet(
+          orderId: orderId,
+          onNavigate: (dest) => _navigate(context, dest),
+        ),
+      ),
     );
   }
 }
