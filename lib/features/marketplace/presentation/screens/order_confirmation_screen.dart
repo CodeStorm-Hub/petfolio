@@ -189,16 +189,19 @@ class OrderConfirmationScreen extends StatelessWidget {
   final String orderId;
 
   void _navigate(BuildContext context, String destination) {
-    switch (destination) {
-      case 'shop':
-        context.go('/marketplace');
-      case 'order':
-        context.go('/marketplace/orders/$orderId');
-      case 'home':
-        context.go('/home');
-      default:
-        context.go('/home/activity');
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
+      switch (destination) {
+        case 'shop':
+          context.go('/marketplace');
+        case 'order':
+          context.go('/marketplace/orders/$orderId');
+        case 'home':
+          context.go('/home');
+        default:
+          context.go('/home/activity');
+      }
+    });
   }
 
   @override
