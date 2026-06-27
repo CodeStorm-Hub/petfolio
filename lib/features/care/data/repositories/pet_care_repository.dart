@@ -89,6 +89,9 @@ class PetCareRepository {
     }
   }
 
+  // All dates are stored as YYYY-MM-DD strings in local time. The server is UTC
+  // but the date displayed to the user is always their local calendar day, so
+  // we call .toLocal() before stripping the time component with DateUtils.dateOnly.
   static String _fmtYmd(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-'
       '${d.month.toString().padLeft(2, '0')}-'

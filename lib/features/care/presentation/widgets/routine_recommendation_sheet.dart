@@ -31,6 +31,18 @@ class RoutineRecommendationSheet extends ConsumerStatefulWidget {
 class _RoutineRecommendationSheetState
     extends ConsumerState<RoutineRecommendationSheet> {
   bool _isSaving = false;
+  final Map<String, TextEditingController> _titleEdits = {};
+
+  @override
+  void dispose() {
+    for (final c in _titleEdits.values) { c.dispose(); }
+    super.dispose();
+  }
+
+  String _resolvedTitle(AiSuggestion s) {
+    final edited = _titleEdits[s.task.id]?.text.trim() ?? '';
+    return edited.isNotEmpty ? edited : s.task.title;
+  }
 
   List<AiSuggestion> get _suggestions =>
       ref.read(aiRoutineProvider).suggestions;
@@ -64,7 +76,11 @@ class _RoutineRecommendationSheetState
   Future<void> _save() async {
     final toSave = _suggestions
         .where((s) => s.isSelected && !s.isDuplicate)
-        .map((s) => s.task)
+        .map((s) {
+          final title = _resolvedTitle(s);
+          if (title == s.task.title) return s.task;
+          return s.task.copyWith(title: title);
+        })
         .toList();
 
     if (toSave.isEmpty) {
@@ -148,6 +164,9 @@ class _RoutineRecommendationSheetState
       for (final suggestion in items) {
         listChildren.add(_TaskSuggestionCard(
           suggestion: suggestion,
+          titleController: suggestion.isDuplicate
+              ? null
+              : (_titleEdits[suggestion.task.id] ??= TextEditingController(text: suggestion.task.title)),
           onToggle: suggestion.isDuplicate
               ? null
               : (_) => setState(() => notifier.toggleSelection(suggestion.task.id)),
@@ -480,10 +499,12 @@ class _TaskSuggestionCard extends StatelessWidget {
   const _TaskSuggestionCard({
     required this.suggestion,
     required this.onToggle,
+    this.titleController,
   });
 
   final AiSuggestion suggestion;
   final ValueChanged<bool?>? onToggle;
+  final TextEditingController? titleController;
 
   String _frequencyLabel(CareFrequency f) {
     switch (f) {
@@ -551,17 +572,33 @@ class _TaskSuggestionCard extends StatelessWidget {
                     size: 20, color: accentColor),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    suggestion.task.title,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: isDuplicate
-                          ? theme.colorScheme.onSurfaceVariant
-                          : isSelected
-                              ? theme.colorScheme.onSurface
-                              : theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
+                  child: titleController != null
+                      ? TextField(
+                          controller: titleController,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: isSelected
+                                ? theme.colorScheme.onSurface
+                                : theme.colorScheme.onSurfaceVariant,
+                          ),
+                          decoration: const InputDecoration(
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                            border: InputBorder.none,
+                          ),
+                          maxLines: 1,
+                        )
+                      : Text(
+                          suggestion.task.title,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: isDuplicate
+                                ? theme.colorScheme.onSurfaceVariant
+                                : isSelected
+                                    ? theme.colorScheme.onSurface
+                                    : theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                 ),
                 if (isDuplicate) ...[
                   const SizedBox(width: 6),

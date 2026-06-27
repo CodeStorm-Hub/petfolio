@@ -105,6 +105,25 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
     }
   }
 
+  static BorderRadius _iconBorderRadius(dbtask.CareTaskType type) {
+    switch (type) {
+      case dbtask.CareTaskType.medication:
+      case dbtask.CareTaskType.vetVisit:
+        return BorderRadius.circular(18); // near-circle for health/medical
+      case dbtask.CareTaskType.walk:
+      case dbtask.CareTaskType.playtime:
+      case dbtask.CareTaskType.training:
+        return BorderRadius.circular(6);  // sharper for activity/movement
+      case dbtask.CareTaskType.grooming:
+      case dbtask.CareTaskType.dental:
+      case dbtask.CareTaskType.nailTrim:
+      case dbtask.CareTaskType.bath:
+        return BorderRadius.circular(14); // mid-round for grooming
+      default:
+        return BorderRadius.circular(10); // standard for feeding/other
+    }
+  }
+
   bool get _isWeeklyish =>
       widget.task.frequency == dbtask.CareFrequency.weekly ||
       widget.task.frequency == dbtask.CareFrequency.biweekly ||
@@ -306,7 +325,7 @@ class _CareTaskCardState extends ConsumerState<CareTaskCard>
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: _iconBorderRadius(task.taskType),
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,

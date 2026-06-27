@@ -65,6 +65,11 @@ class _CareTaskFormSheetState extends ConsumerState<CareTaskFormSheet> {
     _titleFocus.addListener(() {
       if (mounted) setState(() => _titleFocused = _titleFocus.hasFocus);
     });
+    if (!_isEdit) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) { if (mounted) _titleFocus.requestFocus(); },
+      );
+    }
   }
 
   @override

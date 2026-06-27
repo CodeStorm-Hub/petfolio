@@ -370,6 +370,14 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                             // ── Config error — persistent banner ──────────
                             if (aiState.isConfigError)
                               const _AiConfigErrorBanner(),
+                            // ── Compact regen chip (tasks exist, cache stale)
+                            if (dashboard.tasks.value?.isNotEmpty == true &&
+                                !aiState.hasResults &&
+                                !aiState.isLoading &&
+                                !aiState.isConfigError)
+                              _CompactRegenChip(
+                                onTap: () => _generateRoutine(activePet),
+                              ),
                             // ── AI empty-state full banner ─────────────────
                             if (dashboard.tasks.value?.isEmpty == true &&
                                 !aiState.isConfigError)
@@ -540,6 +548,59 @@ class _AiRoutineBanner extends StatelessWidget {
               if (!isGenerating)
                 Icon(Icons.chevron_right, color: lilac),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Compact Regenerate Chip
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CompactRegenChip extends StatelessWidget {
+  const _CompactRegenChip({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final lilac = isDark ? AppColors.lilacD : AppColors.lilac;
+    final lilacSoft = isDark ? AppColors.lilacSoftD : AppColors.lilacSoft;
+    final lilac700 = isDark ? AppColors.lilac700D : AppColors.lilac700;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Semantics(
+        button: true,
+        label: 'Regenerate AI Routine',
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: lilacSoft,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: lilac.withAlpha(100)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.auto_awesome_rounded, size: 15, color: lilac700),
+                const SizedBox(width: 6),
+                Text(
+                  'Regenerate AI Routine',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: lilac700,
+                  ),
+                ),
+                const Spacer(),
+                Icon(Icons.chevron_right_rounded, size: 16, color: lilac700),
+              ],
+            ),
           ),
         ),
       ),
