@@ -14,6 +14,22 @@ class MedicationAdherence {
   final MedicalRecord record;
   final int dosesToday;
   final DateTime? lastGivenAt;
+
+  int get targetDosesToday => _parseDosesPerDay(record.frequency);
+
+  static int _parseDosesPerDay(String? frequency) {
+    if (frequency == null || frequency.isEmpty) return 1;
+    final lower = frequency.toLowerCase();
+    if (lower.contains('twice') || lower.contains('2x') || lower.contains('bid')) return 2;
+    if (lower.contains('three') || lower.contains('3x') || lower.contains('tid')) return 3;
+    if (lower.contains('four') || lower.contains('4x') || lower.contains('qid')) return 4;
+    final every = RegExp(r'every (\d+) hour').firstMatch(lower);
+    if (every != null) {
+      final hours = int.tryParse(every.group(1)!) ?? 24;
+      return (24 / hours).floor().clamp(1, 12);
+    }
+    return 1;
+  }
 }
 
 final medicationsControllerProvider = AsyncNotifierProvider.family<

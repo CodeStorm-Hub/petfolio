@@ -100,8 +100,124 @@ class VitalsChartCard extends ConsumerWidget {
   }
 }
 
-class _WeightChart extends StatelessWidget {
+class _WeightChart extends StatefulWidget {
   const _WeightChart({required this.logs, required this.pt});
+
+  final List<WeightLog> logs;
+  final PetfolioThemeExtension pt;
+
+  @override
+  State<_WeightChart> createState() => _WeightChartState();
+}
+
+class _WeightChartState extends State<_WeightChart> {
+  bool _showTable = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final logs = widget.logs;
+    final pt = widget.pt;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Align(
+          alignment: Alignment.centerRight,
+          child: Semantics(
+            button: true,
+            label: _showTable ? 'Show chart' : 'Show data table',
+            child: InkWell(
+              onTap: () => setState(() => _showTable = !_showTable),
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _showTable ? Icons.show_chart_rounded : Icons.table_rows_rounded,
+                      size: 14,
+                      color: pt.ink500,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      _showTable ? 'Chart' : 'Table',
+                      style: TextStyle(fontSize: 12, color: pt.ink500),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        if (_showTable) _DataTable(logs: logs, pt: pt) else _ChartView(logs: logs, pt: pt),
+      ],
+    );
+  }
+}
+
+class _DataTable extends StatelessWidget {
+  const _DataTable({required this.logs, required this.pt});
+
+  final List<WeightLog> logs;
+  final PetfolioThemeExtension pt;
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Semantics(
+      label: 'Weight log table with ${logs.length} entries',
+      child: SizedBox(
+        height: 160,
+        child: SingleChildScrollView(
+          child: Table(
+            columnWidths: const {
+              0: FlexColumnWidth(2),
+              1: FlexColumnWidth(1),
+            },
+            children: [
+              TableRow(
+                decoration: BoxDecoration(border: Border(bottom: BorderSide(color: pt.line))),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text('Date', style: tt.labelSmall?.copyWith(color: pt.ink500, fontWeight: FontWeight.w700)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text('Weight (kg)', style: tt.labelSmall?.copyWith(color: pt.ink500, fontWeight: FontWeight.w700)),
+                  ),
+                ],
+              ),
+              for (final log in logs.reversed)
+                TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Text(
+                        '${log.recordedAt.year}/${log.recordedAt.month.toString().padLeft(2, '0')}/${log.recordedAt.day.toString().padLeft(2, '0')}',
+                        style: tt.bodySmall?.copyWith(color: pt.ink500),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Text(
+                        log.weightKg.toStringAsFixed(2),
+                        style: tt.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ChartView extends StatelessWidget {
+  const _ChartView({required this.logs, required this.pt});
 
   final List<WeightLog> logs;
   final PetfolioThemeExtension pt;

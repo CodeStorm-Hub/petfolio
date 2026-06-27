@@ -8,6 +8,7 @@ import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../../data/models/medical_record.dart';
 import '../../data/repositories/health_repository.dart';
+import 'ai_routine_controller.dart';
 
 final healthVaultControllerProvider =
     StreamNotifierProvider.autoDispose<HealthVaultController, List<MedicalRecord>>(
@@ -85,6 +86,7 @@ class HealthVaultController extends StreamNotifier<List<MedicalRecord>> {
             if (r.id == sentinelId) created else r,
         ];
       });
+      ref.read(aiRoutineProvider.notifier).invalidateCache();
       return true;
     } catch (e, st) {
       debugPrint('[HealthVaultController] addRecord failed: $e\n$st');
@@ -131,6 +133,7 @@ class HealthVaultController extends StreamNotifier<List<MedicalRecord>> {
 
     try {
       await _repo.deactivateRecord(recordId);
+      ref.read(aiRoutineProvider.notifier).invalidateCache();
     } catch (e, st) {
       debugPrint(
           '[HealthVaultController] deactivateRecord failed, reverting: $e\n$st');

@@ -399,29 +399,34 @@ class _CoverFlowCarouselState extends ConsumerState<CoverFlowCarousel>
               ),
               Expanded(
                 child: Center(
-                  child: Wrap(
-                    spacing: 5,
-                    children: List.generate(
-                      math.min(total, 12),
-                      (i) {
-                        final sel = i == _currentIdx;
-                        final t   = _ordered[i];
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 260),
-                          width: sel ? 22 : 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: sel
-                                ? Theme.of(context).colorScheme.primary
-                                : t.isCompleted
-                                    ? AppColors.mint.withAlpha(140)
-                                    : Theme.of(context)
-                                        .extension<PetfolioThemeExtension>()!
-                                        .line,
-                          ),
-                        );
-                      },
+                  child: Semantics(
+                    label: 'Task ${_currentIdx + 1} of $total',
+                    child: ExcludeSemantics(
+                      child: Wrap(
+                        spacing: 5,
+                        children: List.generate(
+                          math.min(total, 12),
+                          (i) {
+                            final sel = i == _currentIdx;
+                            final t   = _ordered[i];
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 260),
+                              width: sel ? 22 : 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4),
+                                color: sel
+                                    ? Theme.of(context).colorScheme.primary
+                                    : t.isCompleted
+                                        ? AppColors.mint.withAlpha(140)
+                                        : Theme.of(context)
+                                            .extension<PetfolioThemeExtension>()!
+                                            .line,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -703,7 +708,16 @@ class _XpBurstState extends State<_XpBurst>
       TweenSequenceItem(tween: ConstantTween(1.0), weight: 56),
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 32),
     ]).animate(_ctrl);
-    _ctrl.forward();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _ctrl.value = 1.0;
+    } else {
+      _ctrl.forward();
+    }
   }
 
   @override

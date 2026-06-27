@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -8,6 +9,8 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
+import '../../data/repositories/walk_repository.dart';
 
 class _WalkState {
   const _WalkState({
@@ -42,6 +45,7 @@ class _WalkState {
 class _WalkNotifier extends Notifier<_WalkState> {
   StreamSubscription<Position>? _positionSub;
   Timer? _timer;
+  DateTime? _startedAt;
   final _distance = const Distance();
 
   @override
@@ -59,6 +63,7 @@ class _WalkNotifier extends Notifier<_WalkState> {
       return;
     }
 
+    _startedAt = DateTime.now().toUtc();
     state = const _WalkState(isTracking: true);
 
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -84,9 +89,30 @@ class _WalkNotifier extends Notifier<_WalkState> {
     ref.onDispose(_cleanup);
   }
 
-  void stop() {
+  Future<void> stop() async {
+    final endedAt = DateTime.now().toUtc();
+    final startedAt = _startedAt;
+    final duration = state.elapsedSeconds;
+    final distance = state.distanceMeters;
     _cleanup();
     state = state.copyWith(isTracking: false);
+
+    if (startedAt != null && duration >= 10) {
+      final pet = ref.read(activePetControllerProvider);
+      if (pet != null) {
+        try {
+          await ref.read(walkRepositoryProvider).saveWalk(
+                petId: pet.id,
+                startedAt: startedAt,
+                endedAt: endedAt,
+                durationSeconds: duration,
+                distanceMeters: distance,
+              );
+        } catch (e, s) {
+          developer.log('Failed to save walk', error: e, stackTrace: s);
+        }
+      }
+    }
   }
 
   void _cleanup() {

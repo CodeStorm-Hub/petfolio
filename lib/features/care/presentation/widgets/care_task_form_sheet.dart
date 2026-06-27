@@ -36,6 +36,7 @@ class _CareTaskFormSheetState extends ConsumerState<CareTaskFormSheet> {
   bool _userEditedTitle = false;
   TimeOfDay? _time;
   bool _saving = false;
+  String? _titleError;
 
   bool get _isEdit => widget.existing != null;
   bool get _isPrefilledCreate =>
@@ -82,7 +83,12 @@ class _CareTaskFormSheetState extends ConsumerState<CareTaskFormSheet> {
 
   Future<void> _save() async {
     final title = _titleCtrl.text.trim();
-    if (title.isEmpty || _saving) return;
+    if (title.isEmpty) {
+      setState(() => _titleError = 'Please enter a task name');
+      _titleFocus.requestFocus();
+      return;
+    }
+    if (_saving) return;
     setState(() => _saving = true);
     try {
       final timeStr = _time != null
@@ -234,7 +240,10 @@ class _CareTaskFormSheetState extends ConsumerState<CareTaskFormSheet> {
               child: TextField(
                 controller: _titleCtrl,
                 focusNode: _titleFocus,
-                onChanged: (_) => _userEditedTitle = true,
+                onChanged: (_) {
+                  _userEditedTitle = true;
+                  if (_titleError != null) setState(() => _titleError = null);
+                },
                 textCapitalization: TextCapitalization.sentences,
                 style: TextStyle(fontSize: 15, color: cs.onSurface),
                 decoration: InputDecoration(
@@ -242,13 +251,25 @@ class _CareTaskFormSheetState extends ConsumerState<CareTaskFormSheet> {
                   filled: true,
                   fillColor: _titleFocused ? cs.surface : pt.surface2,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  errorText: _titleError,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: pt.line, width: 0.5),
+                    borderSide: BorderSide(
+                      color: _titleError != null ? cs.error : pt.line,
+                      width: _titleError != null ? 1.5 : 0.5,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(color: cs.primary, width: 2),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: cs.error, width: 1.5),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: cs.error, width: 2),
                   ),
                 ),
               ),

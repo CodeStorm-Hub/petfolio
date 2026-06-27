@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../errors/app_exception.dart';
 import '../theme/app_colors.dart';
+import '../../features/care/data/models/pet_level.dart';
 
 final GlobalKey<ScaffoldMessengerState> appSnackBarMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
@@ -133,6 +134,9 @@ class AppSnackBar {
       color: Colors.white,
     );
 
+    final badgeInfo = kBadgeCatalog.where((b) => b.type == badgeType).firstOrNull;
+    final description = badgeInfo?.description;
+
     messenger.showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
@@ -143,9 +147,21 @@ class AppSnackBar {
             Icon(icon, color: AppColors.sunny, size: 28),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                '$label badge unlocked! 🎉',
-                style: style,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('$label badge unlocked! 🎉', style: style),
+                  if (description != null && description.isNotEmpty)
+                    Text(
+                      description,
+                      style: style.copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white.withAlpha(204),
+                      ),
+                    ),
+                ],
               ),
             ),
           ],

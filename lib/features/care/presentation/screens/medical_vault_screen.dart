@@ -601,8 +601,28 @@ class _MedicalRecordCard extends ConsumerWidget {
         child: const Icon(Icons.archive_outlined, color: Colors.white),
       ),
       confirmDismiss: (_) async {
-        ref.read(healthVaultControllerProvider.notifier).deactivateRecord(record.id);
-        return true;
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Archive record?'),
+            content: Text('${record.name} will be moved to the archive.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Archive'),
+              ),
+            ],
+          ),
+        );
+        if (confirmed == true) {
+          ref.read(healthVaultControllerProvider.notifier).deactivateRecord(record.id);
+          return true;
+        }
+        return false;
       },
       child: Padding(
         padding: const EdgeInsets.all(14),

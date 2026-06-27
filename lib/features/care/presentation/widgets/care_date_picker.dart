@@ -21,7 +21,7 @@ class _CareDatePickerState extends State<CareDatePicker> {
 
   static const _chipW = 52.0;
   static const _chipGap = 8.0;
-  static const _daysBack = 7;
+  static const _daysBack = 30;
   static const _daysAhead = 6;
   static const _totalDays = _daysBack + 1 + _daysAhead;
 

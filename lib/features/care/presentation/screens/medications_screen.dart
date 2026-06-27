@@ -105,19 +105,7 @@ class _MedicationCard extends StatelessWidget {
                     style: tt.titleMedium
                         ?.copyWith(fontWeight: FontWeight.w700)),
               ),
-              if (adherence.dosesToday > 0)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: pt.success.withValues(alpha: 0.16),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    '${adherence.dosesToday}× today',
-                    style: tt.labelSmall?.copyWith(color: pt.success),
-                  ),
-                ),
+              _DoseBadge(adherence: adherence, pt: pt, tt: tt),
             ],
           ),
           if (subtitleParts.isNotEmpty) ...[
@@ -148,5 +136,66 @@ class _MedicationCard extends StatelessWidget {
     final m = l.minute.toString().padLeft(2, '0');
     final ampm = l.hour < 12 ? 'AM' : 'PM';
     return '$h:$m $ampm';
+  }
+}
+
+class _DoseBadge extends StatelessWidget {
+  const _DoseBadge({
+    required this.adherence,
+    required this.pt,
+    required this.tt,
+  });
+
+  final MedicationAdherence adherence;
+  final PetfolioThemeExtension pt;
+  final TextTheme tt;
+
+  @override
+  Widget build(BuildContext context) {
+    final given = adherence.dosesToday;
+    final target = adherence.targetDosesToday;
+    final allDone = given >= target;
+    final missed = given == 0 && adherence.lastGivenAt == null;
+
+    if (missed && target > 0) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.orange.withAlpha(30),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.warning_amber_rounded, size: 12, color: Colors.orange),
+            const SizedBox(width: 4),
+            Text(
+              'Dose needed',
+              style: tt.labelSmall?.copyWith(color: Colors.orange),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (given > 0) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: allDone
+              ? pt.success.withAlpha(26)
+              : Colors.orange.withAlpha(26),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          '$given of $target dose${target == 1 ? '' : 's'}',
+          style: tt.labelSmall?.copyWith(
+            color: allDone ? pt.success : Colors.orange,
+          ),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 }

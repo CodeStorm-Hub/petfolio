@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:petfolio/core/theme/theme.dart';
 
@@ -34,12 +35,13 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
   late final AnimationController _coinCtrl;
   late final AnimationController _pulseCtrl;
   late final ConfettiController _confettiCtrl;
-  int? _lastLevel;
+  int? _storedLevel;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _loadStoredLevel();
     _coinCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 4500),
@@ -54,13 +56,27 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    if (reduceMotion) {
+      _coinCtrl.stop();
+      _pulseCtrl.stop();
+    } else {
+      if (!_coinCtrl.isAnimating) _coinCtrl.repeat();
+      if (!_pulseCtrl.isAnimating) _pulseCtrl.repeat();
+    }
+  }
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached ||
         state == AppLifecycleState.hidden) {
       _coinCtrl.stop();
       _pulseCtrl.stop();
-    } else if (state == AppLifecycleState.resumed) {
+    } else if (state == AppLifecycleState.resumed && !reduceMotion) {
       if (!_coinCtrl.isAnimating) _coinCtrl.repeat();
       if (!_pulseCtrl.isAnimating) _pulseCtrl.repeat();
     }
@@ -75,11 +91,30 @@ class _CareGamifiedHeaderState extends ConsumerState<CareGamifiedHeader>
     super.dispose();
   }
 
+  Future<void> _loadStoredLevel() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getInt('care_lvl_${widget.activePet.id}');
+    if (mounted) setState(() => _storedLevel = saved ?? 0);
+  }
+
+  Future<void> _persistLevel(int level) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('care_lvl_${widget.activePet.id}', level);
+  }
+
   void _checkLevelUp(int currentLevel) {
-    if (_lastLevel != null && currentLevel > _lastLevel!) {
-      _confettiCtrl.play();
+    final stored = _storedLevel;
+    if (stored == null) return;
+    if (stored == 0) {
+      _storedLevel = currentLevel;
+      _persistLevel(currentLevel);
+      return;
     }
-    _lastLevel = currentLevel;
+    if (currentLevel > stored) {
+      _confettiCtrl.play();
+      _storedLevel = currentLevel;
+      _persistLevel(currentLevel);
+    }
   }
 
   @override

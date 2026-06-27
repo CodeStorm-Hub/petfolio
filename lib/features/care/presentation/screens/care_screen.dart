@@ -9,6 +9,7 @@ import 'package:petfolio/core/widgets/widgets.dart';
 import 'package:petfolio/features/care/data/models/care_task.dart' as dbtask;
 import 'package:petfolio/features/care/presentation/controllers/ai_routine_controller.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_dashboard_controller.dart';
+import 'package:petfolio/features/care/presentation/controllers/care_filter_controller.dart';
 import 'package:petfolio/features/care/presentation/widgets/care_banners.dart';
 import 'package:petfolio/features/care/presentation/widgets/care_daily_tasks_dashboard.dart';
 import 'package:petfolio/features/care/presentation/widgets/care_date_picker.dart';
@@ -33,7 +34,6 @@ class CareScreen extends ConsumerStatefulWidget {
 class _CareScreenState extends ConsumerState<CareScreen> {
   bool _onboardingSuccessHandled = false;
   bool _shouldAutoTriggerAi = false;
-  CareFilter _careFilter = CareFilter.all;
 
   static const _filterChips = [
     (CareFilter.all, 'All', '🐾'),
@@ -257,6 +257,12 @@ class _CareScreenState extends ConsumerState<CareScreen> {
             color: AppColors.sky,
             onTap: () => context.go('/care/walk'),
           ),
+          PfFabMenuItem(
+            label: 'Symptoms',
+            icon: Icons.biotech_rounded,
+            color: AppColors.lilac,
+            onTap: () => context.push('/care/symptoms'),
+          ),
         ],
       ),
       body: LayoutBuilder(
@@ -287,10 +293,10 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                             const SizedBox(height: 16.0),
                             // ── Category filter — connected button group ───
                             PfButtonGroup<CareFilter>(
-                              selected: _careFilter,
+                              selected: ref.watch(careFilterProvider),
                               onChanged: (filter) {
                                 HapticFeedback.selectionClick();
-                                setState(() => _careFilter = filter);
+                                ref.read(careFilterProvider.notifier).setFilter(filter);
                               },
                               options: _filterChips
                                   .map((chip) => PfButtonGroupOption<CareFilter>(
@@ -380,7 +386,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
                               petName: activePet.name,
                               species: species,
                               onAddTask: openAddSheet,
-                              categoryFilter: _careFilter,
+                              categoryFilter: ref.watch(careFilterProvider),
                             ),
                             const SizedBox(height: 28),
                             const PfSectionTitle(
