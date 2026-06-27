@@ -210,13 +210,13 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
             emoji: emoji,
           );
     }
+    final entryKey = _emojiKeyCounter++;
     setState(() {
       _showReactions = false;
-      _floatingEmojis.add(_FloatingEmojiData(key: _emojiKeyCounter++, emoji: emoji));
+      _floatingEmojis.add(_FloatingEmojiData(key: entryKey, emoji: emoji));
     });
-    // Auto-remove after animation
     Future.delayed(const Duration(milliseconds: 1100), () {
-      if (mounted) setState(() => _floatingEmojis.removeWhere((e) => e.emoji == emoji));
+      if (mounted) setState(() => _floatingEmojis.removeWhere((e) => e.key == entryKey));
     });
   }
 

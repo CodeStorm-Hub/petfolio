@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -220,6 +222,33 @@ class SocialRepository {
           accent: AppColors.meadow500,
           subject: AppColors.mint700,
           gradient: [AppColors.mintSoft, AppColors.mint, AppColors.meadow500],
+        );
+      case 'bird':
+        return const _SpeciesPalette(
+          accent: AppColors.sky,
+          subject: AppColors.sky,
+          gradient: [AppColors.blue100, AppColors.sky, AppColors.blue500],
+        );
+      case 'hamster':
+      case 'guinea pig':
+        return const _SpeciesPalette(
+          accent: AppColors.tangerine,
+          subject: AppColors.tangerine,
+          gradient: [AppColors.cream, AppColors.sunny, AppColors.tangerine],
+        );
+      case 'fish':
+        return const _SpeciesPalette(
+          accent: AppColors.sky,
+          subject: AppColors.sky700,
+          gradient: [AppColors.skySoft, AppColors.sky, AppColors.sky700],
+        );
+      case 'reptile':
+      case 'snake':
+      case 'lizard':
+        return const _SpeciesPalette(
+          accent: AppColors.mint,
+          subject: AppColors.mint700,
+          gradient: [AppColors.mintSoft, AppColors.mint, AppColors.mint700],
         );
       case 'dog':
       default:
@@ -461,36 +490,16 @@ class SocialRepository {
   }) async {
     try {
       final cleanTag = tag.replaceAll('#', '').toLowerCase();
-      final rows = await _client
-          .from('post_hashtags')
-          .select('post_id')
-          .eq('tag', cleanTag)
-          .range(offset, offset + limit - 1);
-      final postIds = (rows as List).cast<Map<String, dynamic>>().map((r) => r['post_id'] as String).toList();
-      if (postIds.isEmpty) return const [];
-
-      final postRows = await _client
-          .from('posts')
-          .select('''
-            id,
-            content,
-            image_urls,
-            created_at,
-            like_count,
-            comment_count,
-            pet:pets!posts_pet_id_fkey!inner(id, name, species, breed, avatar_url),
-            author:users!posts_author_id_fkey(id, username, display_name, avatar_url, location)
-          ''')
-          .inFilter('id', postIds)
-          .eq('visibility', 'public')
-          .order('created_at', ascending: false);
-
-      final posts = (postRows as List).cast<Map<String, dynamic>>();
-      var likedIds = const <String>{};
-      if (activePetId != null && posts.isNotEmpty) {
-        likedIds = await _fetchLikedPostIds(activePetId, postIds);
-      }
-      return posts.map((r) => _rowToFeedPost(r, isLiked: likedIds.contains(r['id'] as String))).toList();
+      final rows = await _client.rpc('get_posts_for_hashtag', params: {
+        'p_tag': cleanTag,
+        'p_active_pet_id': activePetId,
+        'p_limit': limit,
+        'p_offset': offset,
+      });
+      return (rows as List)
+          .cast<Map<String, dynamic>>()
+          .map((r) => _rowToFeedPost(r, isLiked: (r['is_liked'] as bool?) ?? false))
+          .toList();
     } on PostgrestException catch (e) {
       throw DatabaseException.fromPostgrest(e);
     }
@@ -510,8 +519,13 @@ class SocialRepository {
         onConflict: 'post_id,tag',
         ignoreDuplicates: true,
       );
-    } on PostgrestException {
-      // Non-fatal: hashtag indexing failure doesn't break the post.
+    } on PostgrestException catch (e, st) {
+      developer.log(
+        'attachHashtagsToPost failed for post $postId',
+        name: 'petfolio.social',
+        error: e,
+        stackTrace: st,
+      );
     }
   }
 

@@ -88,12 +88,19 @@ class SocialController extends _$SocialController {
             final postId = newRow['id'] as String?;
             if (postId == null) return;
 
-            final likeCount = newRow['like_count'] as int?;
-            final commentCount = newRow['comment_count'] as int?;
-
+            final isHidden = newRow['is_hidden'] as bool?;
             final current = state.value;
             if (current == null) return;
 
+            if (isHidden == true) {
+              state = AsyncData(current.copyWith(
+                posts: current.posts.where((p) => p.id != postId).toList(),
+              ));
+              return;
+            }
+
+            final likeCount = newRow['like_count'] as int?;
+            final commentCount = newRow['comment_count'] as int?;
             final idx = current.posts.indexWhere((p) => p.id == postId);
             if (idx == -1) return;
 
@@ -102,11 +109,52 @@ class SocialController extends _$SocialController {
                 likes: likeCount,
                 comments: commentCount,
               );
-
             state = AsyncData(current.copyWith(posts: updated));
           },
         )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'posts',
+          callback: (payload) {
+            final newRow = payload.newRecord;
+            final postId = newRow['id'] as String?;
+            final visibility = newRow['visibility'] as String?;
+            if (postId == null || visibility != 'public') return;
+            _handleInsertedPost(postId, petId);
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.delete,
+          schema: 'public',
+          table: 'posts',
+          callback: (payload) {
+            final postId = payload.oldRecord['id'] as String?;
+            if (postId == null) return;
+            final current = state.value;
+            if (current == null) return;
+            state = AsyncData(current.copyWith(
+              posts: current.posts.where((p) => p.id != postId).toList(),
+            ));
+          },
+        )
         .subscribe();
+  }
+
+  Future<void> _handleInsertedPost(String postId, String activePetId) async {
+    try {
+      final post = await ref
+          .read(socialRepositoryProvider)
+          .fetchPostById(postId: postId, activePetId: activePetId);
+      if (!ref.mounted) return;
+      final current = state.value;
+      if (current == null) return;
+      if (current.posts.any((p) => p.id == postId)) return;
+      state = AsyncData(current.copyWith(
+        posts: [post, ...current.posts],
+        nextOffset: current.nextOffset + 1,
+      ));
+    } catch (_) {}
   }
 
   Future<void> refresh() async {
@@ -152,10 +200,11 @@ class SocialController extends _$SocialController {
         hasMore: more.length >= _feedPageSize,
         nextOffset: current.nextOffset + more.length,
       ));
-    } catch (_) {
+    } catch (e) {
       if (ref.mounted) {
         final cur = state.value;
         if (cur != null) state = AsyncData(cur.copyWith(isLoadingMore: false));
+        AppSnackBar.showError(e);
       }
     }
   }

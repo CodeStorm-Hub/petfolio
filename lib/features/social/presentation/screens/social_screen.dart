@@ -24,6 +24,7 @@ import '../../data/models/feed_post.dart';
 import '../../data/models/story.dart';
 import '../controllers/social_controller.dart';
 import '../controllers/create_post_controller.dart';
+import '../controllers/saved_posts_controller.dart';
 import '../controllers/story_controller.dart';
 import 'story_viewer_screen.dart';
 import 'post_detail_screen.dart';
@@ -113,7 +114,7 @@ class _SocialViewState extends ConsumerState<_SocialView> {
     if (!_scrollController.hasClients) return;
     final pos = _scrollController.position;
     if (pos.maxScrollExtent <= 0) return;
-    if (pos.pixels >= pos.maxScrollExtent - 300) {
+    if (pos.pixels >= pos.maxScrollExtent - pos.viewportDimension * 0.5) {
       ref
           .read(socialControllerProvider(widget.petId).notifier)
           .loadMore();
@@ -218,17 +219,20 @@ class _SocialViewState extends ConsumerState<_SocialView> {
                       onLike: notifier.toggleLike,
                     ),
                   _LoadMoreSliver(petId: widget.petId),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
-                      child: Center(
-                        child: Text(
-                          "You're all caught up 🐾",
-                          style: Theme.of(context).textTheme.labelLarge,
+                  if (!feedState.hasMore)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+                        child: Center(
+                          child: Text(
+                            "You're all caught up 🐾",
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                    )
+                  else
+                    const SliverToBoxAdapter(child: SizedBox(height: 120)),
                 ],
               ),
             ),
@@ -811,7 +815,7 @@ class _StoryItemState extends State<_StoryItem>
 // Regular post
 // ─────────────────────────────────────────────────────────────────────────────
 
-class PostCard extends StatefulWidget {
+class PostCard extends ConsumerStatefulWidget {
   const PostCard({
     super.key,
     required this.post,
@@ -823,10 +827,10 @@ class PostCard extends StatefulWidget {
   final VoidCallback onTapPost;
 
   @override
-  State<PostCard> createState() => _PostCardState();
+  ConsumerState<PostCard> createState() => _PostCardState();
 }
 
-class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin {
+class _PostCardState extends ConsumerState<PostCard> with SingleTickerProviderStateMixin {
   String? _reacted;
   bool _pickerOpen = false;
   final List<ReactionBurstItem> _bursts = [];
@@ -1290,8 +1294,8 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                         clipBehavior: Clip.none,
                         children: [
                           Positioned(left: 0,  child: _EmojiCircle(emoji: '🐾', color: AppColors.tangerine, index: 0)),
-                          Positioned(left: 18, child: _EmojiCircle(emoji: '❤️', color: AppColors.poppy,     index: 0)),
-                          Positioned(left: 36, child: _EmojiCircle(emoji: '🦴', color: AppColors.sunny,     index: 0)),
+                          Positioned(left: 18, child: _EmojiCircle(emoji: '❤️', color: AppColors.poppy,     index: 1)),
+                          Positioned(left: 36, child: _EmojiCircle(emoji: '🦴', color: AppColors.sunny,     index: 2)),
                         ],
                       ),
                     ),
@@ -1379,13 +1383,30 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                         SharePlus.instance.share(ShareParams(text: caption));
                       },
                     )),
-                    Expanded(child: _ActionBtn(
-                      icon: Icons.bookmark_border_rounded,
-                      label: 'Save',
-                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Saved posts coming soon'), duration: Duration(seconds: 2)),
-                      ),
-                    )),
+                    Builder(builder: (context) {
+                      final isSaved = ref
+                          .watch(isPostSavedProvider(widget.post.id))
+                          .asData?.value ?? false;
+                      return Expanded(
+                        child: _ActionBtn(
+                          icon: isSaved
+                              ? Icons.bookmark_rounded
+                              : Icons.bookmark_border_rounded,
+                          label: 'Save',
+                          onTap: () async {
+                            final notifier =
+                                ref.read(savedPostsProvider.notifier);
+                            if (isSaved) {
+                              await notifier.unsave(widget.post.id);
+                            } else {
+                              await notifier.save(widget.post.id);
+                            }
+                            ref.invalidate(
+                                isPostSavedProvider(widget.post.id));
+                          },
+                        ),
+                      );
+                    }),
                   ],
                 ),
               ),

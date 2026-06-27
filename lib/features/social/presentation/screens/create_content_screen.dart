@@ -5,19 +5,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/platform/media_picker.dart';
-import '../../../../core/platform/web_image_cache.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../../core/widgets/pet_avatar.dart';
 import '../../../pet_profile/data/models/pet.dart';
 import '../../../pet_profile/presentation/controllers/active_pet_controller.dart';
 import '../controllers/create_post_controller.dart';
 import '../controllers/social_controller.dart';
+import '../controllers/story_controller.dart';
 
 enum ContentMode { post, story }
 
@@ -39,21 +37,7 @@ class _CreateContentScreenState extends ConsumerState<CreateContentScreen>
   late final AnimationController _pulseController;
   bool _isRedDotVisible = true;
   Timer? _redDotTimer;
-  bool _isDownloadingMock = false;
-
   static const _maxChars = 500;
-
-  static const _mockPetImages = [
-    'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=600&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1537151608828-ea2b117b6281?w=600&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1495360010541-f48722b34f7d?w=600&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1477884213960-b13d27793fc8?w=600&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=600&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=600&auto=format&fit=crop',
-  ];
 
   @override
   void initState() {
@@ -123,26 +107,6 @@ class _CreateContentScreenState extends ConsumerState<CreateContentScreen>
     }
   }
 
-  Future<void> _selectMockImage(String url) async {
-    setState(() => _isDownloadingMock = true);
-    try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final xFile = XFile.fromData(
-          response.bodyBytes,
-          mimeType: 'image/jpeg',
-          name: 'mock_pet_${DateTime.now().millisecondsSinceEpoch}.jpg',
-        );
-        ref.read(createPostControllerProvider.notifier).setImage(xFile);
-        if (mounted) setState(() => _previewBytes = response.bodyBytes);
-      }
-    } catch (e) {
-      AppSnackBar.showError('Could not load photo: $e');
-    } finally {
-      if (mounted) setState(() => _isDownloadingMock = false);
-    }
-  }
-
   void _submit() async {
     final pet = ref.read(activePetControllerProvider);
     if (pet == null) return;
@@ -158,6 +122,8 @@ class _CreateContentScreenState extends ConsumerState<CreateContentScreen>
     if (success && mounted) {
       if (_mode == ContentMode.post) {
         ref.read(socialControllerProvider(pet.id).notifier).refresh();
+      } else {
+        ref.invalidate(storiesProvider);
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -264,7 +230,7 @@ class _CreateContentScreenState extends ConsumerState<CreateContentScreen>
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
                         child: Text(
-                          'Recent Photos',
+                          'Photos',
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
@@ -272,24 +238,9 @@ class _CreateContentScreenState extends ConsumerState<CreateContentScreen>
                           ),
                         ),
                       ),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
+                      Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                          childAspectRatio: 1,
-                        ),
-                        itemCount: _mockPetImages.length + 1,
-                        itemBuilder: (_, i) {
-                          if (i == 0) return _BrowseLibraryTile(onTap: _pickFromGallery);
-                          return _MockImageTile(
-                            url: _mockPetImages[i - 1],
-                            onTap: () => _selectMockImage(_mockPetImages[i - 1]),
-                          );
-                        },
+                        child: _BrowseLibraryTile(onTap: _pickFromGallery),
                       ),
                     ],
 
@@ -301,23 +252,6 @@ class _CreateContentScreenState extends ConsumerState<CreateContentScreen>
           ),
         ),
         if (state.isSubmitting) _UploadOverlay(step: state.step, cs: cs, isStory: _mode == ContentMode.story),
-        if (_isDownloadingMock)
-          Container(
-            color: Colors.black54,
-            alignment: Alignment.center,
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(color: cs.surface, borderRadius: BorderRadius.circular(16)),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(color: AppColors.sunset500),
-                  const SizedBox(height: 16),
-                  Text('Loading photo…', style: TextStyle(fontWeight: FontWeight.w600, color: cs.onSurface)),
-                ],
-              ),
-            ),
-          ),
       ],
     );
   }
@@ -1014,33 +948,6 @@ class _BrowseLibraryTile extends StatelessWidget {
               const SizedBox(height: 8),
               Text('Browse', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: pt.ink500)),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MockImageTile extends StatelessWidget {
-  const _MockImageTile({required this.url, required this.onTap});
-  final String url;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: 'Select photo',
-      button: true,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          onTap: onTap,
-          child: CachedNetworkImage(
-            imageUrl: url,
-            fit: BoxFit.cover,
-            memCacheWidth: networkImageMemCacheWidth(context, 100, maxPixels: webNetworkImageMemCacheThumb),
-            placeholder: (_, _) => Container(color: Theme.of(context).colorScheme.surfaceContainerHighest),
-            errorWidget: (_, _, _) => const Center(child: Icon(Icons.error_outline_rounded, size: 16)),
           ),
         ),
       ),

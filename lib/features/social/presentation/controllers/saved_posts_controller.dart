@@ -35,9 +35,12 @@ class SavedPosts extends _$SavedPosts {
     state = AsyncData([...current, ...next]);
   }
 
+  Future<void> save(String postId) async {
+    await ref.read(socialRepositoryProvider).savePost(postId);
+  }
+
   Future<void> unsave(String postId) async {
-    final repo = ref.read(socialRepositoryProvider);
-    await repo.unsavePost(postId);
+    await ref.read(socialRepositoryProvider).unsavePost(postId);
     final current = state.asData?.value ?? [];
     state = AsyncData(current.where((p) => p.id != postId).toList());
   }

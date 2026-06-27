@@ -82,24 +82,17 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
       _commentController.clear();
       if (mounted) setState(() => _replyingToComment = null);
 
-      // Scroll to the bottom after posting.
-      await Future.delayed(const Duration(milliseconds: 100));
-      if (mounted && _scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to post comment: ${e.toString()}'),
-            backgroundColor: AppColors.coral500,
-          ),
-        );
-      }
+      AppSnackBar.showError(e);
     } finally {
       if (mounted) {
         setState(() => _isSending = false);
@@ -159,7 +152,23 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
             onPressed: () => context.pop(),
           ),
         ),
-        body: const Center(child: Text('Failed to load post.')),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline_rounded, size: 48, color: pt.ink300),
+              const SizedBox(height: 12),
+              Text('Failed to load post',
+                  style: TextStyle(fontSize: 15, color: pt.ink500)),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: () => ref.invalidate(postDetailProvider(widget.postId)),
+                icon: const Icon(Icons.refresh_rounded, size: 16),
+                label: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
@@ -667,11 +676,11 @@ class _BookmarkButton extends ConsumerWidget {
         color: isSaved ? AppColors.poppy : pt.ink500,
       ),
       onPressed: () async {
-        final repo = ref.read(socialRepositoryProvider);
+        final notifier = ref.read(savedPostsProvider.notifier);
         if (isSaved) {
-          await repo.unsavePost(postId);
+          await notifier.unsave(postId);
         } else {
-          await repo.savePost(postId);
+          await notifier.save(postId);
         }
         ref.invalidate(isPostSavedProvider(postId));
       },
@@ -1338,6 +1347,7 @@ class PostOptionsSheet extends ConsumerWidget {
         content: TextField(
           controller: ctrl,
           maxLines: 4,
+          maxLength: 500,
           decoration: const InputDecoration(border: OutlineInputBorder()),
         ),
         actions: [
@@ -1350,9 +1360,10 @@ class PostOptionsSheet extends ConsumerWidget {
               Navigator.pop(ctx);
               final activePet = ref.read(activePetControllerProvider);
               if (activePet == null) return;
-              ref
+              await ref
                   .read(socialControllerProvider(activePet.id).notifier)
                   .updateCaption(post.id, ctrl.text);
+              ref.invalidate(postDetailProvider(post.id));
             },
             child: const Text('Save'),
           ),

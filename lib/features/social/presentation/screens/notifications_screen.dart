@@ -35,9 +35,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
   void initState() {
     super.initState();
     _tabCtrl = TabController(length: 2, vsync: this);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(notificationsProvider.notifier).markAllRead();
-    });
   }
 
   @override
@@ -384,7 +381,19 @@ class _PromoNotifCard extends StatelessWidget {
                 label: 'Copy referral code',
                 button: true,
                 child: InkWell(
-                  onTap: () => HapticFeedback.selectionClick(),
+                  onTap: () async {
+                    await Clipboard.setData(ClipboardData(text: promo.code));
+                    HapticFeedback.selectionClick();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Code copied to clipboard'),
+                          behavior: SnackBarBehavior.floating,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  },
                   borderRadius: BorderRadius.circular(10),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
