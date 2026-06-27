@@ -74,7 +74,11 @@ class WishlistScreen extends ConsumerWidget {
                     itemBuilder: (_, i) => _WishlistProductCard(
                       product: items[i].product,
                       wishlistItemId: items[i].item.id,
-                      onRemove: () => _removeItem(ref, items[i].item.productId),
+                      onRemove: () => _removeItem(
+                        ref,
+                        items[i].item.productId,
+                        variantId: items[i].item.variantId,
+                      ),
                     ),
                   ),
                 );
@@ -86,10 +90,10 @@ class WishlistScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _removeItem(WidgetRef ref, String productId) async {
+  Future<void> _removeItem(WidgetRef ref, String productId, {String? variantId}) async {
     await ref
         .read(wishlistItemsProvider.notifier)
-        .toggle(productId);
+        .toggle(productId, variantId: variantId);
     AppSnackBar.show('Removed from wishlist');
   }
 }

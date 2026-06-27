@@ -52,7 +52,7 @@ class PrescriptionRepository {
   Future<String> signedUrl(String filePath) async =>
       await _client.storage
           .from('prescriptions')
-          .createSignedUrl(filePath, 3600);
+          .createSignedUrl(filePath, 604800);
 
   static String _mimeFor(String ext) => switch (ext.toLowerCase()) {
         'pdf'  => 'application/pdf',

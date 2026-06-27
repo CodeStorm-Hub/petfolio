@@ -10,6 +10,7 @@ class PromoFilterNotifier extends Notifier<String> {
   String build() => 'all';
 
   void setFilter(String filter) => state = filter;
+  void reset() => state = 'all';
 }
 
 final promoFilterProvider =

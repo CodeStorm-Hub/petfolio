@@ -1,3 +1,5 @@
+import 'dart:developer' show log;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -596,7 +598,8 @@ class _CancelOrderButtonState extends ConsumerState<_CancelOrderButton> {
       if (!mounted) return;
       ref.invalidate(buyerOrdersProvider);
       if (context.canPop()) context.pop();
-    } catch (_) {
+    } catch (e, s) {
+      log('Cancel order failed', name: 'petfolio.orders', level: 1000, error: e, stackTrace: s);
       if (mounted) {
         setState(() => _loading = false);
         AppSnackBar.show('Failed to cancel order. Please try again.');

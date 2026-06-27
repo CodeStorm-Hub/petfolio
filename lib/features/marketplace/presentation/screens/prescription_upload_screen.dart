@@ -63,7 +63,15 @@ class _PrescriptionUploadScreenState
         ),
       ),
     );
-    if (result != null) setState(() => _pickedFile = File(result.path));
+    if (result != null) {
+      final file = File(result.path);
+      final sizeBytes = await file.length();
+      if (sizeBytes > 10 * 1024 * 1024) {
+        if (mounted) AppSnackBar.show('File too large. Maximum size is 10 MB.');
+        return;
+      }
+      setState(() => _pickedFile = file);
+    }
   }
 
   Future<void> _upload() async {
