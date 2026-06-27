@@ -13,27 +13,27 @@ class PromoRepository {
   final SupabaseClient _client;
 
   Future<List<Promo>> fetchActivePromos() async {
+    final now = DateTime.now().toUtc().toIso8601String();
     final data = await _client
         .from('promos')
         .select()
         .eq('is_active', true)
+        .or('valid_until.is.null,valid_until.gt.$now')
         .order('created_at', ascending: false);
-    return (data as List)
-        .map((e) => Promo.fromJson(e))
-        .where((p) => !p.isExpired)
-        .toList();
+    return (data as List).map((e) => Promo.fromJson(e)).toList();
   }
 
   Future<Promo?> validateCode(String code, {String? shopId}) async {
+    final now = DateTime.now().toUtc().toIso8601String();
     final data = await _client
         .from('promos')
         .select()
         .eq('code', code.toUpperCase().trim())
         .eq('is_active', true)
+        .or('valid_until.is.null,valid_until.gt.$now')
         .maybeSingle();
     if (data == null) return null;
     final promo = Promo.fromJson(data);
-    if (promo.isExpired) return null;
     if (shopId != null && promo.shopId != null && promo.shopId != shopId) {
       return null;
     }

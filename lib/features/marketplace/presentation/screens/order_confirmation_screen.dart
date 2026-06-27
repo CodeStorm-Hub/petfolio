@@ -1,3 +1,5 @@
+import 'dart:developer' show log;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -57,6 +59,7 @@ class _OrderSuccessSheetState extends ConsumerState<OrderSuccessSheet>
   late final Animation<double> _scaleAnim;
   late final Animation<double> _fadeAnim;
   bool _confirming = false;
+  bool _verificationPending = false;
 
   @override
   void initState() {
@@ -76,7 +79,17 @@ class _OrderSuccessSheetState extends ConsumerState<OrderSuccessSheet>
     setState(() => _confirming = true);
     try {
       await ref.read(orderRepositoryProvider).pollOrderConfirmation(widget.orderId);
-    } catch (_) {
+    } on PaymentTimeoutException {
+      if (mounted) setState(() => _verificationPending = true);
+    } catch (e, s) {
+      log(
+        'Stripe order poll failed for ${widget.orderId}',
+        name: 'petfolio.checkout',
+        level: 900,
+        error: e,
+        stackTrace: s,
+      );
+      if (mounted) setState(() => _verificationPending = true);
     } finally {
       if (mounted) setState(() => _confirming = false);
     }
@@ -119,7 +132,9 @@ class _OrderSuccessSheetState extends ConsumerState<OrderSuccessSheet>
                   Text(
                     _confirming
                         ? 'Confirming your payment…'
-                        : 'Your order is confirmed and will\narrive within 3–5 business days.',
+                        : _verificationPending
+                            ? 'Your payment is processing.\nCheck your Orders for the final status.'
+                            : 'Your order is confirmed and will\narrive within 3–5 business days.',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 15, height: 1.5, color: pt.ink500),
                   ),

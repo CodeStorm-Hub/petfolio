@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' show log;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -63,7 +64,15 @@ class CartNotifier extends Notifier<CartState> {
       state = CartState.fromStorageJson(
         jsonDecode(raw) as Map<String, dynamic>,
       );
-    } catch (_) {}
+    } catch (e, s) {
+      log(
+        'Cart deserialization failed — cart cleared',
+        name: 'petfolio.cart',
+        level: 900,
+        error: e,
+        stackTrace: s,
+      );
+    }
   }
 
   void _persist() {

@@ -10,11 +10,10 @@ class SelectedAddressNotifier extends Notifier<UserAddress?> {
   UserAddress? build() {
     final list = ref.watch(addressListProvider).value ?? [];
     if (list.isEmpty) return null;
-    try {
-      return list.firstWhere((a) => a.isDefault);
-    } catch (_) {
-      return list.first;
-    }
+    return list.firstWhere(
+      (a) => a.isDefault,
+      orElse: () => list.first,
+    );
   }
 
   void select(UserAddress? address) => state = address;

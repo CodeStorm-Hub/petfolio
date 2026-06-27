@@ -163,25 +163,14 @@ class OrderRepository {
     );
   }
 
-  /// No-op — the stripe-webhook Edge Function transitions pending → processing
-  /// when payment_intent.succeeded fires. Kept so the existing checkout
-  /// controller compiles until Phase 5 removes the call.
-  Future<void> confirmOrder(String orderId) async {}
-
-  /// Cancel a pending order (user dismissed Payment Sheet).
-  /// Releases the inventory reservation before cancelling the order row.
+  /// Cancel a pending order (user dismissed Payment Sheet or CoD declined).
+  /// The cancel_order RPC atomically sets status='cancelled', stamps
+  /// cancelled_at, and releases all inventory_reservations in one transaction.
   Future<void> cancelOrder(String orderId) async {
-    try {
-      await _client.rpc(
-        'release_order_inventory',
-        params: {'p_order_id': orderId},
-      );
-    } catch (_) {}
-    await _client
-        .from('marketplace_orders')
-        .update({'status': 'cancelled'})
-        .eq('id', orderId)
-        .eq('status', 'pending');
+    await _client.rpc(
+      'cancel_order',
+      params: {'p_order_id': orderId},
+    );
   }
 
   // ── Vendor fulfillment ─────────────────────────────────────────────────────

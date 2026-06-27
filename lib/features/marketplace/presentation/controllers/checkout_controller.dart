@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' show log;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -369,7 +370,22 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
 
     try {
       await _finalizePaidCheckout(shopId: shopId, orderId: orderId);
-    } catch (_) {}
+    } catch (e, s) {
+      log(
+        'Web checkout resumption failed for order $orderId',
+        name: 'petfolio.checkout',
+        level: 1000,
+        error: e,
+        stackTrace: s,
+      );
+      state = CheckoutState(
+        status: CheckoutStatus.failure,
+        activeShopId: shopId,
+        orderId: orderId,
+        errorMessage:
+            'Payment verification failed. Check your Orders for the final status.',
+      );
+    }
   }
 
   Future<void> _finalizePaidCheckout({
