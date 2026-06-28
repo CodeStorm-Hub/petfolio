@@ -212,41 +212,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           );
       // GoRouter's authStateProvider listener triggers redirect to /home.
     } on AuthException catch (e) {
-      if (mounted) setState(() => _error = _friendlyAuthError(e.message));
+      if (mounted) setState(() => _error = e.toFriendlyAuthError());
     } catch (e) {
       if (mounted) {
-        setState(() => _error = _friendlyAuthError(e.toString()));
+        setState(() => _error = e.toFriendlyAuthError());
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  /// Maps verbose Supabase / Dart network errors to a short user-facing
-  /// message.  Supabase wraps `ClientException` /`SocketException` inside
-  /// `AuthRetryableFetchException extends AuthException`, so the raw
-  /// `e.message` ends up being a 200-character stack-trace-y blob — useless
-  /// for the user.
-  String _friendlyAuthError(String raw) {
-    final lower = raw.toLowerCase();
-    if (lower.contains('failed host lookup') ||
-        lower.contains('socketexception') ||
-        lower.contains('clientexception') ||
-        lower.contains('no address associated')) {
-      return 'No internet connection. Check your network and try again.';
-    }
-    if (lower.contains('timeout')) {
-      return 'Connection timed out. Please try again.';
-    }
-    if (lower.contains('invalid login') ||
-        lower.contains('invalid_grant') ||
-        lower.contains('invalid credentials')) {
-      return 'Incorrect email or password.';
-    }
-    if (lower.contains('email not confirmed')) {
-      return 'Please confirm your email before signing in.';
-    }
-    return raw;
   }
 
   @override

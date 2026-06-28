@@ -5,9 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/theme_notifier.dart';
-import '../../../../core/widgets/section_header.dart';
+import '../../../../core/widgets/widgets.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../pet_profile/presentation/widgets/pet_switcher_sheet.dart';
+import '../controllers/profile_controller.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -24,12 +25,91 @@ class AccountScreen extends ConsumerWidget {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isWide = constraints.maxWidth >= 600;
+          final profileAsync = ref.watch(profileControllerProvider);
           Widget scrollView = CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: SizedBox(height: MediaQuery.paddingOf(context).top + 76.0 + 16),
           ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: profileAsync.when(
+                data: (profile) {
+                  if (profile == null) return const SizedBox.shrink();
+                  final email = ref.watch(currentUserProvider)?.email ?? '';
+                  final displayName = profile.displayName ?? 'No Name';
+                  final initials = _getInitials(displayName);
+                  final avatarUrl = profile.avatarUrl;
 
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isDark ? pt.surface2 : Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundColor: AppColors.poppy.withAlpha(25),
+                          backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
+                              ? NetworkImage(avatarUrl)
+                              : null,
+                          child: avatarUrl == null || avatarUrl.isEmpty
+                              ? Text(
+                                  initials,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.poppy,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                displayName,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: pt.ink950,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                email,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: pt.ink500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                error: (e, _) => Center(
+                  child: Text(
+                    'Error loading profile: $e',
+                    style: const TextStyle(color: AppColors.danger),
+                  ),
+                ),
+              ),
+            ),
+          ),
           _sectionHeader(context, 'MY PETS'),
           _group(isDark, pt, [
             _AccountTile(
@@ -270,4 +350,17 @@ class _NewBadge extends StatelessWidget {
       ],
     );
   }
+}
+
+String _getInitials(String displayName) {
+  final cleanName = displayName.trim();
+  if (cleanName.isEmpty) return '?';
+  final parts = cleanName.split(RegExp(r'\s+'));
+  if (parts.length == 1) {
+    return parts[0].isNotEmpty ? parts[0][0].toUpperCase() : '?';
+  }
+  final first = parts[0].isNotEmpty ? parts[0][0] : '';
+  final last = parts[parts.length - 1].isNotEmpty ? parts[parts.length - 1][0] : '';
+  final result = '$first$last';
+  return result.isNotEmpty ? result.toUpperCase() : '?';
 }

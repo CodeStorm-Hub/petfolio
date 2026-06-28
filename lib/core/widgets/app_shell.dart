@@ -570,7 +570,8 @@ class AppShellHeader extends ConsumerWidget {
       );
     }
 
-    final innerContent = Padding(
+    final isWide = MediaQuery.sizeOf(context).width >= 600;
+    Widget innerContent = Padding(
       padding: EdgeInsets.fromLTRB(18, topPadding + 8, 18, 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -580,6 +581,15 @@ class AppShellHeader extends ConsumerWidget {
         ],
       ),
     );
+
+    if (isWide) {
+      innerContent = Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 640),
+          child: innerContent,
+        ),
+      );
+    }
 
     return ClipRect(
       child: BackdropFilter(

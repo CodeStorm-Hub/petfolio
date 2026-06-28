@@ -67,41 +67,14 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
           );
       // GoRouter redirects to /home or /onboarding after auth state changes.
     } on AuthException catch (e) {
-      if (mounted) setState(() => _error = _friendlyAuthError(e.message));
+      if (mounted) setState(() => _error = e.toFriendlyAuthError());
     } catch (e) {
       if (mounted) {
-        setState(() => _error = _friendlyAuthError(e.toString()));
+        setState(() => _error = e.toFriendlyAuthError());
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  String _friendlyAuthError(String raw) {
-    final lower = raw.toLowerCase();
-    if (lower.contains('failed host lookup') ||
-        lower.contains('socketexception') ||
-        lower.contains('clientexception') ||
-        lower.contains('no address associated')) {
-      return 'No internet connection. Check your network and try again.';
-    }
-    if (lower.contains('timeout')) {
-      return 'Connection timed out. Please try again.';
-    }
-    if (lower.contains('user already registered') ||
-        lower.contains('email already') ||
-        lower.contains('already registered')) {
-      return 'An account with this email already exists.';
-    }
-    if (lower.contains('over_email_send_rate_limit') ||
-        lower.contains('rate limit')) {
-      return 'Too many attempts. Please wait a moment and try again.';
-    }
-    if (lower.contains('weak password') ||
-        lower.contains('password should be')) {
-      return 'Password is too weak. Use at least 8 characters.';
-    }
-    return raw;
   }
 
   @override

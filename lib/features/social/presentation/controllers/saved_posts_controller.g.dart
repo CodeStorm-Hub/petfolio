@@ -33,7 +33,7 @@ final class SavedPostsProvider
   SavedPosts create() => SavedPosts();
 }
 
-String _$savedPostsHash() => r'c18ff98ff7779fcddf2f3a377d516f37210ae96d';
+String _$savedPostsHash() => r'd519c40e38791cd90552b057ee7803c5a2df6b04';
 
 abstract class _$SavedPosts extends $AsyncNotifier<List<FeedPost>> {
   FutureOr<List<FeedPost>> build();

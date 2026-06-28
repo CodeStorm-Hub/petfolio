@@ -82,7 +82,7 @@ class _AllFeaturesSheetContent extends StatelessWidget {
       sub: 'Medical records',
       color: AppColors.mint,
       soft: AppColors.mintSoft,
-      route: '/care/medical-vault',
+      route: '/care/health',
     ),
     _FeatureItem(
       icon: Icons.groups_rounded,
@@ -114,6 +114,8 @@ class _AllFeaturesSheetContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final width = MediaQuery.sizeOf(context).width;
+    final crossAxisCount = width > 900 ? 4 : (width > 600 ? 3 : 2);
 
     return Container(
       decoration: BoxDecoration(
@@ -177,9 +179,8 @@ class _AllFeaturesSheetContent extends StatelessWidget {
             child: GridView.builder(
               shrinkWrap: true,
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
                 mainAxisSpacing: 10,
                 crossAxisSpacing: 10,
                 childAspectRatio: 2.6,

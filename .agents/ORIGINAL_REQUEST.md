@@ -29,3 +29,34 @@ Generate separate markdown reports for each major feature/module (e.g., `audit_r
 
 ### Alignment with Guidelines
 - [ ] Suggested improvements explicitly adhere to the constraints listed in the repository's `AGENTS.md` file.
+
+## Follow-up — 2026-06-28T12:09:55Z
+
+Systematically implement the UI/UX, architectural, and database improvements identified in the audit reports, starting with a phased approach focused on core features.
+
+Working directory: `j:\GitHub\petfolio`
+Integrity mode: development
+
+## Requirements
+
+### R1. Phased Core Implementation
+Begin by implementing the findings from `audit_reports/auth_audit.md`, `audit_reports/profile_audit.md`, and `audit_reports/home_audit.md`. Update the Flutter source code in `lib/features/` to resolve the identified UI/UX and architectural issues, ensuring strict compliance with `AGENTS.md` (e.g., proper Riverpod usage).
+
+### R2. Supabase Migrations
+For any database optimizations, RLS policy updates, or schema changes identified in those reports, generate proper SQL migration files in the `supabase/migrations/` directory. Apply these migrations using the Supabase CLI (`npx supabase db push`) or the Supabase MCP.
+
+### R3. Quality Assurance
+The modified features must remain fully compilable. You must run static analysis to ensure your changes do not introduce new regressions.
+
+## Acceptance Criteria
+
+### Codebase Health
+- [ ] `dart analyze` returns no new errors or warnings for the `auth`, `profile`, and `home` feature directories.
+- [ ] The Flutter app successfully compiles after your modifications.
+
+### Database State
+- [ ] Distinct, timestamped SQL migration files exist in `supabase/migrations/` for all applied database changes.
+
+### Architectural Alignment
+- [ ] All updated state management strictly utilizes Riverpod (no Provider or setState where Riverpod is appropriate).
+- [ ] RLS policies include subselect optimizations as required by the architectural rules.

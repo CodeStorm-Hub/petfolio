@@ -50,7 +50,7 @@ final class SocialControllerProvider
   }
 }
 
-String _$socialControllerHash() => r'78b8a00628eba2afc24ae42bd34443981678b3e0';
+String _$socialControllerHash() => r'973d150e08057e21730ec1c15fc1b9bf5873ce2a';
 
 final class SocialControllerFamily extends $Family
     with

@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../features/activity/activity_routes.dart';
 import '../features/admin/admin_routes.dart';
 import '../features/offers/offers_routes.dart';
-import '../features/settings/settings_routes.dart';
+import '../features/profile/profile_routes.dart';
 import '../features/appointments/appointment_routes.dart';
 import '../features/auth/auth_routes.dart';
 import '../features/care/care_routes.dart';
@@ -40,7 +40,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ...adminRoutes(rootNavigatorKey),
       ...activityRoutes(rootNavigatorKey),
       ...offersRoutes(rootNavigatorKey),
-      ...settingsRoutes(rootNavigatorKey),
+      ...profileRoutes(rootNavigatorKey),
     ],
   );
 });

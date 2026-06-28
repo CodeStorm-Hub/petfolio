@@ -13,8 +13,9 @@ import 'package:petfolio/features/care/presentation/controllers/care_streak_stre
 import 'package:petfolio/features/care/presentation/controllers/pet_awards_provider.dart';
 import 'package:petfolio/features/pet_profile/data/models/pet.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
+import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart';
 
-import 'package:petfolio/core/providers/shell_scroll_provider.dart';
+import 'package:petfolio/core/providers/shell_scroll_progress_provider.dart';
 
 import '../widgets/all_features_sheet.dart';
 
@@ -69,19 +70,246 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    final activePet = ref.watch(activePetControllerProvider);
     final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     final isWide = MediaQuery.sizeOf(context).width >= 600;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final petListAsync = ref.watch(petListProvider);
 
-    if (activePet == null) {
-      return Scaffold(
+    return petListAsync.when(
+      loading: () => Scaffold(
         backgroundColor: pt.surface1,
         body: const Center(child: TailWagLoader()),
-      );
-    }
+      ),
+      error: (error, stackTrace) => Scaffold(
+        backgroundColor: pt.surface1,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('😢', style: TextStyle(fontSize: 56)),
+                const SizedBox(height: 16),
+                Text(
+                  'Failed to load pets',
+                  style: GoogleFonts.sora(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: pt.ink950,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  error.toString(),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: pt.ink500),
+                ),
+                const SizedBox(height: 24),
+                FilledButton.icon(
+                  onPressed: () => ref.invalidate(petListProvider),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text('Retry'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.poppy,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      data: (pets) {
+        final activePetId = ref.watch(activePetIdProvider);
+        if (activePetId == null || pets.isEmpty) {
+          return Scaffold(
+            backgroundColor: pt.surface1,
+            body: const Center(child: TailWagLoader()),
+          );
+        }
 
-    final streakAsync = ref.watch(careStreakRealtimeProvider(activePet.id));
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+
+        Widget body = CustomScrollView(
+          controller: _scrollCtrl,
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          slivers: [
+            // ── Wave hero — greeting + floating pet card ─────────────────────
+            const SliverToBoxAdapter(
+              child: _WaveHeroSection(),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 4)),
+
+            // ── Services section ─────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: _SectionHeader(
+                pt: pt,
+                title: 'Services',
+                trailing: InkWell(
+                  onTap: () => AllFeaturesSheet.show(context),
+                  borderRadius: BorderRadius.circular(4),
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Text(
+                      'All ›',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.tangerine,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // ── Bento grid ───────────────────────────────────────────────────
+            const SliverToBoxAdapter(
+              child: _BentoGrid(),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
+
+            // ── Quick Actions ────────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: _SectionHeader(pt: pt, title: 'Quick Actions'),
+            ),
+            const SliverToBoxAdapter(
+              child: _QuickActionsRow(),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
+
+            // ── Pet Spotlight ────────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: _SectionHeader(
+                pt: pt,
+                title: 'Pet Spotlight',
+                trailing: InkWell(
+                  onTap: () => context.go('/social'),
+                  borderRadius: BorderRadius.circular(4),
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Text(
+                      'See All ›',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.tangerine,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: _SpotlightCarousel(isDark: isDark, pt: pt),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
+
+            // ── Exclusive Deals ──────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: _SectionHeader(
+                pt: pt,
+                title: 'Exclusive Deals',
+                trailing: InkWell(
+                  onTap: () => context.go('/marketplace'),
+                  borderRadius: BorderRadius.circular(4),
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Text(
+                      'See All ›',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.tangerine,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: _DealsSection(
+                chips: _dealChips,
+                selectedIndex: _selectedDealChip,
+                onChipTap: (i) => setState(() => _selectedDealChip = i),
+                isDark: isDark,
+                pt: pt,
+                onTap: () => context.go('/marketplace'),
+              ),
+            ),
+
+            // ── Bottom nav clearance ─────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: SizedBox(height: 100 + MediaQuery.paddingOf(context).bottom),
+            ),
+          ],
+        );
+
+        return Scaffold(
+          backgroundColor: pt.surface1,
+          body: FadeTransition(
+            opacity: _fadeAnim,
+            child: isWide
+                ? Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 640),
+                      child: body,
+                    ),
+                  )
+                : body,
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wave Hero Section — species-colored wave + greeting + floating pet card
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _WaveHeroSection extends ConsumerWidget {
+  const _WaveHeroSection({super.key});
+
+  String _greeting(Pet pet) {
+    final hour = DateTime.now().hour;
+    final name = pet.name;
+    if (hour < 5) return 'Up late, $name? 🌙';
+    if (hour < 12) return 'Good morning, $name! 🌅';
+    if (hour < 17) return 'Good afternoon, $name! ☀️';
+    if (hour < 21) return 'Good evening, $name! 🌆';
+    return 'Good night, $name! 🌙';
+  }
+
+  String _moodLine(Pet pet, int streak, int doneTasks, int totalTasks) {
+    final remaining = totalTasks - doneTasks;
+    if (totalTasks > 0 && remaining == 0) return '${pet.name} is well cared for ✨';
+    if (streak >= 30) return '${pet.name} is legendary! 🏆';
+    if (streak >= 7) return '${pet.name} is on a winning streak 🔥';
+    if (streak > 0 && remaining > 0) return '${pet.name} has $remaining tasks left 📋';
+    if (streak > 0) return '${pet.name} is thriving today 🌟';
+    if (remaining > 0) return '${pet.name} has $remaining tasks today 📋';
+    return '${pet.name} is ready for a new day 🌱';
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pet = ref.watch(activePetControllerProvider);
+    if (pet == null) return const SizedBox.shrink();
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+
+    final streakAsync = ref.watch(careStreakRealtimeProvider(pet.id));
     final streak = streakAsync.maybeWhen(
       data: (s) => s.currentStreak,
       orElse: () => 0,
@@ -97,202 +325,6 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
     final doneTasks = todayTasks.where((t) => t.isCompleted).length;
     final totalTasks = todayTasks.length;
 
-    Widget body = CustomScrollView(
-      controller: _scrollCtrl,
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
-      slivers: [
-        // ── Wave hero — greeting + floating pet card ─────────────────────
-        SliverToBoxAdapter(
-          child: _WaveHeroSection(
-            pet: activePet,
-            streak: streak,
-            doneTasks: doneTasks,
-            totalTasks: totalTasks,
-            isDark: isDark,
-            pt: pt,
-          ),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 4)),
-
-        // ── Services section ─────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _SectionHeader(
-            pt: pt,
-            title: 'Services',
-            trailing: InkWell(
-              onTap: () => AllFeaturesSheet.show(context),
-              borderRadius: BorderRadius.circular(4),
-              child: const Padding(
-                padding: EdgeInsets.all(4),
-                child: Text(
-                  'All ›',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.tangerine,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-
-        // ── Bento grid ───────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _BentoGrid(
-            doneTasks: doneTasks,
-            totalTasks: totalTasks,
-            streak: streak,
-            isDark: isDark,
-            pt: pt,
-          ),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-        // ── Quick Actions ────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _SectionHeader(pt: pt, title: 'Quick Actions'),
-        ),
-        SliverToBoxAdapter(
-          child: _QuickActionsRow(pet: activePet),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-        // ── Pet Spotlight ────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _SectionHeader(
-            pt: pt,
-            title: 'Pet Spotlight',
-            trailing: InkWell(
-              onTap: () => context.go('/social'),
-              borderRadius: BorderRadius.circular(4),
-              child: const Padding(
-                padding: EdgeInsets.all(4),
-                child: Text(
-                  'See All ›',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.tangerine,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: _SpotlightCarousel(isDark: isDark, pt: pt),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-        // ── Exclusive Deals ──────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _SectionHeader(
-            pt: pt,
-            title: 'Exclusive Deals',
-            trailing: InkWell(
-              onTap: () => context.go('/marketplace'),
-              borderRadius: BorderRadius.circular(4),
-              child: const Padding(
-                padding: EdgeInsets.all(4),
-                child: Text(
-                  'See All ›',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.tangerine,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: _DealsSection(
-            chips: _dealChips,
-            selectedIndex: _selectedDealChip,
-            onChipTap: (i) => setState(() => _selectedDealChip = i),
-            isDark: isDark,
-            pt: pt,
-            onTap: () => context.go('/marketplace'),
-          ),
-        ),
-
-        // ── Bottom nav clearance ─────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: SizedBox(height: 100 + MediaQuery.paddingOf(context).bottom),
-        ),
-      ],
-    );
-
-    return Scaffold(
-      backgroundColor: pt.surface1,
-      body: FadeTransition(
-        opacity: _fadeAnim,
-        child: isWide
-            ? Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 640),
-                  child: body,
-                ),
-              )
-            : body,
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Wave Hero Section — species-colored wave + greeting + floating pet card
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _WaveHeroSection extends StatelessWidget {
-  const _WaveHeroSection({
-    required this.pet,
-    required this.streak,
-    required this.doneTasks,
-    required this.totalTasks,
-    required this.isDark,
-    required this.pt,
-  });
-
-  final Pet pet;
-  final int streak;
-  final int doneTasks;
-  final int totalTasks;
-  final bool isDark;
-  final PetfolioThemeExtension pt;
-
-  String _greeting() {
-    final hour = DateTime.now().hour;
-    final name = pet.name;
-    if (hour < 5) return 'Up late, $name? 🌙';
-    if (hour < 12) return 'Good morning, $name! 🌅';
-    if (hour < 17) return 'Good afternoon, $name! ☀️';
-    if (hour < 21) return 'Good evening, $name! 🌆';
-    return 'Good night, $name! 🌙';
-  }
-
-  String _moodLine() {
-    final remaining = totalTasks - doneTasks;
-    if (totalTasks > 0 && remaining == 0) return '${pet.name} is well cared for ✨';
-    if (streak >= 30) return '${pet.name} is legendary! 🏆';
-    if (streak >= 7) return '${pet.name} is on a winning streak 🔥';
-    if (streak > 0 && remaining > 0) return '${pet.name} has $remaining tasks left 📋';
-    if (streak > 0) return '${pet.name} is thriving today 🌟';
-    if (remaining > 0) return '${pet.name} has $remaining tasks today 📋';
-    return '${pet.name} is ready for a new day 🌱';
-  }
-
-  @override
-  Widget build(BuildContext context) {
     final topPad = MediaQuery.paddingOf(context).top;
     final waveColor = pet.speciesEnum.resolvedAccent(isDark);
     // pet emoji watermark in top-right of wave
@@ -333,7 +365,7 @@ class _WaveHeroSection extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        _greeting(),
+                        _greeting(pet),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -343,7 +375,7 @@ class _WaveHeroSection extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _moodLine(),
+                        _moodLine(pet, streak, doneTasks, totalTasks),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.sora(
@@ -366,15 +398,7 @@ class _WaveHeroSection extends StatelessWidget {
             top: waveH - cardH + cardOverlap,
             left: 16,
             right: 16,
-            child: _PetHeroCard(
-              pet: pet,
-              streak: streak,
-              doneTasks: doneTasks,
-              totalTasks: totalTasks,
-              isDark: isDark,
-              pt: pt,
-              accentColor: waveColor,
-            ),
+            child: const _PetHeroCard(),
           ),
         ],
       ),
@@ -387,26 +411,33 @@ class _WaveHeroSection extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _PetHeroCard extends ConsumerWidget {
-  const _PetHeroCard({
-    required this.pet,
-    required this.streak,
-    required this.doneTasks,
-    required this.totalTasks,
-    required this.isDark,
-    required this.pt,
-    required this.accentColor,
-  });
-
-  final Pet pet;
-  final int streak;
-  final int doneTasks;
-  final int totalTasks;
-  final bool isDark;
-  final PetfolioThemeExtension pt;
-  final Color accentColor;
+  const _PetHeroCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final pet = ref.watch(activePetControllerProvider);
+    if (pet == null) return const SizedBox.shrink();
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+    final accentColor = pet.speciesEnum.resolvedAccent(isDark);
+
+    final streakAsync = ref.watch(careStreakRealtimeProvider(pet.id));
+    final streak = streakAsync.maybeWhen(
+      data: (s) => s.currentStreak,
+      orElse: () => 0,
+    );
+
+    final todayTasksAsync = ref.watch(
+      careDashboardProvider.select((s) => s.todayTasks),
+    );
+    final todayTasks = todayTasksAsync.maybeWhen(
+      data: (t) => t,
+      orElse: () => <CareTask>[],
+    );
+    final doneTasks = todayTasks.where((t) => t.isCompleted).length;
+    final totalTasks = todayTasks.length;
+
     final awardsAsync = ref.watch(petAwardsSummaryProvider(pet.id));
     final petLevel = awardsAsync.maybeWhen(
       data: (a) => PetLevel.fromXp(a.totalXp),
@@ -418,7 +449,7 @@ class _PetHeroCard extends ConsumerWidget {
         : null;
     final subLabel = [
       pet.speciesEnum.label,
-      ?agePart,
+      if (agePart != null) agePart,
     ].join(' · ');
 
     return Container(
@@ -583,7 +614,7 @@ class _SectionHeader extends StatelessWidget {
               letterSpacing: 0.8,
             ),
           ),
-          ?trailing,
+          if (trailing != null) trailing!,
         ],
       ),
     );
@@ -636,25 +667,110 @@ BoxDecoration _bentoCardDecoration(
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _BentoGrid extends StatelessWidget {
-  const _BentoGrid({
-    required this.doneTasks,
-    required this.totalTasks,
-    required this.streak,
-    required this.isDark,
-    required this.pt,
-  });
-
-  final int doneTasks;
-  final int totalTasks;
-  final int streak;
-  final bool isDark;
-  final PetfolioThemeExtension pt;
+  const _BentoGrid({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
     const gap = 12.0;
     const rowH = 148.0;
     const careH = rowH * 2 + gap;
+
+    final isWideBento = MediaQuery.sizeOf(context).width >= 720;
+
+    if (isWideBento) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              height: careH,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Column 1: CareTile
+                  const Expanded(
+                    child: _CareTile(),
+                  ),
+                  const SizedBox(width: gap),
+                  // Column 2: Stacked PawsFeed and Market
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: _BentoTile(
+                            label: 'PawsFeed',
+                            sub: 'Social & stories',
+                            emoji: '🐾',
+                            accent: AppColors.poppy,
+                            isDark: isDark,
+                            pt: pt,
+                            onTap: () => context.go('/social'),
+                          ),
+                        ),
+                        const SizedBox(height: gap),
+                        Expanded(
+                          child: _BentoTile(
+                            label: 'Market',
+                            sub: 'Shop for pets',
+                            emoji: '🛍️',
+                            accent: AppColors.mint,
+                            isDark: isDark,
+                            pt: pt,
+                            onTap: () => context.go('/marketplace'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: gap),
+                  // Column 3: Stacked Match and Vet
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: _BentoTile(
+                            label: 'Match',
+                            sub: 'Find playmates',
+                            emoji: '💛',
+                            accent: AppColors.lilac,
+                            isDark: isDark,
+                            pt: pt,
+                            onTap: () => context.go('/matching'),
+                          ),
+                        ),
+                        const SizedBox(height: gap),
+                        Expanded(
+                          child: _BentoTile(
+                            label: 'Vet',
+                            sub: 'Book a vet',
+                            emoji: '🩺',
+                            accent: AppColors.sky,
+                            isDark: isDark,
+                            pt: pt,
+                            onTap: () => context.push('/appointments'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: gap),
+            _AllTile(
+              isDark: isDark,
+              pt: pt,
+              onTap: () => AllFeaturesSheet.show(context),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -666,15 +782,8 @@ class _BentoGrid extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: _CareTile(
-                    doneTasks: doneTasks,
-                    totalTasks: totalTasks,
-                    streak: streak,
-                    isDark: isDark,
-                    pt: pt,
-                    onTap: () => context.go('/care'),
-                  ),
+                const Expanded(
+                  child: _CareTile(),
                 ),
                 const SizedBox(width: gap),
                 Expanded(
@@ -757,25 +866,33 @@ class _BentoGrid extends StatelessWidget {
 // Care Tile — 2× tall white elevated card, live streak + progress
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _CareTile extends StatelessWidget {
-  const _CareTile({
-    required this.doneTasks,
-    required this.totalTasks,
-    required this.streak,
-    required this.isDark,
-    required this.pt,
-    required this.onTap,
-  });
-
-  final int doneTasks;
-  final int totalTasks;
-  final int streak;
-  final bool isDark;
-  final PetfolioThemeExtension pt;
-  final VoidCallback onTap;
+class _CareTile extends ConsumerWidget {
+  const _CareTile({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activePetId = ref.watch(activePetIdProvider);
+    if (activePetId == null) return const SizedBox.shrink();
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
+
+    final streakAsync = ref.watch(careStreakRealtimeProvider(activePetId));
+    final streak = streakAsync.maybeWhen(
+      data: (s) => s.currentStreak,
+      orElse: () => 0,
+    );
+
+    final todayTasksAsync = ref.watch(
+      careDashboardProvider.select((s) => s.todayTasks),
+    );
+    final todayTasks = todayTasksAsync.maybeWhen(
+      data: (t) => t,
+      orElse: () => <CareTask>[],
+    );
+    final doneTasks = todayTasks.where((t) => t.isCompleted).length;
+    final totalTasks = todayTasks.length;
+
     final progress = totalTasks == 0
         ? 0.0
         : (doneTasks / totalTasks).clamp(0.0, 1.0);
@@ -787,7 +904,7 @@ class _CareTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         onTap: () {
           HapticFeedback.selectionClick();
-          onTap();
+          context.go('/care');
         },
         child: Container(
           decoration: _bentoCardDecoration(isDark, pt, glow: AppColors.sunny),
@@ -1043,12 +1160,14 @@ class _AllTile extends StatelessWidget {
 // Quick Actions Row — horizontal pill cards for common tasks
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _QuickActionsRow extends StatelessWidget {
-  const _QuickActionsRow({required this.pet});
-  final Pet pet;
+class _QuickActionsRow extends ConsumerWidget {
+  const _QuickActionsRow({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pet = ref.watch(activePetControllerProvider);
+    if (pet == null) return const SizedBox.shrink();
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final actions = [

@@ -11,7 +11,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/widgets.dart';
 
-List<GoRoute> settingsRoutes(GlobalKey<NavigatorState> rootKey) => [
+List<GoRoute> profileRoutes(GlobalKey<NavigatorState> rootKey) => [
       GoRoute(
         path: '/settings/addresses',
         parentNavigatorKey: rootKey,
