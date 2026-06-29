@@ -50,7 +50,7 @@ class _StubCareDashboard extends CareDashboard {
 
 void main() {
   testWidgets('HubHomeScreen renders components successfully', (tester) async {
-    final mockStreak = CareStreak(
+    final mockStreak = const CareStreak(
       petId: 'pet-123',
       currentStreak: 5,
       bestStreak: 10,

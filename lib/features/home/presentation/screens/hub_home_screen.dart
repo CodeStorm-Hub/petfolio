@@ -15,7 +15,7 @@ import 'package:petfolio/features/pet_profile/data/models/pet.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/active_pet_controller.dart';
 import 'package:petfolio/features/pet_profile/presentation/controllers/pet_list_controller.dart';
 
-import 'package:petfolio/core/providers/shell_scroll_progress_provider.dart';
+import 'package:petfolio/core/providers/shell_scroll_provider.dart';
 
 import '../widgets/all_features_sheet.dart';
 
@@ -278,7 +278,7 @@ class _HubHomeScreenState extends ConsumerState<HubHomeScreen>
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _WaveHeroSection extends ConsumerWidget {
-  const _WaveHeroSection({super.key});
+  const _WaveHeroSection();
 
   String _greeting(Pet pet) {
     final hour = DateTime.now().hour;
@@ -307,7 +307,6 @@ class _WaveHeroSection extends ConsumerWidget {
     if (pet == null) return const SizedBox.shrink();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final pt = Theme.of(context).extension<PetfolioThemeExtension>()!;
 
     final streakAsync = ref.watch(careStreakRealtimeProvider(pet.id));
     final streak = streakAsync.maybeWhen(
@@ -411,7 +410,7 @@ class _WaveHeroSection extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _PetHeroCard extends ConsumerWidget {
-  const _PetHeroCard({super.key});
+  const _PetHeroCard();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -449,7 +448,7 @@ class _PetHeroCard extends ConsumerWidget {
         : null;
     final subLabel = [
       pet.speciesEnum.label,
-      if (agePart != null) agePart,
+      ?agePart,
     ].join(' · ');
 
     return Container(
@@ -614,7 +613,7 @@ class _SectionHeader extends StatelessWidget {
               letterSpacing: 0.8,
             ),
           ),
-          if (trailing != null) trailing!,
+          ?trailing,
         ],
       ),
     );
@@ -667,7 +666,7 @@ BoxDecoration _bentoCardDecoration(
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _BentoGrid extends StatelessWidget {
-  const _BentoGrid({super.key});
+  const _BentoGrid();
 
   @override
   Widget build(BuildContext context) {
@@ -867,7 +866,7 @@ class _BentoGrid extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _CareTile extends ConsumerWidget {
-  const _CareTile({super.key});
+  const _CareTile();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1161,7 +1160,7 @@ class _AllTile extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _QuickActionsRow extends ConsumerWidget {
-  const _QuickActionsRow({super.key});
+  const _QuickActionsRow();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

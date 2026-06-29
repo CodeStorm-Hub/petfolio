@@ -26,7 +26,7 @@ class SectionHeader extends StatelessWidget {
               style: pt.labelCapsStyle,
             ),
           ),
-          if (action != null) action,
+          ?action,
         ],
       ),
     );
