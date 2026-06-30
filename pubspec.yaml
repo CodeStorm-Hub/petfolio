@@ -120,6 +120,8 @@ dev_dependencies:
   integration_test:
     sdk: flutter
 
+  flutter_svg: ^2.0.10
+
   flutter_lints: ^6.0.0
 
   # Code generation
