@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -36,6 +35,7 @@ class MarketplaceCategoriesSheet extends ConsumerWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => const MarketplaceCategoriesSheet(),
@@ -87,7 +87,7 @@ class MarketplaceCategoriesSheet extends ConsumerWidget {
                       button: true,
                       child: IconButton(
                         icon: Icon(Icons.close_rounded, color: pt.ink500),
-                        onPressed: () => context.pop(),
+                        onPressed: () => Navigator.of(context).pop(),
                       ),
                     ),
                   ],
@@ -119,7 +119,7 @@ class MarketplaceCategoriesSheet extends ConsumerWidget {
                         HapticFeedback.selectionClick();
                         ref.read(selectedCategoryProvider.notifier)
                             .select(isActive ? ProductCategory.all : cat.id);
-                        context.pop();
+                        Navigator.of(context).pop();
                       },
                     )
                         .animate(delay: Duration(milliseconds: 40 * i))

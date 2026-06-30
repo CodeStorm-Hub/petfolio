@@ -114,7 +114,7 @@ class _CareDatePickerState extends State<CareDatePicker> {
                               letterSpacing: 0.5,
                               color: isSelected
                                   ? Colors.white.withAlpha(200)
-                                  : (isFuture ? pt.ink300 : pt.ink500),
+                                  : (isFuture ? pt.ink500.withAlpha(140) : pt.ink500),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -129,7 +129,7 @@ class _CareDatePickerState extends State<CareDatePicker> {
                                   : (isToday
                                       ? cs.primary
                                       : (isFuture
-                                          ? pt.ink300
+                                          ? pt.ink500.withAlpha(140)
                                           : cs.onSurface)),
                             ),
                           ),

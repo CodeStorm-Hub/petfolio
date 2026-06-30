@@ -637,6 +637,7 @@ class _CommentInputBarState extends State<_CommentInputBar> {
                 key: const ValueKey<String>('social_comment_input'),
                 controller: widget.controller,
                 focusNode: _focusNode,
+                autofocus: true,
                 minLines: 1,
                 maxLines: 4,
                 style: TextStyle(

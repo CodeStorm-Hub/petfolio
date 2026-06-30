@@ -656,6 +656,7 @@ class _CoverFlowCard extends StatelessWidget {
                     const SizedBox(width: 10),
                     RepaintBoundary(
                       child: _SpringCheckButton(
+                        key: ValueKey('check_${task.id}'),
                         done: done,
                         color: color,
                         line: pt.line,
@@ -796,6 +797,7 @@ class _NavArrow extends StatelessWidget {
 
 class _SpringCheckButton extends StatefulWidget {
   const _SpringCheckButton({
+    super.key,
     required this.done,
     required this.color,
     required this.line,

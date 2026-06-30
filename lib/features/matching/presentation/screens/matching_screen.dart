@@ -31,6 +31,7 @@ import '../controllers/match_preference_controller.dart';
 import '../controllers/mutual_match_realtime_provider.dart';
 import '../matching_navigation.dart';
 import '../widgets/match_celebration_overlay.dart';
+import '../widgets/match_preferences_sheet.dart';
 
 
 
@@ -651,6 +652,19 @@ class _EmptyDeck extends StatelessWidget {
               subtitle,
               textAlign: TextAlign.center,
               style: tt.bodySmall?.copyWith(color: pt.ink300, height: 1.45),
+            ),
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              key: const ValueKey<String>('matching_empty_adjust_prefs'),
+              onPressed: () => MatchPreferencesSheet.show(context),
+              icon: const Icon(Icons.tune_rounded, size: 18),
+              label: const Text('Adjust Preferences'),
+              style: FilledButton.styleFrom(
+                backgroundColor: pt.surface2,
+                foregroundColor: pt.ink700,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
             ),
           ],
         ),

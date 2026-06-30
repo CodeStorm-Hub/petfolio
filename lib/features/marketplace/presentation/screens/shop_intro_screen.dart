@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,6 +24,7 @@ class ShopIntroSheet extends StatelessWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => const ShopIntroSheet(),
@@ -137,7 +137,7 @@ class ShopIntroSheet extends StatelessWidget {
                 child: FilledButton(
                   onPressed: () async {
                     await ShopIntroSheet.markSeen();
-                    if (context.mounted) context.pop();
+                    if (context.mounted) Navigator.of(context).pop();
                   },
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.poppy,

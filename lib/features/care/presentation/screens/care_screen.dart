@@ -269,6 +269,8 @@ class _CareScreenState extends ConsumerState<CareScreen> {
         builder: (context, constraints) {
           final wide = constraints.maxWidth >= 600;
           final list = ListView(
+            key: const ValueKey('care_list_view'),
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(0, 0, 0, 120),
             children: [
               CareGamifiedHeader(
